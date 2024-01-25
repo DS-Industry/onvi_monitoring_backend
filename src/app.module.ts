@@ -5,7 +5,6 @@ import { configuration } from '@config/configuration';
 import { PrismaModule } from '@prisma/prisma.module';
 import * as process from 'process';
 
-
 @Module({
   imports: [
     LoggerModule.forRoot({
