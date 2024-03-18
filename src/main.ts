@@ -1,18 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '@prisma/client';
+import supertokens from 'supertokens-node';
+import { SupertokensExceptionFilter } from './auth/auth/auth.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
-  const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: configService.get<string>('databaseUrl'),
-      },
-    },
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
+    credentials: true,
   });
-  await app.listen(3000);
+
+  app.useGlobalFilters(new SupertokensExceptionFilter());
+  await app.listen(5000);
 }
 bootstrap();
