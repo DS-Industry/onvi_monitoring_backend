@@ -1,8 +1,8 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class LocalGuard extends AuthGuard('local') {
+export class ApiKeyGuard extends AuthGuard('api-key') {
   constructor() {
     super();
   }

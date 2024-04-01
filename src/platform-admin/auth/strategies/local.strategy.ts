@@ -11,14 +11,14 @@ import { Strategy } from 'passport-local';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
-      usernameField: 'phone',
-      otpField: 'otp',
+      usernameField: 'email',
+      passwordField: 'password',
     });
   }
 
   async validate(
-    phone: string,
-    otp: string,
+    email: string,
+    password: string,
     done: (error: Error, data) => Record<string, unknown>,
   ) {}
 }
