@@ -13,6 +13,8 @@ import { BusinessCoreModule } from './core/business-core/business-core.module';
 import { AccountingCoreModule } from './core/accounting-core/accounting-core.module';
 import { LoyaltyCoreModule } from './core/loyalty-core/loyalty-core.module';
 import * as process from 'process';
+import { BcryptModule } from "./core/modules/services/bcrypt/bcrypt.module";
+import { JwtModule } from "./core/modules/services/jwt/jwt.module";
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import * as process from 'process';
     BusinessCoreModule,
     AccountingCoreModule,
     LoyaltyCoreModule,
+    BcryptModule,
+    JwtModule,
   ],
   controllers: [],
   providers: [],
