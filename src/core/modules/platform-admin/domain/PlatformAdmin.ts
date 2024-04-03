@@ -1,3 +1,5 @@
+import { CreateDto } from "./dto/create.dto";
+
 export class PlatformAdmin {
   id?: number;
   name: string;
@@ -63,7 +65,7 @@ export class PlatformAdmin {
     this.updatedAt = updatedAt;
   }
 
-  public static create(data: any): PlatformAdmin {
+  public static create(createData: CreateDto): PlatformAdmin {
     const {
       name,
       surname,
@@ -80,7 +82,7 @@ export class PlatformAdmin {
       refreshTokenId,
       createdAt,
       updatedAt,
-    } = data;
+    } = createData;
     const status = 'Active';
     return new PlatformAdmin(
       name,

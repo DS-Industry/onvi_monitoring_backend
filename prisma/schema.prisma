@@ -355,7 +355,7 @@ model PlatformUser {
   email String @unique
   password String
   gender String
-  status String
+  status Status @default(ACTIVE)
   avatar String?
   country String
   countryCode Int
@@ -379,5 +379,10 @@ model PlatformUserPermission {
   name String
   permissionModule String
   platformUserRoles PlatformUserRole[]
+}
+
+enum Status {
+  ACTIVE
+  DELETED
 }
 

@@ -8,7 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 
-export class CreatRequestDto {
+export class CreateDto {
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
@@ -34,9 +34,6 @@ export class CreatRequestDto {
   @IsNotEmpty({ message: 'Password number is required' })
   password: string;
   @IsString()
-  @IsNotEmpty({ message: 'Password number is required' })
-  checkPassword: string;
-  @IsString()
   @IsNotEmpty({ message: 'Gender is required' })
   gender: string;
   @IsString()
@@ -51,4 +48,13 @@ export class CreatRequestDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Timezone is required' })
   timezone: number;
+  @IsString()
+  @IsNotEmpty({ message: 'Refresh token is required' })
+  refreshTokenId: string;
+  @IsDate()
+  @IsNotEmpty({ message: 'Created at token is required' })
+  createdAt: Date;
+  @IsDate()
+  @IsNotEmpty({ message: 'Updated at token is required' })
+  updatedAt: Date;
 }

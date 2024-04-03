@@ -42,7 +42,9 @@ export class PlatformAdminUseCase {
       updatedAt: new Date(Date.now()),
     };
     const platformAdmin = PlatformAdmin.create(platformAdminData);
-    const platformAdminDb = await this.platformRepository.create(platformAdmin);
+    const platformAdminDb = await this.platformRepository.create({
+      data: platformAdmin,
+    });
     return { platformAdminDb, accessToken, refreshToken };
   }
 
