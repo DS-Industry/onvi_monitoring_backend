@@ -351,11 +351,11 @@ model PlatformUser {
   surname String
   middlename String?
   birthday DateTime?
-  phone String @unique
+  phone String? @unique
   email String @unique
   password String
   gender String
-  status Status @default(ACTIVE)
+  status StatusPlatformAdmin @default(ACTIVE)
   avatar String?
   country String
   countryCode Int
@@ -381,8 +381,9 @@ model PlatformUserPermission {
   platformUserRoles PlatformUserRole[]
 }
 
-enum Status {
+enum StatusPlatformAdmin {
   ACTIVE
+  BLOCKED
   DELETED
 }
 

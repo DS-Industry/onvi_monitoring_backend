@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { PlatformAdminUseCase } from '../../useCases/platformAdmin.useCase';
-import { CreatRequestDto } from './dto/creat-request.dto';
+import { CreatRequestPlatformAdminDtpDto } from './dto/creat-request-platformAdmin.dto';
 
 @Controller('platformAdmin')
 export class PlatformAdminController {
@@ -18,7 +18,9 @@ export class PlatformAdminController {
 
   @Post('/create')
   @HttpCode(200)
-  async createPlatformAdmin(@Body() data: CreatRequestDto): Promise<any> {
+  async createPlatformAdmin(
+    @Body() data: CreatRequestPlatformAdminDtpDto,
+  ): Promise<any> {
     try {
       return this.platformAdminUseCase.create(data);
     } catch (e) {

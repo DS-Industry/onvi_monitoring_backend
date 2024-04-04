@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PlatformAdminRepository } from '../infrastructure/platformAdmin.repository';
 import { PlatformAdmin } from '../domain/PlatformAdmin';
-import { CreatRequestDto } from '../infrastructure/http/dto/creat-request.dto';
+import { CreatRequestPlatformAdminDtpDto } from '../infrastructure/http/dto/creat-request-platformAdmin.dto';
 import { IBcrypt } from '../../../common/interfaces/bcrypt.interface';
 import {
   IJwtService,
@@ -19,11 +19,7 @@ export class PlatformAdminUseCase {
     private readonly jwtService: IJwtService,
   ) {}
 
-  async create(data: CreatRequestDto) {
-    const checkPhone = await this.platformRepository.findOneByPhone(data.phone);
-    if (checkPhone) {
-      throw new Error('phone exists');
-    }
+  async create(data: CreatRequestPlatformAdminDtpDto) {
     const checkEmail = await this.platformRepository.findOneByEmail(data.email);
     if (checkEmail) {
       throw new Error('email exists');

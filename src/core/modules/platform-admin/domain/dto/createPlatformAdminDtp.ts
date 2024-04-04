@@ -7,8 +7,9 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
+import { StatusPlatformAdmin } from '@prisma/client';
 
-export class CreateDto {
+export class CreatePlatformAdminDtp {
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
@@ -22,7 +23,7 @@ export class CreateDto {
   @IsOptional()
   birthday?: Date;
   @IsString()
-  @IsNotEmpty({ message: 'Phone number is required' })
+  @IsOptional()
   @Matches(/^\+7(9\d{9})$/, {
     message: 'Phone number must be valid',
   })
@@ -39,6 +40,9 @@ export class CreateDto {
   @IsString()
   @IsOptional()
   avatar: string;
+  @IsString()
+  @IsOptional()
+  status: StatusPlatformAdmin;
   @IsString()
   @IsNotEmpty({ message: 'Country is required' })
   country: string;

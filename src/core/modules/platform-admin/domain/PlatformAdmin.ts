@@ -1,4 +1,5 @@
-import { CreateDto } from "./dto/create.dto";
+import { CreatePlatformAdminDtp } from './dto/createPlatformAdminDtp';
+import { StatusPlatformAdmin } from '@prisma/client';
 
 export class PlatformAdmin {
   id?: number;
@@ -6,11 +7,11 @@ export class PlatformAdmin {
   surname: string;
   middlename?: string;
   birthday?: Date;
-  phone: string;
+  phone?: string;
   email: string;
   password: string;
   gender: string;
-  status: string;
+  status?: StatusPlatformAdmin;
   avatar?: string;
   country: string;
   countryCode: number;
@@ -22,11 +23,9 @@ export class PlatformAdmin {
   private constructor(
     name: string,
     surname: string,
-    phone: string,
     email: string,
     password: string,
     gender: string,
-    status: string,
     country: string,
     countryCode: number,
     timezone: number,
@@ -35,14 +34,18 @@ export class PlatformAdmin {
     {
       id,
       middlename,
+      phone,
       birthday,
       avatar,
+      status,
       refreshTokenId,
     }: {
       id?: number;
       middlename?: string;
+      phone?: string;
       birthday?: Date;
       avatar?: string;
+      status?: StatusPlatformAdmin;
       refreshTokenId?: string;
     },
   ) {
@@ -53,6 +56,7 @@ export class PlatformAdmin {
     this.birthday = birthday;
     this.phone = phone;
     this.email = email;
+    this.phone = phone;
     this.password = password;
     this.gender = gender;
     this.status = status;
@@ -65,7 +69,7 @@ export class PlatformAdmin {
     this.updatedAt = updatedAt;
   }
 
-  public static create(createData: CreateDto): PlatformAdmin {
+  public static create(createData: CreatePlatformAdminDtp): PlatformAdmin {
     const {
       name,
       surname,
@@ -75,6 +79,7 @@ export class PlatformAdmin {
       email,
       password,
       gender,
+      status,
       avatar,
       country,
       countryCode,
@@ -83,15 +88,12 @@ export class PlatformAdmin {
       createdAt,
       updatedAt,
     } = createData;
-    const status = 'Active';
     return new PlatformAdmin(
       name,
       surname,
-      phone,
       email,
       password,
       gender,
-      status,
       country,
       countryCode,
       timezone,
@@ -99,8 +101,10 @@ export class PlatformAdmin {
       updatedAt,
       {
         middlename,
+        phone,
         birthday,
         avatar,
+        status,
         refreshTokenId,
       },
     );
