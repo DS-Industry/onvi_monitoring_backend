@@ -310,20 +310,20 @@ model LoyaltyCardTier {
 model MobileUser {
   id Int @id @default(autoincrement())
   name String
-  surname String
-  middlename String
-  birthday DateTime
+  surname String?
+  middlename String?
+  birthday DateTime?
   phone String @unique
   email String @unique
   gender String
   status String
-  avatar String
+  avatar String?
   country String
   countryCode Int
   timezone Int
-  refreshTokenId String
-  createdAt DateTime
-  updatedAt DateTime
+  refreshTokenId String?
+  createdAt DateTime?
+  updatedAt DateTime?
   loyaltyCard LoyaltyCard @relation(fields: [loyaltyCardId], references: [id])
   loyaltyCardId Int @unique
   promocodeTransaction PromocodeTransaction[]
@@ -349,21 +349,22 @@ model PlatformUser {
   id Int @id @default(autoincrement())
   name String
   surname String
-  middlename String
-  birthday DateTime
-  phone String @unique
+  middlename String?
+  birthday DateTime?
+  phone String? @unique
   email String @unique
+  password String
   gender String
-  status String
-  avatar String
+  status StatusPlatformAdmin @default(ACTIVE)
+  avatar String?
   country String
   countryCode Int
   timezone Int
-  refreshTokenId String
+  refreshTokenId String?
   createdAt DateTime
   updatedAt DateTime
-  platformUserRole PlatformUserRole @relation(fields: [platformUserRoleId], references: [id])
-  platformUserRoleId Int
+  platformUserRole PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
+  platformUserRoleId Int?
 }
 
 model PlatformUserRole {
@@ -378,5 +379,11 @@ model PlatformUserPermission {
   name String
   permissionModule String
   platformUserRoles PlatformUserRole[]
+}
+
+enum StatusPlatformAdmin {
+  ACTIVE
+  BLOCKED
+  DELETED
 }
 
