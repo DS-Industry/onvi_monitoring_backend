@@ -29,7 +29,7 @@ async function main() {
               userPermissions: {
                 create: [
                   {
-                    name: 'admin',
+                    name: 'user',
                     permissionModule: 'all',
                   },
                   {

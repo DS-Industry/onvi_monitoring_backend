@@ -1,8 +1,8 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
-import { PlatformAdmin } from '../../../core/modules/platform-admin/domain/PlatformAdmin';
-import { PlatformAdminUseCase } from '../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
+import { PlatformAdmin } from '../../../../core/modules/platform-admin/domain/PlatformAdmin';
+import { PlatformAdminUseCase } from '../../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {

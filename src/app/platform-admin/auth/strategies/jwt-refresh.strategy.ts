@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '../model/TokenPayload';
-import { PlatformAdminUseCase } from '../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
+import { PlatformAdminUseCase } from '../../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(

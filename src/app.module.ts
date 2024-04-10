@@ -6,7 +6,7 @@ import { PrismaModule } from '@prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
 import { CoreModule } from './core/core.module';
 import { PlatformUserModule } from './platform-user/platform-user.module';
-import { PlatformAdminModule } from './platform-admin/platform-admin.module';
+import { PlatformAdminModule } from './app/platform-admin/platform-admin.module';
 import { MobileUserModule } from './mobile-user/mobile-user.module';
 import { PlatformDeviceModule } from './platform-device/platform-device.module';
 import { BusinessCoreModule } from './core/business-core/business-core.module';

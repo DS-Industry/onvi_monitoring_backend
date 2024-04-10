@@ -3,8 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '../model/TokenPayload';
-import { PlatformAdminUseCase } from '../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
-import { PlatformAdmin } from '../../../core/modules/platform-admin/domain/PlatformAdmin';
+import { PlatformAdminUseCase } from '../../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
+import { PlatformAdmin } from '../../../../core/modules/platform-admin/domain/PlatformAdmin';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
