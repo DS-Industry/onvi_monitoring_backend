@@ -24,7 +24,7 @@ export class AdminController {
 
   @Get('list')
   @HttpCode(200)
-  async create(): Promise<any> {
+  async createList(): Promise<any> {
     try {
       return 200;
     } catch (e) {

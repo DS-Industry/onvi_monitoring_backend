@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule } from '@nestjs/config';
 import { configuration } from '@config/configuration';
-import { PrismaModule } from '@prisma/prisma.module';
+import { PrismaModule } from './infra/database/prisma/prisma.module';
 import { PassportModule } from '@nestjs/passport';
 import { CoreModule } from './core/core.module';
 import { PlatformUserModule } from './platform-user/platform-user.module';

@@ -22,7 +22,9 @@
       "@config/*": ["config/*"],
       "@utils/*": ["src/utils/*"],
       "@organization/*": ["src/organization/*"],
-      "@address/*": ["src/address/*"]
+      "@address/*": ["src/address/*"],
+      "@platform-admin/*": ["src/app/platform-admin/*"],
+      "@db/*": ["src/infra/database/*"]
     }
   }
 }
