@@ -2,19 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { PlatformAdminRepository } from '../infrastructure/platformAdmin.repository';
 import { PlatformAdmin } from '../domain/PlatformAdmin';
 import { CreatRequestPlatformAdminDtpDto } from '../infrastructure/http/dto/creat-request-platformAdmin.dto';
-import { IBcrypt } from '../../../common/interfaces/bcrypt.interface';
 import {
   IJwtService,
   IJwtServicePayload,
 } from '../../../common/interfaces/jwt.interface';
 import { ConfigService } from '@nestjs/config';
 import ms = require('ms');
+import { IBcryptAdapter } from '../../../../libs/bcrypt/adapter';
 
 @Injectable()
 export class PlatformAdminUseCase {
   constructor(
     private readonly platformRepository: PlatformAdminRepository,
-    private readonly bcryptService: IBcrypt,
+    private readonly bcryptService: IBcryptAdapter,
     private readonly configService: ConfigService,
     private readonly jwtService: IJwtService,
   ) {}

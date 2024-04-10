@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { IBcrypt } from '../../../common/interfaces/bcrypt.interface';
+import { IBcryptAdapter } from './adapter';
 
 @Injectable()
-export class BcryptService implements IBcrypt {
+export class BcryptService implements IBcryptAdapter {
   rounds = 10;
 
   async hash(hashString: string): Promise<string> {
