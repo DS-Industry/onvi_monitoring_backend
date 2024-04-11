@@ -8,7 +8,7 @@ export class AdminRepository extends IAdminRepository {
   }
 
   public async create(data: Admin): Promise<Admin> {
-    return this.prisma;
+    return Promise.resolve();
   }
 
   public async createMany(data: Admin[]): Promise<Admin[]> {
