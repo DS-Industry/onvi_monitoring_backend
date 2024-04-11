@@ -1,28 +1,33 @@
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { Admin } from '@platform-admin/admin/domain/admin';
+import { PrismaService } from "@db/prisma/prisma.service";
 
 export class AdminRepository extends IAdminRepository {
-  create(data: Admin): Promise<Admin> {
-    return Promise.resolve(undefined);
+
+  constructor(private readonly prisma: PrismaService) {
   }
 
-  createMany(date: Admin[]): Promise<Admin[]> {
+  public async create(data: Admin): Promise<Admin> {
+    return this.prisma.platformUser
+  }
+
+  public async createMany(data: Admin[]): Promise<Admin[]> {
     return Promise.resolve([]);
   }
 
-  findAll(): Promise<Admin[]> {
+  public async findAll(): Promise<Admin[]> {
     return Promise.resolve([]);
   }
 
-  findOneById(id: string): Promise<Admin> {
+  public async findOneById(id: string): Promise<Admin> {
     return Promise.resolve(undefined);
   }
 
-  remove(id: string): Promise<any> {
+  public async remove(id: string): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  update(id: string, data: Admin): Promise<Admin> {
+  public async update(id: string, data: Admin): Promise<Admin> {
     return Promise.resolve(undefined);
   }
 }
