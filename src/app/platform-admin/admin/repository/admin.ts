@@ -1,14 +1,14 @@
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { Admin } from '@platform-admin/admin/domain/admin';
-import { PrismaService } from "@db/prisma/prisma.service";
+import { PrismaService } from '@db/prisma/prisma.service';
 
 export class AdminRepository extends IAdminRepository {
-
   constructor(private readonly prisma: PrismaService) {
+    super();
   }
 
   public async create(data: Admin): Promise<Admin> {
-    return this.prisma.platformUser
+    return this.prisma;
   }
 
   public async createMany(data: Admin[]): Promise<Admin[]> {

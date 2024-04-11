@@ -1,7 +1,7 @@
 import { IBaseRepositoryInterface } from '../../../common/interfaces/baseRepository.interface';
 import { Prisma, PlatformUser } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../../infra/database/prisma/prisma.service';
+import { PrismaService } from '@db/prisma/prisma.service';
 
 @Injectable()
 export class PlatformAdminRepository
