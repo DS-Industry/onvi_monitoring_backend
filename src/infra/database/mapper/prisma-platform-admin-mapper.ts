@@ -1,9 +1,5 @@
 import { Admin } from '@platform-admin/admin/domain/admin';
-import {
-  PlatformUser,
-  PlatformUser as PrismaPlatformUser,
-  Prisma,
-} from '@prisma/client';
+import { PlatformUser as PrismaPlatformUser, Prisma } from '@prisma/client';
 
 export class PrismaPlatformAdminMapper {
   static toDomain(entity: PrismaPlatformUser): Admin {
@@ -28,24 +24,22 @@ export class PrismaPlatformAdminMapper {
     });
   }
 
-  static toPrisma(
-    admin: PlatformUser,
-  ): Prisma.PlatformUserUncheckedCreateInput {
+  static toPrisma(admin: Admin): Prisma.PlatformUserUncheckedCreateInput {
     return {
       id: admin?.id,
       name: admin.name,
       surname: admin.surname,
-      middlename: admin.middlename,
+      middlename: admin?.middlename,
       birthday: admin?.birthday,
-      phone: admin.phone,
+      phone: admin?.phone,
       email: admin.email,
       password: admin.password,
       gender: admin.gender,
       status: admin?.status,
       avatar: admin?.avatar,
-      country: admin?.country,
-      countryCode: admin?.countryCode,
-      timezone: admin?.timezone,
+      country: admin.country,
+      countryCode: admin.countryCode,
+      timezone: admin.timezone,
       refreshTokenId: admin?.refreshTokenId,
       createdAt: admin.name,
       updatedAt: admin.name,

@@ -355,7 +355,7 @@ model PlatformUser {
   email String @unique
   password String
   gender String
-  status StatusPlatformAdmin @default(ACTIVE)
+  status StatusPlatformAdmin? @default(ACTIVE)
   avatar String?
   country String
   countryCode Int
