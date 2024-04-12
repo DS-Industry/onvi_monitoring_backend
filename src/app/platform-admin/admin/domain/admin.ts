@@ -1,5 +1,6 @@
 import { BaseEntity } from '@utils/entity';
 
+
 export interface AdminProps {
   id?: number;
   name: string;

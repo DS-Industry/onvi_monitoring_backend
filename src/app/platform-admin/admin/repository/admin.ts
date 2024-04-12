@@ -1,6 +1,7 @@
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { PrismaService } from '@db/prisma/prisma.service';
+import { PrismaPlatformAdminMapper } from "@db/mapper/prisma-platform-admin-mapper";
 
 export class AdminRepository extends IAdminRepository {
   constructor(private readonly prisma: PrismaService) {
