@@ -1,6 +1,7 @@
 import { BaseEntity } from '@utils/entity';
 import { StatusPlatformAdmin } from '@prisma/client';
 
+
 export interface AdminProps {
   id?: number;
   name: string;
