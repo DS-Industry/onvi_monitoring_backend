@@ -358,7 +358,7 @@ CREATE TABLE "PlatformUser" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "gender" TEXT NOT NULL,
-    "status" "StatusPlatformAdmin" NOT NULL DEFAULT 'ACTIVE',
+    "status" "StatusPlatformAdmin" DEFAULT 'ACTIVE',
     "avatar" TEXT,
     "country" TEXT NOT NULL,
     "countryCode" INTEGER NOT NULL,

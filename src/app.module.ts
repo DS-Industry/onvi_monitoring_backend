@@ -5,6 +5,9 @@ import { configuration } from '@config/configuration';
 import * as process from 'process';
 import { RouterModule } from '@nestjs/core';
 import { routeConfig } from '@utils/route.config';
+import { PlatformAdminModule } from '@platform-admin/platform-admin.module';
+import { PrismaModule } from "@db/prisma/prisma.module";
+import { AdminModule } from "@platform-admin/admin/admin.module";
 
 @Module({
   imports: [
@@ -52,6 +55,9 @@ import { routeConfig } from '@utils/route.config';
       isGlobal: true,
     }),
     RouterModule.register(routeConfig),
+    PlatformAdminModule,
+    PrismaModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],
