@@ -13,8 +13,9 @@ export class AdminController {
   @Get(':id')
   @HttpCode(200)
   async getOneById(@Param('id') data: GetByIdAdminDto): Promise<any> {
+    const id: number = parseInt(data.id, 10);
     try {
-      return this.adminGetById.execute(data);
+      return this.adminGetById.execute(id);
     } catch (e) {
       throw new Error(e);
     }

@@ -3,6 +3,9 @@ import { PlatformUser as PrismaPlatformUser, Prisma } from '@prisma/client';
 
 export class PrismaPlatformAdminMapper {
   static toDomain(entity: PrismaPlatformUser): Admin {
+    if (!entity) {
+      return null;
+    }
     return new Admin({
       id: entity.id,
       name: entity.name,
@@ -41,8 +44,8 @@ export class PrismaPlatformAdminMapper {
       countryCode: admin.countryCode,
       timezone: admin.timezone,
       refreshTokenId: admin?.refreshTokenId,
-      createdAt: admin.name,
-      updatedAt: admin.name,
+      createdAt: admin.createdAt,
+      updatedAt: admin.updatedAt,
     };
   }
 }

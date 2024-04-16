@@ -6,6 +6,6 @@ import { PrismaModule } from '@db/prisma/prisma.module';
   imports: [AdminModule, PrismaModule],
   controllers: [],
   providers: [],
-  exports: [],
+  exports: [AdminModule],
 })
 export class PlatformAdminModule {}
