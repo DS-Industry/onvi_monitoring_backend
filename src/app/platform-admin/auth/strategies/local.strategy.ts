@@ -2,11 +2,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { PlatformAdmin } from '../../../../core/modules/platform-admin/domain/PlatformAdmin';
-import { PlatformAdminUseCase } from '../../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
+import { ValidateUserForLocalStrategyUseCase } from '@platform-admin/auth/use-cases/validate-local-strategy';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly platformAdminUseCase: PlatformAdminUseCase) {
+  constructor(
+    private readonly validateLocalStrategyUseCase: ValidateUserForLocalStrategyUseCase,
+  ) {
     super({
       usernameField: 'email',
       passwordField: 'password',
@@ -20,10 +22,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   ) {
     try {
       const platformAdmin: PlatformAdmin =
-        await this.platformAdminUseCase.validateUserForLocalStrategy(
-          email,
-          password,
-        );
+        await this.validateLocalStrategyUseCase.execute(email, password);
       if (!platformAdmin) {
         return done(null, { register: true });
       }

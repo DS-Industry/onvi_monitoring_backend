@@ -12,16 +12,6 @@ export class AuthController {
     }
   }
 
-  @Post('/register')
-  @HttpCode(201)
-  async register(@Body() body: any): Promise<any> {
-    try {
-      return 201;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   @Post('/verify')
   @HttpCode(201)
   async verify(@Body() body: any): Promise<any> {

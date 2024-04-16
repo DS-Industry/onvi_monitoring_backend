@@ -92,4 +92,44 @@ export class Admin extends BaseEntity<AdminProps> {
   get updatedAt(): Date {
     return this.props.updatedAt;
   }
+
+  set name(name: string) {
+    this.props.name = name;
+  }
+
+  set surname(surname: string) {
+    this.props.surname = surname;
+  }
+
+  set middlename(middlename: string) {
+    this.props.middlename = middlename;
+  }
+
+  set avatar(avatar: string) {
+    this.props.avatar = avatar;
+  }
+
+  set password(password: string) {
+    this.props.password = password;
+  }
+
+  set status(status: StatusPlatformAdmin) {
+    this.props.status = status;
+  }
+
+  set country(country: string) {
+    this.props.country = country;
+  }
+
+  set countryCode(countryCode: number) {
+    this.props.countryCode = countryCode;
+  }
+
+  set timezone(timezone: number) {
+    this.props.timezone = timezone;
+  }
+
+  set refreshTokenId(refreshTokenId: string) {
+    this.props.refreshTokenId = refreshTokenId;
+  }
 }

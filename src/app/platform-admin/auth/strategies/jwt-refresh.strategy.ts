@@ -2,8 +2,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TokenPayload } from '../model/TokenPayload';
-import { PlatformAdminUseCase } from '../../../../core/modules/platform-admin/useCases/platformAdmin.useCase';
+import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
+import { GetAccountIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/get-account-refresh-token';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -12,7 +12,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly platformAdminUseCase: PlatformAdminUseCase,
+    private readonly getAccountUseCase: GetAccountIfRefreshTokenMatchesUseCase,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
@@ -24,10 +24,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(request: Request, payload: TokenPayload) {
     try {
       const refreshToken = request.body['refreshToken'];
-      return await this.platformAdminUseCase.getAccountIfRefreshTokenMatches(
-        refreshToken,
-        payload.phone,
-      );
+      return await this.getAccountUseCase.execute(refreshToken, payload.email);
     } catch (e) {
       throw new Error('error');
     }

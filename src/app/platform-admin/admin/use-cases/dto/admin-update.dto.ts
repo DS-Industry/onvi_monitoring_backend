@@ -1,10 +1,10 @@
 import {
-  IsDate,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { StatusPlatformAdmin } from '@prisma/client';
 
 export class UpdateAdminDto {
   @IsNumber()
@@ -19,9 +19,6 @@ export class UpdateAdminDto {
   @IsString()
   @IsOptional()
   middlename?: string;
-  @IsDate()
-  @IsOptional()
-  birthday?: Date;
   @IsString()
   @IsOptional()
   avatar?: string;
@@ -34,4 +31,13 @@ export class UpdateAdminDto {
   @IsNumber()
   @IsOptional()
   timezone?: number;
+  @IsString()
+  @IsOptional()
+  refreshTokenId?: string;
+  @IsString()
+  @IsOptional()
+  password?: string;
+  @IsString()
+  @IsOptional()
+  status?: StatusPlatformAdmin;
 }
