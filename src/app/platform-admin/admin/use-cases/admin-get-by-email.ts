@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
-import { GetByEmailAdminDto } from '@platform-admin/admin/use-cases/dto/admin-get-by-email.dto';
+import { GetByEmailAdminDto } from '@platform-admin/admin/controller/dto/admin-get-by-email.dto';
 
 @Injectable()
 export class GetByEmailAdminUseCase {

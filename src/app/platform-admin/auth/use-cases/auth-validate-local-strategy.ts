@@ -13,7 +13,7 @@ export class ValidateUserForLocalStrategyUseCase {
   async execute(email: string, password: string): Promise<Admin> {
     const admin = await this.adminRepository.findOneByEmail(email);
     if (!admin) {
-      throw new Error('email not exists');
+      return null;
     }
     const checkPassword = await this.bcrypt.compare(password, admin.password);
 

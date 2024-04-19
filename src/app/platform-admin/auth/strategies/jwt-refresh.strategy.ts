@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
-import { GetAccountIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/get-account-refresh-token';
+import { GetAccountIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/auth-get-account-refresh-token';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -22,6 +22,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(request: Request, payload: TokenPayload) {
+    console.log(request);
     try {
       const refreshToken = request.body['refreshToken'];
       return await this.getAccountUseCase.execute(refreshToken, payload.email);

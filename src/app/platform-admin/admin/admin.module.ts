@@ -7,10 +7,9 @@ import { CreateAdminUseCase } from '@platform-admin/admin/use-cases/admin-create
 import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-id';
 import { GetByEmailAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-email';
 import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
-import { AdminAuthModule } from '@platform-admin/auth/admin-auth.module';
 
 @Module({
-  imports: [PrismaModule, BcryptModule, AdminAuthModule],
+  imports: [PrismaModule, BcryptModule],
   controllers: [AdminController],
   providers: [
     AdminRepositoryProvider,
@@ -19,6 +18,6 @@ import { AdminAuthModule } from '@platform-admin/auth/admin-auth.module';
     GetByEmailAdminUseCase,
     UpdateAdminUseCase,
   ],
-  exports: [AdminRepositoryProvider],
+  exports: [AdminRepositoryProvider, UpdateAdminUseCase],
 })
 export class AdminModule {}

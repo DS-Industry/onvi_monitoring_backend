@@ -1,25 +1,20 @@
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { CreateAdminDto } from '@platform-admin/admin/use-cases/dto/admin-create.dto';
+import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { Injectable } from '@nestjs/common';
-import { GetByEmailAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-email';
 import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
-import { SignRefreshTokenUseCase } from '@platform-admin/auth/use-cases/sign-refresh-token';
+import { SignRefreshTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign-refresh-token';
 
 @Injectable()
 export class CreateAdminUseCase {
   constructor(
     private readonly adminRepository: IAdminRepository,
-    private readonly adminUpdate: UpdateAdminUseCase,
     private readonly bcrypt: IBcryptAdapter,
-    private readonly refreshToken: SignRefreshTokenUseCase,
   ) {}
 
   async execute(input: CreateAdminDto): Promise<Admin> {
-    const checkEmail = await this.adminRepository.findOneByEmail(
-      input.email,
-    );
+    const checkEmail = await this.adminRepository.findOneByEmail(input.email);
     if (checkEmail) {
       throw new Error('email exists');
     }
@@ -46,16 +41,6 @@ export class CreateAdminUseCase {
       updatedAt: new Date(Date.now()),
     });
 
-    const admin = await this.adminRepository.create(adminData);
-
-    if (!admin) {
-      throw new Error('error create admin');
-    }
-
-    const refreshToken = await this.refreshToken.execute(admin.email, admin.id);
-    return await this.adminUpdate.execute({
-      id: admin.id,
-      refreshTokenId: refreshToken.token,
-    });
+    return await this.adminRepository.create(adminData);
   }
 }

@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
 import { IJwtAdapter } from '@libs/auth/adapter';
 import { ConfigService } from '@nestjs/config';
-import ms from 'ms';
+import ms = require('ms');
 
 @Injectable()
 export class SignAccessTokenUseCase {
   constructor(
-    private readonly adminRepository: IAdminRepository,
     private readonly configService: ConfigService,
     private readonly jwtService: IJwtAdapter,
   ) {}

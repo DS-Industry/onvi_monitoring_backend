@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
-import { UpdateAdminDto } from '@platform-admin/admin/use-cases/dto/admin-update.dto';
+import { UpdateAdminDto } from '@platform-admin/admin/controller/dto/admin-update.dto';
 
 @Injectable()
 export class UpdateAdminUseCase {
