@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "StatusPlatformAdmin" AS ENUM ('ACTIVE', 'BLOCKED', 'DELETED');
+CREATE TYPE "StatusUser" AS ENUM ('ACTIVE', 'BLOCKED', 'DELETED');
 
 -- CreateTable
 CREATE TABLE "Organization" (
@@ -39,7 +39,7 @@ CREATE TABLE "User" (
     "phone" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "gender" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "StatusUser" DEFAULT 'ACTIVE',
     "avatar" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "countryCode" INTEGER NOT NULL,
@@ -316,7 +316,7 @@ CREATE TABLE "MobileUser" (
     "phone" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "gender" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "StatusUser" DEFAULT 'ACTIVE',
     "avatar" TEXT,
     "country" TEXT NOT NULL,
     "countryCode" INTEGER NOT NULL,
@@ -358,7 +358,7 @@ CREATE TABLE "PlatformUser" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "gender" TEXT NOT NULL,
-    "status" "StatusPlatformAdmin" DEFAULT 'ACTIVE',
+    "status" "StatusUser" DEFAULT 'ACTIVE',
     "avatar" TEXT,
     "country" TEXT NOT NULL,
     "countryCode" INTEGER NOT NULL,

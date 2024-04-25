@@ -1,8 +1,8 @@
 import { Admin } from '@platform-admin/admin/domain/admin';
-import { PlatformUser as PrismaPlatformUser, Prisma } from '@prisma/client';
+import { PlatformUser as PrismaPlatformAdmin, Prisma } from '@prisma/client';
 
 export class PrismaPlatformAdminMapper {
-  static toDomain(entity: PrismaPlatformUser): Admin {
+  static toDomain(entity: PrismaPlatformAdmin): Admin {
     if (!entity) {
       return null;
     }

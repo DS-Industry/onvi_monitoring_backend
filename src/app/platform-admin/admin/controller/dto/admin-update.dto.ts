@@ -4,7 +4,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { StatusPlatformAdmin } from '@prisma/client';
+import { StatusUser } from '@prisma/client';
 
 export class UpdateAdminDto {
   @IsNumber()
@@ -39,5 +39,5 @@ export class UpdateAdminDto {
   password?: string;
   @IsString()
   @IsOptional()
-  status?: StatusPlatformAdmin;
+  status?: StatusUser;
 }

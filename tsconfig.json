@@ -24,6 +24,7 @@
       "@organization/*": ["src/organization/*"],
       "@address/*": ["src/address/*"],
       "@platform-admin/*": ["src/app/platform-admin/*"],
+      "@platform-user/*": ["src/app/platform-user/*"],
       "@db/*": ["src/infra/database/*"],
       "@libs/*": ["src/libs/*"]
     }

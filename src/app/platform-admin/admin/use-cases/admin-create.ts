@@ -3,8 +3,6 @@ import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { Injectable } from '@nestjs/common';
-import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
-import { SignRefreshTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign-refresh-token';
 
 @Injectable()
 export class CreateAdminUseCase {

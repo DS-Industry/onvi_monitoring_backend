@@ -40,12 +40,12 @@ model User {
   userRoleId Int
   name String
   surname String
-  middlename String
-  birthday DateTime
+  middlename String?
+  birthday DateTime?
   phone String @unique
-  email String @unique
+  email String? @unique
   gender String
-  status String
+  status StatusUser? @default(ACTIVE)
   avatar String
   country String
   countryCode Int
@@ -316,7 +316,7 @@ model MobileUser {
   phone String @unique
   email String @unique
   gender String
-  status String
+  status StatusUser? @default(ACTIVE)
   avatar String?
   country String
   countryCode Int
@@ -355,7 +355,7 @@ model PlatformUser {
   email String @unique
   password String
   gender String
-  status StatusPlatformAdmin? @default(ACTIVE)
+  status StatusUser? @default(ACTIVE)
   avatar String?
   country String
   countryCode Int
@@ -381,7 +381,7 @@ model PlatformUserPermission {
   platformUserRoles PlatformUserRole[]
 }
 
-enum StatusPlatformAdmin {
+enum StatusUser {
   ACTIVE
   BLOCKED
   DELETED

@@ -1,15 +1,15 @@
-import { BaseEntity } from '@utils/entity';
 import { StatusUser } from '@prisma/client';
+import { BaseEntity } from '@utils/entity';
 
-export interface AdminProps {
+export interface UserProps {
   id?: number;
+  userRoleId: number;
   name: string;
   surname: string;
   middlename?: string;
   birthday?: Date;
-  phone?: string;
-  email: string;
-  password: string;
+  phone: string;
+  email?: string;
   gender: string;
   status?: StatusUser;
   avatar?: string;
@@ -21,13 +21,17 @@ export interface AdminProps {
   updatedAt?: Date;
 }
 
-export class Admin extends BaseEntity<AdminProps> {
-  constructor(props: AdminProps) {
+export class User extends BaseEntity<UserProps> {
+  constructor(props: UserProps) {
     super(props);
   }
 
   get id(): number {
     return this.props.id;
+  }
+
+  get userRoleId(): number {
+    return this.props.userRoleId;
   }
 
   get name(): string {
@@ -52,9 +56,6 @@ export class Admin extends BaseEntity<AdminProps> {
 
   get email(): string {
     return this.props.email;
-  }
-  get password(): string {
-    return this.props.password;
   }
 
   get gender(): string {
@@ -93,6 +94,10 @@ export class Admin extends BaseEntity<AdminProps> {
     return this.props.updatedAt;
   }
 
+  set userRoleId(userRoleId: number) {
+    this.props.userRoleId = userRoleId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -107,10 +112,6 @@ export class Admin extends BaseEntity<AdminProps> {
 
   set avatar(avatar: string) {
     this.props.avatar = avatar;
-  }
-
-  set password(password: string) {
-    this.props.password = password;
   }
 
   set status(status: StatusUser) {
