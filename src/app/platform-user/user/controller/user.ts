@@ -1,5 +1,4 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
-import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
 
 @Controller('user')
 export class UserController {

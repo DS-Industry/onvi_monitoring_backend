@@ -3,14 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
-import { ValidateUserForJwtStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-jwt-strategy';
+import { ValidateAdminForJwtStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-jwt-strategy';
 import { Admin } from '@platform-admin/admin/domain/admin';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
-    private readonly validateJwtStrategyUseCase: ValidateUserForJwtStrategyUseCase,
+    private readonly validateJwtStrategyUseCase: ValidateAdminForJwtStrategyUseCase,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

@@ -5,8 +5,6 @@ import { AdminAuthModule } from '@platform-admin/auth/admin-auth.module';
 
 @Module({
   imports: [AdminModule, PrismaModule, AdminAuthModule],
-  controllers: [],
-  providers: [],
   exports: [AdminModule, AdminAuthModule],
 })
 export class PlatformAdminModule {}

@@ -3,7 +3,7 @@ import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { Admin } from '@platform-admin/admin/domain/admin';
 
 @Injectable()
-export class ValidateUserForJwtStrategyUseCase {
+export class ValidateAdminForJwtStrategyUseCase {
   constructor(private readonly adminRepository: IAdminRepository) {}
 
   async execute(email: string): Promise<Admin> {

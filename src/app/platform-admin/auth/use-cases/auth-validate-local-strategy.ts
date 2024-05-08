@@ -4,7 +4,7 @@ import { Admin } from '@platform-admin/admin/domain/admin';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 
 @Injectable()
-export class ValidateUserForLocalStrategyUseCase {
+export class ValidateAdminForLocalStrategyUseCase {
   constructor(
     private readonly adminRepository: IAdminRepository,
     private readonly bcrypt: IBcryptAdapter,

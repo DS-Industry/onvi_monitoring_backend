@@ -46,6 +46,7 @@ async function main() {
           birthday: '2024-01-24T12:00:00Z',
           phone: '123456',
           email: 'test@mail.ru',
+          password: '123',
           gender: 'men',
           status: 'ACTIVE',
           avatar: 'png',
@@ -60,22 +61,13 @@ async function main() {
       users: {
         create: [
           {
-            userRole: {
-              create: {
-                name: 'Operator',
-                userPermissions: {
-                  connect: {
-                    id: 2,
-                  },
-                },
-              },
-            },
             name: 'Pypa',
             surname: 'Dupa',
             middlename: 'lol',
             birthday: '2024-01-24T12:00:00Z',
             phone: '43245425',
             email: 'pupa@mail.ru',
+            password: '123',
             gender: 'man',
             status: 'ACTIVE',
             avatar: 'png',
@@ -85,19 +77,16 @@ async function main() {
             refreshTokenId: 'dsafnfjknj32njnj',
             createdAt: '2024-01-24T12:00:00Z',
             updatedAt: '2024-01-24T12:00:00Z',
+            userRoleId: 2,
           },
           {
-            userRole: {
-              connect: {
-                id: 2,
-              },
-            },
             name: 'Lypa',
             surname: 'Kupa',
             middlename: 'kek',
             birthday: '2024-01-24T12:00:00Z',
             phone: '89480840',
             email: 'lupa@mail.ru',
+            password: '123',
             gender: 'man',
             status: 'ACTIVE',
             avatar: 'png',
@@ -107,6 +96,7 @@ async function main() {
             refreshTokenId: 'dsafnfjknj32njnj',
             createdAt: '2024-01-24T12:00:00Z',
             updatedAt: '2024-01-24T12:00:00Z',
+            userRoleId: 2,
           },
         ],
       },

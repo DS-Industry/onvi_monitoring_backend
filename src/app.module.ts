@@ -7,6 +7,8 @@ import { RouterModule } from '@nestjs/core';
 import { routeConfig } from '@utils/route.config';
 import { PlatformAdminModule } from '@platform-admin/platform-admin.module';
 import { PrismaModule } from '@db/prisma/prisma.module';
+import { PlatformUserModule } from '@platform-user/platform-user.module';
+import { MobileUserModule } from '@mobile-user/mobile-user.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { PrismaModule } from '@db/prisma/prisma.module';
     RouterModule.register(routeConfig),
     PrismaModule,
     PlatformAdminModule,
+    PlatformUserModule,
+    MobileUserModule,
   ],
   controllers: [],
   providers: [],

@@ -3,7 +3,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
-import { GetAccountIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/auth-get-account-refresh-token';
+import { GetAdminIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/auth-get-account-refresh-token';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -12,7 +12,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly getAccountUseCase: GetAccountIfRefreshTokenMatchesUseCase,
+    private readonly getAccountUseCase: GetAdminIfRefreshTokenMatchesUseCase,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),

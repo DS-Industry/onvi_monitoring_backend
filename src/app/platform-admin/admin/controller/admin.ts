@@ -12,9 +12,9 @@ export class AdminController {
   ) {}
   @Get(':id')
   @HttpCode(200)
-  async getOneById(@Param('id') data: GetByIdAdminDto): Promise<any> {
+  async getOneById(@Param('id') data: string): Promise<any> {
     try {
-      const id: number = parseInt(data.id, 10);
+      const id: number = parseInt(data, 10);
       return this.adminGetById.execute(id);
     } catch (e) {
       throw new Error(e);
@@ -26,16 +26,6 @@ export class AdminController {
   async create(@Body() data: CreateAdminDto): Promise<any> {
     try {
       return this.adminCreate.execute(data);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  @Get('list')
-  @HttpCode(200)
-  async createList(): Promise<any> {
-    try {
-      return 200;
     } catch (e) {
       throw new Error(e);
     }

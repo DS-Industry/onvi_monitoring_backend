@@ -8,8 +8,9 @@ export interface UserProps {
   surname: string;
   middlename?: string;
   birthday?: Date;
-  phone: string;
-  email?: string;
+  phone?: string;
+  email: string;
+  password: string;
   gender: string;
   status?: StatusUser;
   avatar?: string;
@@ -56,6 +57,10 @@ export class User extends BaseEntity<UserProps> {
 
   get email(): string {
     return this.props.email;
+  }
+
+  get password(): string {
+    return this.props.password;
   }
 
   get gender(): string {
@@ -108,6 +113,10 @@ export class User extends BaseEntity<UserProps> {
 
   set middlename(middlename: string) {
     this.props.middlename = middlename;
+  }
+
+  set password(password: string) {
+    this.props.password = password;
   }
 
   set avatar(avatar: string) {

@@ -4,7 +4,7 @@ import { Admin } from '@platform-admin/admin/domain/admin';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 
 @Injectable()
-export class GetAccountIfRefreshTokenMatchesUseCase {
+export class GetAdminIfRefreshTokenMatchesUseCase {
   constructor(
     private readonly adminRepository: IAdminRepository,
     private readonly bcrypt: IBcryptAdapter,

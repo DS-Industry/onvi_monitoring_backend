@@ -25,7 +25,9 @@
       "@address/*": ["src/address/*"],
       "@platform-admin/*": ["src/app/platform-admin/*"],
       "@platform-user/*": ["src/app/platform-user/*"],
+      "@mobile-user/*": ["src/app/mobile-user/*"],
       "@db/*": ["src/infra/database/*"],
+      "@constant/*": ["src/infra/constant/*"],
       "@libs/*": ["src/libs/*"]
     }
   }

@@ -36,10 +36,10 @@ export class UserRepository extends IUserRepository {
     return PrismaPlatformUserMapper.toDomain(user);
   }
 
-  public async findOneByPhone(phone: string): Promise<User> {
+  public async findOneByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findFirst({
       where: {
-        phone,
+        email,
       },
     });
     return PrismaPlatformUserMapper.toDomain(user);
