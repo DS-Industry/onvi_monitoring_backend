@@ -7,9 +7,10 @@ import { CreateAdminUseCase } from '@platform-admin/admin/use-cases/admin-create
 import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-id';
 import { GetByEmailAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-email';
 import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
+import { ConfirmMailModule } from '@platform-admin/confirmMail/confirmMail.module';
 
 @Module({
-  imports: [PrismaModule, BcryptModule],
+  imports: [PrismaModule, BcryptModule, ConfirmMailModule],
   controllers: [AdminController],
   providers: [
     AdminRepositoryProvider,

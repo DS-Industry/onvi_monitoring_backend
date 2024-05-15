@@ -3,15 +3,18 @@ import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { Injectable } from '@nestjs/common';
+import { StatusUser } from '@prisma/client';
+import { SendConfirmMailUseCase } from '@platform-admin/confirmMail/use-case/confirm-mail-send';
 
 @Injectable()
 export class CreateAdminUseCase {
   constructor(
     private readonly adminRepository: IAdminRepository,
     private readonly bcrypt: IBcryptAdapter,
+    private readonly sendConfirm: SendConfirmMailUseCase,
   ) {}
 
-  async execute(input: CreateAdminDto): Promise<Admin> {
+  async execute(input: CreateAdminDto): Promise<any> {
     const checkEmail = await this.adminRepository.findOneByEmail(input.email);
     if (checkEmail) {
       throw new Error('email exists');
@@ -30,7 +33,7 @@ export class CreateAdminUseCase {
       email: input.email,
       password: hashPassword,
       gender: input.gender,
-      status: input.status,
+      status: StatusUser.BLOCKED,
       avatar: input.avatar,
       country: input.country,
       countryCode: input.countryCode,
@@ -39,6 +42,12 @@ export class CreateAdminUseCase {
       updatedAt: new Date(Date.now()),
     });
 
-    return await this.adminRepository.create(adminData);
+    const admin = await this.adminRepository.create(adminData);
+
+    const sendMail = await this.sendConfirm.execute(
+      admin.email,
+      'Полная авторизация',
+    );
+    return { admin, sendMail };
   }
 }

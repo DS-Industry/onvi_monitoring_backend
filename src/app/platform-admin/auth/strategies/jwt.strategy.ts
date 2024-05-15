@@ -7,7 +7,7 @@ import { ValidateAdminForJwtStrategyUseCase } from '@platform-admin/auth/use-cas
 import { Admin } from '@platform-admin/admin/domain/admin';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtStrategy extends PassportStrategy(Strategy, 'adminJwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly validateJwtStrategyUseCase: ValidateAdminForJwtStrategyUseCase,

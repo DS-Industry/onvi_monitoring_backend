@@ -8,7 +8,7 @@ import { GetClientIfRefreshTokenMatchesUseCase } from '@mobile-user/auth/use-cas
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh-token',
+  'client-jwt-refresh-token',
 ) {
   constructor(
     private readonly configService: ConfigService,

@@ -7,7 +7,7 @@ import { User } from '@platform-user/user/domain/user';
 import { ValidateUserForJwtStrategyUseCase } from '@platform-user/auth/use-cases/auth-validate-jwt-strategy';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly validateJwtStrategyUseCase: ValidateUserForJwtStrategyUseCase,

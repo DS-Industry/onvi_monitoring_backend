@@ -8,17 +8,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
-import { RefreshGuard } from '@platform-user/auth/guards/jwt.guard';
 import { LocalGuard } from '@platform-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@platform-user/auth/controller/dto/auth-login.dto';
 import { LoginAuthUseCase } from '@platform-user/auth/use-cases/auth-login';
-import { AuthRegisterDto } from "@platform-user/auth/controller/dto/auth-register.dto";
+import { AuthRegisterDto } from '@platform-user/auth/controller/dto/auth-register.dto';
+import { RegisterAuthUseCase } from '@platform-user/auth/use-cases/auth-register';
+import { RefreshGuard } from '@platform-user/auth/guards/refresh.guard';
 
 @Controller('auth')
 export class Auth {
   constructor(
     private readonly singAccessToken: SignAccessTokenUseCase,
     private readonly authLogin: LoginAuthUseCase,
+    private readonly authRegister: RegisterAuthUseCase,
   ) {}
 
   @UseGuards(LocalGuard)
@@ -47,7 +49,17 @@ export class Auth {
     @Request() req: any,
   ): Promise<any> {
     try {
-
+      const { correctUser, accessToken, refreshToken } =
+        await this.authRegister.execute(body);
+      return {
+        user: correctUser,
+        tokens: {
+          accessToken: accessToken.token,
+          accessTokenExp: accessToken.expirationDate,
+          refreshToken: refreshToken.token,
+          refreshTokenExp: refreshToken.expirationDate,
+        },
+      };
     } catch (e) {
       throw new Error(e);
     }

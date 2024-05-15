@@ -7,7 +7,6 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import { StatusUser } from '@prisma/client';
 
 export class CreateAdminDto {
   @IsString()
@@ -43,9 +42,6 @@ export class CreateAdminDto {
   @IsString()
   @IsOptional()
   avatar?: string;
-  @IsString()
-  @IsOptional()
-  status?: StatusUser;
   @IsString()
   @IsNotEmpty({ message: 'Country is required' })
   country: string;

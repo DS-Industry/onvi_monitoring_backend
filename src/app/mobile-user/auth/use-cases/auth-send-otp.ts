@@ -26,6 +26,7 @@ export class SendOtpAuthUseCase {
     }
     const otp = await this.otpRepository.create(otpModel);
     await this.otpRepository.send(otp);
+    return otp;
   }
 
   private generateOtp() {

@@ -6,6 +6,7 @@ import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
+import { StatusUser } from "@prisma/client";
 
 @Injectable()
 export class RegisterAuthUseCase {
@@ -32,12 +33,12 @@ export class RegisterAuthUseCase {
       surname: input.surname,
       middlename: input.middlename,
       birthday: input.birthday,
-      userRoleId: 0,
+      userRoleId: 1,
       phone: input.phone,
       email: input.email,
       password: hashPassword,
       gender: input.gender,
-      status: 'BLOCKED',
+      status: StatusUser.BLOCKED,
       avatar: input.avatar,
       country: input.country,
       countryCode: input.countryCode,

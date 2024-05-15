@@ -6,7 +6,7 @@ import { TokenPayload } from '@mobile-user/auth/domain/jwt-payload';
 import { ValidateClientForJwtStrategyUseCase } from '@mobile-user/auth/use-cases/auth-validate-jwt-strategy';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtStrategy extends PassportStrategy(Strategy, 'clientJwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly validateJwtStrategyUseCase: ValidateClientForJwtStrategyUseCase,

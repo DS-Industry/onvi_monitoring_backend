@@ -8,7 +8,7 @@ import { GetAdminIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-c
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh-token',
+  'admin-jwt-refresh-token',
 ) {
   constructor(
     private readonly configService: ConfigService,

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BcryptModule } from '@libs/bcrypt/module';
 import { JwtModule } from '@libs/auth/module';
-import { UserController } from '@platform-user/user/controller/user';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
 import { LoginAuthUseCase } from '@platform-user/auth/use-cases/auth-login';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
@@ -13,11 +12,12 @@ import { LocalStrategy } from '@platform-user/auth/strategies/local.strategy';
 import { JwtStrategy } from '@platform-user/auth/strategies/jwt.strategy';
 import { JwtRefreshStrategy } from '@platform-user/auth/strategies/jwt-refresh.strategy';
 import { RegisterAuthUseCase } from '@platform-user/auth/use-cases/auth-register';
-import { UserModule } from "@platform-user/user/user.module";
+import { UserModule } from '@platform-user/user/user.module';
+import { Auth } from '@platform-user/auth/controller/auth';
 
 @Module({
   imports: [BcryptModule, JwtModule, UserModule],
-  controllers: [UserController],
+  controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,
     LoginAuthUseCase,

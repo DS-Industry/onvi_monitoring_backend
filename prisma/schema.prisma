@@ -60,10 +60,10 @@ model User {
   posesUpdated Pos[] @relation(name: "UpdateByUser")
 }
 
-model Otp {
+model UserMailConfirm {
   id Int @id @default(autoincrement())
-  phone String @unique
-  confirmCode String
+  email String @unique
+  confirmString String
   createdAt DateTime
   expireAt DateTime
 }
@@ -340,6 +340,14 @@ model MobileUser {
   mobileUserRoleId Int?
 }
 
+model Otp {
+  id Int @id @default(autoincrement())
+  phone String @unique
+  confirmCode String
+  createdAt DateTime
+  expireAt DateTime
+}
+
 model MobileUserRole {
   id Int @id @default(autoincrement())
   name String
@@ -374,6 +382,14 @@ model PlatformUser {
   updatedAt DateTime
   platformUserRole PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
   platformUserRoleId Int?
+}
+
+model PlatformUserMailConfirm {
+  id Int @id @default(autoincrement())
+  email String @unique
+  confirmString String
+  createdAt DateTime
+  expireAt DateTime
 }
 
 model PlatformUserRole {

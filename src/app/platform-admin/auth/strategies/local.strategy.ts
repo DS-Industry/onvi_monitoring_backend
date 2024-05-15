@@ -5,7 +5,7 @@ import { ValidateAdminForLocalStrategyUseCase } from '@platform-admin/auth/use-c
 import { Admin } from '@platform-admin/admin/domain/admin';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalStrategy extends PassportStrategy(Strategy, 'adminLocal') {
   constructor(
     private readonly validateLocalStrategyUseCase: ValidateAdminForLocalStrategyUseCase,
   ) {

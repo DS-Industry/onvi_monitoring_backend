@@ -1,16 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
-import { ValidateUserForLocalStrategyUseCase } from "@platform-user/auth/use-cases/auth-validate-local-strategy";
-import { User } from "@platform-user/user/domain/user";
+import { ValidateUserForLocalStrategyUseCase } from '@platform-user/auth/use-cases/auth-validate-local-strategy';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalStrategy extends PassportStrategy(Strategy, 'userLocal') {
   constructor(
     private readonly validateLocalStrategyUseCase: ValidateUserForLocalStrategyUseCase,
   ) {
