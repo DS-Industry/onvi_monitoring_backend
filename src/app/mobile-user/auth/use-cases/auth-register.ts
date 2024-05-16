@@ -7,6 +7,7 @@ import { SignAccessTokenUseCase } from '@mobile-user/auth/use-cases/auth-sign-ac
 import { SignRefreshTokenUseCase } from '@mobile-user/auth/use-cases/auth-sign-refresh-token';
 import { Client } from '@mobile-user/client/domain/client';
 import { UpdateClientUseCase } from '@mobile-user/client/use-cases/client-update';
+import { SetRefreshTokenUseCase } from '@mobile-user/auth/use-cases/auth-set-refresh-token';
 
 @Injectable()
 export class RegisterAuthUseCase {
@@ -16,7 +17,7 @@ export class RegisterAuthUseCase {
     private readonly clientRepository: IClientRepository,
     private readonly singAccessToken: SignAccessTokenUseCase,
     private readonly singRefreshToken: SignRefreshTokenUseCase,
-    private readonly updateClient: UpdateClientUseCase,
+    private readonly setRefreshToken: SetRefreshTokenUseCase,
   ) {}
 
   async execute(phone: string, otp: string): Promise<any> {
@@ -46,9 +47,10 @@ export class RegisterAuthUseCase {
     const accessToken = await this.singAccessToken.execute(phone, client.id);
     const refreshToken = await this.singRefreshToken.execute(phone, client.id);
 
-    client.refreshTokenId = refreshToken.token;
-
-    const correctClient = await this.updateClient.execute(client);
+    const correctClient = await this.setRefreshToken.execute(
+      client.id,
+      refreshToken.token,
+    );
 
     return { correctClient, accessToken, refreshToken };
   }

@@ -13,21 +13,32 @@ import { JwtRefreshStrategy } from '@platform-admin/auth/strategies/jwt-refresh.
 import { ValidateAdminForLocalStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-local-strategy';
 import { ValidateAdminForJwtStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-jwt-strategy';
 import { GetAdminIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/auth-get-account-refresh-token';
+import { EmailStrategy } from '@platform-admin/auth/strategies/email.strategy';
+import { ValidateAdminEmailStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-email-strategy';
+import { ConfirmMailModule } from '@platform-admin/confirmMail/confirmMail.module';
+import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activate';
+import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-confirm';
+import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
 
 @Module({
-  imports: [BcryptModule, JwtModule, AdminModule],
+  imports: [BcryptModule, JwtModule, AdminModule, ConfirmMailModule],
   controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,
     LoginAuthUseCase,
+    ActivateAuthUseCase,
+    PasswordConfirmMailAdminUseCase,
+    PasswordResetAdminUseCase,
     SignAccessTokenUseCase,
     SetRefreshTokenUseCase,
     ValidateAdminForLocalStrategyUseCase,
     ValidateAdminForJwtStrategyUseCase,
+    ValidateAdminEmailStrategyUseCase,
     GetAdminIfRefreshTokenMatchesUseCase,
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
+    EmailStrategy,
   ],
   exports: [SignRefreshTokenUseCase],
 })

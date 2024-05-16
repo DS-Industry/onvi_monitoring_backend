@@ -11,7 +11,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'clientLocal') {
   ) {
     super({
       usernameField: 'phone',
-      otpField: 'otp',
+      passwordField: 'otp',
     });
   }
 

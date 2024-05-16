@@ -6,7 +6,8 @@ import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
-import { StatusUser } from "@prisma/client";
+import { StatusUser } from '@prisma/client';
+import { SetRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-set-refresh-token';
 
 @Injectable()
 export class RegisterAuthUseCase {
@@ -15,6 +16,7 @@ export class RegisterAuthUseCase {
     private readonly bcrypt: IBcryptAdapter,
     private readonly singAccessToken: SignAccessTokenUseCase,
     private readonly singRefreshToken: SignRefreshTokenUseCase,
+    private readonly setRefreshToken: SetRefreshTokenUseCase,
     private readonly updateUser: UpdateUserUseCase,
   ) {}
 
@@ -55,9 +57,10 @@ export class RegisterAuthUseCase {
       user.id,
     );
 
-    user.refreshTokenId = refreshToken.token;
-
-    const correctUser = await this.updateUser.execute(user);
+    const correctUser = await this.setRefreshToken.execute(
+      user.id,
+      refreshToken.token,
+    );
 
     return { correctUser, accessToken, refreshToken };
   }
