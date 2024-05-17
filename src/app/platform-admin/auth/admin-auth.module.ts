@@ -15,13 +15,13 @@ import { ValidateAdminForJwtStrategyUseCase } from '@platform-admin/auth/use-cas
 import { GetAdminIfRefreshTokenMatchesUseCase } from '@platform-admin/auth/use-cases/auth-get-account-refresh-token';
 import { EmailStrategy } from '@platform-admin/auth/strategies/email.strategy';
 import { ValidateAdminEmailStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-email-strategy';
-import { ConfirmMailModule } from '@platform-admin/confirmMail/confirmMail.module';
+import { ConfirmMailAdminModule } from '@platform-admin/confirmMail/confirmMail.module';
 import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activate';
 import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-confirm';
 import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
 
 @Module({
-  imports: [BcryptModule, JwtModule, AdminModule, ConfirmMailModule],
+  imports: [BcryptModule, JwtModule, AdminModule, ConfirmMailAdminModule],
   controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,

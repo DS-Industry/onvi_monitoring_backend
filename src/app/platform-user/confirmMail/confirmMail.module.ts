@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
-import { ConfirmMailProvider } from '@platform-admin/confirmMail/provider/confirmMail';
-import { SendConfirmMailUseCase } from '@platform-admin/confirmMail/use-case/confirm-mail-send';
 import { DateModule } from '@libs/date/module';
 import { MailModule } from '@libs/mail/module';
-import { ValidateConfirmMailUseCase } from '@platform-admin/confirmMail/use-case/confirm-mail-validate';
+import { ConfirmMailProvider } from '@platform-user/confirmMail/provider/confirmMail';
+import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
+import { ValidateConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-validate';
 
 @Module({
   imports: [PrismaModule, DateModule, MailModule],
@@ -19,4 +19,4 @@ import { ValidateConfirmMailUseCase } from '@platform-admin/confirmMail/use-case
     ValidateConfirmMailUseCase,
   ],
 })
-export class ConfirmMailAdminModule {}
+export class ConfirmMailUserModule {}

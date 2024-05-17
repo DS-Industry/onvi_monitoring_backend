@@ -3,21 +3,15 @@ import { AuthRegisterDto } from '@platform-user/auth/controller/dto/auth-registe
 import { User } from '@platform-user/user/domain/user';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
-import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
-import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
 import { StatusUser } from '@prisma/client';
-import { SetRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-set-refresh-token';
+import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 
 @Injectable()
 export class RegisterAuthUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly bcrypt: IBcryptAdapter,
-    private readonly singAccessToken: SignAccessTokenUseCase,
-    private readonly singRefreshToken: SignRefreshTokenUseCase,
-    private readonly setRefreshToken: SetRefreshTokenUseCase,
-    private readonly updateUser: UpdateUserUseCase,
+    private readonly sendConfirm: SendConfirmMailUseCase,
   ) {}
 
   async execute(input: AuthRegisterDto): Promise<any> {
@@ -51,17 +45,11 @@ export class RegisterAuthUseCase {
 
     const user = await this.userRepository.create(userData);
 
-    const accessToken = await this.singAccessToken.execute(user.email, user.id);
-    const refreshToken = await this.singRefreshToken.execute(
+    const sendMail = await this.sendConfirm.execute(
       user.email,
-      user.id,
+      'Полная авторизация',
     );
 
-    const correctUser = await this.setRefreshToken.execute(
-      user.id,
-      refreshToken.token,
-    );
-
-    return { correctUser, accessToken, refreshToken };
+    return { user, sendMail };
   }
 }

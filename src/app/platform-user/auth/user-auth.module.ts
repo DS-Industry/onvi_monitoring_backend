@@ -14,9 +14,15 @@ import { JwtRefreshStrategy } from '@platform-user/auth/strategies/jwt-refresh.s
 import { RegisterAuthUseCase } from '@platform-user/auth/use-cases/auth-register';
 import { UserModule } from '@platform-user/user/user.module';
 import { Auth } from '@platform-user/auth/controller/auth';
+import { EmailStrategy } from '@platform-user/auth/strategies/email.strategy';
+import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate';
+import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
+import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
+import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/use-cases/auth-validate-email-strategy';
+import { ConfirmMailUserModule } from '@platform-user/confirmMail/confirmMail.module';
 
 @Module({
-  imports: [BcryptModule, JwtModule, UserModule],
+  imports: [BcryptModule, JwtModule, UserModule, ConfirmMailUserModule],
   controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,
@@ -29,7 +35,12 @@ import { Auth } from '@platform-user/auth/controller/auth';
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
+    EmailStrategy,
     RegisterAuthUseCase,
+    ActivateAuthUseCase,
+    PasswordResetUserUseCase,
+    PasswordConfirmMailUserUseCase,
+    ValidateUserEmailStrategyUseCase,
   ],
   exports: [],
 })

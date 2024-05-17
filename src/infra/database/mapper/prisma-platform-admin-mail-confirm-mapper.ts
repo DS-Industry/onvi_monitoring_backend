@@ -1,10 +1,10 @@
-import { ConfirmMail } from '@platform-user/confirmMail/domain/confirmMail';
+import { ConfirmMail } from '@platform-admin/confirmMail/domain/confirmMail';
 import {
-  UserMailConfirm as PrismaUserMailConfirm,
+  PlatformUserMailConfirm as PrismaAdminMailConfirm,
   Prisma,
 } from '@prisma/client';
-export class PrismaPlatformUserMailConfirmMapper {
-  static toDomain(entity: PrismaUserMailConfirm): ConfirmMail {
+export class PrismaPlatformAdminMailConfirmMapper {
+  static toDomain(entity: PrismaAdminMailConfirm): ConfirmMail {
     if (!entity) {
       return null;
     }
@@ -19,7 +19,7 @@ export class PrismaPlatformUserMailConfirmMapper {
 
   static toPrisma(
     confirmMail: ConfirmMail,
-  ): Prisma.UserMailConfirmUncheckedCreateInput {
+  ): Prisma.PlatformUserMailConfirmUncheckedCreateInput {
     return {
       id: confirmMail?.id,
       email: confirmMail.email,

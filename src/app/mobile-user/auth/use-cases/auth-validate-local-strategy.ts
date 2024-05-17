@@ -4,6 +4,7 @@ import { Client } from '@mobile-user/client/domain/client';
 import { IOtpRepository } from '@mobile-user/otp/interfaces/otp';
 import { IDateAdapter } from '@libs/date/adapter';
 import { OTP_EXPIRY_TIME } from '@constant/constants';
+import { StatusUser } from "@prisma/client";
 
 @Injectable()
 export class ValidateClientForLocalStrategyUseCase {
@@ -27,6 +28,9 @@ export class ValidateClientForLocalStrategyUseCase {
 
     if (!client) {
       return null;
+    }
+    if (client.status !== StatusUser.ACTIVE) {
+      throw new Error('authorization error');
     }
     return client;
   }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IConfirmMailRepository } from '@platform-admin/confirmMail/interfaces/confirmMail';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { ConfirmMail } from '@platform-admin/confirmMail/domain/confirmMail';
-import { PrismaPlatformUserMailConfirmMapper } from '@db/mapper/prisma-platform-user-mail-confirm-mapper';
+import { PrismaPlatformAdminMailConfirmMapper } from '@db/mapper/prisma-platform-admin-mail-confirm-mapper';
 
 @Injectable()
 export class ConfirmMailRepository extends IConfirmMailRepository {
@@ -12,11 +12,11 @@ export class ConfirmMailRepository extends IConfirmMailRepository {
 
   public async create(input: ConfirmMail): Promise<ConfirmMail> {
     const confirmMailEntity =
-      PrismaPlatformUserMailConfirmMapper.toPrisma(input);
+      PrismaPlatformAdminMailConfirmMapper.toPrisma(input);
     const confirmMail = await this.prisma.platformUserMailConfirm.create({
       data: confirmMailEntity,
     });
-    return PrismaPlatformUserMailConfirmMapper.toDomain(confirmMail);
+    return PrismaPlatformAdminMailConfirmMapper.toDomain(confirmMail);
   }
 
   public async findOne(email: string): Promise<ConfirmMail> {
@@ -25,7 +25,7 @@ export class ConfirmMailRepository extends IConfirmMailRepository {
         email,
       },
     });
-    return PrismaPlatformUserMailConfirmMapper.toDomain(confirmMail);
+    return PrismaPlatformAdminMailConfirmMapper.toDomain(confirmMail);
   }
 
   public async removeOne(email: string): Promise<void> {
