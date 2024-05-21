@@ -17,9 +17,17 @@ import { ValidateClientForLocalStrategyUseCase } from '@mobile-user/auth/use-cas
 import { ValidateClientForJwtStrategyUseCase } from '@mobile-user/auth/use-cases/auth-validate-jwt-strategy';
 import { OtpModule } from '@mobile-user/otp/otp.module';
 import { DateModule } from '@libs/date/module';
+import { SmsModule } from '@libs/sms/module';
 
 @Module({
-  imports: [BcryptModule, JwtModule, ClientModule, OtpModule, DateModule],
+  imports: [
+    BcryptModule,
+    JwtModule,
+    ClientModule,
+    OtpModule,
+    DateModule,
+    SmsModule,
+  ],
   controllers: [Auth],
   providers: [
     LocalStrategy,

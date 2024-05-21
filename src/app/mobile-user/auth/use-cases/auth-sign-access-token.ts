@@ -14,7 +14,7 @@ export class SignAccessTokenUseCase {
   async execute(
     phone: string,
     id: number,
-  ): Promise<{ token: string; expirationDate: string }> {
+  ): Promise<any> {
     const payload: TokenPayload = { phone: phone, clientId: id };
     const secret = this.configService.get<string>('jwtSecret');
     const expiresIn = this.configService.get<string>('jwtExpirationTime');

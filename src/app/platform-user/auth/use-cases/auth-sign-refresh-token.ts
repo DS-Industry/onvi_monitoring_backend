@@ -11,10 +11,7 @@ export class SignRefreshTokenUseCase {
     private readonly jwtService: IJwtAdapter,
   ) {}
 
-  async execute(
-    email: string,
-    id: number,
-  ): Promise<{ token: string; expirationDate: string }> {
+  async execute(email: string, id: number): Promise<any> {
     const payload: TokenPayload = { email: email, id: id };
     const secret = this.configService.get<string>('jwtRefreshTokenSecret');
     const expiresIn = this.configService.get<string>(

@@ -3,12 +3,14 @@ import { IOtpRepository } from '@mobile-user/otp/interfaces/otp';
 import * as otpGenerator from 'otp-generator';
 import { IDateAdapter } from '@libs/date/adapter';
 import { Otp } from '@mobile-user/otp/domain/otp';
+import { ISmsAdapter } from '@libs/sms/adapter';
 
 @Injectable()
 export class SendOtpAuthUseCase {
   constructor(
     private readonly otpRepository: IOtpRepository,
     private readonly dateService: IDateAdapter,
+    private readonly smsService: ISmsAdapter,
   ) {}
 
   async execute(phone: string): Promise<any> {
@@ -25,7 +27,7 @@ export class SendOtpAuthUseCase {
       await this.otpRepository.removeOne(phone);
     }
     const otp = await this.otpRepository.create(otpModel);
-    await this.otpRepository.send(otp);
+    await this.smsService.send(otp, 'Ваш код доступа: ');
     return otp;
   }
 

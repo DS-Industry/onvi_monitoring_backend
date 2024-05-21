@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE "MobileUser" ALTER COLUMN "gender" DROP NOT NULL,
-ALTER COLUMN "country" DROP NOT NULL,
-ALTER COLUMN "countryCode" DROP NOT NULL,
-ALTER COLUMN "timezone" DROP NOT NULL;

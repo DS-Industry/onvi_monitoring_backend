@@ -1,7 +1,0 @@
--- AlterTable
-ALTER TABLE "MobileUser" ALTER COLUMN "email" DROP NOT NULL;
-
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "middlename" DROP NOT NULL,
-ALTER COLUMN "birthday" DROP NOT NULL,
-ALTER COLUMN "email" DROP NOT NULL;
