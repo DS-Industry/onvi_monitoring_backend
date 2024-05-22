@@ -1,24 +1,21 @@
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { Strategy } from 'passport-local';
+import { Injectable } from '@nestjs/common';
+import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalStrategy extends PassportStrategy(
+  HeaderAPIKeyStrategy,
+  'api-key',
+) {
   constructor() {
-    super({
-      usernameField: 'phone',
-      otpField: 'otp',
-    });
+    super({ header: 'apiKey', prefix: '' }, true, async (apiKey, done) =>
+      this.validateKey(apiKey, done),
+    );
   }
-
-  async validate(
-    phone: string,
-    otp: string,
+  public async validateKey(
+    incomingApiKey: string,
     done: (error: Error, data) => Record<string, unknown>,
-  ) {}
+  ) {
+    done(null, true);
+  }
 }

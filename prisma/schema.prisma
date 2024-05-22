@@ -40,23 +40,32 @@ model User {
   userRoleId Int
   name String
   surname String
-  middlename String
-  birthday DateTime
-  phone String @unique
+  middlename String?
+  birthday DateTime?
+  phone String? @unique
   email String @unique
+  password String
   gender String
-  status String
-  avatar String
+  status StatusUser? @default(ACTIVE)
+  avatar String?
   country String
   countryCode Int
   timezone Int
-  refreshTokenId String
-  createdAt DateTime
-  updatedAt DateTime
+  refreshTokenId String?
+  createdAt DateTime?
+  updatedAt DateTime?
   organizationOwner Organization[] @relation(name: "Owner")
   organizations Organization[]
   posesCreated Pos[] @relation(name: "CreatedByUser")
   posesUpdated Pos[] @relation(name: "UpdateByUser")
+}
+
+model UserMailConfirm {
+  id Int @id @default(autoincrement())
+  email String @unique
+  confirmString String
+  createdAt DateTime
+  expireAt DateTime
 }
 
 model UserRole {
@@ -310,25 +319,33 @@ model LoyaltyCardTier {
 model MobileUser {
   id Int @id @default(autoincrement())
   name String
-  surname String
-  middlename String
-  birthday DateTime
+  surname String?
+  middlename String?
+  birthday DateTime?
   phone String @unique
-  email String @unique
-  gender String
-  status String
-  avatar String
-  country String
-  countryCode Int
-  timezone Int
-  refreshTokenId String
-  createdAt DateTime
-  updatedAt DateTime
-  loyaltyCard LoyaltyCard @relation(fields: [loyaltyCardId], references: [id])
-  loyaltyCardId Int @unique
+  email String? @unique
+  gender String?
+  status StatusUser? @default(ACTIVE)
+  avatar String?
+  country String?
+  countryCode Int?
+  timezone Int?
+  refreshTokenId String?
+  createdAt DateTime?
+  updatedAt DateTime?
+  loyaltyCard LoyaltyCard? @relation(fields: [loyaltyCardId], references: [id])
+  loyaltyCardId Int? @unique
   promocodeTransaction PromocodeTransaction[]
-  mobileUserRole MobileUserRole @relation(fields: [mobileUserRoleId], references: [id])
-  mobileUserRoleId Int
+  mobileUserRole MobileUserRole? @relation(fields: [mobileUserRoleId], references: [id])
+  mobileUserRoleId Int?
+}
+
+model Otp {
+  id Int @id @default(autoincrement())
+  phone String @unique
+  confirmCode String
+  createdAt DateTime
+  expireAt DateTime
 }
 
 model MobileUserRole {
@@ -349,21 +366,30 @@ model PlatformUser {
   id Int @id @default(autoincrement())
   name String
   surname String
-  middlename String
-  birthday DateTime
-  phone String @unique
+  middlename String?
+  birthday DateTime?
+  phone String? @unique
   email String @unique
+  password String
   gender String
-  status String
-  avatar String
+  status StatusUser? @default(ACTIVE)
+  avatar String?
   country String
   countryCode Int
   timezone Int
-  refreshTokenId String
+  refreshTokenId String?
   createdAt DateTime
   updatedAt DateTime
-  platformUserRole PlatformUserRole @relation(fields: [platformUserRoleId], references: [id])
-  platformUserRoleId Int
+  platformUserRole PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
+  platformUserRoleId Int?
+}
+
+model PlatformUserMailConfirm {
+  id Int @id @default(autoincrement())
+  email String @unique
+  confirmString String
+  createdAt DateTime
+  expireAt DateTime
 }
 
 model PlatformUserRole {
@@ -378,5 +404,11 @@ model PlatformUserPermission {
   name String
   permissionModule String
   platformUserRoles PlatformUserRole[]
+}
+
+enum StatusUser {
+  ACTIVE
+  BLOCKED
+  DELETED
 }
 
