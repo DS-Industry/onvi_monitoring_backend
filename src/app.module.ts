@@ -25,7 +25,7 @@ import { MobileUserModule } from '@mobile-user/mobile-user.module';
                   {
                     target: 'pino/file',
                     options: {
-                      destination: './logs',
+                      destination: './logs', //
                       mkdir: true,
                     },
                   },
