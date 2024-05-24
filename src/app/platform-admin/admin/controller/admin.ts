@@ -1,14 +1,27 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreateAdminUseCase } from '@platform-admin/admin/use-cases/admin-create';
 import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-id';
 import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
-import { GetByIdAdminDto } from '@platform-admin/admin/controller/dto/admin-get-by-id.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-upload';
+import { DownloadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-download';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly adminCreate: CreateAdminUseCase,
     private readonly adminGetById: GetByIdAdminUseCase,
+    private readonly adminUploadAvatar: UploadAvatarAdminUseCase,
+    private readonly adminDownloadAvatar: DownloadAvatarAdminUseCase,
   ) {}
   @Get(':id')
   @HttpCode(200)
@@ -26,6 +39,25 @@ export class AdminController {
   async create(@Body() data: CreateAdminDto): Promise<any> {
     try {
       return this.adminCreate.execute(data);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@UploadedFile() file: Express.Multer.File) {
+    try {
+      return this.adminUploadAvatar.execute(file);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('avatar/:key')
+  async download(@Param('key') key: string) {
+    try {
+      return this.adminDownloadAvatar.execute(key);
     } catch (e) {
       throw new Error(e);
     }
