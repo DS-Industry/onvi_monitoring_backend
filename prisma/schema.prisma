@@ -8,402 +8,410 @@ datasource db {
 }
 
 model Organization {
-  id Int    @id @default(autoincrement())
-  name String
-  slug String
-  address Address @relation(fields: [addressId], references: [id])
-  addressId Int @unique
+  id                    Int      @id @default(autoincrement())
+  name                  String
+  slug                  String
+  address               Address  @relation(fields: [addressId], references: [id])
+  addressId             Int      @unique
   organizationDocuments String
-  organizationStatus String
-  organizationType String
-  createdAt DateTime
-  updatedAt DateTime
-  owner User @relation(name: "Owner", fields: [ownerId], references: [id])
-  ownerId Int
-  users User[]
-  poses Pos[]
+  organizationStatus    String
+  organizationType      String
+  createdAt             DateTime
+  updatedAt             DateTime
+  owner                 User     @relation(name: "Owner", fields: [ownerId], references: [id])
+  ownerId               Int
+  users                 User[]
+  poses                 Pos[]
 }
 
 model Address {
-  id Int @id @default(autoincrement())
-  city String
-  location String
+  id           Int           @id @default(autoincrement())
+  city         String
+  location     String
   organization Organization?
-  pos Pos?
-  lat Int
-  lon Int
+  pos          Pos?
+  lat          Int
+  lon          Int
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  userRole UserRole @relation(fields: [userRoleId], references: [id])
-  userRoleId Int
-  name String
-  surname String
-  middlename String?
-  birthday DateTime?
-  phone String? @unique
-  email String @unique
-  password String
-  gender String
-  status StatusUser? @default(ACTIVE)
-  avatar String?
-  country String
-  countryCode Int
-  timezone Int
-  refreshTokenId String?
-  createdAt DateTime?
-  updatedAt DateTime?
+  id                Int            @id @default(autoincrement())
+  userRole          UserRole       @relation(fields: [userRoleId], references: [id])
+  userRoleId        Int
+  name              String
+  surname           String
+  middlename        String?
+  birthday          DateTime?
+  phone             String?        @unique
+  email             String         @unique
+  password          String
+  gender            String
+  status            StatusUser?    @default(ACTIVE)
+  avatar            String?
+  country           String
+  countryCode       Int
+  timezone          Int
+  refreshTokenId    String?
+  createdAt         DateTime?
+  updatedAt         DateTime?
   organizationOwner Organization[] @relation(name: "Owner")
-  organizations Organization[]
-  posesCreated Pos[] @relation(name: "CreatedByUser")
-  posesUpdated Pos[] @relation(name: "UpdateByUser")
+  organizations     Organization[]
+  posesCreated      Pos[]          @relation(name: "CreatedByUser")
+  posesUpdated      Pos[]          @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
-  id Int @id @default(autoincrement())
-  email String @unique
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   confirmString String
-  createdAt DateTime
-  expireAt DateTime
+  createdAt     DateTime
+  expireAt      DateTime
 }
 
 model UserRole {
-  id Int @id @default(autoincrement())
-  name String
-  users User[]
+  id              Int              @id @default(autoincrement())
+  name            String
+  users           User[]
   userPermissions UserPermission[]
 }
 
 model UserPermission {
-  id Int @id @default(autoincrement())
-  name String
+  id               Int        @id @default(autoincrement())
+  name             String
   permissionModule String
-  userRoles UserRole[]
+  userRoles        UserRole[]
 }
 
 model Pos {
-  id Int @id @default(autoincrement())
-  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId Int
-  name String
-  slug String
-  monthlyPlan Int
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId Int
-  posMetaData String
-  timezone Int
-  address Address @relation(fields: [addressId], references: [id])
-  addressId Int @unique
-  image String
-  rating Int
-  status String
-  createdAt DateTime
-  updatedAt DateTime
-  createdBy User @relation(name: "CreatedByUser", fields: [createdById], references: [id])
-  createdById Int
-  updateBy User @relation(name: "UpdateByUser", fields: [updateById], references: [id])
-  updateById Int
-  posBenefit PosBenefit?
+  id                   Int                   @id @default(autoincrement())
+  loyaltyProgram       LoyaltyProgram        @relation(fields: [loyaltyProgramId], references: [id])
+  loyaltyProgramId     Int
+  name                 String
+  slug                 String
+  monthlyPlan          Int
+  organization         Organization          @relation(fields: [organizationId], references: [id])
+  organizationId       Int
+  posMetaData          String
+  timezone             Int
+  address              Address               @relation(fields: [addressId], references: [id])
+  addressId            Int                   @unique
+  image                String
+  rating               Int
+  status               String
+  createdAt            DateTime
+  updatedAt            DateTime
+  createdBy            User                  @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById          Int
+  updateBy             User                  @relation(name: "UpdateByUser", fields: [updateById], references: [id])
+  updateById           Int
+  posBenefit           PosBenefit?
   loyaltyPosPromocodes LoyaltyPosPromocode[]
-  carWashPos CarWashPos?
+  carWashPos           CarWashPos?
 }
 
 model CarWashPos {
-  id Int @id @default(autoincrement())
-  name String
-  slug String
-  pos Pos @relation(fields: [posId], references: [id])
-  posId Int @unique
+  id              Int              @id @default(autoincrement())
+  name            String
+  slug            String
+  pos             Pos              @relation(fields: [posId], references: [id])
+  posId           Int              @unique
   carWashServices CarWashService[]
-  carWashDevices CarWashDevice[]
+  carWashDevices  CarWashDevice[]
 }
 
 model CarWashService {
-  id Int @id @default(autoincrement())
-  name String
-  code String
+  id          Int          @id @default(autoincrement())
+  name        String
+  code        String
   description String
   carWasPoses CarWashPos[]
 }
 
 model CarWashDevice {
-  id Int @id @default(autoincrement())
-  name String
-  carWashDeviceMetaData String
-  status String
-  ipAddress String
-  carWashDeviceType CarWashDeviceType @relation(fields: [carWashDeviceTypeId], references: [id])
-  carWashDeviceTypeId Int
-  carWasPoses CarWashPos[]
+  id                            Int                            @id @default(autoincrement())
+  name                          String
+  carWashDeviceMetaData         String
+  status                        String
+  ipAddress                     String
+  carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId           Int
+  carWasPoses                   CarWashPos[]
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
-  carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
-  carWashDeviceEvents CarWashDeviceEvent[]
+  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
+  carWashDeviceEvents           CarWashDeviceEvent[]
 }
 
 model CarWashDeviceType {
-  id Int @id @default(autoincrement())
-  name String
-  code String
-  carWashDevices CarWashDevice[]
+  id                          Int                          @id @default(autoincrement())
+  name                        String
+  code                        String
+  carWashDevices              CarWashDevice[]
   carWashDeviceProgrammsTypes CarWashDeviceProgrammsType[]
 }
 
 model CarWashDeviceOperationsEvent {
-  id Int @id @default(autoincrement())
-  carWashDevice CarWashDevice @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId Int
-  operDate DateTime
-  loadDate DateTime
-  counter Int
-  operSum Int
-  status String
-  localId Int
-  paymentType String
-  isBoxOffice Boolean
-  errNums ErrNum[]
+  id                           Int                           @id @default(autoincrement())
+  carWashDevice                CarWashDevice                 @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId              Int
+  operDate                     DateTime
+  loadDate                     DateTime
+  counter                      Int
+  operSum                      Int
+  status                       String
+  localId                      Int
+  paymentType                  String
+  isBoxOffice                  Boolean
+  errNums                      ErrNum[]
   carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
 }
 
 model CarWashDeviceProgrammsEvent {
-  id Int @id @default(autoincrement())
-  carWashDevice CarWashDevice @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId Int
-  carWashDeviceOperationsEvent CarWashDeviceOperationsEvent @relation(fields: [carWashDeviceOperationsEventId], references: [id])
+  id                             Int                          @id @default(autoincrement())
+  carWashDevice                  CarWashDevice                @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId                Int
+  carWashDeviceOperationsEvent   CarWashDeviceOperationsEvent @relation(fields: [carWashDeviceOperationsEventId], references: [id])
   carWashDeviceOperationsEventId Int
-  carWashDeviceProgrammsType CarWashDeviceProgrammsType @relation(fields: [carWashDeviceProgrammsTypeId], references: [id])
-  carWashDeviceProgrammsTypeId Int
-  beginDate DateTime
-  loadDate DateTime
-  endDate DateTime
-  beginConfirm Boolean
-  endConfirm Boolean
-  isPaid Int
-  beginLocalId Int
-  endLocalId Int
-  crdOper Int
-  uncNumber Int
-  errNums ErrNum[]
+  carWashDeviceProgrammsType     CarWashDeviceProgrammsType   @relation(fields: [carWashDeviceProgrammsTypeId], references: [id])
+  carWashDeviceProgrammsTypeId   Int
+  beginDate                      DateTime
+  loadDate                       DateTime
+  endDate                        DateTime
+  beginConfirm                   Boolean
+  endConfirm                     Boolean
+  isPaid                         Int
+  beginLocalId                   Int
+  endLocalId                     Int
+  crdOper                        Int
+  uncNumber                      Int
+  errNums                        ErrNum[]
 }
 
 model CarWashDeviceProgrammsType {
-  id Int @id @default(autoincrement())
-  carWashDeviceType CarWashDeviceType @relation(fields: [carWashDeviceTypeId], references: [id])
-  carWashDeviceTypeId Int
-  name String
-  code String
+  id                           Int                           @id @default(autoincrement())
+  carWashDeviceType            CarWashDeviceType             @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId          Int
+  name                         String
+  code                         String
   carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
 }
 
 model CarWashDeviceEvent {
-  id Int @id @default(autoincrement())
-  carWashDevice CarWashDevice @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId Int
-  carWashDeviceEventType CarWashDeviceEventType @relation(fields: [carWashDeviceEventTypeId], references: [id])
+  id                       Int                    @id @default(autoincrement())
+  carWashDevice            CarWashDevice          @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId          Int
+  carWashDeviceEventType   CarWashDeviceEventType @relation(fields: [carWashDeviceEventTypeId], references: [id])
   carWashDeviceEventTypeId Int
-  eventDate DateTime
-  loadDate DateTime
-  localId Int
-  errNums ErrNum[]
+  eventDate                DateTime
+  loadDate                 DateTime
+  localId                  Int
+  errNums                  ErrNum[]
 }
 
 model CarWashDeviceEventType {
-  id Int @id @default(autoincrement())
-  name String
-  code String
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  code                String
   carWashDeviceEvents CarWashDeviceEvent[]
 }
 
 model ErrNum {
-  id Int @id @default(autoincrement())
-  message String
-  code String
+  id                            Int                            @id @default(autoincrement())
+  message                       String
+  code                          String
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
-  carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
-  carWashDeviceEvents CarWashDeviceEvent[]
+  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
+  carWashDeviceEvents           CarWashDeviceEvent[]
 }
 
 model LoyaltyProgram {
-  id Int @id @default(autoincrement())
-  name String
-  poses Pos[]
+  id               Int               @id @default(autoincrement())
+  name             String
+  poses            Pos[]
   loyaltyCardTiers LoyaltyCardTier[]
 }
 
 model PosBenefit {
-  id Int @id @default(autoincrement())
-  pos Pos @relation(fields: [posId], references: [id])
-  posId Int @unique
-  benefits Benefit[]
+  id           Int           @id @default(autoincrement())
+  pos          Pos           @relation(fields: [posId], references: [id])
+  posId        Int           @unique
+  benefits     Benefit[]
   benefitTypes BenefitType[]
 }
 
 model LoyaltyPosPromocode {
-  id Int @id @default(autoincrement())
-  pos Pos @relation(fields: [posId], references: [id])
-  posId Int
-  code Int
+  id                   Int                   @id @default(autoincrement())
+  pos                  Pos                   @relation(fields: [posId], references: [id])
+  posId                Int
+  code                 Int
   promocodeTransaction PromocodeTransaction?
-  metaData String
-  discount Int
-  discountType String
-  expiryDate DateTime
-  status String
-  createdAt DateTime
-  updatedAt DateTime
+  metaData             String
+  discount             Int
+  discountType         String
+  expiryDate           DateTime
+  status               String
+  createdAt            DateTime
+  updatedAt            DateTime
 }
 
 model PromocodeTransaction {
-  id Int @id @default(autoincrement())
-  loyaltyPosPromocode LoyaltyPosPromocode @relation(fields: [loyaltyPosPromocodeId], references: [id])
-  loyaltyPosPromocodeId Int @unique
-  mobileUser MobileUser @relation(fields: [mobileUserId], references: [id])
-  mobileUserId Int @unique
-  activationDate DateTime
-  status String
+  id                    Int                 @id @default(autoincrement())
+  loyaltyPosPromocode   LoyaltyPosPromocode @relation(fields: [loyaltyPosPromocodeId], references: [id])
+  loyaltyPosPromocodeId Int                 @unique
+  mobileUser            MobileUser          @relation(fields: [mobileUserId], references: [id])
+  mobileUserId          Int                 @unique
+  activationDate        DateTime
+  status                String
 }
 
 model Benefit {
-  id Int @id @default(autoincrement())
-  benefitType BenefitType @relation(fields: [benefitTypeId], references: [id])
-  benefitTypeId Int
-  name String
-  code String
-  bonus String
-  benefitActionType BenefitActionType @relation(fields: [benefitActionTypeId], references: [id])
+  id                  Int               @id @default(autoincrement())
+  benefitType         BenefitType       @relation(fields: [benefitTypeId], references: [id])
+  benefitTypeId       Int
+  name                String
+  code                String
+  bonus               String
+  benefitActionType   BenefitActionType @relation(fields: [benefitActionTypeId], references: [id])
   benefitActionTypeId Int
-  posBenefit PosBenefit @relation(fields: [posBenefitId], references: [id])
-  posBenefitId Int
-  loyaltyCardTiers LoyaltyCardTier[]
+  posBenefit          PosBenefit        @relation(fields: [posBenefitId], references: [id])
+  posBenefitId        Int
+  loyaltyCardTiers    LoyaltyCardTier[]
 }
 
 model BenefitType {
-  id Int @id @default(autoincrement())
-  benefites Benefit[]
-  name String
-  code String
-  bonus String
-  posBenefit PosBenefit @relation(fields: [posBenefitId], references: [id])
+  id           Int        @id @default(autoincrement())
+  benefites    Benefit[]
+  name         String
+  code         String
+  bonus        String
+  posBenefit   PosBenefit @relation(fields: [posBenefitId], references: [id])
   posBenefitId Int
 }
 
 model BenefitActionType {
-  id Int @id @default(autoincrement())
-  benefites Benefit[]
-  name String
+  id          Int       @id @default(autoincrement())
+  benefites   Benefit[]
+  name        String
   description String
 }
 
 model LoyaltyCard {
-  id Int @id @default(autoincrement())
-  balance Int
-  statuc String
-  dateBegin DateTime
-  dateEnd DateTime
-  loyaltyCardTier LoyaltyCardTier @relation(fields: [loyaltyCardTierId], references: [id])
+  id                Int             @id @default(autoincrement())
+  balance           Int
+  statuc            String
+  dateBegin         DateTime
+  dateEnd           DateTime
+  loyaltyCardTier   LoyaltyCardTier @relation(fields: [loyaltyCardTierId], references: [id])
   loyaltyCardTierId Int
-  uncNumber String
-  note String
-  mobileUser MobileUser?
+  uncNumber         String
+  note              String
+  mobileUser        MobileUser?
 }
 
 model LoyaltyCardTier {
-  id Int @id @default(autoincrement())
-  name String
-  loyaltyCard LoyaltyCard[]
-  loyaltyProgram LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id])
+  id               Int            @id @default(autoincrement())
+  name             String
+  loyaltyCard      LoyaltyCard[]
+  loyaltyProgram   LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id])
   loyaltyProgramId Int
-  benefits Benefit[]
+  benefits         Benefit[]
 }
 
 model MobileUser {
-  id Int @id @default(autoincrement())
-  name String
-  surname String?
-  middlename String?
-  birthday DateTime?
-  phone String @unique
-  email String? @unique
-  gender String?
-  status StatusUser? @default(ACTIVE)
-  avatar String?
-  country String?
-  countryCode Int?
-  timezone Int?
-  refreshTokenId String?
-  createdAt DateTime?
-  updatedAt DateTime?
-  loyaltyCard LoyaltyCard? @relation(fields: [loyaltyCardId], references: [id])
-  loyaltyCardId Int? @unique
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  surname              String?
+  middlename           String?
+  birthday             DateTime?
+  phone                String                 @unique
+  email                String?                @unique
+  gender               String?
+  status               StatusUser?            @default(ACTIVE)
+  avatar               String?
+  country              String?
+  countryCode          Int?
+  timezone             Int?
+  refreshTokenId       String?
+  createdAt            DateTime?
+  updatedAt            DateTime?
+  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
+  loyaltyCardId        Int?                   @unique
   promocodeTransaction PromocodeTransaction[]
-  mobileUserRole MobileUserRole? @relation(fields: [mobileUserRoleId], references: [id])
-  mobileUserRoleId Int?
+  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
+  mobileUserRoleId     Int?
 }
 
 model Otp {
-  id Int @id @default(autoincrement())
-  phone String @unique
+  id          Int      @id @default(autoincrement())
+  phone       String   @unique
   confirmCode String
-  createdAt DateTime
-  expireAt DateTime
+  createdAt   DateTime
+  expireAt    DateTime
 }
 
 model MobileUserRole {
-  id Int @id @default(autoincrement())
-  name String
-  mobileUsers MobileUser[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  mobileUsers          MobileUser[]
   mobileUserPermission MobileUserPermission[]
 }
 
 model MobileUserPermission {
-  id Int @id @default(autoincrement())
-  name String
+  id               Int              @id @default(autoincrement())
+  name             String
   permissionModule String
-  mobileUserRoles MobileUserRole[]
+  mobileUserRoles  MobileUserRole[]
 }
 
 model PlatformUser {
-  id Int @id @default(autoincrement())
-  name String
-  surname String
-  middlename String?
-  birthday DateTime?
-  phone String? @unique
-  email String @unique
-  password String
-  gender String
-  status StatusUser? @default(ACTIVE)
-  avatar String?
-  country String
-  countryCode Int
-  timezone Int
-  refreshTokenId String?
-  createdAt DateTime
-  updatedAt DateTime
-  platformUserRole PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
+  id                 Int               @id @default(autoincrement())
+  name               String
+  surname            String
+  middlename         String?
+  birthday           DateTime?
+  phone              String?           @unique
+  email              String            @unique
+  password           String
+  gender             String
+  status             StatusUser?       @default(ACTIVE)
+  avatar             String?
+  country            String
+  countryCode        Int
+  timezone           Int
+  refreshTokenId     String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  platformUserRole   PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
   platformUserRoleId Int?
 }
 
 model PlatformUserMailConfirm {
-  id Int @id @default(autoincrement())
-  email String @unique
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
   confirmString String
-  createdAt DateTime
-  expireAt DateTime
+  createdAt     DateTime
+  expireAt      DateTime
 }
 
 model PlatformUserRole {
-  id Int @id @default(autoincrement())
-  name String
-  platformUsers PlatformUser[]
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUsers           PlatformUser[]
   platformUserPermissions PlatformUserPermission[]
 }
 
 model PlatformUserPermission {
-  id Int @id @default(autoincrement())
-  name String
-  permissionModule String
+  id                Int                  @id @default(autoincrement())
+  action            String
+  object            PlatformUserObjects? @relation(fields: [ojectId], references: [id])
+  ojectId           Int?
+  condition         Json?
   platformUserRoles PlatformUserRole[]
+}
+
+model PlatformUserObjects {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUserPermissions PlatformUserPermission[]
 }
 
 enum StatusUser {
@@ -411,4 +419,3 @@ enum StatusUser {
   BLOCKED
   DELETED
 }
-
