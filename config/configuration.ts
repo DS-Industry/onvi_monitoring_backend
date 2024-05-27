@@ -18,4 +18,6 @@ export const configuration = () => ({
   emailName: process.env.EMAIL_NAME,
   emailFrom: process.env.EMAIL_FROM,
   bucketName: process.env.BUCKET_NAME,
+  endpointFile: process.env.ENDPOINT_FILE,
+  storageUrl: process.env.STORAGE_URL,
 });

@@ -14,6 +14,7 @@ import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-creat
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-upload';
 import { DownloadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-download';
+import { UploadAvatarAdminDto } from '@platform-admin/admin/controller/dto/admin-upload-avatar.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -46,9 +47,12 @@ export class AdminController {
 
   @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
-  async upload(@UploadedFile() file: Express.Multer.File) {
+  async upload(
+    @Body() data: UploadAvatarAdminDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     try {
-      return this.adminUploadAvatar.execute(file);
+      return this.adminUploadAvatar.execute(file, Number(data.id));
     } catch (e) {
       throw new Error(e);
     }

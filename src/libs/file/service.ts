@@ -9,7 +9,7 @@ export class FileService implements IFileAdapter {
 
   constructor(private readonly configService: ConfigService) {
     this.s3 = new AWS.S3({
-      endpoint: 'storage.yandexcloud.net',
+      endpoint: this.configService.get<string>('endpointFile'),
     });
   }
 
@@ -33,5 +33,14 @@ export class FileService implements IFileAdapter {
 
     const data = await this.s3.getObject(params).promise();
     return data.Body as Buffer;
+  }
+
+  async delete(key: string): Promise<void> {
+    const params = {
+      Bucket: this.configService.get<string>('bucketName'),
+      Key: key,
+    };
+
+    await this.s3.deleteObject(params).promise();
   }
 }

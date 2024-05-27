@@ -30,7 +30,7 @@ export class UpdateAdminUseCase {
     admin.country = country ? country : admin.country;
     admin.countryCode = countryCode ? countryCode : admin.countryCode;
     admin.timezone = timezone ? timezone : admin.timezone;
-    admin.avatar = middlename ? avatar : admin.avatar;
+    admin.avatar = avatar ? avatar : admin.avatar;
     admin.refreshTokenId = refreshTokenId
       ? refreshTokenId
       : admin.refreshTokenId;
