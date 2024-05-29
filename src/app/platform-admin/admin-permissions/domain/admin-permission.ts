@@ -1,8 +1,14 @@
 import { BaseEntity } from '@utils/entity';
+import { JSONObject } from '../../../../common/types/json-type';
 
-export interface PermissionCondition {}
-export class AdminPermission extends BaseEntity<any> {
-  constructor(props: any) {
+export interface PermissionProps {
+  id?: number;
+  action: string;
+  objectId: number;
+  condition: JSONObject;
+}
+export class AdminPermission extends BaseEntity<PermissionProps> {
+  constructor(props: PermissionProps) {
     super(props);
   }
 
@@ -12,9 +18,9 @@ export class AdminPermission extends BaseEntity<any> {
    * @return condition after parse: {"departmentId": 1}
    */
   public static parseCondition(
-    condition: PermissionCondition,
+    condition: any,
     variables: Record<string, any>,
-  ): PermissionCondition {
+  ): any {
     if (!condition) return null;
     const parsedCondition = {};
     for (const [key, rawValue] of Object.entries(condition)) {
@@ -40,5 +46,21 @@ export class AdminPermission extends BaseEntity<any> {
       parsedCondition[key] = value;
     }
     return parsedCondition;
+  }
+
+  get id(): number {
+    return this.props.id;
+  }
+
+  get action(): string {
+    return this.props.action;
+  }
+
+  get objectId(): number {
+    return this.props.objectId;
+  }
+
+  get condition(): JSONObject {
+    return this.props.condition;
   }
 }

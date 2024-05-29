@@ -9,7 +9,7 @@ import {
 import {
   AdminPermission,
   PermissionCondition,
-} from '@platform-admin/permissions/domain/admin-permission';
+} from '@platform-admin/admin-permissions/domain/admin-permission';
 
 export enum PermissionAction {
   Manage = 'manage',
