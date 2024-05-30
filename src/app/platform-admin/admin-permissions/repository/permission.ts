@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IPermissionsRepository } from '@platform-admin/admin-permissions/interfaces/permissions';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { AdminPermission } from "@platform-admin/admin-permissions/domain/admin-permission";
+import { AdminPermission } from '@platform-admin/admin-permissions/domain/admin-permission';
 
 @Injectable()
 export class PermissionRepository extends IPermissionsRepository {

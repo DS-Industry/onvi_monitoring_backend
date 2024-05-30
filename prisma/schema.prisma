@@ -402,8 +402,8 @@ model PlatformUserRole {
 model PlatformUserPermission {
   id                Int                  @id @default(autoincrement())
   action            String
-  object            PlatformUserObjects? @relation(fields: [ojectId], references: [id])
-  ojectId           Int?
+  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  objectId           Int?
   condition         Json?
   platformUserRoles PlatformUserRole[]
 }

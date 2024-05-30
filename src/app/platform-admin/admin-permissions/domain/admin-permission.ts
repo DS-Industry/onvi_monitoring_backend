@@ -1,5 +1,5 @@
 import { BaseEntity } from '@utils/entity';
-import { JSONObject } from '../../../../common/types/json-type';
+import { JSONObject } from '@common/types/json-type';
 
 export interface PermissionProps {
   id?: number;
