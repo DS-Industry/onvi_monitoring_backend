@@ -6,10 +6,8 @@ import {
   AbilityClass,
   InferSubjects,
 } from '@casl/ability';
-import {
-  AdminPermission,
-  PermissionCondition,
-} from '@platform-admin/admin-permissions/domain/admin-permission';
+import { AdminPermission } from '@platform-admin/admin-permissions/domain/admin-permission';
+import { JSONObject } from '@common/types/json-type';
 
 export enum PermissionAction {
   Manage = 'manage',
@@ -22,7 +20,7 @@ export enum PermissionAction {
 interface CaslPermission {
   action: PermissionAction;
   subject: string;
-  condition?: PermissionCondition;
+  condition?: JSONObject;
 }
 export type PermissionObjectType = any;
 export type AppAbility = Ability<[PermissionAction, PermissionObjectType]>;

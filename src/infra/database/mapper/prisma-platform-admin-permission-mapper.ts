@@ -1,14 +1,14 @@
 import {
-  PlatformUserPermission as PrismaPlatformUserPermission,
+  PlatformUserPermission as PrismaPlatformAdminPermission,
   Prisma,
 } from '@prisma/client';
 import { AdminPermission } from '@platform-admin/admin-permissions/domain/admin-permission';
 import { JSONObject } from '@common/types/json-type';
 
 export class PrismaPlatformAdminPermissionMapper {
-  static toDomain(entity: PrismaPlatformUserPermission): AdminPermission {
+  static toDomain(entity: PrismaPlatformAdminPermission): AdminPermission {
     if (!entity) return null;
-    const condition = this.fromJson(entity.condition);
+    const condition = this.fromJson(entity?.condition);
     return new AdminPermission({
       id: entity.id,
       action: entity.action,

@@ -5,7 +5,7 @@ export interface PermissionProps {
   id?: number;
   action: string;
   objectId: number;
-  condition: JSONObject;
+  condition?: JSONObject;
 }
 export class AdminPermission extends BaseEntity<PermissionProps> {
   constructor(props: PermissionProps) {
@@ -62,5 +62,17 @@ export class AdminPermission extends BaseEntity<PermissionProps> {
 
   get condition(): JSONObject {
     return this.props.condition;
+  }
+
+  set action(action: string) {
+    this.props.action = action;
+  }
+
+  set objectId(objectId: number) {
+    this.props.objectId = objectId;
+  }
+
+  set condition(condition: JSONObject) {
+    this.props.condition = condition;
   }
 }
