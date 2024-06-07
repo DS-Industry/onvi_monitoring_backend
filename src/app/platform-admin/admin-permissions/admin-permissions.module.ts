@@ -5,9 +5,11 @@ import { CreatePermissionsUseCase } from '@platform-admin/admin-permissions/use-
 import { GetAllPermissionsUseCases } from '@platform-admin/admin-permissions/use-cases/permissions-get-all';
 import { GetByIdPermissionsUseCase } from '@platform-admin/admin-permissions/use-cases/permissions-get-by-id';
 import { UpdatePermissionsUseCase } from '@platform-admin/admin-permissions/use-cases/permissions-update';
+import { Permissions } from '@platform-admin/admin-permissions/controller/permissions';
 
 @Module({
   imports: [PrismaModule],
+  controllers: [Permissions],
   providers: [
     PermissionsRepositoryProvider,
     CreatePermissionsUseCase,

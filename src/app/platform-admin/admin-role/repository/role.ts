@@ -3,6 +3,8 @@ import { IRoleRepository } from '@platform-admin/admin-role/interfaces/role';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { AdminRole } from '@platform-admin/admin-role/domain/admin-role';
 import { PrismaPlatformAdminRoleMapper } from '@db/mapper/prisma-platform-admin-role-mapper';
+import { AdminPermission } from '@platform-admin/admin-permissions/domain/admin-permission';
+import { PrismaPlatformAdminPermissionMapper } from '@db/mapper/prisma-platform-admin-permission-mapper';
 
 @Injectable()
 export class RoleRepository extends IRoleRepository {
@@ -52,5 +54,20 @@ export class RoleRepository extends IRoleRepository {
       },
     });
     return PrismaPlatformAdminRoleMapper.toDomain(adminRole);
+  }
+
+  async findAllPermissionsById(id: number): Promise<AdminPermission[]> {
+    const adminRole = await this.prisma.platformUserRole.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        platformUserPermissions: true,
+      },
+    });
+
+    return adminRole.platformUserPermissions.map((item) =>
+      PrismaPlatformAdminPermissionMapper.toDomain(item),
+    );
   }
 }

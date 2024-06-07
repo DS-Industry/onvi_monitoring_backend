@@ -25,7 +25,7 @@ export class PrismaPlatformAdminPermissionMapper {
       id: permission?.id,
       action: permission?.action,
       objectId: permission?.objectId,
-      condition: condition,
+      condition: permission?.condition,
     };
   }
 

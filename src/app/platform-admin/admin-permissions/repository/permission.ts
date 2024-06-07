@@ -9,11 +9,19 @@ export class PermissionRepository extends IPermissionsRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
   }
-  async create(input: AdminPermission): Promise<AdminPermission> {
+  async create(
+    input: AdminPermission,
+    roles: { id: number }[],
+  ): Promise<AdminPermission> {
     const permissionPrismaEntity =
       PrismaPlatformAdminPermissionMapper.toPrisma(input);
     const permission = await this.prisma.platformUserPermission.create({
-      data: permissionPrismaEntity,
+      data: {
+        ...permissionPrismaEntity,
+        platformUserRoles: {
+          connect: roles,
+        },
+      },
     });
     return PrismaPlatformAdminPermissionMapper.toDomain(permission);
   }

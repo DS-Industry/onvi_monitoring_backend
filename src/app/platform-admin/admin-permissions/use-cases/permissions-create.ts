@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePermissionsDto } from '@platform-admin/admin-permissions/use-cases/dto/permissions-create.dto';
+import { CreatePermissionsDto } from '@platform-admin/admin-permissions/controller/dto/permissions-create.dto';
 import { AdminPermission } from '@platform-admin/admin-permissions/domain/admin-permission';
 import { IPermissionsRepository } from '@platform-admin/admin-permissions/interfaces/permissions';
 
@@ -14,6 +14,8 @@ export class CreatePermissionsUseCase {
       condition: input.condition,
     });
 
-    return await this.permissionsRepository.create(permissionData);
+    const rolesId = input.roles.map((roleId) => ({ id: roleId }));
+
+    return await this.permissionsRepository.create(permissionData, rolesId);
   }
 }

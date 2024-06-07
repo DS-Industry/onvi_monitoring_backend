@@ -3,7 +3,7 @@ import { IRoleRepository } from '@platform-admin/admin-role/interfaces/role';
 
 @Injectable()
 export class GetByIdRoleUseCase {
-  constructor(private roleRepository: IRoleRepository) {}
+  constructor(private readonly roleRepository: IRoleRepository) {}
 
   async execute(input: number) {
     const role = await this.roleRepository.findOneById(input);

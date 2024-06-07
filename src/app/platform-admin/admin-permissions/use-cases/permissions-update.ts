@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IPermissionsRepository } from '@platform-admin/admin-permissions/interfaces/permissions';
-import { UpdatePermissionsDto } from '@platform-admin/admin-permissions/use-cases/dto/permissions-update.dto';
+import { UpdatePermissionsDto } from '@platform-admin/admin-permissions/controller/dto/permissions-update.dto';
 
 @Injectable()
 export class UpdatePermissionsUseCase {

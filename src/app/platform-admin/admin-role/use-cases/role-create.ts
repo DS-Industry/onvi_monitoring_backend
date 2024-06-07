@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { IRoleRepository } from "@platform-admin/admin-role/interfaces/role";
-import { CreateRoleDto } from "@platform-admin/admin-role/use-cases/dto/role-create.dto";
+import { CreateRoleDto } from "@platform-admin/admin-role/controller/dto/role-create.dto";
 import { AdminRole } from "@platform-admin/admin-role/domain/admin-role";
 
 @Injectable()

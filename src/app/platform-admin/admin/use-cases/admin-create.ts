@@ -40,6 +40,7 @@ export class CreateAdminUseCase {
       timezone: input.timezone,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
+      platformUserRoleId: input.platformUserRoleId,
     });
 
     const admin = await this.adminRepository.create(adminData);
