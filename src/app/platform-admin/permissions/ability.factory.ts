@@ -58,7 +58,7 @@ export class AbilityFactory {
 
     //Билдер с createPrismaAbility необходим, чтобы использовать condition
     //У того индуса в видосе есть закрепелнный коммент на эту тему
-    const abilityBuilder = new AbilityBuilder<PureAbility>(createPrismaAbility);
+    const abilityBuilder = new AbilityBuilder(createPrismaAbility);
 
     for (const p of dbPermissions) {
       const conditions = AdminPermission.parseCondition(p.condition, admin);
