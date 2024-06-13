@@ -22,6 +22,7 @@ export class UpdateAdminUseCase {
       refreshTokenId,
       password,
       status,
+      platformUserRoleId,
     } = input;
 
     admin.name = name ? name : admin.name;
@@ -36,6 +37,9 @@ export class UpdateAdminUseCase {
       : admin.refreshTokenId;
     admin.password = password ? password : admin.password;
     admin.status = status ? status : admin.status;
+    admin.platformUserRoleId = platformUserRoleId
+      ? platformUserRoleId
+      : admin.platformUserRoleId;
 
     return await this.adminRepository.update(admin.id, admin);
   }

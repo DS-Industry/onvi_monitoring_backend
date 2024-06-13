@@ -28,7 +28,8 @@
       "@mobile-user/*": ["src/app/mobile-user/*"],
       "@db/*": ["src/infra/database/*"],
       "@constant/*": ["src/infra/constant/*"],
-      "@libs/*": ["src/libs/*"]
+      "@libs/*": ["src/libs/*"],
+      "@common/*": ["src/common/*"],
     }
   }
 }

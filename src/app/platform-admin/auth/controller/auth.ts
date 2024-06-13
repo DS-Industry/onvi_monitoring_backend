@@ -19,6 +19,9 @@ import { AuthPasswordConfirmDto } from '@platform-admin/auth/controller/dto/auth
 import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-confirm';
 import { AuthPasswordResetDto } from '@platform-admin/auth/controller/dto/auth-password-reset.dto';
 import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
+import { AbilityFactory, PermissionAction } from "@platform-admin/permissions/ability.factory";
+import { Admin } from "@platform-admin/admin/domain/admin";
+import { subject } from "@casl/ability";
 
 @Controller('auth')
 export class Auth {
@@ -28,6 +31,7 @@ export class Auth {
     private readonly singAccessToken: SignAccessTokenUseCase,
     private readonly passwordConfirmMail: PasswordConfirmMailAdminUseCase,
     private readonly passwordReset: PasswordResetAdminUseCase,
+    private abilityFacrory: AbilityFactory,
   ) {}
   @UseGuards(LocalGuard)
   @Post('/login')
@@ -42,6 +46,10 @@ export class Auth {
           type: 'register-required',
         };
       }
+      const ability = await this.abilityFacrory.createForPlatformManager(user);
+      console.log(ability);
+      const check = ability.can(<PermissionAction>'create', subject('Admin', { name: user.name}));
+      console.log(check);
       return await this.authLogin.execute(body.email, user.props.id);
     } catch (e) {
       throw new Error(e);

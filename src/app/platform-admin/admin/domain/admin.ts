@@ -19,6 +19,7 @@ export interface AdminProps {
   refreshTokenId?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  platformUserRoleId: number;
 }
 
 export class Admin extends BaseEntity<AdminProps> {
@@ -93,6 +94,10 @@ export class Admin extends BaseEntity<AdminProps> {
     return this.props.updatedAt;
   }
 
+  get platformUserRoleId(): number {
+    return this.props.platformUserRoleId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -131,5 +136,9 @@ export class Admin extends BaseEntity<AdminProps> {
 
   set refreshTokenId(refreshTokenId: string) {
     this.props.refreshTokenId = refreshTokenId;
+  }
+
+  set platformUserRoleId(platformUserRoleId: number) {
+    this.props.platformUserRoleId = platformUserRoleId;
   }
 }

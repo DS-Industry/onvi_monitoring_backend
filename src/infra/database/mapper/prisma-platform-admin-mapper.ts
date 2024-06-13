@@ -24,6 +24,7 @@ export class PrismaPlatformAdminMapper {
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      platformUserRoleId: entity.platformUserRoleId,
     });
   }
 
@@ -46,6 +47,7 @@ export class PrismaPlatformAdminMapper {
       refreshTokenId: admin?.refreshTokenId,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt,
+      platformUserRoleId: admin?.platformUserRoleId,
     };
   }
 }

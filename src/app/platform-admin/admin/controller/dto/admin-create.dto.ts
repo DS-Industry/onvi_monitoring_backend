@@ -51,4 +51,7 @@ export class CreateAdminDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Timezone is required' })
   timezone: number;
+  @IsNumber()
+  @IsOptional()
+  platformUserRoleId?: number;
 }
