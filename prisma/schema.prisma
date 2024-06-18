@@ -401,7 +401,7 @@ model PlatformUserRole {
 
 model PlatformUserPermission {
   id                Int                  @id @default(autoincrement())
-  action            String
+  action            PermissionAction
   object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
   objectId          Int
   condition         Json?
@@ -418,4 +418,12 @@ enum StatusUser {
   ACTIVE
   BLOCKED
   DELETED
+}
+
+enum PermissionAction {
+  manage
+  create
+  update
+  delete
+  read
 }

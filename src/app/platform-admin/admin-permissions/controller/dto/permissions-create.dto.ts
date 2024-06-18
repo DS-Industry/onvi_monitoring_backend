@@ -1,6 +1,5 @@
 import {
   IsArray,
-  IsJSON,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -8,11 +7,11 @@ import {
 } from 'class-validator';
 import { JSONObject } from '@common/types/json-type';
 import { Type } from 'class-transformer';
+import { PermissionAction } from '@prisma/client';
 
 export class CreatePermissionsDto {
-  @IsString()
   @IsNotEmpty({ message: 'Action is required' })
-  action: string;
+  action: PermissionAction;
   @IsNumber()
   @IsNotEmpty({ message: 'ObjectId is required' })
   objectId: number;

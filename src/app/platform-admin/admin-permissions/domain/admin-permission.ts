@@ -1,9 +1,10 @@
 import { BaseEntity } from '@utils/entity';
 import { JSONObject } from '@common/types/json-type';
+import { PermissionAction } from '@prisma/client';
 
 export interface PermissionProps {
   id?: number;
-  action: string;
+  action: PermissionAction;
   objectId: number;
   condition?: JSONObject;
 }
@@ -13,9 +14,9 @@ export class AdminPermission extends BaseEntity<PermissionProps> {
   }
 
   /**
-   * @param condition: {"departmentId": "${id}"}
-   * @param variables: {"id: 1"}
    * @return condition after parse: {"departmentId": 1}
+   * @param condition
+   * @param variables
    */
   public static parseCondition(
     condition: any,
@@ -25,8 +26,7 @@ export class AdminPermission extends BaseEntity<PermissionProps> {
     const parsedCondition = {};
     for (const [key, rawValue] of Object.entries(condition)) {
       if (rawValue !== null && typeof rawValue === 'object') {
-        const value = this.parseCondition(rawValue, variables);
-        parsedCondition[key] = value;
+        parsedCondition[key] = this.parseCondition(rawValue, variables);
         continue;
       }
       if (typeof rawValue !== 'string') {
@@ -52,7 +52,7 @@ export class AdminPermission extends BaseEntity<PermissionProps> {
     return this.props.id;
   }
 
-  get action(): string {
+  get action(): PermissionAction {
     return this.props.action;
   }
 
@@ -64,7 +64,7 @@ export class AdminPermission extends BaseEntity<PermissionProps> {
     return this.props.condition;
   }
 
-  set action(action: string) {
+  set action(action: PermissionAction) {
     this.props.action = action;
   }
 
