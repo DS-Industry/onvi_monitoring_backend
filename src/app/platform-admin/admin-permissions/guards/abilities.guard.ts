@@ -18,7 +18,6 @@ export class AbilitiesGuard implements CanActivate {
     private reflector: Reflector,
     private caslAbilityFactory: AbilityFactory,
   ) {}
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const rules =
       this.reflector.get<RequiredRule[]>(CHECK_ABILITY, context.getHandler()) ||
