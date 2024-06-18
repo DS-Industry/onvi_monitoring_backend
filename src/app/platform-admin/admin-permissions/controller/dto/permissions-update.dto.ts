@@ -6,14 +6,14 @@ import {
   IsString,
 } from 'class-validator';
 import { JSONObject } from '@common/types/json-type';
+import { PermissionAction } from "@prisma/client";
 
 export class UpdatePermissionsDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Id is required' })
   id: number;
-  @IsString()
   @IsNotEmpty({ message: 'Action is required' })
-  action: string;
+  action: PermissionAction;
   @IsNumber()
   @IsNotEmpty({ message: 'ObjectId is required' })
   objectId: number;
