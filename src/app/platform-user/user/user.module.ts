@@ -20,6 +20,11 @@ import { FileModule } from '@libs/file/module';
     UploadAvatarUserUseCase,
     DownloadAvatarUserUseCase,
   ],
-  exports: [UserRepositoryProvider, UpdateUserUseCase],
+  exports: [
+    UserRepositoryProvider,
+    UpdateUserUseCase,
+    GetByIdUserUseCase,
+    GetByEmailUserUseCase,
+  ],
 })
 export class UserModule {}

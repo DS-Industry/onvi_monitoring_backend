@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { GetByIdClientUseCase } from '@mobile-user/client/use-cases/client-get-by-id';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadAvatarClientDto } from '@platform-admin/admin/controller/dto/client-upkoad-avatar';
+import { UploadAvatarClientDto } from '@mobile-user/client/controller/dto/client-upload-avatar';
 import { UploadAvatarClientUseCase } from '@mobile-user/client/use-cases/client-avatar-upload';
 import { DownloadAvatarClientUseCase } from '@mobile-user/client/use-cases/client-avatar-download';
 

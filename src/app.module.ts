@@ -9,6 +9,7 @@ import { PlatformAdminModule } from '@platform-admin/platform-admin.module';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { MobileUserModule } from '@mobile-user/mobile-user.module';
+import { OrganizationModule } from '@organization/organization/organization.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { MobileUserModule } from '@mobile-user/mobile-user.module';
     PlatformAdminModule,
     PlatformUserModule,
     MobileUserModule,
+    OrganizationModule,
   ],
   controllers: [],
   providers: [],

@@ -20,9 +20,17 @@ import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-pas
 import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
 import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/use-cases/auth-validate-email-strategy';
 import { ConfirmMailUserModule } from '@platform-user/confirmMail/confirmMail.module';
+import { OrganizationConfirmMailModule } from '@organization/confirmMail/confirmMail.module';
+import { AuthRegisterWorkerUseCase } from "@platform-user/auth/use-cases/auth-register-worker";
 
 @Module({
-  imports: [BcryptModule, JwtModule, UserModule, ConfirmMailUserModule],
+  imports: [
+    BcryptModule,
+    JwtModule,
+    UserModule,
+    ConfirmMailUserModule,
+    OrganizationConfirmMailModule,
+  ],
   controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,
@@ -41,6 +49,7 @@ import { ConfirmMailUserModule } from '@platform-user/confirmMail/confirmMail.mo
     PasswordResetUserUseCase,
     PasswordConfirmMailUserUseCase,
     ValidateUserEmailStrategyUseCase,
+    AuthRegisterWorkerUseCase,
   ],
   exports: [],
 })

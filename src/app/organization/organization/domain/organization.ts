@@ -1,16 +1,19 @@
 import { BaseEntity } from '@utils/entity';
+import { StatusOrganization, TypeOrganization } from '@prisma/client';
+import { Address } from "@address/domain/address";
 
 export interface OrganizationProps {
   id?: number;
   name: string;
   slug: string;
-  addressId: number;
-  organizationDocuments: string;
-  organizationStatus: string;
-  organizationType: string;
+  addressId?: number;
+  address?: Address;
+  organizationDocumentId?: number;
+  organizationStatus: StatusOrganization;
+  organizationType: TypeOrganization;
   createdAt?: Date;
   updatedAt?: Date;
-  ownerId: number;
+  ownerId?: number;
 }
 
 export class Organization extends BaseEntity<OrganizationProps> {
@@ -34,15 +37,19 @@ export class Organization extends BaseEntity<OrganizationProps> {
     return this.props.addressId;
   }
 
-  get organizationDocuments(): string {
-    return this.props.organizationDocuments;
+  get address(): Address {
+    return this.props.address;
   }
 
-  get organizationStatus(): string {
+  get organizationDocumentId(): number {
+    return this.props.organizationDocumentId;
+  }
+
+  get organizationStatus(): StatusOrganization {
     return this.props.organizationStatus;
   }
 
-  get organizationType(): string {
+  get organizationType(): TypeOrganization {
     return this.props.organizationType;
   }
 
@@ -70,15 +77,19 @@ export class Organization extends BaseEntity<OrganizationProps> {
     this.props.addressId = addressId;
   }
 
-  set organizationDocuments(organizationDocuments: string) {
-    this.props.organizationDocuments = organizationDocuments;
+  set address(address: Address) {
+    this.props.address = address;
   }
 
-  set organizationStatus(organizationStatus: string) {
+  set organizationDocumentId(organizationDocumentId: number) {
+    this.props.organizationDocumentId = organizationDocumentId;
+  }
+
+  set organizationStatus(organizationStatus: StatusOrganization) {
     this.props.organizationStatus = organizationStatus;
   }
 
-  set organizationType(organizationType: string) {
+  set organizationType(organizationType: TypeOrganization) {
     this.props.organizationType = organizationType;
   }
 

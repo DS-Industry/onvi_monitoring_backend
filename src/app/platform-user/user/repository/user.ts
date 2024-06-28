@@ -18,6 +18,20 @@ export class UserRepository extends IUserRepository {
     return PrismaPlatformUserMapper.toDomain(user);
   }
 
+  public async createWorker(
+    input: User,
+    organizationId: number,
+  ): Promise<User> {
+    const userPrismaEntity = PrismaPlatformUserMapper.toPrisma(input);
+    const user = await this.prisma.user.create({
+      data: {
+        ...userPrismaEntity,
+        organizations: { connect: { id: organizationId } },
+      },
+    });
+    return PrismaPlatformUserMapper.toDomain(user);
+  }
+
   public async createMany(input: User[]): Promise<User[]> {
     return Promise.resolve([]);
   }

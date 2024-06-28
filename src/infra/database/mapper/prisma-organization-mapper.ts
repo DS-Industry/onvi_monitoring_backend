@@ -1,4 +1,4 @@
-import { Organization } from '@organization/domain/organization';
+import { Organization } from '@organization/organization/domain/organization';
 import { Organization as PrismaOrganization, Prisma } from '@prisma/client';
 
 export class PrismaOrganizationMapper {
@@ -11,7 +11,7 @@ export class PrismaOrganizationMapper {
       name: entity.name,
       slug: entity.slug,
       addressId: entity.addressId,
-      organizationDocuments: entity.organizationDocuments,
+      organizationDocumentId: entity.organizationDocumentId,
       organizationStatus: entity.organizationStatus,
       organizationType: entity.organizationType,
       createdAt: entity.createdAt,
@@ -27,13 +27,13 @@ export class PrismaOrganizationMapper {
       id: organization?.id,
       name: organization.name,
       slug: organization.slug,
-      addressId: organization.addressId,
-      organizationDocuments: organization.organizationDocuments,
+      addressId: organization?.addressId,
+      organizationDocumentId: organization.organizationDocumentId,
       organizationStatus: organization.organizationStatus,
       organizationType: organization.organizationType,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,
-      ownerId: organization.ownerId,
+      ownerId: organization?.ownerId,
     };
   }
 }

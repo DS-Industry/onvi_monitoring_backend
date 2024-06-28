@@ -8,20 +8,22 @@ datasource db {
 }
 
 model Organization {
-  id                    Int      @id @default(autoincrement())
-  name                  String
-  slug                  String
-  address               Address  @relation(fields: [addressId], references: [id])
-  addressId             Int      @unique
-  organizationDocuments String
-  organizationStatus    String
-  organizationType      String
+  id                    Int       @id @default(autoincrement())
+  name                  String    @unique
+  slug                  String    @unique
+  address               Address?  @relation(fields: [addressId], references: [id])
+  addressId             Int?      @unique
+  organizationDocument  OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
+  organizationDocumentId Int?     @unique
+  organizationStatus    StatusOrganization
+  organizationType      TypeOrganization
   createdAt             DateTime
   updatedAt             DateTime
-  owner                 User     @relation(name: "Owner", fields: [ownerId], references: [id])
-  ownerId               Int
+  owner                 User?     @relation(name: "Owner", fields: [ownerId], references: [id])
+  ownerId               Int?
   users                 User[]
   poses                 Pos[]
+  organizationMailConfirms OrganizationMailConfirm[]
 }
 
 model Address {
@@ -32,6 +34,35 @@ model Address {
   pos          Pos?
   lat          Int
   lon          Int
+}
+
+model OrganizationDocument {
+  id                    Int       @id @default(autoincrement())
+  organization          Organization?
+  rateVat               String
+  inn                   String
+  fullName              String    @unique
+  okpo                  String
+  kpp                   String
+  addressRegistration   String
+  ogrn                  String
+  bik                   String
+  correspondentAccount  String
+  bank                  String
+  settlementAccount     String
+  address               String
+  documentDoc           String?
+
+}
+
+model OrganizationMailConfirm {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  organization Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+  confirmString String
+  createdAt     DateTime
+  expireAt      DateTime
 }
 
 model User {
@@ -418,6 +449,18 @@ enum StatusUser {
   ACTIVE
   BLOCKED
   DELETED
+}
+
+enum StatusOrganization {
+  VERIFICATE
+  PENDING
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum TypeOrganization {
+  CarWash
 }
 
 enum PermissionAction {
