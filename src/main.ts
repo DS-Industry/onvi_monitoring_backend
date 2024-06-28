@@ -22,6 +22,7 @@ async function bootstrap() {
     }),
   );
 
+  app.enableShutdownHooks();
   await app.listen(PORT);
   console.log(
     `Application ${appName} ready to receive request in PORT - ${PORT}`,
