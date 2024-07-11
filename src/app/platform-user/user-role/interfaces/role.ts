@@ -1,0 +1,14 @@
+import { UserRole } from '@platform-user/user-role/domain/user-role';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+
+
+export abstract class IRoleRepository {
+    abstract create(input: UserRole): Promise<UserRole>;
+    abstract update(id: number, input: UserRole): Promise<UserRole>;
+    abstract remove(id: number): Promise<UserRole>;
+    abstract findAll(): Promise<UserRole[]>;
+    abstract findOneById(id: number): Promise<UserRole>;
+    abstract findOneByName(name: string): Promise<UserRole>;
+    abstract findAllPermissionsById(id: number): Promise<UserPermission[]>;
+  }
+  
