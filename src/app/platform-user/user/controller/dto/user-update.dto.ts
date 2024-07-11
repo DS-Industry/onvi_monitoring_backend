@@ -10,6 +10,7 @@ export class UpdateUserDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Id is required' })
   id: number;
+  
   @IsString()
   @IsOptional()
   name?: string;

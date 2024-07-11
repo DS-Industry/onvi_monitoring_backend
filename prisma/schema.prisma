@@ -34,6 +34,14 @@ model Address {
   lon          Int
 }
 
+model UserMailConfirm {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  confirmString String
+  createdAt     DateTime
+  expireAt      DateTime
+}
+
 model User {
   id                Int            @id @default(autoincrement())
   userRole          UserRole       @relation(fields: [userRoleId], references: [id])
@@ -60,14 +68,6 @@ model User {
   posesUpdated      Pos[]          @relation(name: "UpdateByUser")
 }
 
-model UserMailConfirm {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  confirmString String
-  createdAt     DateTime
-  expireAt      DateTime
-}
-
 model UserRole {
   id              Int              @id @default(autoincrement())
   name            String
@@ -80,6 +80,96 @@ model UserPermission {
   name             String
   permissionModule String
   userRoles        UserRole[]
+}
+
+model MobileUser {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  surname              String?
+  middlename           String?
+  birthday             DateTime?
+  phone                String                 @unique
+  email                String?                @unique
+  gender               String?
+  status               StatusUser?            @default(ACTIVE)
+  avatar               String?
+  country              String?
+  countryCode          Int?
+  timezone             Int?
+  refreshTokenId       String?
+  createdAt            DateTime?
+  updatedAt            DateTime?
+  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
+  loyaltyCardId        Int?                   @unique
+  promocodeTransaction PromocodeTransaction[]
+  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
+  mobileUserRoleId     Int?
+}
+
+model MobileUserRole {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  mobileUsers          MobileUser[]
+  mobileUserPermission MobileUserPermission[]
+}
+
+model MobileUserPermission {
+  id               Int              @id @default(autoincrement())
+  name             String
+  permissionModule String
+  mobileUserRoles  MobileUserRole[]
+}
+
+model PlatformUser {
+  id                 Int               @id @default(autoincrement())
+  name               String
+  surname            String
+  middlename         String?
+  birthday           DateTime?
+  phone              String?           @unique
+  email              String            @unique
+  password           String
+  gender             Gender
+  status             StatusUser?       @default(ACTIVE)
+  avatar             String?
+  country            String
+  countryCode        Int
+  timezone           Int
+  refreshTokenId     String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  platformUserRole   PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
+  platformUserRoleId Int?
+}
+
+model PlatformUserMailConfirm {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  confirmString String
+  createdAt     DateTime
+  expireAt      DateTime
+}
+
+model PlatformUserRole {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUsers           PlatformUser[]
+  platformUserPermissions PlatformUserPermission[]
+}
+
+model PlatformUserPermission {
+  id                Int                  @id @default(autoincrement())
+  action            PermissionAction
+  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  objectId          Int
+  condition         Json?
+  platformUserRoles PlatformUserRole[]
+}
+
+model PlatformUserObjects {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUserPermissions PlatformUserPermission[]
 }
 
 model Pos {
@@ -316,102 +406,12 @@ model LoyaltyCardTier {
   benefits         Benefit[]
 }
 
-model MobileUser {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  surname              String?
-  middlename           String?
-  birthday             DateTime?
-  phone                String                 @unique
-  email                String?                @unique
-  gender               String?
-  status               StatusUser?            @default(ACTIVE)
-  avatar               String?
-  country              String?
-  countryCode          Int?
-  timezone             Int?
-  refreshTokenId       String?
-  createdAt            DateTime?
-  updatedAt            DateTime?
-  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
-  loyaltyCardId        Int?                   @unique
-  promocodeTransaction PromocodeTransaction[]
-  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
-  mobileUserRoleId     Int?
-}
-
 model Otp {
   id          Int      @id @default(autoincrement())
   phone       String   @unique
   confirmCode String
   createdAt   DateTime
   expireAt    DateTime
-}
-
-model MobileUserRole {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  mobileUsers          MobileUser[]
-  mobileUserPermission MobileUserPermission[]
-}
-
-model MobileUserPermission {
-  id               Int              @id @default(autoincrement())
-  name             String
-  permissionModule String
-  mobileUserRoles  MobileUserRole[]
-}
-
-model PlatformUser {
-  id                 Int               @id @default(autoincrement())
-  name               String
-  surname            String
-  middlename         String?
-  birthday           DateTime?
-  phone              String?           @unique
-  email              String            @unique
-  password           String
-  gender             String
-  status             StatusUser?       @default(ACTIVE)
-  avatar             String?
-  country            String
-  countryCode        Int
-  timezone           Int
-  refreshTokenId     String?
-  createdAt          DateTime
-  updatedAt          DateTime
-  platformUserRole   PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
-  platformUserRoleId Int?
-}
-
-model PlatformUserMailConfirm {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  confirmString String
-  createdAt     DateTime
-  expireAt      DateTime
-}
-
-model PlatformUserRole {
-  id                      Int                      @id @default(autoincrement())
-  name                    String
-  platformUsers           PlatformUser[]
-  platformUserPermissions PlatformUserPermission[]
-}
-
-model PlatformUserPermission {
-  id                Int                  @id @default(autoincrement())
-  action            PermissionAction
-  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
-  objectId          Int
-  condition         Json?
-  platformUserRoles PlatformUserRole[]
-}
-
-model PlatformUserObjects {
-  id                      Int                      @id @default(autoincrement())
-  name                    String
-  platformUserPermissions PlatformUserPermission[]
 }
 
 enum StatusUser {
@@ -426,4 +426,10 @@ enum PermissionAction {
   update
   delete
   read
+}
+
+enum Gender {
+  male
+  female
+  other
 }
