@@ -1,8 +1,11 @@
 import {   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString
+  IsString,
+  IsEnum,
+  IsDate
  } from 'class-validator';
+ import { StatusUser,Gender } from '@prisma/client'
 
 export class CreateUserDto{
   
@@ -69,5 +72,9 @@ export class CreateUserDto{
   @IsNumber()
   @IsOptional()
   platformUserRoleId?:number
+
+  @IsString()
+  @IsNotEmpty({ message: 'Password number is required' })
+  checkPassword: string;
 
 }

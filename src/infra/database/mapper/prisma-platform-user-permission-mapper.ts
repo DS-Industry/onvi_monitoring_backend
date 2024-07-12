@@ -1,5 +1,5 @@
 import {
-    PlatformUserPermissio,
+    PlatformUserPermission,
     Prisma,
   } from '@prisma/client';
   import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';

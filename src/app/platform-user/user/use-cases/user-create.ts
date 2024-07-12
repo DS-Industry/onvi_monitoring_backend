@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { CreateUserDto } from '@platform-user/user/controller/dto/user-create.dto';
+import { StatusUser,Gender } from '@prisma/client'
 
 
 @Injectable()
@@ -32,7 +33,7 @@ async execute(input:CreateUserDto):Promise<any>{
         country: input.country,
         gender: input.gender,
         countryCode: input.countryCode,
-        status: StatusUser.ACTIVE,
+        status: StatusUser.BLOCKED,
         birthday: input.birthday,
         timezone: input.timezone,
         createdAt: new Date(Date.now()),
