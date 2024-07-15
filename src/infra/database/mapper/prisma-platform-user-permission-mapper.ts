@@ -1,32 +1,28 @@
 import {
-    PlatformUserPermission,
+    UserPermission as PrismaUserPermission,
     Prisma,
   } from '@prisma/client';
-  import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+  import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
   import { JSONObject } from '@common/types/json-type';
   
 
   export class PrismaPlatformUserPermissionMapper {
-    static toDomain(entity: PrismaPlatformUserPermission): UserPermission {
+    static toDomain(entity: PrismaUserPermission): UserPermission {
       if (!entity) return null;
-      const condition = this.fromJson(entity?.condition);
       return new UserPermission({
         id: entity.id,
-        action: entity.action,
-        objectId: entity.objectId,
-        condition: condition,
+        name: entity.name,
+         permissionModule:entity?.permissionModule
       });
     }
 
     static toPrisma(
         permission: UserPermission,
-      ): Prisma.PlatformUserPermissionUncheckedCreateInput {
-        const condition = this.toJson(permission?.condition);
+      ): Prisma.UserPermissionUncheckedCreateInput {
         return {
-          id: permission?.id,
-          action: permission?.action,
-          objectId: permission?.objectId,
-          condition: permission?.condition,
+         id: permission?.id,
+         name:permission.name,
+         permissionModule:permission?.permissionModule
         };
       }
     

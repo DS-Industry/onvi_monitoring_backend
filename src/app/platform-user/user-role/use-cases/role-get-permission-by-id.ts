@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IRoleRepository } from '@platform-user/user-role/interfaces/role';
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
 
 @Injectable()
 export class GetPermissionsByIdRoleUseCase {

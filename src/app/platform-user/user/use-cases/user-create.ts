@@ -3,6 +3,8 @@ import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { CreateUserDto } from '@platform-user/user/controller/dto/user-create.dto';
 import { StatusUser,Gender } from '@prisma/client'
+import { User } from '@platform-user/user/domain/user';
+import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 
 
 @Injectable()
@@ -38,11 +40,12 @@ async execute(input:CreateUserDto):Promise<any>{
         timezone: input.timezone,
         createdAt: new Date(Date.now()),
         updatedAt: new Date(Date.now()),
-        platformUserRoleId: input.platformUserRoleId,
+        userRoleId: input.platformUserRoleId,
       });
       const user = await this.userRepository.create(userData);
       const sendMail = await this.sendConfirm.execute(
         user.email,
+        'Полная авторизация'
       );
       return { user, sendMail };
   

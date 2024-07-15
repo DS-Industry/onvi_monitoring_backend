@@ -3,7 +3,7 @@ import { IPermissionsRepository } from '@platform-user/user-permissions/interfac
 
 @Injectable()
 export class GetByIdPermissionsUseCase{
-    constructor(private permissionsRepositary:IPermissionsRepository)
+    constructor(private permissionsRepositary:IPermissionsRepository){}
 
     async execute(input:number){
         const permissions = await this.permissionsRepositary.findOneById(input)

@@ -2,7 +2,7 @@ import { BaseEntity } from '@utils/entity';
 
 export interface RoleProps{
     id?:number,
-    name:string
+    name:string,
 }
 
 export class UserRole extends BaseEntity<RoleProps>{
@@ -15,11 +15,12 @@ export class UserRole extends BaseEntity<RoleProps>{
     
       get name(): string {
         return this.props.name;
-      }
-    
+      }  
+        
       set name(name: string) {
         this.props.name = name;
       }
+     
 }
 
 

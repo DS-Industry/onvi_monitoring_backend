@@ -1,26 +1,27 @@
 import { UserRole } from '@platform-user/user-role/domain/user-role';
 import {
-  PlatformUserRole,
+  UserRole as PrismaUserRole,
   Prisma,
 } from '@prisma/client';
 
-export class PrismaPlatformUserRoleMapper{
-    static toDomain(entity:PrismaPlatformUserRole):UserRole{
+export class PrismaUserRoleMapper{
+    static toDomain(entity:PrismaUserRole):UserRole{
         if(!entity){
             return null;
         }
         return new UserRole({
             id:entity.id,
-            name:entity.name
+            name:entity.name,
+
         })
     }
 
 static toPrisma(
     role:UserRole
-):Prisma.PlatformUserRoleUncheckedCreateInput{
+):Prisma.UserRoleUncheckedCreateInput{
     return {
         id:role?.id,
-        name:role.name
+        name:role.name,
     }
 }
 }

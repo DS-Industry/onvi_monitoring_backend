@@ -11,7 +11,7 @@ import { GetPermissionsByIdRoleUseCase } from '@platform-user/user-role/use-case
 
 @Module({
     imports:[PrismaModule],
-    controller:[Role],
+    controllers:[Role],
     providers:[
         RoleRepositoryProvider, 
         CreateRoleUseCase,

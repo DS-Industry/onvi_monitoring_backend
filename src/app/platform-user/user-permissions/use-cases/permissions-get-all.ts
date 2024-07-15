@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IPermissionsRepository } from '@platform-user/user-permissions/interfaces/permissions';
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
 import { PermissionRepository } from '../repository/permission';
 
 @Injectable()

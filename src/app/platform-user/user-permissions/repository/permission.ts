@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { IPermissionsRepository } from '@platform-user/user-permissions/interfaces/permissions';
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
 import { PrismaPlatformUserPermissionMapper } from '@db/mapper/prisma-platform-user-permission-mapper';
 
 
@@ -16,10 +16,10 @@ export class PermissionRepository extends IPermissionsRepository {
       ): Promise<UserPermission> {
         const permissionPrismaEntity =
         PrismaPlatformUserPermissionMapper.toPrisma(input);
-        const permission = await this.prisma.platformUserPermission.create({
+        const permission = await this.prisma.userPermission.create({
           data: {
             ...permissionPrismaEntity,
-            platformUserRoles: {
+            userRoles: {
               connect: roles,
             },
           },
@@ -30,7 +30,7 @@ export class PermissionRepository extends IPermissionsRepository {
       async update(id: number, input: UserPermission): Promise<UserPermission> {
         const permissionPrismaEntity =
         PrismaPlatformUserPermissionMapper.toPrisma(input);
-        const permission = await this.prisma.platformUserPermission.update({
+        const permission = await this.prisma.userPermission.update({
           where: {
             id: id,
           },
@@ -43,13 +43,13 @@ export class PermissionRepository extends IPermissionsRepository {
         throw new Error('Method not implemented.');
       }
       async findAll(): Promise<UserPermission[]> {
-        const permissions = await this.prisma.platformUserPermission.findMany();
+        const permissions = await this.prisma.userPermission.findMany();
         return permissions.map((item) =>
         PrismaPlatformUserPermissionMapper.toDomain(item),
         );
       }
       async findOneById(id: number): Promise<UserPermission> {
-        const permission = await this.prisma.platformUserPermission.findFirst({
+        const permission = await this.prisma.userPermission.findFirst({
           where: {
             id,
           },

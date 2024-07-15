@@ -1,5 +1,5 @@
 import { UserRole } from '@platform-user/user-role/domain/user-role';
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
 
 
 export abstract class IRoleRepository {

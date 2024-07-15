@@ -1,4 +1,4 @@
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permission';
+import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
 
 export abstract class IPermissionsRepository {
   abstract create(
