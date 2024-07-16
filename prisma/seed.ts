@@ -29,12 +29,20 @@ async function main() {
               userPermissions: {
                 create: [
                   {
-                    name: 'user',
-                    permissionModule: 'all',
+                    action: 'create',
+                    object: {
+                      create: {
+                        name: 'subscription',
+                      },
+                    },
                   },
                   {
-                    name: 'user',
-                    permissionModule: 'all users',
+                    action: 'read',
+                    object: {
+                      create: {
+                        name: 'subscription',
+                      },
+                    },
                   },
                 ],
               },

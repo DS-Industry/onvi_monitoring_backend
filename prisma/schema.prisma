@@ -76,9 +76,9 @@ model UserRole {
 }
 
 model UserPermission {
-  id        Int                  @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   action    PermissionAction
-  object    PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  object    UserObjects?     @relation(fields: [objectId], references: [id])
   objectId  Int
   condition Json?
   userRoles UserRole[]
@@ -140,7 +140,7 @@ model PlatformUser {
   phone              String?           @unique
   email              String            @unique
   password           String
-  gender             Gender
+  gender             String
   status             StatusUser?       @default(ACTIVE)
   avatar             String?
   country            String
@@ -172,7 +172,12 @@ model PlatformUserObjects {
   id                      Int                      @id @default(autoincrement())
   name                    String
   platformUserPermissions PlatformUserPermission[]
-  UserPermission          UserPermission[]
+}
+
+model UserObjects {
+  id             Int              @id @default(autoincrement())
+  name           String
+  UserPermission UserPermission[]
 }
 
 model Pos {
@@ -429,10 +434,4 @@ enum PermissionAction {
   update
   delete
   read
-}
-
-enum Gender {
-  male
-  female
-  other
 }

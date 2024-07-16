@@ -1,18 +1,17 @@
-import {   IsNotEmpty,
+import {
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  IsEnum,
-  IsDate
- } from 'class-validator';
- import { StatusUser,Gender } from '@prisma/client'
+  IsDate,
+} from 'class-validator';
+import { StatusUser } from '@prisma/client';
 
-export class CreateUserDto{
-  
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   name?: string;
-  
+
   @IsString()
   @IsNotEmpty()
   surname?: string;
@@ -43,9 +42,7 @@ export class CreateUserDto{
 
   @IsString()
   @IsOptional()
-  @IsEnum(Gender)
-  gender?: Gender;
-
+  gender?: string;
 
   @IsNumber()
   @IsNotEmpty()
@@ -59,11 +56,9 @@ export class CreateUserDto{
   @IsOptional()
   refreshTokenId?: string;
 
-
   @IsString()
   @IsOptional()
   status?: StatusUser;
-
 
   @IsDate()
   @IsOptional()
@@ -71,10 +66,9 @@ export class CreateUserDto{
 
   @IsNumber()
   @IsOptional()
-  platformUserRoleId?:number
+  platformUserRoleId?: number;
 
   @IsString()
   @IsNotEmpty({ message: 'Password number is required' })
   checkPassword: string;
-
 }
