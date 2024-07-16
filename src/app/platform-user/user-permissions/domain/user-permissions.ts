@@ -4,9 +4,10 @@ import { PermissionAction } from '@prisma/client';
 
 
 export interface PermissionProps {
-    id?: number;
-    name: string
-    permissionModule:string     
+  id?: number;
+  action: PermissionAction;
+  objectId: number;
+  condition?: JSONObject     
 }
 
 export class UserPermission extends BaseEntity<PermissionProps> {
@@ -52,12 +53,30 @@ export class UserPermission extends BaseEntity<PermissionProps> {
   get id(): number {
     return this.props.id;
   }
-get name():string{
-  return this.props.name
-}
-get permissionModule():string{
-  return this.props.permissionModule
-}
+
+  get action(): PermissionAction {
+    return this.props.action;
+  }
+
+  get objectId(): number {
+    return this.props.objectId;
+  }
+
+  get condition(): JSONObject {
+    return this.props.condition;
+  }
+
+  set action(action: PermissionAction) {
+    this.props.action = action;
+  }
+
+  set objectId(objectId: number) {
+    this.props.objectId = objectId;
+  }
+
+  set condition(condition: JSONObject) {
+    this.props.condition = condition;
+  }
 
 
 }

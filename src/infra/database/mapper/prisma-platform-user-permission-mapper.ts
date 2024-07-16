@@ -9,10 +9,12 @@ import {
   export class PrismaPlatformUserPermissionMapper {
     static toDomain(entity: PrismaUserPermission): UserPermission {
       if (!entity) return null;
+      const condition = this.fromJson(entity?.condition);
       return new UserPermission({
         id: entity.id,
-        name: entity.name,
-         permissionModule:entity?.permissionModule
+        action: entity.action,
+        objectId: entity.objectId,
+        condition: condition,
       });
     }
 
@@ -20,9 +22,10 @@ import {
         permission: UserPermission,
       ): Prisma.UserPermissionUncheckedCreateInput {
         return {
-         id: permission?.id,
-         name:permission.name,
-         permissionModule:permission?.permissionModule
+          id: permission?.id,
+          action: permission?.action,
+          objectId: permission?.objectId,
+          condition: permission?.condition,    
         };
       }
     

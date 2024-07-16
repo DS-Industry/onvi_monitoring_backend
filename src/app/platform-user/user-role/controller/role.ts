@@ -5,7 +5,7 @@ import { CreateRoleDto } from '@platform-user/user-role/controller/dto/role-crea
 import { GetPermissionsByIdRoleUseCase } from '@platform-user/user-role/use-cases/role-get-permission-by-id';
 
 
-@Controller('userrole')
+@Controller('role')
 export class Role {
 constructor(private readonly roleCreate: CreateRoleUseCase,
     private readonly roleGetById: GetByIdRoleUseCase,

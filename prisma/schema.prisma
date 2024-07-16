@@ -76,10 +76,21 @@ model UserRole {
 }
 
 model UserPermission {
-  id               Int        @id @default(autoincrement())
-  name             String
-  permissionModule String
-  userRoles        UserRole[]
+  id        Int                  @id @default(autoincrement())
+  action    PermissionAction
+  object    PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  objectId  Int
+  condition Json?
+  userRoles UserRole[]
+}
+
+model PlatformUserPermission {
+  id                Int                  @id @default(autoincrement())
+  action            PermissionAction
+  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  objectId          Int
+  condition         Json?
+  platformUserRoles PlatformUserRole[]
 }
 
 model MobileUser {
@@ -157,19 +168,11 @@ model PlatformUserRole {
   platformUserPermissions PlatformUserPermission[]
 }
 
-model PlatformUserPermission {
-  id                Int                  @id @default(autoincrement())
-  action            PermissionAction
-  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
-  objectId          Int
-  condition         Json?
-  platformUserRoles PlatformUserRole[]
-}
-
 model PlatformUserObjects {
   id                      Int                      @id @default(autoincrement())
   name                    String
   platformUserPermissions PlatformUserPermission[]
+  UserPermission          UserPermission[]
 }
 
 model Pos {
