@@ -21,8 +21,9 @@
       "@prisma/*": ["src/prisma/*"],
       "@config/*": ["config/*"],
       "@utils/*": ["src/utils/*"],
-      "@organization/*": ["src/app/organization/*"],
-      "@address/*": ["src/app/address/*"],
+      "@organization/*": ["src/core/business-core/organization/*"],
+      "@pos/*": ["src/core/business-core/pos/*"],
+      "@address/*": ["src/core/business-core/address/*"],
       "@platform-admin/*": ["src/app/platform-admin/*"],
       "@platform-user/*": ["src/app/platform-user/*"],
       "@mobile-user/*": ["src/app/mobile-user/*"],
@@ -30,6 +31,7 @@
       "@constant/*": ["src/infra/constant/*"],
       "@libs/*": ["src/libs/*"],
       "@common/*": ["src/common/*"],
+      "@business-core/*": ["src/core/business-core/*"]
     }
   }
 }

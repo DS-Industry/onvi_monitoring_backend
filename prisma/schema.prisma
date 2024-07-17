@@ -115,19 +115,19 @@ model UserPermission {
 
 model Pos {
   id                   Int                   @id @default(autoincrement())
-  loyaltyProgram       LoyaltyProgram        @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId     Int
+  loyaltyProgram       LoyaltyProgram?        @relation(fields: [loyaltyProgramId], references: [id])
+  loyaltyProgramId     Int?
   name                 String
   slug                 String
-  monthlyPlan          Int
+  monthlyPlan          Int?
   organization         Organization          @relation(fields: [organizationId], references: [id])
   organizationId       Int
-  posMetaData          String
+  posMetaData          String?
   timezone             Int
-  address              Address               @relation(fields: [addressId], references: [id])
-  addressId            Int                   @unique
-  image                String
-  rating               Int
+  address              Address?              @relation(fields: [addressId], references: [id])
+  addressId            Int?                   @unique
+  image                String?
+  rating               Int?
   status               String
   createdAt            DateTime
   updatedAt            DateTime

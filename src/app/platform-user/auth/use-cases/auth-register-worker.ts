@@ -4,7 +4,7 @@ import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { StatusUser } from '@prisma/client';
 import { AuthRegisterWorkerDto } from '@platform-user/auth/controller/dto/auth-register-worker.dto';
-import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-validate';
+import { ValidateOrganizationConfirmMailUseCase } from '../../../../core/business-core/organization/confirmMail/use-case/confirm-mail-validate';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
 import { SetRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-set-refresh-token';

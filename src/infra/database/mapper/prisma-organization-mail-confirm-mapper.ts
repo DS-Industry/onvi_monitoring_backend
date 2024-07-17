@@ -1,4 +1,4 @@
-import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
+import { OrganizationConfirmMail } from '../../../core/business-core/organization/confirmMail/domain/confirmMail';
 import {
   OrganizationMailConfirm as PrismaOrganizationMailConfirm,
   Prisma,

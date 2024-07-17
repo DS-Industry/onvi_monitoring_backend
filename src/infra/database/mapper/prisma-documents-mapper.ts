@@ -1,4 +1,4 @@
-import { Documents } from '@organization/documents/domain/documents';
+import { Documents } from '../../../core/business-core/organization/documents/domain/documents';
 import {
   OrganizationDocument as PrismaDocuments,
   Prisma,

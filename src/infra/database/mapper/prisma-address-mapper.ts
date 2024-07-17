@@ -1,4 +1,4 @@
-import { Address } from '@address/domain/address';
+import { Address } from '../../../core/business-core/address/domain/address';
 import { Address as PrismaAddress, Prisma } from '@prisma/client';
 
 export class PrismaAddressMapper {

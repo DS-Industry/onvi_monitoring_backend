@@ -20,7 +20,7 @@ import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-pas
 import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
 import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/use-cases/auth-validate-email-strategy';
 import { ConfirmMailUserModule } from '@platform-user/confirmMail/confirmMail.module';
-import { OrganizationConfirmMailModule } from '@organization/confirmMail/confirmMail.module';
+import { OrganizationConfirmMailModule } from '../../../core/business-core/organization/confirmMail/confirmMail.module';
 import { AuthRegisterWorkerUseCase } from "@platform-user/auth/use-cases/auth-register-worker";
 
 @Module({
