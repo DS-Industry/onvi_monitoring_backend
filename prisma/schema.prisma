@@ -166,7 +166,8 @@ model CarWashDevice {
   ipAddress                     String
   carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
   carWashDeviceTypeId           Int
-  carWasPoses                   CarWashPos[]
+  carWasPos                     CarWashPos                     @relation(fields: [carWashPosId], references: [id])
+  carWashPosId                  Int
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
   carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
   carWashDeviceEvents           CarWashDeviceEvent[]

@@ -7,6 +7,7 @@ import { CreateAddressUseCase } from '@address/use-case/address-create';
 import slugify from 'slugify';
 import { CreateCarWashPosUseCase } from '@pos/carWashPos/use-cases/car-wash-pos-create';
 import { PosResponseDto } from '@platform-user/pos/controller/dto/pos-response.dto';
+import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
 
 @Injectable()
 export class CreatePosUseCase {
@@ -14,6 +15,7 @@ export class CreatePosUseCase {
     private readonly posRepository: IPosRepository,
     private readonly createAddressUseCase: CreateAddressUseCase,
     private readonly createCarWashPosUseCase: CreateCarWashPosUseCase,
+    private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
   async execute(input: PosCreateDto, owner: User): Promise<PosResponseDto> {
@@ -40,37 +42,7 @@ export class CreatePosUseCase {
     });
 
     const pos = await this.posRepository.create(posData);
-    const carWashPos = await this.createCarWashPosUseCase.execute(
-      pos.name,
-      pos.id,
-    );
-    return {
-      id: pos.id,
-      name: pos.name,
-      slug: pos.slug,
-      monthlyPlan: pos.monthlyPlan,
-      organizationId: pos.organizationId,
-      posMetaData: pos.posMetaData,
-      timezone: pos.timezone,
-      image: pos.image,
-      rating: pos.rating,
-      status: pos.status,
-      createdAt: pos.createdAt,
-      updatedAt: pos.updatedAt,
-      createdById: pos.createdById,
-      updatedById: pos.updatedById,
-      address: {
-        id: address.id,
-        city: address.city,
-        location: address.location,
-        lat: address.lat,
-        lon: address.lon,
-      },
-      posType: {
-        id: carWashPos.id,
-        name: carWashPos.name,
-        slug: carWashPos.slug,
-      },
-    };
+    await this.createCarWashPosUseCase.execute(pos.name, pos.id);
+    return this.posCreateFullDataUseCase.execute(pos);
   }
 }

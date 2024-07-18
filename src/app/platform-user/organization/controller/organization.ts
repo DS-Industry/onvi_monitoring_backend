@@ -21,7 +21,7 @@ import { OrganizationPreCreateDto } from '@platform-user/organization/controller
 import { AddWorkerOrganizationDto } from '@platform-user/organization/controller/dto/organization-add-worker.dto';
 import { PreAddWorkerOrganizationUseCase } from '@platform-user/organization/use-cases/organization-pre-add-worker';
 import { GetAllOrganizationByOwnerUseCase } from '@organization/organization/use-cases/organization-get-all-by-owner';
-import { GetAllPosOrganizationUseCase } from "@organization/organization/use-cases/organization-get-all-pos";
+import { GetAllPosOrganizationUseCase } from '@organization/organization/use-cases/organization-get-all-pos';
 
 @Controller('organization')
 export class OrganizationController {
@@ -32,7 +32,7 @@ export class OrganizationController {
     private readonly organizationGetAllUsers: GetAllUsersOrganizationUseCase,
     private readonly preOrganizationAddWorker: PreAddWorkerOrganizationUseCase,
     private readonly organizationGetAllByOwner: GetAllOrganizationByOwnerUseCase,
-    private readonly organizationGetAllPos:GetAllPosOrganizationUseCase,
+    private readonly organizationGetAllPos: GetAllPosOrganizationUseCase,
   ) {}
 
   @Post('')

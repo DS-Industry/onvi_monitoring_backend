@@ -5,12 +5,14 @@ import { UserAuthModule } from '@platform-user/auth/user-auth.module';
 import { PlatformUserOrganizationModule } from '@platform-user/organization/platform-user-organization.module';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { PlatformUserPosModule } from '@platform-user/pos/platform-user-pos.module';
+import { PlatformUserDeviceModule } from '@platform-user/device/platform-user-device.module';
 
 @Module({
   imports: [
     UserModule,
     PrismaModule,
     UserAuthModule,
+    PlatformUserDeviceModule,
     PlatformUserOrganizationModule,
     PlatformUserPosModule,
     BusinessCoreModule,

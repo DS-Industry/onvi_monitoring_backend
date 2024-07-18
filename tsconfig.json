@@ -23,6 +23,7 @@
       "@utils/*": ["src/utils/*"],
       "@organization/*": ["src/core/business-core/organization/*"],
       "@pos/*": ["src/core/business-core/pos/*"],
+      "@device/*": ["src/core/business-core/device/*"],
       "@address/*": ["src/core/business-core/address/*"],
       "@platform-admin/*": ["src/app/platform-admin/*"],
       "@platform-user/*": ["src/app/platform-user/*"],

@@ -15,6 +15,11 @@ import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-dat
     GetByIdPosUseCase,
     CreateFullDataPosUseCase,
   ],
-  exports: [CreatePosUseCase, GetByIdPosUseCase, CreateFullDataPosUseCase],
+  exports: [
+    CreatePosUseCase,
+    GetByIdPosUseCase,
+    CreateFullDataPosUseCase,
+    CarWashPosModule,
+  ],
 })
 export class PosModule {}
