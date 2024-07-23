@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 async function main() {
@@ -29,12 +29,20 @@ async function main() {
               userPermissions: {
                 create: [
                   {
-                    name: 'admin',
-                    permissionModule: 'all',
+                    action: 'create',
+                    object: {
+                      create: {
+                        name: 'subscription',
+                      },
+                    },
                   },
                   {
-                    name: 'user',
-                    permissionModule: 'all users',
+                    action: 'read',
+                    object: {
+                      create: {
+                        name: 'subscription',
+                      },
+                    },
                   },
                 ],
               },
@@ -46,8 +54,9 @@ async function main() {
           birthday: '2024-01-24T12:00:00Z',
           phone: '123456',
           email: 'test@mail.ru',
+          password: '123',
           gender: 'men',
-          status: 'active',
+          status: 'ACTIVE',
           avatar: 'png',
           country: 'Voronez',
           countryCode: 36,
@@ -60,24 +69,15 @@ async function main() {
       users: {
         create: [
           {
-            userRole: {
-              create: {
-                name: 'Operator',
-                userPermissions: {
-                  connect: {
-                    id: 2,
-                  },
-                },
-              },
-            },
             name: 'Pypa',
             surname: 'Dupa',
             middlename: 'lol',
             birthday: '2024-01-24T12:00:00Z',
             phone: '43245425',
             email: 'pupa@mail.ru',
+            password: '123',
             gender: 'man',
-            status: 'Active',
+            status: 'ACTIVE',
             avatar: 'png',
             country: 'Voronez',
             countryCode: 36,
@@ -85,21 +85,18 @@ async function main() {
             refreshTokenId: 'dsafnfjknj32njnj',
             createdAt: '2024-01-24T12:00:00Z',
             updatedAt: '2024-01-24T12:00:00Z',
+            userRoleId: 2,
           },
           {
-            userRole: {
-              connect: {
-                id: 2,
-              },
-            },
             name: 'Lypa',
             surname: 'Kupa',
             middlename: 'kek',
             birthday: '2024-01-24T12:00:00Z',
             phone: '89480840',
             email: 'lupa@mail.ru',
+            password: '123',
             gender: 'man',
-            status: 'Active',
+            status: 'ACTIVE',
             avatar: 'png',
             country: 'Voronez',
             countryCode: 36,
@@ -107,6 +104,7 @@ async function main() {
             refreshTokenId: 'dsafnfjknj32njnj',
             createdAt: '2024-01-24T12:00:00Z',
             updatedAt: '2024-01-24T12:00:00Z',
+            userRoleId: 2,
           },
         ],
       },

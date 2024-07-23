@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: onvi-business-postgres
+    image: postgres
+    env_file:
+      - .env.development
+    ports:
+      - '5432:5432'
+    volumes:
+      - onvi-business-postgres:/data/postgres
+      - ./docker/postgres/create-database.sql:/docker-entrypoint-initdb.d/create-database.sql
+    restart: always
+    networks:
+      - postgres-network
+  pgadmin:
+    container_name: onvi-business-pgadmin
+    image: dpage/pgadmin4
+    env_file:
+      - .env.development
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
+    networks:
+      - postgres-network
+
+volumes:
+  onvi-business-postgres:
+networks:
+  postgres-network:
+    driver: bridge
