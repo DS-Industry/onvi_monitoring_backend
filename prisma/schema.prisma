@@ -8,20 +8,22 @@ datasource db {
 }
 
 model Organization {
-  id                    Int      @id @default(autoincrement())
-  name                  String
-  slug                  String
-  address               Address  @relation(fields: [addressId], references: [id])
-  addressId             Int      @unique
-  organizationDocuments String
-  organizationStatus    String
-  organizationType      String
+  id                    Int       @id @default(autoincrement())
+  name                  String    @unique
+  slug                  String    @unique
+  address               Address?  @relation(fields: [addressId], references: [id])
+  addressId             Int?      @unique
+  organizationDocument  OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
+  organizationDocumentId Int?     @unique
+  organizationStatus    StatusOrganization
+  organizationType      TypeOrganization
   createdAt             DateTime
   updatedAt             DateTime
-  owner                 User     @relation(name: "Owner", fields: [ownerId], references: [id])
-  ownerId               Int
+  owner                 User?     @relation(name: "Owner", fields: [ownerId], references: [id])
+  ownerId               Int?
   users                 User[]
   poses                 Pos[]
+  organizationMailConfirms OrganizationMailConfirm[]
 }
 
 model Address {
@@ -34,9 +36,30 @@ model Address {
   lon          Int
 }
 
-model UserMailConfirm {
+model OrganizationDocument {
+  id                    Int       @id @default(autoincrement())
+  organization          Organization?
+  rateVat               String
+  inn                   String
+  fullName              String    @unique
+  okpo                  String
+  kpp                   String
+  addressRegistration   String
+  ogrn                  String
+  bik                   String
+  correspondentAccount  String
+  bank                  String
+  settlementAccount     String
+  address               String
+  documentDoc           String?
+
+}
+
+model OrganizationMailConfirm {
   id            Int      @id @default(autoincrement())
   email         String   @unique
+  organization Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
   confirmString String
   createdAt     DateTime
   expireAt      DateTime
@@ -68,6 +91,14 @@ model User {
   posesUpdated      Pos[]          @relation(name: "UpdateByUser")
 }
 
+model UserMailConfirm {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  confirmString String
+  createdAt     DateTime
+  expireAt      DateTime
+}
+
 model UserRole {
   id              Int              @id @default(autoincrement())
   name            String
@@ -84,96 +115,6 @@ model UserPermission {
   userRoles UserRole[]
 }
 
-model PlatformUserPermission {
-  id                Int                  @id @default(autoincrement())
-  action            PermissionAction
-  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
-  objectId          Int
-  condition         Json?
-  platformUserRoles PlatformUserRole[]
-}
-
-model MobileUser {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  surname              String?
-  middlename           String?
-  birthday             DateTime?
-  phone                String                 @unique
-  email                String?                @unique
-  gender               String?
-  status               StatusUser?            @default(ACTIVE)
-  avatar               String?
-  country              String?
-  countryCode          Int?
-  timezone             Int?
-  refreshTokenId       String?
-  createdAt            DateTime?
-  updatedAt            DateTime?
-  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
-  loyaltyCardId        Int?                   @unique
-  promocodeTransaction PromocodeTransaction[]
-  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
-  mobileUserRoleId     Int?
-}
-
-model MobileUserRole {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  mobileUsers          MobileUser[]
-  mobileUserPermission MobileUserPermission[]
-}
-
-model MobileUserPermission {
-  id               Int              @id @default(autoincrement())
-  name             String
-  permissionModule String
-  mobileUserRoles  MobileUserRole[]
-}
-
-model PlatformUser {
-  id                 Int               @id @default(autoincrement())
-  name               String
-  surname            String
-  middlename         String?
-  birthday           DateTime?
-  phone              String?           @unique
-  email              String            @unique
-  password           String
-  gender             String
-  status             StatusUser?       @default(ACTIVE)
-  avatar             String?
-  country            String
-  countryCode        Int
-  timezone           Int
-  refreshTokenId     String?
-  createdAt          DateTime
-  updatedAt          DateTime
-  platformUserRole   PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
-  platformUserRoleId Int?
-}
-
-model PlatformUserMailConfirm {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  confirmString String
-  createdAt     DateTime
-  expireAt      DateTime
-}
-
-model PlatformUserRole {
-  id                      Int                      @id @default(autoincrement())
-  name                    String
-  platformUsers           PlatformUser[]
-  platformUserPermissions PlatformUserPermission[]
-}
-
-model PlatformUserObjects {
-  id                      Int                      @id @default(autoincrement())
-  name                    String
-  platformUserPermissions PlatformUserPermission[]
-}
-
 model UserObjects {
   id             Int              @id @default(autoincrement())
   name           String
@@ -182,19 +123,19 @@ model UserObjects {
 
 model Pos {
   id                   Int                   @id @default(autoincrement())
-  loyaltyProgram       LoyaltyProgram        @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId     Int
+  loyaltyProgram       LoyaltyProgram?        @relation(fields: [loyaltyProgramId], references: [id])
+  loyaltyProgramId     Int?
   name                 String
   slug                 String
-  monthlyPlan          Int
+  monthlyPlan          Int?
   organization         Organization          @relation(fields: [organizationId], references: [id])
   organizationId       Int
-  posMetaData          String
+  posMetaData          String?
   timezone             Int
-  address              Address               @relation(fields: [addressId], references: [id])
-  addressId            Int                   @unique
-  image                String
-  rating               Int
+  address              Address?              @relation(fields: [addressId], references: [id])
+  addressId            Int?                   @unique
+  image                String?
+  rating               Int?
   status               String
   createdAt            DateTime
   updatedAt            DateTime
@@ -233,7 +174,8 @@ model CarWashDevice {
   ipAddress                     String
   carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
   carWashDeviceTypeId           Int
-  carWasPoses                   CarWashPos[]
+  carWasPos                     CarWashPos                     @relation(fields: [carWashPosId], references: [id])
+  carWashPosId                  Int
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
   carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
   carWashDeviceEvents           CarWashDeviceEvent[]
@@ -414,6 +356,30 @@ model LoyaltyCardTier {
   benefits         Benefit[]
 }
 
+model MobileUser {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  surname              String?
+  middlename           String?
+  birthday             DateTime?
+  phone                String                 @unique
+  email                String?                @unique
+  gender               String?
+  status               StatusUser?            @default(ACTIVE)
+  avatar               String?
+  country              String?
+  countryCode          Int?
+  timezone             Int?
+  refreshTokenId       String?
+  createdAt            DateTime?
+  updatedAt            DateTime?
+  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
+  loyaltyCardId        Int?                   @unique
+  promocodeTransaction PromocodeTransaction[]
+  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
+  mobileUserRoleId     Int?
+}
+
 model Otp {
   id          Int      @id @default(autoincrement())
   phone       String   @unique
@@ -422,10 +388,88 @@ model Otp {
   expireAt    DateTime
 }
 
+model MobileUserRole {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  mobileUsers          MobileUser[]
+  mobileUserPermission MobileUserPermission[]
+}
+
+model MobileUserPermission {
+  id               Int              @id @default(autoincrement())
+  name             String
+  permissionModule String
+  mobileUserRoles  MobileUserRole[]
+}
+
+model PlatformUser {
+  id                 Int               @id @default(autoincrement())
+  name               String
+  surname            String
+  middlename         String?
+  birthday           DateTime?
+  phone              String?           @unique
+  email              String            @unique
+  password           String
+  gender             String
+  status             StatusUser?       @default(ACTIVE)
+  avatar             String?
+  country            String
+  countryCode        Int
+  timezone           Int
+  refreshTokenId     String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  platformUserRole   PlatformUserRole? @relation(fields: [platformUserRoleId], references: [id])
+  platformUserRoleId Int?
+}
+
+model PlatformUserMailConfirm {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  confirmString String
+  createdAt     DateTime
+  expireAt      DateTime
+}
+
+model PlatformUserRole {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUsers           PlatformUser[]
+  platformUserPermissions PlatformUserPermission[]
+}
+
+model PlatformUserPermission {
+  id                Int                  @id @default(autoincrement())
+  action            PermissionAction
+  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  objectId          Int
+  condition         Json?
+  platformUserRoles PlatformUserRole[]
+}
+
+model PlatformUserObjects {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUserPermissions PlatformUserPermission[]
+}
+
 enum StatusUser {
   ACTIVE
   BLOCKED
   DELETED
+}
+
+enum StatusOrganization {
+  VERIFICATE
+  PENDING
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum TypeOrganization {
+  CarWash
 }
 
 enum PermissionAction {

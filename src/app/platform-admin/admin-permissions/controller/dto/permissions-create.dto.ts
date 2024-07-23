@@ -1,15 +1,16 @@
 import {
-  IsArray,
+  IsArray, IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString,
-} from 'class-validator';
+  IsString
+} from "class-validator";
 import { JSONObject } from '@common/types/json-type';
 import { Type } from 'class-transformer';
 import { PermissionAction } from '@prisma/client';
 
 export class CreatePermissionsDto {
+  @IsEnum(PermissionAction)
   @IsNotEmpty({ message: 'Action is required' })
   action: PermissionAction;
   @IsNumber()

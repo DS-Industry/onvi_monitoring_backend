@@ -31,7 +31,7 @@ export class UpdateUserUseCase {
     user.country = country ? country : user.country;
     user.countryCode = countryCode ? countryCode : user.countryCode;
     user.timezone = timezone ? timezone : user.timezone;
-    user.avatar = middlename ? avatar : user.avatar;
+    user.avatar = avatar ? avatar : user.avatar;
     user.refreshTokenId = refreshTokenId ? refreshTokenId : user.refreshTokenId;
     user.password = password ? password : user.password;
     user.status = status ? status : user.status;

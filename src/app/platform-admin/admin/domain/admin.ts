@@ -134,6 +134,10 @@ export class Admin extends BaseEntity<AdminProps> {
     this.props.timezone = timezone;
   }
 
+  set updatedAt(updatedAt: Date) {
+    this.props.updatedAt = updatedAt;
+  }
+
   set refreshTokenId(refreshTokenId: string) {
     this.props.refreshTokenId = refreshTokenId;
   }

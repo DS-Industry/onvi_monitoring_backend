@@ -16,9 +16,8 @@ async function main() {
           lon: 4,
         },
       },
-      organizationDocuments: 'document',
-      organizationStatus: 'active',
-      organizationType: 'OOO',
+      organizationStatus: 'ACTIVE',
+      organizationType: 'CarWash',
       createdAt: '2024-01-24T12:00:00Z',
       updatedAt: '2024-01-24T12:00:00Z',
       owner: {
