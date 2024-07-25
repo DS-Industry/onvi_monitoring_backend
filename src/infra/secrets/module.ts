@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { z } from 'zod';
 
-import { ZodInferSchema } from '@/utils/zod';
+import { ZodInferSchema } from '../../utils/zod';
 
 import { LogLevelEnum } from '../logger';
 import { ISecretsAdapter } from './adapter';

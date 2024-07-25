@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 
-import { ISecretsAdapter, SecretsModule } from '@/infra/secrets';
+import { ISecretsAdapter, SecretsModule } from '../secrets';
 
 import { ILoggerAdapter } from './adapter';
 import { LoggerService } from './service';
