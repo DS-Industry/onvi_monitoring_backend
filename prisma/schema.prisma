@@ -446,6 +446,18 @@ model PlatformUserObjects {
   platformUserPermissions PlatformUserPermission[]
 }
 
+model DeviceDataRaw {
+  id                      Int                      @id @default(autoincrement())
+  data                    String
+  errors                  String?
+  status                  StatusDeviceDataRaw
+  version                 String
+  createdAt               DateTime
+  updatedAt               DateTime
+  countRow                Int?
+  countError              Int?
+}
+
 enum StatusUser {
   ACTIVE
   BLOCKED
@@ -470,4 +482,10 @@ enum PermissionAction {
   update
   delete
   read
+}
+
+enum StatusDeviceDataRaw {
+  NEW
+  PENDING
+  DONE
 }
