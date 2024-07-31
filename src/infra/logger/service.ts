@@ -11,10 +11,8 @@ import { LevelWithSilent, Logger, multistream, pino } from 'pino';
 import { HttpLogger, Options, pinoHttp } from 'pino-http';
 import pinoPretty, { PrettyOptions } from 'pino-pretty';
 import { v4 as uuidv4 } from 'uuid';
-
 import { DateUtils } from '../../utils/date';
 import { ApiBadRequestException, BaseException } from '../../utils/exception';
-
 import { ILoggerAdapter } from './adapter';
 import { ErrorType, MessageType } from './types';
 
