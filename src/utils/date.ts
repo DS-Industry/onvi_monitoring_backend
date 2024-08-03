@@ -16,10 +16,9 @@ export class DateUtils {
     if (!input?.format) {
       Object.assign(input, { format: process.env.DATE_FORMAT });
     }
-
-    return DateTime.fromJSDate(input.date, { zone: 'utc' })
-      .setZone(process.env.TZ)
-      .toFormat(input.format);
+    return DateTime.fromJSDate(input.date, { zone: 'utc' }).setZone(
+      process.env.TZ,
+    );
   }
 
   static getISODateString(): string {

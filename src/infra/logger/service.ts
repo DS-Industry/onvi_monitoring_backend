@@ -19,9 +19,7 @@ import { ErrorType, MessageType } from './types';
 @Injectable({ scope: Scope.REQUEST })
 export class LoggerService implements ILoggerAdapter {
   private app: string;
-
   logger: HttpLogger;
-
   async connect<T = LevelWithSilent>(logLevel: T): Promise<void> {
     const pinoLogger = pino(
       {
@@ -31,16 +29,6 @@ export class LoggerService implements ILoggerAdapter {
         {
           level: 'trace',
           stream: pinoPretty(this.getPinoConfig()),
-        },
-        {
-          level: 'error',
-          stream: pino.transport({
-            target: 'pino-mongodb',
-            options: {
-              uri: process.env.MONGO_URL,
-              collection: 'logs',
-            },
-          }),
         },
       ]),
     );
@@ -66,6 +54,8 @@ export class LoggerService implements ILoggerAdapter {
 
   info({ message, context, obj = {} }: MessageType): void {
     Object.assign(obj, { context, createdAt: DateUtils.getISODateString() });
+    console.log(this.logger.logger.info);
+    this.logger.logger.info('........');
     this.logger.logger.info([obj, message].find(Boolean), message);
   }
 
