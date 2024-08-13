@@ -30,6 +30,7 @@
       "@constant/*": ["src/infra/constant/*"],
       "@libs/*": ["src/libs/*"],
       "@common/*": ["src/common/*"],
+      "@platform-device/*":["src/platform-device"]
     }
   }
 }

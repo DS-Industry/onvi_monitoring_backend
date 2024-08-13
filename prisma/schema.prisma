@@ -8,20 +8,21 @@ datasource db {
 }
 
 model Organization {
-  id                    Int      @id @default(autoincrement())
+  id                    Int            @id @default(autoincrement())
   name                  String
   slug                  String
-  address               Address  @relation(fields: [addressId], references: [id])
-  addressId             Int      @unique
+  address               Address        @relation(fields: [addressId], references: [id])
+  addressId             Int            @unique
   organizationDocuments String
   organizationStatus    String
   organizationType      String
   createdAt             DateTime
   updatedAt             DateTime
-  owner                 User     @relation(name: "Owner", fields: [ownerId], references: [id])
+  owner                 User           @relation(name: "Owner", fields: [ownerId], references: [id])
   ownerId               Int
   users                 User[]
   poses                 Pos[]
+  DeviceApiKey          DeviceApiKey[]
 }
 
 model Address {
@@ -245,6 +246,15 @@ model CarWashDeviceType {
   code                        String
   carWashDevices              CarWashDevice[]
   carWashDeviceProgrammsTypes CarWashDeviceProgrammsType[]
+}
+
+model DeviceApiKey {
+  id            Int          @id @default(autoincrement())
+  key           String
+  expiryAt      DateTime
+  issuedAt      DateTime
+  organization  Organization @relation(fields: [organiationId], references: [id])
+  organiationId Int
 }
 
 model CarWashDeviceOperationsEvent {
