@@ -148,6 +148,7 @@ model CarWashPos {
   posId           Int              @unique
   carWashServices CarWashService[]
   carWashDevices  CarWashDevice[]
+  currencyCarWashPoses          CurrencyCarWashPos[]
 }
 
 model CarWashService {
@@ -169,8 +170,11 @@ model CarWashDevice {
   carWasPos                     CarWashPos                     @relation(fields: [carWashPosId], references: [id])
   carWashPosId                  Int
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
-  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
+  carWashDeviceOperationsCardEvents CarWashDeviceOperationsCardEvent[]
+  carWashDeviceProgrammsEvents  CarWashDeviceProgramsEvent[]
   carWashDeviceEvents           CarWashDeviceEvent[]
+  carWashDeviceServiceEvent     CarWashDeviceServiceEvent[]
+  carWashDeviceMfuEvent         CarWashDeviceMfuEvent[]
 }
 
 model CarWashDeviceType {
@@ -178,72 +182,146 @@ model CarWashDeviceType {
   name                        String
   code                        String
   carWashDevices              CarWashDevice[]
-  carWashDeviceProgrammsTypes CarWashDeviceProgrammsType[]
+  carWashDeviceProgrammsTypes CarWashDeviceProgramsType[]
+  currencyCarWashPoses        CurrencyCarWashPos[]
 }
 
 model CarWashDeviceOperationsEvent {
   id                           Int                           @id @default(autoincrement())
-  carWashDevice                CarWashDevice                 @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId              Int
+  carWashDevice                CarWashDevice?                @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId              Int?
   operDate                     DateTime
   loadDate                     DateTime
   counter                      Int
   operSum                      Int
-  status                       String
+  confirm                      Int
+  isAgregate                   Int
   localId                      Int
-  paymentType                  String
-  isBoxOffice                  Boolean
-  errNums                      ErrNum[]
-  carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
+  currency                     Currency                      @relation(fields: [currencyId], references: [id])
+  currencyId                   Int
+  isBoxOffice                  Int
+  errNum                       ErrNum?                       @relation(fields: [errNumId], references: [id])
+  errNumId                     Int?
 }
 
-model CarWashDeviceProgrammsEvent {
+model CarWashDeviceOperationsCardEvent {
+  id                           Int                           @id @default(autoincrement())
+  carWashDevice                CarWashDevice?                @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId              Int?
+  operDate                     DateTime
+  loadDate                     DateTime
+  cardNumber                    String
+  discount                     Int
+  sum                          Int
+  localId                      Int
+  operId                       Int
+  discountSum                  Int
+  totalSum                     Int?
+  isBonus                      Int?
+  currency                     CurrencyType
+  cashback                     Int?
+  cashbackPercent              Int?
+  errNum                       ErrNum?                       @relation(fields: [errNumId], references: [id])
+  errNumId                     Int?
+}
+
+model CarWashDeviceProgramsEvent {
   id                             Int                          @id @default(autoincrement())
-  carWashDevice                  CarWashDevice                @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId                Int
-  carWashDeviceOperationsEvent   CarWashDeviceOperationsEvent @relation(fields: [carWashDeviceOperationsEventId], references: [id])
-  carWashDeviceOperationsEventId Int
-  carWashDeviceProgrammsType     CarWashDeviceProgrammsType   @relation(fields: [carWashDeviceProgrammsTypeId], references: [id])
-  carWashDeviceProgrammsTypeId   Int
+  carWashDevice                  CarWashDevice?                @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId                Int?
+  carWashDeviceProgramsType      CarWashDeviceProgramsType?   @relation(fields: [carWashDeviceProgramsTypeId], references: [id])
+  carWashDeviceProgramsTypeId    Int?
   beginDate                      DateTime
   loadDate                       DateTime
   endDate                        DateTime
-  beginConfirm                   Boolean
-  endConfirm                     Boolean
+  confirm                        Int
   isPaid                         Int
-  beginLocalId                   Int
-  endLocalId                     Int
-  crdOper                        Int
-  uncNumber                      Int
-  errNums                        ErrNum[]
+  localId                        Int
+  isAgregate                     Int?
+  minute                         Int?
+  errNum                         ErrNum?                       @relation(fields: [errNumId], references: [id])
+  errNumId                       Int?
 }
 
-model CarWashDeviceProgrammsType {
+model CarWashDeviceProgramsType {
   id                           Int                           @id @default(autoincrement())
   carWashDeviceType            CarWashDeviceType             @relation(fields: [carWashDeviceTypeId], references: [id])
   carWashDeviceTypeId          Int
   name                         String
-  code                         String
-  carWashDeviceProgrammsEvents CarWashDeviceProgrammsEvent[]
+  code                         String?
+  description                  String?
+  orderNum                     Int?
+  carWashDeviceProgrammsEvents CarWashDeviceProgramsEvent[]
+  carWashDeviceServiceEvent     CarWashDeviceServiceEvent[]
 }
 
 model CarWashDeviceEvent {
   id                       Int                    @id @default(autoincrement())
-  carWashDevice            CarWashDevice          @relation(fields: [carWashDeviceId], references: [id])
-  carWashDeviceId          Int
-  carWashDeviceEventType   CarWashDeviceEventType @relation(fields: [carWashDeviceEventTypeId], references: [id])
-  carWashDeviceEventTypeId Int
+  carWashDevice            CarWashDevice?          @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId          Int?
+  carWashDeviceEventType   CarWashDeviceEventType? @relation(fields: [carWashDeviceEventTypeId], references: [id])
+  carWashDeviceEventTypeId Int?
   eventDate                DateTime
   loadDate                 DateTime
   localId                  Int
-  errNums                  ErrNum[]
+  errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
+  errNumId                 Int?
 }
 
 model CarWashDeviceEventType {
   id                  Int                  @id @default(autoincrement())
   name                String
-  code                String
   carWashDeviceEvents CarWashDeviceEvent[]
+}
+
+model CarWashDeviceServiceEvent {
+  id                       Int                    @id @default(autoincrement())
+  carWashDevice            CarWashDevice?          @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId          Int?
+  carWashDeviceProgramsType      CarWashDeviceProgramsType?   @relation(fields: [carWashDeviceProgramsTypeId], references: [id])
+  carWashDeviceProgramsTypeId    Int?
+  beginDate                DateTime
+  endDate                  DateTime
+  loadDate                 DateTime
+  localId                  Int
+  counter                  Int
+  errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
+  errNumId                 Int?
+}
+
+model CarWashDeviceMfuEvent {
+  id                       Int                    @id @default(autoincrement())
+  carWashDevice            CarWashDevice?          @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId          Int?
+  cashIn                   Int
+  coinOut                  Int
+  beginDate                DateTime
+  endDate                  DateTime
+  loadDate                 DateTime
+  localId                  Int
+  errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
+  errNumId                 Int?
+}
+
+model Currency {
+  id                            Int                            @id @default(autoincrement())
+  code                          String @unique
+  name                          String @unique
+  currencyType                  CurrencyType
+  currencyView                  CurrencyView?
+  currencyCarWashPoses          CurrencyCarWashPos[]
+  carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
+}
+
+model CurrencyCarWashPos {
+  id                            Int                            @id @default(autoincrement())
+  currency                      Currency                       @relation(fields: [currencyId], references: [id])
+  currencyId                    Int
+  carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId           Int
+  coef                          Int
+  carWashPos                    CarWashPos                     @relation(fields: [carWashPosId], references: [id])
+  carWashPosId                  Int
 }
 
 model ErrNum {
@@ -251,8 +329,11 @@ model ErrNum {
   message                       String
   code                          String
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
-  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
+  carWashDeviceOperationsCardEvents CarWashDeviceOperationsCardEvent[]
+  carWashDeviceProgramsEvents  CarWashDeviceProgramsEvent[]
   carWashDeviceEvents           CarWashDeviceEvent[]
+  carWashDeviceServiceEvent     CarWashDeviceServiceEvent[]
+  carWashDeviceMfuEvent         CarWashDeviceMfuEvent[]
 }
 
 model LoyaltyProgram {
@@ -474,6 +555,17 @@ enum StatusOrganization {
 
 enum TypeOrganization {
   CarWash
+}
+
+enum CurrencyType {
+  CASH
+  CASHLESS
+  VIRTUAL
+}
+
+enum CurrencyView {
+  COIN
+  PAPER
 }
 
 enum PermissionAction {

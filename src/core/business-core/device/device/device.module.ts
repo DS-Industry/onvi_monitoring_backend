@@ -4,20 +4,21 @@ import { DeviceTypeModule } from '@device/deviceType/deviceType.module';
 import { CarWashDeviceRepositoryProvider } from '@device/device/provider/device';
 import { CreateCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-create';
 import { GetFullDataCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-full-data';
-import { DeviceDataRawModule } from '@device/device-data-raw/device-data-raw.module';
+import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
 
 @Module({
-  imports: [PrismaModule, DeviceTypeModule, DeviceDataRawModule],
+  imports: [PrismaModule, DeviceTypeModule],
   providers: [
     CarWashDeviceRepositoryProvider,
     CreateCarWashDeviceUseCase,
     GetFullDataCarWashDeviceUseCase,
+    GetByIdCarWashDeviceUseCase,
   ],
   exports: [
     DeviceTypeModule,
-    DeviceDataRawModule,
     CreateCarWashDeviceUseCase,
     GetFullDataCarWashDeviceUseCase,
+    GetByIdCarWashDeviceUseCase,
   ],
 })
 export class DeviceModule {}

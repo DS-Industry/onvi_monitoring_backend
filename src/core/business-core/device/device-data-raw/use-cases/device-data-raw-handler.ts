@@ -3,11 +3,24 @@ import { IDeviceDataRawRepository } from '@device/device-data-raw/interface/devi
 import { DeviceDataRaw } from '@device/device-data-raw/domain/device-data-raw';
 import { LEN_DEVICE_DATA_RAW } from '@constant/constants';
 import { StatusDeviceDataRaw } from '@prisma/client';
+import { DeviceDataRawHandlerResponse } from '@device/device-data-raw/use-cases/dto/device-data-raw-handler-response';
+import { DeviceOperationHandlerUseCase } from '@device/device-operation/use-cases/device-operation-handler';
+import { DeviceProgramHandlerUseCase } from '@device/device-program/device-program/use-case/device-program-handler';
+import { DeviceEventHandlerUseCase } from '@device/device-event/device-event/use-case/device-event-handler';
+import { DeviceOperationCardHandlerUseCase } from '@device/device-operation-card/use-cases/device-operation-card-handler';
+import { DeviceServiceHandlerUseCase } from '@device/device-service/use-case/device-service-handler';
+import { DeviceMfuHandlerUseCase } from '@device/device-mfu/use-case/device-mfu-handler';
 
 @Injectable()
 export class HandlerDeviceDataRawUseCase {
   constructor(
     private readonly deviceDataRawRepository: IDeviceDataRawRepository,
+    private readonly deviceOperationHandler: DeviceOperationHandlerUseCase,
+    private readonly deviceProgramHandlerUseCase: DeviceProgramHandlerUseCase,
+    private readonly deviceEventHandlerUseCase: DeviceEventHandlerUseCase,
+    private readonly deviceOperationCardHandlerUseCase: DeviceOperationCardHandlerUseCase,
+    private readonly deviceServiceHandlerUseCase: DeviceServiceHandlerUseCase,
+    private readonly deviceMfuHandlerUseCase: DeviceMfuHandlerUseCase,
   ) {}
 
   async execute(input: DeviceDataRaw): Promise<void> {
@@ -30,6 +43,25 @@ export class HandlerDeviceDataRawUseCase {
           );
           const data = this.parseStr(onceRow);
           console.log(data);
+          if (data.oper === 3) {
+            console.log('program');
+            await this.deviceProgramHandlerUseCase.execute(data);
+          } else if (data.oper === 4) {
+            console.log('event');
+            await this.deviceEventHandlerUseCase.execute(data);
+          } else if (data.oper >= 7 && data.oper <= 10) {
+            console.log('operCard');
+            await this.deviceOperationCardHandlerUseCase.execute(data);
+          } else if (data.oper === 6) {
+            console.log('service');
+            await this.deviceServiceHandlerUseCase.execute(data);
+          } else if (data.oper === 0) {
+            console.log('MFU');
+            await this.deviceMfuHandlerUseCase.execute(data);
+          } else {
+            console.log('oper');
+            await this.deviceOperationHandler.execute(data);
+          }
         } catch (error) {
           countErr += 1;
           err += `${countRow}: ${error.message}; `;
@@ -76,24 +108,24 @@ export class HandlerDeviceDataRawUseCase {
     return new Date(date.getTime() + seconds * 1000);
   }
 
-  private parseStr(hex: string): any {
+  private parseStr(hex: string): DeviceDataRawHandlerResponse {
     const oper = this.hex2dec(this.reverseHex(hex.substring(0, 2)));
     const status = this.hex2dec(this.reverseHex(hex.substring(2, 4)));
     const data = this.hex2dec(this.reverseHex(hex.substring(4, 8)));
     const counter = this.hex2dec(this.reverseHex(hex.substring(8, 16)));
-    const local_id = this.hex2dec(this.reverseHex(hex.substring(16, 24)));
-    const beg_date = this.hex2date(this.reverseHex(hex.substring(24, 32)));
-    const end_date = this.hex2date(this.reverseHex(hex.substring(32, 40)));
-    const device_id = this.hex2dec(this.reverseHex(hex.substring(40, 44)));
+    const localId = this.hex2dec(this.reverseHex(hex.substring(16, 24)));
+    const begDate = this.hex2date(this.reverseHex(hex.substring(24, 32)));
+    const endDate = this.hex2date(this.reverseHex(hex.substring(32, 40)));
+    const deviceId = this.hex2dec(this.reverseHex(hex.substring(40, 44)));
     return {
       oper: oper,
       status: status,
       data: data,
       counter: counter,
-      local_id: local_id,
-      beg_date: beg_date,
-      end_date: end_date,
-      device_id: device_id,
+      localId: localId,
+      begDate: begDate,
+      endDate: endDate,
+      deviceId: deviceId,
     };
   }
 }
