@@ -16,9 +16,9 @@ export class ApiKeyAuthGuard
     return super.canActivate(context);
   }
 
-  handleRequest(err, user, info) {
+  handleRequest(err: any, user: any, context: ExecutionContext) {
     if (err || !user) {
-      throw err || new UnauthorizedException('Unauthorized access');
+      throw new Error(err) || new UnauthorizedException('Unauthorized access');
     }
     return user;
   }
