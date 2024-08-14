@@ -1,6 +1,7 @@
+// src/app/device/auth/strategies/api-key.strategy.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-http-bearer';
+import Strategy from 'passport-headerapikey';
 import { IDeviceApiKeyRepository } from '../interfaces/api-key';
 import { DeviceApiKey } from '../domain/api-key';
 
@@ -9,17 +10,24 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
   constructor(
     private readonly deviceApiKeyRepository: IDeviceApiKeyRepository,
   ) {
-    super({
-      // Extract API key from the Authorization header
-      passReqToCallback: true,
+    super({ header: 'X-API-KEY', prefix: '' }, true, async (apiKey, done) => {
+      return this.validate(apiKey, done);
     });
   }
 
-  async validate(req: Request, apiKey: string): Promise<DeviceApiKey> {
-    const deviceApiKey = await this.deviceApiKeyRepository.findByKey(apiKey);
-    if (!deviceApiKey) {
-      throw new UnauthorizedException('Invalid API key');
+  async validate(apiKey: string, done: (error: Error, data) => {}) {
+    try {
+      const deviceApiKey = await this.deviceApiKeyRepository.findByKey(apiKey);
+
+      if (!deviceApiKey || deviceApiKey.expiryAt < new Date()) {
+        return done(
+          new UnauthorizedException('Invalid or expired API key'),
+          null,
+        );
+      }
+      done(null, deviceApiKey);
+    } catch (error) {
+      done(new UnauthorizedException('Unauthorized'), null);
     }
-    return deviceApiKey;
   }
 }

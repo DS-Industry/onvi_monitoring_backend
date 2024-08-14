@@ -1,33 +1,25 @@
+// src/app/device/auth/guards/api-key.guard.ts
 import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
-import { ApiKeyStrategy } from '../strategies/api-key.strategy';
-import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class ApiKeyGuard implements CanActivate {
-  constructor(
-    private readonly apiKeyStrategy: ApiKeyStrategy,
-    private readonly reflector: Reflector,
-  ) {}
+export class ApiKeyAuthGuard
+  extends AuthGuard('api-key')
+  implements CanActivate
+{
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
+  }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const apiKey = request.headers['authorization']?.replace('Bearer ', '');
-
-    if (!apiKey) {
-      throw new ForbiddenException('API key is missing');
+  handleRequest(err, user, info) {
+    if (err || !user) {
+      throw err || new UnauthorizedException('Unauthorized access');
     }
-
-    try {
-      const deviceApiKey = await this.apiKeyStrategy.validate(request, apiKey);
-      request.deviceApiKey = deviceApiKey; // Attach the validated deviceApiKey to the request object
-      return true;
-    } catch (error) {
-      throw new ForbiddenException('Invalid API key');
-    }
+    return user;
   }
 }
