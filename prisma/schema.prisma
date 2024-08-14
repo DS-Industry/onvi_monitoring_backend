@@ -249,12 +249,12 @@ model CarWashDeviceType {
 }
 
 model DeviceApiKey {
-  id            Int          @id @default(autoincrement())
-  key           String
-  expiryAt      DateTime
-  issuedAt      DateTime
-  organization  Organization @relation(fields: [organiationId], references: [id])
-  organiationId Int
+  id             Int          @id @default(autoincrement())
+  key            String
+  expiryAt       DateTime
+  issuedAt       DateTime
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
 }
 
 model CarWashDeviceOperationsEvent {

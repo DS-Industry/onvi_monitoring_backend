@@ -1,7 +1,7 @@
 import { IsNumber, IsNotEmpty } from 'class-validator';
 
-export class CreateApiKeyDto {
+export class CreateDeviceApiKeyDto {
   @IsNumber()
   @IsNotEmpty({ message: 'organizationId is required' })
-  organiationId: number;
+  organizationId: number;
 }
