@@ -94,6 +94,15 @@ model PlatformUserPermission {
   platformUserRoles PlatformUserRole[]
 }
 
+model DevicePermissions {
+  id         Int              @id @default(autoincrement())
+  action     PermissionAction
+  object     deviceObjects?   @relation(fields: [objectId], references: [id])
+  objectId   Int?
+  condition  Json?
+  DeviceRole DeviceRole[]
+}
+
 model MobileUser {
   id                   Int                    @id @default(autoincrement())
   name                 String
@@ -154,6 +163,22 @@ model PlatformUser {
   platformUserRoleId Int?
 }
 
+model CarWashDevice {
+  id                            Int                            @id @default(autoincrement())
+  name                          String
+  carWashDeviceMetaData         String
+  status                        String
+  ipAddress                     String
+  carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId           Int
+  carWasPoses                   CarWashPos[]
+  carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
+  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
+  carWashDeviceEvents           CarWashDeviceEvent[]
+  DeviceRole                    DeviceRole?                    @relation(fields: [deviceRoleId], references: [id])
+  deviceRoleId                  Int?
+}
+
 model PlatformUserMailConfirm {
   id            Int      @id @default(autoincrement())
   email         String   @unique
@@ -169,10 +194,23 @@ model PlatformUserRole {
   platformUserPermissions PlatformUserPermission[]
 }
 
+model DeviceRole {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  carWashDevice     CarWashDevice[]
+  devicePermissions DevicePermissions[]
+}
+
 model PlatformUserObjects {
   id                      Int                      @id @default(autoincrement())
   name                    String
   platformUserPermissions PlatformUserPermission[]
+}
+
+model deviceObjects {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  devicePermissions DevicePermissions[]
 }
 
 model UserObjects {
@@ -224,20 +262,6 @@ model CarWashService {
   code        String
   description String
   carWasPoses CarWashPos[]
-}
-
-model CarWashDevice {
-  id                            Int                            @id @default(autoincrement())
-  name                          String
-  carWashDeviceMetaData         String
-  status                        String
-  ipAddress                     String
-  carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
-  carWashDeviceTypeId           Int
-  carWasPoses                   CarWashPos[]
-  carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
-  carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]
-  carWashDeviceEvents           CarWashDeviceEvent[]
 }
 
 model CarWashDeviceType {
