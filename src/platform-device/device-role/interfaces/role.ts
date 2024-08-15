@@ -1,9 +1,6 @@
-// import { DeviceRole } from '../domain/device-role';
-// import { DevicePermissions } from '../domain/device-permissions'; // Replace with correct import
+import { DeviceRole } from '../domain/device-role';
 
-// export abstract class IDeviceRoleRepository {
-//   abstract findById(id: number): Promise<DeviceRole>;
-//   abstract findAllPermissionsByRoleId(
-//     roleId: number,
-//   ): Promise<DevicePermissions[]>;
-// }
+export abstract class IDeviceRoleRepository {
+  abstract findOneById(id: number): Promise<DeviceRole>;
+  abstract findAllPermissionsByRoleId(roleId: number): Promise<DeviceRole>;
+}
