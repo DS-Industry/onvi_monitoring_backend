@@ -169,8 +169,8 @@ model CarWashDevice {
   carWashDeviceMetaData         String
   status                        String
   ipAddress                     String
-  carWashDeviceType             CarWashDeviceType              @relation(fields: [carWashDeviceTypeId], references: [id])
-  carWashDeviceTypeId           Int
+  carWashDeviceType             CarWashDeviceType?             @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId           Int?
   carWasPoses                   CarWashPos[]
   carWashDeviceOperationsEvents CarWashDeviceOperationsEvent[]
   carWashDeviceProgrammsEvents  CarWashDeviceProgrammsEvent[]

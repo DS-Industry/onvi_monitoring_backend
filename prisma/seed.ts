@@ -29,7 +29,7 @@ async function main() {
               userPermissions: {
                 create: [
                   {
-                    action: 'create',
+                    action: 'manage',
                     object: {
                       create: {
                         name: 'subscription',
@@ -37,7 +37,7 @@ async function main() {
                     },
                   },
                   {
-                    action: 'read',
+                    action: 'create',
                     object: {
                       create: {
                         name: 'subscription',

@@ -9,8 +9,11 @@ import { PlatformAdminModule } from '@platform-admin/platform-admin.module';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { MobileUserModule } from '@mobile-user/mobile-user.module';
-
-
+import { LoggerModule as Logger } from '../src/infra/logger/module';
+import { CarWashDeviceModule } from './platform-device/car-wash-device/car-wash-device.module';
+import { DeviceObjectModule } from './platform-device/device-objects/device-objects.module';
+import { DevicePermissionsModule } from './platform-device/device-permissions/device-permission-module';
+import { DeviceRoleModule } from './platform-device/device-role/device-role-module';
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -61,6 +64,11 @@ import { MobileUserModule } from '@mobile-user/mobile-user.module';
     PlatformAdminModule,
     PlatformUserModule,
     MobileUserModule,
+    CarWashDeviceModule,
+    DeviceObjectModule,
+    DevicePermissionsModule,
+    DeviceRoleModule,
+    Logger,
   ],
   controllers: [],
   providers: [],
