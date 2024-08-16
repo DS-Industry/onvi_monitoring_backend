@@ -9,14 +9,18 @@ import { PlatformUserDeviceModule } from '@platform-user/device/platform-user-de
 
 @Module({
   imports: [
-    UserModule,
     PrismaModule,
+    UserModule,
     UserAuthModule,
+    UserPermissionsModule,
+    UserRoleModule,
     PlatformUserDeviceModule,
     PlatformUserOrganizationModule,
     PlatformUserPosModule,
-    BusinessCoreModule,
+    BusinessCoreModule
   ],
   exports: [UserModule, UserAuthModule],
 })
 export class PlatformUserModule {}
+
+

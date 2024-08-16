@@ -11,19 +11,20 @@ model Organization {
   id                    Int       @id @default(autoincrement())
   name                  String    @unique
   slug                  String    @unique
-  address               Address?  @relation(fields: [addressId], references: [id])
-  addressId             Int?      @unique
+  address               Address      ?  @relation(fields: [addressId], references: [id])
+  addressId             Int      ?      @unique
   organizationDocument  OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
   organizationDocumentId Int?     @unique
   organizationStatus    StatusOrganization
   organizationType      TypeOrganization
   createdAt             DateTime
   updatedAt             DateTime
-  owner                 User?     @relation(name: "Owner", fields: [ownerId], references: [id])
+  owner                 User      ?     @relation(name: "Owner", fields: [ownerId], references: [id])
   ownerId               Int?
   users                 User[]
   poses                 Pos[]
   organizationMailConfirms OrganizationMailConfirm[]
+  DeviceApiKey          DeviceApiKey[]
 }
 
 model Address {
@@ -106,12 +107,38 @@ model UserRole {
   userPermissions UserPermission[]
 }
 
+model UserObjects {
+  id             Int              @id @default(autoincrement())
+  name           String
+  UserPermission UserPermission[]
+}
+
 model UserPermission {
   id               Int        @id @default(autoincrement())
   name             String
   permissionModule String
   userRoles        UserRole[]
 }
+
+model DeviceRole {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  carWashDevice     CarWashDevice[]
+  devicePermissions DevicePermissions[]
+}
+
+model PlatformUserObjects {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  platformUserPermissions PlatformUserPermission[]
+}
+
+model deviceObjects {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  devicePermissions DevicePermissions[]
+}
+
 
 model Pos {
   id                   Int                   @id @default(autoincrement())
@@ -184,6 +211,15 @@ model CarWashDeviceType {
   carWashDevices              CarWashDevice[]
   carWashDeviceProgrammsTypes CarWashDeviceProgramsType[]
   currencyCarWashPoses        CurrencyCarWashPos[]
+}
+
+model DeviceApiKey {
+  id             Int          @id @default(autoincrement())
+  key            String
+  expiryAt       DateTime
+  issuedAt       DateTime
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
 }
 
 model CarWashDeviceOperationsEvent {

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
-import { User } from '@prisma/client';
+// import { User } from '@prisma/client';
+import { User } from '@platform-user/user/domain/user';
+ 
 
 @Injectable()
 export class GetUserIfRefreshTokenMatchesUseCase {
