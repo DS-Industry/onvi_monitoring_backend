@@ -14,6 +14,9 @@ import { CarWashDeviceModule } from './platform-device/car-wash-device/car-wash-
 import { DeviceObjectModule } from './platform-device/device-objects/device-objects.module';
 import { DevicePermissionsModule } from './platform-device/device-permissions/device-permission-module';
 import { DeviceRoleModule } from './platform-device/device-role/device-role-module';
+import { RequestIdInterceptor } from './infra/interceptors/custom-interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -71,6 +74,11 @@ import { DeviceRoleModule } from './platform-device/device-role/device-role-modu
     Logger,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestIdInterceptor,
+    },
+  ],
 })
 export class AppModule {}
