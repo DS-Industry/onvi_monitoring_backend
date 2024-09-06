@@ -25,7 +25,16 @@ services:
       - postgres
     networks:
       - postgres-network
-
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - .env.development
 volumes:
   onvi-business-postgres:
 networks:

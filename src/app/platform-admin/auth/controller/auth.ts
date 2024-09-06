@@ -80,16 +80,6 @@ export class Auth {
     }
   }
 
-  @Post('/verify')
-  @HttpCode(201)
-  async verify(@Body() body: any): Promise<any> {
-    try {
-      return 201;
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   @UseGuards(EmailGuard, AbilitiesGuard)
   @CheckAbilities({ action: PermissionAction.update, subject: 'Admin' })
   @Post('/password/reset')

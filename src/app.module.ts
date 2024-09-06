@@ -9,7 +9,12 @@ import { PlatformAdminModule } from '@platform-admin/platform-admin.module';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { MobileUserModule } from '@mobile-user/mobile-user.module';
-
+import { BusinessCoreModule } from '@business-core/business-core.module';
+import { PlatformDeviceModule } from '@platform-device/platform-device.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
+import { HandlerDeviceDataRawModule } from './infra/handler-device-data-raw/handler-device-data-raw.module';
+import { LoggerModule as Logger } from '../src/infra/logger/module';
 
 @Module({
   imports: [
@@ -56,11 +61,22 @@ import { MobileUserModule } from '@mobile-user/mobile-user.module';
       load: [configuration],
       isGlobal: true,
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     RouterModule.register(routeConfig),
+    ScheduleModule.forRoot(),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,
     MobileUserModule,
+    PlatformDeviceModule,
+    BusinessCoreModule,
+    HandlerDeviceDataRawModule,
+    Logger,
   ],
   controllers: [],
   providers: [],

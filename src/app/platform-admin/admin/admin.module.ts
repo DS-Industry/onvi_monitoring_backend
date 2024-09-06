@@ -8,9 +8,12 @@ import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-b
 import { GetByEmailAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-email';
 import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
 import { ConfirmMailAdminModule } from '@platform-admin/confirmMail/confirmMail.module';
+import { FileModule } from '@libs/file/module';
+import { UploadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-upload';
+import { DownloadAvatarAdminUseCase } from '@platform-admin/admin/use-cases/admin-avatar-download';
 
 @Module({
-  imports: [PrismaModule, BcryptModule, ConfirmMailAdminModule],
+  imports: [PrismaModule, BcryptModule, ConfirmMailAdminModule, FileModule],
   controllers: [AdminController],
   providers: [
     AdminRepositoryProvider,
@@ -18,6 +21,8 @@ import { ConfirmMailAdminModule } from '@platform-admin/confirmMail/confirmMail.
     GetByIdAdminUseCase,
     GetByEmailAdminUseCase,
     UpdateAdminUseCase,
+    UploadAvatarAdminUseCase,
+    DownloadAvatarAdminUseCase,
   ],
   exports: [AdminRepositoryProvider, UpdateAdminUseCase],
 })

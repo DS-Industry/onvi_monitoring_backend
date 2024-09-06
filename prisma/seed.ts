@@ -16,9 +16,8 @@ async function main() {
           lon: 4,
         },
       },
-      organizationDocuments: 'document',
-      organizationStatus: 'active',
-      organizationType: 'OOO',
+      organizationStatus: 'ACTIVE',
+      organizationType: 'LegalEntity',
       createdAt: '2024-01-24T12:00:00Z',
       updatedAt: '2024-01-24T12:00:00Z',
       owner: {
@@ -29,7 +28,7 @@ async function main() {
               userPermissions: {
                 create: [
                   {
-                    action: 'create',
+                    action: 'manage',
                     object: {
                       create: {
                         name: 'subscription',
@@ -37,7 +36,7 @@ async function main() {
                     },
                   },
                   {
-                    action: 'read',
+                    action: 'create',
                     object: {
                       create: {
                         name: 'subscription',

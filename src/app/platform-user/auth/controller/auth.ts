@@ -21,6 +21,8 @@ import { AuthPasswordResetDto } from '@platform-user/auth/controller/dto/auth-pa
 import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
 import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
 import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate';
+import { AuthRegisterWorkerDto } from "@platform-user/auth/controller/dto/auth-register-worker.dto";
+import { AuthRegisterWorkerUseCase } from "@platform-user/auth/use-cases/auth-register-worker";
 
 @Controller('auth')
 export class Auth {
@@ -31,6 +33,7 @@ export class Auth {
     private readonly authActive: ActivateAuthUseCase,
     private readonly passwordConfirmMail: PasswordConfirmMailUserUseCase,
     private readonly passwordReset: PasswordResetUserUseCase,
+    private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
   ) {}
 
   @UseGuards(LocalGuard)
@@ -57,6 +60,21 @@ export class Auth {
   async register(@Body() body: AuthRegisterDto): Promise<any> {
     try {
       const { correctUser, sendMail } = await this.authRegister.execute(body);
+      return {
+        user: correctUser,
+        statusMail: sendMail,
+      };
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Post('/worker')
+  @HttpCode(201)
+  async registerWorker(@Body() body: AuthRegisterWorkerDto): Promise<any> {
+    try {
+      const { correctUser, sendMail } =
+        await this.authRegisterWorker.execute(body);
       return {
         user: correctUser,
         statusMail: sendMail,
