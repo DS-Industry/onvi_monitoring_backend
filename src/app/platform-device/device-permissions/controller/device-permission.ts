@@ -4,7 +4,7 @@ import { GetAllDevicePermissionsUseCase } from '../use-cases/permission-get-all'
 import { GetDevicePermissionByIdUseCase } from '../use-cases/permission-get-by-id';
 import { CreateDevicePermissionDto } from './dto/create-device-permission.dto';
 
-@Controller('devicepermissions')
+@Controller('permissions')
 export class DevicePermissionsController {
   constructor(
     private readonly createDevicePermissionUseCase: CreateDevicePermissionUseCase,

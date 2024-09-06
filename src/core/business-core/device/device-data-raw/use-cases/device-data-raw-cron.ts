@@ -12,7 +12,6 @@ export class CronDeviceDataRawUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    console.log('start');
     const deviceDataRaws = await this.deviceDataRawRepository.findAllByStatus(
       StatusDeviceDataRaw.NEW,
     );
@@ -26,6 +25,5 @@ export class CronDeviceDataRawUseCase {
         removeOnFail: false,
       });
     }
-    console.log('end');
   }
 }

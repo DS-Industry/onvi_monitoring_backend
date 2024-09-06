@@ -7,12 +7,11 @@ import {
   HttpCode,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateDeviceApiKeyUseCase } from '../user-cases/create-api-key';
-import { FindDeviceApiKeysByKeyUseCase } from '../user-cases/api-get-by-id';
+import { CreateDeviceApiKeyUseCase } from '@platform-device/auth/use-cases/create-api-key';
+import { FindDeviceApiKeysByKeyUseCase } from '@platform-device/auth/use-cases/api-get-by-id';
 import { CreateDeviceApiKeyDto } from './dto/create-api-key-dto';
-import { FindDeviceApiKeysByKeyDto } from './dto/find-api-key-dto';
 
-@Controller('deviceapikey')
+@Controller('auth')
 export class DeviceApiKeyController {
   constructor(
     private readonly createDeviceApiKeyUseCase: CreateDeviceApiKeyUseCase,

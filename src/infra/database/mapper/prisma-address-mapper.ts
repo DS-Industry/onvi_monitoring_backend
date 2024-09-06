@@ -1,4 +1,4 @@
-import { Address } from "@address/domain/address";
+import { Address } from '@address/domain/address';
 import { Address as PrismaAddress, Prisma } from '@prisma/client';
 
 export class PrismaAddressMapper {
@@ -20,8 +20,8 @@ export class PrismaAddressMapper {
       id: address?.id,
       city: address.city,
       location: address.location,
-      lat: address.lat,
-      lon: address.lon,
+      lat: address?.lat,
+      lon: address?.lon,
     };
   }
 }

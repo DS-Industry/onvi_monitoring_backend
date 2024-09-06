@@ -1,6 +1,5 @@
 import { CarWashDevice as PrismaCarWashDevice, Prisma } from '@prisma/client';
-import { CarWashDevice } from '@business-core/device/device/domain/device';
-
+import { CarWashDevice } from '@device/device/domain/device';
 export class PrismaCarWashDeviceMapper {
   static toDomain(entity: PrismaCarWashDevice): CarWashDevice {
     if (!entity) {
@@ -14,6 +13,7 @@ export class PrismaCarWashDeviceMapper {
       ipAddress: entity.ipAddress,
       carWashDeviceTypeId: entity.carWashDeviceTypeId,
       carWashPosId: entity.carWashPosId,
+      deviceRoleId: entity.deviceRoleId,
     });
   }
 
@@ -28,6 +28,7 @@ export class PrismaCarWashDeviceMapper {
       ipAddress: carWashDevice.ipAddress,
       carWashDeviceTypeId: carWashDevice.carWashDeviceTypeId,
       carWashPosId: carWashDevice.carWashPosId,
+      deviceRoleId: carWashDevice.deviceRoleId,
     };
   }
 }

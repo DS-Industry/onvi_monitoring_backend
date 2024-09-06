@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CarWashDevice } from '../car-wash-device/domain/car-wash-device';
 import { AbilityBuilder } from '@casl/ability';
 import { GetDeviceRoleByIdUseCase } from '../device-role/use-cases/device-role-get-by-id';
 import { GetPermissionsByRoleIdUseCase } from '../device-role/use-cases/device-role-get-permission-by-id';
-import { GetByIdCarWashDeviceUseCase } from '../car-wash-device/use-cases/get-by-id-car-wash-device';
 import { createPrismaAbility } from '@casl/prisma';
+import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
+import { CarWashDevice } from '@prisma/client';
 
 @Injectable()
 export class CarWashDeviceAbilityFactory {

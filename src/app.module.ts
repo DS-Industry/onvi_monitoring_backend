@@ -15,10 +15,6 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HandlerDeviceDataRawModule } from './infra/handler-device-data-raw/handler-device-data-raw.module';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
-import { CarWashDeviceModule } from './platform-device/car-wash-device/car-wash-device.module';
-import { DeviceObjectModule } from './platform-device/device-objects/device-objects.module';
-import { DevicePermissionsModule } from './platform-device/device-permissions/device-permission-module';
-import { DeviceRoleModule } from './platform-device/device-role/device-role-module';
 
 @Module({
   imports: [
@@ -80,10 +76,6 @@ import { DeviceRoleModule } from './platform-device/device-role/device-role-modu
     PlatformDeviceModule,
     BusinessCoreModule,
     HandlerDeviceDataRawModule,
-    CarWashDeviceModule,
-    DeviceObjectModule,
-    DevicePermissionsModule,
-    DeviceRoleModule,
     Logger,
   ],
   controllers: [],

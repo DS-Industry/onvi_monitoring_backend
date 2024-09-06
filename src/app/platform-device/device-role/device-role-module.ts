@@ -13,6 +13,6 @@ import { DeviceRoleController } from './controller/device-role';
     GetDeviceRoleByIdUseCase,
     GetPermissionsByRoleIdUseCase,
   ],
-  exports: [],
+  exports: [GetDeviceRoleByIdUseCase, GetPermissionsByRoleIdUseCase],
 })
 export class DeviceRoleModule {}

@@ -1,5 +1,5 @@
-import { deviceObjects as PrismaDeviceObject } from '@prisma/client';
-import { DeviceObject } from '../../../platform-device/device-objects/domain/device-object';
+import { DeviceObjects as PrismaDeviceObject, Prisma } from '@prisma/client';
+import { DeviceObject } from '@platform-device/device-objects/domain/device-object';
 
 export class PrismaDeviceObjectMapper {
   static toDomain(entity: PrismaDeviceObject): DeviceObject {
@@ -10,7 +10,9 @@ export class PrismaDeviceObjectMapper {
     });
   }
 
-  static toPrisma(deviceObject: DeviceObject): PrismaDeviceObject {
+  static toPrisma(
+    deviceObject: DeviceObject,
+  ): Prisma.DeviceObjectsUncheckedCreateInput {
     return {
       id: deviceObject.id,
       name: deviceObject.name,

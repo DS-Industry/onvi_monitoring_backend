@@ -17,7 +17,7 @@ async function main() {
         },
       },
       organizationStatus: 'ACTIVE',
-      organizationType: 'CarWash',
+      organizationType: 'LegalEntity',
       createdAt: '2024-01-24T12:00:00Z',
       updatedAt: '2024-01-24T12:00:00Z',
       owner: {

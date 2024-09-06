@@ -8,6 +8,7 @@ export interface CarWashDeviceProps {
   ipAddress: string;
   carWashDeviceTypeId: number;
   carWashPosId: number;
+  deviceRoleId?: number;
 }
 
 export class CarWashDevice extends BaseEntity<CarWashDeviceProps> {
@@ -43,6 +44,10 @@ export class CarWashDevice extends BaseEntity<CarWashDeviceProps> {
     return this.props.carWashPosId;
   }
 
+  get deviceRoleId(): number | undefined {
+    return this.props.deviceRoleId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -65,5 +70,9 @@ export class CarWashDevice extends BaseEntity<CarWashDeviceProps> {
 
   set carWashPosId(carWashPosId: number) {
     this.props.carWashPosId = carWashPosId;
+  }
+
+  set deviceRoleId(roleId: number | undefined) {
+    this.props.deviceRoleId = roleId;
   }
 }

@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { ZodError } from 'zod';
 import { ILoggerAdapter } from '../../infra/logger/adapter';
-import { DateUtils } from '../../utils/date';
-import { BaseException, ErrorModel } from '../../utils/exception';
+import { DateUtils } from '@utils/date';
+import { BaseException, ErrorModel } from '@utils/exception';
 import errorStatus from '../../utils/static/http-status.json';
 
 @Catch()

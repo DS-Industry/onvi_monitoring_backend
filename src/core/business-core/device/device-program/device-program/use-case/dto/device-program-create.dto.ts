@@ -1,4 +1,12 @@
-import { IsDate, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { Prisma } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 export class DeviceProgramCreateDto {
   @IsNumber()
@@ -28,9 +36,9 @@ export class DeviceProgramCreateDto {
   @IsNumber()
   @IsOptional()
   isAgregate?: number;
-  @IsNumber()
-  @IsNotEmpty({ message: 'minute is required' })
-  minute?: number;
+  @Type(() => Prisma.Decimal)
+  @ValidateNested()
+  minute?: Prisma.Decimal;
   @IsNumber()
   @IsOptional()
   errNumId?: number;

@@ -34,6 +34,8 @@ import { DeviceMfuModule } from '@device/device-mfu/device-mfu.module';
     HandlerDeviceDataRawUseCase,
   ],
   exports: [
+    DeviceOperationModule,
+    DeviceProgramModule,
     CreateDeviceDataRawUseCase,
     GetAllByStatusDeviceDataRawUseCase,
     CronDeviceDataRawUseCase,

@@ -5,8 +5,8 @@ import { Organization } from '../domain/organization';
 import { PrismaOrganizationMapper } from '@db/mapper/prisma-organization-mapper';
 import { User } from '@platform-user/user/domain/user';
 import { PrismaPlatformUserMapper } from '@db/mapper/prisma-platform-user-mapper';
-import { PrismaPosMapper } from "@db/mapper/prisma-pos-mapper";
-import { Pos } from "@pos/pos/domain/pos";
+import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class OrganizationRepository extends IOrganizationRepository {
@@ -62,6 +62,19 @@ export class OrganizationRepository extends IOrganizationRepository {
   public async findAllByOwner(ownerId: number): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
       where: { ownerId },
+    });
+    return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
+  }
+
+  public async findAllByUser(userId: number): Promise<Organization[]> {
+    const organization = await this.prisma.organization.findMany({
+      where: {
+        users: {
+          some: {
+            id: userId,
+          },
+        },
+      },
     });
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }

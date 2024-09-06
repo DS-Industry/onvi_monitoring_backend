@@ -4,8 +4,8 @@ export interface AddressProps {
   id?: number;
   city: string;
   location: string;
-  lat: number;
-  lon: number;
+  lat?: number;
+  lon?: number;
 }
 
 export class Address extends BaseEntity<AddressProps> {

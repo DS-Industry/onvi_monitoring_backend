@@ -2,10 +2,16 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { CarWashDeviceAbilityFactory } from '../permissions/ability.factory';
 import { DeviceRoleModule } from '../device-role/device-role-module';
-import { CarWashDeviceModule } from '../car-wash-device/car-wash-device.module';
+import { DeviceObjectModule } from '@platform-device/device-objects/device-objects.module';
+import { BusinessCoreModule } from '@business-core/business-core.module';
 
 @Module({
-  imports: [PrismaModule, DeviceRoleModule, CarWashDeviceModule],
+  imports: [
+    PrismaModule,
+    DeviceRoleModule,
+    DeviceObjectModule,
+    BusinessCoreModule,
+  ],
   providers: [CarWashDeviceAbilityFactory],
   exports: [CarWashDeviceAbilityFactory],
 })

@@ -1,6 +1,5 @@
-import { Prisma } from '@prisma/client';
-import { DeviceApiKey as PrismaDeviceApiKey } from '@prisma/client';
-import { DeviceApiKey } from '../../../platform-device/auth/domain/api-key';
+import { DeviceApiKey as PrismaDeviceApiKey, Prisma } from '@prisma/client';
+import { DeviceApiKey } from '@platform-device/auth/domain/api-key';
 
 export class PrismaDeviceApiKeyMapper {
   static toDomain(entity: PrismaDeviceApiKey): DeviceApiKey {

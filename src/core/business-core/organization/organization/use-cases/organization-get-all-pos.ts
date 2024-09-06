@@ -13,7 +13,7 @@ export class GetAllPosOrganizationUseCase {
   async execute(input: number): Promise<PosResponseDto[]> {
     const poses = await this.organizationRepository.findAllPos(input);
     if (poses.length == 0) {
-      throw new Error('poses not exists');
+      return [];
     }
     return await Promise.all(
       poses.map(

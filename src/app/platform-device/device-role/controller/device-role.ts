@@ -2,7 +2,7 @@ import { Controller, Get, Param, HttpCode } from '@nestjs/common';
 import { GetDeviceRoleByIdUseCase } from '../use-cases/device-role-get-by-id';
 import { GetPermissionsByRoleIdUseCase } from '../use-cases/device-role-get-permission-by-id';
 
-@Controller('device-role')
+@Controller('role')
 export class DeviceRoleController {
   constructor(
     private readonly getDeviceRoleByIdUseCase: GetDeviceRoleByIdUseCase,

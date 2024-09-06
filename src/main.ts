@@ -26,6 +26,12 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ExceptionFilter(loggerService));
 
+  app.enableCors({
+    origin: ['http://localhost:5173'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // if you need to send cookies or credentials,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

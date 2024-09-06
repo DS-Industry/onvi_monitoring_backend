@@ -26,7 +26,9 @@ export class UserController {
   async getOneById(@Param('id') data: string): Promise<any> {
     try {
       const id: number = parseInt(data, 10);
-      return this.userGetById.execute(id);
+      const user = this.userGetById.execute(id);
+      console.log(user);
+      return user;
     } catch (e) {
       throw new Error(e);
     }

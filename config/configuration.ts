@@ -20,4 +20,6 @@ export const configuration = () => ({
   bucketName: process.env.BUCKET_NAME,
   endpointFile: process.env.ENDPOINT_FILE,
   storageUrl: process.env.STORAGE_URL,
+  tz: process.env.TZ,
+  apiExpirationTime: process.env.API_EXPIRATION_TIME,
 });

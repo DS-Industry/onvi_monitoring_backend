@@ -1,4 +1,5 @@
 import { DeviceOperation } from '@device/device-operation/domain/device-operation';
+import { CurrencyType } from '@prisma/client';
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
@@ -6,4 +7,29 @@ export abstract class IDeviceOperationRepository {
   abstract findAllByDeviceId(
     carWashDeviceId: number,
   ): Promise<DeviceOperation[]>;
+  abstract findAllByCurTypeAndDate(
+    currencyType: CurrencyType,
+    carWashDeviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperation[]>;
+  abstract findAllByOrgIdAndDate(
+    organizationId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperation[]>;
+  abstract findAllByPosIdAndDate(
+    carWashPosId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperation[]>;
+  abstract findAllByDeviceIdAndDate(
+    carWashDeviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperation[]>;
+  abstract findLastOperByPosId(byPosId: number): Promise<DeviceOperation>;
+  abstract findLastOperByDeviceId(
+    carWashDeviceId: number,
+  ): Promise<DeviceOperation>;
 }

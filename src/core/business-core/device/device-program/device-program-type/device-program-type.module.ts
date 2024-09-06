@@ -9,6 +9,9 @@ import { GetByIdDeviceProgramTypeUseCase } from '@device/device-program/device-p
     DeviceProgramTypeRepositoryProvider,
     GetByIdDeviceProgramTypeUseCase,
   ],
-  exports: [GetByIdDeviceProgramTypeUseCase],
+  exports: [
+    DeviceProgramTypeRepositoryProvider,
+    GetByIdDeviceProgramTypeUseCase,
+  ],
 })
 export class DeviceProgramTypeModule {}

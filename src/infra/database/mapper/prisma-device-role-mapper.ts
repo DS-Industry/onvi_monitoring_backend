@@ -1,5 +1,5 @@
-import { DeviceRole } from '../../../platform-device/device-role/domain/device-role';
-import { DeviceRole as PrismaDeviceRole } from '@prisma/client';
+import { DeviceRole as PrismaDeviceRole, Prisma } from '@prisma/client';
+import { DeviceRole } from '@platform-device/device-role/domain/device-role';
 
 export class PrismaDeviceRoleMapper {
   static toDomain(prismaDeviceRole: PrismaDeviceRole): DeviceRole {
@@ -9,7 +9,9 @@ export class PrismaDeviceRoleMapper {
     });
   }
 
-  static toPrisma(deviceRole: DeviceRole): PrismaDeviceRole {
+  static toPrisma(
+    deviceRole: DeviceRole,
+  ): Prisma.DeviceRoleUncheckedCreateInput {
     return {
       id: deviceRole.id,
       name: deviceRole.name,

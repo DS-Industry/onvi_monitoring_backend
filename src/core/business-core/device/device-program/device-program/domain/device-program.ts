@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface DeviceProgramProps {
@@ -11,7 +12,7 @@ export interface DeviceProgramProps {
   isPaid: number;
   localId: number;
   isAgregate?: number;
-  minute?: number;
+  minute?: Prisma.Decimal;
   errNumId?: number;
 }
 
@@ -60,7 +61,7 @@ export class DeviceProgram extends BaseEntity<DeviceProgramProps> {
     return this.props.isAgregate;
   }
 
-  get minute(): number {
+  get minute(): Prisma.Decimal {
     return this.props.minute;
   }
 
