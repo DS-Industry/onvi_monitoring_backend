@@ -34,15 +34,6 @@ export class UserController {
     }
   }
 
-  @Post('')
-  @HttpCode(201)
-  async create(@Body() data: any): Promise<any> {
-    try {
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
   @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
   async upload(

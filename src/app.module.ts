@@ -63,8 +63,8 @@ import { LoggerModule as Logger } from '../src/infra/logger/module';
     }),
     BullModule.forRoot({
       connection: {
-        host: 'localhost',
-        port: 6379,
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
       },
     }),
     RouterModule.register(routeConfig),

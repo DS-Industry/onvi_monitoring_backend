@@ -23,6 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generate-schema": "cat src/*/*.prisma > prisma/schema.prisma",
     "migrate:dev": "dotenv -e ./config/env/.env.development -- npx prisma migrate dev --preview-feature --name init && prisma generate",
+    "migrate:prod": "dotenv -e ./config/env/.env.production -- npx prisma migrate dev --preview-feature --name init && prisma generate",
     "seed:dev": "dotenv -e ./config/env/.env.development -- npx prisma db seed",
     "studio:dev": "dotenv -e ./config/env/.env.development -- npx prisma studio",
     "start:infra": ""

@@ -22,4 +22,6 @@ export const configuration = () => ({
   storageUrl: process.env.STORAGE_URL,
   tz: process.env.TZ,
   apiExpirationTime: process.env.API_EXPIRATION_TIME,
+  redisHost: process.env.REDIS_HOST,
+  redisPort: process.env.REDIS_PORT,
 });

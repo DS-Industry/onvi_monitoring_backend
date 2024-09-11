@@ -15,7 +15,7 @@ export class DeviceRoleController {
     return this.getDeviceRoleByIdUseCase.execute(id);
   }
 
-  @Get(':id/permissions')
+  @Get('permissions/:id')
   @HttpCode(200)
   async getPermissionsByRoleId(@Param('id') id: number): Promise<any> {
     return this.getPermissionsByRoleIdUseCase.execute(id);
