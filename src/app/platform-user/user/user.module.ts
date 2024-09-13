@@ -8,9 +8,10 @@ import { GetByEmailUserUseCase } from '@platform-user/user/use-cases/user-get-by
 import { UploadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-upload';
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileModule } from '@libs/file/module';
+import { AbilityModule } from '@platform-user/permissions/ability.module';
 
 @Module({
-  imports: [PrismaModule, FileModule],
+  imports: [PrismaModule, FileModule, AbilityModule],
   controllers: [UserController],
   providers: [
     UserRepositoryProvider,
@@ -25,6 +26,7 @@ import { FileModule } from '@libs/file/module';
     UpdateUserUseCase,
     GetByIdUserUseCase,
     GetByEmailUserUseCase,
+    AbilityModule,
   ],
 })
 export class UserModule {}

@@ -28,6 +28,8 @@ import { OrganizationDateDto } from '@platform-user/organization/controller/dto/
 import { GetRatingOrganizationUseCase } from '@organization/organization/use-cases/organization-get-rating';
 import { OrganizationStatisticsResponseDto } from '@platform-user/organization/controller/dto/organization-statistics-response.dto';
 import { GetStatisticsOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics';
+import { AbilityFactory } from '@platform-user/permissions/ability.factory';
+import { GetAllByPermissionPosUseCase } from '@pos/pos/use-cases/pos-get-all-by-permission';
 
 @Controller('organization')
 export class OrganizationController {
@@ -42,6 +44,8 @@ export class OrganizationController {
     private readonly filterByUserOrganizationUseCase: FilterByUserOrganizationUseCase,
     private readonly getRatingOrganizationUseCase: GetRatingOrganizationUseCase,
     private readonly getStatisticsOrganizationUseCase: GetStatisticsOrganizationUseCase,
+    private readonly caslAbilityFactory: AbilityFactory,
+    private readonly getAllByPermissionPosUseCase: GetAllByPermissionPosUseCase,
   ) {}
 
   @Post('')
@@ -91,6 +95,20 @@ export class OrganizationController {
     try {
       const id: number = parseInt(data, 10);
       return this.organizationGetAllUsers.execute(id);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('pos/test')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getPosesTest(@Request() req: any): Promise<any> {
+    try {
+      const { user } = req;
+      const ability =
+        await this.caslAbilityFactory.createForPlatformManager(user);
+      return await this.getAllByPermissionPosUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }

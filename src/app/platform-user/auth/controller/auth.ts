@@ -1,12 +1,12 @@
 import {
   Body,
-  Controller,
+  Controller, Get,
   HttpCode,
   Post,
   Req,
   Request,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { LocalGuard } from '@platform-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@platform-user/auth/controller/dto/auth-login.dto';
@@ -21,8 +21,8 @@ import { AuthPasswordResetDto } from '@platform-user/auth/controller/dto/auth-pa
 import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
 import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
 import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate';
-import { AuthRegisterWorkerDto } from "@platform-user/auth/controller/dto/auth-register-worker.dto";
-import { AuthRegisterWorkerUseCase } from "@platform-user/auth/use-cases/auth-register-worker";
+import { AuthRegisterWorkerDto } from '@platform-user/auth/controller/dto/auth-register-worker.dto';
+import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-register-worker';
 
 @Controller('auth')
 export class Auth {

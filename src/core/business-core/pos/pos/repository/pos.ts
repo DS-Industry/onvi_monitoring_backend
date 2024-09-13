@@ -3,6 +3,7 @@ import { IPosRepository } from '@pos/pos/interface/pos';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Pos } from '@pos/pos/domain/pos';
 import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class PosRepository extends IPosRepository {
@@ -62,5 +63,12 @@ export class PosRepository extends IPosRepository {
       data: posPrismaEntity,
     });
     return PrismaPosMapper.toDomain(pos);
+  }
+
+  public async findAllByPermission(ability: any): Promise<Pos[]> {
+    const pos = await this.prisma.pos.findMany({
+      where: accessibleBy(ability).Pos,
+    });
+    return pos.map((item) => PrismaPosMapper.toDomain(item));
   }
 }
