@@ -23,6 +23,7 @@ export class GetFullDataCarWashDeviceUseCase {
       status: carWashDevice.status,
       ipAddress: carWashDevice.ipAddress,
       carWashPosId: carWashDevice.carWashPosId,
+      deviceRoleId: carWashDevice.deviceRoleId,
       deviceType: {
         name: carWashDeviceType.name,
         code: carWashDeviceType.code,

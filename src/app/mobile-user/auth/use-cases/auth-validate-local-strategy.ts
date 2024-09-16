@@ -4,7 +4,7 @@ import { Client } from '@mobile-user/client/domain/client';
 import { IOtpRepository } from '@mobile-user/otp/interfaces/otp';
 import { IDateAdapter } from '@libs/date/adapter';
 import { OTP_EXPIRY_TIME } from '@constant/constants';
-import { StatusUser } from "@prisma/client";
+import { StatusUser } from '@prisma/client';
 
 @Injectable()
 export class ValidateClientForLocalStrategyUseCase {

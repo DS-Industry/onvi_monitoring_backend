@@ -14,9 +14,9 @@ export class LoginAuthUseCase {
   async execute(email: string, id: number): Promise<any> {
     const accessToken = await this.singAccessToken.execute(email, id);
     const refreshToken = await this.singRefreshToken.execute(email, id);
-    const admin = await this.setRefreshToken.execute(id, refreshToken.token);
+    const user = await this.setRefreshToken.execute(id, refreshToken.token);
     return {
-      admin: admin,
+      admin: user,
       tokens: {
         accessToken: accessToken.token,
         accessTokenExp: accessToken.expirationDate,

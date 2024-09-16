@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AddressCreateDto {
   @IsString()
@@ -8,9 +8,9 @@ export class AddressCreateDto {
   @IsNotEmpty({ message: 'location is required' })
   location: string;
   @IsNumber()
-  @IsNotEmpty({ message: 'lat is required' })
-  lat: number;
+  @IsOptional()
+  lat?: number;
   @IsNumber()
-  @IsNotEmpty({ message: 'lon is required' })
-  lon: number;
+  @IsOptional()
+  lon?: number;
 }

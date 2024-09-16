@@ -5,7 +5,7 @@ services:
     container_name: onvi-business-postgres
     image: postgres
     env_file:
-      - .env.development
+      - /config/env/.env.development
     ports:
       - '5432:5432'
     volumes:
@@ -18,14 +18,23 @@ services:
     container_name: onvi-business-pgadmin
     image: dpage/pgadmin4
     env_file:
-      - .env.development
+      - /config/env/.env.development
     ports:
       - "16543:80"
     depends_on:
       - postgres
     networks:
       - postgres-network
-
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - /config/env/.env.development
 volumes:
   onvi-business-postgres:
 networks:

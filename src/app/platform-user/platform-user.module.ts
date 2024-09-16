@@ -6,12 +6,16 @@ import { PlatformUserOrganizationModule } from '@platform-user/organization/plat
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { PlatformUserPosModule } from '@platform-user/pos/platform-user-pos.module';
 import { PlatformUserDeviceModule } from '@platform-user/device/platform-user-device.module';
+import { UserPermissionsModule } from '@platform-user/user-permissions/user-permission.module';
+import { UserRoleModule } from '@platform-user/user-role/user-role.module';
 
 @Module({
   imports: [
-    UserModule,
     PrismaModule,
+    UserModule,
     UserAuthModule,
+    UserPermissionsModule,
+    UserRoleModule,
     PlatformUserDeviceModule,
     PlatformUserOrganizationModule,
     PlatformUserPosModule,
@@ -20,5 +24,3 @@ import { PlatformUserDeviceModule } from '@platform-user/device/platform-user-de
   exports: [UserModule, UserAuthModule],
 })
 export class PlatformUserModule {}
-
-

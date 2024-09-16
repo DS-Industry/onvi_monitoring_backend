@@ -26,16 +26,9 @@ export class UserController {
   async getOneById(@Param('id') data: string): Promise<any> {
     try {
       const id: number = parseInt(data, 10);
-      return this.userGetById.execute(id);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  @Post('')
-  @HttpCode(201)
-  async create(@Body() data: any): Promise<any> {
-    try {
+      const user = this.userGetById.execute(id);
+      console.log(user);
+      return user;
     } catch (e) {
       throw new Error(e);
     }

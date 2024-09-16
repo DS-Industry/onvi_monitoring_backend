@@ -9,6 +9,7 @@ export abstract class IOrganizationRepository {
   abstract findOneBySlug(slug: string): Promise<Organization>;
   abstract findAll(): Promise<Organization[]>;
   abstract findAllByOwner(ownerId: number): Promise<Organization[]>;
+  abstract findAllByUser(userId: number): Promise<Organization[]>;
   abstract findAllUser(id: number): Promise<User[]>;
   abstract findAllPos(id: number): Promise<Pos[]>;
   abstract update(id: number, input: Organization): Promise<Organization>;

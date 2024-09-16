@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -22,6 +23,11 @@ import { AddWorkerOrganizationDto } from '@platform-user/organization/controller
 import { PreAddWorkerOrganizationUseCase } from '@platform-user/organization/use-cases/organization-pre-add-worker';
 import { GetAllOrganizationByOwnerUseCase } from '@organization/organization/use-cases/organization-get-all-by-owner';
 import { GetAllPosOrganizationUseCase } from '@organization/organization/use-cases/organization-get-all-pos';
+import { FilterByUserOrganizationUseCase } from '@platform-user/organization/use-cases/organization-filter-by-user';
+import { OrganizationDateDto } from '@platform-user/organization/controller/dto/organization-date.dto';
+import { GetRatingOrganizationUseCase } from '@organization/organization/use-cases/organization-get-rating';
+import { OrganizationStatisticsResponseDto } from '@platform-user/organization/controller/dto/organization-statistics-response.dto';
+import { GetStatisticsOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics';
 
 @Controller('organization')
 export class OrganizationController {
@@ -33,6 +39,9 @@ export class OrganizationController {
     private readonly preOrganizationAddWorker: PreAddWorkerOrganizationUseCase,
     private readonly organizationGetAllByOwner: GetAllOrganizationByOwnerUseCase,
     private readonly organizationGetAllPos: GetAllPosOrganizationUseCase,
+    private readonly filterByUserOrganizationUseCase: FilterByUserOrganizationUseCase,
+    private readonly getRatingOrganizationUseCase: GetRatingOrganizationUseCase,
+    private readonly getStatisticsOrganizationUseCase: GetStatisticsOrganizationUseCase,
   ) {}
 
   @Post('')
@@ -103,7 +112,20 @@ export class OrganizationController {
   async getOrganizationByOwner(@Param('id') data: string): Promise<any> {
     try {
       const id: number = parseInt(data, 10);
-      return this.organizationGetAllByOwner.execute(id);
+      return await this.organizationGetAllByOwner.execute(id);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('filter/:userId')
+  @HttpCode(200)
+  async filterViewOrganizationByUser(
+    @Param('userId') data: string,
+  ): Promise<any> {
+    try {
+      const userId = parseInt(data, 10);
+      return await this.filterByUserOrganizationUseCase.execute(userId);
     } catch (e) {
       throw new Error(e);
     }
@@ -123,6 +145,44 @@ export class OrganizationController {
       };
 
       return await this.organizationAddDocuments.execute(updateData, file);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('rating/:orgId')
+  @HttpCode(200)
+  async ratingPosByOrg(
+    @Param('orgId') orgId: string,
+    @Query() data: OrganizationDateDto,
+  ): Promise<any> {
+    try {
+      const id: number = parseInt(orgId, 10);
+      const input = {
+        dateStart: new Date(data.dateStart),
+        dateEnd: new Date(data.dateEnd),
+        organizationId: id,
+      };
+      return await this.getRatingOrganizationUseCase.execute(input);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('statistics/:orgId')
+  @HttpCode(200)
+  async statisticsOrg(
+    @Param('orgId') orgId: string,
+    @Query() data: OrganizationDateDto,
+  ): Promise<OrganizationStatisticsResponseDto> {
+    try {
+      const id: number = parseInt(orgId, 10);
+      const input = {
+        dateStart: new Date(data.dateStart),
+        dateEnd: new Date(data.dateEnd),
+        organizationId: id,
+      };
+      return await this.getStatisticsOrganizationUseCase.execute(input);
     } catch (e) {
       throw new Error(e);
     }

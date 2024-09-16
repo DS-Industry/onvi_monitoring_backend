@@ -37,6 +37,7 @@ export class CreateCarWashDeviceUseCase {
       ipAddress: input.ipAddress,
       carWashDeviceTypeId: carWashDeviceType.id,
       carWashPosId: input.carWashPosId,
+      deviceRoleId: input.deviceRoleId,
     });
 
     const carWashDevice =

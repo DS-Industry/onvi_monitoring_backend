@@ -11,8 +11,8 @@ export class CreateAddressUseCase {
     const addressData = new Address({
       city: input.city,
       location: input.location,
-      lat: input.lat,
-      lon: input.lon,
+      lat: input?.lat,
+      lon: input?.lon,
     });
     return await this.addressRepository.create(addressData);
   }

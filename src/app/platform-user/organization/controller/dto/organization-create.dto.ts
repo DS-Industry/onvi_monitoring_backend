@@ -1,9 +1,4 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TypeOrganization } from '@prisma/client';
 import { AddressCreateDto } from '@platform-user/organization/controller/dto/address-create.dto';

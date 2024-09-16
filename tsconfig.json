@@ -17,6 +17,8 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "paths": {
       "@prisma/*": ["src/prisma/*"],
       "@config/*": ["config/*"],
@@ -28,6 +30,7 @@
       "@platform-admin/*": ["src/app/platform-admin/*"],
       "@platform-user/*": ["src/app/platform-user/*"],
       "@mobile-user/*": ["src/app/mobile-user/*"],
+      "@platform-device/*": ["src/app/platform-device/*"],
       "@db/*": ["src/infra/database/*"],
       "@constant/*": ["src/infra/constant/*"],
       "@libs/*": ["src/libs/*"],

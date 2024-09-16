@@ -5,6 +5,7 @@ export interface CarWashDeviceFullDataResponseDto {
   status: string;
   ipAddress: string;
   carWashPosId: number;
+  deviceRoleId: number;
   deviceType: {
     name: string;
     code: string;

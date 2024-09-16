@@ -13,6 +13,10 @@ import { OrganizationConfirmMailModule } from '../confirmMail/confirmMail.module
 import { GetAllOrganizationByOwnerUseCase } from '@organization/organization/use-cases/organization-get-all-by-owner';
 import { GetAllPosOrganizationUseCase } from '@organization/organization/use-cases/organization-get-all-pos';
 import { PosModule } from '@pos/pos/pos.module';
+import { GetAllByUserOrganizationUseCase } from '@organization/organization/use-cases/organization-get-all-by-user';
+import { GetRatingOrganizationUseCase } from '@organization/organization/use-cases/organization-get-rating';
+import { DeviceDataRawModule } from '@device/device-data-raw/device-data-raw.module';
+import { GetStatisticsOrganizationUseCase } from "@organization/organization/use-cases/organization-get-statistics";
 
 @Module({
   imports: [
@@ -21,6 +25,7 @@ import { PosModule } from '@pos/pos/pos.module';
     DocumentsModule,
     OrganizationConfirmMailModule,
     PosModule,
+    DeviceDataRawModule,
   ],
   providers: [
     OrganizationRepositoryProvider,
@@ -32,6 +37,9 @@ import { PosModule } from '@pos/pos/pos.module';
     AddWorkerOrganizationUseCase,
     GetAllOrganizationByOwnerUseCase,
     GetAllPosOrganizationUseCase,
+    GetAllByUserOrganizationUseCase,
+    GetRatingOrganizationUseCase,
+    GetStatisticsOrganizationUseCase,
   ],
   exports: [
     CreateOrganizationUseCase,
@@ -42,6 +50,9 @@ import { PosModule } from '@pos/pos/pos.module';
     AddWorkerOrganizationUseCase,
     GetAllOrganizationByOwnerUseCase,
     GetAllPosOrganizationUseCase,
+    GetAllByUserOrganizationUseCase,
+    GetRatingOrganizationUseCase,
+    GetStatisticsOrganizationUseCase,
   ],
 })
 export class OrganizationModule {}

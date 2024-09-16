@@ -19,10 +19,16 @@ import { ConfirmMailAdminModule } from '@platform-admin/confirmMail/confirmMail.
 import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activate';
 import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-confirm';
 import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
-import { AbilityModule } from "@platform-admin/permissions/ability.module";
+import { AbilityModule } from '@platform-admin/permissions/ability.module';
 
 @Module({
-  imports: [BcryptModule, JwtModule, AdminModule, ConfirmMailAdminModule, AbilityModule,],
+  imports: [
+    BcryptModule,
+    JwtModule,
+    AdminModule,
+    ConfirmMailAdminModule,
+    AbilityModule,
+  ],
   controllers: [Auth],
   providers: [
     SignRefreshTokenUseCase,

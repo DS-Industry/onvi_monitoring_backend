@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CarWashDeviceCreateDto {
   @IsString()
@@ -19,4 +19,7 @@ export class CarWashDeviceCreateDto {
   @IsNumber()
   @IsNotEmpty({ message: 'carWashPosId is required' })
   carWashPosId: number;
+  @IsNumber()
+  @IsOptional()
+  deviceRoleId?: number;
 }
