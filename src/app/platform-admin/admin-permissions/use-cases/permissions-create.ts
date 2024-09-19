@@ -11,7 +11,6 @@ export class CreatePermissionsUseCase {
     const permissionData = new AdminPermission({
       action: input.action,
       objectId: input.objectId,
-      condition: input.condition,
     });
 
     const rolesId = input.roles.map((roleId) => ({ id: roleId }));

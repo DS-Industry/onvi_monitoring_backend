@@ -11,11 +11,10 @@ export class UpdatePermissionsUseCase {
     if (!permissions) {
       throw new Error('permissions not exists');
     }
-    const { action, objectId, condition } = input;
+    const { action, objectId } = input;
 
     permissions.action = action ? action : permissions.action;
     permissions.objectId = objectId ? objectId : permissions.objectId;
-    permissions.condition = condition ? condition : permissions.condition;
 
     return await this.permissionsRepository.update(permissions.id, permissions);
   }

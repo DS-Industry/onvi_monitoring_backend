@@ -8,10 +8,12 @@ import { PlatformUserPosModule } from '@platform-user/pos/platform-user-pos.modu
 import { PlatformUserDeviceModule } from '@platform-user/device/platform-user-device.module';
 import { UserPermissionsModule } from '@platform-user/user-permissions/user-permission.module';
 import { UserRoleModule } from '@platform-user/user-role/user-role.module';
+import { AbilityModule } from '@platform-user/permissions/ability.module';
 
 @Module({
   imports: [
     PrismaModule,
+    AbilityModule,
     UserModule,
     UserAuthModule,
     UserPermissionsModule,

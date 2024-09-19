@@ -6,5 +6,6 @@ export abstract class IPosRepository {
   abstract findOneByName(name: string): Promise<Pos>;
   abstract findOneBySlug(slug: string): Promise<Pos>;
   abstract findAll(): Promise<Pos[]>;
+  abstract findAllByPermission(ability: any): Promise<Pos[]>;
   abstract update(input: Pos): Promise<Pos>;
 }

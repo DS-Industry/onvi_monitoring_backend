@@ -10,9 +10,6 @@ export class CreateDevicePermissionDto {
   @IsOptional()
   objectId?: number;
 
-  @IsOptional()
-  condition?: any;
-
   @IsNotEmpty({ each: true })
   roles: number[];
 }

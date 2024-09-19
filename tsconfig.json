@@ -35,7 +35,8 @@
       "@constant/*": ["src/infra/constant/*"],
       "@libs/*": ["src/libs/*"],
       "@common/*": ["src/common/*"],
-      "@business-core/*": ["src/core/business-core/*"]
+      "@business-core/*": ["src/core/business-core/*"],
+      "@object-permission/*": ["src/infra/object/*"],
     }
   }
 }
