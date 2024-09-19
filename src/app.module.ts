@@ -15,7 +15,6 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HandlerDeviceDataRawModule } from './infra/handler-device-data-raw/handler-device-data-raw.module';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
-import passwordReset from "supertokens-node/lib/build/recipe/emailpassword/api/passwordReset";
 
 @Module({
   imports: [

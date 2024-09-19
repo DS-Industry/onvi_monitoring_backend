@@ -73,4 +73,28 @@ export class UserRepository extends IUserRepository {
     });
     return PrismaPlatformUserMapper.toDomain(user);
   }
+
+  public async getAllPosPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        posesPermissions: true,
+      },
+    });
+    return user?.posesPermissions?.map((item) => item.id) || [];
+  }
+
+  public async getAllOrganizationPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        organizations: true,
+      },
+    });
+    return user?.organizations?.map((item) => item.id) || [];
+  }
 }

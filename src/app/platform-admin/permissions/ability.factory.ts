@@ -3,8 +3,8 @@ import { Admin } from '@platform-admin/admin/domain/admin';
 import { AbilityBuilder } from '@casl/ability';
 import { GetByIdRoleUseCase } from '@platform-admin/admin-role/use-cases/role-get-by-id';
 import { GetPermissionsByIdRoleUseCase } from '@platform-admin/admin-role/use-cases/role-get-permissions-by-id';
-import { GetByIdObjectUseCase } from '@platform-admin/object/use-case/object-get-by-id';
 import { createPrismaAbility } from '@casl/prisma';
+import { GetByIdObjectUseCase } from '@object-permission/use-case/object-get-by-id';
 
 @Injectable()
 export class AbilityFactory {
@@ -33,7 +33,7 @@ export class AbilityFactory {
     const dbPermissions = permissions.map((permission) => ({
       id: permission.id,
       action: permission.action,
-      condition: permission.condition,
+      condition: null,
       permissionObject: objectMap[permission.objectId],
     }));
 

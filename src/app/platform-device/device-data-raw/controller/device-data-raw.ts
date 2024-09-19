@@ -14,7 +14,7 @@ export class DeviceDataRawController {
   ) {}
 
   @Post('')
-  @UseGuards(ApiKeyAuthGuard)
+  //@UseGuards(ApiKeyAuthGuard)
   @HttpCode(201)
   async create(@Body() data: DeviceDataRawCreateDto): Promise<void> {
     try {

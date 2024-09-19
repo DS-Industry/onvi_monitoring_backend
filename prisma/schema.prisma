@@ -91,6 +91,7 @@ model User {
   organizations     Organization[]
   posesCreated      Pos[]          @relation(name: "CreatedByUser")
   posesUpdated      Pos[]          @relation(name: "UpdateByUser")
+  posesPermissions  Pos[]
 }
 
 model UserMailConfirm {
@@ -108,27 +109,19 @@ model UserRole {
   userPermissions UserPermission[]
 }
 
-model UserObjects {
-  id             Int              @id @default(autoincrement())
-  name           String
-  UserPermission UserPermission[]
-}
-
 model UserPermission {
   id        Int              @id @default(autoincrement())
   action    PermissionAction
-  object    UserObjects?     @relation(fields: [objectId], references: [id])
+  object    ObjectPermissions?     @relation(fields: [objectId], references: [id])
   objectId  Int
-  condition Json?
   userRoles UserRole[]
 }
 
 model DevicePermissions {
   id         Int              @id @default(autoincrement())
   action     PermissionAction
-  object     DeviceObjects?   @relation(fields: [objectId], references: [id])
+  object     ObjectPermissions?   @relation(fields: [objectId], references: [id])
   objectId   Int?
-  condition  Json?
   DeviceRole DeviceRole[]
 }
 
@@ -139,16 +132,12 @@ model DeviceRole {
   devicePermissions DevicePermissions[]
 }
 
-model PlatformUserObjects {
+model ObjectPermissions {
   id                      Int                      @id @default(autoincrement())
   name                    String
+  userPermissions         UserPermission[]
   platformUserPermissions PlatformUserPermission[]
-}
-
-model DeviceObjects {
-  id                Int                 @id @default(autoincrement())
-  name              String
-  devicePermissions DevicePermissions[]
+  devicePermissions       DevicePermissions[]
 }
 
 
@@ -177,6 +166,7 @@ model Pos {
   posBenefit           PosBenefit?
   loyaltyPosPromocodes LoyaltyPosPromocode[]
   carWashPos           CarWashPos?
+  usersPermissions     User[]
 }
 
 model CarWashPos {
@@ -565,9 +555,8 @@ model PlatformUserRole {
 model PlatformUserPermission {
   id                Int                  @id @default(autoincrement())
   action            PermissionAction
-  object            PlatformUserObjects? @relation(fields: [objectId], references: [id])
+  object            ObjectPermissions? @relation(fields: [objectId], references: [id])
   objectId          Int
-  condition         Json?
   platformUserRoles PlatformUserRole[]
 }
 

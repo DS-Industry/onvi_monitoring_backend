@@ -1,5 +1,4 @@
 import { BaseEntity } from '@utils/entity';
-import { JSONObject } from '@common/types/json-type';
 import { PermissionAction } from '@prisma/client';
 
 
@@ -7,7 +6,6 @@ export interface PermissionProps {
   id?: number;
   action: PermissionAction;
   objectId: number;
-  condition?: JSONObject     
 }
 
 export class UserPermission extends BaseEntity<PermissionProps> {
@@ -62,10 +60,6 @@ export class UserPermission extends BaseEntity<PermissionProps> {
     return this.props.objectId;
   }
 
-  get condition(): JSONObject {
-    return this.props.condition;
-  }
-
   set action(action: PermissionAction) {
     this.props.action = action;
   }
@@ -73,11 +67,5 @@ export class UserPermission extends BaseEntity<PermissionProps> {
   set objectId(objectId: number) {
     this.props.objectId = objectId;
   }
-
-  set condition(condition: JSONObject) {
-    this.props.condition = condition;
-  }
-
-
 }
   

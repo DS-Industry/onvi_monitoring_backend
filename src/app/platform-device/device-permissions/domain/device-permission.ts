@@ -1,12 +1,10 @@
 import { BaseEntity } from '@utils/entity';
-import { JSONObject } from '@common/types/json-type';
 import { PermissionAction } from '@prisma/client'; // Adjust import if needed
 
 export interface DevicePermissionProps {
   id?: number;
   action: PermissionAction;
   objectId?: number;
-  condition?: JSONObject;
 }
 
 export class DevicePermission extends BaseEntity<DevicePermissionProps> {
@@ -55,19 +53,11 @@ export class DevicePermission extends BaseEntity<DevicePermissionProps> {
     return this.props.objectId;
   }
 
-  get condition(): JSONObject | undefined {
-    return this.props.condition;
-  }
-
   set action(action: PermissionAction) {
     this.props.action = action;
   }
 
   set objectId(objectId: number | undefined) {
     this.props.objectId = objectId;
-  }
-
-  set condition(condition: JSONObject | undefined) {
-    this.props.condition = condition;
   }
 }

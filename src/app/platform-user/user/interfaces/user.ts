@@ -9,4 +9,6 @@ export abstract class IUserRepository {
   abstract findAll(): Promise<User[]>;
   abstract update(id: number, input: User): Promise<User>;
   abstract remove(id: number): Promise<any>;
+  abstract getAllPosPermissions(id: number): Promise<number[]>;
+  abstract getAllOrganizationPermissions(id: number): Promise<number[]>;
 }

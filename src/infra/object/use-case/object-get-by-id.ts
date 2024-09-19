@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IObjectPermissionsRepository } from '@platform-user/object/interfaces/object';
+import { IObjectPermissionsRepository } from '../interface/object';
 
 @Injectable()
 export class GetByIdObjectUseCase {

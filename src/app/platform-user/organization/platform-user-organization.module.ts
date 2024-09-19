@@ -4,9 +4,10 @@ import { PreAddWorkerOrganizationUseCase } from '@platform-user/organization/use
 import { UserModule } from '@platform-user/user/user.module';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { FilterByUserOrganizationUseCase } from '@platform-user/organization/use-cases/organization-filter-by-user';
+import { AbilityModule } from "@platform-user/permissions/ability.module";
 
 @Module({
-  imports: [UserModule, BusinessCoreModule],
+  imports: [UserModule, BusinessCoreModule, AbilityModule],
   controllers: [OrganizationController],
   providers: [PreAddWorkerOrganizationUseCase, FilterByUserOrganizationUseCase],
 })

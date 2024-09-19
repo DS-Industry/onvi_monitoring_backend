@@ -8,10 +8,13 @@ import { GetByEmailUserUseCase } from '@platform-user/user/use-cases/user-get-by
 import { UploadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-upload';
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileModule } from '@libs/file/module';
-import { AbilityModule } from '@platform-user/permissions/ability.module';
+import { GetIdPosPermissionUserUseCase } from "@platform-user/user/use-cases/user-get-id-pos-permission";
+import {
+  GetIdOrganizationPermissionUserUseCase
+} from "@platform-user/user/use-cases/user-get-id-organization-permission";
 
 @Module({
-  imports: [PrismaModule, FileModule, AbilityModule],
+  imports: [PrismaModule, FileModule],
   controllers: [UserController],
   providers: [
     UserRepositoryProvider,
@@ -20,13 +23,16 @@ import { AbilityModule } from '@platform-user/permissions/ability.module';
     GetByEmailUserUseCase,
     UploadAvatarUserUseCase,
     DownloadAvatarUserUseCase,
+    GetIdPosPermissionUserUseCase,
+    GetIdOrganizationPermissionUserUseCase
   ],
   exports: [
     UserRepositoryProvider,
     UpdateUserUseCase,
     GetByIdUserUseCase,
     GetByEmailUserUseCase,
-    AbilityModule,
+    GetIdPosPermissionUserUseCase,
+    GetIdOrganizationPermissionUserUseCase
   ],
 })
 export class UserModule {}
