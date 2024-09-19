@@ -14,7 +14,7 @@ export class CreateDeviceDataRawUseCase {
     const postDataData = new DeviceDataRaw({
       data: input.data,
       status: StatusDeviceDataRaw.NEW,
-      version: input.version,
+      version: 'OVEN',
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
     });
