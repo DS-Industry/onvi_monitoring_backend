@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
 import { DeviceDataRawHandlerResponse } from '@device/device-data-raw/use-cases/dto/device-data-raw-handler-response';
 import { GetByIdDeviceEventTypeUseCase } from '@device/device-event/device-event-type/use-case/device-event-type-get-by-id';
 import { CreateDeviceEventUseCase } from '@device/device-event/device-event/use-case/device-event-create';
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
 
 @Injectable()
 export class DeviceEventHandlerUseCase {
   constructor(
-    private readonly getByIdCarWashDeviceUseCase: GetByIdCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly getByIdDeviceEventTypeUseCase: GetByIdDeviceEventTypeUseCase,
     private readonly createDeviceEventUseCase: CreateDeviceEventUseCase,
   ) {}
@@ -17,7 +17,7 @@ export class DeviceEventHandlerUseCase {
     let errNumId: number = null;
     let eventTypeId = input.data;
 
-    const device = await this.getByIdCarWashDeviceUseCase.execute(
+    const device = await this.findMethodsCarWashDeviceUseCase.getById(
       input.deviceId,
     );
     if (!device) {

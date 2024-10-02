@@ -1,31 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { IOrganizationRepository } from '../interfaces/organization';
-import { CreateAddressUseCase } from '@address/use-case/address-create';
-import { OrganizationCreateDto } from '@platform-user/organization/controller/dto/organization-create.dto';
 import { Organization } from '../domain/organization';
 import { StatusOrganization } from '@prisma/client';
 import slugify from 'slugify';
 import { User } from '@platform-user/user/domain/user';
+import { IAddressRepository } from '@address/interfaces/address';
+import { Address } from '@address/domain/address';
+import { OrganizationCreateDto } from '@organization/organization/use-cases/dto/organization-create.dto';
 
 @Injectable()
 export class CreateOrganizationUseCase {
   constructor(
     private readonly organizationRepository: IOrganizationRepository,
-    private readonly createAddressUseCase: CreateAddressUseCase,
+    private readonly addressRepository: IAddressRepository,
   ) {}
 
   async execute(
     input: OrganizationCreateDto,
     owner: User,
   ): Promise<Organization> {
-    const checkOrganization = await this.organizationRepository.findOneByName(
-      input.name,
-    );
-    if (checkOrganization) {
-      throw new Error('organization exists');
-    }
-
-    const address = await this.createAddressUseCase.execute(input.address);
+    const addressData = new Address({
+      city: input.address.city,
+      location: input.address.location,
+      lat: input?.address.lat,
+      lon: input?.address.lon,
+    });
+    const address = await this.addressRepository.create(addressData);
     const organizationData = new Organization({
       name: input.name,
       slug: slugify(input.name, '_'),
@@ -37,6 +37,9 @@ export class CreateOrganizationUseCase {
       ownerId: owner.id,
     });
 
-    return await this.organizationRepository.create(organizationData);
+    return await this.organizationRepository.create(
+      organizationData,
+      addressData,
+    );
   }
 }

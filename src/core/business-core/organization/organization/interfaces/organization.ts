@@ -1,9 +1,10 @@
 import { Organization } from '../domain/organization';
 import { User } from '@platform-user/user/domain/user';
 import { Pos } from "@pos/pos/domain/pos";
+import { Address } from "@address/domain/address";
 
 export abstract class IOrganizationRepository {
-  abstract create(input: Organization): Promise<Organization>;
+  abstract create(input: Organization, address: Address): Promise<Organization>;
   abstract findOneById(id: number): Promise<Organization>;
   abstract findOneByName(name: string): Promise<Organization>;
   abstract findOneBySlug(slug: string): Promise<Organization>;

@@ -1,24 +1,13 @@
 import { Module } from '@nestjs/common';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { PosController } from '@platform-user/pos/controller/pos';
-import { PreCreatePosUseCase } from '@platform-user/pos/use-cases/pos-pre-create';
-import { FilterByUserPosUseCase } from '@platform-user/pos/use-cases/pos-filter-by-user';
 import { UserModule } from '@platform-user/user/user.module';
-import { MonitoringPosUseCase } from '@platform-user/pos/use-cases/pos-monitoring';
-import { MonitoringFullByIdPosUseCase } from "@platform-user/pos/use-cases/pos-monitoring-full-by-id";
-import { ProgramPosUseCase } from "@platform-user/pos/use-cases/pos-program";
-import { PosProgramFullUseCase } from "@platform-user/pos/use-cases/pos-program-full";
+import { AbilityModule } from '@platform-user/permissions/ability.module';
+import { PosValidateRules } from '@platform-user/pos/controller/validate/pos-validate-rules';
 
 @Module({
-  imports: [UserModule, BusinessCoreModule],
+  imports: [UserModule, BusinessCoreModule, AbilityModule],
   controllers: [PosController],
-  providers: [
-    PreCreatePosUseCase,
-    FilterByUserPosUseCase,
-    MonitoringPosUseCase,
-    MonitoringFullByIdPosUseCase,
-    ProgramPosUseCase,
-    PosProgramFullUseCase
-  ],
+  providers: [PosValidateRules],
 })
 export class PlatformUserPosModule {}

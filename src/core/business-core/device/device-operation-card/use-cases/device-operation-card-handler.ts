@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
 import { CreateDeviceOperationCardUseCase } from '@device/device-operation-card/use-cases/device-operation-card-create';
 import { DeviceDataRawHandlerResponse } from '@device/device-data-raw/use-cases/dto/device-data-raw-handler-response';
 import { CurrencyType } from '@prisma/client';
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
 
 @Injectable()
 export class DeviceOperationCardHandlerUseCase {
   constructor(
-    private readonly getByIdCarWashDeviceUseCase: GetByIdCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly createDeviceOperationCardUseCase: CreateDeviceOperationCardUseCase,
   ) {}
 
@@ -32,7 +32,7 @@ export class DeviceOperationCardHandlerUseCase {
       operId = 8;
     }
 
-    const device = await this.getByIdCarWashDeviceUseCase.execute(
+    const device = await this.findMethodsCarWashDeviceUseCase.getById(
       input.deviceId,
     );
     if (!device) {

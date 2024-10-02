@@ -12,9 +12,6 @@ export class UpdateOrganizationUseCase {
     const organization = await this.organizationRepository.findOneById(
       input.id,
     );
-    if (!organization) {
-      throw new Error('organization not exists');
-    }
     const { organizationDocumentId, organizationType, organizationStatus } =
       input;
 

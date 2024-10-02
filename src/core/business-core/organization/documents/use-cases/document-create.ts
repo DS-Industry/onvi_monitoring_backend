@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { IDocumentsRepository } from '../interfaces/documents';
-import { CreateDocumentDto } from '@platform-user/organization/controller/dto/document-create.dto';
 import { v4 as uuid } from 'uuid';
 import { IFileAdapter } from '@libs/file/adapter';
 import { Documents } from '../domain/documents';
+import { CreateDocumentDto } from '@organization/documents/use-cases/dto/organization-document-create.dto';
 
 @Injectable()
 export class CreateDocumentUseCase {
@@ -15,7 +15,7 @@ export class CreateDocumentUseCase {
   async execute(
     input: CreateDocumentDto,
     file: Express.Multer.File,
-    slug: string,
+    organizationId: number,
   ) {
     const keyDocument = uuid();
     const documentData = new Documents({
@@ -35,7 +35,7 @@ export class CreateDocumentUseCase {
     });
 
     const document = await this.documentRepository.create(documentData);
-    const keyWay = 'organization/document/' + slug + '/' + keyDocument;
+    const keyWay = 'organization/document/' + organizationId + '/' + keyDocument;
     await this.fileService.upload(file, keyWay);
 
     return document;

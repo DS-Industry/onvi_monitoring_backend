@@ -1,6 +1,6 @@
 import { BaseEntity } from '@utils/entity';
 import { StatusOrganization, TypeOrganization } from '@prisma/client';
-import { Address } from "../../../address/domain/address";
+import { Address } from '@address/domain/address';
 
 export interface OrganizationProps {
   id?: number;

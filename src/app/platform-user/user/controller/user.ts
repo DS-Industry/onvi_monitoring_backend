@@ -3,11 +3,11 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param,
+  Param, ParseIntPipe,
   Post,
   UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { GetByIdUserUseCase } from '@platform-user/user/use-cases/user-get-by-id';
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,9 +23,8 @@ export class UserController {
   ) {}
   @Get(':id')
   @HttpCode(200)
-  async getOneById(@Param('id') data: string): Promise<any> {
+  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
-      const id: number = parseInt(data, 10);
       const user = this.userGetById.execute(id);
       console.log(user);
       return user;
@@ -41,7 +40,7 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
-      return this.userUploadAvatar.execute(file, Number(data.id));
+      return this.userUploadAvatar.execute(file, data.id);
     } catch (e) {
       throw new Error(e);
     }

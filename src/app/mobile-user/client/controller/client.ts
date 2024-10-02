@@ -3,10 +3,10 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param,
+  Param, ParseIntPipe,
   Post,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { GetByIdClientUseCase } from '@mobile-user/client/use-cases/client-get-by-id';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,9 +23,8 @@ export class ClientController {
   ) {}
   @Get(':id')
   @HttpCode(200)
-  async getOneById(@Param('id') data: string): Promise<any> {
+  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
-      const id: number = parseInt(data, 10);
       return this.clientGetById.execute(id);
     } catch (e) {
       throw new Error(e);
@@ -39,7 +38,7 @@ export class ClientController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
-      return this.clientUploadAvatar.execute(file, Number(data.id));
+      return this.clientUploadAvatar.execute(file, data.id);
     } catch (e) {
       throw new Error(e);
     }

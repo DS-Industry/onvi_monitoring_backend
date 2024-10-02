@@ -3,15 +3,15 @@ import { AbilityBuilder } from '@casl/ability';
 import { GetDeviceRoleByIdUseCase } from '../device-role/use-cases/device-role-get-by-id';
 import { GetPermissionsByRoleIdUseCase } from '../device-role/use-cases/device-role-get-permission-by-id';
 import { createPrismaAbility } from '@casl/prisma';
-import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
 import { CarWashDevice } from '@prisma/client';
+import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 
 @Injectable()
 export class CarWashDeviceAbilityFactory {
   constructor(
     private readonly roleGetById: GetDeviceRoleByIdUseCase,
     private readonly roleGetPermissionsById: GetPermissionsByRoleIdUseCase,
-    private readonly carWashDeviceGetById: GetByIdCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
   ) {}
 
   async createForCarWashDevice(device: CarWashDevice): Promise<any> {
@@ -22,7 +22,9 @@ export class CarWashDeviceAbilityFactory {
     for (const permission of permissions) {
       if (!objectMap[permission.objectId]) {
         objectMap[permission.objectId] =
-          await this.carWashDeviceGetById.execute(permission.objectId);
+          await this.findMethodsCarWashDeviceUseCase.getById(
+            permission.objectId,
+          );
       }
     }
 

@@ -1,30 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { IPosRepository } from '@pos/pos/interface/pos';
-import { PosCreateDto } from '@platform-user/pos/controller/dto/pos-create.dto';
 import { User } from '@platform-user/user/domain/user';
 import { Pos } from '@pos/pos/domain/pos';
-import { CreateAddressUseCase } from '@address/use-case/address-create';
 import slugify from 'slugify';
-import { CreateCarWashPosUseCase } from '@pos/carWashPos/use-cases/car-wash-pos-create';
 import { PosResponseDto } from '@platform-user/pos/controller/dto/pos-response.dto';
 import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
+import { Address } from '@address/domain/address';
+import { IAddressRepository } from '@address/interfaces/address';
+import { ICarWashPosRepository } from '@pos/carWashPos/interface/carWashPos';
+import { CarWashPos } from '@pos/carWashPos/domain/carWashPos';
+import { PosCreateDto } from '@pos/pos/use-cases/dto/pos-create.dto';
 
 @Injectable()
 export class CreatePosUseCase {
   constructor(
     private readonly posRepository: IPosRepository,
-    private readonly createAddressUseCase: CreateAddressUseCase,
-    private readonly createCarWashPosUseCase: CreateCarWashPosUseCase,
+    private readonly addressRepository: IAddressRepository,
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
+    private readonly carWashPosRepository: ICarWashPosRepository,
   ) {}
 
   async execute(input: PosCreateDto, owner: User): Promise<PosResponseDto> {
-    const checkPos = await this.posRepository.findOneByName(input.name);
-    if (checkPos) {
-      throw new Error('pos exists');
-    }
-
-    const address = await this.createAddressUseCase.execute(input.address);
+    const addressData = new Address({
+      city: input.address.city,
+      location: input.address.location,
+      lat: input?.address.lat,
+      lon: input?.address.lon,
+    });
+    const address = await this.addressRepository.create(addressData);
     const posData = new Pos({
       name: input.name,
       slug: slugify(input.name, '_'),
@@ -42,7 +45,14 @@ export class CreatePosUseCase {
     });
 
     const pos = await this.posRepository.create(posData);
-    await this.createCarWashPosUseCase.execute(pos.name, pos.id);
+
+    const nameCarWashPos = pos.name + ' Car Wash';
+    const carWashPosData = new CarWashPos({
+      name: nameCarWashPos,
+      slug: slugify(nameCarWashPos, '_'),
+      posId: pos.id,
+    });
+    await this.carWashPosRepository.create(carWashPosData);
     return this.posCreateFullDataUseCase.execute(pos);
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post } from "@nestjs/common";
 import { CreateRoleUseCase } from '@platform-admin/admin-role/use-cases/role-create';
 import { GetByIdRoleUseCase } from '@platform-admin/admin-role/use-cases/role-get-by-id';
 import { CreateRoleDto } from '@platform-admin/admin-role/controller/dto/role-create.dto';
@@ -24,9 +24,8 @@ export class Role {
 
   @Get('permissions/:id')
   @HttpCode(200)
-  async getRolePermissionsById(@Param('id') data: string): Promise<any> {
+  async getRolePermissionsById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
-      const id: number = parseInt(data, 10);
       return this.rolePermissionsById.execute(id);
     } catch (e) {
       throw new Error(e);

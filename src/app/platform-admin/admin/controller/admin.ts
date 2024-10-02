@@ -3,11 +3,11 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param,
+  Param, ParseIntPipe,
   Post,
   UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { CreateAdminUseCase } from '@platform-admin/admin/use-cases/admin-create';
 import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-id';
 import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';
@@ -26,9 +26,8 @@ export class AdminController {
   ) {}
   @Get(':id')
   @HttpCode(200)
-  async getOneById(@Param('id') data: string): Promise<any> {
+  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
-      const id: number = parseInt(data, 10);
       return this.adminGetById.execute(id);
     } catch (e) {
       throw new Error(e);
@@ -52,7 +51,7 @@ export class AdminController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
-      return this.adminUploadAvatar.execute(file, Number(data.id));
+      return this.adminUploadAvatar.execute(file, data.id);
     } catch (e) {
       throw new Error(e);
     }

@@ -1,33 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateOrganizationUseCase } from './organization-update';
-import { GetByIdOrganizationUseCase } from './organization-get-by-id';
-import { CreateDocumentDto } from '@platform-user/organization/controller/dto/document-create.dto';
 import { CreateDocumentUseCase } from '../../documents/use-cases/document-create';
 import { StatusOrganization } from '@prisma/client';
+import { CreateDocumentDto } from '@organization/documents/use-cases/dto/organization-document-create.dto';
+import { Organization } from '@organization/organization/domain/organization';
 
 @Injectable()
 export class AddDocumentUseCase {
   constructor(
     private readonly organizationUpdateUseCase: UpdateOrganizationUseCase,
-    private readonly organizationGetByIdUseCase: GetByIdOrganizationUseCase,
     private readonly documentCreateUseCase: CreateDocumentUseCase,
   ) {}
 
   async execute(input: CreateDocumentDto, file: Express.Multer.File) {
-    const organization = await this.organizationGetByIdUseCase.execute(
-      input.organizationId,
-    );
-    if (organization.organizationDocumentId) {
-      throw new Error('organizationDocument exists');
-    }
-
     const document = await this.documentCreateUseCase.execute(
       input,
       file,
-      organization.slug,
+      input.organizationId,
     );
     const updateOrganizationData = {
-      id: organization.id,
+      id: input.organizationId,
       organizationDocumentId: document.id,
       organizationStatus: StatusOrganization.PENDING,
     };

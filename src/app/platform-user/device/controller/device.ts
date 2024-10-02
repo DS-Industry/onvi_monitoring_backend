@@ -4,34 +4,37 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
 } from '@nestjs/common';
-import { CreateCarWashDeviceTypeUseCase } from '@device/deviceType/use-cases/car-wash-device-type-create';
-import { CarWashDeviceType } from '@device/deviceType/domen/deviceType';
+import { CreateCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-create';
+import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
 import { DeviceTypeCreateDto } from '@platform-user/device/controller/dto/device-type-create.dto';
-import { UpdateCarWashDeviceTypeUseCase } from '@device/deviceType/use-cases/car-wash-device-type-update';
+import { UpdateCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-update';
 import { DeviceTypeUpdateDto } from '@platform-user/device/controller/dto/device-type-update.dto';
 import { CarWashDeviceFullDataResponseDto } from '@platform-user/device/controller/dto/car-wash-device-full-data-response.dto';
 import { CarWashDeviceCreateDto } from '@platform-user/device/controller/dto/car-wash-device-create.dto';
-import { PreCreateDeviceUseCase } from '@platform-user/device/use-case/device-pre-create';
 import { FilterDeviceByUserUseCase } from '@platform-user/device/use-case/devica-filter-by-user';
 import { DevicePreMonitoringDto } from '@platform-user/device/controller/dto/device-pre-monitoring.dto';
 import { MonitoringDeviceUseCase } from '@platform-user/device/use-case/device-monitoring';
-import { ProgramDeviceUseCase } from "@platform-user/device/use-case/device-program";
-import { GetAllByPosCarWashDeviceUseCase } from "@device/device/use-cases/car-wash-device-get-all-by-pos";
+import { ProgramDeviceUseCase } from '@platform-user/device/use-case/device-program';
+import { DeviceValidateRules } from '@platform-user/device/controller/validate/device-validate-rules';
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
+import { CreateCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-create";
 
 @Controller('device')
 export class DeviceController {
   constructor(
     private readonly carWashDeviceTypeCreate: CreateCarWashDeviceTypeUseCase,
     private readonly carWashDeviceTypeUpdate: UpdateCarWashDeviceTypeUseCase,
-    private readonly carWashDevicePreCreate: PreCreateDeviceUseCase,
+    private readonly deviceCreateCarWashDevice: CreateCarWashDeviceUseCase,
     private readonly filterDeviceByUserUseCase: FilterDeviceByUserUseCase,
     private readonly monitoringDeviceUseCase: MonitoringDeviceUseCase,
     private readonly programDeviceUseCase: ProgramDeviceUseCase,
-    private readonly getAllByPosCarWashDeviceUseCase: GetAllByPosCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
+    private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
 
   @Post('')
@@ -40,7 +43,8 @@ export class DeviceController {
     @Body() data: CarWashDeviceCreateDto,
   ): Promise<CarWashDeviceFullDataResponseDto> {
     try {
-      return await this.carWashDevicePreCreate.execute(data);
+      await this.deviceValidateRules.createValidate(data.carWashPosId);
+      return await this.deviceCreateCarWashDevice.execute(data);
     } catch (e) {
       throw new Error(e);
     }
@@ -49,14 +53,13 @@ export class DeviceController {
   @Get('monitoring/:id')
   @HttpCode(200)
   async monitoringDevice(
-    @Param('id') deviceId: string,
+    @Param('id', ParseIntPipe) id: number,
     @Query() data: DevicePreMonitoringDto,
   ): Promise<any> {
     try {
-      const id: number = parseInt(deviceId, 10);
       const input = {
-        dateStart: new Date(data.dateStart),
-        dateEnd: new Date(data.dateEnd),
+        dateStart: data.dateStart,
+        dateEnd: data.dateEnd,
         deviceId: id,
       };
       return await this.monitoringDeviceUseCase.execute(input);
@@ -68,14 +71,13 @@ export class DeviceController {
   @Get('program/:id')
   @HttpCode(200)
   async programDevice(
-    @Param('id') deviceId: string,
+    @Param('id', ParseIntPipe) id: number,
     @Query() data: DevicePreMonitoringDto,
   ): Promise<any> {
     try {
-      const id: number = parseInt(deviceId, 10);
       const input = {
-        dateStart: new Date(data.dateStart),
-        dateEnd: new Date(data.dateEnd),
+        dateStart: data.dateStart,
+        dateEnd: data.dateEnd,
         deviceId: id,
       };
       return await this.programDeviceUseCase.execute(input);
@@ -90,6 +92,7 @@ export class DeviceController {
     @Body() data: DeviceTypeCreateDto,
   ): Promise<CarWashDeviceType> {
     try {
+      await this.deviceValidateRules.createTypeValidate(data.name, data.code);
       return await this.carWashDeviceTypeCreate.execute(data.name, data.code);
     } catch (e) {
       throw new Error(e);
@@ -102,6 +105,7 @@ export class DeviceController {
     @Body() data: DeviceTypeUpdateDto,
   ): Promise<CarWashDeviceType> {
     try {
+      await this.deviceValidateRules.updateTypeValidate(data.id);
       return await this.carWashDeviceTypeUpdate.execute(data);
     } catch (e) {
       throw new Error(e);
@@ -110,10 +114,11 @@ export class DeviceController {
 
   @Get('filter/:userId')
   @HttpCode(200)
-  async filterViewDeviceByUser(@Param('userId') data: string): Promise<any> {
+  async filterViewDeviceByUser(
+    @Param('userId', ParseIntPipe) id: number,
+  ): Promise<any> {
     try {
-      const userId = parseInt(data, 10);
-      return await this.filterDeviceByUserUseCase.execute(userId);
+      return await this.filterDeviceByUserUseCase.execute(id);
     } catch (e) {
       throw new Error(e);
     }
@@ -121,10 +126,11 @@ export class DeviceController {
 
   @Get('filter/pos/:posId')
   @HttpCode(200)
-  async filterViewDeviceByPosId(@Param('posId') data: string): Promise<any> {
+  async filterViewDeviceByPosId(
+    @Param('posId', ParseIntPipe) id: number,
+  ): Promise<any> {
     try {
-      const posId = parseInt(data, 10);
-      return await this.getAllByPosCarWashDeviceUseCase.execute(posId);
+      return await this.findMethodsCarWashDeviceUseCase.getAllByPos(id);
     } catch (e) {
       throw new Error(e);
     }

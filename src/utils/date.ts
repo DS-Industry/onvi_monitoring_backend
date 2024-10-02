@@ -14,23 +14,25 @@ export class DateUtils {
     }
 
     if (!input?.format) {
-      Object.assign(input, { format: process.env.DATE_FORMAT });
+      Object.assign(input, {
+        format: process.env.DATE_FORMAT || 'dd-MM-yyyy HH:mm:ss',
+      });
     }
 
     return DateTime.fromJSDate(input.date, { zone: 'utc' })
-      .setZone(process.env.TZ)
+      .setZone(process.env.TZ || 'utc')
       .toFormat(input.format);
   }
 
   static getISODateString(): string {
     return DateTime.fromJSDate(DateUtils.getJSDate(), { zone: 'utc' })
-      .setZone(process.env.TZ)
+      .setZone(process.env.TZ || 'utc')
       .toJSON();
   }
 
   static getJSDate(): Date {
     return DateTime.fromJSDate(DateTime.now().toJSDate(), { zone: 'utc' })
-      .setZone(process.env.TZ)
+      .setZone(process.env.TZ || 'utc')
       .toJSDate();
   }
 
@@ -40,10 +42,10 @@ export class DateUtils {
     compareType: DurationUnit,
   ): Date {
     const date1 = DateTime.fromJSDate(date, { zone: 'utc' }).setZone(
-      process.env.TZ,
+      process.env.TZ || 'utc',
     );
     const date2 = DateTime.fromJSDate(compareDate, { zone: 'utc' }).setZone(
-      process.env.TZ,
+      process.env.TZ || 'utc',
     );
 
     return date1.diff(date2, compareType)[`${compareType}`];
@@ -51,7 +53,7 @@ export class DateUtils {
 
   static getDate(): DateTime {
     return DateTime.fromJSDate(DateUtils.getJSDate(), { zone: 'utc' }).setZone(
-      process.env.TZ,
+      process.env.TZ || 'utc',
     );
   }
 }

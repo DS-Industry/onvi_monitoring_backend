@@ -1,7 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { Transform } from "class-transformer";
 
 export class UploadAvatarUserDto {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty({ message: 'Id is required' })
-  id: string;
+  @Transform(({ value }) => parseInt(value, 10))
+  id: number;
 }

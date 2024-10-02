@@ -1,9 +1,11 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Transform } from "class-transformer";
 
 export class CreatePreDocumentDto {
   @IsString()
   @IsNotEmpty({ message: 'organizationId is required' })
-  organizationId: string;
+  @Transform(({ value }) => parseInt(value, 10))
+  organizationId: number;
   @IsString()
   @IsNotEmpty({ message: 'rateVat is required' })
   rateVat: string;

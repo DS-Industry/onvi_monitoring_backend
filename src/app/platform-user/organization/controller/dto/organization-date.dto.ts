@@ -1,10 +1,13 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { Transform } from "class-transformer";
 
 export class OrganizationDateDto {
   @IsString()
   @IsNotEmpty({ message: 'dateStart is required' })
-  dateStart: string;
+  @Transform(({ value }) => new Date(value))
+  dateStart: Date;
   @IsString()
   @IsNotEmpty({ message: 'dateEnd is required' })
-  dateEnd: string;
+  @Transform(({ value }) => new Date(value))
+  dateEnd: Date;
 }

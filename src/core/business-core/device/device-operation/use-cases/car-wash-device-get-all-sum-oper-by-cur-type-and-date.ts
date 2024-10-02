@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PosGetSumByCutTypeAndDateDto } from '@device/device-operation/use-cases/dto/pos-get-sum-by-cut-type-and-date.dto';
 import { DeviceOperationGetSumByCurTypeAndDateUseCase } from '@device/device-operation/use-cases/device-operation-get-sum-by-cur-type-and-date';
-import { GetAllByPosCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-all-by-pos';
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
 
 @Injectable()
 export class GetAllSumOperByCurTypeAndDateCarWashDeviceUseCase {
   constructor(
-    private readonly getAllByPosCarWashDeviceUseCase: GetAllByPosCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly getSumByCurTypeAndDateDeviceOperationUseCase: DeviceOperationGetSumByCurTypeAndDateUseCase,
   ) {}
   async execute(input: PosGetSumByCutTypeAndDateDto): Promise<number> {
     let sum = 0;
-    const devices = await this.getAllByPosCarWashDeviceUseCase.execute(
+    const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
       input.posId,
     );
     await Promise.all(

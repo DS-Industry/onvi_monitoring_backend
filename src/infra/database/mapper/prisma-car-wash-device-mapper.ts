@@ -1,5 +1,5 @@
 import { CarWashDevice as PrismaCarWashDevice, Prisma } from '@prisma/client';
-import { CarWashDevice } from '@device/device/domain/device';
+import { CarWashDevice } from '@pos/device/device/domain/device';
 export class PrismaCarWashDeviceMapper {
   static toDomain(entity: PrismaCarWashDevice): CarWashDevice {
     if (!entity) {

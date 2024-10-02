@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
 import { CreateDeviceMfuUseCase } from '@device/device-mfu/use-case/device-mfu-create';
 import { DeviceDataRawHandlerResponse } from '@device/device-data-raw/use-cases/dto/device-data-raw-handler-response';
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
 
 @Injectable()
 export class DeviceMfuHandlerUseCase {
   constructor(
-    private readonly getByIdCarWashDeviceUseCase: GetByIdCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly createDeviceMfuUseCase: CreateDeviceMfuUseCase,
   ) {}
 
@@ -14,7 +14,7 @@ export class DeviceMfuHandlerUseCase {
     let deviceId: number = null;
     let errNumId: number = null;
 
-    const device = await this.getByIdCarWashDeviceUseCase.execute(
+    const device = await this.findMethodsCarWashDeviceUseCase.getById(
       input.deviceId,
     );
     if (!device) {

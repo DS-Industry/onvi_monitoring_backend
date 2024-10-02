@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { DeviceProgramRepositoryProvider } from '@device/device-program/device-program/provider/device-program';
 import { DeviceProgramHandlerUseCase } from '@device/device-program/device-program/use-case/device-program-handler';
-import { DeviceModule } from '@device/device/device.module';
 import { CreateDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-create';
 import { DeviceProgramTypeModule } from '@device/device-program/device-program-type/device-program-type.module';
 import { GetAllByPosIdAndDateDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-get-all-by-pos-id-and-date';
@@ -13,9 +12,10 @@ import { DeviceProgramGetLastProgByPosIdUseCase } from '@device/device-program/d
 import { DeviceProgramGetLastProgByDeviceIdUseCase } from '@device/device-program/device-program/use-case/device-program-get-last-prog-by-device-id';
 import { CheckCarDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-check-car';
 import { GetAllByOrgIdAndDateDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-get-all-by-org-id-and-date';
+import { PosModule } from "@pos/pos.module";
 
 @Module({
-  imports: [PrismaModule, DeviceModule, DeviceProgramTypeModule],
+  imports: [PrismaModule, PosModule, DeviceProgramTypeModule],
   providers: [
     DeviceProgramRepositoryProvider,
     DeviceProgramHandlerUseCase,

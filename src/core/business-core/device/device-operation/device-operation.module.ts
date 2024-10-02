@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { DeviceOperationRepositoryProvider } from '@device/device-operation/provider/device-operation';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { DeviceOperationHandlerUseCase } from '@device/device-operation/use-cases/device-operation-handler';
-import { DeviceModule } from '@device/device/device.module';
 import { CurrencyCarWashPosModule } from '@device/currency/currency-car-wash-pos/currency-car-wash-pos.module';
 import { CreateDeviceOperationUseCase } from '@device/device-operation/use-cases/device-operation-create';
 import { DeviceOperationGetSumByCurTypeAndDateUseCase } from '@device/device-operation/use-cases/device-operation-get-sum-by-cur-type-and-date';
@@ -16,11 +15,12 @@ import { GetFullDataByPosIdDeviceOperationResponseUseCase } from '@device/device
 import { DeviceOperationGetLastOperByPosIdUseCase } from '@device/device-operation/use-cases/device-operation-get-last-oper-by-pos-id';
 import { DeviceOperationGetLastOperByDeviceIdUseCase } from '@device/device-operation/use-cases/device-operation-get-last-oper-by-device-id';
 import { DeviceOperationGetAllByOrgIdAndDateUseCase } from '@device/device-operation/use-cases/device-operation-get-all-by-org-id-and-date';
+import { PosModule } from "@pos/pos.module";
 
 @Module({
   imports: [
     PrismaModule,
-    DeviceModule,
+    PosModule,
     CurrencyCarWashPosModule,
     CurrencyModule,
   ],
