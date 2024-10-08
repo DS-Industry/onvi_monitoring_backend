@@ -7,7 +7,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
-import { CarWashDeviceCreateDto } from '@platform-user/device/controller/dto/car-wash-device-create.dto';
+import { CarWashDeviceCreateDto } from '@platform-user/core-controller/dto/receive/car-wash-device-create.dto';
 import { DeviceValidateRules } from '@platform-device/device/controller/validate/device-validate-rules';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 

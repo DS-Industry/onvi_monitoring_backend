@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ICarWashDeviceRepository } from '@pos/device/device/interfaces/device';
-import { CarWashDeviceFullDataResponseDto } from '@platform-user/device/controller/dto/car-wash-device-full-data-response.dto';
+import { CarWashDeviceFullDataResponseDto } from '@platform-user/core-controller/dto/response/car-wash-device-full-data-response.dto';
 import { CarWashDevice } from '@pos/device/device/domain/device';
 import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { CarWashDeviceCreateDto } from '@pos/device/device/use-cases/dto/car-wash-device-create.dto';

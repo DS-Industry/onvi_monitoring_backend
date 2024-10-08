@@ -1,4 +1,4 @@
-import { StatusUser } from '@prisma/client';
+import { PositionUser, StatusUser } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface UserProps {
@@ -12,12 +12,14 @@ export interface UserProps {
   email: string;
   password: string;
   gender: string;
+  position: PositionUser;
   status?: StatusUser;
   avatar?: string;
   country: string;
   countryCode: number;
   timezone: number;
   refreshTokenId?: string;
+  receiveNotifications?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -67,6 +69,10 @@ export class User extends BaseEntity<UserProps> {
     return this.props.gender;
   }
 
+  get position(): PositionUser {
+    return this.props.position;
+  }
+
   get status(): StatusUser {
     return this.props.status;
   }
@@ -85,6 +91,10 @@ export class User extends BaseEntity<UserProps> {
 
   get timezone(): number {
     return this.props.timezone;
+  }
+
+  get receiveNotifications(): number {
+    return this.props.receiveNotifications;
   }
 
   get refreshTokenId(): string {
@@ -119,8 +129,20 @@ export class User extends BaseEntity<UserProps> {
     this.props.password = password;
   }
 
+  set phone(phone: string) {
+    this.props.phone = phone;
+  }
+
+  set email(email: string) {
+    this.props.email = email;
+  }
+
   set avatar(avatar: string) {
     this.props.avatar = avatar;
+  }
+
+  set position(position: PositionUser) {
+    this.props.position = position;
   }
 
   set status(status: StatusUser) {
@@ -137,6 +159,10 @@ export class User extends BaseEntity<UserProps> {
 
   set timezone(timezone: number) {
     this.props.timezone = timezone;
+  }
+
+  set receiveNotifications(receiveNotifications: number) {
+    this.props.receiveNotifications = receiveNotifications;
   }
 
   set refreshTokenId(refreshTokenId: string) {

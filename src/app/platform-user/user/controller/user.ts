@@ -3,52 +3,94 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param, ParseIntPipe,
-  Post,
+  Patch,
+  Request,
   UploadedFile,
-  UseInterceptors
-} from "@nestjs/common";
-import { GetByIdUserUseCase } from '@platform-user/user/use-cases/user-get-by-id';
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadAvatarUserDto } from '@platform-user/user/controller/dto/user-upload-avatar.dto';
-import { UploadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-upload';
+import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
+import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
+import { UpdateUserDto } from '@platform-user/user/controller/dto/user-update.dto';
+import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
+import { UserPasswordResetDto } from '@platform-user/user/controller/dto/user-password-reset.dto';
+import { UserValidateRules } from '@platform-user/validate/validate-rules/user-validate-rules';
 
-@Controller('user')
+@Controller('')
 export class UserController {
   constructor(
-    private readonly userGetById: GetByIdUserUseCase,
+    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly userDownloadAvatar: DownloadAvatarUserUseCase,
-    private readonly userUploadAvatar: UploadAvatarUserUseCase,
+    private readonly userUpdate: UpdateUserUseCase,
+    private readonly userValidateRules: UserValidateRules,
   ) {}
-  @Get(':id')
+  @Get('')
+  @UseGuards(JwtGuard)
   @HttpCode(200)
-  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  async getOneById(@Request() req: any): Promise<any> {
     try {
-      const user = this.userGetById.execute(id);
-      console.log(user);
-      return user;
+      const { user } = req;
+      return this.findMethodsUserUseCase.getById(user.id);
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  @Post('avatar')
+  @Patch('')
+  @UseGuards(JwtGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async upload(
-    @Body() data: UploadAvatarUserDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  @HttpCode(201)
+  async update(
+    @Request() req: any,
+    @Body() body: UpdateUserDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<any> {
     try {
-      return this.userUploadAvatar.execute(file, data.id);
+      const { user } = req;
+      const updateData = {
+        ...body,
+        id: user.id,
+      };
+      if (file) {
+        return this.userUpdate.execute(updateData, file);
+      } else {
+        return this.userUpdate.execute(updateData);
+      }
     } catch (e) {
       throw new Error(e);
     }
   }
-  @Get('avatar/:key')
-  async download(@Param('key') key: string) {
+
+  @Patch('password')
+  @UseGuards(JwtGuard)
+  @HttpCode(201)
+  async resetPassword(
+    @Request() req: any,
+    @Body() body: UserPasswordResetDto,
+  ): Promise<any> {
     try {
-      return this.userDownloadAvatar.execute(key);
+      const { user } = req;
+      await this.userValidateRules.resetPasswordValidate(
+        body.oldPassword,
+        user.password,
+      );
+      return this.userUpdate.execute({
+        id: user.id,
+        password: body.newPassword,
+      });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('avatar')
+  @UseGuards(JwtGuard)
+  async download(@Request() req: any) {
+    try {
+      const { user } = req;
+      return this.userDownloadAvatar.execute(user.avatar);
     } catch (e) {
       throw new Error(e);
     }

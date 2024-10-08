@@ -2,7 +2,7 @@ import {
   CarWashDeviceEventType as PrismaCarWashDeviceEventType,
   Prisma,
 } from '@prisma/client';
-import { DeviceEventType } from '@device/device-event/device-event-type/domain/device-event-type';
+import { DeviceEventType } from '@pos/device/device-data/device-data/device-event/device-event-type/domain/device-event-type';
 export class PrismaCarWashDeviceEventTypeMapper {
   static toDomain(entity: PrismaCarWashDeviceEventType): DeviceEventType {
     if (!entity) {

@@ -65,6 +65,7 @@ import { LoggerModule as Logger } from '../src/infra/logger/module';
       connection: {
         host: process.env.REDIS_HOST,
         port: Number(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
       },
     }),
     RouterModule.register(routeConfig),

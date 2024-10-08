@@ -1,12 +1,13 @@
 import {
   Body,
-  Controller, Get,
+  Controller,
+  Get,
   HttpCode,
   Post,
   Req,
   Request,
-  UseGuards
-} from "@nestjs/common";
+  UseGuards,
+} from '@nestjs/common';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { LocalGuard } from '@platform-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@platform-user/auth/controller/dto/auth-login.dto';
@@ -18,11 +19,12 @@ import { EmailGuard } from '@platform-user/auth/guards/email.guard';
 import { AuthActivationDto } from '@platform-user/auth/controller/dto/auth-activation.dto';
 import { AuthPasswordConfirmDto } from '@platform-user/auth/controller/dto/auth-password-confirm.dto';
 import { AuthPasswordResetDto } from '@platform-user/auth/controller/dto/auth-password-reset.dto';
-import { PasswordConfirmMailUserUseCase } from '@platform-user/auth/use-cases/auth-password-confirm';
 import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
 import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate';
 import { AuthRegisterWorkerDto } from '@platform-user/auth/controller/dto/auth-register-worker.dto';
 import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-register-worker';
+import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
+import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 
 @Controller('auth')
 export class Auth {
@@ -31,9 +33,10 @@ export class Auth {
     private readonly authLogin: LoginAuthUseCase,
     private readonly authRegister: RegisterAuthUseCase,
     private readonly authActive: ActivateAuthUseCase,
-    private readonly passwordConfirmMail: PasswordConfirmMailUserUseCase,
+    private readonly sendConfirm: SendConfirmMailUseCase,
     private readonly passwordReset: PasswordResetUserUseCase,
     private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
+    private readonly authValidateRules: AuthValidateRules,
   ) {}
 
   @UseGuards(LocalGuard)
@@ -59,6 +62,7 @@ export class Auth {
   @HttpCode(201)
   async register(@Body() body: AuthRegisterDto): Promise<any> {
     try {
+      await this.authValidateRules.registerValidate(body.email);
       const { correctUser, sendMail } = await this.authRegister.execute(body);
       return {
         user: correctUser,
@@ -73,6 +77,10 @@ export class Auth {
   @HttpCode(201)
   async registerWorker(@Body() body: AuthRegisterWorkerDto): Promise<any> {
     try {
+      await this.authValidateRules.registerWorkerValidate(
+        body.email,
+        body.confirmString,
+      );
       const { correctUser, sendMail } =
         await this.authRegisterWorker.execute(body);
       return {
@@ -141,11 +149,7 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.passwordReset.execute(
-        user,
-        body.newPassword,
-        body.checkNewPassword,
-      );
+      return await this.passwordReset.execute(user, body.newPassword);
     } catch (e) {
       throw new Error(e);
     }
@@ -154,7 +158,8 @@ export class Auth {
   @HttpCode(201)
   async passwordConfirm(@Body() body: AuthPasswordConfirmDto): Promise<any> {
     try {
-      return await this.passwordConfirmMail.execute(body.email);
+      await this.authValidateRules.passwordConfirmValidate(body.email);
+      return await this.sendConfirm.execute(body.email, 'Смена пароля');
     } catch (e) {
       throw new Error(e);
     }

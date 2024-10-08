@@ -1,5 +1,5 @@
 import { Currency as PrismaCurrency, Prisma } from '@prisma/client';
-import { Currency } from '@device/currency/currency/domain/currency';
+import { Currency } from '@pos/device/device-data/currency/currency/domain/currency';
 
 export class PrismaCurrencyMapper {
   static toDomain(entity: PrismaCurrency): Currency {

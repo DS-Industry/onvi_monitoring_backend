@@ -1,41 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { DataByPosIdDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-data-by-pos-id';
-import { PosProgramResponseDto } from '@platform-user/pos/controller/dto/pos-program-response.dto';
-import { GetAllByDeviceIdAndDateDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-get-all-by-device-id-and-date';
-import { DeviceProgramGetLastProgByDeviceIdUseCase } from '@device/device-program/device-program/use-case/device-program-get-last-prog-by-device-id';
-import { PosMonitoringFullDto } from "@pos/pos/use-cases/dto/pos-monitoring-full.dto";
-import { FindMethodsPosUseCase } from "@pos/pos/use-cases/pos-find-methods";
-import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
+import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
+import { PosProgramResponseDto } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
+import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 
 @Injectable()
 export class PosProgramFullUseCase {
   constructor(
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
-    private readonly getAllByDeviceIdAndDateDeviceProgramUseCase: GetAllByDeviceIdAndDateDeviceProgramUseCase,
-    private readonly dataByPosIdDeviceProgramUseCase: DataByPosIdDeviceProgramUseCase,
-    private readonly deviceProgramGetLastProgByDeviceIdUseCase: DeviceProgramGetLastProgByDeviceIdUseCase,
+    private readonly findMethodsDeviceProgramUseCase: FindMethodsDeviceProgramUseCase,
+    private readonly dataDeviceProgramUseCase: DataDeviceProgramUseCase,
   ) {}
 
-  async execute(input: PosMonitoringFullDto): Promise<PosProgramResponseDto[]> {
+  async execute(
+    dateStart: Date,
+    dateEnd: Date,
+    posId: number,
+  ): Promise<PosProgramResponseDto[]> {
     const response: PosProgramResponseDto[] = [];
-    const pos = await this.findMethodsPosUseCase.getById(input.posId);
-    const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(pos.id);
+    const pos = await this.findMethodsPosUseCase.getById(posId);
+    const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
+      pos.id,
+    );
 
     await Promise.all(
       devices.map(async (device) => {
         const devicePrograms =
-          await this.getAllByDeviceIdAndDateDeviceProgramUseCase.execute({
-            deviceId: device.id,
-            dateStart: input.dateStart,
-            dateEnd: input.dateEnd,
-          });
+          await this.findMethodsDeviceProgramUseCase.getAllByDeviceIdAndDateProgram(
+            device.id,
+            dateStart,
+            dateEnd,
+          );
         const lastProg =
-          await this.deviceProgramGetLastProgByDeviceIdUseCase.execute(
+          await this.findMethodsDeviceProgramUseCase.getLastByDeviceId(
             device.id,
           );
         if (devicePrograms.length > 0) {
-          const programs = await this.dataByPosIdDeviceProgramUseCase.execute(
+          const programs = await this.dataDeviceProgramUseCase.execute(
             devicePrograms,
             lastProg,
           );

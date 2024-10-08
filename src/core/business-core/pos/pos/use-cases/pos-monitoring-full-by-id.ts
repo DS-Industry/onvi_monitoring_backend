@@ -1,33 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { PosMonitoringFullResponseDto } from '@platform-user/pos/controller/dto/pos-monitoring-full-response.dto';
-import { GetFullDataByPosIdDeviceOperationResponseUseCase } from '@device/device-operation/use-cases/device-operation-get-full-data-by-pos-id-response';
-import { PosMonitoringFullDto } from "@pos/pos/use-cases/dto/pos-monitoring-full.dto";
-import { FindMethodsPosUseCase } from "@pos/pos/use-cases/pos-find-methods";
-import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
+import { PosMonitoringFullResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-full-response.dto';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
+import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
 
 @Injectable()
 export class MonitoringFullByIdPosUseCase {
   constructor(
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
-    private readonly getFullDataByPosIdDeviceOperationResponseUseCase: GetFullDataByPosIdDeviceOperationResponseUseCase,
+    private readonly dataDeviceOperationUseCase: DataDeviceOperationUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
   ) {}
 
   async execute(
-    input: PosMonitoringFullDto,
+    dateStart: Date,
+    dateEnd: Date,
+    posId: number,
   ): Promise<PosMonitoringFullResponseDto[]> {
     const response: PosMonitoringFullResponseDto[] = [];
-    const pos = await this.findMethodsPosUseCase.getById(input.posId);
-    const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(pos.id);
+    const pos = await this.findMethodsPosUseCase.getById(posId);
+    const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
+      pos.id,
+    );
 
     await Promise.all(
       devices.map(async (device) => {
-        const deviceOperData =
-          await this.getFullDataByPosIdDeviceOperationResponseUseCase.execute({
-            deviceId: device.id,
-            dateStart: input.dateStart,
-            dateEnd: input.dateEnd,
-          });
+        const deviceOperations =
+          await this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
+            device.id,
+            dateStart,
+            dateEnd,
+          );
+        const lastOper =
+          await this.findMethodsDeviceOperationUseCase.getLastByDeviceIdUseCase(
+            device.id,
+          );
+
+        const deviceOperData = await this.dataDeviceOperationUseCase.execute(
+          deviceOperations,
+          lastOper,
+        );
         response.push({
           id: device.id,
           name: device.name,

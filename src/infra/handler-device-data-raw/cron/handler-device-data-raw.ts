@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CronDeviceDataRawUseCase } from '@device/device-data-raw/use-cases/device-data-raw-cron';
+import { CronDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-cron';
 import { Cron } from '@nestjs/schedule';
 
 @Injectable()

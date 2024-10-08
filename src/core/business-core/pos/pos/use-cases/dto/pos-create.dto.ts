@@ -1,15 +1,19 @@
+import { CarWashPosType } from '@prisma/client';
+
 export class PosCreateDto {
   name: string;
-  monthlyPlan?: number;
+  monthlyPlan: number;
+  timeWork: string;
   posMetaData?: string;
-  timezone: number;
   address: {
     city: string;
     location: string;
     lat?: number;
     lon?: number;
   };
-  image?: string;
-  status: string;
   organizationId: number;
+  carWashPosType: CarWashPosType;
+  minSumOrder: number;
+  maxSumOrder: number;
+  stepSumOrder: number;
 }

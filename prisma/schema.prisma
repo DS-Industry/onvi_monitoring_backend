@@ -12,8 +12,7 @@ model Organization {
   id                    Int       @id @default(autoincrement())
   name                  String    @unique
   slug                  String    @unique
-  address               Address      ?  @relation(fields: [addressId], references: [id])
-  addressId             Int      ?      @unique
+  address               String?
   organizationDocument  OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
   organizationDocumentId Int?     @unique
   organizationStatus    StatusOrganization
@@ -32,7 +31,6 @@ model Address {
   id           Int           @id @default(autoincrement())
   city         String
   location     String
-  organization Organization?
   pos          Pos?
   lat          Int?
   lon          Int?
@@ -43,18 +41,17 @@ model OrganizationDocument {
   organization          Organization?
   rateVat               String
   inn                   String
-  fullName              String    @unique
   okpo                  String
-  kpp                   String
-  addressRegistration   String
+  kpp                   String?
   ogrn                  String
   bik                   String
   correspondentAccount  String
   bank                  String
   settlementAccount     String
-  address               String
+  addressBank           String
   documentDoc           String?
-
+  certificateNumber     String?
+  dateCertificate       DateTime?
 }
 
 model OrganizationMailConfirm {
@@ -79,12 +76,14 @@ model User {
   email             String         @unique
   password          String
   gender            String
+  position          PositionUser?  @default(Operator)
   status            StatusUser?    @default(ACTIVE)
   avatar            String?
   country           String
   countryCode       Int
   timezone          Int
   refreshTokenId    String?
+  receiveNotifications  Int?  @default(1)
   createdAt         DateTime?
   updatedAt         DateTime?
   organizationOwner Organization[] @relation(name: "Owner")
@@ -148,6 +147,7 @@ model Pos {
   name                 String
   slug                 String
   monthlyPlan          Int?
+  timeWork             String                @default("24")
   organization         Organization          @relation(fields: [organizationId], references: [id])
   organizationId       Int
   posMetaData          String?
@@ -156,7 +156,7 @@ model Pos {
   addressId            Int?                   @unique
   image                String?
   rating               Int?
-  status               String
+  status               StatusPos            @default(VERIFICATE)
   createdAt            DateTime
   updatedAt            DateTime
   createdBy            User                  @relation(name: "CreatedByUser", fields: [createdById], references: [id])
@@ -175,6 +175,10 @@ model CarWashPos {
   slug            String
   pos             Pos              @relation(fields: [posId], references: [id])
   posId           Int              @unique
+  carWashPosType  CarWashPosType   @default(SelfService)
+  minSumOrder     Int              @default(50)
+  maxSumOrder     Int              @default(500)
+  stepSumOrder    Int              @default(10)
   carWashServices CarWashService[]
   carWashDevices  CarWashDevice[]
   currencyCarWashPoses          CurrencyCarWashPos[]
@@ -578,12 +582,30 @@ enum StatusUser {
   DELETED
 }
 
+enum PositionUser {
+  Owner
+  Operator
+}
+
 enum StatusOrganization {
   VERIFICATE
   PENDING
   ACTIVE
   BLOCKED
   DELETED
+}
+
+enum StatusPos {
+  VERIFICATE
+  ACTIVE
+  OFFLINE
+  DELETED
+}
+
+enum CarWashPosType {
+  SelfService
+  Portal
+  SelfServiceAndPortal
 }
 
 enum TypeOrganization {

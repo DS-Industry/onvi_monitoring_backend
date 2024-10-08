@@ -29,9 +29,6 @@ export class AuthRegisterWorkerDto {
   @IsNotEmpty({ message: 'Password number is required' })
   password: string;
   @IsString()
-  @IsNotEmpty({ message: 'Password number is required' })
-  checkPassword: string;
-  @IsString()
   @IsNotEmpty({ message: 'Gender is required' })
   gender: string;
   @IsString()

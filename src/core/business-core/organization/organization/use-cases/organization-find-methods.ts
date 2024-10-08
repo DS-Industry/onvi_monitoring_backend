@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
-import { GetByIdAddressUseCase } from '@address/use-case/address-get-by-id';
 import { Organization } from '@organization/organization/domain/organization';
 import { User } from '@platform-user/user/domain/user';
 import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
-import { PosResponseDto } from '@platform-user/pos/controller/dto/pos-response.dto';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 @Injectable()
 export class FindMethodsOrganizationUseCase {
   constructor(
     private readonly organizationRepository: IOrganizationRepository,
-    private readonly addressGetByIdUseCase: GetByIdAddressUseCase,
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
@@ -45,5 +43,9 @@ export class FindMethodsOrganizationUseCase {
         async (item) => await this.posCreateFullDataUseCase.execute(item),
       ),
     );
+  }
+
+  async getAllByAbility(input: any): Promise<Organization[]> {
+    return this.organizationRepository.findAllByPermission(input);
   }
 }

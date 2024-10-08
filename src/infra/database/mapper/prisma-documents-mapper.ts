@@ -1,4 +1,4 @@
-import { Documents } from '../../../core/business-core/organization/documents/domain/documents';
+import { Documents } from '@organization/documents/domain/documents';
 import {
   OrganizationDocument as PrismaDocuments,
   Prisma,
@@ -13,17 +13,17 @@ export class PrismaDocumentsMapper {
       id: entity.id,
       rateVat: entity.rateVat,
       inn: entity.inn,
-      fullName: entity.fullName,
       okpo: entity.okpo,
       kpp: entity.kpp,
-      addressRegistration: entity.addressRegistration,
       ogrn: entity.ogrn,
       bik: entity.bik,
       correspondentAccount: entity.correspondentAccount,
       bank: entity.bank,
       settlementAccount: entity.settlementAccount,
-      address: entity.address,
+      addressBank: entity.addressBank,
       documentDoc: entity.documentDoc,
+      certificateNumber: entity.certificateNumber,
+      dateCertificate: entity.dateCertificate,
     });
   }
 
@@ -34,17 +34,17 @@ export class PrismaDocumentsMapper {
       id: documents?.id,
       rateVat: documents.rateVat,
       inn: documents.inn,
-      fullName: documents.fullName,
       okpo: documents.okpo,
-      kpp: documents.kpp,
-      addressRegistration: documents.addressRegistration,
+      kpp: documents?.kpp,
       ogrn: documents.ogrn,
       bik: documents.bik,
       correspondentAccount: documents.correspondentAccount,
       bank: documents.bank,
       settlementAccount: documents.settlementAccount,
-      address: documents.address,
+      addressBank: documents.addressBank,
       documentDoc: documents?.documentDoc,
+      certificateNumber: documents?.certificateNumber,
+      dateCertificate: documents?.dateCertificate,
     };
   }
 }

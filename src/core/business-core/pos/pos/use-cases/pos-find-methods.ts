@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IPosRepository } from '@pos/pos/interface/pos';
 import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
-import { PosResponseDto } from '@platform-user/pos/controller/dto/pos-response.dto';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
@@ -13,9 +13,6 @@ export class FindMethodsPosUseCase {
 
   async getById(input: number): Promise<PosResponseDto> {
     const pos = await this.posRepository.findOneById(input);
-    if (!pos) {
-      throw new Error('pos not exists');
-    }
     return this.posCreateFullDataUseCase.execute(pos);
   }
 
@@ -32,7 +29,12 @@ export class FindMethodsPosUseCase {
     );
   }
 
-  async getAllByAbility(input: any): Promise<Pos[]> {
-    return this.posRepository.findAllByPermission(input);
+  async getAllByAbility(input: any): Promise<PosResponseDto[]> {
+    const poses = await this.posRepository.findAllByPermission(input);
+    return await Promise.all(
+      poses.map(
+        async (pos) => await this.posCreateFullDataUseCase.execute(pos),
+      ),
+    );
   }
 }

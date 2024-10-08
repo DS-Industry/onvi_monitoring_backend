@@ -27,11 +27,11 @@ export class DocumentsRepository extends IDocumentsRepository {
     return PrismaDocumentsMapper.toDomain(documents);
   }
 
-  public async update(id: number, input: Documents): Promise<Documents> {
+  public async update(input: Documents): Promise<Documents> {
     const documentsPrismaEntity = PrismaDocumentsMapper.toPrisma(input);
     const documents = await this.prisma.organizationDocument.update({
       where: {
-        id: id,
+        id: input.id,
       },
       data: documentsPrismaEntity,
     });

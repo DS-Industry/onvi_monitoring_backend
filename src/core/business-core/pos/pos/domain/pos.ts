@@ -1,11 +1,14 @@
 import { Address } from '@address/domain/address';
 import { BaseEntity } from '@utils/entity';
+import { StatusPos } from "@prisma/client";
+
 
 export interface PosProps {
   id?: number;
   name: string;
   slug: string;
-  monthlyPlan?: number;
+  monthlyPlan: number;
+  timeWork: string;
   organizationId: number;
   posMetaData?: string;
   timezone: number;
@@ -13,7 +16,7 @@ export interface PosProps {
   address?: Address;
   image?: string;
   rating?: number;
-  status: string;
+  status: StatusPos;
   createdAt?: Date;
   updatedAt?: Date;
   createdById: number;
@@ -39,6 +42,10 @@ export class Pos extends BaseEntity<PosProps> {
 
   get monthlyPlan(): number {
     return this.props.monthlyPlan;
+  }
+
+  get timeWork(): string {
+    return this.props.timeWork;
   }
 
   get organizationId(): number {
@@ -69,7 +76,7 @@ export class Pos extends BaseEntity<PosProps> {
     return this.props.rating;
   }
 
-  get status(): string {
+  get status(): StatusPos {
     return this.props.status;
   }
 
@@ -101,6 +108,10 @@ export class Pos extends BaseEntity<PosProps> {
     this.props.monthlyPlan = monthlyPlan;
   }
 
+  set timeWork(timeWork: string) {
+    this.props.timeWork = timeWork;
+  }
+
   set organizationId(organizationId: number) {
     this.props.organizationId = organizationId;
   }
@@ -129,7 +140,7 @@ export class Pos extends BaseEntity<PosProps> {
     this.props.rating = rating;
   }
 
-  set status(status: string) {
+  set status(status: StatusPos) {
     this.props.status = status;
   }
 

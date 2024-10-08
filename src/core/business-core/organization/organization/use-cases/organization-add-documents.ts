@@ -1,28 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateOrganizationUseCase } from './organization-update';
-import { CreateDocumentUseCase } from '../../documents/use-cases/document-create';
 import { StatusOrganization } from '@prisma/client';
-import { CreateDocumentDto } from '@organization/documents/use-cases/dto/organization-document-create.dto';
-import { Organization } from '@organization/organization/domain/organization';
+import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
+import { v4 as uuid } from 'uuid';
+import { IFileAdapter } from '@libs/file/adapter';
+import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
+import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
 
 @Injectable()
 export class AddDocumentUseCase {
   constructor(
-    private readonly organizationUpdateUseCase: UpdateOrganizationUseCase,
-    private readonly documentCreateUseCase: CreateDocumentUseCase,
+    private readonly organizationRepository: IOrganizationRepository,
+    private readonly documentRepository: IDocumentsRepository,
+    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
+    private readonly fileService: IFileAdapter,
   ) {}
 
-  async execute(input: CreateDocumentDto, file: Express.Multer.File) {
-    const document = await this.documentCreateUseCase.execute(
-      input,
-      file,
-      input.organizationId,
+  async execute(organizationId: number, file: Express.Multer.File) {
+    const organization =
+      await this.findMethodsOrganizationUseCase.getById(organizationId);
+    const document = await this.documentRepository.findOneById(
+      organization.organizationDocumentId,
     );
-    const updateOrganizationData = {
-      id: input.organizationId,
-      organizationDocumentId: document.id,
-      organizationStatus: StatusOrganization.PENDING,
-    };
-    return await this.organizationUpdateUseCase.execute(updateOrganizationData);
+
+    const keyDocument = uuid();
+    document.documentDoc = keyDocument;
+    const keyWay =
+      'organization/document/' + organization.name + '/' + keyDocument;
+    await this.fileService.upload(file, keyWay);
+
+    await this.documentRepository.update(document);
+    organization.organizationStatus = StatusOrganization.PENDING;
+    return await this.organizationRepository.update(organization);
   }
 }

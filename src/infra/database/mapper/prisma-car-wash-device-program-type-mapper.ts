@@ -2,7 +2,7 @@ import {
   CarWashDeviceProgramsType as PrismaCarWashDeviceProgramsType,
   Prisma,
 } from '@prisma/client';
-import { DeviceProgramType } from '@device/device-program/device-program-type/domain/device-program-type';
+import { DeviceProgramType } from '@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type';
 
 export class PrismaCarWashDeviceProgramTypeMapper {
   static toDomain(entity: PrismaCarWashDeviceProgramsType): DeviceProgramType {

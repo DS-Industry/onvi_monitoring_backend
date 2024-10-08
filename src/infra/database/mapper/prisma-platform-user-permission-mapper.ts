@@ -1,5 +1,5 @@
 import { UserPermission as PrismaUserPermission, Prisma } from '@prisma/client';
-import { UserPermission } from '@platform-user/user-permissions/domain/user-permissions';
+import { UserPermission } from '@platform-user/permissions/user-permissions/domain/user-permissions';
 
 export class PrismaPlatformUserPermissionMapper {
   static toDomain(entity: PrismaUserPermission): UserPermission {

@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { OrganizationGetRatingDto } from '@organization/organization/use-cases/dto/organization-get-rating.dto';
-import { OrganizationStatisticsResponseDto } from '@platform-user/organization/controller/dto/organization-statistics-response.dto';
-import { DeviceOperationGetAllByOrgIdAndDateUseCase } from '@device/device-operation/use-cases/device-operation-get-all-by-org-id-and-date';
-import { GetAllByOrgIdAndDateDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-get-all-by-org-id-and-date';
-import { CheckCarDeviceProgramUseCase } from '@device/device-program/device-program/use-case/device-program-check-car';
+import { OrganizationStatisticsResponseDto } from '@platform-user/core-controller/dto/response/organization-statistics-response.dto';
+import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
+import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 
 @Injectable()
 export class GetStatisticsOrganizationUseCase {
   constructor(
-    private readonly deviceOperationGetAllByOrgIdAndDateUseCase: DeviceOperationGetAllByOrgIdAndDateUseCase,
-    private readonly getAllByOrgIdAndDateDeviceProgramUseCase: GetAllByOrgIdAndDateDeviceProgramUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
+    private readonly findMethodsDeviceProgramUseCase: FindMethodsDeviceProgramUseCase,
     private readonly checkCarDeviceProgramUseCase: CheckCarDeviceProgramUseCase,
   ) {}
 
@@ -18,20 +18,28 @@ export class GetStatisticsOrganizationUseCase {
   ): Promise<OrganizationStatisticsResponseDto> {
     let countAuto = 0;
     const deviceOperations =
-      await this.deviceOperationGetAllByOrgIdAndDateUseCase.execute(input);
+      await this.findMethodsDeviceOperationUseCase.getAllByOrgIdAndDateUseCase(
+        input.organizationId,
+        input.dateStart,
+        input.dateEnd,
+      );
     const totalSum = deviceOperations.reduce(
       (sum, operation) => sum + operation.operSum,
       0,
     );
     const deviceProgram =
-      await this.getAllByOrgIdAndDateDeviceProgramUseCase.execute(input);
+      await this.findMethodsDeviceProgramUseCase.getAllByOrgIdAndDateProgram(
+        input.organizationId,
+        input.dateStart,
+        input.dateEnd,
+      );
     await Promise.all(
       deviceProgram.map(async (program) => {
-        const isCarCheck = await this.checkCarDeviceProgramUseCase.execute({
-          deviceId: program.carWashDeviceId,
-          dateProgram: program.beginDate,
-          programTypeId: program.carWashDeviceProgramsTypeId,
-        });
+        const isCarCheck = await this.checkCarDeviceProgramUseCase.execute(
+          program.beginDate,
+          program.carWashDeviceId,
+          program.carWashDeviceProgramsTypeId,
+        );
         if (isCarCheck) {
           countAuto++;
         }

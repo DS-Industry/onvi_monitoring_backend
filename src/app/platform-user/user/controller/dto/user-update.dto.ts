@@ -1,16 +1,6 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { StatusUser } from '@prisma/client';
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNumber()
-  @IsNotEmpty({ message: 'Id is required' })
-  id: number;
-  
   @IsString()
   @IsOptional()
   name?: string;
@@ -22,26 +12,14 @@ export class UpdateUserDto {
   middlename?: string;
   @IsString()
   @IsOptional()
+  phone?: string;
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+  @IsString()
+  @IsOptional()
   avatar?: string;
-  @IsString()
-  @IsOptional()
-  country?: string;
   @IsNumber()
   @IsOptional()
-  countryCode?: number;
-  @IsNumber()
-  @IsOptional()
-  timezone?: number;
-  @IsString()
-  @IsOptional()
-  refreshTokenId?: string;
-  @IsString()
-  @IsOptional()
-  password?: string;
-  @IsString()
-  @IsOptional()
-  status?: StatusUser;
-  @IsNumber()
-  @IsOptional()
-  userRoleId?: number;
+  receiveNotifications?: number;
 }

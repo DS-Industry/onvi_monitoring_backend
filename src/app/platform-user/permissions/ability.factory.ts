@@ -1,29 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@platform-user/user/domain/user';
 import { AbilityBuilder } from '@casl/ability';
-import { GetPermissionsByIdRoleUseCase } from '@platform-user/user-role/use-cases/role-get-permission-by-id';
 import { GetByIdObjectUseCase } from '@object-permission/use-case/object-get-by-id';
 import { createPrismaAbility } from '@casl/prisma';
-import { GetIdPosPermissionUserUseCase } from '@platform-user/user/use-cases/user-get-id-pos-permission';
-import { GetIdOrganizationPermissionUserUseCase } from '@platform-user/user/use-cases/user-get-id-organization-permission';
+import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
+import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
 
 @Injectable()
 export class AbilityFactory {
   constructor(
-    private readonly roleGetPermissionsById: GetPermissionsByIdRoleUseCase,
+    private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
     private readonly objectGetById: GetByIdObjectUseCase,
-    private readonly getIdPosPermissionUserUseCase: GetIdPosPermissionUserUseCase,
-    private readonly getIdOrganizationPermissionUserUseCase: GetIdOrganizationPermissionUserUseCase,
+    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
   ) {}
 
   async createForPlatformManager(user: User): Promise<any> {
-    const permissions = await this.roleGetPermissionsById.execute(
+    const permissions = await this.findMethodsRoleUseCase.getPermissionsById(
       user.userRoleId,
     );
 
     const organizationCondition =
-      await this.getIdOrganizationPermissionUserUseCase.execute(user.id);
-    const posCondition = await this.getIdPosPermissionUserUseCase.execute(
+      await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
+    const posCondition = await this.findMethodsUserUseCase.getPosPermissionById(
       user.id,
     );
 
@@ -41,6 +39,10 @@ export class AbilityFactory {
         condition = {
           id: { in: posCondition },
           organizationId: { in: organizationCondition },
+        };
+      } else if (objectMap[permission.objectId].name == 'Organization') {
+        condition = {
+          id: { in: organizationCondition },
         };
       }
       console.log(condition);

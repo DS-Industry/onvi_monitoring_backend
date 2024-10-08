@@ -2,7 +2,7 @@ import {
   CarWashDeviceServiceEvent as PrismaCarWashDeviceServiceEvent,
   Prisma,
 } from '@prisma/client';
-import { DeviceService } from '@device/device-service/domain/device-service';
+import { DeviceService } from '@pos/device/device-data/device-data/device-service/domain/device-service';
 
 export class PrismaCarWashDeviceServiceMapper {
   static toDomain(entity: PrismaCarWashDeviceServiceEvent): DeviceService {
