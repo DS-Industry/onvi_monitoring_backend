@@ -26,7 +26,7 @@ export class RegisterAuthUseCase {
       email: input.email,
       password: hashPassword,
       gender: input.gender,
-      position: PositionUser.Operator,
+      position: PositionUser.Owner,
       status: StatusUser.BLOCKED,
       avatar: input.avatar,
       country: input.country,
