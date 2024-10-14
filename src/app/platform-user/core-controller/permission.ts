@@ -15,6 +15,11 @@ import { UserUpdateRoleDto } from '@platform-user/core-controller/dto/receive/us
 import { User } from '@platform-user/user/domain/user';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { UserPermissionValidateRules } from '@platform-user/validate/validate-rules/user-permission-validate-rules';
+import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
+import {
+  CheckAbilities,
+  ManageOrgAbility,
+} from '@common/decorators/abilities.decorator';
 
 @Controller('permission')
 export class PermissionController {
@@ -26,15 +31,14 @@ export class PermissionController {
   ) {}
 
   @Get('worker')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
   @HttpCode(200)
   async getWorker(
     @Request() req: any,
   ): Promise<UserPermissionDataResponseDto[]> {
     try {
-      const { user } = req;
-      const ability =
-        await this.caslAbilityFactory.createForPlatformManager(user);
+      const ability = req.ability;
       return await this.organizationManageUserUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
@@ -43,6 +47,8 @@ export class PermissionController {
 
   @Patch('')
   @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
   @HttpCode(201)
   async updateRole(
     @Request() req: any,

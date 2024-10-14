@@ -4,6 +4,8 @@ import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
+import { ForbiddenError } from "@casl/ability";
+import { PermissionAction } from "@prisma/client";
 
 @Injectable()
 export class MonitoringFullByIdPosUseCase {

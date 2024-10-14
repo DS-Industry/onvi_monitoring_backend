@@ -34,6 +34,11 @@ import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { OrganizationUpdateDto } from '@platform-user/core-controller/dto/receive/organization-update.dto';
 import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/organization-update';
+import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
+import {
+  CheckAbilities,
+  CreateOrgAbility, ReadOrgAbility, ReadPosAbility, UpdateOrgAbility
+} from "@common/decorators/abilities.decorator";
 
 @Controller('organization')
 export class OrganizationController {
@@ -44,14 +49,30 @@ export class OrganizationController {
     private readonly filterByUserOrganizationUseCase: FilterByUserOrganizationUseCase,
     private readonly getRatingOrganizationUseCase: GetRatingOrganizationUseCase,
     private readonly getStatisticsOrganizationUseCase: GetStatisticsOrganizationUseCase,
-    private readonly caslAbilityFactory: AbilityFactory,
     private readonly sendOrganizationConfirmMailUseCase: SendOrganizationConfirmMailUseCase,
     private readonly organizationValidateRules: OrganizationValidateRules,
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
   ) {}
+
+  @Get('filter')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadOrgAbility())
+  @HttpCode(200)
+  async filterViewOrganizationByUser(
+    @Request() req: any,
+  ): Promise<OrganizationFilterResponseDto[]> {
+    try {
+      const ability = req.ability;
+      return await this.filterByUserOrganizationUseCase.execute(ability);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   @Post('')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateOrgAbility())
   @HttpCode(201)
   async create(
     @Body() data: OrganizationCreateDto,
@@ -67,13 +88,13 @@ export class OrganizationController {
   }
 
   @Patch('')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(201)
   async update(
     @Request() req: any,
     @Body() data: OrganizationUpdateDto,
   ): Promise<any> {
-    const { user } = req;
     await this.organizationValidateRules.updateValidate(data.organizationId);
     return await this.updateOrganizationUseCase.execute(data);
   }
@@ -184,6 +205,8 @@ export class OrganizationController {
   }
 
   @Get('pos/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async getPosesById(
     @Param('id', ParseIntPipe) id: number,
@@ -202,22 +225,6 @@ export class OrganizationController {
   ): Promise<any> {
     try {
       return await this.findMethodsOrganizationUseCase.getAllByOwner(id);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-
-  @Get('filter')
-  @UseGuards(JwtGuard)
-  @HttpCode(200)
-  async filterViewOrganizationByUser(
-    @Request() req: any,
-  ): Promise<OrganizationFilterResponseDto[]> {
-    try {
-      const { user } = req;
-      const ability =
-        await this.caslAbilityFactory.createForPlatformManager(user);
-      return await this.filterByUserOrganizationUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }

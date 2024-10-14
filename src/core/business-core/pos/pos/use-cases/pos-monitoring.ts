@@ -26,6 +26,7 @@ export class MonitoringPosUseCase {
     } else {
       poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
     }
+    console.log(poses)
     await Promise.all(
       poses.map(async (pos) => {
         const deviceOperations =

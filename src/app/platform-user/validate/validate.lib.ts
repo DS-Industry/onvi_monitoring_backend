@@ -7,6 +7,7 @@ import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMai
 import { IBcryptAdapter } from "@libs/bcrypt/adapter";
 import { PositionUser } from "@prisma/client";
 import { FindMethodsRoleUseCase } from "@platform-user/permissions/user-role/use-cases/role-find-methods";
+import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
 
 @Injectable()
 export class ValidateLib {
@@ -17,6 +18,7 @@ export class ValidateLib {
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -150,6 +152,14 @@ export class ValidateLib {
       await this.findMethodsCarWashDeviceTypeUseCase.getById(id);
     if (!deviceType) {
       return 472;
+    }
+    return 200;
+  }
+  public async deviceByIdExists(id: number): Promise<number> {
+    const device =
+      await this.findMethodsCarWashDeviceUseCase.getById(id);
+    if (!device) {
+      return 473;
     }
     return 200;
   }

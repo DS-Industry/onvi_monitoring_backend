@@ -31,4 +31,11 @@ export class DeviceValidateRules {
       throw new Error(`Validation errors: ${response}`);
     }
   }
+
+  public async getByIdValidate(id: number) {
+    const response = await this.validateLib.deviceByIdExists(id);
+    if (response !== 200) {
+      throw new Error(`Validation errors: ${response}`);
+    }
+  }
 }

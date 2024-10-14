@@ -679,6 +679,166 @@ async function main() {
       carWashDeviceTypeId: 5,
     },
   });
+  const objectOrg = await prisma.objectPermissions.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      name: 'Organization',
+    },
+  });
+  const objectPos = await prisma.objectPermissions.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      name: 'Pos',
+    },
+  });
+  const userPermissionsOrgManage = await prisma.userPermission.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      action: 'manage',
+      objectId: 1,
+    },
+  });
+  const userPermissionsOrgCreate = await prisma.userPermission.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      action: 'create',
+      objectId: 1,
+    },
+  });
+  const userPermissionsOrgUpdate = await prisma.userPermission.upsert({
+    where: { id: 3 },
+    update: {},
+    create: {
+      id: 3,
+      action: 'update',
+      objectId: 1,
+    },
+  });
+  const userPermissionsOrgRead = await prisma.userPermission.upsert({
+    where: { id: 4 },
+    update: {},
+    create: {
+      id: 4,
+      action: 'read',
+      objectId: 1,
+    },
+  });
+  const userPermissionsOrgDelete = await prisma.userPermission.upsert({
+    where: { id: 5 },
+    update: {},
+    create: {
+      id: 5,
+      action: 'delete',
+      objectId: 1,
+    },
+  });
+  const userPermissionsPosManage = await prisma.userPermission.upsert({
+    where: { id: 6 },
+    update: {},
+    create: {
+      id: 6,
+      action: 'manage',
+      objectId: 2,
+    },
+  });
+  const userPermissionsPosCreate = await prisma.userPermission.upsert({
+    where: { id: 7 },
+    update: {},
+    create: {
+      id: 7,
+      action: 'create',
+      objectId: 2,
+    },
+  });
+  const userPermissionsPosUpdate = await prisma.userPermission.upsert({
+    where: { id: 8 },
+    update: {},
+    create: {
+      id: 8,
+      action: 'update',
+      objectId: 2,
+    },
+  });
+  const userPermissionsPosRead = await prisma.userPermission.upsert({
+    where: { id: 9 },
+    update: {},
+    create: {
+      id: 9,
+      action: 'read',
+      objectId: 2,
+    },
+  });
+  const userPermissionsPosDelete = await prisma.userPermission.upsert({
+    where: { id: 10 },
+    update: {},
+    create: {
+      id: 10,
+      action: 'delete',
+      objectId: 2,
+    },
+  });
+  const userRoleOwner = await prisma.userRole.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      name: 'Owner',
+      userPermissions: {
+        connect: [
+          {
+            id: 1,
+          },
+          {
+            id: 6,
+          },
+        ],
+      },
+    },
+  });
+  const userRoleAdmin = await prisma.userRole.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      name: 'Admin',
+      userPermissions: {
+        connect: [
+          {
+            id: 1,
+          },
+          {
+            id: 6,
+          },
+        ],
+      },
+    },
+  });
+  const userRoleManager = await prisma.userRole.upsert({
+    where: { id: 3 },
+    update: {},
+    create: {
+      id: 3,
+      name: 'Manager',
+      userPermissions: {
+        connect: [
+          {
+            id: 4,
+          },
+          {
+            id: 9,
+          },
+        ],
+      },
+    },
+  });
   console.log({
     //organization,
     washerCarWashDeviceType,
@@ -746,6 +906,21 @@ async function main() {
     program21,
     program22,
     program23,
+    objectOrg,
+    objectPos,
+    userPermissionsOrgManage,
+    userPermissionsOrgCreate,
+    userPermissionsOrgUpdate,
+    userPermissionsOrgRead,
+    userPermissionsOrgDelete,
+    userPermissionsPosManage,
+    userPermissionsPosCreate,
+    userPermissionsPosUpdate,
+    userPermissionsPosRead,
+    userPermissionsPosDelete,
+    userRoleOwner,
+    userRoleAdmin,
+    userRoleManager,
   });
 }
 main()

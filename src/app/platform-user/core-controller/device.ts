@@ -32,6 +32,8 @@ import {
   DeviceOperationMonitoringResponseDto
 } from "@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto";
 import { DeviceProgramResponseDto } from "@platform-user/core-controller/dto/response/device-program-response.dto";
+import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
+import { CheckAbilities, ReadPosAbility } from "@common/decorators/abilities.decorator";
 
 @Controller('device')
 export class DeviceController {
@@ -61,12 +63,15 @@ export class DeviceController {
   }
 
   @Get('monitoring/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async monitoringDevice(
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
   ): Promise<DeviceOperationMonitoringResponseDto[]> {
     try {
+      await this.deviceValidateRules.getByIdValidate(id);
       return await this.dataByDeviceOperationUseCase.execute(
         id,
         data.dateStart,
@@ -78,12 +83,15 @@ export class DeviceController {
   }
 
   @Get('program/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async programDevice(
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
   ): Promise<DeviceProgramResponseDto[]> {
     try {
+      await this.deviceValidateRules.getByIdValidate(id);
       return await this.dataByDeviceProgramUseCase.execute(
         id,
         data.dateStart,

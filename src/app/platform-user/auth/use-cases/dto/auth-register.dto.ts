@@ -1,14 +1,14 @@
 export class AuthRegisterDto {
   name: string;
-  surname: string;
+  surname?: string;
   middlename?: string;
   birthday?: Date;
-  phone?: string;
+  phone: string;
   email: string;
   password: string;
-  gender: string;
+  gender?: string;
   avatar?: string;
-  country: string;
-  countryCode: number;
-  timezone: number;
+  country?: string;
+  countryCode?: number;
+  timezone?: number;
 }

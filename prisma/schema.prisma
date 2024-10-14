@@ -69,19 +69,19 @@ model User {
   userRole          UserRole       @relation(fields: [userRoleId], references: [id])
   userRoleId        Int
   name              String
-  surname           String
+  surname           String?
   middlename        String?
-  birthday          DateTime?
-  phone             String?        @unique
+  birthday          DateTime
+  phone             String
   email             String         @unique
   password          String
-  gender            String
+  gender            String?
   position          PositionUser?  @default(Operator)
   status            StatusUser?    @default(ACTIVE)
   avatar            String?
-  country           String
-  countryCode       Int
-  timezone          Int
+  country           String?
+  countryCode       Int?
+  timezone          Int?
   refreshTokenId    String?
   receiveNotifications  Int?  @default(1)
   createdAt         DateTime?
