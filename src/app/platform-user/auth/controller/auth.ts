@@ -164,4 +164,14 @@ export class Auth {
       throw new Error(e);
     }
   }
+  @Post('/password/valid/confirm')
+  @UseGuards(EmailGuard)
+  @HttpCode(201)
+  async passwordValidConfirm(@Body() body: AuthActivationDto): Promise<any> {
+    try {
+      return true;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
 }
