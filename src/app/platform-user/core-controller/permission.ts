@@ -7,7 +7,6 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AbilityFactory } from '@platform-user/permissions/ability.factory';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/user-organization-manage';
 import { UserPermissionDataResponseDto } from '@platform-user/user/use-cases/dto/user-permission-data-response.dto';
@@ -24,12 +23,11 @@ import {
 @Controller('permission')
 export class PermissionController {
   constructor(
-    private readonly caslAbilityFactory: AbilityFactory,
     private readonly organizationManageUserUseCase: OrganizationManageUserUseCase,
     private readonly userUpdate: UpdateUserUseCase,
     private readonly userPermissionValidateRules: UserPermissionValidateRules,
   ) {}
-
+  //All worker for permission org
   @Get('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ManageOrgAbility())
@@ -38,13 +36,13 @@ export class PermissionController {
     @Request() req: any,
   ): Promise<UserPermissionDataResponseDto[]> {
     try {
-      const ability = req.ability;
+      const { ability } = req;
       return await this.organizationManageUserUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Update worker role
   @Patch('')
   @UseGuards(JwtGuard)
   @UseGuards(JwtGuard, AbilitiesGuard)

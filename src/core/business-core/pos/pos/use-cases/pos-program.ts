@@ -4,6 +4,7 @@ import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
+import { Pos } from "@pos/pos/domain/pos";
 
 @Injectable()
 export class ProgramPosUseCase {
@@ -17,14 +18,14 @@ export class ProgramPosUseCase {
     dateStart: Date,
     dateEnd: Date,
     ability: any,
-    posId?: number,
+    pos?: Pos,
   ): Promise<PosProgramResponseDto[]> {
     const response: PosProgramResponseDto[] = [];
-    let poses: PosResponseDto[] = [];
-    if (posId) {
-      poses.push(await this.findMethodsPosUseCase.getById(posId));
+    let poses: Pos[] = [];
+    if (pos) {
+      poses.push(pos);
     } else {
-      poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
+      poses = await this.findMethodsPosUseCase.getAllByAbilityPos(ability);
     }
 
     await Promise.all(

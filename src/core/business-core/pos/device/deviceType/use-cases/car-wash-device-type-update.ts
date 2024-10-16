@@ -9,9 +9,10 @@ export class UpdateCarWashDeviceTypeUseCase {
     private readonly carWashDeviseTypeRepository: ICarWashDeviceTypeRepository,
   ) {}
 
-  async execute(input: CarWashDeviceTypeUpdateDto): Promise<CarWashDeviceType> {
-    const carWashDeviceType =
-      await this.carWashDeviseTypeRepository.findOneById(input.id);
+  async execute(
+    input: CarWashDeviceTypeUpdateDto,
+    carWashDeviceType: CarWashDeviceType,
+  ): Promise<CarWashDeviceType> {
     const { name, code } = input;
 
     carWashDeviceType.name = name ? name : carWashDeviceType.name;

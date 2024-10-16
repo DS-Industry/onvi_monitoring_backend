@@ -47,6 +47,7 @@ import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/use
 import { PermissionController } from '@platform-user/core-controller/permission';
 import { UserPermissionValidateRules } from "@platform-user/validate/validate-rules/user-permission-validate-rules";
 
+
 const repositories: Provider[] = [
   ConfirmMailProvider,
   PermissionsRepositoryProvider,

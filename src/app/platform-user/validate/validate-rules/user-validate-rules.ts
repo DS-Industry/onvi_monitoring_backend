@@ -11,8 +11,8 @@ export class UserValidateRules {
       oldPassword,
     );
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
   }
 }

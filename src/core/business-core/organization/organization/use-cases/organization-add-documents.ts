@@ -1,24 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateOrganizationUseCase } from './organization-update';
 import { StatusOrganization } from '@prisma/client';
-import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { v4 as uuid } from 'uuid';
 import { IFileAdapter } from '@libs/file/adapter';
 import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
 import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
+import { Organization } from "@organization/organization/domain/organization";
 
 @Injectable()
 export class AddDocumentUseCase {
   constructor(
     private readonly organizationRepository: IOrganizationRepository,
     private readonly documentRepository: IDocumentsRepository,
-    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly fileService: IFileAdapter,
   ) {}
 
-  async execute(organizationId: number, file: Express.Multer.File) {
-    const organization =
-      await this.findMethodsOrganizationUseCase.getById(organizationId);
+  async execute(organization: Organization, file: Express.Multer.File) {
     const document = await this.documentRepository.findOneById(
       organization.organizationDocumentId,
     );

@@ -23,7 +23,6 @@ import { FilterByUserOrganizationUseCase } from '@organization/organization/use-
 import { GetRatingOrganizationUseCase } from '@organization/organization/use-cases/organization-get-rating';
 import { OrganizationStatisticsResponseDto } from '@platform-user/core-controller/dto/response/organization-statistics-response.dto';
 import { GetStatisticsOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics';
-import { AbilityFactory } from '@platform-user/permissions/ability.factory';
 import { OrganizationValidateRules } from '@platform-user/validate/validate-rules/organization-validate-rules';
 import { SendOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-send';
 import { OrganizationCreateDto } from '@platform-user/core-controller/dto/receive/organization-create.dto';
@@ -37,8 +36,11 @@ import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
-  CreateOrgAbility, ReadOrgAbility, ReadPosAbility, UpdateOrgAbility
-} from "@common/decorators/abilities.decorator";
+  CreateOrgAbility,
+  ReadOrgAbility,
+  ReadPosAbility,
+  UpdateOrgAbility,
+} from '@common/decorators/abilities.decorator';
 
 @Controller('organization')
 export class OrganizationController {
@@ -54,7 +56,7 @@ export class OrganizationController {
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
   ) {}
-
+  //All organization for user
   @Get('filter')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadOrgAbility())
@@ -63,13 +65,13 @@ export class OrganizationController {
     @Request() req: any,
   ): Promise<OrganizationFilterResponseDto[]> {
     try {
-      const ability = req.ability;
+      const { ability } = req;
       return await this.filterByUserOrganizationUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Create organization
   @Post('')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateOrgAbility())
@@ -86,7 +88,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Update organization
   @Patch('')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateOrgAbility())
@@ -95,10 +97,14 @@ export class OrganizationController {
     @Request() req: any,
     @Body() data: OrganizationUpdateDto,
   ): Promise<any> {
-    await this.organizationValidateRules.updateValidate(data.organizationId);
-    return await this.updateOrganizationUseCase.execute(data);
+    const { ability } = req;
+    const organization = await this.organizationValidateRules.updateValidate(
+      data.organizationId,
+      ability,
+    );
+    return await this.updateOrganizationUseCase.execute(data, organization);
   }
-
+  //Send email for add worker
   @Post('worker')
   @UseGuards(JwtGuard)
   @HttpCode(201)
@@ -122,7 +128,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Statistics for organization
   @Get('statistics')
   @UseGuards(JwtGuard)
   @HttpCode(200)
@@ -160,7 +166,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Rating for organization
   @Get('rating')
   @UseGuards(JwtGuard)
   @HttpCode(200)
@@ -182,18 +188,26 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Get org by id
   @Get(':id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  async getOneById(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
     try {
-      await this.organizationValidateRules.getOneByIdValidate(id);
-      return this.findMethodsOrganizationUseCase.getById(id);
+      const { ability } = req;
+      return await this.organizationValidateRules.getOneByIdValidate(
+        id,
+        ability,
+      );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Get all worker for org
   @Get('worker/:id')
   @HttpCode(200)
   async getUsersById(@Param('id', ParseIntPipe) id: number): Promise<any> {
@@ -203,7 +217,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Get all pos for org
   @Get('pos/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -217,7 +231,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Get all org for owner
   @Get('owner/:id')
   @HttpCode(200)
   async getOrganizationByOwner(
@@ -229,7 +243,7 @@ export class OrganizationController {
       throw new Error(e);
     }
   }
-
+  //Add document for org
   @Post('verificate')
   @HttpCode(201)
   @UseInterceptors(FileInterceptor('file'))
@@ -238,13 +252,11 @@ export class OrganizationController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<any> {
     try {
-      await this.organizationValidateRules.verificateValidate(
-        data.organizationId,
-      );
-      return await this.organizationAddDocuments.execute(
-        data.organizationId,
-        file,
-      );
+      const organization =
+        await this.organizationValidateRules.verificateValidate(
+          data.organizationId,
+        );
+      return await this.organizationAddDocuments.execute(organization, file);
     } catch (e) {
       throw new Error(e);
     }

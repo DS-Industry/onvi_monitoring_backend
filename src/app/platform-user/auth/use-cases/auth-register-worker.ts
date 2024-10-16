@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@platform-user/user/domain/user';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { PositionUser, StatusUser } from "@prisma/client";
+import { PositionUser, StatusUser } from '@prisma/client';
 import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-validate';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
@@ -20,13 +20,10 @@ export class AuthRegisterWorkerUseCase {
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
   ) {}
 
-  async execute(input: AuthRegisterWorkerDto): Promise<any> {
-    const organizationIdConfirmMail =
-      await this.validateOrganizationMail.execute(
-        input.email,
-        input.confirmString,
-      );
-
+  async execute(
+    input: AuthRegisterWorkerDto,
+    organizationIdConfirmMail: number,
+  ): Promise<any> {
     const hashPassword = await this.bcrypt.hash(input.password);
     const userData = new User({
       name: input.name,

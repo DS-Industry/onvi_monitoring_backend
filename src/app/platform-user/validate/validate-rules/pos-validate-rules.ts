@@ -1,29 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { ValidateLib } from '@platform-user/validate/validate.lib';
+import {
+  ValidateLib,
+  ValidateResponse,
+} from '@platform-user/validate/validate.lib';
+import { ForbiddenError } from '@casl/ability';
+import { PermissionAction } from '@prisma/client';
 
 @Injectable()
 export class PosValidateRules {
   constructor(private readonly validateLib: ValidateLib) {}
 
-  public async createValidate(name: string, organizationId: number) {
-    const response = [];
+  public async createValidate(
+    name: string,
+    organizationId: number,
+    ability: any,
+  ) {
+    const response: ValidateResponse[] = [];
     response.push(await this.validateLib.posByNameNotExists(name));
     response.push(
       await this.validateLib.organizationByIdExists(organizationId),
     );
 
-    const hasErrors = response.some((code) => code !== 200);
-    if (hasErrors) {
-      const errorCodes = response.filter((code) => code !== 200);
-      throw new Error(`Validation errors: ${errorCodes.join(', ')}`);
-    }
+    this.validateLib.handlerArrayResponse(response);
+    const organization = response.find(
+      (item) => item.object !== undefined,
+    )?.object;
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      organization,
+    );
   }
 
-  public async getOneByIdValidate(id: number) {
+  public async getOneByIdValidate(id: number, ability: any) {
     const response = await this.validateLib.posByIdExists(id);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      response.object,
+    );
+    return response.object;
   }
 }

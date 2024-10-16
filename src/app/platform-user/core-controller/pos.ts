@@ -24,8 +24,6 @@ import { PosProgramFullUseCase } from '@pos/pos/use-cases/pos-program-full';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { CreatePosUseCase } from '@pos/pos/use-cases/pos-create';
 import { PosCreateDto } from '@platform-user/core-controller/dto/receive/pos-create.dto';
-import { AbilityFactory } from '@platform-user/permissions/ability.factory';
-import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { PosFilterResponseDto } from '@platform-user/core-controller/dto/response/pos-filter-by-response.dto';
 import {
@@ -33,16 +31,12 @@ import {
   CreatePosAbility,
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
-import { PermissionAction } from '@prisma/client';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
-import { ForbiddenError } from '@casl/ability';
 
 @Controller('pos')
 export class PosController {
   constructor(
-    private readonly caslAbilityFactory: AbilityFactory,
     private readonly createPosUseCase: CreatePosUseCase,
-    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly filterByUserPosUseCase: FilterByUserPosUseCase,
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
@@ -50,7 +44,7 @@ export class PosController {
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
-
+  //Create pos
   @Post('')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreatePosAbility())
@@ -61,10 +55,11 @@ export class PosController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<any> {
     try {
-      const { user } = req;
+      const { user, ability } = req;
       await this.posValidateRules.createValidate(
         data.name,
         data.organizationId,
+        ability,
       );
       if (file) {
         return await this.createPosUseCase.execute(data, user, file);
@@ -74,7 +69,7 @@ export class PosController {
       throw new Error(e);
     }
   }
-
+  //Monitoring pos in detail
   @Get('monitoring/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -85,17 +80,18 @@ export class PosController {
     @Query() data: DataFilterDto,
   ): Promise<PosMonitoringFullResponseDto[]> {
     try {
-      await this.posValidateRules.getOneByIdValidate(id);
+      const { ability } = req;
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.monitoringFullByIdPosUseCase.execute(
         data.dateStart,
         data.dateEnd,
-        id,
+        pos,
       );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Monitoring pos all or certain
   @Get('monitoring')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -105,21 +101,25 @@ export class PosController {
     @Query() params: PosMonitoringDto,
   ): Promise<PosMonitoringResponseDto[]> {
     try {
-      const ability = req.ability;
+      const { ability } = req;
+      let pos = null;
       if (params.posId) {
-        await this.posValidateRules.getOneByIdValidate(params.posId);
+        pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
       }
       return await this.monitoringPosUseCase.execute(
         params.dateStart,
         params.dateEnd,
         ability,
-        params.posId,
+        pos,
       );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Program pos all or certain
   @Get('program')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -129,52 +129,63 @@ export class PosController {
     @Query() params: PosMonitoringDto,
   ): Promise<PosProgramResponseDto[]> {
     try {
-      const ability = req.ability;
+      const { ability } = req;
+      let pos = null;
       if (params.posId) {
-        await this.posValidateRules.getOneByIdValidate(params.posId);
+        pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
       }
       return await this.programPosUseCase.execute(
         params.dateStart,
         params.dateEnd,
         ability,
-        params.posId,
+        pos,
       );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Program pos in detail
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async programFullPos(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
   ): Promise<PosProgramResponseDto[]> {
     try {
-      await this.posValidateRules.getOneByIdValidate(id);
+      const { ability } = req;
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.posProgramFullUseCase.execute(
         data.dateStart,
         data.dateEnd,
-        id,
+        pos,
       );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Get pos by id
   @Get(':id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  async getOneById(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
     try {
-      await this.posValidateRules.getOneByIdValidate(id);
-      return this.findMethodsPosUseCase.getById(id);
+      const { ability } = req;
+      return await this.posValidateRules.getOneByIdValidate(id, ability);
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //Get all pos for permission user
   @Get('filter')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -183,7 +194,7 @@ export class PosController {
     @Request() req: any,
   ): Promise<PosFilterResponseDto[]> {
     try {
-      const ability = req.ability;
+      const { ability } = req;
       return await this.filterByUserPosUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);

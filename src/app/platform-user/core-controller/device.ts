@@ -24,21 +24,21 @@ import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/ca
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
 import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
-import { AbilityFactory } from '@platform-user/permissions/ability.factory';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
 import { DeviceFilterResponseDto } from '@platform-user/core-controller/dto/response/device-filter-response.dto';
+import { DeviceOperationMonitoringResponseDto } from '@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto';
+import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
+import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
-  DeviceOperationMonitoringResponseDto
-} from "@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto";
-import { DeviceProgramResponseDto } from "@platform-user/core-controller/dto/response/device-program-response.dto";
-import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
-import { CheckAbilities, ReadPosAbility } from "@common/decorators/abilities.decorator";
+  CheckAbilities,
+  ReadPosAbility,
+} from '@common/decorators/abilities.decorator';
+import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 
 @Controller('device')
 export class DeviceController {
   constructor(
-    private readonly caslAbilityFactory: AbilityFactory,
     private readonly carWashDeviceTypeCreate: CreateCarWashDeviceTypeUseCase,
     private readonly carWashDeviceTypeUpdate: UpdateCarWashDeviceTypeUseCase,
     private readonly deviceCreateCarWashDevice: CreateCarWashDeviceUseCase,
@@ -47,8 +47,9 @@ export class DeviceController {
     private readonly dataByDeviceProgramUseCase: DataByDeviceProgramUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
+    private readonly posValidateRules: PosValidateRules,
   ) {}
-
+  //Create device
   @Post('')
   @HttpCode(201)
   async create(
@@ -61,17 +62,19 @@ export class DeviceController {
       throw new Error(e);
     }
   }
-
+  //Monitoring operation on device
   @Get('monitoring/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async monitoringDevice(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
   ): Promise<DeviceOperationMonitoringResponseDto[]> {
     try {
-      await this.deviceValidateRules.getByIdValidate(id);
+      const { ability } = req;
+      await this.deviceValidateRules.getByIdValidate(id, ability);
       return await this.dataByDeviceOperationUseCase.execute(
         id,
         data.dateStart,
@@ -81,17 +84,19 @@ export class DeviceController {
       throw new Error(e);
     }
   }
-
+  //Program on device
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async programDevice(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
   ): Promise<DeviceProgramResponseDto[]> {
     try {
-      await this.deviceValidateRules.getByIdValidate(id);
+      const { ability } = req;
+      await this.deviceValidateRules.getByIdValidate(id, ability);
       return await this.dataByDeviceProgramUseCase.execute(
         id,
         data.dateStart,
@@ -101,7 +106,7 @@ export class DeviceController {
       throw new Error(e);
     }
   }
-
+  //Create type device
   @Post('type')
   @HttpCode(201)
   async createType(
@@ -114,42 +119,50 @@ export class DeviceController {
       throw new Error(e);
     }
   }
-
+  //Update type device
   @Patch('type')
   @HttpCode(201)
   async updateType(
     @Body() data: DeviceTypeUpdateDto,
   ): Promise<CarWashDeviceType> {
     try {
-      await this.deviceValidateRules.updateTypeValidate(data.id);
-      return await this.carWashDeviceTypeUpdate.execute(data);
+      const carWashDeviceType =
+        await this.deviceValidateRules.updateTypeValidate(data.id);
+      return await this.carWashDeviceTypeUpdate.execute(
+        data,
+        carWashDeviceType,
+      );
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //All device for user
   @Get('filter')
   @HttpCode(200)
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   async filterViewDeviceByUser(
     @Request() req: any,
   ): Promise<DeviceFilterResponseDto[]> {
     try {
-      const { user } = req;
-      const ability =
-        await this.caslAbilityFactory.createForPlatformManager(user);
+      const { ability } = req;
       return await this.dataByPermissionCarWashDeviceUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }
   }
-
+  //All device for pos
   @Get('filter/pos/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async filterViewDeviceByPosId(
+    @Request() req: any,
     @Param('posId', ParseIntPipe) id: number,
   ): Promise<any> {
     try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.findMethodsCarWashDeviceUseCase.getAllByPos(id);
     } catch (e) {
       throw new Error(e);

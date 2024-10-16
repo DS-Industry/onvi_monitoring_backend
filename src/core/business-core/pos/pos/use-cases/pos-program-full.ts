@@ -4,6 +4,7 @@ import { PosProgramResponseDto } from '@platform-user/core-controller/dto/respon
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
+import { Pos } from "@pos/pos/domain/pos";
 
 @Injectable()
 export class PosProgramFullUseCase {
@@ -17,10 +18,9 @@ export class PosProgramFullUseCase {
   async execute(
     dateStart: Date,
     dateEnd: Date,
-    posId: number,
+    pos: Pos,
   ): Promise<PosProgramResponseDto[]> {
     const response: PosProgramResponseDto[] = [];
-    const pos = await this.findMethodsPosUseCase.getById(posId);
     const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
       pos.id,
     );

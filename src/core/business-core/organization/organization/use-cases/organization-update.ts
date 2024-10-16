@@ -3,6 +3,7 @@ import { IOrganizationRepository } from '../interfaces/organization';
 import { UpdateOrganizationDto } from '@organization/organization/use-cases/dto/organization-update.dto';
 import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
 import slugify from 'slugify';
+import { Organization } from "@organization/organization/domain/organization";
 
 @Injectable()
 export class UpdateOrganizationUseCase {
@@ -11,10 +12,7 @@ export class UpdateOrganizationUseCase {
     private readonly documentsRepository: IDocumentsRepository,
   ) {}
 
-  async execute(input: UpdateOrganizationDto) {
-    const organization = await this.organizationRepository.findOneById(
-      input.organizationId,
-    );
+  async execute(input: UpdateOrganizationDto, organization: Organization) {
     const document = await this.documentsRepository.findOneById(
       organization.organizationDocumentId,
     );

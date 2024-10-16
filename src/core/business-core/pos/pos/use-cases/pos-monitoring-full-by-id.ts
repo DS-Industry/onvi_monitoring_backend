@@ -6,6 +6,7 @@ import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/devic
 import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
 import { ForbiddenError } from "@casl/ability";
 import { PermissionAction } from "@prisma/client";
+import { Pos } from "@pos/pos/domain/pos";
 
 @Injectable()
 export class MonitoringFullByIdPosUseCase {
@@ -19,10 +20,9 @@ export class MonitoringFullByIdPosUseCase {
   async execute(
     dateStart: Date,
     dateEnd: Date,
-    posId: number,
+    pos: Pos,
   ): Promise<PosMonitoringFullResponseDto[]> {
     const response: PosMonitoringFullResponseDto[] = [];
-    const pos = await this.findMethodsPosUseCase.getById(posId);
     const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
       pos.id,
     );

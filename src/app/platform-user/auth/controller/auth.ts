@@ -38,7 +38,7 @@ export class Auth {
     private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
     private readonly authValidateRules: AuthValidateRules,
   ) {}
-
+  //Login
   @UseGuards(LocalGuard)
   @Post('/login')
   @HttpCode(201)
@@ -57,7 +57,7 @@ export class Auth {
       throw new Error(e);
     }
   }
-
+  //register
   @Post('/register')
   @HttpCode(201)
   async register(@Body() body: AuthRegisterDto): Promise<any> {
@@ -72,17 +72,20 @@ export class Auth {
       throw new Error(e);
     }
   }
-
+  //Register worker in org on confirm string
   @Post('/worker')
   @HttpCode(201)
   async registerWorker(@Body() body: AuthRegisterWorkerDto): Promise<any> {
     try {
-      await this.authValidateRules.registerWorkerValidate(
-        body.email,
-        body.confirmString,
+      const organizationIdConfirmMail =
+        await this.authValidateRules.registerWorkerValidate(
+          body.email,
+          body.confirmString,
+        );
+      const { correctUser, sendMail } = await this.authRegisterWorker.execute(
+        body,
+        organizationIdConfirmMail,
       );
-      const { correctUser, sendMail } =
-        await this.authRegisterWorker.execute(body);
       return {
         user: correctUser,
         statusMail: sendMail,
@@ -91,7 +94,7 @@ export class Auth {
       throw new Error(e);
     }
   }
-
+  //Activation account
   @UseGuards(EmailGuard)
   @Post('/activation')
   @HttpCode(201)
@@ -113,7 +116,7 @@ export class Auth {
       throw new Error(e);
     }
   }
-
+  //Update refresh
   @UseGuards(RefreshGuard)
   @Post('/refresh')
   @HttpCode(200)
@@ -132,7 +135,7 @@ export class Auth {
       throw new Error(e);
     }
   }
-
+  //Reset password
   @UseGuards(EmailGuard)
   @Post('/password/reset')
   @HttpCode(201)
@@ -154,6 +157,7 @@ export class Auth {
       throw new Error(e);
     }
   }
+  //Send email for reset password
   @Post('/password/confirm')
   @HttpCode(201)
   async passwordConfirm(@Body() body: AuthPasswordConfirmDto): Promise<any> {
@@ -164,6 +168,7 @@ export class Auth {
       throw new Error(e);
     }
   }
+  //Valid confirm string
   @Post('/password/valid/confirm')
   @UseGuards(EmailGuard)
   @HttpCode(201)

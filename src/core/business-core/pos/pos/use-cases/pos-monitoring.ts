@@ -4,6 +4,8 @@ import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
+import { Pos } from "@pos/pos/domain/pos";
+import { CreateFullDataPosUseCase } from "@pos/pos/use-cases/pos-create-full-data";
 
 @Injectable()
 export class MonitoringPosUseCase {
@@ -11,18 +13,19 @@ export class MonitoringPosUseCase {
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly dataDeviceOperationUseCase: DataDeviceOperationUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
+    private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
   async execute(
     dateStart: Date,
     dateEnd: Date,
     ability: any,
-    posId?: number,
+    pos?: Pos,
   ): Promise<PosMonitoringResponseDto[]> {
     const response: PosMonitoringResponseDto[] = [];
     let poses: PosResponseDto[] = [];
-    if (posId) {
-      poses.push(await this.findMethodsPosUseCase.getById(posId));
+    if (pos) {
+      poses.push(await this.posCreateFullDataUseCase.execute(pos));
     } else {
       poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
     }

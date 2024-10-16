@@ -1,16 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ValidateLib } from '@platform-user/validate/validate.lib';
+import { ForbiddenError } from '@casl/ability';
+import { PermissionAction } from '@prisma/client';
 
 @Injectable()
 export class DeviceValidateRules {
-  constructor(private readonly validateLib: ValidateLib) {}
+  constructor(
+    private readonly validateLib: ValidateLib,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+  ) {}
 
   public async createValidate(id: number) {
     const response = await this.validateLib.posByIdExists(id);
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
   }
   public async createTypeValidate(name: string, code: string) {
@@ -18,24 +22,25 @@ export class DeviceValidateRules {
     response.push(await this.validateLib.deviceTypeByNameNotExists(name));
     response.push(await this.validateLib.deviceTypeByCodeNotExists(code));
 
-    const hasErrors = response.some((code) => code !== 200);
-    if (hasErrors) {
-      const errorCodes = response.filter((code) => code !== 200);
-      throw new Error(`Validation errors: ${errorCodes.join(', ')}`);
-    }
+    this.validateLib.handlerArrayResponse(response);
   }
 
   public async updateTypeValidate(id: number) {
     const response = await this.validateLib.deviceTypeByIdExists(id);
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
+    return response.object;
   }
 
-  public async getByIdValidate(id: number) {
+  public async getByIdValidate(id: number, ability: any) {
     const response = await this.validateLib.deviceByIdExists(id);
-    if (response !== 200) {
+    if (response.code !== 200) {
       throw new Error(`Validation errors: ${response}`);
     }
+
+    const device = response.object;
+    const pos = await this.findMethodsPosUseCase.getById(device.carWashPosId);
+    ForbiddenError.from(ability).throwUnlessCan(PermissionAction.read, pos);
   }
 }

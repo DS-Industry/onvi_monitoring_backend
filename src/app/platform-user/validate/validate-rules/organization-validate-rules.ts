@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ValidateLib } from '@platform-user/validate/validate.lib';
+import { ForbiddenError } from '@casl/ability';
+import { PermissionAction } from '@prisma/client';
 
 @Injectable()
 export class OrganizationValidateRules {
@@ -15,45 +17,53 @@ export class OrganizationValidateRules {
     response.push(
       await this.validateLib.organizationByOwnerExists(organizationId, userId),
     );
-
-    const hasErrors = response.some((code) => code !== 200);
-    if (hasErrors) {
-      const errorCodes = response.filter((code) => code !== 200);
-      throw new Error(`Validation errors: ${errorCodes.join(', ')}`);
-    }
+    this.validateLib.handlerArrayResponse(response);
   }
 
   public async verificateValidate(organizationId: number) {
     const response =
       await this.validateLib.organizationByIdExists(organizationId);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
+    return response.object;
   }
 
-  public async updateValidate(organizationId: number) {
+  public async updateValidate(organizationId: number, ability: any) {
     const response =
       await this.validateLib.organizationByIdExists(organizationId);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      response.object,
+    );
+    return response.object;
   }
 
-  public async getOneByIdValidate(id: number) {
+  public async getOneByIdValidate(id: number, ability: any) {
     const response = await this.validateLib.organizationByIdExists(id);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      response.object,
+    );
+    return response.object;
   }
 
   public async createValidate(name: string) {
     const response = await this.validateLib.organizationByNameNotExists(name);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
   }
 }

@@ -14,7 +14,10 @@ export class PosRepository extends IPosRepository {
   public async create(input: Pos): Promise<Pos> {
     const posPrismaEntity = PrismaPosMapper.toPrisma(input);
     const pos = await this.prisma.pos.create({
-      data: posPrismaEntity,
+      data: {
+        ...posPrismaEntity,
+        usersPermissions: { connect: { id: posPrismaEntity.createdById } },
+      },
     });
     return PrismaPosMapper.toDomain(pos);
   }

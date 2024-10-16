@@ -8,16 +8,16 @@ export class AuthValidateRules {
   public async passwordConfirmValidate(email: string) {
     const response = await this.validateLib.userByEmailExists(email);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
   }
 
   public async registerValidate(email: string) {
     const response = await this.validateLib.userByEmailNotExists(email);
 
-    if (response !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
     }
   }
 
@@ -28,10 +28,7 @@ export class AuthValidateRules {
       await this.validateLib.workerConfirmMailExists(email, confirmString),
     );
 
-    const hasErrors = response.some((code) => code !== 200);
-    if (hasErrors) {
-      const errorCodes = response.filter((code) => code !== 200);
-      throw new Error(`Validation errors: ${errorCodes.join(', ')}`);
-    }
+    this.validateLib.handlerArrayResponse(response);
+    return response.find((item) => item.object !== undefined)?.object;
   }
 }

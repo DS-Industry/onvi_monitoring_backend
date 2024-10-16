@@ -11,15 +11,15 @@ export class FindMethodsPosUseCase {
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
-  async getById(input: number): Promise<PosResponseDto> {
+  async getByIdFull(input: number): Promise<PosResponseDto> {
     const pos = await this.posRepository.findOneById(input);
     return this.posCreateFullDataUseCase.execute(pos);
   }
-/*
-  async getByIdPos(input: number): Promise<Pos> {
+
+  async getById(input: number): Promise<Pos> {
     return await this.posRepository.findOneById(input);
   }
-*/
+
   async getByName(input: string): Promise<Pos> {
     return await this.posRepository.findOneByName(input);
   }
@@ -40,5 +40,9 @@ export class FindMethodsPosUseCase {
         async (pos) => await this.posCreateFullDataUseCase.execute(pos),
       ),
     );
+  }
+
+  async getAllByAbilityPos(input: any): Promise<Pos[]> {
+    return await this.posRepository.findAllByPermission(input);
   }
 }
