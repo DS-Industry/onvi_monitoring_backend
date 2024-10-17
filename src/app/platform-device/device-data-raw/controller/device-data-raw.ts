@@ -1,11 +1,8 @@
 import {
-  Body,
   Controller,
-  Get,
   HttpCode,
   Post,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import { CreateDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-create';
 import { ApiKeyAuthGuard } from '@platform-device/device-data-raw/guards/api-key.guards';
@@ -17,7 +14,7 @@ export class DeviceDataRawController {
   ) {}
 
   @Post('')
-  @UseGuards(ApiKeyAuthGuard)
+  //@UseGuards(ApiKeyAuthGuard)
   @HttpCode(201)
   async create(@Request() req: any): Promise<void> {
     try {

@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PosProgramResponseDto } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
-import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
-import { Pos } from "@pos/pos/domain/pos";
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class ProgramPosUseCase {
