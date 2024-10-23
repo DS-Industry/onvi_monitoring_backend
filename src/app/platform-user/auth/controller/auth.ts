@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Post,
   Req,
@@ -25,6 +24,7 @@ import { AuthRegisterWorkerDto } from '@platform-user/auth/controller/dto/auth-r
 import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-register-worker';
 import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
+import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 
 @Controller('auth')
 export class Auth {
@@ -37,6 +37,7 @@ export class Auth {
     private readonly passwordReset: PasswordResetUserUseCase,
     private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
     private readonly authValidateRules: AuthValidateRules,
+    private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
   ) {}
   //Login
   @UseGuards(LocalGuard)
@@ -52,7 +53,12 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authLogin.execute(body.email, user.props.id);
+      const response = await this.authLogin.execute(body.email, user.props.id);
+      const permissionInfo =
+        await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
+          response.admin,
+        );
+      return { ...response, permissionInfo };
     } catch (e) {
       throw new Error(e);
     }

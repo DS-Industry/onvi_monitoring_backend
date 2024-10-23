@@ -8,7 +8,7 @@ export interface DeviceServiceProps {
   endDate: Date;
   loadDate: Date;
   localId: number;
-  counter: number;
+  counter: bigint;
   errNumId?: number;
 }
 
@@ -41,7 +41,7 @@ export class DeviceService extends BaseEntity<DeviceServiceProps> {
     return this.props.loadDate;
   }
 
-  get counter(): number {
+  get counter(): bigint {
     return this.props.counter;
   }
 

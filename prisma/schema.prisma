@@ -236,7 +236,7 @@ model CarWashDeviceOperationsEvent {
   carWashDeviceId              Int?
   operDate                     DateTime
   loadDate                     DateTime
-  counter                      Int
+  counter                      BigInt
   operSum                      Int
   confirm                      Int
   isAgregate                   Int
@@ -328,7 +328,7 @@ model CarWashDeviceServiceEvent {
   endDate                  DateTime
   loadDate                 DateTime
   localId                  Int
-  counter                  Int
+  counter                  BigInt
   errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
   errNumId                 Int?
 }

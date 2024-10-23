@@ -3,6 +3,7 @@ import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ValidateLib } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
+import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
 
 @Injectable()
 export class DeviceValidateRules {
@@ -11,11 +12,21 @@ export class DeviceValidateRules {
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
   ) {}
 
-  public async createValidate(id: number) {
-    const response = await this.validateLib.posByIdExists(id);
-    if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response.code}`);
-    }
+  public async createValidate(
+    posId: number,
+    name: string,
+    deviceTypeId: number,
+  ): Promise<CarWashDeviceType> {
+    const response = [];
+
+    response.push(await this.validateLib.posByIdExists(posId));
+    response.push(
+      await this.validateLib.deviceByNameAndPosIdNotExists(posId, name),
+    );
+    response.push(await this.validateLib.deviceTypeByIdExists(deviceTypeId));
+
+    this.validateLib.handlerArrayResponse(response);
+    return response.find((item) => item.object !== undefined)?.object;
   }
   public async createTypeValidate(name: string, code: string) {
     const response = [];

@@ -56,8 +56,15 @@ export class DeviceController {
     @Body() data: CarWashDeviceCreateDto,
   ): Promise<CarWashDeviceFullDataResponseDto> {
     try {
-      await this.deviceValidateRules.createValidate(data.carWashPosId);
-      return await this.deviceCreateCarWashDevice.execute(data);
+      const carWashDeviceType = await this.deviceValidateRules.createValidate(
+        data.carWashPosId,
+        data.name,
+        data.carWashDeviceTypeId,
+      );
+      return await this.deviceCreateCarWashDevice.execute(
+        data,
+        carWashDeviceType,
+      );
     } catch (e) {
       throw new Error(e);
     }

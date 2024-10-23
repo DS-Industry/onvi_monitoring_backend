@@ -3,7 +3,7 @@ export class DeviceOperationMonitoringResponseDto {
   sumOper: number;
   dateOper: Date;
   dateLoad: Date;
-  counter: number;
+  counter: bigint;
   localId: number;
   currencyType: string;
 }

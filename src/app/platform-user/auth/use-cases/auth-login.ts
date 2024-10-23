@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 
 @Injectable()
@@ -12,7 +11,6 @@ export class LoginAuthUseCase {
     private readonly singRefreshToken: SignRefreshTokenUseCase,
     private readonly userUpdate: UpdateUserUseCase,
     private readonly bcrypt: IBcryptAdapter,
-    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
   ) {}
 
   async execute(email: string, id: number): Promise<any> {

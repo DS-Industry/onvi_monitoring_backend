@@ -47,7 +47,7 @@ export class DeviceOperationHandlerUseCase {
         carWashDeviceId: deviceId,
         operDate: input.begDate,
         loadDate: loadDate,
-        counter: counter,
+        counter: BigInt(counter),
         operSum: sum,
         confirm: 1,
         isAgregate: 0,

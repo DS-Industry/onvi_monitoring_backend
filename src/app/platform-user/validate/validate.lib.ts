@@ -178,6 +178,20 @@ export class ValidateLib {
     return { code: 200, object: device };
   }
 
+  public async deviceByNameAndPosIdNotExists(
+    posId: number,
+    name: string,
+  ): Promise<ValidateResponse> {
+    const device = await this.findMethodsCarWashDeviceUseCase.getByNameAndCWId(
+      posId,
+      name,
+    );
+    if (device) {
+      return { code: 481 };
+    }
+    return { code: 200 };
+  }
+
   public handlerArrayResponse(response: ValidateResponse[]) {
     const hasErrors = response.some((response) => response.code !== 200);
     if (hasErrors) {

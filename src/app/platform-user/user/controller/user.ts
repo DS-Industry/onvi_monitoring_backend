@@ -12,19 +12,19 @@ import {
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
-import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { UpdateUserDto } from '@platform-user/user/controller/dto/user-update.dto';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { UserPasswordResetDto } from '@platform-user/user/controller/dto/user-password-reset.dto';
 import { UserValidateRules } from '@platform-user/validate/validate-rules/user-validate-rules';
+import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 
 @Controller('')
 export class UserController {
   constructor(
-    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly userDownloadAvatar: DownloadAvatarUserUseCase,
     private readonly userUpdate: UpdateUserUseCase,
     private readonly userValidateRules: UserValidateRules,
+    private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
   ) {}
   @Get('')
   @UseGuards(JwtGuard)
@@ -32,7 +32,11 @@ export class UserController {
   async getOneById(@Request() req: any): Promise<any> {
     try {
       const { user } = req;
-      return this.findMethodsUserUseCase.getById(user.id);
+      const permissionInfo =
+        await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
+          user,
+        );
+      return { ...user, permissionInfo };
     } catch (e) {
       throw new Error(e);
     }

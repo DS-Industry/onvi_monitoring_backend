@@ -45,8 +45,8 @@ import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-v
 import { UserValidateRules } from '@platform-user/validate/validate-rules/user-validate-rules';
 import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/user-organization-manage';
 import { PermissionController } from '@platform-user/core-controller/permission';
-import { UserPermissionValidateRules } from "@platform-user/validate/validate-rules/user-permission-validate-rules";
-
+import { UserPermissionValidateRules } from '@platform-user/validate/validate-rules/user-permission-validate-rules';
+import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -101,7 +101,11 @@ const validate: Provider[] = [
   UserPermissionValidateRules,
 ];
 
-const permission: Provider[] = [AbilityFactory, FindMethodsRoleUseCase];
+const permission: Provider[] = [
+  AbilityFactory,
+  FindMethodsRoleUseCase,
+  GetAllPermissionsInfoUseCases,
+];
 
 @Module({
   imports: [

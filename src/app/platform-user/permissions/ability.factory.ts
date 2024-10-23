@@ -45,7 +45,6 @@ export class AbilityFactory {
           id: { in: organizationCondition },
         };
       }
-      console.log(condition);
       return {
         id: permission.id,
         action: permission.action,

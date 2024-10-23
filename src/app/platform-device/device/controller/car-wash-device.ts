@@ -7,7 +7,6 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
-import { CarWashDeviceCreateDto } from '@platform-user/core-controller/dto/receive/car-wash-device-create.dto';
 import { DeviceValidateRules } from '@platform-device/device/controller/validate/device-validate-rules';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 
@@ -18,16 +17,6 @@ export class CarWashDeviceController {
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
-
-  @Post()
-  async create(@Body() input: CarWashDeviceCreateDto) {
-    await this.deviceValidateRules.createValidate(
-      input.carWashDeviceTypeId,
-      input.carWashPosId,
-      input.name,
-    );
-    return await this.createCarWashDeviceUseCase.execute(input);
-  }
 
   @Get(':id')
   async getById(@Param('id', ParseIntPipe) id: number) {

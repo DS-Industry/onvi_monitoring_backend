@@ -19,6 +19,7 @@ import {
   CheckAbilities,
   ManageOrgAbility,
 } from '@common/decorators/abilities.decorator';
+import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 
 @Controller('permission')
 export class PermissionController {
@@ -26,7 +27,19 @@ export class PermissionController {
     private readonly organizationManageUserUseCase: OrganizationManageUserUseCase,
     private readonly userUpdate: UpdateUserUseCase,
     private readonly userPermissionValidateRules: UserPermissionValidateRules,
+    private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
   ) {}
+  @Get('role')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
+  @HttpCode(200)
+  async getPermissionRoles(): Promise<any> {
+    try {
+      return await this.getAllPermissionsInfoUseCases.getAllPermissionsInfo();
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
   //All worker for permission org
   @Get('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)

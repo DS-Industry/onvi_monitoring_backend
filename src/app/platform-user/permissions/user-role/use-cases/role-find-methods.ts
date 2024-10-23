@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { IRoleRepository } from "@platform-user/permissions/user-role/interfaces/role";
-import { UserRole } from "@platform-user/permissions/user-role/domain/user-role";
-import { UserPermission } from "@platform-user/permissions/user-permissions/domain/user-permissions";
+import { Injectable } from '@nestjs/common';
+import { IRoleRepository } from '@platform-user/permissions/user-role/interfaces/role';
+import { UserRole } from '@platform-user/permissions/user-role/domain/user-role';
+import { UserPermission } from '@platform-user/permissions/user-permissions/domain/user-permissions';
 
 @Injectable()
 export class FindMethodsRoleUseCase {

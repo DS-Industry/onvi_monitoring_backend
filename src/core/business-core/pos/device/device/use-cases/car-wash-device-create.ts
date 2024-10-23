@@ -2,23 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { ICarWashDeviceRepository } from '@pos/device/device/interfaces/device';
 import { CarWashDeviceFullDataResponseDto } from '@platform-user/core-controller/dto/response/car-wash-device-full-data-response.dto';
 import { CarWashDevice } from '@pos/device/device/domain/device';
-import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { CarWashDeviceCreateDto } from '@pos/device/device/use-cases/dto/car-wash-device-create.dto';
+import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
 
 @Injectable()
 export class CreateCarWashDeviceUseCase {
   constructor(
     private readonly carWashDeviceRepository: ICarWashDeviceRepository,
-    private readonly findMethodsCarWashDeviceTypeUseCase: FindMethodsCarWashDeviceTypeUseCase,
   ) {}
 
   async execute(
     input: CarWashDeviceCreateDto,
+    carWashDeviceType: CarWashDeviceType
   ): Promise<CarWashDeviceFullDataResponseDto> {
-    const carWashDeviceType =
-      await this.findMethodsCarWashDeviceTypeUseCase.getById(
-        input.carWashDeviceTypeId,
-      );
 
     const carWashDeviceData = new CarWashDevice({
       name: input.name,
