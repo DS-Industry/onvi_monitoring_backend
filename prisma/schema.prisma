@@ -91,6 +91,9 @@ model User {
   posesCreated      Pos[]          @relation(name: "CreatedByUser")
   posesUpdated      Pos[]          @relation(name: "UpdateByUser")
   posesPermissions  Pos[]
+  techTaskExecutor  TechTask[]     @relation(name: "Executor")
+  techTaskCreated   TechTask[]     @relation(name: "CreatedByUser")
+  techTaskUpdated   TechTask[]     @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -167,6 +170,7 @@ model Pos {
   loyaltyPosPromocodes LoyaltyPosPromocode[]
   carWashPos           CarWashPos?
   usersPermissions     User[]
+  techTasks            TechTask[]
 }
 
 model CarWashPos {
@@ -574,6 +578,80 @@ model DeviceDataRaw {
   updatedAt               DateTime
   countRow                Int?
   countError              Int?
+}
+
+model TechTask {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  pos                     Pos                      @relation(fields: [posId], references: [id])
+  posId                   Int
+  type                    TypeTechTask
+  status                  StatusTechTask
+  period                  PeriodTechTask
+  startDate               DateTime
+  startWorkDate           DateTime?
+  sendWorkDate            DateTime?
+  executor                User?                    @relation(name: "Executor", fields: [executorId], references: [id])
+  executorId              Int?
+  createdAt               DateTime
+  updatedAt               DateTime
+  createdBy               User                     @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updateBy                User                     @relation(name: "UpdateByUser", fields: [updateById], references: [id])
+  updateById              Int
+  techTaskItemValueToTechTasks       TechTaskItemValueToTechTask[]
+}
+
+enum TypeTechTask {
+  Routine
+  Regulation
+}
+
+enum StatusTechTask {
+  ACTIVE
+  FINISHED
+  PAUSE
+}
+
+enum PeriodTechTask {
+  Daily
+  Weekly
+  Monthly
+}
+
+model TechTaskItemTemplate {
+  id                      Int                      @id @default(autoincrement())
+  title                   String
+  type                    TypeTechTaskItemTemplate
+  group                   GroupTechTaskItemTemplate
+  techTaskItemValueToTechTasks       TechTaskItemValueToTechTask[]
+}
+
+enum TypeTechTaskItemTemplate {
+  Text
+  Number
+  SelectList
+  Checkbox
+}
+
+enum GroupTechTaskItemTemplate {
+  Check
+  PowerConsumption
+  Installations
+  Softener
+  Osmosis
+  CarbonFilter
+  Chemistry
+  Counters
+}
+
+model TechTaskItemValueToTechTask {
+  id                      Int                      @id @default(autoincrement())
+  techTask                TechTask                 @relation(fields: [techTaskId], references: [id])
+  techTaskId              Int
+  techTaskItemTemplate    TechTaskItemTemplate     @relation(fields: [techTaskItemTemplateId], references: [id])
+  techTaskItemTemplateId  Int
+  value                   String?
 }
 
 enum StatusUser {

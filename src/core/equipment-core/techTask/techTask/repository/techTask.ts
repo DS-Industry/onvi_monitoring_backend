@@ -1,0 +1,59 @@
+import { Injectable } from '@nestjs/common';
+import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
+import { PrismaService } from '@db/prisma/prisma.service';
+import { TechTask } from '@tech-task/techTask/domain/techTask';
+import { PrismaTechTaskMapper } from '@db/mapper/prisma-tech-task-mapper';
+import { StatusTechTask } from '@prisma/client';
+
+@Injectable()
+export class TechTaskRepository extends ITechTaskRepository {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
+  public async create(input: TechTask): Promise<TechTask> {
+    const techTaskEntity = PrismaTechTaskMapper.toPrisma(input);
+    const techTask = await this.prisma.techTask.create({
+      data: techTaskEntity,
+    });
+    return PrismaTechTaskMapper.toDomain(techTask);
+  }
+
+  public async findOneById(id: number): Promise<TechTask> {
+    const techTask = await this.prisma.techTask.findFirst({
+      where: {
+        id,
+      },
+    });
+    return PrismaTechTaskMapper.toDomain(techTask);
+  }
+
+  public async findAllByPosId(posId: number): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId,
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        status,
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async update(input: TechTask): Promise<TechTask> {
+    const techTaskEntity = PrismaTechTaskMapper.toPrisma(input);
+    const techTask = await this.prisma.techTask.update({
+      where: {
+        id: input.id,
+      },
+      data: techTaskEntity,
+    });
+    return PrismaTechTaskMapper.toDomain(techTask);
+  }
+}

@@ -117,7 +117,12 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authActive.execute(user);
+      const response = await this.authActive.execute(user);
+      const permissionInfo =
+        await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
+          response.admin,
+        );
+      return { ...response, permissionInfo };
     } catch (e) {
       throw new Error(e);
     }
