@@ -53,4 +53,12 @@ export class DeviceProgramTypeRepository extends IDeviceProgramTypeRepository {
       });
     return PrismaCarWashDeviceProgramTypeMapper.toDomain(deviceProgramType);
   }
+
+  public async findAll(): Promise<DeviceProgramType[]> {
+    const deviceProgramTypes =
+      await this.prisma.carWashDeviceProgramsType.findMany();
+    return deviceProgramTypes.map((item) =>
+      PrismaCarWashDeviceProgramTypeMapper.toDomain(item),
+    );
+  }
 }

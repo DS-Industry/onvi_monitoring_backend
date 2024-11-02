@@ -4,6 +4,7 @@ import { ValidateLib } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
+import { DeviceProgramType } from '@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type';
 
 @Injectable()
 export class DeviceValidateRules {
@@ -53,5 +54,13 @@ export class DeviceValidateRules {
     const device = response.object;
     const pos = await this.findMethodsPosUseCase.getById(device.carWashPosId);
     ForbiddenError.from(ability).throwUnlessCan(PermissionAction.read, pos);
+  }
+
+  public async getProgramTypeById(id: number): Promise<DeviceProgramType> {
+    const response = await this.validateLib.deviceProgramTypeByIdExists(id);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response}`);
+    }
+    return response.object;
   }
 }

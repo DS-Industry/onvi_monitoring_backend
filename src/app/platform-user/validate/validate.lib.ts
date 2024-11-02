@@ -13,6 +13,15 @@ import { Pos } from '@pos/pos/domain/pos';
 import { Organization } from '@organization/organization/domain/organization';
 import { User } from '@platform-user/user/domain/user';
 import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
+import { FindMethodsEquipmentKnotUseCase } from '@equipment/equipmentKnot/use-cases/equipment-knot-find-methods';
+import { FindMethodsIncidentNameUseCase } from '@equipment/incident/incidentName/use-cases/incident-name-find-methods';
+import { FindMethodsIncidentInfoUseCase } from '@equipment/incident/incidentInfo/use-cases/incident-info-find-methods';
+import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
+import { FindMethodsIncidentUseCase } from "@equipment/incident/incident/use-cases/incident-find-methods";
+import { Incident } from "@equipment/incident/incident/domain/incident";
+import {
+  DeviceProgramType
+} from "@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type";
 export interface ValidateResponse<T = any> {
   code: number;
   object?: T;
@@ -25,6 +34,11 @@ export class ValidateLib {
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
+    private readonly findMethodsEquipmentKnotUseCase: FindMethodsEquipmentKnotUseCase,
+    private readonly findMethodsIncidentUseCase: FindMethodsIncidentUseCase,
+    private readonly findMethodsIncidentNameUseCase: FindMethodsIncidentNameUseCase,
+    private readonly findMethodsIncidentInfoUseCase: FindMethodsIncidentInfoUseCase,
+    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly bcrypt: IBcryptAdapter,
@@ -80,6 +94,13 @@ export class ValidateLib {
       return { code: 450 };
     }
     return { code: 200 };
+  }
+  public async userByIdExists(id: number): Promise<ValidateResponse<User>> {
+    const checkUserId = await this.findMethodsUserUseCase.getById(id);
+    if (!checkUserId) {
+      return { code: 450 };
+    }
+    return { code: 200, object: checkUserId };
   }
   public async organizationByOwnerExists(
     organizationId: number,
@@ -190,6 +211,53 @@ export class ValidateLib {
       return { code: 481 };
     }
     return { code: 200 };
+  }
+
+  public async deviceProgramTypeByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<DeviceProgramType>> {
+    const programType =
+      await this.findMethodsDeviceProgramTypeUseCase.getById(id);
+    if (!programType) {
+      return { code: 482 };
+    }
+    return { code: 200, object: programType };
+  }
+
+  public async equipmentKnotByIdExists(
+    id: number,
+    posId: number,
+  ): Promise<ValidateResponse> {
+    const equipmentKnot =
+      await this.findMethodsEquipmentKnotUseCase.getById(id);
+    if (!equipmentKnot || equipmentKnot.posId != posId) {
+      return { code: 490 };
+    }
+    return { code: 200 };
+  }
+
+  public async incidentNameByIdExists(id: number): Promise<ValidateResponse> {
+    const incidentName = await this.findMethodsIncidentNameUseCase.getById(id);
+    if (!incidentName) {
+      return { code: 491 };
+    }
+    return { code: 200 };
+  }
+
+  public async incidentInfoByIdExists(id: number): Promise<ValidateResponse> {
+    const incidentInfo = await this.findMethodsIncidentInfoUseCase.getById(id);
+    if (!incidentInfo) {
+      return { code: 492 };
+    }
+    return { code: 200 };
+  }
+
+  public async incidentByIdExists(id: number): Promise<ValidateResponse<Incident>> {
+    const incident = await this.findMethodsIncidentUseCase.getById(id);
+    if (!incident) {
+      return { code: 493 };
+    }
+    return { code: 200, object: incident };
   }
 
   public handlerArrayResponse(response: ValidateResponse[]) {

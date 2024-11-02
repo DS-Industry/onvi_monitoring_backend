@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
+  ParseIntPipe,
   Patch,
   Request,
   UploadedFile,
@@ -37,6 +39,24 @@ export class UserController {
           user,
         );
       return { ...user, permissionInfo };
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  @Get('contact/:id')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getContactData(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    try {
+      const user = await this.userValidateRules.getContact(id);
+      return {
+        name: user.name,
+        surname: user.surname,
+        middlename: user.middlename,
+        email: user.email,
+        position: user.position,
+      };
     } catch (e) {
       throw new Error(e);
     }

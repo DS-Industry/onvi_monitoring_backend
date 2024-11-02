@@ -37,7 +37,8 @@
       "@common/*": ["src/common/*"],
       "@business-core/*": ["src/core/business-core/*"],
       "@object-permission/*": ["src/infra/object/*"],
-      "@tech-task/*": ["src/core/equipment-core/techTask/*"]
+      "@tech-task/*": ["src/core/equipment-core/techTask/*"],
+      "@equipment/*": ["src/core/equipment-core/equipment/*"]
     }
   }
 }

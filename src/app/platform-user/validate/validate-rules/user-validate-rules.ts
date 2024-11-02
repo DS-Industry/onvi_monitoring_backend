@@ -15,4 +15,12 @@ export class UserValidateRules {
       throw new Error(`Validation errors: ${response.code}`);
     }
   }
+
+  public async getContact(id: number) {
+    const response = await this.validateLib.userByIdExists(id);
+    if (response.code !== 200) {
+      throw new Error(`Validation errors: ${response.code}`);
+    }
+    return response.object;
+  }
 }

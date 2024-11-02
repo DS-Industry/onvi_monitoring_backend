@@ -153,6 +153,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
     ...deviceTypeUseCase,
+    ...deviceDataHandlerUseCase,
   ],
 })
 export class PosModule {}

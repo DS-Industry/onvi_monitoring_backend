@@ -2,50 +2,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 async function main() {
-  /*const organization = await prisma.organization.upsert({
-    where: { name: 'DS test' },
-    update: {},
-    create: {
-      name: 'DS test',
-      slug: 'DS_test',
-      address: {
-        create: {
-          id: 0,
-          city: 'Воронеж',
-          location: 'Брусилова 4',
-          lat: 10,
-          lon: 10,
-        },
-      },
-      organizationStatus: 'ACTIVE',
-      organizationType: 'LegalEntity',
-      createdAt: new Date(Date.now()),
-      updatedAt: new Date(Date.now()),
-      owner: {
-        create: {
-          userRole: {
-            create: {
-              name: 'Admin',
-            },
-          },
-          name: 'Admin',
-          surname: 'Adminov',
-          phone: '+79000000000',
-          email: 'bychenko-work@mail.ru',
-          password:
-            '$2b$10$yPnmYJDL1W/RQ8bJ5HchCOTV8vSleguHzn94P7vlU/5PVjr4gx3ea',
-          gender: 'Man',
-          status: 'ACTIVE',
-          country: 'Воронеж',
-          countryCode: 1,
-          timezone: 1,
-          createdAt: new Date(Date.now()),
-          updatedAt: new Date(Date.now()),
-        },
-      },
-    },
-  });*/
-
   const washerCarWashDeviceType = await prisma.carWashDeviceType.upsert({
     where: { id: 1 },
     update: {},
@@ -695,6 +651,14 @@ async function main() {
       name: 'Pos',
     },
   });
+  const objectIncident = await prisma.objectPermissions.upsert({
+    where: { id: 3 },
+    update: {},
+    create: {
+      id: 3,
+      name: 'Incident',
+    },
+  });
   const userPermissionsOrgManage = await prisma.userPermission.upsert({
     where: { id: 1 },
     update: {},
@@ -785,6 +749,51 @@ async function main() {
       objectId: 2,
     },
   });
+  const userPermissionsIncidentManage = await prisma.userPermission.upsert({
+    where: { id: 11 },
+    update: {},
+    create: {
+      id: 11,
+      action: 'manage',
+      objectId: 3,
+    },
+  });
+  const userPermissionsIncidentCreate = await prisma.userPermission.upsert({
+    where: { id: 12 },
+    update: {},
+    create: {
+      id: 12,
+      action: 'create',
+      objectId: 3,
+    },
+  });
+  const userPermissionsIncidentUpdate = await prisma.userPermission.upsert({
+    where: { id: 13 },
+    update: {},
+    create: {
+      id: 13,
+      action: 'update',
+      objectId: 3,
+    },
+  });
+  const userPermissionsIncidentRead = await prisma.userPermission.upsert({
+    where: { id: 14 },
+    update: {},
+    create: {
+      id: 14,
+      action: 'read',
+      objectId: 3,
+    },
+  });
+  const userPermissionsIncidentDelete = await prisma.userPermission.upsert({
+    where: { id: 15 },
+    update: {},
+    create: {
+      id: 15,
+      action: 'delete',
+      objectId: 3,
+    },
+  });
   const userRoleOwner = await prisma.userRole.upsert({
     where: { id: 1 },
     update: {},
@@ -798,6 +807,9 @@ async function main() {
           },
           {
             id: 6,
+          },
+          {
+            id: 11,
           },
         ],
       },
@@ -817,6 +829,9 @@ async function main() {
           {
             id: 6,
           },
+          {
+            id: 11,
+          },
         ],
       },
     },
@@ -834,6 +849,9 @@ async function main() {
           },
           {
             id: 9,
+          },
+          {
+            id: 14,
           },
         ],
       },

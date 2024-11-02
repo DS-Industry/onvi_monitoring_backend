@@ -7,4 +7,5 @@ export abstract class IDeviceProgramTypeRepository {
   abstract findAllByCarWashDeviceTypeId(
     carWashDeviceTypeId: number,
   ): Promise<DeviceProgramType[]>;
+  abstract findAll(): Promise<DeviceProgramType[]>;
 }

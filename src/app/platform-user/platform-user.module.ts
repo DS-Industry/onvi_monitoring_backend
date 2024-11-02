@@ -47,6 +47,10 @@ import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/use
 import { PermissionController } from '@platform-user/core-controller/permission';
 import { UserPermissionValidateRules } from '@platform-user/validate/validate-rules/user-permission-validate-rules';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { EquipmentModule } from "@equipment/equipment.module";
+import { IncidentController } from "@platform-user/core-controller/incident";
+import { IncidentValidateRules } from "@platform-user/validate/validate-rules/incident-validate-rules";
+import { EquipmentController } from "@platform-user/core-controller/equipment";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -61,6 +65,8 @@ const controllers = [
   PosController,
   UserController,
   PermissionController,
+  IncidentController,
+  EquipmentController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -99,6 +105,7 @@ const validate: Provider[] = [
   AuthValidateRules,
   UserValidateRules,
   UserPermissionValidateRules,
+  IncidentValidateRules
 ];
 
 const permission: Provider[] = [
@@ -115,6 +122,7 @@ const permission: Provider[] = [
     DateModule,
     MailModule,
     BusinessCoreModule,
+    EquipmentModule,
     ObjectModule,
     FileModule,
   ],

@@ -44,6 +44,10 @@ export class AbilityFactory {
         condition = {
           id: { in: organizationCondition },
         };
+      } else if (objectMap[permission.objectId].name == 'Incident') {
+        condition = {
+          posId: { in: posCondition },
+        };
       }
       return {
         id: permission.id,

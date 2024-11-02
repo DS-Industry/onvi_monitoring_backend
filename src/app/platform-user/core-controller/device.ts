@@ -35,6 +35,7 @@ import {
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
+import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 
 @Controller('device')
 export class DeviceController {
@@ -46,6 +47,7 @@ export class DeviceController {
     private readonly dataByDeviceOperationUseCase: DataByDeviceOperationUseCase,
     private readonly dataByDeviceProgramUseCase: DataByDeviceProgramUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
+    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
     private readonly posValidateRules: PosValidateRules,
   ) {}
@@ -87,6 +89,30 @@ export class DeviceController {
         data.dateStart,
         data.dateEnd,
       );
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get all program type
+  @Get('program/type')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getAllProgramType(): Promise<any> {
+    try {
+      return await this.findMethodsDeviceProgramTypeUseCase.getAll();
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get program type by id
+  @Get('program/type/:id')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getProgramTypeById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    try {
+      return await this.deviceValidateRules.getProgramTypeById(id);
     } catch (e) {
       throw new Error(e);
     }

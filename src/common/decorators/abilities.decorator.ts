@@ -55,3 +55,25 @@ export class DeletePosAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'Pos';
 }
+export class ManageIncidentAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'Incident';
+}
+
+export class ReadIncidentAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'Incident';
+}
+
+export class CreateIncidentAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'Incident';
+}
+export class UpdateIncidentAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'Incident';
+}
+export class DeleteIncidentAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'Incident';
+}
