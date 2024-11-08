@@ -48,6 +48,10 @@ export class AbilityFactory {
         condition = {
           posId: { in: posCondition },
         };
+      } else if (objectMap[permission.objectId].name == 'TechTask') {
+        condition = {
+          posId: { in: posCondition },
+        };
       }
       return {
         id: permission.id,

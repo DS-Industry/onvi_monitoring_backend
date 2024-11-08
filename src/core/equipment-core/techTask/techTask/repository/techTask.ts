@@ -37,6 +37,19 @@ export class TechTaskRepository extends ITechTaskRepository {
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 
+  public async findAllByPosIdAndStatuses(
+    posId: number,
+    statuses: StatusTechTask[],
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId,
+        status: { in: statuses },
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
   public async findAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
     const techTasks = await this.prisma.techTask.findMany({
       where: {

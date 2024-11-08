@@ -589,12 +589,13 @@ model DeviceDataRaw {
 model TechTask {
   id                      Int                      @id @default(autoincrement())
   name                    String
-  pos                     Pos                      @relation(fields: [posId], references: [id])
-  posId                   Int
+  pos                     Pos?                      @relation(fields: [posId], references: [id])
+  posId                   Int?
   type                    TypeTechTask
   status                  StatusTechTask
   period                  PeriodTechTask
   startDate               DateTime
+  nextCreateDate          DateTime?
   startWorkDate           DateTime?
   sendWorkDate            DateTime?
   executor                User?                    @relation(name: "Executor", fields: [executorId], references: [id])
@@ -617,6 +618,7 @@ enum StatusTechTask {
   ACTIVE
   FINISHED
   PAUSE
+  OVERDUE
 }
 
 enum PeriodTechTask {

@@ -5,7 +5,7 @@ import { FindMethodsOrganizationUseCase } from '@organization/organization/use-c
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-validate';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { PositionUser } from '@prisma/client';
+import { PositionUser, StatusTechTask } from '@prisma/client';
 import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { CarWashDevice } from '@pos/device/device/domain/device';
@@ -17,11 +17,13 @@ import { FindMethodsEquipmentKnotUseCase } from '@equipment/equipmentKnot/use-ca
 import { FindMethodsIncidentNameUseCase } from '@equipment/incident/incidentName/use-cases/incident-name-find-methods';
 import { FindMethodsIncidentInfoUseCase } from '@equipment/incident/incidentInfo/use-cases/incident-info-find-methods';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
-import { FindMethodsIncidentUseCase } from "@equipment/incident/incident/use-cases/incident-find-methods";
-import { Incident } from "@equipment/incident/incident/domain/incident";
-import {
-  DeviceProgramType
-} from "@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type";
+import { FindMethodsIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-find-methods';
+import { Incident } from '@equipment/incident/incident/domain/incident';
+import { DeviceProgramType } from '@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type';
+import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
+import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
+import { TechTask } from '@tech-task/techTask/domain/techTask';
+import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 export interface ValidateResponse<T = any> {
   code: number;
   object?: T;
@@ -38,6 +40,9 @@ export class ValidateLib {
     private readonly findMethodsIncidentUseCase: FindMethodsIncidentUseCase,
     private readonly findMethodsIncidentNameUseCase: FindMethodsIncidentNameUseCase,
     private readonly findMethodsIncidentInfoUseCase: FindMethodsIncidentInfoUseCase,
+    private readonly findMethodsTechTaskUseCase: FindMethodsTechTaskUseCase,
+    private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
+    private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
@@ -252,12 +257,62 @@ export class ValidateLib {
     return { code: 200 };
   }
 
-  public async incidentByIdExists(id: number): Promise<ValidateResponse<Incident>> {
+  public async incidentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Incident>> {
     const incident = await this.findMethodsIncidentUseCase.getById(id);
     if (!incident) {
       return { code: 493 };
     }
     return { code: 200, object: incident };
+  }
+
+  public async itemTemplateByIdExists(id: number): Promise<ValidateResponse> {
+    const itemTemplate = await this.findMethodsItemTemplateUseCase.getById(id);
+    if (!itemTemplate) {
+      return { code: 494 };
+    }
+    return { code: 200 };
+  }
+
+  public async techTaskByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<TechTask>> {
+    const techTask = await this.findMethodsTechTaskUseCase.getById(id);
+    if (!techTask) {
+      return { code: 495 };
+    }
+    return { code: 200, object: techTask };
+  }
+
+  public async techTaskByIdAndStatusExists(
+    id: number,
+  ): Promise<ValidateResponse<TechTask>> {
+    const techTask = await this.findMethodsTechTaskUseCase.getById(id);
+    if (
+      !techTask ||
+      techTask.status == StatusTechTask.FINISHED ||
+      techTask.status == StatusTechTask.PAUSE
+    ) {
+      return { code: 495 };
+    }
+    return { code: 200, object: techTask };
+  }
+
+  public async techTaskItemComparisonByIdAndList(
+    id: number,
+    itemsIds: number[],
+  ): Promise<ValidateResponse> {
+    const itemToTechTask =
+      await this.findMethodsItemTemplateToTechTaskUseCase.findAllByTaskId(id);
+    const techTaskItemIds = itemToTechTask.map((item) => item.id);
+    const unnecessaryItems = itemsIds.filter(
+      (item) => !techTaskItemIds.includes(item),
+    );
+    if (unnecessaryItems.length > 0) {
+      return { code: 496 };
+    }
+    return { code: 200 };
   }
 
   public handlerArrayResponse(response: ValidateResponse[]) {

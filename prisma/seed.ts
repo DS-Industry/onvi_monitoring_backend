@@ -659,6 +659,14 @@ async function main() {
       name: 'Incident',
     },
   });
+  const objectTechTask = await prisma.objectPermissions.upsert({
+    where: { id: 4 },
+    update: {},
+    create: {
+      id: 4,
+      name: 'TechTask',
+    },
+  });
   const userPermissionsOrgManage = await prisma.userPermission.upsert({
     where: { id: 1 },
     update: {},
@@ -794,9 +802,73 @@ async function main() {
       objectId: 3,
     },
   });
+  const userPermissionsTechTaskManage = await prisma.userPermission.upsert({
+    where: { id: 16 },
+    update: {},
+    create: {
+      id: 16,
+      action: 'manage',
+      objectId: 4,
+    },
+  });
+  const userPermissionsTechTaskCreate = await prisma.userPermission.upsert({
+    where: { id: 17 },
+    update: {},
+    create: {
+      id: 17,
+      action: 'create',
+      objectId: 4,
+    },
+  });
+  const userPermissionsTechTaskUpdate = await prisma.userPermission.upsert({
+    where: { id: 18 },
+    update: {},
+    create: {
+      id: 18,
+      action: 'update',
+      objectId: 4,
+    },
+  });
+  const userPermissionsTechTaskRead = await prisma.userPermission.upsert({
+    where: { id: 19 },
+    update: {},
+    create: {
+      id: 19,
+      action: 'read',
+      objectId: 4,
+    },
+  });
+  const userPermissionsTechTaskDelete = await prisma.userPermission.upsert({
+    where: { id: 20 },
+    update: {},
+    create: {
+      id: 20,
+      action: 'delete',
+      objectId: 4,
+    },
+  });
   const userRoleOwner = await prisma.userRole.upsert({
     where: { id: 1 },
-    update: {},
+    update: {
+      id: 1,
+      name: 'Owner',
+      userPermissions: {
+        connect: [
+          {
+            id: 1,
+          },
+          {
+            id: 6,
+          },
+          {
+            id: 11,
+          },
+          {
+            id: 16,
+          },
+        ],
+      },
+    },
     create: {
       id: 1,
       name: 'Owner',
@@ -811,13 +883,35 @@ async function main() {
           {
             id: 11,
           },
+          {
+            id: 16,
+          },
         ],
       },
     },
   });
   const userRoleAdmin = await prisma.userRole.upsert({
     where: { id: 2 },
-    update: {},
+    update: {
+      id: 2,
+      name: 'Admin',
+      userPermissions: {
+        connect: [
+          {
+            id: 1,
+          },
+          {
+            id: 6,
+          },
+          {
+            id: 11,
+          },
+          {
+            id: 16,
+          },
+        ],
+      },
+    },
     create: {
       id: 2,
       name: 'Admin',
@@ -831,6 +925,9 @@ async function main() {
           },
           {
             id: 11,
+          },
+          {
+            id: 16,
           },
         ],
       },

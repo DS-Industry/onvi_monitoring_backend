@@ -47,10 +47,12 @@ import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/use
 import { PermissionController } from '@platform-user/core-controller/permission';
 import { UserPermissionValidateRules } from '@platform-user/validate/validate-rules/user-permission-validate-rules';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
-import { EquipmentModule } from "@equipment/equipment.module";
 import { IncidentController } from "@platform-user/core-controller/incident";
 import { IncidentValidateRules } from "@platform-user/validate/validate-rules/incident-validate-rules";
 import { EquipmentController } from "@platform-user/core-controller/equipment";
+import { TechTaskController } from "@platform-user/core-controller/techTask";
+import { EquipmentCoreModule } from "../../core/equipment-core/equipment-core.module";
+import { TechTaskValidateRules } from "@platform-user/validate/validate-rules/techTask-rules";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -66,6 +68,7 @@ const controllers = [
   UserController,
   PermissionController,
   IncidentController,
+  TechTaskController,
   EquipmentController,
 ];
 const authUseCase: Provider[] = [
@@ -105,7 +108,8 @@ const validate: Provider[] = [
   AuthValidateRules,
   UserValidateRules,
   UserPermissionValidateRules,
-  IncidentValidateRules
+  IncidentValidateRules,
+  TechTaskValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -122,7 +126,7 @@ const permission: Provider[] = [
     DateModule,
     MailModule,
     BusinessCoreModule,
-    EquipmentModule,
+    EquipmentCoreModule,
     ObjectModule,
     FileModule,
   ],

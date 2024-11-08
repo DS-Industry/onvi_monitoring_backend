@@ -4,7 +4,16 @@ export abstract class ITechTaskItemValueToTechTaskRepository {
   abstract create(
     input: TechTaskItemValueToTechTask,
   ): Promise<TechTaskItemValueToTechTask>;
+  abstract createMany(input: TechTaskItemValueToTechTask[]): void;
+  abstract deleteMany(
+    techTaskId: number,
+    techTaskItemTemplateIds: number[],
+  ): void;
   abstract findAllByTaskId(
     techTaskId: number,
   ): Promise<TechTaskItemValueToTechTask[]>;
+  abstract updateValue(
+    id: number,
+    value: string,
+  ): Promise<TechTaskItemValueToTechTask>;
 }

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsIncidentNameUseCase } from '@equipment/incident/incidentName/use-cases/incident-name-find-methods';
-import { IncidentFullInfoResponseDto } from '@equipment/incident/incidentName/use-cases/dto/incident-full-info-response.dto';
+import {
+  IncidentFullInfoResponseDto,
+  IncidentInfoDto
+} from '@equipment/incident/incidentName/use-cases/dto/incident-full-info-response.dto';
 import { FindMethodsIncidentInfoUseCase } from '@equipment/incident/incidentInfo/use-cases/incident-info-find-methods';
 import { IncidentInfoType } from '@prisma/client';
 
@@ -20,20 +23,21 @@ export class FullInfoByEquipmentKnotIncidentUseCase {
       );
     await Promise.all(
       incidentNames.map(async (incidentName) => {
-        const reason: string[] = [];
-        const solution: string[] = [];
+        const reason: IncidentInfoDto[] = [];
+        const solution: IncidentInfoDto[] = [];
         const incidentInfos =
           await this.findMethodsIncidentInfoUseCase.getAllByIncidentNameId(
             incidentName.id,
           );
         incidentInfos.map((incidentInfo) => {
           if (incidentInfo.type == IncidentInfoType.Reason) {
-            reason.push(incidentInfo.name);
+            reason.push({ id: incidentInfo.id, infoName: incidentInfo.name });
           } else if (incidentInfo.type == IncidentInfoType.Solution) {
-            solution.push(incidentInfo.name);
+            solution.push({ id: incidentInfo.id, infoName: incidentInfo.name });
           }
         });
         response.push({
+          id: incidentName.id,
           problemName: incidentName.name,
           reason: reason,
           solution: solution,

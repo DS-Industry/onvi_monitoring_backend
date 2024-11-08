@@ -24,6 +24,28 @@ export class TechTaskItemValueToTechTaskRepository extends ITechTaskItemValueToT
     );
   }
 
+  public async createMany(input: TechTaskItemValueToTechTask[]): Promise<void> {
+    const itemValueToTechTaskEntities = input.map((item) =>
+      PrismaTechTaskItemValueToTechTaskMapper.toPrisma(item),
+    );
+
+    await this.prisma.techTaskItemValueToTechTask.createMany({
+      data: itemValueToTechTaskEntities,
+    });
+  }
+
+  public async deleteMany(
+    techTaskId: number,
+    techTaskItemTemplateIds: number[],
+  ): Promise<void> {
+    await this.prisma.techTaskItemValueToTechTask.deleteMany({
+      where: {
+        techTaskId,
+        techTaskItemTemplateId: { in: techTaskItemTemplateIds },
+      },
+    });
+  }
+
   public async findAllByTaskId(
     techTaskId: number,
   ): Promise<TechTaskItemValueToTechTask[]> {
@@ -35,6 +57,22 @@ export class TechTaskItemValueToTechTaskRepository extends ITechTaskItemValueToT
       });
     return itemValueToTechTasks.map((item) =>
       PrismaTechTaskItemValueToTechTaskMapper.toDomain(item),
+    );
+  }
+
+  public async updateValue(
+    id: number,
+    value: string,
+  ): Promise<TechTaskItemValueToTechTask> {
+    const itemValueToTechTask =
+      await this.prisma.techTaskItemValueToTechTask.update({
+        where: {
+          id,
+        },
+        data: { value: value },
+      });
+    return PrismaTechTaskItemValueToTechTaskMapper.toDomain(
+      itemValueToTechTask,
     );
   }
 }

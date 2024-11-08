@@ -13,9 +13,9 @@ import { BusinessCoreModule } from '@business-core/business-core.module';
 import { PlatformDeviceModule } from '@platform-device/platform-device.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerDeviceDataRawModule } from './infra/handler-device-data-raw/handler-device-data-raw.module';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
 import { EquipmentCoreModule } from "./core/equipment-core/equipment-core.module";
+import { HandlerModule } from "./infra/handler/handler.module";
 
 @Module({
   imports: [
@@ -78,7 +78,7 @@ import { EquipmentCoreModule } from "./core/equipment-core/equipment-core.module
     PlatformDeviceModule,
     BusinessCoreModule,
     EquipmentCoreModule,
-    HandlerDeviceDataRawModule,
+    HandlerModule,
     Logger,
   ],
   controllers: [],

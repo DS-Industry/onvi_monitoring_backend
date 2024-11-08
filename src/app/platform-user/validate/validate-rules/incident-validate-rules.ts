@@ -62,17 +62,14 @@ export class IncidentValidateRules {
       input.incidentId,
     );
     response.push(incidentCheck);
-    const posCheck = await this.validateLib.posByIdExists(
-      incidentCheck.object.posId,
-    );
     if (input.workerId) {
       response.push(await this.validateLib.userByIdExists(input.workerId));
     }
-    if (input.equipmentKnotId) {
+    if (input.equipmentKnotId && incidentCheck.object) {
       response.push(
         await this.validateLib.equipmentKnotByIdExists(
           input.equipmentKnotId,
-          posCheck.object.id,
+          incidentCheck.object.posId,
         ),
       );
     }
@@ -101,8 +98,8 @@ export class IncidentValidateRules {
 
     this.validateLib.handlerArrayResponse(response);
     ForbiddenError.from(input.ability).throwUnlessCan(
-      PermissionAction.read,
-      posCheck.object,
+      PermissionAction.update,
+      incidentCheck.object,
     );
     return incidentCheck.object;
   }

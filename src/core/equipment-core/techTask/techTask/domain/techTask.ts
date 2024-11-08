@@ -8,6 +8,7 @@ export interface TechTaskProps {
   type: TypeTechTask;
   status: StatusTechTask;
   period: PeriodTechTask;
+  nextCreateDate?: Date;
   startDate: Date;
   startWorkDate?: Date;
   sendWorkDate?: Date;
@@ -45,6 +46,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   get period(): PeriodTechTask {
     return this.props.period;
+  }
+
+  get nextCreateDate(): Date {
+    return this.props.nextCreateDate;
   }
 
   get startDate(): Date {
@@ -97,6 +102,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   set period(period: PeriodTechTask) {
     this.props.period = period;
+  }
+
+  set nextCreateDate(nextCreateDate: Date) {
+    this.props.nextCreateDate = nextCreateDate;
   }
 
   set startDate(startDate: Date) {

@@ -69,24 +69,17 @@ export class PosController {
       throw new Error(e);
     }
   }
-  //Monitoring pos in detail
-  @Get('monitoring/:id')
+  //Get all pos for permission user
+  @Get('filter')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  async monitoringFullPos(
+  async filterViewPosByUser(
     @Request() req: any,
-    @Param('id', ParseIntPipe) id: number,
-    @Query() data: DataFilterDto,
-  ): Promise<PosMonitoringFullResponseDto[]> {
+  ): Promise<PosFilterResponseDto[]> {
     try {
       const { ability } = req;
-      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
-      return await this.monitoringFullByIdPosUseCase.execute(
-        data.dateStart,
-        data.dateEnd,
-        pos,
-      );
+      return await this.filterByUserPosUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }
@@ -113,6 +106,28 @@ export class PosController {
         params.dateStart,
         params.dateEnd,
         ability,
+        pos,
+      );
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Monitoring pos in detail
+  @Get('monitoring/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async monitoringFullPos(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() data: DataFilterDto,
+  ): Promise<PosMonitoringFullResponseDto[]> {
+    try {
+      const { ability } = req;
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+      return await this.monitoringFullByIdPosUseCase.execute(
+        data.dateStart,
+        data.dateEnd,
         pos,
       );
     } catch (e) {
@@ -181,21 +196,6 @@ export class PosController {
     try {
       const { ability } = req;
       return await this.posValidateRules.getOneByIdValidate(id, ability);
-    } catch (e) {
-      throw new Error(e);
-    }
-  }
-  //Get all pos for permission user
-  @Get('filter')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  @HttpCode(200)
-  async filterViewPosByUser(
-    @Request() req: any,
-  ): Promise<PosFilterResponseDto[]> {
-    try {
-      const { ability } = req;
-      return await this.filterByUserPosUseCase.execute(ability);
     } catch (e) {
       throw new Error(e);
     }
