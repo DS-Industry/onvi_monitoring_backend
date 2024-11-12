@@ -1,5 +1,5 @@
 import { TechTask } from '@tech-task/techTask/domain/techTask';
-import { StatusTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from '@prisma/client';
 
 export abstract class ITechTaskRepository {
   abstract create(input: TechTask): Promise<TechTask>;
@@ -8,6 +8,17 @@ export abstract class ITechTaskRepository {
   abstract findAllByPosIdAndStatuses(
     posId: number,
     statuses: StatusTechTask[],
+  ): Promise<TechTask[]>;
+  abstract findAllByPosIdAndDate(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]>;
+  abstract findAllByTypeAndPosIdAndDate(
+    posId: number,
+    type: TypeTechTask,
+    dateStart: Date,
+    dateEnd: Date,
   ): Promise<TechTask[]>;
   abstract findAllByStatus(status: StatusTechTask): Promise<TechTask[]>;
   abstract update(input: TechTask): Promise<TechTask>;

@@ -7,6 +7,7 @@ import { BaseEntity } from '@utils/entity';
 export interface TechTaskItemTemplateProps {
   id?: number;
   title: string;
+  code?: string;
   type: TypeTechTaskItemTemplate;
   group: GroupTechTaskItemTemplate;
 }
@@ -24,6 +25,10 @@ export class TechTaskItemTemplate extends BaseEntity<TechTaskItemTemplateProps> 
     return this.props.title;
   }
 
+  get code(): string {
+    return this.props.code;
+  }
+
   get type(): TypeTechTaskItemTemplate {
     return this.props.type;
   }
@@ -34,6 +39,10 @@ export class TechTaskItemTemplate extends BaseEntity<TechTaskItemTemplateProps> 
 
   set title(title: string) {
     this.props.title = title;
+  }
+
+  set code(code: string) {
+    this.props.code = code;
   }
 
   set type(type: TypeTechTaskItemTemplate) {

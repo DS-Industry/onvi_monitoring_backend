@@ -31,12 +31,25 @@ export class FindMethodsDeviceProgramUseCase {
     );
   }
   async getAllByPosIdAndDateProgram(
-    organizationId: number,
+    posId: number,
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]> {
     return await this.deviceProgramRepository.findAllByPosIdAndDate(
-      organizationId,
+      posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getAllByPosIdAndProgramCodeAndDate(
+    posId: number,
+    code: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    return await this.deviceProgramRepository.findAllByPosIdAndProgramCodeAndDate(
+      posId,
+      code,
       dateStart,
       dateEnd,
     );

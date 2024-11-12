@@ -9,16 +9,18 @@ import { HandlerTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-h
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
 import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
-import {
-  ManageAllByPosAndStatusesTechTaskUseCase
-} from "@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses";
-import { ShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-shape";
-import { CompletionShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-completion-shape";
+import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
+import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
+import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
+import { ProgramTechRateProvider } from '@tech-task/programTechRate/provider/programTechRate';
+import { FindMethodsProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-find-methods';
+import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
   TechTaskItemTemplateProvider,
   TechTaskItemValueToTechTaskProvider,
+  ProgramTechRateProvider,
 ];
 
 const techTaskUseCases: Provider[] = [
@@ -37,6 +39,11 @@ const itemTemplateToTechTaskUseCases: Provider[] = [
   FindMethodsItemTemplateToTechTaskUseCase,
 ];
 
+const programTechRateUseCases: Provider[] = [
+  FindMethodsProgramTechRateUseCase,
+  GeneratingReportProgramTechRate,
+];
+
 @Module({
   imports: [PrismaModule],
   providers: [
@@ -44,11 +51,13 @@ const itemTemplateToTechTaskUseCases: Provider[] = [
     ...techTaskUseCases,
     ...itemTemplateUseCases,
     ...itemTemplateToTechTaskUseCases,
+    ...programTechRateUseCases,
   ],
   exports: [
     ...techTaskUseCases,
     ...itemTemplateUseCases,
     ...itemTemplateToTechTaskUseCases,
+    ...programTechRateUseCases,
   ],
 })
 export class TechTaskModule {}

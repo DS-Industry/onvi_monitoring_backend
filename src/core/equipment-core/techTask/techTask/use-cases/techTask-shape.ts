@@ -31,6 +31,9 @@ export class ShapeTechTaskUseCase {
         items.push({
           id: itemValue.id,
           title: itemTechTask.title,
+          type: itemTechTask.type,
+          group: itemTechTask.group,
+          code: itemTechTask.code,
           value: itemValue.value,
         });
       }),

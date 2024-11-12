@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
-import { StatusTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from '@prisma/client';
 
 @Injectable()
 export class FindMethodsTechTaskUseCase {
@@ -22,6 +22,32 @@ export class FindMethodsTechTaskUseCase {
     return await this.techTaskRepository.findAllByPosIdAndStatuses(
       posId,
       statuses,
+    );
+  }
+
+  async getAllAllByPosIdAndDate(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllByPosIdAndDate(
+      posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getAllAllByTypeAndPosIdAndDate(
+    posId: number,
+    type: TypeTechTask,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllByTypeAndPosIdAndDate(
+      posId,
+      type,
+      dateStart,
+      dateEnd,
     );
   }
 

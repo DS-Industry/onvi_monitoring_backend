@@ -3,7 +3,7 @@ import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { PrismaTechTaskMapper } from '@db/mapper/prisma-tech-task-mapper';
-import { StatusTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from "@prisma/client";
 
 @Injectable()
 export class TechTaskRepository extends ITechTaskRepository {
@@ -33,6 +33,53 @@ export class TechTaskRepository extends ITechTaskRepository {
       where: {
         posId,
       },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllByPosIdAndDate(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId,
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        status: StatusTechTask.FINISHED,
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllByTypeAndPosIdAndDate(
+    posId: number,
+    type: TypeTechTask,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId,
+        type,
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        status: StatusTechTask.FINISHED,
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
     });
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
@@ -46,6 +93,9 @@ export class TechTaskRepository extends ITechTaskRepository {
         posId,
         status: { in: statuses },
       },
+      orderBy: {
+        startDate: 'asc',
+      },
     });
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
@@ -54,6 +104,9 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         status,
+      },
+      orderBy: {
+        startDate: 'asc',
       },
     });
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));

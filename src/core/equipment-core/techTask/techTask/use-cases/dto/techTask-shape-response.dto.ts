@@ -1,4 +1,4 @@
-import { StatusTechTask, TypeTechTask } from '@prisma/client';
+import { GroupTechTaskItemTemplate, StatusTechTask, TypeTechTask, TypeTechTaskItemTemplate } from "@prisma/client";
 
 export class TechTaskShapeResponseDto {
   id: number;
@@ -15,5 +15,8 @@ export class TechTaskShapeResponseDto {
 export class TechTaskItemDto {
   id: number;
   title: string;
+  type: TypeTechTaskItemTemplate;
+  group: GroupTechTaskItemTemplate;
+  code: string;
   value?: string;
 }

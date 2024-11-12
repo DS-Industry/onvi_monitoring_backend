@@ -12,6 +12,7 @@ export class PrismaTechTaskItemTemplateMapper {
     return new TechTaskItemTemplate({
       id: entity.id,
       title: entity.title,
+      code: entity.code,
       type: entity.type,
       group: entity.group,
     });
@@ -23,6 +24,7 @@ export class PrismaTechTaskItemTemplateMapper {
     return {
       id: techTaskItemTemplate?.id,
       title: techTaskItemTemplate.title,
+      code: techTaskItemTemplate?.code,
       type: techTaskItemTemplate.type,
       group: techTaskItemTemplate.group,
     };

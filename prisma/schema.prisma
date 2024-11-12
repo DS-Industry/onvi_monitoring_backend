@@ -191,6 +191,7 @@ model CarWashPos {
   carWashServices CarWashService[]
   carWashDevices  CarWashDevice[]
   currencyCarWashPoses          CurrencyCarWashPos[]
+  programTechRates              ProgramTechRate[]
 }
 
 model CarWashService {
@@ -307,6 +308,7 @@ model CarWashDeviceProgramsType {
   carWashDeviceProgrammsEvents CarWashDeviceProgramsEvent[]
   carWashDeviceServiceEvent     CarWashDeviceServiceEvent[]
   incident                      Incident[]
+  programTechRates              ProgramTechRate[]
 }
 
 model CarWashDeviceEvent {
@@ -630,6 +632,7 @@ enum PeriodTechTask {
 model TechTaskItemTemplate {
   id                      Int                      @id @default(autoincrement())
   title                   String
+  code                    String?
   type                    TypeTechTaskItemTemplate
   group                   GroupTechTaskItemTemplate
   techTaskItemValueToTechTasks       TechTaskItemValueToTechTask[]
@@ -721,6 +724,16 @@ model IncidentInfo {
 enum IncidentInfoType {
   Reason
   Solution
+}
+
+model ProgramTechRate {
+  id                      Int                      @id @default(autoincrement())
+  carWashPos                    CarWashPos                     @relation(fields: [carWashPosId], references: [id])
+  carWashPosId                  Int
+  carWashDeviceProgramsType      CarWashDeviceProgramsType   @relation(fields: [carWashDeviceProgramsTypeId], references: [id])
+  carWashDeviceProgramsTypeId    Int
+  literRate                      Int
+  concentration                  Int
 }
 
 enum StatusUser {

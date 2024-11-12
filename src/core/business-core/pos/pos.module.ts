@@ -52,6 +52,7 @@ import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cas
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
 import { FileModule } from "@libs/file/module";
+import { PosChemistryProductionUseCase } from "@pos/pos/use-cases/pos-chemistry-production";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -80,6 +81,7 @@ const posUseCase: Provider[] = [
   ProgramPosUseCase,
   PosProgramFullUseCase,
   FindMethodsPosUseCase,
+  PosChemistryProductionUseCase,
 ];
 
 const carWashPosUseCase: Provider[] = [FindMethodsCarWashPosUseCase];

@@ -15,9 +15,7 @@ import {
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
-import {
-  FullInfoByEquipmentKnotIncidentUseCase
-} from "@equipment/incident/incidentName/use-cases/incident-full-info-by-equipment-knot";
+import { FullInfoByEquipmentKnotIncidentUseCase } from '@equipment/incident/incidentName/use-cases/incident-full-info-by-equipment-knot';
 
 @Controller('equipment')
 export class EquipmentController {
