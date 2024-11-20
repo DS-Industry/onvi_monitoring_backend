@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ITechTaskItemTemplateRepository } from '@tech-task/itemTemplate/interface/itemTemplate';
-import { TechTaskItemTemplate } from "@tech-task/itemTemplate/domain/itemTemplate";
+import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplate';
 
 @Injectable()
 export class FindMethodsItemTemplateUseCase {
@@ -10,5 +10,9 @@ export class FindMethodsItemTemplateUseCase {
 
   async getById(input: number): Promise<TechTaskItemTemplate> {
     return await this.itemTemplateRepository.findOneById(input);
+  }
+
+  async getAll(): Promise<TechTaskItemTemplate[]> {
+    return await this.itemTemplateRepository.findAll();
   }
 }

@@ -9,34 +9,31 @@ import {
   Post,
   Query,
   Request,
-  UseGuards
-} from "@nestjs/common";
-import { CreateTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-create";
-import { JwtGuard } from "@platform-user/auth/guards/jwt.guard";
-import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
+  UseGuards,
+} from '@nestjs/common';
+import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
+import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
+import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
   CreateTechTaskAbility,
   ReadTechTaskAbility,
-  UpdateTechTaskAbility
-} from "@common/decorators/abilities.decorator";
-import { TechTaskCreateDto } from "@platform-user/core-controller/dto/receive/tech-task-create.dto";
-import { TechTaskValidateRules } from "@platform-user/validate/validate-rules/techTask-rules";
-import { TechTaskUpdateDto } from "@platform-user/core-controller/dto/receive/tech-task-update.dto";
-import { UpdateTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-update";
-import { PosValidateRules } from "@platform-user/validate/validate-rules/pos-validate-rules";
-import {
-  ManageAllByPosAndStatusesTechTaskUseCase
-} from "@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses";
-import { StatusTechTask } from "@prisma/client";
-import { ShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-shape";
-import { TechTaskCompletionShapeDto } from "@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto";
-import { CompletionShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-completion-shape";
-import { DataFilterDto } from "@platform-user/core-controller/dto/receive/data-filter.dto";
-import {
-  GeneratingReportProgramTechRate
-} from "@tech-task/programTechRate/use-cases/programTechRate-generating-report";
-import { PosChemistryProductionUseCase } from "@pos/pos/use-cases/pos-chemistry-production";
+  UpdateTechTaskAbility,
+} from '@common/decorators/abilities.decorator';
+import { TechTaskCreateDto } from '@platform-user/core-controller/dto/receive/tech-task-create.dto';
+import { TechTaskValidateRules } from '@platform-user/validate/validate-rules/techTask-rules';
+import { TechTaskUpdateDto } from '@platform-user/core-controller/dto/receive/tech-task-update.dto';
+import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
+import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
+import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
+import { StatusTechTask } from '@prisma/client';
+import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
+import { TechTaskCompletionShapeDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
+import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
+import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
+import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
+import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
+import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -49,6 +46,7 @@ export class TechTaskController {
     private readonly generatingReportProgramTechRate: GeneratingReportProgramTechRate,
     private readonly posChemistryProductionUseCase: PosChemistryProductionUseCase,
     private readonly completionShapeTechTaskUseCase: CompletionShapeTechTaskUseCase,
+    private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
   //Create techTask
@@ -124,6 +122,13 @@ export class TechTaskController {
       StatusTechTask.ACTIVE,
       StatusTechTask.OVERDUE,
     ]);
+  }
+  //Get all items
+  @Get('item')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getAllItems(): Promise<any> {
+    return await this.findMethodsItemTemplateUseCase.getAll();
   }
   //Get shape techTask by id
   @Get(':id')
