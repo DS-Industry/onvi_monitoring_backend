@@ -34,6 +34,7 @@ import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-f
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
+import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -42,6 +43,7 @@ export class TechTaskController {
     private readonly techTaskValidateRules: TechTaskValidateRules,
     private readonly updateTechTaskUseCase: UpdateTechTaskUseCase,
     private readonly manageAllByPosAndStatusesTechTaskUseCase: ManageAllByPosAndStatusesTechTaskUseCase,
+    private readonly readAllByPosTechTaskUseCase: ReadAllByPosTechTaskUseCase,
     private readonly shapeTechTaskUseCase: ShapeTechTaskUseCase,
     private readonly generatingReportProgramTechRate: GeneratingReportProgramTechRate,
     private readonly posChemistryProductionUseCase: PosChemistryProductionUseCase,
@@ -118,10 +120,7 @@ export class TechTaskController {
   ) {
     const { ability } = req;
     await this.posValidateRules.getOneByIdValidate(posId, ability);
-    return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(posId, [
-      StatusTechTask.ACTIVE,
-      StatusTechTask.OVERDUE,
-    ]);
+    return await this.readAllByPosTechTaskUseCase.execute(posId);
   }
   //Get all items
   @Get('item')
