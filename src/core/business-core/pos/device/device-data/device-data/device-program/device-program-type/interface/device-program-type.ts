@@ -8,4 +8,9 @@ export abstract class IDeviceProgramTypeRepository {
     carWashDeviceTypeId: number,
   ): Promise<DeviceProgramType[]>;
   abstract findAll(): Promise<DeviceProgramType[]>;
+  abstract connectionPos(
+    deviceProgramTypeIds: number[],
+    posId: number,
+  ): Promise<any>;
+  abstract findAllByPosId(posId: number): Promise<DeviceProgramType[]>;
 }

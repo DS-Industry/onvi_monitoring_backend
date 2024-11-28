@@ -51,8 +51,9 @@ import { BullModule } from '@nestjs/bullmq';
 import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
-import { FileModule } from "@libs/file/module";
-import { PosChemistryProductionUseCase } from "@pos/pos/use-cases/pos-chemistry-production";
+import { FileModule } from '@libs/file/module';
+import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
+import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -109,6 +110,7 @@ const deviceDataHandlerUseCase: Provider[] = [
   DeviceOperationCardHandlerUseCase,
   DeviceServiceHandlerUseCase,
   FindMethodsDeviceProgramTypeUseCase,
+  ConnectionPosDeviceProgramTypeUseCase,
   DeviceProgramHandlerUseCase,
   DeviceOperationHandlerUseCase,
 ];

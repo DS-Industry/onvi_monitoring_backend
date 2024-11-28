@@ -5,6 +5,7 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -30,8 +31,11 @@ import {
   CheckAbilities,
   CreatePosAbility,
   ReadPosAbility,
+  UpdatePosAbility,
 } from '@common/decorators/abilities.decorator';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
+import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
+import { PosConnectionProgramTypeDto } from '@platform-user/core-controller/dto/receive/pos-connection-programType.dto';
 
 @Controller('pos')
 export class PosController {
@@ -41,6 +45,7 @@ export class PosController {
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
     private readonly programPosUseCase: ProgramPosUseCase,
+    private readonly connectionPosDeviceProgramTypeUseCase: ConnectionPosDeviceProgramTypeUseCase,
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
@@ -184,6 +189,28 @@ export class PosController {
       throw new Error(e);
     }
   }
+  //Connection ProgramTypes
+  @Patch('connection-program/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdatePosAbility())
+  @HttpCode(201)
+  async connectionProgramTypes(
+    @Request() req: any,
+    @Param('posId', ParseIntPipe) id: number,
+    @Body() data: PosConnectionProgramTypeDto,
+  ): Promise<any> {
+    const { ability } = req;
+    await this.posValidateRules.connectionProgramTypesValidate(
+      id,
+      data.programTypeIds,
+      ability,
+    );
+    return await this.connectionPosDeviceProgramTypeUseCase.execute(
+      id,
+      data.programTypeIds,
+    );
+  }
+
   //Get pos by id
   @Get(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)

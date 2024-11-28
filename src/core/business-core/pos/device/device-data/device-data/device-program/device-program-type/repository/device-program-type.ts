@@ -61,4 +61,37 @@ export class DeviceProgramTypeRepository extends IDeviceProgramTypeRepository {
       PrismaCarWashDeviceProgramTypeMapper.toDomain(item),
     );
   }
+
+  public async connectionPos(
+    deviceProgramTypeIds: number[],
+    posId: number,
+  ): Promise<any> {
+    const updates = deviceProgramTypeIds.map((id) =>
+      this.prisma.carWashDeviceProgramsType.update({
+        where: { id },
+        data: {
+          carWashPoses: {
+            connect: { posId: posId },
+          },
+        },
+      }),
+    );
+    return Promise.all(updates);
+  }
+
+  public async findAllByPosId(posId: number): Promise<DeviceProgramType[]> {
+    const deviceProgramTypes =
+      await this.prisma.carWashDeviceProgramsType.findMany({
+        where: {
+          carWashPoses: {
+            some: {
+              posId: posId,
+            },
+          },
+        },
+      });
+    return deviceProgramTypes.map((item) =>
+      PrismaCarWashDeviceProgramTypeMapper.toDomain(item),
+    );
+  }
 }

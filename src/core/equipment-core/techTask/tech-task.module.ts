@@ -16,6 +16,10 @@ import { ProgramTechRateProvider } from '@tech-task/programTechRate/provider/pro
 import { FindMethodsProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-find-methods';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { ReadAllByPosTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-read-all-by-pos";
+import {
+  GetAllByPosIdProgramTechRateUseCase
+} from "@tech-task/programTechRate/use-cases/programTechRate-get-all-by-pos-id";
+import { UpdateProgramTechRateUseCase } from "@tech-task/programTechRate/use-cases/programTechRate-update";
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
@@ -44,6 +48,8 @@ const itemTemplateToTechTaskUseCases: Provider[] = [
 const programTechRateUseCases: Provider[] = [
   FindMethodsProgramTechRateUseCase,
   GeneratingReportProgramTechRate,
+  GetAllByPosIdProgramTechRateUseCase,
+  UpdateProgramTechRateUseCase,
 ];
 
 @Module({

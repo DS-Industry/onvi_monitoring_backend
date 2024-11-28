@@ -31,4 +31,8 @@ export class FindMethodsProgramTechRateUseCase {
       carWashDeviceProgramsTypeCode,
     );
   }
+
+  async getAllByPosId(posId: number): Promise<ProgramTechRate[]> {
+    return await this.programTechRateRepository.findAllByPosId(posId);
+  }
 }

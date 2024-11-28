@@ -9,6 +9,7 @@ import { ProgramTypes } from './seedData/programType';
 import { Objects } from './seedData/object';
 import { UserPermissions } from './seedData/userPermission';
 import { UserRoles } from './seedData/userRole';
+import { TechTaskItemTemplate } from "./seedData/techTaskItemTemplate";
 
 async function main() {
   //DeviceType
@@ -100,6 +101,17 @@ async function main() {
     }),
   );
   console.log('UserRole create');
+  //TechTaskItemTemplate
+  await Promise.all(
+    TechTaskItemTemplate.map(async (itemTemplate) => {
+      await prisma.techTaskItemTemplate.upsert({
+        where: { id: itemTemplate.id },
+        update: itemTemplate,
+        create: itemTemplate,
+      });
+    }),
+  );
+  console.log('TechTaskItemTemplate create');
 }
 main()
   .then(async () => {

@@ -15,4 +15,8 @@ export class FindMethodsDeviceProgramTypeUseCase {
   async getAll(): Promise<DeviceProgramType[]> {
     return await this.deviceProgramTypeRepository.findAll();
   }
+
+  async getAllByPosId(posId: number): Promise<DeviceProgramType[]> {
+    return await this.deviceProgramTypeRepository.findAllByPosId(posId);
+  }
 }

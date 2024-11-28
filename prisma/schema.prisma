@@ -97,6 +97,10 @@ model User {
   incidentWorker    Incident[]     @relation(name: "Worker")
   incidentsCreated  Incident[]     @relation(name: "CreatedByUser")
   incidentsUpdated  Incident[]     @relation(name: "UpdateByUser")
+  warehouseManager  Warehouse[]    @relation(name: "Manager")
+  warehouseCreated  Warehouse[]     @relation(name: "CreatedByUser")
+  warehouseUpdated  Warehouse[]     @relation(name: "UpdateByUser")
+
 }
 
 model UserMailConfirm {
@@ -176,6 +180,7 @@ model Pos {
   techTasks            TechTask[]
   equipmentKnots       EquipmentKnot[]
   incident             Incident[]
+  warehouse             Warehouse[]
 }
 
 model CarWashPos {
@@ -192,6 +197,7 @@ model CarWashPos {
   carWashDevices  CarWashDevice[]
   currencyCarWashPoses          CurrencyCarWashPos[]
   programTechRates              ProgramTechRate[]
+  carWashDeviceProgramTypes            CarWashDeviceProgramsType[]
 }
 
 model CarWashService {
@@ -309,6 +315,7 @@ model CarWashDeviceProgramsType {
   carWashDeviceServiceEvent     CarWashDeviceServiceEvent[]
   incident                      Incident[]
   programTechRates              ProgramTechRate[]
+  carWashPoses                  CarWashPos[]
 }
 
 model CarWashDeviceEvent {
@@ -732,8 +739,37 @@ model ProgramTechRate {
   carWashPosId                  Int
   carWashDeviceProgramsType      CarWashDeviceProgramsType   @relation(fields: [carWashDeviceProgramsTypeId], references: [id])
   carWashDeviceProgramsTypeId    Int
-  literRate                      Int
-  concentration                  Int
+  literRate                      Int?
+  concentration                  Int?
+}
+
+model Warehouse {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  location                String
+  manager                 User?                    @relation(name: "Manager", fields: [managerId], references: [id])
+  managerId               Int?
+  pos                     Pos?                      @relation(fields: [posId], references: [id])
+  posId                   Int?
+  createdBy               User                     @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updateBy                User                     @relation(name: "UpdateByUser", fields: [updateById], references: [id])
+  updateById              Int
+}
+
+model InventoryItem {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  sku                     String
+}
+
+model Category {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  description             String
+  ownerCategoryId         Int?                      @unique
+  ownerCategory           Category?                 @relation("OwnerCategory", fields: [ownerCategoryId], references: [id])
+  preOwnerCategory        Category?                 @relation("OwnerCategory")
 }
 
 enum StatusUser {

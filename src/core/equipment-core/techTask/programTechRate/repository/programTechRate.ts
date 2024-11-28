@@ -63,4 +63,31 @@ export class ProgramTechRateRepository extends IProgramTechRateRepository {
     });
     return PrismaProgramTechRateMapper.toDomain(programTechRate);
   }
+
+  public async updateValue(
+    id: number,
+    literRate?: number,
+    concentration?: number,
+  ): Promise<ProgramTechRate> {
+    const programTechRate = await this.prisma.programTechRate.update({
+      where: {
+        id: id,
+      },
+      data: { literRate: literRate, concentration: concentration },
+    });
+    return PrismaProgramTechRateMapper.toDomain(programTechRate);
+  }
+
+  public async findAllByPosId(posId: number): Promise<ProgramTechRate[]> {
+    const programTechRates = await this.prisma.programTechRate.findMany({
+      where: {
+        carWashPos: {
+          posId: posId,
+        },
+      },
+    });
+    return programTechRates.map((item) =>
+      PrismaProgramTechRateMapper.toDomain(item),
+    );
+  }
 }

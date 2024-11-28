@@ -24,6 +24,7 @@ import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-case
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
+import { FindMethodsProgramTechRateUseCase } from "@tech-task/programTechRate/use-cases/programTechRate-find-methods";
 export interface ValidateResponse<T = any> {
   code: number;
   object?: T;
@@ -44,6 +45,7 @@ export class ValidateLib {
     private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
+    private readonly findMethodsProgramTechRateUseCase: FindMethodsProgramTechRateUseCase,
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly bcrypt: IBcryptAdapter,
@@ -227,6 +229,41 @@ export class ValidateLib {
       return { code: 482 };
     }
     return { code: 200, object: programType };
+  }
+
+  public async programTypeByIdsExists(
+    programTypeIds: number[],
+  ): Promise<ValidateResponse> {
+    const programTypes =
+      await this.findMethodsDeviceProgramTypeUseCase.getAll();
+    const programTypeIdsCheck = programTypes.map(
+      (programType) => programType.id,
+    );
+    const unnecessaryProgramTypes = programTypeIds.filter(
+      (programTypeId) => !programTypeIdsCheck.includes(programTypeId),
+    );
+    if (unnecessaryProgramTypes.length > 0) {
+      return { code: 483 };
+    }
+    return { code: 200 };
+  }
+
+  public async programTypeByIdsAndPosExists(
+    programTypeIds: number[],
+    posId: number,
+  ): Promise<ValidateResponse> {
+    const programTypes =
+      await this.findMethodsProgramTechRateUseCase.getAllByPosId(posId);
+    const programTypeIdsCheck = programTypes.map(
+      (programType) => programType.id,
+    );
+    const unnecessaryProgramTypes = programTypeIds.filter(
+      (programTypeId) => !programTypeIdsCheck.includes(programTypeId),
+    );
+    if (unnecessaryProgramTypes.length > 0) {
+      return { code: 483 };
+    }
+    return { code: 200 };
   }
 
   public async equipmentKnotByIdExists(

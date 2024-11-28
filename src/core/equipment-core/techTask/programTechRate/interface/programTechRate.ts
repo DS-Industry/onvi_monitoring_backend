@@ -12,4 +12,10 @@ export abstract class IProgramTechRateRepository {
     carWashDeviceProgramsTypeCode: string,
   ): Promise<ProgramTechRate>;
   abstract update(input: ProgramTechRate): Promise<ProgramTechRate>;
+  abstract updateValue(
+    id: number,
+    literRate?: number,
+    concentration?: number,
+  ): Promise<ProgramTechRate>;
+  abstract findAllByPosId(posId: number): Promise<ProgramTechRate[]>;
 }

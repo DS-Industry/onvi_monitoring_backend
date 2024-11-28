@@ -44,4 +44,40 @@ export class PosValidateRules {
     );
     return response.object;
   }
+
+  public async connectionProgramTypesValidate(
+    id: number,
+    programTypeIds: number[],
+    ability: any,
+  ) {
+    const response: ValidateResponse[] = [];
+    const pos = await this.validateLib.posByIdExists(id);
+    response.push(pos);
+    response.push(
+      await this.validateLib.programTypeByIdsExists(programTypeIds),
+    );
+    this.validateLib.handlerArrayResponse(response);
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      pos.object,
+    );
+  }
+
+  public async patchProgramRateValidate(
+    id: number,
+    programTypeIds: number[],
+    ability: any,
+  ) {
+    const response: ValidateResponse[] = [];
+    const pos = await this.validateLib.posByIdExists(id);
+    response.push(pos);
+    response.push(
+      await this.validateLib.programTypeByIdsAndPosExists(programTypeIds, id),
+    );
+    this.validateLib.handlerArrayResponse(response);
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      pos.object,
+    );
+  }
 }

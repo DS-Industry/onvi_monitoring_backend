@@ -64,6 +64,7 @@ export class CreatePosUseCase {
 
     const nameCarWashPos = pos.name + ' Car Wash';
     const carWashPosData = new CarWashPos({
+      id: pos.id,
       name: nameCarWashPos,
       slug: slugify(nameCarWashPos, '_'),
       posId: pos.id,
