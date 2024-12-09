@@ -24,7 +24,15 @@ import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-case
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
-import { FindMethodsProgramTechRateUseCase } from "@tech-task/programTechRate/use-cases/programTechRate-find-methods";
+import { FindMethodsProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-find-methods';
+import { FindMethodsWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-find-methods';
+import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
+import { FindMethodsCategoryUseCase } from '@warehouse/category/use-cases/category-find-methods';
+import { Category } from '@warehouse/category/domain/category';
+import { FindMethodsSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-find-methods';
+import { Supplier } from '@warehouse/supplier/domain/supplier';
+import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
+import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 export interface ValidateResponse<T = any> {
   code: number;
   object?: T;
@@ -48,6 +56,10 @@ export class ValidateLib {
     private readonly findMethodsProgramTechRateUseCase: FindMethodsProgramTechRateUseCase,
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
+    private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
+    private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
+    private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
+    private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -140,6 +152,16 @@ export class ValidateLib {
     }
     return { code: 200 };
   }
+  public async organizationByNameExists(
+    name: string,
+  ): Promise<ValidateResponse<Organization>> {
+    const organization =
+      await this.findMethodsOrganizationUseCase.getByName(name);
+    if (!organization) {
+      return { code: 453 };
+    }
+    return { code: 200, object: organization };
+  }
   public async organizationByIdExists(
     organizationId: number,
   ): Promise<ValidateResponse<Organization>> {
@@ -165,6 +187,70 @@ export class ValidateLib {
       return { code: 464 };
     }
     return { code: 200, object: pos };
+  }
+  public async warehouseByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Warehouse>> {
+    const warehouse = await this.findMethodsWarehouseUseCase.getById(id);
+    if (!warehouse) {
+      return { code: 465 };
+    }
+    return { code: 200, object: warehouse };
+  }
+  public async categoryByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Category>> {
+    const category = await this.findMethodsCategoryUseCase.getById(id);
+    if (!category) {
+      return { code: 466 };
+    }
+    return { code: 200, object: category };
+  }
+  public async categoryByNameExists(
+    name: string,
+  ): Promise<ValidateResponse<Category>> {
+    const category = await this.findMethodsCategoryUseCase.getByName(name);
+    if (!category) {
+      return { code: 466 };
+    }
+    return { code: 200, object: category };
+  }
+  public async supplierByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Supplier>> {
+    const supplier = await this.findMethodsSupplierUseCase.getById(id);
+    if (!supplier) {
+      return { code: 467 };
+    }
+    return { code: 200, object: supplier };
+  }
+  public async nomenclatureBySkuAndOrganizationIdNotExists(
+    sku: string,
+    organizationId: number,
+  ): Promise<ValidateResponse> {
+    const nomenclature =
+      await this.findMethodsNomenclatureUseCase.getOneBySkuAndOrganizationId(
+        sku,
+        organizationId,
+      );
+    if (nomenclature) {
+      return { code: 468 };
+    }
+    return { code: 200 };
+  }
+  public async nomenclatureByNameAndOrganizationIdNotExists(
+    name: string,
+    organizationId: number,
+  ): Promise<ValidateResponse> {
+    const nomenclature =
+      await this.findMethodsNomenclatureUseCase.getOneByNameAndOrganizationId(
+        name,
+        organizationId,
+      );
+    if (nomenclature) {
+      return { code: 469 };
+    }
+    return { code: 200 };
   }
   public async deviceTypeByNameNotExists(
     name: string,
@@ -204,6 +290,114 @@ export class ValidateLib {
       return { code: 473 };
     }
     return { code: 200, object: device };
+  }
+
+  public async nomenclatureExel(
+    headers: string[],
+    columnMappings: any,
+  ): Promise<ValidateResponse> {
+    const missingHeaders = Object.keys(columnMappings).filter(
+      (header) => !headers.includes(header),
+    );
+    if (missingHeaders.length > 0) {
+      return { code: 474 };
+    }
+    return { code: 200 };
+  }
+
+  public async nomenclatureExelOriginalValues(
+    jsonData: any,
+  ): Promise<ValidateResponse> {
+    const organizationMap = new Map<
+      string,
+      { names: Set<string>; skus: Set<string> }
+    >();
+
+    for (const row of jsonData) {
+      const { organization, name, sku } = row;
+
+      if (!organization || !name || !sku) {
+        return { code: 475 };
+      }
+      if (!organizationMap.has(organization)) {
+        organizationMap.set(organization, {
+          names: new Set(),
+          skus: new Set(),
+        });
+      }
+      const { names, skus } = organizationMap.get(organization);
+
+      if (names.has(name)) {
+        return { code: 475 };
+      }
+
+      if (skus.has(sku)) {
+        return { code: 475 };
+      }
+      names.add(name);
+      skus.add(sku);
+    }
+    return { code: 200 };
+  }
+
+  public async nomenclatureExelDBOriginalValues(
+    jsonData: any,
+  ): Promise<ValidateResponse> {
+    const response = [];
+
+    const organizationMap = new Map<
+      number,
+      { names: Set<string>; skus: Set<string> }
+    >();
+
+    for (const row of jsonData) {
+      const { organizationId, name, sku } = row;
+
+      if (!organizationMap.has(organizationId)) {
+        organizationMap.set(organizationId, {
+          names: new Set(),
+          skus: new Set(),
+        });
+      }
+
+      const { names, skus } = organizationMap.get(organizationId);
+      if (!names.has(name)) {
+        const nameCheck =
+          await this.nomenclatureByNameAndOrganizationIdNotExists(
+            name,
+            organizationId,
+          );
+        response.push(nameCheck);
+        names.add(name);
+      }
+
+      if (!skus.has(sku)) {
+        const skuCheck = await this.nomenclatureBySkuAndOrganizationIdNotExists(
+          sku,
+          organizationId,
+        );
+        response.push(skuCheck);
+        skus.add(sku);
+      }
+    }
+
+    const failedResponses = response.filter((res) => res.code !== 200);
+    if (failedResponses.length > 0) {
+      return { code: 476 };
+    }
+
+    return { code: 200 };
+  }
+
+  public async nomenclatureByIdExists(
+    nomenclatureId: number,
+  ): Promise<ValidateResponse<Nomenclature>> {
+    const nomenclature =
+      await this.findMethodsNomenclatureUseCase.getOneById(nomenclatureId);
+    if (!nomenclature) {
+      return { code: 477 };
+    }
+    return { code: 200, object: nomenclature };
   }
 
   public async deviceByNameAndPosIdNotExists(

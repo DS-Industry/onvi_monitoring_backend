@@ -53,6 +53,9 @@ import { EquipmentController } from "@platform-user/core-controller/equipment";
 import { TechTaskController } from "@platform-user/core-controller/techTask";
 import { EquipmentCoreModule } from "../../core/equipment-core/equipment-core.module";
 import { TechTaskValidateRules } from "@platform-user/validate/validate-rules/techTask-rules";
+import { WarehouseCoreModule } from "../../core/warehouse-core/warehouse-core.module";
+import { WarehouseController } from "@platform-user/core-controller/warehouse";
+import { WarehouseValidateRules } from "@platform-user/validate/validate-rules/warehouse-validate-rules";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -70,6 +73,7 @@ const controllers = [
   IncidentController,
   TechTaskController,
   EquipmentController,
+  WarehouseController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -110,6 +114,7 @@ const validate: Provider[] = [
   UserPermissionValidateRules,
   IncidentValidateRules,
   TechTaskValidateRules,
+  WarehouseValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -127,6 +132,7 @@ const permission: Provider[] = [
     MailModule,
     BusinessCoreModule,
     EquipmentCoreModule,
+    WarehouseCoreModule,
     ObjectModule,
     FileModule,
   ],

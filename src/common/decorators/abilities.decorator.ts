@@ -94,3 +94,23 @@ export class DeleteTechTaskAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'TechTask';
 }
+export class ManageWarehouseAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'Warehouse';
+}
+export class ReadWarehouseAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'Warehouse';
+}
+export class CreateWarehouseAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'Warehouse';
+}
+export class UpdateWarehouseAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'Warehouse';
+}
+export class DeleteWarehouseAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'Warehouse';
+}

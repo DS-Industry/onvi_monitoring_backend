@@ -44,11 +44,11 @@ export class AbilityFactory {
         condition = {
           id: { in: organizationCondition },
         };
-      } else if (objectMap[permission.objectId].name == 'Incident') {
-        condition = {
-          posId: { in: posCondition },
-        };
-      } else if (objectMap[permission.objectId].name == 'TechTask') {
+      } else if (
+        objectMap[permission.objectId].name == 'Incident' ||
+        objectMap[permission.objectId].name == 'TechTask' ||
+        objectMap[permission.objectId].name == 'Warehouse'
+      ) {
         condition = {
           posId: { in: posCondition },
         };

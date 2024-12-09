@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StatusPos } from '@prisma/client';
 
 const prisma = new PrismaClient();
 import { DeviceTypes } from './seedData/deviceType';
@@ -9,7 +9,10 @@ import { ProgramTypes } from './seedData/programType';
 import { Objects } from './seedData/object';
 import { UserPermissions } from './seedData/userPermission';
 import { UserRoles } from './seedData/userRole';
-import { TechTaskItemTemplate } from "./seedData/techTaskItemTemplate";
+import { TechTaskItemTemplate } from './seedData/techTaskItemTemplate';
+import { Organizations } from './seedData/organization';
+import { Poses } from './seedData/pos';
+import { Devices } from './seedData/device';
 
 async function main() {
   //DeviceType
@@ -112,6 +115,36 @@ async function main() {
     }),
   );
   console.log('TechTaskItemTemplate create');
+  await Promise.all(
+    Organizations.map(async (organization) => {
+      await prisma.organization.upsert({
+        where: { id: organization.id },
+        update: {},
+        create: organization,
+      });
+    }),
+  );
+  console.log('Organization create');
+  await Promise.all(
+    Poses.map(async (pos) => {
+      prisma.pos.upsert({
+        where: { id: pos.id },
+        update: {},
+        create: pos,
+      });
+    }),
+  );
+  console.log('Pos create');
+  await Promise.all(
+    Devices.map(async (device) => {
+      prisma.carWashDevice.upsert({
+        where: { id: device.id },
+        update: {},
+        create: device,
+      });
+    }),
+  );
+  console.log('Device create');
 }
 main()
   .then(async () => {

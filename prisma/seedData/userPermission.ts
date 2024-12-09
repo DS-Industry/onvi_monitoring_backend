@@ -105,4 +105,29 @@ export const UserPermissions: {
     action: 'delete',
     objectId: 4,
   },
+  {
+    id: 16,
+    action: 'manage',
+    objectId: 5,
+  },
+  {
+    id: 17,
+    action: 'create',
+    objectId: 5,
+  },
+  {
+    id: 18,
+    action: 'update',
+    objectId: 5,
+  },
+  {
+    id: 19,
+    action: 'read',
+    objectId: 5,
+  },
+  {
+    id: 20,
+    action: 'delete',
+    objectId: 5,
+  },
 ];

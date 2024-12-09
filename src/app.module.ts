@@ -16,6 +16,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
 import { EquipmentCoreModule } from "./core/equipment-core/equipment-core.module";
 import { HandlerModule } from "./infra/handler/handler.module";
+import { WarehouseCoreModule } from "./core/warehouse-core/warehouse-core.module";
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { HandlerModule } from "./infra/handler/handler.module";
     PlatformDeviceModule,
     BusinessCoreModule,
     EquipmentCoreModule,
+    WarehouseCoreModule,
     HandlerModule,
     Logger,
   ],

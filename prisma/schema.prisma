@@ -25,6 +25,7 @@ model Organization {
   poses                 Pos[]
   organizationMailConfirms OrganizationMailConfirm[]
   DeviceApiKey          DeviceApiKey[]
+  nomenclatures          Nomenclature[]
 }
 
 model Address {
@@ -100,7 +101,8 @@ model User {
   warehouseManager  Warehouse[]    @relation(name: "Manager")
   warehouseCreated  Warehouse[]     @relation(name: "CreatedByUser")
   warehouseUpdated  Warehouse[]     @relation(name: "UpdateByUser")
-
+  nomenclatureCreated Nomenclature[]  @relation(name: "CreatedByUser")
+  nomenclatureUpdated  Nomenclature[]     @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -755,21 +757,54 @@ model Warehouse {
   createdById             Int
   updateBy                User                     @relation(name: "UpdateByUser", fields: [updateById], references: [id])
   updateById              Int
+  createdAt               DateTime
+  updatedAt               DateTime
+  inventoryItems          InventoryItem[]
+}
+
+model Nomenclature {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  sku                     String
+  organization            Organization             @relation(fields: [organizationId], references: [id])
+  organizationId          Int
+  category                Category                 @relation(fields: [categoryId], references: [id])
+  categoryId              Int
+  supplier                Supplier?                  @relation(fields: [supplierId], references: [id])
+  supplierId              Int?
+  createdAt               DateTime
+  createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updateBy                User                     @relation(name: "UpdateByUser", fields: [updateById], references: [id])
+  updateById              Int
+  updatedAt               DateTime
+  inventoryItems          InventoryItem[]
 }
 
 model InventoryItem {
   id                      Int                      @id @default(autoincrement())
-  name                    String
-  sku                     String
+  nomenclature            Nomenclature             @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId          Int
+  quantity                Int
+  warehouse               Warehouse                 @relation(fields: [warehouseId], references: [id])
+  warehouseId             Int
 }
 
 model Category {
   id                      Int                      @id @default(autoincrement())
   name                    String
-  description             String
+  description             String?
   ownerCategoryId         Int?                      @unique
   ownerCategory           Category?                 @relation("OwnerCategory", fields: [ownerCategoryId], references: [id])
-  preOwnerCategory        Category?                 @relation("OwnerCategory")
+  preOwnerCategory        Category[]                 @relation("OwnerCategory")
+  nomenclatures          Nomenclature[]
+}
+
+model Supplier {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  contact                 String
+  nomenclatures          Nomenclature[]
 }
 
 enum StatusUser {
