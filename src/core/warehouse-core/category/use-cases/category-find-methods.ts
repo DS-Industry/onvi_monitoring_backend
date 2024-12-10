@@ -19,4 +19,8 @@ export class FindMethodsCategoryUseCase {
       ownerCategoryId,
     );
   }
+
+  async getAll(): Promise<Category[]> {
+    return await this.categoryRepository.findAll();
+  }
 }

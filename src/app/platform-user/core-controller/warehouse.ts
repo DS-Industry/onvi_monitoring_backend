@@ -34,6 +34,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-create';
 import { NomenclatureUpdateDto } from '@platform-user/core-controller/dto/receive/nomenclature-update.dto';
 import { UpdateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-update';
+import { FindMethodsCategoryUseCase } from "@warehouse/category/use-cases/category-find-methods";
+import { FindMethodsSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-find-methods";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -46,6 +48,8 @@ export class WarehouseController {
     private readonly createSupplierUseCase: CreateSupplierUseCase,
     private readonly createNomenclatureUseCase: CreateNomenclatureUseCase,
     private readonly updateNomenclatureUseCase: UpdateNomenclatureUseCase,
+    private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
+    private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -158,6 +162,18 @@ export class WarehouseController {
       throw new Error(e);
     }
   }
+  //Get all category
+  @Get('category')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllCategory(): Promise<any> {
+    try {
+      return await this.findMethodsCategoryUseCase.getAll();
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
   //Create supplier
   @Post('supplier')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -169,6 +185,18 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       return await this.createSupplierUseCase.execute(data.name, data.contact);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get all supplier
+  @Get('supplier')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllSupplier(): Promise<any> {
+    try {
+      return await this.findMethodsSupplierUseCase.getAll();
     } catch (e) {
       throw new Error(e);
     }

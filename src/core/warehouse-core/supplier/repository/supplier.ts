@@ -27,6 +27,11 @@ export class SupplierRepository extends ISupplierRepository {
     return PrismaSupplierMapper.toDomain(supplier);
   }
 
+  public async findAll(): Promise<Supplier[]> {
+    const suppliers = await this.prisma.supplier.findMany();
+    return suppliers.map((item) => PrismaSupplierMapper.toDomain(item));
+  }
+
   public async update(input: Supplier): Promise<Supplier> {
     const supplierEntity = PrismaSupplierMapper.toPrisma(input);
     const supplier = await this.prisma.supplier.update({

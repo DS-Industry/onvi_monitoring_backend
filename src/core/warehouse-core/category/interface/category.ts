@@ -7,5 +7,6 @@ export abstract class ICategoryRepository {
   abstract findAllByOwnerCategoryId(
     ownerCategoryId: number,
   ): Promise<Category[]>;
+  abstract findAll(): Promise<Category[]>;
   abstract update(input: Category): Promise<Category>;
 }

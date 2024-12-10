@@ -9,4 +9,8 @@ export class FindMethodsSupplierUseCase {
   async getById(input: number): Promise<Supplier> {
     return await this.supplierRepository.findOneById(input);
   }
+
+  async getAll(): Promise<Supplier[]> {
+    return await this.supplierRepository.findAll();
+  }
 }

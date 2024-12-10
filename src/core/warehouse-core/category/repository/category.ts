@@ -47,6 +47,11 @@ export class CategoryRepository extends ICategoryRepository {
     return categories.map((item) => PrismaCategoryMapper.toDomain(item));
   }
 
+  public async findAll(): Promise<Category[]> {
+    const categories = await this.prisma.category.findMany();
+    return categories.map((item) => PrismaCategoryMapper.toDomain(item));
+  }
+
   public async update(input: Category): Promise<Category> {
     const categoryEntity = PrismaCategoryMapper.toPrisma(input);
     const category = await this.prisma.category.update({
