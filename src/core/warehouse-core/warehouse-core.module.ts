@@ -16,6 +16,7 @@ import { NomenclatureRepositoryProvider } from '@warehouse/nomenclature/provider
 import { CreateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-create';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 import { UpdateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-update';
+import { InventoryItemMonitoringUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-monitoring";
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -38,6 +39,7 @@ const supplierUseCase: Provider[] = [
 const inventoryItemUseCase: Provider[] = [
   CreateInventoryItemUseCase,
   FindMethodsInventoryItemUseCase,
+  InventoryItemMonitoringUseCase,
 ];
 
 const categoryUseCase: Provider[] = [

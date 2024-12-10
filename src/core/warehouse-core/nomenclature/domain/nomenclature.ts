@@ -1,4 +1,5 @@
 import { BaseEntity } from '@utils/entity';
+import { MeasurementNomenclature } from '@prisma/client';
 
 export interface NomenclatureProps {
   id?: number;
@@ -7,6 +8,7 @@ export interface NomenclatureProps {
   organizationId: number;
   categoryId: number;
   supplierId?: number;
+  measurement: MeasurementNomenclature;
   createdAt?: Date;
   updatedAt?: Date;
   createdById: number;
@@ -39,6 +41,10 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
 
   get supplierId(): number {
     return this.props.supplierId;
+  }
+
+  get measurement(): MeasurementNomenclature {
+    return this.props.measurement;
   }
 
   get createdAt(): Date {
@@ -75,6 +81,10 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
 
   set supplierId(supplierId: number) {
     this.props.supplierId = supplierId;
+  }
+
+  set measurement(measurement: MeasurementNomenclature) {
+    this.props.measurement = measurement;
   }
 
   set updatedAt(updatedAt: Date) {

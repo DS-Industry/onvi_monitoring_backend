@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { MeasurementNomenclature } from '@prisma/client';
 
 export class NomenclatureUpdateDto {
   @IsNumber()
@@ -13,4 +14,7 @@ export class NomenclatureUpdateDto {
   @IsNumber()
   @IsOptional()
   supplierId?: number;
+  @IsEnum(MeasurementNomenclature)
+  @IsOptional()
+  measurement?: MeasurementNomenclature;
 }

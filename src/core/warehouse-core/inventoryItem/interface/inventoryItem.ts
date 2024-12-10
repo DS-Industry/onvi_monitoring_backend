@@ -11,5 +11,9 @@ export abstract class IInventoryItemRepository {
     nomenclatureId: number,
     warehouseId: number,
   ): Promise<InventoryItem>;
+  abstract findAllByNomenclatureIdsAndWarehouseIds(
+    nomenclatureIds: number[],
+    warehouseIds: number[],
+  ): Promise<InventoryItem[]>;
   abstract update(input: InventoryItem): Promise<InventoryItem>;
 }

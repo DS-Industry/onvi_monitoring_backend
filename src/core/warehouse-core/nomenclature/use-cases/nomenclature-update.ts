@@ -15,7 +15,7 @@ export class UpdateNomenclatureUseCase {
     oldNomenclature: Nomenclature,
     user?: User,
   ): Promise<Nomenclature> {
-    const { name, sku, organizationId, categoryId, supplierId } = input;
+    const { name, sku, organizationId, categoryId, supplierId, measurement } = input;
 
     oldNomenclature.name = name ? name : oldNomenclature.name;
     oldNomenclature.sku = sku ? sku : oldNomenclature.sku;
@@ -28,6 +28,9 @@ export class UpdateNomenclatureUseCase {
     oldNomenclature.supplierId = supplierId
       ? supplierId
       : oldNomenclature.supplierId;
+    oldNomenclature.measurement = measurement
+      ? measurement
+      : oldNomenclature.measurement;
 
     oldNomenclature.updatedAt = new Date(Date.now());
     oldNomenclature.updatedById = user.id;

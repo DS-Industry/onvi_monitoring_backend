@@ -4,5 +4,6 @@ export abstract class IWarehouseRepository {
   abstract create(input: Warehouse): Promise<Warehouse>;
   abstract findOneById(id: number): Promise<Warehouse>;
   abstract findAllByPosId(posId: number): Promise<Warehouse[]>;
+  abstract findAllByPermission(ability: any): Promise<Warehouse[]>;
   abstract update(input: Warehouse): Promise<Warehouse>;
 }

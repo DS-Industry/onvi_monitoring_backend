@@ -8,6 +8,7 @@ import { PermissionAction } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { NomenclatureUpdateDto } from '@platform-user/validate/validate-rules/dto/nomenclature-update.dto';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { InventoryItemMonitoringDto } from "@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto";
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -216,5 +217,33 @@ export class WarehouseValidateRules {
       warehouseCheck.object,
     );
     return warehouseCheck.object;
+  }
+
+  public async getAllInventoryItemValidate(input: InventoryItemMonitoringDto) {
+    const response = [];
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(input.orgId);
+    response.push(organizationCheck);
+    if (input.categoryId) {
+      response.push(
+        await this.validateLib.categoryByIdExists(input.categoryId),
+      );
+    }
+    if (input.warehouseId) {
+      const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
+      response.push(warehouseCheck);
+      if (warehouseCheck.object) {
+        ForbiddenError.from(input.ability).throwUnlessCan(
+          PermissionAction.read,
+          warehouseCheck.object,
+        );
+      }
+    }
+    this.validateLib.handlerArrayResponse(response);
+    ForbiddenError.from(input.ability).throwUnlessCan(
+      PermissionAction.read,
+      organizationCheck.object,
+    );
   }
 }

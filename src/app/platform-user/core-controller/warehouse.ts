@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -24,7 +25,6 @@ import {
 import { WarehouseCreateDto } from '@platform-user/core-controller/dto/receive/warehouse-create.dto';
 import { WarehouseValidateRules } from '@platform-user/validate/validate-rules/warehouse-validate-rules';
 import { FindMethodsWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-find-methods';
-import { CreateInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-create';
 import { NomenclatureCreateDto } from '@platform-user/core-controller/dto/receive/nomenclature-create.dto';
 import { CategoryCreateDto } from '@platform-user/core-controller/dto/receive/category-create.dto';
 import { CreateCategoryUseCase } from '@warehouse/category/use-cases/category-create';
@@ -34,8 +34,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-create';
 import { NomenclatureUpdateDto } from '@platform-user/core-controller/dto/receive/nomenclature-update.dto';
 import { UpdateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-update';
-import { FindMethodsCategoryUseCase } from "@warehouse/category/use-cases/category-find-methods";
-import { FindMethodsSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-find-methods";
+import { FindMethodsCategoryUseCase } from '@warehouse/category/use-cases/category-find-methods';
+import { FindMethodsSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-find-methods';
+import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-monitoring';
+import { InventoryItemMonitoringDto } from '@platform-user/core-controller/dto/receive/inventoryItem-monitoring.dto';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -43,7 +45,7 @@ export class WarehouseController {
     private readonly createWarehouseUseCase: CreateWarehouseUseCase,
     private readonly warehouseValidateRules: WarehouseValidateRules,
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
-    private readonly createInventoryItemUseCase: CreateInventoryItemUseCase,
+    private readonly inventoryItemMonitoringUseCase: InventoryItemMonitoringUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
     private readonly createSupplierUseCase: CreateSupplierUseCase,
     private readonly createNomenclatureUseCase: CreateNomenclatureUseCase,
@@ -197,6 +199,32 @@ export class WarehouseController {
   async getAllSupplier(): Promise<any> {
     try {
       return await this.findMethodsSupplierUseCase.getAll();
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get all InventoryItem
+  @Get('inventory-item/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllInventoryItem(
+    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: InventoryItemMonitoringDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.warehouseValidateRules.getAllInventoryItemValidate({
+        orgId,
+        ability,
+        ...params,
+      });
+      return await this.inventoryItemMonitoringUseCase.execute({
+        orgId,
+        ability,
+        ...params,
+      });
     } catch (e) {
       throw new Error(e);
     }

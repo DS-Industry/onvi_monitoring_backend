@@ -33,4 +33,14 @@ export class FindMethodsInventoryItemUseCase {
       warehouseId,
     );
   }
+
+  async getAllByNomenclatureIdsAndWarehouseIds(
+    nomenclatureIds: number[],
+    warehouseIds: number[],
+  ): Promise<InventoryItem[]> {
+    return await this.inventoryItemRepository.findAllByNomenclatureIdsAndWarehouseIds(
+      nomenclatureIds,
+      warehouseIds,
+    );
+  }
 }

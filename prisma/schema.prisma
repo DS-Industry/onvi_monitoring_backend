@@ -772,6 +772,7 @@ model Nomenclature {
   categoryId              Int
   supplier                Supplier?                  @relation(fields: [supplierId], references: [id])
   supplierId              Int?
+  measurement             MeasurementNomenclature?
   createdAt               DateTime
   createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
   createdById             Int
@@ -779,6 +780,13 @@ model Nomenclature {
   updateById              Int
   updatedAt               DateTime
   inventoryItems          InventoryItem[]
+}
+
+enum MeasurementNomenclature {
+  PIECE
+  KILOGRAM
+  LITER
+  METER
 }
 
 model InventoryItem {

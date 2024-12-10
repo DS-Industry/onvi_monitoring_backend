@@ -66,6 +66,21 @@ export class InventoryItemRepository extends IInventoryItemRepository {
     return PrismaInventoryItemMapper.toDomain(inventoryItem);
   }
 
+  public async findAllByNomenclatureIdsAndWarehouseIds(
+    nomenclatureIds: number[],
+    warehouseIds: number[],
+  ): Promise<InventoryItem[]> {
+    const inventoryItems = await this.prisma.inventoryItem.findMany({
+      where: {
+        warehouseId: { in: warehouseIds },
+        nomenclatureId: { in: nomenclatureIds },
+      },
+    });
+    return inventoryItems.map((item) =>
+      PrismaInventoryItemMapper.toDomain(item),
+    );
+  }
+
   public async update(input: InventoryItem): Promise<InventoryItem> {
     const inventoryItemEntity = PrismaInventoryItemMapper.toPrisma(input);
     const inventoryItem = await this.prisma.inventoryItem.update({
