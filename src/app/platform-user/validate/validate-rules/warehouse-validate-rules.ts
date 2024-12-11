@@ -196,6 +196,17 @@ export class WarehouseValidateRules {
     }
   }
 
+  public async getAllNomenclatureByOrgIdValidate(orgId: number, ability: any) {
+    const orgCheck = await this.validateLib.organizationByIdExists(orgId);
+    if (orgCheck.code !== 200) {
+      throw new Error(`Validation errors: ${orgCheck.code}`);
+    }
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      orgCheck.object,
+    );
+  }
+
   public async getAllByPosId(posId: number, ability: any) {
     const posCheck = await this.validateLib.posByIdExists(posId);
     if (posCheck.code !== 200) {

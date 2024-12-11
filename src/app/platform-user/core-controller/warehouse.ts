@@ -38,6 +38,7 @@ import { FindMethodsCategoryUseCase } from '@warehouse/category/use-cases/catego
 import { FindMethodsSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-find-methods';
 import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-monitoring';
 import { InventoryItemMonitoringDto } from '@platform-user/core-controller/dto/receive/inventoryItem-monitoring.dto';
+import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -52,6 +53,7 @@ export class WarehouseController {
     private readonly updateNomenclatureUseCase: UpdateNomenclatureUseCase,
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
+    private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -118,6 +120,28 @@ export class WarehouseController {
         data,
         oldNomenclature,
         user,
+      );
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get all by OrgId
+  @Get('nomenclature/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllNomenclatureByOrgId(
+    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
+        orgId,
+        ability,
+      );
+      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
+        orgId,
       );
     } catch (e) {
       throw new Error(e);
