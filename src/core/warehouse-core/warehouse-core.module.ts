@@ -16,7 +16,18 @@ import { NomenclatureRepositoryProvider } from '@warehouse/nomenclature/provider
 import { CreateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-create';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 import { UpdateNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-update';
-import { InventoryItemMonitoringUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-monitoring";
+import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-monitoring';
+import { WarehouseDocumentRepositoryProvider } from '@warehouse/document/document/provider/warehouseDocument';
+import { WarehouseDocumentDetailRepositoryProvider } from '@warehouse/document/documentDetail/provider/warehouseDocumentDetail';
+import { CreateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-create';
+import { CarryingWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-carrying';
+import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
+import { CreateWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-create';
+import { FindMethodsWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-find-methods';
+import { UpdateInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-update";
+import {
+  AllByFilterWarehouseDocumentUseCase,
+} from "@warehouse/document/document/use-cases/warehouseDocument-all-by-filter";
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -24,11 +35,25 @@ const repositories: Provider[] = [
   NomenclatureRepositoryProvider,
   CategoryProvider,
   SupplierRepositoryProvider,
+  WarehouseDocumentRepositoryProvider,
+  WarehouseDocumentDetailRepositoryProvider,
 ];
 
 const warehouseUseCase: Provider[] = [
   CreateWarehouseUseCase,
   FindMethodsWarehouseUseCase,
+];
+
+const warehouseDocumentUseCase: Provider[] = [
+  CreateWarehouseDocumentUseCase,
+  CarryingWarehouseDocumentUseCase,
+  FindMethodsWarehouseDocumentUseCase,
+  AllByFilterWarehouseDocumentUseCase,
+];
+
+const warehouseDocumentDetailUseCase: Provider[] = [
+  CreateWarehouseDocumentDetailUseCase,
+  FindMethodsWarehouseDocumentDetailUseCase,
 ];
 
 const supplierUseCase: Provider[] = [
@@ -40,6 +65,7 @@ const inventoryItemUseCase: Provider[] = [
   CreateInventoryItemUseCase,
   FindMethodsInventoryItemUseCase,
   InventoryItemMonitoringUseCase,
+  UpdateInventoryItemUseCase,
 ];
 
 const categoryUseCase: Provider[] = [
@@ -62,6 +88,8 @@ const nomenclatureUseCase: Provider[] = [
     ...inventoryItemUseCase,
     ...categoryUseCase,
     ...nomenclatureUseCase,
+    ...warehouseDocumentUseCase,
+    ...warehouseDocumentDetailUseCase,
   ],
   exports: [
     ...warehouseUseCase,
@@ -69,6 +97,8 @@ const nomenclatureUseCase: Provider[] = [
     ...categoryUseCase,
     ...supplierUseCase,
     ...nomenclatureUseCase,
+    ...warehouseDocumentUseCase,
+    ...warehouseDocumentDetailUseCase,
   ],
 })
 export class WarehouseCoreModule {}

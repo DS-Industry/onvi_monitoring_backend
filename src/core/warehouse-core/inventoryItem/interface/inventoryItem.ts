@@ -16,4 +16,5 @@ export abstract class IInventoryItemRepository {
     warehouseIds: number[],
   ): Promise<InventoryItem[]>;
   abstract update(input: InventoryItem): Promise<InventoryItem>;
+  abstract updateMany(input: InventoryItem[]): Promise<void>;
 }

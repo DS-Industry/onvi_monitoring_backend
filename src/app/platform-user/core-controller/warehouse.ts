@@ -39,6 +39,12 @@ import { FindMethodsSupplierUseCase } from '@warehouse/supplier/use-cases/suppli
 import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-monitoring';
 import { InventoryItemMonitoringDto } from '@platform-user/core-controller/dto/receive/inventoryItem-monitoring.dto';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
+import { WarehouseDocumentCreateDto } from '@platform-user/core-controller/dto/receive/warehouse-document-create.dto';
+import { CarryingWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-carrying';
+import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
+import { FindMethodsWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-find-methods';
+import { WarehouseDocumentFilterDto } from '@platform-user/core-controller/dto/receive/warehouse-document-filter.dto';
+import { AllByFilterWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-all-by-filter';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -51,9 +57,13 @@ export class WarehouseController {
     private readonly createSupplierUseCase: CreateSupplierUseCase,
     private readonly createNomenclatureUseCase: CreateNomenclatureUseCase,
     private readonly updateNomenclatureUseCase: UpdateNomenclatureUseCase,
+    private readonly carryingWarehouseDocumentUseCase: CarryingWarehouseDocumentUseCase,
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
+    private readonly findMethodsWarehouseDocumentUseCase: FindMethodsWarehouseDocumentUseCase,
+    private readonly findMethodsWarehouseDocumentDetailUseCase: FindMethodsWarehouseDocumentDetailUseCase,
+    private readonly allByFilterWarehouseDocumentUseCase: AllByFilterWarehouseDocumentUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -164,6 +174,7 @@ export class WarehouseController {
         ability,
       );
       await this.createNomenclatureUseCase.createMany(data, user);
+      return { status: 'SUCCESS' };
     } catch (e) {
       throw new Error(e);
     }
@@ -266,6 +277,76 @@ export class WarehouseController {
       const { ability } = req;
       await this.warehouseValidateRules.getAllByPosId(posId, ability);
       return await this.findMethodsWarehouseUseCase.getAllByPosId(posId);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  @Post('document')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async createDocument(
+    @Request() req: any,
+    @Body() data: WarehouseDocumentCreateDto,
+  ): Promise<any> {
+    try {
+      const { user, ability } = req;
+      await this.warehouseValidateRules.createDocumentValidate({
+        warehouseId: data.warehouseId,
+        responsibleId: data.responsibleId,
+        type: data.type,
+        ability: ability,
+        details: data.details,
+      });
+      return await this.carryingWarehouseDocumentUseCase.execute(data, user);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Get document and details
+  @Get('document/:documentId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getOneDocumentById(
+    @Request() req: any,
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ): Promise<any> {
+    try {
+      const document =
+        await this.findMethodsWarehouseDocumentUseCase.getOneById(documentId);
+      const documentDetails =
+        await this.findMethodsWarehouseDocumentDetailUseCase.getAllByWarehouseDocumentId(
+          document.id,
+        );
+      return { document: document, details: documentDetails };
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  @Get('documents')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllDocuments(
+    @Request() req: any,
+    @Query() params: WarehouseDocumentFilterDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      let warehouse = null;
+      if (params.warehouseId) {
+        warehouse = await this.warehouseValidateRules.getOneByIdValidate(
+          params.warehouseId,
+          ability,
+        );
+      }
+      return await this.allByFilterWarehouseDocumentUseCase.execute(
+        params.dateStart,
+        params.dateEnd,
+        ability,
+        warehouse,
+      );
     } catch (e) {
       throw new Error(e);
     }

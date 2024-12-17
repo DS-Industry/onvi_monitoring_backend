@@ -4,11 +4,12 @@ import {
   ValidateResponse,
 } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction, WarehouseDocumentType } from "@prisma/client";
 import * as XLSX from 'xlsx';
 import { NomenclatureUpdateDto } from '@platform-user/validate/validate-rules/dto/nomenclature-update.dto';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
-import { InventoryItemMonitoringDto } from "@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto";
+import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
+import { WarehouseDocumentCreateDto } from "@platform-user/validate/validate-rules/dto/warehouseDocument-create.dto";
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -255,6 +256,62 @@ export class WarehouseValidateRules {
     ForbiddenError.from(input.ability).throwUnlessCan(
       PermissionAction.read,
       organizationCheck.object,
+    );
+  }
+
+  public async createDocumentValidate(input: WarehouseDocumentCreateDto) {
+    const response = [];
+    const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
+    response.push(warehouseCheck)
+    response.push(await this.validateLib.userByIdExists(input.responsibleId));
+
+    await Promise.all(
+      input.details.map(async (item) => {
+        response.push(await this.validateLib.nomenclatureByIdExists(item.nomenclatureId));
+        if (input.type === WarehouseDocumentType.INVENTORY) {
+          if (!this.isValidInventoryMetaData(item.metaData)) {
+            response.push({ code: 465 });
+          }
+        } else if (input.type === WarehouseDocumentType.MOVING) {
+          if (!this.isValidMovingMetaData(item.metaData)) {
+            response.push({ code: 465 });
+          }
+        }
+      })
+    )
+
+    if (input.type === WarehouseDocumentType.MOVING && input.details[0].metaData &&
+      'warehouseReceirId' in input.details[0].metaData) {
+      const warehouseNewCheck = await this.validateLib.warehouseByIdExists(input.details[0].metaData.warehouseReceirId);
+      /*if (warehouseNewCheck.object) {
+        ForbiddenError.from(input.ability).throwUnlessCan(
+          PermissionAction.update,
+          warehouseNewCheck.object,
+        );
+      }*/
+      response.push(warehouseNewCheck)
+    }
+
+
+    this.validateLib.handlerArrayResponse(response);
+    ForbiddenError.from(input.ability).throwUnlessCan(
+      PermissionAction.update,
+      warehouseCheck.object,
+    );
+  }
+
+  private isValidInventoryMetaData(metaData: any): boolean {
+    return (
+      metaData &&
+      typeof metaData.oldQuantity === 'number' &&
+      typeof metaData.deviation === 'number'
+    );
+  }
+
+  private isValidMovingMetaData(metaData: any): boolean {
+    return (
+      metaData &&
+      typeof metaData.warehouseReceirId === 'number'
     );
   }
 }

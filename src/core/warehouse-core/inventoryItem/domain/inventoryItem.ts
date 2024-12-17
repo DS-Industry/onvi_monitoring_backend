@@ -39,4 +39,12 @@ export class InventoryItem extends BaseEntity<InventoryItemProps> {
   set warehouseId(warehouseId: number) {
     this.props.warehouseId = warehouseId;
   }
+
+  adjustQuantity(amount: number): void {
+    const newQuantity = this.quantity + amount;
+    if (newQuantity < 0) {
+      throw new Error('stock value error');
+    }
+    this.quantity = newQuantity;
+  }
 }

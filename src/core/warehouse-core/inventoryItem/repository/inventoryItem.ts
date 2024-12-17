@@ -91,4 +91,15 @@ export class InventoryItemRepository extends IInventoryItemRepository {
     });
     return PrismaInventoryItemMapper.toDomain(inventoryItem);
   }
+
+  public async updateMany(input: InventoryItem[]): Promise<void> {
+    const updates = input.map((item) => {
+      return this.prisma.inventoryItem.update({
+        where: { id: item.id },
+        data: PrismaInventoryItemMapper.toPrisma(item),
+      });
+    });
+
+    await this.prisma.$transaction(updates);
+  }
 }

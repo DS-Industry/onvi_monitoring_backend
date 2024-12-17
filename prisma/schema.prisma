@@ -103,6 +103,9 @@ model User {
   warehouseUpdated  Warehouse[]     @relation(name: "UpdateByUser")
   nomenclatureCreated Nomenclature[]  @relation(name: "CreatedByUser")
   nomenclatureUpdated  Nomenclature[]     @relation(name: "UpdateByUser")
+  warehouseDocumentResponsible WarehouseDocument[]  @relation(name: "responsibleUser")
+  warehouseDocumentCreated WarehouseDocument[]  @relation(name: "CreatedByUser")
+  warehouseDocumentUpdated WarehouseDocument[]  @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -760,6 +763,7 @@ model Warehouse {
   createdAt               DateTime
   updatedAt               DateTime
   inventoryItems          InventoryItem[]
+  warehouseDocuments      WarehouseDocument[]
 }
 
 model Nomenclature {
@@ -780,6 +784,7 @@ model Nomenclature {
   updateById              Int
   updatedAt               DateTime
   inventoryItems          InventoryItem[]
+  warehouseDocumentDetails      WarehouseDocumentDetail[]
 }
 
 enum MeasurementNomenclature {
@@ -802,10 +807,10 @@ model Category {
   id                      Int                      @id @default(autoincrement())
   name                    String
   description             String?
-  ownerCategoryId         Int?                      @unique
+  ownerCategoryId         Int?
   ownerCategory           Category?                 @relation("OwnerCategory", fields: [ownerCategoryId], references: [id])
   preOwnerCategory        Category[]                 @relation("OwnerCategory")
-  nomenclatures          Nomenclature[]
+  nomenclatures           Nomenclature[]
 }
 
 model Supplier {
@@ -813,6 +818,43 @@ model Supplier {
   name                    String
   contact                 String
   nomenclatures          Nomenclature[]
+}
+
+model WarehouseDocument {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  warehouseDocumentType   WarehouseDocumentType
+  warehouse               Warehouse                 @relation(fields: [warehouseId], references: [id])
+  warehouseId             Int
+  responsible             User                      @relation(name: "responsibleUser", fields: [responsibleId], references: [id])
+  responsibleId           Int
+  carryingAt              DateTime
+  createdAt               DateTime
+  updatedAt               DateTime
+  createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updateBy                User                      @relation(name: "UpdateByUser", fields: [updateById], references: [id])
+  updateById              Int
+  warehouseDocumentDetails      WarehouseDocumentDetail[]
+}
+
+enum WarehouseDocumentType {
+  WRITEOFF
+  INVENTORY
+  COMMISSIONING
+  RECEIPT
+  MOVING
+}
+
+model WarehouseDocumentDetail {
+  id                      Int                      @id @default(autoincrement())
+  warehouseDocument       WarehouseDocument        @relation(fields: [warehouseDocumentId], references: [id])
+  warehouseDocumentId     Int
+  nomenclature            Nomenclature             @relation(fields: [nomenclatureId], references: [id])
+  nomenclatureId          Int
+  quantity                Int
+  comment                 String?
+  metaData                Json?
 }
 
 enum StatusUser {

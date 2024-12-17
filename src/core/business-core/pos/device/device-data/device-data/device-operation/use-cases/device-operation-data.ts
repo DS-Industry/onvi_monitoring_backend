@@ -37,7 +37,7 @@ export class DataDeviceOperationUseCase {
       cashSum: cashSum,
       virtualSum: virtualSum,
       yandexSum: yandexSum,
-      lastOper: lastOper ? lastOper.loadDate : undefined,
+      lastOper: lastOper ? lastOper.operDate : undefined,
     };
   }
 }
