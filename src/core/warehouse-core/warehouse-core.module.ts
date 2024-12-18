@@ -28,6 +28,7 @@ import { UpdateInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/i
 import {
   AllByFilterWarehouseDocumentUseCase,
 } from "@warehouse/document/document/use-cases/warehouseDocument-all-by-filter";
+import { InventoryInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-inventory";
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -66,6 +67,7 @@ const inventoryItemUseCase: Provider[] = [
   FindMethodsInventoryItemUseCase,
   InventoryItemMonitoringUseCase,
   UpdateInventoryItemUseCase,
+  InventoryInventoryItemUseCase,
 ];
 
 const categoryUseCase: Provider[] = [

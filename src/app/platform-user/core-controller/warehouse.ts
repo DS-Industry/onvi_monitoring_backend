@@ -45,6 +45,7 @@ import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/documen
 import { FindMethodsWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-find-methods';
 import { WarehouseDocumentFilterDto } from '@platform-user/core-controller/dto/receive/warehouse-document-filter.dto';
 import { AllByFilterWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-all-by-filter';
+import { InventoryInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-inventory";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -64,6 +65,7 @@ export class WarehouseController {
     private readonly findMethodsWarehouseDocumentUseCase: FindMethodsWarehouseDocumentUseCase,
     private readonly findMethodsWarehouseDocumentDetailUseCase: FindMethodsWarehouseDocumentDetailUseCase,
     private readonly allByFilterWarehouseDocumentUseCase: AllByFilterWarehouseDocumentUseCase,
+    private readonly inventoryInventoryItemUseCase: InventoryInventoryItemUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -264,6 +266,26 @@ export class WarehouseController {
       throw new Error(e);
     }
   }
+  //Get all InventoryItem
+  @Get('inventory-item/inventory/:warehouseId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllInventoryItemByWarehouse(
+    @Request() req: any,
+    @Param('warehouseId', ParseIntPipe) warehouseId: number
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.warehouseValidateRules.getOneByIdValidate(
+        warehouseId,
+        ability,
+      );
+      return await this.inventoryInventoryItemUseCase.execute(warehouseId);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
   //Get all by PosId
   @Get('pos/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -281,6 +303,7 @@ export class WarehouseController {
       throw new Error(e);
     }
   }
+  //Create Document
   @Post('document')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateWarehouseAbility())
@@ -324,6 +347,7 @@ export class WarehouseController {
       throw new Error(e);
     }
   }
+  //Get all Documents by filter
   @Get('documents')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
