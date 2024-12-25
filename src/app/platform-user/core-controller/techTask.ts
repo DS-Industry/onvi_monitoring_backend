@@ -9,7 +9,9 @@ import {
   Post,
   Query,
   Request,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
@@ -35,6 +37,7 @@ import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -149,14 +152,27 @@ export class TechTaskController {
   @Post(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
+  @UseInterceptors(AnyFilesInterceptor())
   @HttpCode(200)
   async completionShapeById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: TechTaskCompletionShapeDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<any> {
     const { ability, user } = req;
-    const itemIds = data.valueData.map((item) => item.itemValueId);
+
+    const valueWithFiles = data.valueData.map((item) => {
+      const matchingFile = files.find(
+        (file) => file.fieldname === item.itemValueId.toString(),
+      );
+      return {
+        ...item,
+        file: matchingFile || undefined,
+      };
+    });
+
+    const itemIds = valueWithFiles.map((item) => item.itemValueId);
     const techTask =
       await this.techTaskValidateRules.completionShapeByIdValidate(
         id,
@@ -165,7 +181,7 @@ export class TechTaskController {
       );
     return await this.completionShapeTechTaskUseCase.execute(
       techTask,
-      data.valueData,
+      valueWithFiles,
       user,
     );
   }

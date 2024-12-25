@@ -7,7 +7,6 @@ import {
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
-import { StatusTechTask } from '@prisma/client';
 
 @Injectable()
 export class ShapeTechTaskUseCase {
@@ -35,6 +34,7 @@ export class ShapeTechTaskUseCase {
           group: itemTechTask.group,
           code: itemTechTask.code,
           value: itemValue.value,
+          image: itemValue.image,
         });
       }),
     );

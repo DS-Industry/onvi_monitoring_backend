@@ -16,6 +16,7 @@ export class PrismaTechTaskItemValueToTechTaskMapper {
       techTaskId: entity.techTaskId,
       techTaskItemTemplateId: entity.techTaskItemTemplateId,
       value: entity.value,
+      image: entity.image,
     });
   }
 
@@ -28,6 +29,7 @@ export class PrismaTechTaskItemValueToTechTaskMapper {
       techTaskItemTemplateId:
         techTaskItemValueToTechTask.techTaskItemTemplateId,
       value: techTaskItemValueToTechTask?.value,
+      image: techTaskItemValueToTechTask?.image,
     };
   }
 }

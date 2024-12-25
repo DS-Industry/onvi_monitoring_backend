@@ -29,6 +29,15 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
     return PrismaWarehouseDocumentMapper.toDomain(warehouseDocument);
   }
 
+  public async findOneByName(name: string): Promise<WarehouseDocument> {
+    const warehouseDocument = await this.prisma.warehouseDocument.findFirst({
+      where: {
+        name,
+      },
+    });
+    return PrismaWarehouseDocumentMapper.toDomain(warehouseDocument);
+  }
+
   public async findAllByWarehouseId(
     warehouseId: number,
   ): Promise<WarehouseDocument[]> {

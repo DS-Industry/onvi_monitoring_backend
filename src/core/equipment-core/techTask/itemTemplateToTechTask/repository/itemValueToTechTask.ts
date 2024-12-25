@@ -63,13 +63,14 @@ export class TechTaskItemValueToTechTaskRepository extends ITechTaskItemValueToT
   public async updateValue(
     id: number,
     value: string,
+    image?: string,
   ): Promise<TechTaskItemValueToTechTask> {
     const itemValueToTechTask =
       await this.prisma.techTaskItemValueToTechTask.update({
         where: {
           id,
         },
-        data: { value: value },
+        data: { value: value, image: image },
       });
     return PrismaTechTaskItemValueToTechTaskMapper.toDomain(
       itemValueToTechTask,

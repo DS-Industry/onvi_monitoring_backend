@@ -19,4 +19,5 @@ export class TechTaskItemDto {
   group: GroupTechTaskItemTemplate;
   code: string;
   value?: string;
+  image?: string;
 }

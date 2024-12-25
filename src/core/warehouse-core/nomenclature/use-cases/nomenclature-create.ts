@@ -3,16 +3,20 @@ import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomen
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { NomenclatureCreateDto } from '@warehouse/nomenclature/use-cases/dto/nomenclature-create.dto';
 import { User } from '@platform-user/user/domain/user';
+import { v4 as uuid } from 'uuid';
+import { IFileAdapter } from '@libs/file/adapter';
 
 @Injectable()
 export class CreateNomenclatureUseCase {
   constructor(
     private readonly nomenclatureRepository: INomenclatureRepository,
+    private readonly fileService: IFileAdapter,
   ) {}
 
   async create(
     input: NomenclatureCreateDto,
     user: User,
+    file?: Express.Multer.File,
   ): Promise<Nomenclature> {
     const nomenclatureData = new Nomenclature({
       name: input.name,
@@ -26,6 +30,12 @@ export class CreateNomenclatureUseCase {
       createdById: user.id,
       updatedById: user.id,
     });
+    if (file) {
+      const key = uuid();
+      nomenclatureData.image = key;
+      const keyWay = `image/${nomenclatureData.organizationId}/nomenclature/${key}`;
+      await this.fileService.upload(file, keyWay);
+    }
     return await this.nomenclatureRepository.create(nomenclatureData);
   }
 

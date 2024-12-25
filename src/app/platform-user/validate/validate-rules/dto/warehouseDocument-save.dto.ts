@@ -1,14 +1,12 @@
-import { WarehouseDocumentType } from "@prisma/client";
-
-export class WarehouseDocumentCreateDto {
+export class WarehouseDocumentSaveDto {
+  warehouseDocumentId: number;
   warehouseId: number;
   responsibleId: number;
-  type: WarehouseDocumentType;
   ability: any;
-  details: WarehouseDocumentDetailCreateDto[];
+  details: WarehouseDocumentDetailSaveDto[];
 }
 
-export class WarehouseDocumentDetailCreateDto {
+export class WarehouseDocumentDetailSaveDto {
   nomenclatureId: number;
   quantity: number;
   comment?: string;

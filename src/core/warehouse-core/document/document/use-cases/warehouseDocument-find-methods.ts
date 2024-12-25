@@ -13,6 +13,10 @@ export class FindMethodsWarehouseDocumentUseCase {
     return await this.warehouseDocumentRepository.findOneById(id);
   }
 
+  async getOneByName(name: string): Promise<WarehouseDocument> {
+    return await this.warehouseDocumentRepository.findOneByName(name);
+  }
+
   async getAllByWarehouseId(warehouseId: number): Promise<WarehouseDocument[]> {
     return await this.warehouseDocumentRepository.findAllByWarehouseId(
       warehouseId,

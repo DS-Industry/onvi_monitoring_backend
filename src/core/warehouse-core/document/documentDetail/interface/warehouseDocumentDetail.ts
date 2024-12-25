@@ -5,6 +5,7 @@ export abstract class IWarehouseDocumentDetailRepository {
     input: WarehouseDocumentDetail,
   ): Promise<WarehouseDocumentDetail>;
   abstract createMany(input: WarehouseDocumentDetail[]): void;
+  abstract deleteManyByDocumentId(documentId: number): void;
   abstract findOneById(id: number): Promise<WarehouseDocumentDetail>;
   abstract findAllByNomenclatureId(
     nomenclatureId: number,

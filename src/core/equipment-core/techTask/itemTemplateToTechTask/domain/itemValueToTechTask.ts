@@ -5,6 +5,7 @@ export interface TechTaskItemValueToTechTaskProps {
   techTaskId: number;
   techTaskItemTemplateId: number;
   value?: string;
+  image?: string;
 }
 
 export class TechTaskItemValueToTechTask extends BaseEntity<TechTaskItemValueToTechTaskProps> {
@@ -28,7 +29,15 @@ export class TechTaskItemValueToTechTask extends BaseEntity<TechTaskItemValueToT
     return this.props.value;
   }
 
+  get image(): string {
+    return this.props.image;
+  }
+
   set value(value: string) {
     this.props.value = value;
+  }
+
+  set image(image: string) {
+    this.props.image = image;
   }
 }

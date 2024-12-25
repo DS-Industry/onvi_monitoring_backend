@@ -1,8 +1,4 @@
-import { WarehouseDocumentType } from '@prisma/client';
-
-export class WarehouseDocumentCarryingDto {
-  name: string;
-  type: WarehouseDocumentType;
+export class WarehouseDocumentSaveDto {
   warehouseId: number;
   responsibleId: number;
   carryingAt: Date;

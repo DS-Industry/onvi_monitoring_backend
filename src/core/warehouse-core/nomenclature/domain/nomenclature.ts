@@ -9,6 +9,7 @@ export interface NomenclatureProps {
   categoryId: number;
   supplierId?: number;
   measurement: MeasurementNomenclature;
+  image?: string;
   createdAt?: Date;
   updatedAt?: Date;
   createdById: number;
@@ -45,6 +46,10 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
 
   get measurement(): MeasurementNomenclature {
     return this.props.measurement;
+  }
+
+  get image(): string {
+    return this.props.image;
   }
 
   get createdAt(): Date {
@@ -85,6 +90,10 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
 
   set measurement(measurement: MeasurementNomenclature) {
     this.props.measurement = measurement;
+  }
+
+  set image(image: string) {
+    this.props.image = image;
   }
 
   set updatedAt(updatedAt: Date) {

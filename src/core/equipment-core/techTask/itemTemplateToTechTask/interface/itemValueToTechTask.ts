@@ -15,5 +15,6 @@ export abstract class ITechTaskItemValueToTechTaskRepository {
   abstract updateValue(
     id: number,
     value: string,
+    image?: string,
   ): Promise<TechTaskItemValueToTechTask>;
 }

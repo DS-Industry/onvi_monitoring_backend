@@ -4,12 +4,12 @@ import {
   ValidateResponse,
 } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
-import { PermissionAction, WarehouseDocumentType } from "@prisma/client";
+import { PermissionAction, WarehouseDocumentStatus, WarehouseDocumentType } from "@prisma/client";
 import * as XLSX from 'xlsx';
 import { NomenclatureUpdateDto } from '@platform-user/validate/validate-rules/dto/nomenclature-update.dto';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
-import { WarehouseDocumentCreateDto } from "@platform-user/validate/validate-rules/dto/warehouseDocument-create.dto";
+import { WarehouseDocumentSaveDto } from "@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto";
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -259,37 +259,46 @@ export class WarehouseValidateRules {
     );
   }
 
-  public async createDocumentValidate(input: WarehouseDocumentCreateDto) {
+  public async saveDocumentValidate(input: WarehouseDocumentSaveDto) {
     const response = [];
+    const warehouseDocumentCheck = await this.validateLib.warehouseDocumentByIdExists(input.warehouseDocumentId);
+    response.push(warehouseDocumentCheck)
     const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
     response.push(warehouseCheck)
     response.push(await this.validateLib.userByIdExists(input.responsibleId));
 
-    await Promise.all(
-      input.details.map(async (item) => {
-        response.push(await this.validateLib.nomenclatureByIdExists(item.nomenclatureId));
-        if (input.type === WarehouseDocumentType.INVENTORY) {
-          if (!this.isValidInventoryMetaData(item.metaData)) {
-            response.push({ code: 465 });
-          }
-        } else if (input.type === WarehouseDocumentType.MOVING) {
-          if (!this.isValidMovingMetaData(item.metaData)) {
-            response.push({ code: 465 });
-          }
-        }
-      })
-    )
 
-    if (input.type === WarehouseDocumentType.MOVING && input.details[0].metaData &&
-      'warehouseReceirId' in input.details[0].metaData) {
-      const warehouseNewCheck = await this.validateLib.warehouseByIdExists(input.details[0].metaData.warehouseReceirId);
-      /*if (warehouseNewCheck.object) {
-        ForbiddenError.from(input.ability).throwUnlessCan(
-          PermissionAction.update,
-          warehouseNewCheck.object,
-        );
-      }*/
-      response.push(warehouseNewCheck)
+    if (warehouseDocumentCheck.object) {
+      await Promise.all(
+        input.details.map(async (item) => {
+          response.push(await this.validateLib.nomenclatureByIdExists(item.nomenclatureId));
+          if (warehouseDocumentCheck.object.type === WarehouseDocumentType.INVENTORY) {
+            if (!this.isValidInventoryMetaData(item.metaData)) {
+              response.push({ code: 465 });
+            }
+          } else if (warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING) {
+            if (!this.isValidMovingMetaData(item.metaData)) {
+              response.push({ code: 465 });
+            }
+          }
+        })
+      );
+
+      if (warehouseDocumentCheck.object.status === WarehouseDocumentStatus.SENT) {
+        response.push({ code: 465 })
+      }
+
+      if (warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING && input.details[0].metaData &&
+        "warehouseReceirId" in input.details[0].metaData) {
+        const warehouseNewCheck = await this.validateLib.warehouseByIdExists(input.details[0].metaData.warehouseReceirId);
+        /*if (warehouseNewCheck.object) {
+          ForbiddenError.from(input.ability).throwUnlessCan(
+            PermissionAction.update,
+            warehouseNewCheck.object,
+          );
+        }*/
+        response.push(warehouseNewCheck);
+      }
     }
 
 
@@ -298,6 +307,7 @@ export class WarehouseValidateRules {
       PermissionAction.update,
       warehouseCheck.object,
     );
+    return warehouseDocumentCheck.object;
   }
 
   private isValidInventoryMetaData(metaData: any): boolean {

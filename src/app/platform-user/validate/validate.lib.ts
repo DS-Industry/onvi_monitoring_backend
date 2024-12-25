@@ -33,6 +33,8 @@ import { FindMethodsSupplierUseCase } from '@warehouse/supplier/use-cases/suppli
 import { Supplier } from '@warehouse/supplier/domain/supplier';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
+import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 export interface ValidateResponse<T = any> {
   code: number;
   object?: T;
@@ -57,6 +59,7 @@ export class ValidateLib {
     private readonly validateOrganizationMail: ValidateOrganizationConfirmMailUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
+    private readonly findMethodsWarehouseDocumentUseCase: FindMethodsWarehouseDocumentUseCase,
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
@@ -398,6 +401,17 @@ export class ValidateLib {
       return { code: 477 };
     }
     return { code: 200, object: nomenclature };
+  }
+
+  public async warehouseDocumentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<WarehouseDocument>> {
+    const warehouseDocument =
+      await this.findMethodsWarehouseDocumentUseCase.getOneById(id);
+    if (!warehouseDocument) {
+      return { code: 476 };
+    }
+    return { code: 200, object: warehouseDocument };
   }
 
   public async deviceByNameAndPosIdNotExists(

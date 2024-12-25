@@ -20,15 +20,17 @@ import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cas
 import { WarehouseDocumentRepositoryProvider } from '@warehouse/document/document/provider/warehouseDocument';
 import { WarehouseDocumentDetailRepositoryProvider } from '@warehouse/document/documentDetail/provider/warehouseDocumentDetail';
 import { CreateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-create';
-import { CarryingWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-carrying';
+import { SandWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-send';
 import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
 import { CreateWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-create';
 import { FindMethodsWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-find-methods';
-import { UpdateInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-update";
-import {
-  AllByFilterWarehouseDocumentUseCase,
-} from "@warehouse/document/document/use-cases/warehouseDocument-all-by-filter";
-import { InventoryInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-inventory";
+import { UpdateInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-update';
+import { AllByFilterWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-all-by-filter';
+import { InventoryInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-inventory';
+import { FileModule } from '@libs/file/module';
+import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
+import { DeleteWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-delete';
+import { UpdateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-update';
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -47,13 +49,16 @@ const warehouseUseCase: Provider[] = [
 
 const warehouseDocumentUseCase: Provider[] = [
   CreateWarehouseDocumentUseCase,
-  CarryingWarehouseDocumentUseCase,
+  SandWarehouseDocumentUseCase,
+  SaveWarehouseDocumentUseCase,
   FindMethodsWarehouseDocumentUseCase,
   AllByFilterWarehouseDocumentUseCase,
+  UpdateWarehouseDocumentUseCase,
 ];
 
 const warehouseDocumentDetailUseCase: Provider[] = [
   CreateWarehouseDocumentDetailUseCase,
+  DeleteWarehouseDocumentDetailUseCase,
   FindMethodsWarehouseDocumentDetailUseCase,
 ];
 
@@ -82,7 +87,7 @@ const nomenclatureUseCase: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, FileModule],
   providers: [
     ...repositories,
     ...warehouseUseCase,

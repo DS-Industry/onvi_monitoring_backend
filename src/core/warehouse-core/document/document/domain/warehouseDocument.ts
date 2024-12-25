@@ -1,12 +1,13 @@
-import { WarehouseDocumentType } from '@prisma/client';
+import { WarehouseDocumentStatus, WarehouseDocumentType } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface WarehouseDocumentProps {
   id?: number;
   name: string;
   type: WarehouseDocumentType;
-  warehouseId: number;
-  responsibleId: number;
+  warehouseId?: number;
+  responsibleId?: number;
+  status: WarehouseDocumentStatus;
   carryingAt: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -29,6 +30,10 @@ export class WarehouseDocument extends BaseEntity<WarehouseDocumentProps> {
 
   get type(): WarehouseDocumentType {
     return this.props.type;
+  }
+
+  get status(): WarehouseDocumentStatus {
+    return this.props.status;
   }
 
   get responsibleId(): number {
@@ -65,6 +70,10 @@ export class WarehouseDocument extends BaseEntity<WarehouseDocumentProps> {
 
   set type(type: WarehouseDocumentType) {
     this.props.type = type;
+  }
+
+  set status(status: WarehouseDocumentStatus) {
+    this.props.status = status;
   }
 
   set warehouseId(warehouseId: number) {

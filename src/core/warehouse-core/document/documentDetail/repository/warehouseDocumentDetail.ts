@@ -33,6 +33,12 @@ export class WarehouseDocumentDetailRepository extends IWarehouseDocumentDetailR
     });
   }
 
+  public async deleteManyByDocumentId(documentId: number): Promise<void> {
+    await this.prisma.warehouseDocumentDetail.deleteMany({
+      where: { warehouseDocumentId: documentId },
+    });
+  }
+
   public async findOneById(id: number): Promise<WarehouseDocumentDetail> {
     const warehouseDocumentDetail =
       await this.prisma.warehouseDocumentDetail.findFirst({

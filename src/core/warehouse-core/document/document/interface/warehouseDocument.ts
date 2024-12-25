@@ -4,6 +4,7 @@ import { WarehouseDocumentType } from '@prisma/client';
 export abstract class IWarehouseDocumentRepository {
   abstract create(input: WarehouseDocument): Promise<WarehouseDocument>;
   abstract findOneById(id: number): Promise<WarehouseDocument>;
+  abstract findOneByName(name: string): Promise<WarehouseDocument>;
   abstract findAllByWarehouseId(
     warehouseId: number,
   ): Promise<WarehouseDocument[]>;

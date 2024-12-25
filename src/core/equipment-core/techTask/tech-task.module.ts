@@ -20,6 +20,7 @@ import {
   GetAllByPosIdProgramTechRateUseCase
 } from "@tech-task/programTechRate/use-cases/programTechRate-get-all-by-pos-id";
 import { UpdateProgramTechRateUseCase } from "@tech-task/programTechRate/use-cases/programTechRate-update";
+import { FileModule } from "@libs/file/module";
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
@@ -53,7 +54,7 @@ const programTechRateUseCases: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, FileModule],
   providers: [
     ...repositories,
     ...techTaskUseCases,

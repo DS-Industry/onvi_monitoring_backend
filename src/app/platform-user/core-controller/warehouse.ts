@@ -40,12 +40,15 @@ import { InventoryItemMonitoringUseCase } from '@warehouse/inventoryItem/use-cas
 import { InventoryItemMonitoringDto } from '@platform-user/core-controller/dto/receive/inventoryItem-monitoring.dto';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 import { WarehouseDocumentCreateDto } from '@platform-user/core-controller/dto/receive/warehouse-document-create.dto';
-import { CarryingWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-carrying';
+import { SandWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-send';
 import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
 import { FindMethodsWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-find-methods';
 import { WarehouseDocumentFilterDto } from '@platform-user/core-controller/dto/receive/warehouse-document-filter.dto';
 import { AllByFilterWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-all-by-filter';
-import { InventoryInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-inventory";
+import { InventoryInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-inventory';
+import { WarehouseDocumentSaveDto } from '@platform-user/core-controller/dto/receive/warehouse-document-save.dto';
+import { CreateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-create';
+import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -58,7 +61,8 @@ export class WarehouseController {
     private readonly createSupplierUseCase: CreateSupplierUseCase,
     private readonly createNomenclatureUseCase: CreateNomenclatureUseCase,
     private readonly updateNomenclatureUseCase: UpdateNomenclatureUseCase,
-    private readonly carryingWarehouseDocumentUseCase: CarryingWarehouseDocumentUseCase,
+    private readonly sandWarehouseDocumentUseCase: SandWarehouseDocumentUseCase,
+    private readonly saveWarehouseDocumentUseCase: SaveWarehouseDocumentUseCase,
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
@@ -66,6 +70,7 @@ export class WarehouseController {
     private readonly findMethodsWarehouseDocumentDetailUseCase: FindMethodsWarehouseDocumentDetailUseCase,
     private readonly allByFilterWarehouseDocumentUseCase: AllByFilterWarehouseDocumentUseCase,
     private readonly inventoryInventoryItemUseCase: InventoryInventoryItemUseCase,
+    private readonly createWarehouseDocumentUseCase: CreateWarehouseDocumentUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -92,10 +97,12 @@ export class WarehouseController {
   @Post('nomenclature')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateWarehouseAbility())
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createNomenclature(
     @Request() req: any,
     @Body() data: NomenclatureCreateDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<any> {
     try {
       const { user, ability } = req;
@@ -107,7 +114,7 @@ export class WarehouseController {
         ability,
         data?.supplierId,
       );
-      return await this.createNomenclatureUseCase.create(data, user);
+      return await this.createNomenclatureUseCase.create(data, user, file);
     } catch (e) {
       throw new Error(e);
     }
@@ -116,10 +123,12 @@ export class WarehouseController {
   @Patch('nomenclature')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateWarehouseAbility())
+  @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async updateNomenclature(
     @Request() req: any,
     @Body() data: NomenclatureUpdateDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<any> {
     try {
       const { user, ability } = req;
@@ -132,6 +141,7 @@ export class WarehouseController {
         data,
         oldNomenclature,
         user,
+        file,
       );
     } catch (e) {
       throw new Error(e);
@@ -273,7 +283,7 @@ export class WarehouseController {
   @HttpCode(200)
   async getAllInventoryItemByWarehouse(
     @Request() req: any,
-    @Param('warehouseId', ParseIntPipe) warehouseId: number
+    @Param('warehouseId', ParseIntPipe) warehouseId: number,
   ): Promise<any> {
     try {
       const { ability } = req;
@@ -313,15 +323,71 @@ export class WarehouseController {
     @Body() data: WarehouseDocumentCreateDto,
   ): Promise<any> {
     try {
+      const { user } = req;
+      return await this.createWarehouseDocumentUseCase.execute(data.type, user);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Save Document
+  @Post('document/save/:documentId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async saveDocument(
+    @Request() req: any,
+    @Body() data: WarehouseDocumentSaveDto,
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ): Promise<any> {
+    try {
       const { user, ability } = req;
-      await this.warehouseValidateRules.createDocumentValidate({
-        warehouseId: data.warehouseId,
-        responsibleId: data.responsibleId,
-        type: data.type,
-        ability: ability,
-        details: data.details,
-      });
-      return await this.carryingWarehouseDocumentUseCase.execute(data, user);
+      const oldDocument =
+        await this.warehouseValidateRules.saveDocumentValidate({
+          warehouseDocumentId: documentId,
+          warehouseId: data.warehouseId,
+          responsibleId: data?.responsibleId,
+          ability: ability,
+          details: data?.details,
+        });
+      return await this.saveWarehouseDocumentUseCase.execute(
+        oldDocument,
+        data,
+        user,
+      );
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+  //Send Document
+  @Post('document/send/:documentId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async sendDocument(
+    @Request() req: any,
+    @Body() data: WarehouseDocumentSaveDto,
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ): Promise<any> {
+    try {
+      const { user, ability } = req;
+      const oldDocument =
+        await this.warehouseValidateRules.saveDocumentValidate({
+          warehouseDocumentId: documentId,
+          warehouseId: data.warehouseId,
+          responsibleId: data.responsibleId,
+          ability: ability,
+          details: data.details,
+        });
+      const document = await this.saveWarehouseDocumentUseCase.execute(
+        oldDocument,
+        data,
+        user,
+      );
+      return await this.sandWarehouseDocumentUseCase.execute(
+        document,
+        data.details,
+        user,
+      );
     } catch (e) {
       throw new Error(e);
     }

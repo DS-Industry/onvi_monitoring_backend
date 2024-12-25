@@ -675,6 +675,7 @@ model TechTaskItemValueToTechTask {
   techTaskItemTemplate    TechTaskItemTemplate     @relation(fields: [techTaskItemTemplateId], references: [id])
   techTaskItemTemplateId  Int
   value                   String?
+  image                   String?
 }
 
 model Incident {
@@ -777,6 +778,7 @@ model Nomenclature {
   supplier                Supplier?                  @relation(fields: [supplierId], references: [id])
   supplierId              Int?
   measurement             MeasurementNomenclature?
+  image                   String?
   createdAt               DateTime
   createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
   createdById             Int
@@ -824,10 +826,11 @@ model WarehouseDocument {
   id                      Int                      @id @default(autoincrement())
   name                    String
   warehouseDocumentType   WarehouseDocumentType
-  warehouse               Warehouse                 @relation(fields: [warehouseId], references: [id])
-  warehouseId             Int
-  responsible             User                      @relation(name: "responsibleUser", fields: [responsibleId], references: [id])
-  responsibleId           Int
+  warehouse               Warehouse?                 @relation(fields: [warehouseId], references: [id])
+  warehouseId             Int?
+  responsible             User?                      @relation(name: "responsibleUser", fields: [responsibleId], references: [id])
+  responsibleId           Int?
+  status                  WarehouseDocumentStatus?
   carryingAt              DateTime
   createdAt               DateTime
   updatedAt               DateTime
@@ -836,6 +839,12 @@ model WarehouseDocument {
   updateBy                User                      @relation(name: "UpdateByUser", fields: [updateById], references: [id])
   updateById              Int
   warehouseDocumentDetails      WarehouseDocumentDetail[]
+}
+
+enum WarehouseDocumentStatus {
+  CREATED
+  SAVED
+  SENT
 }
 
 enum WarehouseDocumentType {
