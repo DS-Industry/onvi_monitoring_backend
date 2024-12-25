@@ -40,6 +40,7 @@ export class AllByFilterWarehouseDocumentUseCase {
             type: document.type,
             warehouseId: document.warehouseId,
             responsibleId: document.responsibleId,
+            status: document.status,
             carryingAt: document.carryingAt,
           });
         });
