@@ -349,11 +349,12 @@ export class WarehouseController {
           ability: ability,
           details: data?.details,
         });
-      return await this.saveWarehouseDocumentUseCase.execute(
+      const response = await this.saveWarehouseDocumentUseCase.execute(
         oldDocument,
         data,
         user,
       );
+      return response.status;
     } catch (e) {
       throw new Error(e);
     }
@@ -384,7 +385,7 @@ export class WarehouseController {
         user,
       );
       return await this.sandWarehouseDocumentUseCase.execute(
-        document,
+        document.newDocument,
         data.details,
         user,
       );

@@ -19,7 +19,7 @@ export class SaveWarehouseDocumentUseCase {
     oldDocument: WarehouseDocument,
     input: WarehouseDocumentSaveDto,
     user: User,
-  ): Promise<any> {
+  ): Promise<{ status: string; newDocument: WarehouseDocument }> {
     const updateData = {
       warehouseId: input?.warehouseId,
       responsibleId: input?.responsibleId,
@@ -41,6 +41,6 @@ export class SaveWarehouseDocumentUseCase {
     await this.createWarehouseDocumentDetailUseCase.createMany(
       detailsWithDocumentId,
     );
-    return { status: 'SAVE' };
+    return { status: 'SAVE', newDocument: warehouseDocument };
   }
 }
