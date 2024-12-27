@@ -354,7 +354,7 @@ export class WarehouseController {
         data,
         user,
       );
-      return response.status;
+      return { status: response.status };
     } catch (e) {
       throw new Error(e);
     }
