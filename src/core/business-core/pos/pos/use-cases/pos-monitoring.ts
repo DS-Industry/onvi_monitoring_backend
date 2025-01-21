@@ -3,15 +3,16 @@ import { PosMonitoringResponseDto } from '@platform-user/core-controller/dto/res
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
-import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
-import { Pos } from "@pos/pos/domain/pos";
-import { CreateFullDataPosUseCase } from "@pos/pos/use-cases/pos-create-full-data";
+import { Pos } from '@pos/pos/domain/pos';
+import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
+import { CurrencyType } from '@prisma/client';
+import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
 
 @Injectable()
 export class MonitoringPosUseCase {
   constructor(
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
-    private readonly dataDeviceOperationUseCase: DataDeviceOperationUseCase,
+    private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
@@ -29,9 +30,15 @@ export class MonitoringPosUseCase {
     } else {
       poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
     }
+
+    const currencyCache = new Map<number, CurrencyType>();
+    const cashSumMap = new Map<number, number>();
+    const virtualSumMap = new Map<number, number>();
+    const yandexSumMap = new Map<number, number>();
+
     await Promise.all(
       poses.map(async (pos) => {
-        const deviceOperations =
+        const posOperations =
           await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
             pos.id,
             dateStart,
@@ -42,21 +49,44 @@ export class MonitoringPosUseCase {
             pos.id,
           );
 
-        const deviceOperData = await this.dataDeviceOperationUseCase.execute(
-          deviceOperations,
-          lastOper,
+        await Promise.all(
+          posOperations.map(async (posOperation) => {
+            if (!currencyCache.has(posOperation.currencyId)) {
+              const cur = await this.findMethodsCurrencyUseCase.getById(
+                posOperation.currencyId,
+              );
+              currencyCache.set(posOperation.currencyId, cur.currencyType);
+              const curType = currencyCache.get(posOperation.currencyId);
+              const operSum = posOperation.operSum;
+              const posId = pos.id;
+
+              if (curType == CurrencyType.CASH) {
+                cashSumMap.set(posId, (cashSumMap.get(posId) || 0) + operSum);
+              } else if (curType == CurrencyType.CASHLESS) {
+                virtualSumMap.set(
+                  posId,
+                  (virtualSumMap.get(posId) || 0) + operSum,
+                );
+              } else if (curType == CurrencyType.VIRTUAL) {
+                yandexSumMap.set(
+                  posId,
+                  (yandexSumMap.get(posId) || 0) + operSum,
+                );
+              }
+            }
+          }),
         );
         response.push({
           id: pos.id,
           name: pos.name,
           city: pos.address.city,
-          counter: deviceOperData.counter,
-          cashSum: deviceOperData.cashSum,
-          virtualSum: deviceOperData.virtualSum,
-          yandexSum: deviceOperData.yandexSum,
+          counter: posOperations.length,
+          cashSum: cashSumMap.get(pos.id) || 0,
+          virtualSum: virtualSumMap.get(pos.id) || 0,
+          yandexSum: yandexSumMap.get(pos.id) || 0,
           mobileSum: 0,
           cardSum: 0,
-          lastOper: deviceOperData.lastOper,
+          lastOper: lastOper ? lastOper.operDate : undefined,
           discountSum: 0,
           cashbackSumCard: 0,
           cashbackSumMub: 0,

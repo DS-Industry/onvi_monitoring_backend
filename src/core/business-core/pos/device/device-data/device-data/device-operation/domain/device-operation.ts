@@ -5,7 +5,7 @@ export interface DeviceOperationProps {
   carWashDeviceId: number;
   operDate: Date;
   loadDate: Date;
-  counter: bigint;
+  counter: string;
   operSum: number;
   confirm: number;
   isAgregate: number;
@@ -36,7 +36,7 @@ export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
     return this.props.loadDate;
   }
 
-  get counter(): bigint {
+  get counter(): string {
     return this.props.counter;
   }
 

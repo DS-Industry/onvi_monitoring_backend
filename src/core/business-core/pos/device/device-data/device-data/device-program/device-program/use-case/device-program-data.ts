@@ -14,28 +14,37 @@ export class DataDeviceProgramUseCase {
     lastProg: DeviceProgram,
   ): Promise<PosProgramInfo[]> {
     const groupedPrograms: { [key: string]: PosProgramInfo } = {};
+    const programTypeCache = new Map<number, string>();
+
     await Promise.all(
       input.map(async (deviceProgram) => {
-        const programType =
-          await this.findMethodsDeviceProgramTypeUseCase.getById(
+        if (!programTypeCache.has(deviceProgram.carWashDeviceProgramsTypeId)) {
+          const programType =
+            await this.findMethodsDeviceProgramTypeUseCase.getById(
+              deviceProgram.carWashDeviceProgramsTypeId,
+            );
+          programTypeCache.set(
             deviceProgram.carWashDeviceProgramsTypeId,
+            programType.name,
           );
-        if (groupedPrograms[programType.name]) {
-          groupedPrograms[programType.name].counter += 1;
-          groupedPrograms[programType.name].totalTime += Math.trunc(
+        }
+        const programName = programTypeCache.get(
+          deviceProgram.carWashDeviceProgramsTypeId,
+        );
+
+        if (groupedPrograms[programName]) {
+          groupedPrograms[programName].counter += 1;
+          groupedPrograms[programName].totalTime += Math.trunc(
             (deviceProgram.endDate.getTime() -
               deviceProgram.beginDate.getTime()) /
               1000,
           );
-          if (
-            groupedPrograms[programType.name].lastOper < deviceProgram.beginDate
-          ) {
-            groupedPrograms[programType.name].lastOper =
-              deviceProgram.beginDate;
+          if (groupedPrograms[programName].lastOper < deviceProgram.beginDate) {
+            groupedPrograms[programName].lastOper = deviceProgram.beginDate;
           }
         } else {
-          groupedPrograms[programType.name] = {
-            programName: programType.name,
+          groupedPrograms[programName] = {
+            programName: programName,
             counter: 1,
             totalTime: Math.trunc(
               (deviceProgram.endDate.getTime() -

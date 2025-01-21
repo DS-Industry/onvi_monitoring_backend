@@ -44,7 +44,7 @@ export class DeviceServiceHandlerUseCase {
       endDate: input.endDate,
       loadDate: loadDate,
       localId: input.localId,
-      counter: BigInt(input.counter),
+      counter: input.counter.toString(),
       errNumId: errNumId,
     });
     await this.deviceServiceRepository.create(deviceService);
