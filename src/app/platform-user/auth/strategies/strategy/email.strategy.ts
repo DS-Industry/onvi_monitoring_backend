@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-email-strategy';
 import { User } from '@platform-user/user/domain/user';
+import { UserException } from "@exception/option.exceptions";
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
 
 @Injectable()
 export class EmailStrategy extends PassportStrategy(Strategy, 'userEmail') {
@@ -31,7 +33,10 @@ export class EmailStrategy extends PassportStrategy(Strategy, 'userEmail') {
 
       return done(null, user);
     } catch (e) {
-      throw new Error(e);
+      throw new UserException(
+        USER_AUTHORIZATION_EXCEPTION_CODE,
+        'Unauthorized',
+      );
     }
   }
 }

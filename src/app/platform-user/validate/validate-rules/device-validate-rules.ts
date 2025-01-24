@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
-import { ValidateLib } from '@platform-user/validate/validate.lib';
+import {
+  ExceptionType,
+  ValidateLib,
+} from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
 import { DeviceProgramType } from '@pos/device/device-data/device-data/device-program/device-program-type/domain/device-program-type';
+import {
+  DEVICE_CREATE_EXCEPTION_CODE,
+  DEVICE_CREATE_TYPE_EXCEPTION_CODE,
+  DEVICE_GET_BY_ID_EXCEPTION_CODE,
+  DEVICE_PROGRAM_TYPE_GET_BY_ID_EXCEPTION_CODE,
+  DEVICE_UPDATE_TYPE_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import { DeviceException } from '@exception/option.exceptions';
 
 @Injectable()
 export class DeviceValidateRules {
@@ -26,7 +37,11 @@ export class DeviceValidateRules {
     );
     response.push(await this.validateLib.deviceTypeByIdExists(deviceTypeId));
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.DEVICE,
+      DEVICE_CREATE_EXCEPTION_CODE,
+    );
     return response.find((item) => item.object !== undefined)?.object;
   }
   public async createTypeValidate(name: string, code: string) {
@@ -34,13 +49,20 @@ export class DeviceValidateRules {
     response.push(await this.validateLib.deviceTypeByNameNotExists(name));
     response.push(await this.validateLib.deviceTypeByCodeNotExists(code));
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.DEVICE,
+      DEVICE_CREATE_TYPE_EXCEPTION_CODE,
+    );
   }
 
   public async updateTypeValidate(id: number) {
     const response = await this.validateLib.deviceTypeByIdExists(id);
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response.code}`);
+      throw new DeviceException(
+        DEVICE_UPDATE_TYPE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
     return response.object;
   }
@@ -48,7 +70,10 @@ export class DeviceValidateRules {
   public async getByIdValidate(id: number, ability: any) {
     const response = await this.validateLib.deviceByIdExists(id);
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+      throw new DeviceException(
+        DEVICE_GET_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
 
     const device = response.object;
@@ -59,7 +84,10 @@ export class DeviceValidateRules {
   public async getProgramTypeById(id: number): Promise<DeviceProgramType> {
     const response = await this.validateLib.deviceProgramTypeByIdExists(id);
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response}`);
+      throw new DeviceException(
+        DEVICE_PROGRAM_TYPE_GET_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
     return response.object;
   }

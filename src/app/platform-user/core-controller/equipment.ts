@@ -3,10 +3,10 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
-  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +24,8 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { GetAllByPosIdProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-get-all-by-pos-id';
 import { UpdateProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-update';
 import { EquipmentTechRateUpdateDto } from '@platform-user/core-controller/dto/receive/equipment-tech-rate-update.dto';
+import { PosException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('equipment')
 export class EquipmentController {
@@ -49,7 +51,19 @@ export class EquipmentController {
       await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.findMethodsEquipmentKnotUseCase.getAllByPosId(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -62,7 +76,19 @@ export class EquipmentController {
     try {
       return await this.fullInfoByEquipmentKnotIncidentUseCase.execute(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -74,14 +100,30 @@ export class EquipmentController {
     @Request() req: any,
     @Param('posId', ParseIntPipe) id: number,
   ): Promise<any> {
-    const { ability } = req;
-    await this.posValidateRules.getOneByIdValidate(id, ability);
-    const programTypes =
-      await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(id);
-    return await this.getAllByPosIdProgramTechRateUseCase.execute(
-      programTypes,
-      id,
-    );
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(id, ability);
+      const programTypes =
+        await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(id);
+      return await this.getAllByPosIdProgramTechRateUseCase.execute(
+        programTypes,
+        id,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
 
   @Patch('rate/:posId')
@@ -93,15 +135,31 @@ export class EquipmentController {
     @Param('posId', ParseIntPipe) id: number,
     @Body() data: EquipmentTechRateUpdateDto,
   ): Promise<any> {
-    const { ability } = req;
-    const programTechRateIds = data.valueData.map(
-      (item) => item.programTechRateId,
-    );
-    await this.posValidateRules.patchProgramRateValidate(
-      id,
-      programTechRateIds,
-      ability,
-    );
-    return await this.updateProgramTechRateUseCase.execute(data.valueData);
+    try {
+      const { ability } = req;
+      const programTechRateIds = data.valueData.map(
+        (item) => item.programTechRateId,
+      );
+      await this.posValidateRules.patchProgramRateValidate(
+        id,
+        programTechRateIds,
+        ability,
+      );
+      return await this.updateProgramTechRateUseCase.execute(data.valueData);
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
 }

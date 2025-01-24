@@ -2,15 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
+  HttpCode, HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
   Request,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { DownloadAvatarUserUseCase } from '@platform-user/user/use-cases/user-avatar-download';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
@@ -19,6 +19,8 @@ import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { UserPasswordResetDto } from '@platform-user/user/controller/dto/user-password-reset.dto';
 import { UserValidateRules } from '@platform-user/validate/validate-rules/user-validate-rules';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { UserException } from "@exception/option.exceptions";
+import { CustomHttpException } from "@exception/custom-http.exception";
 
 @Controller('')
 export class UserController {
@@ -40,7 +42,19 @@ export class UserController {
         );
       return { ...user, permissionInfo };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -58,7 +72,19 @@ export class UserController {
         position: user.position,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -83,7 +109,19 @@ export class UserController {
         return this.userUpdate.execute(updateData);
       }
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -105,7 +143,19 @@ export class UserController {
         password: body.newPassword,
       });
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
@@ -116,7 +166,19 @@ export class UserController {
       const { user } = req;
       return this.userDownloadAvatar.execute(user.avatar);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

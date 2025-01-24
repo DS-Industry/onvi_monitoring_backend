@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ValidateConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-validate';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { User } from '@platform-user/user/domain/user';
+import { UserException } from "@exception/option.exceptions";
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
 
 @Injectable()
 export class ValidateUserEmailStrategyUseCase {
@@ -20,7 +22,10 @@ export class ValidateUserEmailStrategyUseCase {
       confirmString,
     );
     if (!checkConfirmMail) {
-      throw new Error('confirmMail error');
+      throw new UserException(
+        USER_AUTHORIZATION_EXCEPTION_CODE,
+        'Unauthorized',
+      );
     }
 
     return user;

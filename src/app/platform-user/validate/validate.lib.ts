@@ -35,9 +35,28 @@ import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-case
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
+import {
+  DeviceException,
+  IncidentException,
+  OrganizationException,
+  PosException,
+  TechTaskException,
+  UserException,
+  WarehouseException,
+} from '@exception/option.exceptions';
 export interface ValidateResponse<T = any> {
   code: number;
+  errorMessage?: string;
   object?: T;
+}
+export enum ExceptionType {
+  USER = 'User',
+  DEVICE = 'Device',
+  INCIDENT = 'Incident',
+  ORGANIZATION = 'Organization',
+  POS = 'Pos',
+  TECH_TASK = 'TechTask',
+  WAREHOUSE = 'Warehouse',
 }
 @Injectable()
 export class ValidateLib {
@@ -75,7 +94,10 @@ export class ValidateLib {
       confirmString,
     );
     if (!confirmMail) {
-      return { code: 440 };
+      return {
+        code: 400,
+        errorMessage: 'Validation error of the verification message',
+      };
     }
     return { code: 200, object: confirmMail };
   }
@@ -85,42 +107,51 @@ export class ValidateLib {
   ): Promise<ValidateResponse> {
     const checkPassword = await this.bcrypt.compare(password, oldPassword);
     if (!checkPassword) {
-      return { code: 441 };
+      return { code: 400, errorMessage: 'Password comparison error' };
     }
     return { code: 200 };
   }
   public async userByIdCheckOwner(id: number): Promise<ValidateResponse<User>> {
     const user = await this.findMethodsUserUseCase.getById(id);
     if (!user || user.position == PositionUser.Owner) {
-      return { code: 443 };
+      return {
+        code: 400,
+        errorMessage: 'The user does not exist or is the owner',
+      };
     }
     return { code: 200 };
   }
   public async roleByIdExists(id: number): Promise<ValidateResponse> {
     const role = await this.findMethodsRoleUseCase.getById(id);
     if (!role) {
-      return { code: 444 };
+      return { code: 400, errorMessage: 'Role not found' };
     }
     return { code: 200 };
   }
   public async userByEmailNotExists(email: string): Promise<ValidateResponse> {
     const checkUserEmail = await this.findMethodsUserUseCase.getByEmail(email);
     if (checkUserEmail) {
-      return { code: 450 };
+      return {
+        code: 400,
+        errorMessage: 'The mail already exists in the system',
+      };
     }
     return { code: 200 };
   }
   public async userByEmailExists(email: string): Promise<ValidateResponse> {
     const checkUserEmail = await this.findMethodsUserUseCase.getByEmail(email);
     if (!checkUserEmail) {
-      return { code: 450 };
+      return {
+        code: 400,
+        errorMessage: 'The mail was not found in the system',
+      };
     }
     return { code: 200 };
   }
   public async userByIdExists(id: number): Promise<ValidateResponse<User>> {
     const checkUserId = await this.findMethodsUserUseCase.getById(id);
     if (!checkUserId) {
-      return { code: 450 };
+      return { code: 400, errorMessage: 'The user was not found' };
     }
     return { code: 200, object: checkUserId };
   }
@@ -131,7 +162,10 @@ export class ValidateLib {
     const organization =
       await this.findMethodsOrganizationUseCase.getById(organizationId);
     if (organization.ownerId !== userId) {
-      return { code: 451 };
+      return {
+        code: 400,
+        errorMessage: 'The user is not the owner of the organization',
+      };
     }
     return { code: 200 };
   }
@@ -141,7 +175,7 @@ export class ValidateLib {
     const organization =
       await this.findMethodsOrganizationUseCase.getById(organizationId);
     if (organization.organizationDocumentId) {
-      return { code: 452 };
+      return { code: 400, errorMessage: 'The documents already exist' };
     }
     return { code: 200 };
   }
@@ -151,7 +185,10 @@ export class ValidateLib {
     const organization =
       await this.findMethodsOrganizationUseCase.getByName(name);
     if (organization) {
-      return { code: 453 };
+      return {
+        code: 400,
+        errorMessage: 'An organization with that name already exists',
+      };
     }
     return { code: 200 };
   }
@@ -161,7 +198,10 @@ export class ValidateLib {
     const organization =
       await this.findMethodsOrganizationUseCase.getByName(name);
     if (!organization) {
-      return { code: 453 };
+      return {
+        code: 400,
+        errorMessage: 'An organization with that name does not exist',
+      };
     }
     return { code: 200, object: organization };
   }
@@ -171,7 +211,7 @@ export class ValidateLib {
     const organization =
       await this.findMethodsOrganizationUseCase.getById(organizationId);
     if (!organization) {
-      return { code: 454 };
+      return { code: 400, errorMessage: 'The organization does not exist' };
     }
     return { code: 200, object: organization };
   }
@@ -180,14 +220,14 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Pos>> {
     const pos = await this.findMethodsPosUseCase.getByName(name);
     if (pos) {
-      return { code: 463 };
+      return { code: 400, errorMessage: 'A POS with that name exists' };
     }
     return { code: 200 };
   }
   public async posByIdExists(id: number): Promise<ValidateResponse<Pos>> {
     const pos = await this.findMethodsPosUseCase.getById(id);
     if (!pos) {
-      return { code: 464 };
+      return { code: 400, errorMessage: 'POS does not exist' };
     }
     return { code: 200, object: pos };
   }
@@ -196,7 +236,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Warehouse>> {
     const warehouse = await this.findMethodsWarehouseUseCase.getById(id);
     if (!warehouse) {
-      return { code: 465 };
+      return { code: 400, errorMessage: 'The warehouse does not exist' };
     }
     return { code: 200, object: warehouse };
   }
@@ -205,7 +245,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Category>> {
     const category = await this.findMethodsCategoryUseCase.getById(id);
     if (!category) {
-      return { code: 466 };
+      return { code: 400, errorMessage: 'The category does not exist' };
     }
     return { code: 200, object: category };
   }
@@ -214,7 +254,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Category>> {
     const category = await this.findMethodsCategoryUseCase.getByName(name);
     if (!category) {
-      return { code: 466 };
+      return { code: 400, errorMessage: 'There is no category with that name' };
     }
     return { code: 200, object: category };
   }
@@ -223,7 +263,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Supplier>> {
     const supplier = await this.findMethodsSupplierUseCase.getById(id);
     if (!supplier) {
-      return { code: 467 };
+      return { code: 400, errorMessage: 'The supplier does not exist' };
     }
     return { code: 200, object: supplier };
   }
@@ -237,7 +277,10 @@ export class ValidateLib {
         organizationId,
       );
     if (nomenclature) {
-      return { code: 468 };
+      return {
+        code: 400,
+        errorMessage: 'There is a nomenclature with such an sku',
+      };
     }
     return { code: 200 };
   }
@@ -251,7 +294,10 @@ export class ValidateLib {
         organizationId,
       );
     if (nomenclature) {
-      return { code: 469 };
+      return {
+        code: 400,
+        errorMessage: 'There is a nomenclature with this name',
+      };
     }
     return { code: 200 };
   }
@@ -261,7 +307,10 @@ export class ValidateLib {
     const deviceType =
       await this.findMethodsCarWashDeviceTypeUseCase.getByNameWithNull(name);
     if (deviceType) {
-      return { code: 470 };
+      return {
+        code: 400,
+        errorMessage: 'There is a device type with this name',
+      };
     }
     return { code: 200 };
   }
@@ -271,7 +320,10 @@ export class ValidateLib {
     const deviceType =
       await this.findMethodsCarWashDeviceTypeUseCase.getByCodeWithNull(code);
     if (deviceType) {
-      return { code: 471 };
+      return {
+        code: 400,
+        errorMessage: 'There is a device type with this code',
+      };
     }
     return { code: 200 };
   }
@@ -281,7 +333,7 @@ export class ValidateLib {
     const deviceType =
       await this.findMethodsCarWashDeviceTypeUseCase.getById(id);
     if (!deviceType) {
-      return { code: 472 };
+      return { code: 400, errorMessage: 'The device type does not exist' };
     }
     return { code: 200, object: deviceType };
   }
@@ -290,7 +342,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<CarWashDevice>> {
     const device = await this.findMethodsCarWashDeviceUseCase.getById(id);
     if (!device) {
-      return { code: 473 };
+      return { code: 400, errorMessage: 'The device does not exist' };
     }
     return { code: 200, object: device };
   }
@@ -303,7 +355,7 @@ export class ValidateLib {
       (header) => !headers.includes(header),
     );
     if (missingHeaders.length > 0) {
-      return { code: 474 };
+      return { code: 400, errorMessage: 'Excel file validation error' };
     }
     return { code: 200 };
   }
@@ -320,7 +372,7 @@ export class ValidateLib {
       const { organization, name, sku } = row;
 
       if (!organization || !name || !sku) {
-        return { code: 475 };
+        return { code: 400, errorMessage: 'Excel file validation error' };
       }
       if (!organizationMap.has(organization)) {
         organizationMap.set(organization, {
@@ -331,11 +383,11 @@ export class ValidateLib {
       const { names, skus } = organizationMap.get(organization);
 
       if (names.has(name)) {
-        return { code: 475 };
+        return { code: 400, errorMessage: 'Excel file validation error' };
       }
 
       if (skus.has(sku)) {
-        return { code: 475 };
+        return { code: 400, errorMessage: 'Excel file validation error' };
       }
       names.add(name);
       skus.add(sku);
@@ -386,7 +438,7 @@ export class ValidateLib {
 
     const failedResponses = response.filter((res) => res.code !== 200);
     if (failedResponses.length > 0) {
-      return { code: 476 };
+      return { code: 400, errorMessage: 'Data error in Excel file' };
     }
 
     return { code: 200 };
@@ -398,7 +450,7 @@ export class ValidateLib {
     const nomenclature =
       await this.findMethodsNomenclatureUseCase.getOneById(nomenclatureId);
     if (!nomenclature) {
-      return { code: 477 };
+      return { code: 400, errorMessage: 'The nomenclature does not exist' };
     }
     return { code: 200, object: nomenclature };
   }
@@ -409,7 +461,10 @@ export class ValidateLib {
     const warehouseDocument =
       await this.findMethodsWarehouseDocumentUseCase.getOneById(id);
     if (!warehouseDocument) {
-      return { code: 476 };
+      return {
+        code: 400,
+        errorMessage: 'The warehouse document does not exist',
+      };
     }
     return { code: 200, object: warehouseDocument };
   }
@@ -423,7 +478,10 @@ export class ValidateLib {
       name,
     );
     if (device) {
-      return { code: 481 };
+      return {
+        code: 400,
+        errorMessage: 'The device name for POS already exists',
+      };
     }
     return { code: 200 };
   }
@@ -434,7 +492,7 @@ export class ValidateLib {
     const programType =
       await this.findMethodsDeviceProgramTypeUseCase.getById(id);
     if (!programType) {
-      return { code: 482 };
+      return { code: 400, errorMessage: 'The program type does not exist' };
     }
     return { code: 200, object: programType };
   }
@@ -451,7 +509,7 @@ export class ValidateLib {
       (programTypeId) => !programTypeIdsCheck.includes(programTypeId),
     );
     if (unnecessaryProgramTypes.length > 0) {
-      return { code: 483 };
+      return { code: 400, errorMessage: 'The program type does not exist' };
     }
     return { code: 200 };
   }
@@ -469,7 +527,7 @@ export class ValidateLib {
       (programTypeId) => !programTypeIdsCheck.includes(programTypeId),
     );
     if (unnecessaryProgramTypes.length > 0) {
-      return { code: 483 };
+      return { code: 400, errorMessage: 'POS doesnt have a program type' };
     }
     return { code: 200 };
   }
@@ -481,7 +539,7 @@ export class ValidateLib {
     const equipmentKnot =
       await this.findMethodsEquipmentKnotUseCase.getById(id);
     if (!equipmentKnot || equipmentKnot.posId != posId) {
-      return { code: 490 };
+      return { code: 400, errorMessage: 'POS doesnt have a program type' };
     }
     return { code: 200 };
   }
@@ -489,7 +547,7 @@ export class ValidateLib {
   public async incidentNameByIdExists(id: number): Promise<ValidateResponse> {
     const incidentName = await this.findMethodsIncidentNameUseCase.getById(id);
     if (!incidentName) {
-      return { code: 491 };
+      return { code: 400, errorMessage: 'The incident name does not exist' };
     }
     return { code: 200 };
   }
@@ -497,7 +555,7 @@ export class ValidateLib {
   public async incidentInfoByIdExists(id: number): Promise<ValidateResponse> {
     const incidentInfo = await this.findMethodsIncidentInfoUseCase.getById(id);
     if (!incidentInfo) {
-      return { code: 492 };
+      return { code: 400, errorMessage: 'The incident info does not exist' };
     }
     return { code: 200 };
   }
@@ -507,7 +565,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<Incident>> {
     const incident = await this.findMethodsIncidentUseCase.getById(id);
     if (!incident) {
-      return { code: 493 };
+      return { code: 400, errorMessage: 'The incident does not exist' };
     }
     return { code: 200, object: incident };
   }
@@ -515,7 +573,7 @@ export class ValidateLib {
   public async itemTemplateByIdExists(id: number): Promise<ValidateResponse> {
     const itemTemplate = await this.findMethodsItemTemplateUseCase.getById(id);
     if (!itemTemplate) {
-      return { code: 494 };
+      return { code: 400, errorMessage: 'The item template does not exist' };
     }
     return { code: 200 };
   }
@@ -525,7 +583,7 @@ export class ValidateLib {
   ): Promise<ValidateResponse<TechTask>> {
     const techTask = await this.findMethodsTechTaskUseCase.getById(id);
     if (!techTask) {
-      return { code: 495 };
+      return { code: 400, errorMessage: 'The tech task does not exist' };
     }
     return { code: 200, object: techTask };
   }
@@ -539,7 +597,10 @@ export class ValidateLib {
       techTask.status == StatusTechTask.FINISHED ||
       techTask.status == StatusTechTask.PAUSE
     ) {
-      return { code: 495 };
+      return {
+        code: 400,
+        errorMessage: 'The technical task does not exist or is not active',
+      };
     }
     return { code: 200, object: techTask };
   }
@@ -555,19 +616,37 @@ export class ValidateLib {
       (item) => !techTaskItemIds.includes(item),
     );
     if (unnecessaryItems.length > 0) {
-      return { code: 496 };
+      return { code: 400, errorMessage: 'Technical task item error' };
     }
     return { code: 200 };
   }
 
-  public handlerArrayResponse(response: ValidateResponse[]) {
+  public handlerArrayResponse(
+    response: ValidateResponse[],
+    exceptionType: ExceptionType,
+    exceptionCode: number,
+  ) {
     const hasErrors = response.some((response) => response.code !== 200);
     if (hasErrors) {
       const errorCodes = response
         .filter((response) => response.code !== 200)
-        .map((response) => response.code)
-        .join(', ');
-      throw new Error(`Validation errors: ${errorCodes}`);
+        .map((response) => response.errorMessage)
+        .join('; ');
+      if (exceptionType == ExceptionType.USER) {
+        throw new UserException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.DEVICE) {
+        throw new DeviceException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.INCIDENT) {
+        throw new IncidentException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.ORGANIZATION) {
+        throw new OrganizationException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.POS) {
+        throw new PosException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.TECH_TASK) {
+        throw new TechTaskException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.WAREHOUSE) {
+        throw new WarehouseException(exceptionCode, errorCodes);
+      }
     }
   }
 }

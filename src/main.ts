@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
 import { ILoggerAdapter } from "./infra/logger";
 import { ExceptionFilter } from "./observables/filters";
+import { AllExceptionFilter } from "./infra/exceptions/exception.filter";
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule, {
@@ -24,7 +25,7 @@ async function bootstrap() {
   loggerService.setApplication('');
   app.useLogger(loggerService);
 
-  app.useGlobalFilters(new ExceptionFilter(loggerService));
+  app.useGlobalFilters(new AllExceptionFilter());
   /*
   app.enableCors({
     origin: [

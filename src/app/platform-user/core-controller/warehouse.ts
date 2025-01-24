@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
+  HttpCode, HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -11,8 +11,8 @@ import {
   Request,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+  UseInterceptors
+} from "@nestjs/common";
 import { CreateWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-create';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
@@ -49,6 +49,8 @@ import { InventoryInventoryItemUseCase } from '@warehouse/inventoryItem/use-case
 import { WarehouseDocumentSaveDto } from '@platform-user/core-controller/dto/receive/warehouse-document-save.dto';
 import { CreateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-create';
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
+import { WarehouseDomainException, WarehouseException } from "@exception/option.exceptions";
+import { CustomHttpException } from "@exception/custom-http.exception";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -90,7 +92,19 @@ export class WarehouseController {
       );
       return await this.createWarehouseUseCase.execute(data, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create nomenclature
@@ -116,7 +130,19 @@ export class WarehouseController {
       );
       return await this.createNomenclatureUseCase.create(data, user, file);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Patch nomenclature
@@ -144,7 +170,19 @@ export class WarehouseController {
         file,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all by OrgId
@@ -166,7 +204,19 @@ export class WarehouseController {
         orgId,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create nomenclature file
@@ -188,7 +238,19 @@ export class WarehouseController {
       await this.createNomenclatureUseCase.createMany(data, user);
       return { status: 'SUCCESS' };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create category
@@ -208,7 +270,19 @@ export class WarehouseController {
       }
       return await this.createCategoryUseCase.execute(data);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all category
@@ -220,7 +294,19 @@ export class WarehouseController {
     try {
       return await this.findMethodsCategoryUseCase.getAll();
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create supplier
@@ -235,7 +321,19 @@ export class WarehouseController {
     try {
       return await this.createSupplierUseCase.execute(data.name, data.contact);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all supplier
@@ -247,7 +345,19 @@ export class WarehouseController {
     try {
       return await this.findMethodsSupplierUseCase.getAll();
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all InventoryItem
@@ -273,7 +383,19 @@ export class WarehouseController {
         ...params,
       });
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all InventoryItem
@@ -293,7 +415,19 @@ export class WarehouseController {
       );
       return await this.inventoryInventoryItemUseCase.execute(warehouseId);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all by PosId
@@ -310,7 +444,19 @@ export class WarehouseController {
       await this.warehouseValidateRules.getAllByPosId(posId, ability);
       return await this.findMethodsWarehouseUseCase.getAllByPosId(posId);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create Document
@@ -326,7 +472,19 @@ export class WarehouseController {
       const { user } = req;
       return await this.createWarehouseDocumentUseCase.execute(data.type, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Save Document
@@ -356,7 +514,19 @@ export class WarehouseController {
       );
       return { status: response.status };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Send Document
@@ -390,7 +560,26 @@ export class WarehouseController {
         user,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof WarehouseDomainException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get document and details
@@ -411,7 +600,19 @@ export class WarehouseController {
         );
       return { document: document, details: documentDetails };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all Documents by filter
@@ -439,7 +640,19 @@ export class WarehouseController {
         warehouse,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get by id
@@ -455,7 +668,19 @@ export class WarehouseController {
       const { ability } = req;
       return await this.warehouseValidateRules.getOneByIdValidate(id, ability);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

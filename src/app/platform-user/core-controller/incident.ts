@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Patch,
   Post,
   Query,
@@ -24,6 +25,8 @@ import { UpdateIncidentUseCase } from '@equipment/incident/incident/use-cases/in
 import { IncidentUpdateDto } from '@platform-user/core-controller/dto/receive/incident-update.dto';
 import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos-monitoring';
 import { GetAllByFilterIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-get-all-by-filter';
+import { IncidentException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('incident')
 export class IncidentController {
@@ -56,7 +59,19 @@ export class IncidentController {
       });
       return await this.createIncidentUseCase.execute(data, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof IncidentException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update incident
@@ -82,7 +97,19 @@ export class IncidentController {
       });
       return await this.updateIncidentUseCase.execute(data, oldIncident, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof IncidentException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all incident by filter
@@ -108,7 +135,19 @@ export class IncidentController {
         params.posId,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof IncidentException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

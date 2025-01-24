@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ExceptionType,
   ValidateLib,
   ValidateResponse,
 } from '@platform-user/validate/validate.lib';
@@ -8,6 +9,12 @@ import { PermissionAction } from '@prisma/client';
 import { IncidentCreateDto } from '@platform-user/validate/validate-rules/dto/incident-create.dto';
 import { IncidentUpdateDto } from '@platform-user/validate/validate-rules/dto/incident-update.dto';
 import { Incident } from '@equipment/incident/incident/domain/incident';
+import {
+  INCIDENT_CREATE_EXCEPTION_CODE,
+  INCIDENT_GET_ALL_BY_FILTER_EXCEPTION_CODE,
+  INCIDENT_UPDATE_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import { IncidentException } from '@exception/option.exceptions';
 
 @Injectable()
 export class IncidentValidateRules {
@@ -49,7 +56,11 @@ export class IncidentValidateRules {
       );
     }
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.INCIDENT,
+      INCIDENT_CREATE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(input.ability).throwUnlessCan(
       PermissionAction.read,
       posCheck.object,
@@ -96,7 +107,11 @@ export class IncidentValidateRules {
       );
     }
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.INCIDENT,
+      INCIDENT_UPDATE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(input.ability).throwUnlessCan(
       PermissionAction.update,
       incidentCheck.object,
@@ -108,7 +123,10 @@ export class IncidentValidateRules {
     const posCheck = await this.validateLib.posByIdExists(posId);
 
     if (posCheck.code !== 200) {
-      throw new Error(`Validation errors: ${posCheck.code}`);
+      throw new IncidentException(
+        INCIDENT_GET_ALL_BY_FILTER_EXCEPTION_CODE,
+        posCheck.errorMessage,
+      );
     }
 
     ForbiddenError.from(ability).throwUnlessCan(

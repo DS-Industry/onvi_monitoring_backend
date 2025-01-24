@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Patch,
   Request,
   UseGuards,
@@ -20,6 +21,8 @@ import {
   ManageOrgAbility,
 } from '@common/decorators/abilities.decorator';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { UserException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('permission')
 export class PermissionController {
@@ -37,7 +40,19 @@ export class PermissionController {
     try {
       return await this.getAllPermissionsInfoUseCases.getAllPermissionsInfo();
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //All worker for permission org
@@ -52,7 +67,19 @@ export class PermissionController {
       const { ability } = req;
       return await this.organizationManageUserUseCase.execute(ability);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update worker role
@@ -65,13 +92,29 @@ export class PermissionController {
     @Request() req: any,
     @Body() body: UserUpdateRoleDto,
   ): Promise<User> {
-    await this.userPermissionValidateRules.updateRoleValidate(
-      body.userId,
-      body.roleId,
-    );
-    return await this.userUpdate.execute({
-      id: body.userId,
-      roleId: body.roleId,
-    });
+    try {
+      await this.userPermissionValidateRules.updateRoleValidate(
+        body.userId,
+        body.roleId,
+      );
+      return await this.userUpdate.execute({
+        id: body.userId,
+        roleId: body.roleId,
+      });
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
 }

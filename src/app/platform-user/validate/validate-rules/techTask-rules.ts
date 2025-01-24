@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ExceptionType,
   ValidateLib,
   ValidateResponse,
 } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
+import {
+  TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
+  TECH_TASK_CREATE_EXCEPTION_CODE,
+  TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
+  TECH_TASK_UPDATE_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import { TechTaskException } from '@exception/option.exceptions';
 
 @Injectable()
 export class TechTaskValidateRules {
@@ -25,7 +33,11 @@ export class TechTaskValidateRules {
       }),
     );
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.TECH_TASK,
+      TECH_TASK_CREATE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       checkPos.object,
@@ -48,7 +60,11 @@ export class TechTaskValidateRules {
       );
     }
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.TECH_TASK,
+      TECH_TASK_UPDATE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       techTaskCheck.object,
@@ -63,7 +79,10 @@ export class TechTaskValidateRules {
     const response = await this.validateLib.techTaskByIdExists(id);
 
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response.code}`);
+      throw new TechTaskException(
+        TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
 
     ForbiddenError.from(ability).throwUnlessCan(
@@ -86,7 +105,11 @@ export class TechTaskValidateRules {
       await this.validateLib.techTaskItemComparisonByIdAndList(id, itemIds),
     );
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.TECH_TASK,
+      TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       techTaskCheck.object,

@@ -1,15 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ExceptionType,
   ValidateLib,
   ValidateResponse,
 } from '@platform-user/validate/validate.lib';
 import { ForbiddenError } from '@casl/ability';
-import { PermissionAction, WarehouseDocumentStatus, WarehouseDocumentType } from "@prisma/client";
+import {
+  PermissionAction,
+  WarehouseDocumentStatus,
+  WarehouseDocumentType,
+} from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { NomenclatureUpdateDto } from '@platform-user/validate/validate-rules/dto/nomenclature-update.dto';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
-import { WarehouseDocumentSaveDto } from "@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto";
+import { WarehouseDocumentSaveDto } from '@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto';
+import {
+  WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
+  WAREHOUSE_CREATE_EXCEPTION_CODE,
+  WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
+  WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE,
+  WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE,
+  WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
+  WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE,
+  WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE,
+  WAREHOUSE_SAVE_DOCUMENT_EXCEPTION_CODE,
+  WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import { WarehouseException } from '@exception/option.exceptions';
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -24,7 +42,11 @@ export class WarehouseValidateRules {
     const posCheck = await this.validateLib.posByIdExists(posId);
     response.push(posCheck);
     response.push(await this.validateLib.userByIdExists(managerId));
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_CREATE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       posCheck.object,
@@ -60,7 +82,11 @@ export class WarehouseValidateRules {
       response.push(await this.validateLib.supplierByIdExists(supplierId));
     }
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
+    );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       organizationCheck.object,
@@ -102,14 +128,22 @@ export class WarehouseValidateRules {
         );
       }
 
-      this.validateLib.handlerArrayResponse(response);
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.WAREHOUSE,
+        WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
+      );
       ForbiddenError.from(input.ability).throwUnlessCan(
         PermissionAction.read,
         organizationCheck.object,
       );
       return nomenclatureCheck.object;
     } else {
-      this.validateLib.handlerArrayResponse(response);
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.WAREHOUSE,
+        WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
+      );
     }
   }
 
@@ -186,21 +220,25 @@ export class WarehouseValidateRules {
     response.push(await this.validateLib.nomenclatureExelOriginalValues(jsonData))
     response.push(await this.validateLib.nomenclatureExelDBOriginalValues(jsonData))
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE,
+    );
     return jsonData;
   }
 
   public async createCategoryValidate(categoryId: number) {
     const categoryCheck = await this.validateLib.categoryByIdExists(categoryId);
     if (categoryCheck.code !== 200) {
-      throw new Error(`Validation errors: ${categoryCheck.code}`);
+      throw new WarehouseException(WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE, categoryCheck.errorMessage);
     }
   }
 
   public async getAllNomenclatureByOrgIdValidate(orgId: number, ability: any) {
     const orgCheck = await this.validateLib.organizationByIdExists(orgId);
     if (orgCheck.code !== 200) {
-      throw new Error(`Validation errors: ${orgCheck.code}`);
+      throw new WarehouseException(WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE, orgCheck.errorMessage);
     }
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
@@ -211,7 +249,7 @@ export class WarehouseValidateRules {
   public async getAllByPosId(posId: number, ability: any) {
     const posCheck = await this.validateLib.posByIdExists(posId);
     if (posCheck.code !== 200) {
-      throw new Error(`Validation errors: ${posCheck.code}`);
+      throw new WarehouseException(WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE, posCheck.errorMessage);
     }
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
@@ -222,7 +260,7 @@ export class WarehouseValidateRules {
   public async getOneByIdValidate(id: number, ability: any) {
     const warehouseCheck = await this.validateLib.warehouseByIdExists(id);
     if (warehouseCheck.code !== 200) {
-      throw new Error(`Validation errors: ${warehouseCheck.code}`);
+      throw new WarehouseException(WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE, warehouseCheck.errorMessage);
     }
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
@@ -252,7 +290,11 @@ export class WarehouseValidateRules {
         );
       }
     }
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
+    );
     ForbiddenError.from(input.ability).throwUnlessCan(
       PermissionAction.read,
       organizationCheck.object,
@@ -302,7 +344,11 @@ export class WarehouseValidateRules {
     }
 
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_SAVE_DOCUMENT_EXCEPTION_CODE,
+    );
     ForbiddenError.from(input.ability).throwUnlessCan(
       PermissionAction.update,
       warehouseCheck.object,

@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ValidateLib } from '@platform-user/validate/validate.lib';
+import {
+  ExceptionType,
+  ValidateLib,
+} from '@platform-user/validate/validate.lib';
+import { USER_UPDATE_ROLE_EXCEPTION_CODE } from '@constant/error.constants';
 
 @Injectable()
 export class UserPermissionValidateRules {
@@ -10,6 +14,10 @@ export class UserPermissionValidateRules {
     response.push(await this.validateLib.userByIdCheckOwner(userId));
     response.push(await this.validateLib.roleByIdExists(roleId));
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.USER,
+      USER_UPDATE_ROLE_EXCEPTION_CODE,
+    );
   }
 }

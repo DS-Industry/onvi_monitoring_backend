@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpStatus,
   Post,
   Req,
   Request,
@@ -25,6 +26,8 @@ import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-re
 import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { UserException } from '@exception/option.exceptions';
 
 @Controller('auth')
 export class Auth {
@@ -60,7 +63,19 @@ export class Auth {
         );
       return { ...response, permissionInfo };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //register
@@ -75,7 +90,19 @@ export class Auth {
         statusMail: sendMail,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Register worker in org on confirm string
@@ -97,7 +124,19 @@ export class Auth {
         statusMail: sendMail,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Activation account
@@ -124,7 +163,19 @@ export class Auth {
         );
       return { ...response, permissionInfo };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update refresh
@@ -143,7 +194,19 @@ export class Auth {
         accessTokenExp: accessToken.expirationDate,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Reset password
@@ -165,7 +228,19 @@ export class Auth {
       }
       return await this.passwordReset.execute(user, body.newPassword);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Send email for reset password
@@ -176,7 +251,19 @@ export class Auth {
       await this.authValidateRules.passwordConfirmValidate(body.email);
       return await this.sendConfirm.execute(body.email, 'Смена пароля');
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Valid confirm string
@@ -187,7 +274,19 @@ export class Auth {
     try {
       return true;
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

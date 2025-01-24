@@ -1,5 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { ValidateLib } from '@platform-user/validate/validate.lib';
+import {
+  ExceptionType,
+  ValidateLib,
+} from '@platform-user/validate/validate.lib';
+import {
+  USER_PASSWORD_CONFIRM_EXCEPTION_CODE,
+  USER_REGISTER_EXCEPTION_CODE,
+  USER_REGISTER_WORKER_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import { UserException } from '@exception/option.exceptions';
 
 @Injectable()
 export class AuthValidateRules {
@@ -9,7 +18,10 @@ export class AuthValidateRules {
     const response = await this.validateLib.userByEmailExists(email);
 
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response.code}`);
+      throw new UserException(
+        USER_PASSWORD_CONFIRM_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
   }
 
@@ -17,7 +29,10 @@ export class AuthValidateRules {
     const response = await this.validateLib.userByEmailNotExists(email);
 
     if (response.code !== 200) {
-      throw new Error(`Validation errors: ${response.code}`);
+      throw new UserException(
+        USER_REGISTER_EXCEPTION_CODE,
+        response.errorMessage,
+      );
     }
   }
 
@@ -28,7 +43,11 @@ export class AuthValidateRules {
       await this.validateLib.workerConfirmMailExists(email, confirmString),
     );
 
-    this.validateLib.handlerArrayResponse(response);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.USER,
+      USER_REGISTER_WORKER_EXCEPTION_CODE,
+    );
     return response.find((item) => item.object !== undefined)?.object;
   }
 }

@@ -1,4 +1,6 @@
 import { BaseEntity } from '@utils/entity';
+import { WarehouseDomainException } from '@exception/option.exceptions';
+import { WAREHOUSE_REMAINING_ITEM_EXCEPTION_CODE } from '@constant/error.constants';
 
 export interface InventoryItemProps {
   id?: number;
@@ -43,7 +45,10 @@ export class InventoryItem extends BaseEntity<InventoryItemProps> {
   adjustQuantity(amount: number): void {
     const newQuantity = this.quantity + amount;
     if (newQuantity < 0) {
-      throw new Error('stock value error');
+      throw new WarehouseDomainException(
+        WAREHOUSE_REMAINING_ITEM_EXCEPTION_CODE,
+        'Inventory item movement error',
+      );
     }
     this.quantity = newQuantity;
   }

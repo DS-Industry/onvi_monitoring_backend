@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -36,6 +37,8 @@ import {
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
 import { PosConnectionProgramTypeDto } from '@platform-user/core-controller/dto/receive/pos-connection-programType.dto';
+import { DeviceException, PosException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('pos')
 export class PosController {
@@ -71,7 +74,19 @@ export class PosController {
       }
       return await this.createPosUseCase.execute(data, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all pos for permission user
@@ -86,7 +101,19 @@ export class PosController {
       const { ability } = req;
       return await this.filterByUserPosUseCase.execute(ability);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Monitoring pos all or certain
@@ -114,7 +141,19 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Monitoring pos in detail
@@ -136,7 +175,19 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Program pos all or certain
@@ -164,7 +215,19 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Program pos in detail
@@ -186,7 +249,19 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Connection ProgramTypes
@@ -199,16 +274,32 @@ export class PosController {
     @Param('posId', ParseIntPipe) id: number,
     @Body() data: PosConnectionProgramTypeDto,
   ): Promise<any> {
-    const { ability } = req;
-    await this.posValidateRules.connectionProgramTypesValidate(
-      id,
-      data.programTypeIds,
-      ability,
-    );
-    return await this.connectionPosDeviceProgramTypeUseCase.execute(
-      id,
-      data.programTypeIds,
-    );
+    try {
+      const { ability } = req;
+      await this.posValidateRules.connectionProgramTypesValidate(
+        id,
+        data.programTypeIds,
+        ability,
+      );
+      return await this.connectionPosDeviceProgramTypeUseCase.execute(
+        id,
+        data.programTypeIds,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
 
   //Get pos by id
@@ -224,7 +315,19 @@ export class PosController {
       const { ability } = req;
       return await this.posValidateRules.getOneByIdValidate(id, ability);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -38,6 +39,8 @@ import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { PosException, TechTaskException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -72,7 +75,19 @@ export class TechTaskController {
       );
       return await this.createTechTaskUseCase.execute(data, user.id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Patch techTask
@@ -93,7 +108,19 @@ export class TechTaskController {
       );
       return await this.updateTechTaskUseCase.execute(data, techTask, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all techTask for manage by id
@@ -105,12 +132,28 @@ export class TechTaskController {
     @Request() req: any,
     @Param('posId', ParseIntPipe) posId: number,
   ) {
-    const { ability } = req;
-    await this.posValidateRules.getOneByIdValidate(posId, ability);
-    return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(posId, [
-      StatusTechTask.ACTIVE,
-      StatusTechTask.PAUSE,
-    ]);
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(
+        posId,
+        [StatusTechTask.ACTIVE, StatusTechTask.PAUSE],
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //Get all techTask for read by id
   @Get('read/:posId')
@@ -121,16 +164,48 @@ export class TechTaskController {
     @Request() req: any,
     @Param('posId', ParseIntPipe) posId: number,
   ) {
-    const { ability } = req;
-    await this.posValidateRules.getOneByIdValidate(posId, ability);
-    return await this.readAllByPosTechTaskUseCase.execute(posId);
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      return await this.readAllByPosTechTaskUseCase.execute(posId);
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //Get all items
   @Get('item')
   @UseGuards(JwtGuard)
   @HttpCode(200)
   async getAllItems(): Promise<any> {
-    return await this.findMethodsItemTemplateUseCase.getAll();
+    try {
+      return await this.findMethodsItemTemplateUseCase.getAll();
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //Get shape techTask by id
   @Get(':id')
@@ -141,12 +216,28 @@ export class TechTaskController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<any> {
-    const { ability } = req;
-    const techTask = await this.techTaskValidateRules.getShapeByIdValidate(
-      id,
-      ability,
-    );
-    return await this.shapeTechTaskUseCase.execute(techTask);
+    try {
+      const { ability } = req;
+      const techTask = await this.techTaskValidateRules.getShapeByIdValidate(
+        id,
+        ability,
+      );
+      return await this.shapeTechTaskUseCase.execute(techTask);
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //Completion shape techTask by id
   @Post(':id')
@@ -160,30 +251,46 @@ export class TechTaskController {
     @Body() data: TechTaskCompletionShapeDto,
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<any> {
-    const { ability, user } = req;
+    try {
+      const { ability, user } = req;
 
-    const valueWithFiles = data.valueData.map((item) => {
-      const matchingFile = files.find(
-        (file) => file.fieldname === item.itemValueId.toString(),
-      );
-      return {
-        ...item,
-        file: matchingFile || undefined,
-      };
-    });
+      const valueWithFiles = data.valueData.map((item) => {
+        const matchingFile = files.find(
+          (file) => file.fieldname === item.itemValueId.toString(),
+        );
+        return {
+          ...item,
+          file: matchingFile || undefined,
+        };
+      });
 
-    const itemIds = valueWithFiles.map((item) => item.itemValueId);
-    const techTask =
-      await this.techTaskValidateRules.completionShapeByIdValidate(
-        id,
-        itemIds,
-        ability,
+      const itemIds = valueWithFiles.map((item) => item.itemValueId);
+      const techTask =
+        await this.techTaskValidateRules.completionShapeByIdValidate(
+          id,
+          itemIds,
+          ability,
+        );
+      return await this.completionShapeTechTaskUseCase.execute(
+        techTask,
+        valueWithFiles,
+        user,
       );
-    return await this.completionShapeTechTaskUseCase.execute(
-      techTask,
-      valueWithFiles,
-      user,
-    );
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //TechRate generating report
   @Get('chemistry-report/:posId')
@@ -195,13 +302,29 @@ export class TechTaskController {
     @Param('posId', ParseIntPipe) posId: number,
     @Query() data: DataFilterDto,
   ): Promise<any> {
-    const { ability } = req;
-    await this.posValidateRules.getOneByIdValidate(posId, ability);
-    const techRateInfo = await this.generatingReportProgramTechRate.execute(
-      posId,
-      data.dateStart,
-      data.dateEnd,
-    );
-    return await this.posChemistryProductionUseCase.execute(techRateInfo);
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      const techRateInfo = await this.generatingReportProgramTechRate.execute(
+        posId,
+        data.dateStart,
+        data.dateEnd,
+      );
+      return await this.posChemistryProductionUseCase.execute(techRateInfo);
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
 }
