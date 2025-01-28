@@ -20,17 +20,19 @@ export class HandlerTechTaskUseCase {
     const month = ('0' + (moment().month() + 1)).slice(-2);
     const day = ('0' + moment().date()).slice(-2);
     const today = new Date(year + '-' + month + '-' + day + ' 03:00:00');
+    /*
+        const techTaskActive = await this.findMethodsTechTaskUseCase.getAllByStatus(
+          StatusTechTask.ACTIVE,       );
+    /*
+        const activeTasksWithFutureStartDate = techTaskActive.filter((task) => {
+          const nextCreateDate = new Date(task.nextCreateDate);
+          const nextCreateWithoutTime = nextCreateDate.toLocaleDateString();
+          const todayWithoutTime = today.toLocaleDateString();
+          return nextCreateWithoutTime == todayWithoutTime;
+        });*/
 
-    const techTaskActive = await this.findMethodsTechTaskUseCase.getAllByStatus(
-      StatusTechTask.ACTIVE,
-    );
-
-    const activeTasksWithFutureStartDate = techTaskActive.filter((task) => {
-      const nextCreateDate = new Date(task.nextCreateDate);
-      const nextCreateWithoutTime = nextCreateDate.toLocaleDateString();
-      const todayWithoutTime = today.toLocaleDateString();
-      return nextCreateWithoutTime == todayWithoutTime;
-    });
+    const activeTasksWithFutureStartDate =
+      await this.findMethodsTechTaskUseCase.getAllForHandler();
 
     await Promise.all(
       activeTasksWithFutureStartDate.map(async (item) => {

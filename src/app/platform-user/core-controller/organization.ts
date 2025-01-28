@@ -42,10 +42,9 @@ import {
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
-import {
-  OrganizationException,
-} from '@exception/option.exceptions';
+import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
 
 @Controller('organization')
 export class OrganizationController {
@@ -59,6 +58,7 @@ export class OrganizationController {
     private readonly sendOrganizationConfirmMailUseCase: SendOrganizationConfirmMailUseCase,
     private readonly organizationValidateRules: OrganizationValidateRules,
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
+    private readonly findMethodsDocumentUseCase: FindMethodsDocumentUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
   ) {}
   //All organization for user
@@ -294,6 +294,38 @@ export class OrganizationController {
   async getUsersById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       return this.findMethodsOrganizationUseCase.getAllWorker(id);
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get all worker for org
+  @Get('document/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getDocumentById(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      const organization =
+        await this.organizationValidateRules.getOneByIdValidate(id, ability);
+      return await this.findMethodsDocumentUseCase.getById(
+        organization.organizationDocumentId,
+      );
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

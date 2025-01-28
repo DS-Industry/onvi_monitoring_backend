@@ -9,4 +9,8 @@ export class FindMethodsCurrencyUseCase {
   async getById(input: number): Promise<Currency> {
     return await this.currencyRepository.findOneById(input);
   }
+
+  async getAll(): Promise<Currency[]> {
+    return await this.currencyRepository.findAll();
+  }
 }

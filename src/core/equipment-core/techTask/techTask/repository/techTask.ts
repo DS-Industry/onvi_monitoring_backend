@@ -4,6 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { PrismaTechTaskMapper } from '@db/mapper/prisma-tech-task-mapper';
 import { StatusTechTask, TypeTechTask } from "@prisma/client";
+import moment from 'moment';
 
 @Injectable()
 export class TechTaskRepository extends ITechTaskRepository {
@@ -109,6 +110,28 @@ export class TechTaskRepository extends ITechTaskRepository {
         startDate: 'asc',
       },
     });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllForHandler(): Promise<TechTask[]> {
+    const today = moment().startOf('day').toISOString();
+    const tomorrow = moment().startOf('day').add(1, 'day').toISOString();
+
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        nextCreateDate: {
+          gte: today, // Дата равна или больше сегодняшней
+          lt: tomorrow, // Дата меньше следующего дня
+        },
+        status: {
+          not: StatusTechTask.PAUSE, // Исключаем задачи со статусом PAUSE
+        },
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 

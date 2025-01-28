@@ -249,19 +249,23 @@ export class TechTaskController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: TechTaskCompletionShapeDto,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFiles() files?: Array<Express.Multer.File>,
   ): Promise<any> {
     try {
       const { ability, user } = req;
 
       const valueWithFiles = data.valueData.map((item) => {
-        const matchingFile = files.find(
-          (file) => file.fieldname === item.itemValueId.toString(),
-        );
-        return {
-          ...item,
-          file: matchingFile || undefined,
-        };
+        if (files) {
+          const matchingFile = files.find(
+            (file) => file.fieldname === item.itemValueId.toString(),
+          );
+          return {
+            ...item,
+            file: matchingFile || undefined,
+          };
+        } else {
+          return { ...item };
+        }
       });
 
       const itemIds = valueWithFiles.map((item) => item.itemValueId);

@@ -54,4 +54,8 @@ export class FindMethodsTechTaskUseCase {
   async getAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllByStatus(status);
   }
+
+  async getAllForHandler(): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllForHandler();
+  }
 }

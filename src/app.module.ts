@@ -14,9 +14,10 @@ import { PlatformDeviceModule } from '@platform-device/platform-device.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
-import { EquipmentCoreModule } from "./core/equipment-core/equipment-core.module";
-import { HandlerModule } from "./infra/handler/handler.module";
-import { WarehouseCoreModule } from "./core/warehouse-core/warehouse-core.module";
+import { EquipmentCoreModule } from './core/equipment-core/equipment-core.module';
+import { HandlerModule } from './infra/handler/handler.module';
+import { WarehouseCoreModule } from './core/warehouse-core/warehouse-core.module';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { WarehouseCoreModule } from "./core/warehouse-core/warehouse-core.module
     }),
     RouterModule.register(routeConfig),
     ScheduleModule.forRoot(),
+    PrometheusModule.register(),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,

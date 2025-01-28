@@ -44,4 +44,9 @@ export class CurrencyRepository extends ICurrencyRepository {
     });
     return PrismaCurrencyMapper.toDomain(currency);
   }
+
+  public async findAll(): Promise<Currency[]> {
+    const currencies = await this.prisma.currency.findMany();
+    return currencies.map((item) => PrismaCurrencyMapper.toDomain(item));
+  }
 }
