@@ -5,32 +5,17 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 
 @Injectable()
 export class DataDeviceProgramUseCase {
-  constructor(
-    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
-  ) {}
+  constructor() {}
 
   async execute(
     input: DeviceProgram[],
     lastProg: DeviceProgram,
   ): Promise<PosProgramInfo[]> {
     const groupedPrograms: { [key: string]: PosProgramInfo } = {};
-    const programTypeCache = new Map<number, string>();
 
     await Promise.all(
       input.map(async (deviceProgram) => {
-        if (!programTypeCache.has(deviceProgram.carWashDeviceProgramsTypeId)) {
-          const programType =
-            await this.findMethodsDeviceProgramTypeUseCase.getById(
-              deviceProgram.carWashDeviceProgramsTypeId,
-            );
-          programTypeCache.set(
-            deviceProgram.carWashDeviceProgramsTypeId,
-            programType.name,
-          );
-        }
-        const programName = programTypeCache.get(
-          deviceProgram.carWashDeviceProgramsTypeId,
-        );
+        const programName = deviceProgram.programName;
 
         if (groupedPrograms[programName]) {
           groupedPrograms[programName].counter += 1;

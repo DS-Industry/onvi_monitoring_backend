@@ -31,7 +31,6 @@ export class MonitoringPosUseCase {
       poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
     }
 
-    const currencyCache = new Map<number, CurrencyType>();
     const cashSumMap = new Map<number, number>();
     const virtualSumMap = new Map<number, number>();
     const yandexSumMap = new Map<number, number>();
@@ -51,28 +50,18 @@ export class MonitoringPosUseCase {
 
         await Promise.all(
           posOperations.map(async (posOperation) => {
-            if (!currencyCache.has(posOperation.currencyId)) {
-              const cur = await this.findMethodsCurrencyUseCase.getById(
-                posOperation.currencyId,
-              );
-              currencyCache.set(posOperation.currencyId, cur.currencyType);
-              const curType = currencyCache.get(posOperation.currencyId);
-              const operSum = posOperation.operSum;
-              const posId = pos.id;
+            const operSum = posOperation.operSum;
+            const posId = pos.id;
 
-              if (curType == CurrencyType.CASH) {
-                cashSumMap.set(posId, (cashSumMap.get(posId) || 0) + operSum);
-              } else if (curType == CurrencyType.CASHLESS) {
-                virtualSumMap.set(
-                  posId,
-                  (virtualSumMap.get(posId) || 0) + operSum,
-                );
-              } else if (curType == CurrencyType.VIRTUAL) {
-                yandexSumMap.set(
-                  posId,
-                  (yandexSumMap.get(posId) || 0) + operSum,
-                );
-              }
+            if (posOperation.currencyType == CurrencyType.CASH) {
+              cashSumMap.set(posId, (cashSumMap.get(posId) || 0) + operSum);
+            } else if (posOperation.currencyType == CurrencyType.CASHLESS) {
+              virtualSumMap.set(
+                posId,
+                (virtualSumMap.get(posId) || 0) + operSum,
+              );
+            } else if (posOperation.currencyType == CurrencyType.VIRTUAL) {
+              yandexSumMap.set(posId, (yandexSumMap.get(posId) || 0) + operSum);
             }
           }),
         );

@@ -22,22 +22,17 @@ export class DataByDeviceOperationUseCase {
         dateStart,
         dateEnd,
       );
-    await Promise.all(
-      deviceOperations.map(async (deviceOperation) => {
-        const cur = await this.findMethodsCurrencyUseCase.getById(
-          deviceOperation.currencyId,
-        );
-        response.push({
-          id: deviceOperation.id,
-          sumOper: deviceOperation.operSum,
-          dateOper: deviceOperation.operDate,
-          dateLoad: deviceOperation.loadDate,
-          counter: deviceOperation.counter,
-          localId: deviceOperation.localId,
-          currencyType: cur.name,
-        });
-      }),
-    );
+    deviceOperations.map((deviceOperation) => {
+      response.push({
+        id: deviceOperation.id,
+        sumOper: deviceOperation.operSum,
+        dateOper: deviceOperation.operDate,
+        dateLoad: deviceOperation.loadDate,
+        counter: deviceOperation.counter,
+        localId: deviceOperation.localId,
+        currencyType: deviceOperation.currencyName,
+      });
+    });
     return response;
   }
 }

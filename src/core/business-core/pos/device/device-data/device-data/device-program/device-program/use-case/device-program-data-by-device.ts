@@ -3,6 +3,7 @@ import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
 import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
+import { PROGRAM_TIME_CHECK_AUTO, PROGRAM_TYPE_ID_CHECK_AUTO } from "@constant/constants";
 
 @Injectable()
 export class DataByDeviceProgramUseCase {
@@ -25,43 +26,54 @@ export class DataByDeviceProgramUseCase {
         dateEnd,
       );
 
-    await Promise.all(
-      devicePrograms.map(async (deviceProgram) => {
-        const programType =
-          await this.findMethodsDeviceProgramTypeUseCase.getById(
-            deviceProgram.carWashDeviceProgramsTypeId,
-          );
-        const payTypeMapping = {
-          1: 'Наличные',
-          2: 'Карта',
-          3: 'Карта (наличные)',
-          0: 'Уборка',
-        };
-        let payType = payTypeMapping[deviceProgram.isPaid];
-        if (!payType) {
-          payType = 'Неизвестный тип оплаты';
-        }
-        const isCarCheck = await this.checkCarDeviceProgramUseCase.execute(
-          deviceProgram.beginDate,
-          deviceProgram.carWashDeviceId,
-          deviceProgram.carWashDeviceProgramsTypeId,
-        );
+    const payTypeMapping = {
+      1: 'Наличные',
+      2: 'Карта',
+      3: 'Карта (наличные)',
+      0: 'Уборка',
+    };
 
-        response.push({
-          id: deviceProgram.id,
-          name: programType.name,
-          dateBegin: deviceProgram.beginDate,
-          dateEnd: deviceProgram.endDate,
-          time: this.formatSecondsToTime(
-            deviceProgram.endDate,
-            deviceProgram.beginDate,
-          ),
-          localId: deviceProgram.localId,
-          payType: payType,
-          isCar: isCarCheck ? 1 : 0,
-        });
-      }),
-    );
+    // Хранение последнего времени программы с типом PROGRAM_TYPE_ID_CHECK_AUTO
+    let lastCheckAutoTime: Date | null = null;
+
+    for (let i = 0; i < devicePrograms.length; i++) {
+      const deviceProgram = devicePrograms[i];
+
+      // Определяем тип оплаты
+      const payType =
+        payTypeMapping[deviceProgram.isPaid] || 'Неизвестный тип оплаты';
+
+      // Проверяем, является ли программа проверкой автомобиля
+      let isCarCheck = 0;
+      if (
+        deviceProgram.carWashDeviceProgramsTypeId === PROGRAM_TYPE_ID_CHECK_AUTO
+      ) {
+        if (
+          lastCheckAutoTime === null ||
+          (deviceProgram.beginDate.getTime() - lastCheckAutoTime.getTime()) /
+            (1000 * 60) >
+            PROGRAM_TIME_CHECK_AUTO
+        ) {
+          isCarCheck = 1;
+        }
+        lastCheckAutoTime = deviceProgram.beginDate; // Обновляем время последней проверки авто
+      }
+
+      // Формируем ответ
+      response.push({
+        id: deviceProgram.id,
+        name: deviceProgram.programName,
+        dateBegin: deviceProgram.beginDate,
+        dateEnd: deviceProgram.endDate,
+        time: this.formatSecondsToTime(
+          deviceProgram.endDate,
+          deviceProgram.beginDate,
+        ),
+        localId: deviceProgram.localId,
+        payType: payType,
+        isCar: isCarCheck,
+      });
+    }
 
     return response;
   }

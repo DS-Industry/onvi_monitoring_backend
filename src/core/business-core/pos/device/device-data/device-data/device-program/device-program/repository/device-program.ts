@@ -89,6 +89,9 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
             lte: dateEnd,
           },
         },
+        include: {
+          carWashDeviceProgramsType: true,
+        },
         orderBy: {
           beginDate: 'asc',
         },
@@ -140,6 +143,9 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
             gte: dateStart,
             lte: dateEnd,
           },
+        },
+        include: {
+          carWashDeviceProgramsType: true,
         },
         orderBy: {
           beginDate: 'asc',

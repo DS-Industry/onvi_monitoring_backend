@@ -113,6 +113,9 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
             lte: dateEnd,
           },
         },
+        include: {
+          currency: true,
+        },
         orderBy: {
           operDate: 'asc',
         },
@@ -135,6 +138,9 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
             gte: dateStart,
             lte: dateEnd,
           },
+        },
+        include: {
+          currency: true,
         },
         orderBy: {
           operDate: 'asc',

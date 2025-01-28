@@ -26,7 +26,7 @@ export class MonitoringFullByIdPosUseCase {
       pos.id,
     );
 
-    const currencyCache = new Map<number, CurrencyType>();
+    //const currencyCache = new Map<number, CurrencyType>();
     const cashSumMap = new Map<number, number>();
     const virtualSumMap = new Map<number, number>();
     const yandexSumMap = new Map<number, number>();
@@ -47,27 +47,27 @@ export class MonitoringFullByIdPosUseCase {
 
         await Promise.all(
           deviceOperations.map(async (deviceOperation) => {
-            if (!currencyCache.has(deviceOperation.currencyId)) {
+            /*if (!currencyCache.has(deviceOperation.currencyId)) {
               const cur = await this.findMethodsCurrencyUseCase.getById(
                 deviceOperation.currencyId,
               );
               currencyCache.set(deviceOperation.currencyId, cur.currencyType);
             }
-            const curType = currencyCache.get(deviceOperation.currencyId);
+            const curType = currencyCache.get(deviceOperation.currencyId);*/
             const operSum = deviceOperation.operSum;
             const deviceId = deviceOperation.carWashDeviceId;
 
-            if (curType == CurrencyType.CASH) {
+            if (deviceOperation.currencyType == CurrencyType.CASH) {
               cashSumMap.set(
                 deviceId,
                 (cashSumMap.get(deviceId) || 0) + operSum,
               );
-            } else if (curType == CurrencyType.CASHLESS) {
+            } else if (deviceOperation.currencyType == CurrencyType.CASHLESS) {
               virtualSumMap.set(
                 deviceId,
                 (virtualSumMap.get(deviceId) || 0) + operSum,
               );
-            } else if (curType == CurrencyType.VIRTUAL) {
+            } else if (deviceOperation.currencyType == CurrencyType.VIRTUAL) {
               yandexSumMap.set(
                 deviceId,
                 (yandexSumMap.get(deviceId) || 0) + operSum,

@@ -3,11 +3,27 @@ import {
   Prisma,
 } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+export type PrismaCarWashDeviceOperWithCurrency =
+  Prisma.CarWashDeviceOperationsEventGetPayload<{
+    include: { currency: true };
+  }>;
 export class PrismaCarWashDeviceOperMapper {
-  static toDomain(entity: PrismaCarWashDeviceOper): DeviceOperation {
+  static toDomain(
+    entity: PrismaCarWashDeviceOper | PrismaCarWashDeviceOperWithCurrency,
+  ): DeviceOperation {
     if (!entity) {
       return null;
     }
+    const currencyType =
+      'currency' in entity && entity.currency
+        ? entity.currency.currencyType
+        : undefined;
+
+    const currencyName =
+      'currency' in entity && entity.currency
+        ? entity.currency.name
+        : undefined;
+
     return new DeviceOperation({
       id: entity.id,
       carWashDeviceId: entity.carWashDeviceId,
@@ -21,6 +37,8 @@ export class PrismaCarWashDeviceOperMapper {
       currencyId: entity.currencyId,
       isBoxOffice: entity.isBoxOffice,
       errNumId: entity.errNumId,
+      currencyType: currencyType,
+      currencyName: currencyName,
     });
   }
 
