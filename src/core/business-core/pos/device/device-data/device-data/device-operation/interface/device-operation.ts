@@ -27,6 +27,8 @@ export abstract class IDeviceOperationRepository {
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceOperation[]>;
   abstract findLastOperByPosId(byPosId: number): Promise<DeviceOperation>;
   abstract findLastOperByDeviceId(

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class DataFilterDto {
@@ -8,4 +8,10 @@ export class DataFilterDto {
   @IsNotEmpty({ message: 'dateEnd is required' })
   @Transform(({ value }) => new Date(value))
   dateEnd: Date;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }

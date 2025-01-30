@@ -3,7 +3,11 @@ import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
 import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
-import { PROGRAM_TIME_CHECK_AUTO, PROGRAM_TYPE_ID_CHECK_AUTO } from "@constant/constants";
+import {
+  PROGRAM_TIME_CHECK_AUTO,
+  PROGRAM_TYPE_ID_CHECK_AUTO,
+} from '@constant/constants';
+import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/device-program/device-program/interface/device-program';
 
 @Injectable()
 export class DataByDeviceProgramUseCase {
@@ -11,12 +15,15 @@ export class DataByDeviceProgramUseCase {
     private readonly findMethodsDeviceProgramUseCase: FindMethodsDeviceProgramUseCase,
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly checkCarDeviceProgramUseCase: CheckCarDeviceProgramUseCase,
+    private readonly deviceProgramRepository: IDeviceProgramRepository,
   ) {}
 
   async execute(
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgramResponseDto[]> {
     const response: DeviceProgramResponseDto[] = [];
     const devicePrograms =
@@ -24,6 +31,8 @@ export class DataByDeviceProgramUseCase {
         deviceId,
         dateStart,
         dateEnd,
+        skip,
+        take,
       );
 
     const payTypeMapping = {
@@ -33,17 +42,27 @@ export class DataByDeviceProgramUseCase {
       0: 'Уборка',
     };
 
-    // Хранение последнего времени программы с типом PROGRAM_TYPE_ID_CHECK_AUTO
     let lastCheckAutoTime: Date | null = null;
 
-    for (let i = 0; i < devicePrograms.length; i++) {
-      const deviceProgram = devicePrograms[i];
+    if (devicePrograms.length > 0) {
+      const firstProgram = devicePrograms[0];
 
-      // Определяем тип оплаты
+      if (
+        firstProgram.carWashDeviceProgramsTypeId === PROGRAM_TYPE_ID_CHECK_AUTO
+      ) {
+        lastCheckAutoTime =
+          await this.deviceProgramRepository.findProgramForCheckCar(
+            deviceId,
+            firstProgram.beginDate,
+            PROGRAM_TYPE_ID_CHECK_AUTO,
+          );
+      }
+    }
+
+    for (const deviceProgram of devicePrograms) {
       const payType =
         payTypeMapping[deviceProgram.isPaid] || 'Неизвестный тип оплаты';
 
-      // Проверяем, является ли программа проверкой автомобиля
       let isCarCheck = 0;
       if (
         deviceProgram.carWashDeviceProgramsTypeId === PROGRAM_TYPE_ID_CHECK_AUTO
@@ -56,10 +75,9 @@ export class DataByDeviceProgramUseCase {
         ) {
           isCarCheck = 1;
         }
-        lastCheckAutoTime = deviceProgram.beginDate; // Обновляем время последней проверки авто
+        lastCheckAutoTime = deviceProgram.beginDate;
       }
 
-      // Формируем ответ
       response.push({
         id: deviceProgram.id,
         name: deviceProgram.programName,

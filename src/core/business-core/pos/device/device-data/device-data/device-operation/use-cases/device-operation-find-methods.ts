@@ -27,11 +27,15 @@ export class FindMethodsDeviceOperationUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceOperation[]> {
     return await this.deviceOperationRepository.findAllByDeviceIdAndDate(
       deviceId,
       dateStart,
       dateEnd,
+      skip,
+      take,
     );
   }
 

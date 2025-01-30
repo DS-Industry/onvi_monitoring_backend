@@ -24,6 +24,8 @@ export abstract class IDeviceProgramRepository {
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]>;
   abstract findLastProgramByPosId(carWashPosId: number): Promise<DeviceProgram>;
   abstract findLastProgramByDeviceId(

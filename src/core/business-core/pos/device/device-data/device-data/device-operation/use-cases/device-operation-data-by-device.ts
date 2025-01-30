@@ -14,6 +14,8 @@ export class DataByDeviceOperationUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceOperationMonitoringResponseDto[]> {
     const response: DeviceOperationMonitoringResponseDto[] = [];
     const deviceOperations =
@@ -21,6 +23,8 @@ export class DataByDeviceOperationUseCase {
         deviceId,
         dateStart,
         dateEnd,
+        skip,
+        take,
       );
     deviceOperations.map((deviceOperation) => {
       response.push({

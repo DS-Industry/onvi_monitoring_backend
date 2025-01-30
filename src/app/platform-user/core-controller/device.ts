@@ -2,15 +2,16 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode, HttpStatus,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
   Request,
-  UseGuards
-} from "@nestjs/common";
+  UseGuards,
+} from '@nestjs/common';
 import { CreateCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-create';
 import { CarWashDeviceType } from '@pos/device/deviceType/domen/deviceType';
 import { DeviceTypeCreateDto } from '@platform-user/core-controller/dto/receive/device-type-create.dto';
@@ -36,8 +37,12 @@ import {
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
-import { DeviceException, PosException, UserException } from "@exception/option.exceptions";
-import { CustomHttpException } from "@exception/custom-http.exception";
+import {
+  DeviceException,
+  PosException,
+  UserException,
+} from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('device')
 export class DeviceController {
@@ -96,12 +101,20 @@ export class DeviceController {
     @Query() data: DataFilterDto,
   ): Promise<DeviceOperationMonitoringResponseDto[]> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       await this.deviceValidateRules.getByIdValidate(id, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
       return await this.dataByDeviceOperationUseCase.execute(
         id,
         data.dateStart,
         data.dateEnd,
+        skip,
+        take,
       );
     } catch (e) {
       if (e instanceof DeviceException) {
@@ -178,12 +191,20 @@ export class DeviceController {
     @Query() data: DataFilterDto,
   ): Promise<DeviceProgramResponseDto[]> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       await this.deviceValidateRules.getByIdValidate(id, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
       return await this.dataByDeviceProgramUseCase.execute(
         id,
         data.dateStart,
         data.dateEnd,
+        skip,
+        take,
       );
     } catch (e) {
       if (e instanceof DeviceException) {

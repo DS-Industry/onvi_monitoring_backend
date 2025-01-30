@@ -12,11 +12,15 @@ export class FindMethodsDeviceProgramUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]> {
     return await this.deviceProgramRepository.findAllByDeviceIdAndDate(
       deviceId,
       dateStart,
       dateEnd,
+      skip,
+      take,
     );
   }
   async getAllByOrgIdAndDateProgram(

@@ -134,9 +134,13 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]> {
     const devicePrograms =
       await this.prisma.carWashDeviceProgramsEvent.findMany({
+        skip: skip,
+        take: take,
         where: {
           carWashDeviceId,
           beginDate: {
