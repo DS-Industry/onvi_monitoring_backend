@@ -66,4 +66,16 @@ export class FindMethodsDeviceProgramUseCase {
   async getLastByPosId(posId: number): Promise<DeviceProgram> {
     return await this.deviceProgramRepository.findLastProgramByPosId(posId);
   }
+
+  async getCountAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return await this.deviceProgramRepository.countAllByDeviceIdAndDateProgram(
+      deviceId,
+      dateStart,
+      dateEnd,
+    );
+  }
 }

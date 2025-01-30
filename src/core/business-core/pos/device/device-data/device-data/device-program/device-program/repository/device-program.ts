@@ -213,4 +213,17 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     }
     return deviceProgram.beginDate;
   }
+
+  public async countAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return this.prisma.carWashDeviceProgramsEvent.count({
+      where: {
+        carWashDeviceId: deviceId,
+        beginDate: { gte: dateStart, lte: dateEnd },
+      },
+    });
+  }
 }

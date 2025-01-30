@@ -34,4 +34,9 @@ export abstract class IDeviceOperationRepository {
   abstract findLastOperByDeviceId(
     carWashDeviceId: number,
   ): Promise<DeviceOperation>;
+  abstract countAllByDeviceIdAndDateOper(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number>;
 }

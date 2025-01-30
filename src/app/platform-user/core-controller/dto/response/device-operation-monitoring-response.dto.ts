@@ -1,4 +1,8 @@
 export class DeviceOperationMonitoringResponseDto {
+  oper: MonitoringDto[];
+  totalCount: number;
+}
+export class MonitoringDto {
   id: number;
   sumOper: number;
   dateOper: Date;

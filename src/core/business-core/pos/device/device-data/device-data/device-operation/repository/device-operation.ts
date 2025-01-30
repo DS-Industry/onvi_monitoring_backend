@@ -186,4 +186,17 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       });
     return PrismaCarWashDeviceOperMapper.toDomain(deviceOperation);
   }
+
+  public async countAllByDeviceIdAndDateOper(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return this.prisma.carWashDeviceOperationsEvent.count({
+      where: {
+        carWashDeviceId: deviceId,
+        operDate: { gte: dateStart, lte: dateEnd },
+      },
+    });
+  }
 }

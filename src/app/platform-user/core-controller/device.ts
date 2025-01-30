@@ -99,7 +99,7 @@ export class DeviceController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
-  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+  ): Promise<DeviceOperationMonitoringResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;
@@ -189,7 +189,7 @@ export class DeviceController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
-  ): Promise<DeviceProgramResponseDto[]> {
+  ): Promise<DeviceProgramResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;

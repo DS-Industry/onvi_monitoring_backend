@@ -36,4 +36,9 @@ export abstract class IDeviceProgramRepository {
     dateStart: Date,
     carWashDeviceProgramsTypeId: number,
   ): Promise<Date>;
+  abstract countAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number>;
 }

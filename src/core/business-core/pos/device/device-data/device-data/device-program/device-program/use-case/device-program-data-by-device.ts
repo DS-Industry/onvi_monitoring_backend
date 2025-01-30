@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
-import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
+import {
+  DeviceProgramResponseDto,
+  ProgramDto,
+} from '@platform-user/core-controller/dto/response/device-program-response.dto';
 import {
   PROGRAM_TIME_CHECK_AUTO,
   PROGRAM_TYPE_ID_CHECK_AUTO,
@@ -13,8 +16,6 @@ import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/de
 export class DataByDeviceProgramUseCase {
   constructor(
     private readonly findMethodsDeviceProgramUseCase: FindMethodsDeviceProgramUseCase,
-    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
-    private readonly checkCarDeviceProgramUseCase: CheckCarDeviceProgramUseCase,
     private readonly deviceProgramRepository: IDeviceProgramRepository,
   ) {}
 
@@ -24,8 +25,14 @@ export class DataByDeviceProgramUseCase {
     dateEnd: Date,
     skip?: number,
     take?: number,
-  ): Promise<DeviceProgramResponseDto[]> {
-    const response: DeviceProgramResponseDto[] = [];
+  ): Promise<DeviceProgramResponseDto> {
+    const response: ProgramDto[] = [];
+    const totalCount =
+      await this.findMethodsDeviceProgramUseCase.getCountAllByDeviceIdAndDateProgram(
+        deviceId,
+        dateStart,
+        dateEnd,
+      );
     const devicePrograms =
       await this.findMethodsDeviceProgramUseCase.getAllByDeviceIdAndDateProgram(
         deviceId,
@@ -93,7 +100,7 @@ export class DataByDeviceProgramUseCase {
       });
     }
 
-    return response;
+    return { prog: response, totalCount: totalCount };
   }
 
   private formatSecondsToTime(endDate: Date, beginDate: Date): string {

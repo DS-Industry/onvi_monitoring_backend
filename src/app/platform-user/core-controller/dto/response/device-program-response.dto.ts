@@ -1,4 +1,8 @@
 export class DeviceProgramResponseDto {
+  prog: ProgramDto[];
+  totalCount: number;
+}
+export class ProgramDto {
   id: number;
   name: string;
   dateBegin: Date;
