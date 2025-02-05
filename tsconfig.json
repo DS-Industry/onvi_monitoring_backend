@@ -40,7 +40,8 @@
       "@object-permission/*": ["src/infra/object/*"],
       "@tech-task/*": ["src/core/equipment-core/techTask/*"],
       "@equipment/*": ["src/core/equipment-core/equipment/*"],
-      "@warehouse/*": ["src/core/warehouse-core/*"]
+      "@warehouse/*": ["src/core/warehouse-core/*"],
+      "@finance/*": ["src/core/finance-core/*"]
     }
   }
 }

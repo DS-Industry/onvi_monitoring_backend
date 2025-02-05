@@ -56,6 +56,7 @@ import { TechTaskValidateRules } from "@platform-user/validate/validate-rules/te
 import { WarehouseCoreModule } from "../../core/warehouse-core/warehouse-core.module";
 import { WarehouseController } from "@platform-user/core-controller/warehouse";
 import { WarehouseValidateRules } from "@platform-user/validate/validate-rules/warehouse-validate-rules";
+import { FinanceController } from "@platform-user/core-controller/finance";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -74,6 +75,7 @@ const controllers = [
   TechTaskController,
   EquipmentController,
   WarehouseController,
+  FinanceController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,

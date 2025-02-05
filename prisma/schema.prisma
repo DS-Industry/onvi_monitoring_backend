@@ -106,6 +106,8 @@ model User {
   warehouseDocumentResponsible WarehouseDocument[]  @relation(name: "responsibleUser")
   warehouseDocumentCreated WarehouseDocument[]  @relation(name: "CreatedByUser")
   warehouseDocumentUpdated WarehouseDocument[]  @relation(name: "UpdateByUser")
+  cashCollectionCreated CashCollection[]  @relation(name: "CreatedByUser")
+  cashCollectionUpdated CashCollection[]  @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -185,7 +187,8 @@ model Pos {
   techTasks            TechTask[]
   equipmentKnots       EquipmentKnot[]
   incident             Incident[]
-  warehouse             Warehouse[]
+  warehouse            Warehouse[]
+  cashCollection       CashCollection[]
 }
 
 model CarWashPos {
@@ -231,6 +234,7 @@ model CarWashDevice {
   carWashDeviceMfuEvent         CarWashDeviceMfuEvent[]
   DeviceRole                    DeviceRole?                    @relation(fields: [deviceRoleId], references: [id])
   deviceRoleId                  Int?
+  cashCollectionDevice          CashCollectionDevice[]
 }
 
 model CarWashDeviceType {
@@ -240,6 +244,7 @@ model CarWashDeviceType {
   carWashDevices              CarWashDevice[]
   carWashDeviceProgrammsTypes CarWashDeviceProgramsType[]
   currencyCarWashPoses        CurrencyCarWashPos[]
+  cashCollectionDeviceTypes   CashCollectionDeviceType[]
 }
 
 model DeviceApiKey {
@@ -864,6 +869,62 @@ model WarehouseDocumentDetail {
   quantity                Int
   comment                 String?
   metaData                Json?
+}
+
+model CashCollection {
+  id                        Int                      @id @default(autoincrement())
+  cashCollectionDate        DateTime
+  sendAt                    DateTime
+  status                    StatusCashCollection
+  sumFact                   Int
+  pos                       Pos?                      @relation(fields: [posId], references: [id])
+  posId                     Int?
+  shortage                  Int
+  sumCard                   Int
+  countCar                  Int
+  countCarCard              Int
+  averageCheck              Int
+  virtualSum                Int
+  createdAt                 DateTime
+  updatedAt                 DateTime
+  createdBy                 User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById               Int
+  updatedBy                 User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
+  updatedById               Int
+  cashCollectionDeviceTypes CashCollectionDeviceType[]
+  cashCollectionDevices     CashCollectionDevice[]
+}
+
+enum StatusCashCollection {
+  CREATED
+  SAVED
+  SENT
+}
+
+model CashCollectionDeviceType {
+  id                      Int                      @id @default(autoincrement())
+  cashCollection          CashCollection?          @relation(fields: [cashCollectionId], references: [id])
+  cashCollectionId        Int?
+  carWashDeviceType       CarWashDeviceType?       @relation(fields: [carWashDeviceTypeId], references: [id])
+  carWashDeviceTypeId     Int?
+  sumFact                 Int
+  sumCoin                 Int
+  sumPaper                Int
+  shortage                Int
+  virtualSum              Int
+}
+
+model CashCollectionDevice {
+  id                      Int                      @id @default(autoincrement())
+  cashCollection          CashCollection?          @relation(fields: [cashCollectionId], references: [id])
+  cashCollectionId        Int?
+  carWashDevice           CarWashDevice?           @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId         Int?
+  tookMoneyTime           DateTime
+  sum                     Int
+  sumCoin                 Int
+  sumPaper                Int
+  virtualSum              Int
 }
 
 enum StatusUser {

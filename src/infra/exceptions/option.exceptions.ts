@@ -70,6 +70,16 @@ export class WarehouseException extends BaseException {
   }
 }
 
+export class FinanceException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_finance', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
 export class WarehouseDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
     super('domain_warehouse', innerCode, message);
