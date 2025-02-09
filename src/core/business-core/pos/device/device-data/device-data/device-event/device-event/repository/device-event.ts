@@ -26,4 +26,18 @@ export class DeviceEventRepository extends IDeviceEventRepository {
     });
     return PrismaCarWashDeviceEventMapper.toDomain(deviceEvent);
   }
+
+  public async findLastEventByDeviceId(
+    carWashDeviceId: number,
+  ): Promise<DeviceEvent> {
+    const deviceEvent = await this.prisma.carWashDeviceEvent.findFirst({
+      where: {
+        carWashDeviceId,
+      },
+      orderBy: {
+        eventDate: 'desc',
+      },
+    });
+    return PrismaCarWashDeviceEventMapper.toDomain(deviceEvent);
+  }
 }

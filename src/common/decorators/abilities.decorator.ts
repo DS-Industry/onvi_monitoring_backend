@@ -114,3 +114,23 @@ export class DeleteWarehouseAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'Warehouse';
 }
+export class ManageCashCollectionAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'Warehouse';
+}
+export class ReadCashCollectionAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'CashCollection';
+}
+export class CreateCashCollectionAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'CashCollection';
+}
+export class UpdateCashCollectionAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'CashCollection';
+}
+export class DeleteCashCollectionAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'CashCollection';
+}

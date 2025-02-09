@@ -10,7 +10,6 @@ export interface CashCollectionResponseDto {
   sumCard: number;
   shortage: number;
   countCar: number;
-  countCarCard: number;
   averageCheck: number;
   cashCollectionDeviceType: CashCollectionDeviceTypeDto[];
   cashCollectionDevice: CashCollectionDeviceDto[];

@@ -1,5 +1,5 @@
 import { BaseEntity } from '@utils/entity';
-import { CurrencyType } from "@prisma/client";
+import { CurrencyType, CurrencyView } from "@prisma/client";
 
 export interface DeviceOperationProps {
   id?: number;
@@ -16,6 +16,7 @@ export interface DeviceOperationProps {
   errNumId?: number;
   currencyType?: CurrencyType;
   currencyName?: string;
+  currencyView?: CurrencyView;
 }
 
 export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
@@ -77,5 +78,9 @@ export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
 
   get currencyName(): string {
     return this.props.currencyName;
+  }
+
+  get currencyView(): CurrencyView {
+    return this.props.currencyView;
   }
 }

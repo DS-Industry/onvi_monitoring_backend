@@ -53,6 +53,9 @@ import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-dat
 import { FileModule } from '@libs/file/module';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
+import { FindMethodsDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-find-methods';
+import { CountCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-count-car';
+import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -112,6 +115,7 @@ const deviceDataHandlerUseCase: Provider[] = [
   ConnectionPosDeviceProgramTypeUseCase,
   DeviceProgramHandlerUseCase,
   DeviceOperationHandlerUseCase,
+  FindMethodsDeviceEventUseCase,
 ];
 
 const deviceDataUseCase: Provider[] = [
@@ -121,6 +125,8 @@ const deviceDataUseCase: Provider[] = [
   FindMethodsDeviceProgramUseCase,
   FindMethodsDeviceOperationUseCase,
   CheckCarDeviceProgramUseCase,
+  CountCarDeviceProgramUseCase,
+  FindMethodsDeviceOperationCardUseCase,
 ];
 
 const deviceDataRawHandlerUseCase: Provider[] = [

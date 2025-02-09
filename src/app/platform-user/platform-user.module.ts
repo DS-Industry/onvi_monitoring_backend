@@ -57,6 +57,8 @@ import { WarehouseCoreModule } from "../../core/warehouse-core/warehouse-core.mo
 import { WarehouseController } from "@platform-user/core-controller/warehouse";
 import { WarehouseValidateRules } from "@platform-user/validate/validate-rules/warehouse-validate-rules";
 import { FinanceController } from "@platform-user/core-controller/finance";
+import { FinanceCoreModule } from "@finance/finance-core.module";
+import { FinanceValidateRules } from "@platform-user/validate/validate-rules/finance-rules";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -117,6 +119,7 @@ const validate: Provider[] = [
   IncidentValidateRules,
   TechTaskValidateRules,
   WarehouseValidateRules,
+  FinanceValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -135,6 +138,7 @@ const permission: Provider[] = [
     BusinessCoreModule,
     EquipmentCoreModule,
     WarehouseCoreModule,
+    FinanceCoreModule,
     ObjectModule,
     FileModule,
   ],

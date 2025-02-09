@@ -19,4 +19,8 @@ export const Objects = [
     id: 5,
     name: 'Warehouse',
   },
+  {
+    id: 6,
+    name: 'CashCollection',
+  },
 ];

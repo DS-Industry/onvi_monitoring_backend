@@ -24,6 +24,11 @@ export class PrismaCarWashDeviceOperMapper {
         ? entity.currency.name
         : undefined;
 
+    const currencyView =
+      'currency' in entity && entity.currency
+        ? entity.currency.currencyView
+        : undefined;
+
     return new DeviceOperation({
       id: entity.id,
       carWashDeviceId: entity.carWashDeviceId,
@@ -39,6 +44,7 @@ export class PrismaCarWashDeviceOperMapper {
       errNumId: entity.errNumId,
       currencyType: currencyType,
       currencyName: currencyName,
+      currencyView: currencyView,
     });
   }
 

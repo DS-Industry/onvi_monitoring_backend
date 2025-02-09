@@ -873,18 +873,18 @@ model WarehouseDocumentDetail {
 
 model CashCollection {
   id                        Int                      @id @default(autoincrement())
+  oldCashCollectionDate     DateTime?
   cashCollectionDate        DateTime
-  sendAt                    DateTime
+  sendAt                    DateTime?
   status                    StatusCashCollection
-  sumFact                   Int
+  sumFact                   Int?
   pos                       Pos?                      @relation(fields: [posId], references: [id])
   posId                     Int?
-  shortage                  Int
-  sumCard                   Int
-  countCar                  Int
-  countCarCard              Int
-  averageCheck              Int
-  virtualSum                Int
+  shortage                  Int?
+  sumCard                   Int?
+  countCar                  Int?
+  averageCheck              Int?
+  virtualSum                Int?
   createdAt                 DateTime
   updatedAt                 DateTime
   createdBy                 User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
@@ -920,10 +920,13 @@ model CashCollectionDevice {
   cashCollectionId        Int?
   carWashDevice           CarWashDevice?           @relation(fields: [carWashDeviceId], references: [id])
   carWashDeviceId         Int?
+  oldTookMoneyTime        DateTime
   tookMoneyTime           DateTime
   sum                     Int
   sumCoin                 Int
   sumPaper                Int
+  sumCard                 Int
+  carCount                Int
   virtualSum              Int
 }
 

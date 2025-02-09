@@ -5,7 +5,11 @@ import { FindMethodsOrganizationUseCase } from '@organization/organization/use-c
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-validate';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { PositionUser, StatusTechTask } from '@prisma/client';
+import {
+  PositionUser,
+  StatusCashCollection,
+  StatusTechTask,
+} from '@prisma/client';
 import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { CarWashDevice } from '@pos/device/device/domain/device';
@@ -37,6 +41,7 @@ import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/documen
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import {
   DeviceException,
+  FinanceException,
   IncidentException,
   OrganizationException,
   PosException,
@@ -44,6 +49,8 @@ import {
   UserException,
   WarehouseException,
 } from '@exception/option.exceptions';
+import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
+import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -57,6 +64,7 @@ export enum ExceptionType {
   POS = 'Pos',
   TECH_TASK = 'TechTask',
   WAREHOUSE = 'Warehouse',
+  FINANCE = 'Finance',
 }
 @Injectable()
 export class ValidateLib {
@@ -82,6 +90,7 @@ export class ValidateLib {
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
+    private readonly findMethodsCashCollectionUseCase: FindMethodsCashCollectionUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -621,6 +630,61 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async oldCashCollectionByPosId(
+    posId: number,
+    cashCollectionData: Date,
+  ): Promise<ValidateResponse<CashCollection>> {
+    const oldCashCollection =
+      await this.findMethodsCashCollectionUseCase.getLastSendByPosId(posId);
+    if (oldCashCollection) {
+      if (oldCashCollection.cashCollectionDate < cashCollectionData) {
+        return { code: 200, object: oldCashCollection };
+      } else {
+        return {
+          code: 400,
+          errorMessage: 'Creation date error cashCollection',
+        };
+      }
+    } else {
+      return { code: 200 };
+    }
+  }
+
+  public async cashCollectionByIdExists(
+    cashCollectionId: number,
+  ): Promise<ValidateResponse<CashCollection>> {
+    const cashCollection =
+      await this.findMethodsCashCollectionUseCase.getOneById(cashCollectionId);
+    if (!cashCollection) {
+      return { code: 400, errorMessage: 'The cashCollection does not exist' };
+    }
+    return { code: 200, object: cashCollection };
+  }
+
+  public async cashCollectionRecalculateStatus(
+    cashCollection: CashCollection,
+  ): Promise<ValidateResponse> {
+    if (cashCollection.status == StatusCashCollection.SENT) {
+      return {
+        code: 400,
+        errorMessage: 'The cashCollection can`t be recalculate',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async cashCollectionReturnStatus(
+    cashCollection: CashCollection,
+  ): Promise<ValidateResponse> {
+    if (cashCollection.status != StatusCashCollection.SENT) {
+      return {
+        code: 400,
+        errorMessage: 'The cashCollection can`t be return',
+      };
+    }
+    return { code: 200 };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -646,6 +710,8 @@ export class ValidateLib {
         throw new TechTaskException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.WAREHOUSE) {
         throw new WarehouseException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.FINANCE) {
+        throw new FinanceException(exceptionCode, errorCodes);
       }
     }
   }

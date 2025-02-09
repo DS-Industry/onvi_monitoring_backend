@@ -4,10 +4,13 @@ export interface CashCollectionDeviceProps {
   id?: number;
   cashCollectionId?: number;
   carWashDeviceId?: number;
+  oldTookMoneyTime: Date;
   tookMoneyTime: Date;
   sum: number;
   sumCoin: number;
   sumPaper: number;
+  sumCard: number;
+  carCount: number;
   virtualSum: number;
 }
 
@@ -28,6 +31,10 @@ export class CashCollectionDevice extends BaseEntity<CashCollectionDeviceProps> 
     return this.props.carWashDeviceId;
   }
 
+  get oldTookMoneyTime(): Date {
+    return this.props.oldTookMoneyTime;
+  }
+
   get tookMoneyTime(): Date {
     return this.props.tookMoneyTime;
   }
@@ -44,6 +51,14 @@ export class CashCollectionDevice extends BaseEntity<CashCollectionDeviceProps> 
     return this.props.sumPaper;
   }
 
+  get sumCard(): number {
+    return this.props.sumCard;
+  }
+
+  get carCount(): number {
+    return this.props.carCount;
+  }
+
   get virtualSum(): number {
     return this.props.virtualSum;
   }
@@ -54,6 +69,10 @@ export class CashCollectionDevice extends BaseEntity<CashCollectionDeviceProps> 
 
   set carWashDeviceId(carWashDeviceId: number) {
     this.props.carWashDeviceId = carWashDeviceId;
+  }
+
+  set oldTookMoneyTime(oldTookMoneyTime: Date) {
+    this.props.oldTookMoneyTime = oldTookMoneyTime;
   }
 
   set tookMoneyTime(tookMoneyTime: Date) {
@@ -70,6 +89,14 @@ export class CashCollectionDevice extends BaseEntity<CashCollectionDeviceProps> 
 
   set sumPaper(sumPaper: number) {
     this.props.sumPaper = sumPaper;
+  }
+
+  set sumCard(sumCard: number) {
+    this.props.sumCard = sumCard;
+  }
+
+  set carCount(carCount: number) {
+    this.props.carCount = carCount;
   }
 
   set virtualSum(virtualSum: number) {

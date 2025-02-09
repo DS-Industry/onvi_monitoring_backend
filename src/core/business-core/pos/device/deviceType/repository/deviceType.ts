@@ -26,6 +26,21 @@ export class CarWashDeviceTypeRepository extends ICarWashDeviceTypeRepository {
     );
   }
 
+  public async findAllByPosId(posId: number): Promise<CarWashDeviceType[]> {
+    const carWashDeviceTypes = await this.prisma.carWashDeviceType.findMany({
+      where: {
+        carWashDevices: {
+          some: {
+            carWashPosId: posId,
+          },
+        },
+      },
+    });
+    return carWashDeviceTypes.map((item) =>
+      PrismaCarWashDeviceTypeMapper.toDomain(item),
+    );
+  }
+
   public async findOneById(id: number): Promise<CarWashDeviceType> {
     const carWashDeviceType = await this.prisma.carWashDeviceType.findFirst({
       where: {

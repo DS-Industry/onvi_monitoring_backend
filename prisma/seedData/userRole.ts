@@ -16,6 +16,12 @@ export const UserRoles = [
         {
           id: 16,
         },
+        {
+          id: 21,
+        },
+        {
+          id: 26,
+        },
       ],
     },
   },

@@ -16,8 +16,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
 import { EquipmentCoreModule } from './core/equipment-core/equipment-core.module';
 import { HandlerModule } from './infra/handler/handler.module';
-import { WarehouseCoreModule } from './core/warehouse-core/warehouse-core.module';
+import { WarehouseCoreModule } from "@warehouse/warehouse-core.module";
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { FinanceCoreModule } from "@finance/finance-core.module";
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
     BusinessCoreModule,
     EquipmentCoreModule,
     WarehouseCoreModule,
+    FinanceCoreModule,
     HandlerModule,
     Logger,
   ],

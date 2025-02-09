@@ -7,6 +7,7 @@ export interface CarWashDeviceProps {
   status: string;
   ipAddress: string;
   carWashDeviceTypeId: number;
+  carWashDeviceTypeName?: string;
   carWashPosId: number;
   deviceRoleId?: number;
 }
@@ -38,6 +39,10 @@ export class CarWashDevice extends BaseEntity<CarWashDeviceProps> {
 
   get carWashDeviceTypeId(): number {
     return this.props.carWashDeviceTypeId;
+  }
+
+  get carWashDeviceTypeName(): string {
+    return this.props.carWashDeviceTypeName;
   }
 
   get carWashPosId(): number {

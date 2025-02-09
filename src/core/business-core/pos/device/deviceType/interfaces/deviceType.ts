@@ -6,5 +6,6 @@ export abstract class ICarWashDeviceTypeRepository {
   abstract findOneByName(name: string): Promise<CarWashDeviceType>;
   abstract findOneByCode(code: string): Promise<CarWashDeviceType>;
   abstract findAll(): Promise<CarWashDeviceType[]>;
+  abstract findAllByPosId(posId: number): Promise<CarWashDeviceType[]>;
   abstract update(input: CarWashDeviceType): Promise<CarWashDeviceType>;
 }

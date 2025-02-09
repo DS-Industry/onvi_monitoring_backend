@@ -106,28 +106,53 @@ export const UserPermissions: {
     objectId: 4,
   },
   {
-    id: 16,
+    id: 21,
     action: 'manage',
     objectId: 5,
   },
   {
-    id: 17,
+    id: 22,
     action: 'create',
     objectId: 5,
   },
   {
-    id: 18,
+    id: 23,
     action: 'update',
     objectId: 5,
   },
   {
-    id: 19,
+    id: 24,
     action: 'read',
     objectId: 5,
   },
   {
-    id: 20,
+    id: 25,
     action: 'delete',
     objectId: 5,
+  },
+  {
+    id: 26,
+    action: 'manage',
+    objectId: 6,
+  },
+  {
+    id: 27,
+    action: 'create',
+    objectId: 6,
+  },
+  {
+    id: 28,
+    action: 'update',
+    objectId: 6,
+  },
+  {
+    id: 29,
+    action: 'read',
+    objectId: 6,
+  },
+  {
+    id: 30,
+    action: 'delete',
+    objectId: 6,
   },
 ];

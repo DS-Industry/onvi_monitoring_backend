@@ -4,9 +4,11 @@ export interface CashCollectionDeviceTypeProps {
   id?: number;
   cashCollectionId?: number;
   carWashDeviceTypeId?: number;
+  carWashDeviceTypeName?: string;
   sumFact: number;
   sumCoin: number;
   sumPaper: number;
+  shortage: number;
   virtualSum: number;
 }
 
@@ -27,12 +29,20 @@ export class CashCollectionDeviceType extends BaseEntity<CashCollectionDeviceTyp
     return this.props.carWashDeviceTypeId;
   }
 
+  get carWashDeviceTypeName(): string {
+    return this.props.carWashDeviceTypeName;
+  }
+
   get sumFact(): number {
     return this.props.sumFact;
   }
 
   get sumCoin(): number {
     return this.props.sumCoin;
+  }
+
+  get shortage(): number {
+    return this.props.shortage;
   }
 
   get sumPaper(): number {
@@ -57,6 +67,10 @@ export class CashCollectionDeviceType extends BaseEntity<CashCollectionDeviceTyp
 
   set sumCoin(sumCoin: number) {
     this.props.sumCoin = sumCoin;
+  }
+
+  set shortage(shortage: number) {
+    this.props.shortage = shortage;
   }
 
   set sumPaper(sumPaper: number) {

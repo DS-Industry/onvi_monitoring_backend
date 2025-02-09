@@ -47,7 +47,8 @@ export class AbilityFactory {
       } else if (
         objectMap[permission.objectId].name == 'Incident' ||
         objectMap[permission.objectId].name == 'TechTask' ||
-        objectMap[permission.objectId].name == 'Warehouse'
+        objectMap[permission.objectId].name == 'Warehouse' ||
+        objectMap[permission.objectId].name == 'CashCollection'
       ) {
         condition = {
           posId: { in: posCondition },

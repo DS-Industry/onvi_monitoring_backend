@@ -3,17 +3,17 @@ import { BaseEntity } from '@utils/entity';
 
 export interface CashCollectionProps {
   id?: number;
+  oldCashCollectionDate?: Date;
   cashCollectionDate: Date;
-  sendDate: Date;
+  sendDate?: Date;
   status: StatusCashCollection;
-  sumFact: number;
+  sumFact?: number;
   posId?: number;
-  shortage: number;
-  sumCard: number;
-  countCar: number;
-  countCarCard: number;
-  averageCheck: number;
-  virtualSum: number;
+  shortage?: number;
+  sumCard?: number;
+  countCar?: number;
+  averageCheck?: number;
+  virtualSum?: number;
   createdAt?: Date;
   updatedAt?: Date;
   createdById: number;
@@ -27,6 +27,10 @@ export class CashCollection extends BaseEntity<CashCollectionProps> {
 
   get id(): number {
     return this.props.id;
+  }
+
+  get oldCashCollectionDate(): Date {
+    return this.props.oldCashCollectionDate;
   }
 
   get cashCollectionDate(): Date {
@@ -61,10 +65,6 @@ export class CashCollection extends BaseEntity<CashCollectionProps> {
     return this.props.countCar;
   }
 
-  get countCarCard(): number {
-    return this.props.countCarCard;
-  }
-
   get averageCheck(): number {
     return this.props.averageCheck;
   }
@@ -87,6 +87,10 @@ export class CashCollection extends BaseEntity<CashCollectionProps> {
 
   get updatedById(): number {
     return this.props.updatedById;
+  }
+
+  set oldCashCollectionDate(oldCashCollectionDate: Date) {
+    this.props.oldCashCollectionDate = oldCashCollectionDate;
   }
 
   set cashCollectionDate(cashCollectionDate: Date) {
@@ -119,10 +123,6 @@ export class CashCollection extends BaseEntity<CashCollectionProps> {
 
   set countCar(countCar: number) {
     this.props.countCar = countCar;
-  }
-
-  set countCarCard(countCarCard: number) {
-    this.props.countCarCard = countCarCard;
   }
 
   set averageCheck(averageCheck: number) {

@@ -6,4 +6,11 @@ export abstract class IDeviceOperationCardRepository {
   abstract findAllByDeviceId(
     carWashDeviceId: number,
   ): Promise<DeviceOperationCard[]>;
+  abstract findAllByDeviceIdAndDate(
+    carWashDeviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<DeviceOperationCard[]>;
 }
