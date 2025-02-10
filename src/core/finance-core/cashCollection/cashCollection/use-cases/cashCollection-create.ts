@@ -29,19 +29,19 @@ export class CreateCashCollectionUseCase {
     user: User,
     oldCashCollection: CashCollection,
   ): Promise<CashCollectionResponseDto> {
-    const cashCollectionData = new CashCollection({
-      cashCollectionDate: data.cashCollectionDate,
-      posId: data.posId,
-      status: StatusCashCollection.CREATED,
-      createdAt: new Date(Date.now()),
-      updatedAt: new Date(Date.now()),
-      createdById: user.id,
-      updatedById: user.id,
-    });
-    const cashCollection =
-      await this.cashCollectionRepository.create(cashCollectionData);
-
-    const cashCollectionDeviceResulte =
+    const now = new Date();
+    const cashCollection = await this.cashCollectionRepository.create(
+      new CashCollection({
+        cashCollectionDate: data.cashCollectionDate,
+        posId: data.posId,
+        status: StatusCashCollection.CREATED,
+        createdAt: now,
+        updatedAt: now,
+        createdById: user.id,
+        updatedById: user.id,
+      }),
+    );
+    const { carCount, sumCard } =
       await this.createManyCashCollectionDeviceUseCase.execute(
         cashCollection.id,
         devices,
@@ -51,16 +51,15 @@ export class CreateCashCollectionUseCase {
       await this.findMethodsCashCollectionDeviceUseCase.getAllByCashCollection(
         cashCollection.id,
       );
+    const deviceMap = new Map(devices.map((d) => [d.id, d]));
     const cashCollectionDeviceResponse = cashCollectionDevices.map(
       (cashDevice) => {
-        const matchedDevice = devices.find(
-          (device) => device.id === cashDevice.carWashDeviceId,
-        );
+        const matchedDevice = deviceMap.get(cashDevice.carWashDeviceId);
         return {
           id: cashDevice.id!,
           deviceId: cashDevice.carWashDeviceId,
-          deviceName: matchedDevice.name,
-          deviceType: matchedDevice.carWashDeviceTypeName,
+          deviceName: matchedDevice?.name,
+          deviceType: matchedDevice?.carWashDeviceTypeName,
           oldTookMoneyTime: cashDevice.oldTookMoneyTime,
           tookMoneyTime: cashDevice.tookMoneyTime,
           sumDevice: cashDevice.sum,
@@ -74,16 +73,17 @@ export class CreateCashCollectionUseCase {
     let sumFactCashCollection = 0;
     let virtualSumCashCollection = 0;
     let shortageCashCollection = 0;
-    const createCashCollectionDeviceTypeResult =
-      await this.createManyCashCollectionTypeUseCase.execute(
-        cashCollection.id,
-        cashCollectionDevices,
-        devices,
-      );
+    console.log(new Date());
+    await this.createManyCashCollectionTypeUseCase.execute(
+      cashCollection.id,
+      cashCollectionDevices,
+      devices,
+    );
     const cashCollectionDeviceType =
       await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
         cashCollection.id,
       );
+
     const cashCollectionDeviceTypeResponse = cashCollectionDeviceType.map(
       (cashDeviceType) => {
         sumFactCashCollection += cashDeviceType.sumFact;
@@ -109,11 +109,10 @@ export class CreateCashCollectionUseCase {
         status: StatusCashCollection.SAVED,
         sumFact: sumFactCashCollection,
         shortage: shortageCashCollection,
-        sumCard: cashCollectionDeviceResulte.sumCard,
-        countCar: cashCollectionDeviceResulte.carCount,
+        sumCard,
+        countCar: carCount,
         averageCheck:
-          (sumFactCashCollection + virtualSumCashCollection) /
-          cashCollectionDeviceResulte.carCount,
+          (sumFactCashCollection + virtualSumCashCollection) / carCount,
         virtualSum: virtualSumCashCollection,
       },
       cashCollection,

@@ -34,6 +34,9 @@ import {
 import {
   GetOneFullDataCashCollectionUseCase
 } from "@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data";
+import {
+  CalculateMethodsCashCollectionUseCase
+} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -48,6 +51,7 @@ const cashCollectionUseCase: Provider[] = [
   RecalculateCashCollectionUseCase,
   GetAllByFilterCashCollectionUseCase,
   GetOneFullDataCashCollectionUseCase,
+  CalculateMethodsCashCollectionUseCase,
 ];
 
 const cashCollectionDeviceUseCase: Provider[] = [

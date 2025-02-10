@@ -3,10 +3,12 @@ import { ICashCollectionDeviceTypeRepository } from '@finance/cashCollection/cas
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
 import { CarWashDevice } from '@pos/device/device/domain/device';
 import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
+import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
 
 @Injectable()
 export class CreateManyCashCollectionTypeUseCase {
   constructor(
+    private readonly calculateMethodsCashCollectionUseCase: CalculateMethodsCashCollectionUseCase,
     private readonly cashCollectionDeviceTypeRepository: ICashCollectionDeviceTypeRepository,
   ) {}
 
@@ -14,55 +16,30 @@ export class CreateManyCashCollectionTypeUseCase {
     cashCollectionId: number,
     cashCollectionDevices: CashCollectionDevice[],
     devices: CarWashDevice[],
-  ): Promise<any> {
-    const cashCollectionTypeData: CashCollectionDeviceType[] = [];
-    const cashSumMap = new Map<number, { sum: number; virtSum: number }>();
+  ): Promise<void> {
+    const cashSumMap =
+      await this.calculateMethodsCashCollectionUseCase.calculateDeviceTypeSums(
+        cashCollectionDevices,
+        devices,
+      );
 
-    await Promise.all(
-      cashCollectionDevices.map((cashCollectionDevice) => {
-        const device = devices.find(
-          (d) => d.id === cashCollectionDevice.carWashDeviceId,
-        );
-        if (!cashSumMap.get(device.carWashDeviceTypeId)) {
-          cashSumMap.set(device.carWashDeviceTypeId, {
-            sum: cashCollectionDevice.sum,
-            virtSum: cashCollectionDevice.virtualSum,
-          });
-          cashCollectionTypeData.push(
-            new CashCollectionDeviceType({
-              cashCollectionId: cashCollectionId,
-              carWashDeviceTypeId: device.carWashDeviceTypeId,
-              carWashDeviceTypeName: device.carWashDeviceTypeName,
-              sumFact: 0,
-              sumCoin: 0,
-              sumPaper: 0,
-              shortage: 0,
-              virtualSum: 0,
-            }),
-          );
-        } else {
-          cashSumMap.set(device.carWashDeviceTypeId, {
-            sum:
-              cashSumMap.get(device.carWashDeviceTypeId).sum +
-              cashCollectionDevice.sum,
-            virtSum:
-              cashSumMap.get(device.carWashDeviceTypeId).virtSum +
-              cashCollectionDevice.virtualSum,
-          });
-        }
-      }),
+    const cashCollectionTypeData = Array.from(cashSumMap.entries()).map(
+      ([typeId, sums]) =>
+        new CashCollectionDeviceType({
+          cashCollectionId,
+          carWashDeviceTypeId: typeId,
+          carWashDeviceTypeName:
+            devices.find((d) => d.carWashDeviceTypeId === typeId)
+              ?.carWashDeviceTypeName || '',
+          sumFact: 0,
+          sumCoin: 0,
+          sumPaper: 0,
+          shortage: sums.sum,
+          virtualSum: sums.virtSum,
+        }),
     );
 
-    cashCollectionTypeData.map((cashCollectionType) => {
-      cashCollectionType.shortage = cashSumMap.get(
-        cashCollectionType.carWashDeviceTypeId,
-      ).sum;
-      cashCollectionType.virtualSum = cashSumMap.get(
-        cashCollectionType.carWashDeviceTypeId,
-      ).virtSum;
-    });
-
-    return await this.cashCollectionDeviceTypeRepository.createMany(
+    await this.cashCollectionDeviceTypeRepository.createMany(
       cashCollectionTypeData,
     );
   }
