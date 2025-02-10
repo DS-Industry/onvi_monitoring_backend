@@ -3,16 +3,21 @@ import { IDeviceEventRepository } from '@pos/device/device-data/device-data/devi
 import { DeviceEvent } from '@pos/device/device-data/device-data/device-event/device-event/domain/device-event';
 
 @Injectable()
-export class FindMethodsDeviceEventUseCase {
+export class CreateDeviceEventUseCase {
   constructor(private readonly deviceEventRepository: IDeviceEventRepository) {}
 
-  async getLastEventByDeviceIdAndTypeId(
+  async execute(
     carWashDeviceId: number,
     eventTypeId: number,
+    eventDate: Date,
   ): Promise<DeviceEvent> {
-    return await this.deviceEventRepository.findLastEventByDeviceIdAndTypeId(
-      carWashDeviceId,
-      eventTypeId,
-    );
+    const deviceEventDate = new DeviceEvent({
+      carWashDeviceId: carWashDeviceId,
+      carWashDeviceEventTypeId: eventTypeId,
+      eventDate: eventDate,
+      loadDate: new Date(Date.now()),
+      localId: 0,
+    });
+    return await this.deviceEventRepository.create(deviceEventDate);
   }
 }

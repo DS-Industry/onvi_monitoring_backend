@@ -51,6 +51,10 @@ import {
 } from '@exception/option.exceptions';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
+import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-find-methods';
+import {
+  FindMethodsCashCollectionTypeUseCase
+} from "@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods";
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -91,6 +95,8 @@ export class ValidateLib {
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
     private readonly findMethodsCashCollectionUseCase: FindMethodsCashCollectionUseCase,
+    private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
+    private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -681,6 +687,46 @@ export class ValidateLib {
         code: 400,
         errorMessage: 'The cashCollection can`t be return',
       };
+    }
+    return { code: 200 };
+  }
+
+  public async cashCollectionDeviceComparisonByIdAndList(
+    cashCollectionId: number,
+    cashCollectionDeviceIds: number[],
+  ): Promise<ValidateResponse> {
+    const cashCollectionDevices =
+      await this.findMethodsCashCollectionDeviceUseCase.getAllByCashCollection(
+        cashCollectionId,
+      );
+    const cashCollectionDeviceIdsCheck = cashCollectionDevices.map(
+      (item) => item.id,
+    );
+    const unnecessaryItems = cashCollectionDeviceIds.filter(
+      (item) => !cashCollectionDeviceIdsCheck.includes(item),
+    );
+    if (unnecessaryItems.length > 0) {
+      return { code: 400, errorMessage: 'CashCollectionDevice item error' };
+    }
+    return { code: 200 };
+  }
+
+  public async cashCollectionDeviceTypeComparisonByIdAndList(
+    cashCollectionId: number,
+    cashCollectionDeviceTypeIds: number[],
+  ): Promise<ValidateResponse> {
+    const cashCollectionDeviceTypes =
+      await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
+        cashCollectionId,
+      );
+    const cashCollectionDeviceTypeIdsCheck = cashCollectionDeviceTypes.map(
+      (item) => item.id,
+    );
+    const unnecessaryItems = cashCollectionDeviceTypeIds.filter(
+      (item) => !cashCollectionDeviceTypeIdsCheck.includes(item),
+    );
+    if (unnecessaryItems.length > 0) {
+      return { code: 400, errorMessage: 'CashCollectionDeviceType item error' };
     }
     return { code: 200 };
   }

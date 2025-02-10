@@ -13,7 +13,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
-import { FinanceException, PosException } from '@exception/option.exceptions';
+import {
+  DeviceException,
+  FinanceException,
+  PosException,
+} from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { CashCollectionCreateDto } from '@platform-user/core-controller/dto/receive/cash-collection-create.dto';
 import { CashCollectionResponseDto } from '@platform-user/core-controller/dto/response/cash-collection-response.dto';
@@ -36,6 +40,12 @@ import { CashCollectionsResponseDto } from '@platform-user/core-controller/dto/r
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { GetAllByFilterCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-all-by-filter';
 import { GetOneFullDataCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data';
+import { FinanceGetTimeStampResponseDto } from '@platform-user/core-controller/dto/response/finance-get-time-stamp-response.dto';
+import { GetAllTimeStampDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-get-all-time-stamp';
+import { FinanceCreateTimeStampDto } from '@platform-user/core-controller/dto/receive/finance-create-time-stamp.dto';
+import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
+import { DeviceValidateRules } from '@platform-user/validate/validate-rules/device-validate-rules';
+import { EVENT_TYPE_CASH_COLLECTION_ID } from '@constant/constants';
 
 @Controller('finance')
 export class FinanceController {
@@ -47,7 +57,10 @@ export class FinanceController {
     private readonly updateCashCollectionUseCase: UpdateCashCollectionUseCase,
     private readonly getAllByFilterCashCollectionUseCase: GetAllByFilterCashCollectionUseCase,
     private readonly getOneFullDataCashCollectionUseCase: GetOneFullDataCashCollectionUseCase,
+    private readonly getAllTimeStampDeviceEventUseCase: GetAllTimeStampDeviceEventUseCase,
+    private readonly createDeviceEventUseCase: CreateDeviceEventUseCase,
     private readonly posValidateRules: PosValidateRules,
+    private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
   //CreateCashCollection
   @Post('cash-collection')
@@ -103,9 +116,18 @@ export class FinanceController {
   ): Promise<CashCollectionResponseDto> {
     try {
       const { user, ability } = req;
+      const cashCollectionDeviceIds = data.cashCollectionDeviceData.map(
+        (item) => item.cashCollectionDeviceId,
+      );
+      const cashCollectionDeviceTypeIds = data.cashCollectionDeviceTypeData.map(
+        (item) => item.cashCollectionDeviceTypeId,
+      );
+
       const cashCollection =
         await this.financeValidateRules.recalculateCashCollectionValidate(
           cashCollectionId,
+          cashCollectionDeviceIds,
+          cashCollectionDeviceTypeIds,
           ability,
         );
       const carWashDevice =
@@ -148,9 +170,18 @@ export class FinanceController {
   ): Promise<CashCollectionResponseDto> {
     try {
       const { user, ability } = req;
+      const cashCollectionDeviceIds = data.cashCollectionDeviceData.map(
+        (item) => item.cashCollectionDeviceId,
+      );
+      const cashCollectionDeviceTypeIds = data.cashCollectionDeviceTypeData.map(
+        (item) => item.cashCollectionDeviceTypeId,
+      );
+
       const cashCollection =
         await this.financeValidateRules.recalculateCashCollectionValidate(
           cashCollectionId,
+          cashCollectionDeviceIds,
+          cashCollectionDeviceTypeIds,
           ability,
         );
       const carWashDevice =
@@ -288,6 +319,80 @@ export class FinanceController {
           code: e.getHttpStatus(),
         });
       } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get TimeStamps by PosId
+  @Get('time-stamp/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateCashCollectionAbility())
+  @HttpCode(200)
+  async getTimeStamps(
+    @Request() req: any,
+    @Param('posId', ParseIntPipe) posId: number,
+  ): Promise<FinanceGetTimeStampResponseDto[]> {
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      return await this.getAllTimeStampDeviceEventUseCase.execute(posId);
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Post TimeStamp by deviceId
+  @Post('time-stamp/:deviceId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateCashCollectionAbility())
+  @HttpCode(200)
+  async createTimeStamp(
+    @Request() req: any,
+    @Param('deviceId', ParseIntPipe) deviceId: number,
+    @Body() data: FinanceCreateTimeStampDto,
+  ): Promise<{
+    deviceId: number;
+    tookMoneyTime: Date;
+  }> {
+    try {
+      const { ability } = req;
+      await this.deviceValidateRules.getByIdValidate(deviceId, ability);
+      const deviceEvent = await this.createDeviceEventUseCase.execute(
+        deviceId,
+        EVENT_TYPE_CASH_COLLECTION_ID,
+        data.dateTimeStamp,
+      );
+      return { deviceId: deviceEvent.id, tookMoneyTime: deviceEvent.eventDate };
+    } catch (e) {
+      if (e instanceof DeviceException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

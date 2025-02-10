@@ -4,9 +4,11 @@ import {
   ValidateLib,
 } from '@platform-user/validate/validate.lib';
 import {
-  FINANCE_CREATE_EXCEPTION_CODE, FINANCE_GET_ONE_EXCEPTION_CODE,
-  FINANCE_RECALCULATE_EXCEPTION_CODE, FINANCE_RETURN_EXCEPTION_CODE
-} from "@constant/error.constants";
+  FINANCE_CREATE_EXCEPTION_CODE,
+  FINANCE_GET_ONE_EXCEPTION_CODE,
+  FINANCE_RECALCULATE_EXCEPTION_CODE,
+  FINANCE_RETURN_EXCEPTION_CODE,
+} from '@constant/error.constants';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
@@ -65,6 +67,8 @@ export class FinanceValidateRules {
 
   public async recalculateCashCollectionValidate(
     cashCollectionId: number,
+    cashCollectionDeviceIds: number[],
+    cashCollectionDeviceTypeIds: number[],
     ability: any,
   ): Promise<CashCollection> {
     const response = [];
@@ -74,6 +78,18 @@ export class FinanceValidateRules {
     response.push(
       await this.validateLib.cashCollectionRecalculateStatus(
         cashCollectionCheck.object,
+      ),
+    );
+    response.push(
+      await this.validateLib.cashCollectionDeviceComparisonByIdAndList(
+        cashCollectionId,
+        cashCollectionDeviceIds,
+      ),
+    );
+    response.push(
+      await this.validateLib.cashCollectionDeviceTypeComparisonByIdAndList(
+        cashCollectionId,
+        cashCollectionDeviceTypeIds,
       ),
     );
     this.validateLib.handlerArrayResponse(

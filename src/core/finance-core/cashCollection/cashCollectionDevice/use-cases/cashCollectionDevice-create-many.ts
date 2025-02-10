@@ -7,6 +7,7 @@ import { FindMethodsDeviceEventUseCase } from '@pos/device/device-data/device-da
 import { CurrencyView } from '@prisma/client';
 import { CountCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-count-car';
 import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
+import { EVENT_TYPE_CASH_COLLECTION_ID } from '@constant/constants';
 
 @Injectable()
 export class CreateManyCashCollectionDeviceUseCase {
@@ -52,8 +53,9 @@ export class CreateManyCashCollectionDeviceUseCase {
     await Promise.all(
       devices.map(async (device) => {
         const lastEventDevice =
-          await this.findMethodsDeviceEventUseCase.getLastEventByDeviceId(
+          await this.findMethodsDeviceEventUseCase.getLastEventByDeviceIdAndTypeId(
             device.id,
+            EVENT_TYPE_CASH_COLLECTION_ID,
           );
         const deviceOperations =
           await this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
