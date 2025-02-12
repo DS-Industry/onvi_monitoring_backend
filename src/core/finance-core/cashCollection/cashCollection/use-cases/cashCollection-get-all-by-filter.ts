@@ -16,22 +16,25 @@ export class GetAllByFilterCashCollectionUseCase {
   ) {}
   async execute(
     posId: number,
-    data: DataFilterDto,
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<CashCollectionsResponseDto> {
     const response: CashCollectionsDataResponseDto[] = [];
     const count =
       await this.findMethodsCashCollectionUseCase.getCountAllByPosIdAndDate(
         posId,
-        data.dateStart,
-        data.dateEnd,
+        dateStart,
+        dateEnd,
       );
     const cashCollections =
       await this.findMethodsCashCollectionUseCase.getAllByPosIdAndDate(
         posId,
-        data.dateStart,
-        data.dateEnd,
-        data?.page,
-        data?.size,
+        dateStart,
+        dateEnd,
+        skip,
+        take,
       );
     await Promise.all(
       cashCollections.map(async (cashCollection) => {

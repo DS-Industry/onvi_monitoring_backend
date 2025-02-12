@@ -304,11 +304,20 @@ export class FinanceController {
     @Query() data: DataFilterDto,
   ): Promise<CashCollectionsResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       await this.posValidateRules.getOneByIdValidate(posId, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
       return await this.getAllByFilterCashCollectionUseCase.execute(
         posId,
-        data,
+        data.dateStart,
+        data.dateEnd,
+        skip,
+        take,
       );
     } catch (e) {
       if (e instanceof FinanceException) {
