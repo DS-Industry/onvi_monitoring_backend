@@ -48,7 +48,8 @@ export class AbilityFactory {
         objectMap[permission.objectId].name == 'Incident' ||
         objectMap[permission.objectId].name == 'TechTask' ||
         objectMap[permission.objectId].name == 'Warehouse' ||
-        objectMap[permission.objectId].name == 'CashCollection'
+        objectMap[permission.objectId].name == 'CashCollection' ||
+        objectMap[permission.objectId].name == 'ShiftReport'
       ) {
         condition = {
           posId: { in: posCondition },

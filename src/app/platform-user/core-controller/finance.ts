@@ -26,8 +26,10 @@ import { CreateCashCollectionUseCase } from '@finance/cashCollection/cashCollect
 import {
   CheckAbilities,
   CreateCashCollectionAbility,
+  CreateShiftReportAbility,
   ReadCashCollectionAbility,
   UpdateCashCollectionAbility,
+  UpdateShiftReportAbility,
 } from '@common/decorators/abilities.decorator';
 import { FinanceValidateRules } from '@platform-user/validate/validate-rules/finance-rules';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
@@ -46,6 +48,20 @@ import { FinanceCreateTimeStampDto } from '@platform-user/core-controller/dto/re
 import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
 import { DeviceValidateRules } from '@platform-user/validate/validate-rules/device-validate-rules';
 import { EVENT_TYPE_CASH_COLLECTION_ID } from '@constant/constants';
+import { ShiftReportCreateDto } from '@platform-user/core-controller/dto/receive/shift-report-create.dto';
+import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
+import { CreateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-create';
+import { ShiftReportAddWorkerDto } from '@platform-user/core-controller/dto/receive/shift-report-add-worker.dto';
+import { AddWorkerShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-add-worker';
+import {
+  ShiftReportResponseDto,
+  WorkerShiftReportDto
+} from "@platform-user/core-controller/dto/response/shift-report-response.dto";
+import { FindMethodsShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods";
+import { ShiftReportsResponseDto } from "@platform-user/core-controller/dto/response/shift-reports-response.dto";
+import {
+  GetAllByFilterShiftReportUseCase
+} from "@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter";
 
 @Controller('finance')
 export class FinanceController {
@@ -59,6 +75,10 @@ export class FinanceController {
     private readonly getOneFullDataCashCollectionUseCase: GetOneFullDataCashCollectionUseCase,
     private readonly getAllTimeStampDeviceEventUseCase: GetAllTimeStampDeviceEventUseCase,
     private readonly createDeviceEventUseCase: CreateDeviceEventUseCase,
+    private readonly createShiftReportUseCase: CreateShiftReportUseCase,
+    private readonly addWorkerShiftReportUseCase: AddWorkerShiftReportUseCase,
+    private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
+    private readonly getAllByFilterShiftReportUseCase: GetAllByFilterShiftReportUseCase,
     private readonly posValidateRules: PosValidateRules,
     private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
@@ -378,7 +398,7 @@ export class FinanceController {
       }
     }
   }
-  //Post TimeStamp by deviceId
+  //Create TimeStamp by deviceId
   @Post('time-stamp/:deviceId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -402,6 +422,170 @@ export class FinanceController {
       return { deviceId: deviceEvent.id, tookMoneyTime: deviceEvent.eventDate };
     } catch (e) {
       if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Create ShiftReport
+  @Post('shift-report')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateShiftReportAbility())
+  @HttpCode(201)
+  async createShiftReport(
+    @Request() req: any,
+    @Body() data: ShiftReportCreateDto,
+  ): Promise<ShiftReport> {
+    try {
+      const { ability, user } = req;
+      await this.posValidateRules.getOneByIdValidate(data.posId, ability);
+      return await this.createShiftReportUseCase.execute(data, user);
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Add worker ShiftReport
+  @Post('shift-report/worker/:shiftReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateShiftReportAbility())
+  @HttpCode(201)
+  async addWorker(
+    @Request() req: any,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+    @Body() data: ShiftReportAddWorkerDto,
+  ): Promise<ShiftReportResponseDto> {
+    try {
+      const { ability } = req;
+      await this.financeValidateRules.addWorkerShiftReport(
+        shiftReportId,
+        data.userId,
+        ability,
+      );
+      return await this.addWorkerShiftReportUseCase.execute(
+        shiftReportId,
+        data.userId,
+      );
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get Shift Reports
+  @Get('shift-reports/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadCashCollectionAbility())
+  @HttpCode(200)
+  async getShiftReports(
+    @Request() req: any,
+    @Param('posId', ParseIntPipe) posId: number,
+    @Query() data: DataFilterDto,
+  ): Promise<ShiftReportsResponseDto> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
+      return await this.getAllByFilterShiftReportUseCase.execute(
+        posId,
+        data.dateStart,
+        data.dateEnd,
+        skip,
+        take,
+      );
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get one ShiftReport
+  @Get('shift-report/:shiftReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateShiftReportAbility())
+  @HttpCode(201)
+  async getOneById(
+    @Request() req: any,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+  ): Promise<ShiftReportResponseDto> {
+    try {
+      const { ability } = req;
+      const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
+        shiftReportId,
+        ability,
+      );
+      const workers = await this.findMethodsShiftReportUseCase.getAllWorkerById(
+        shiftReport.id,
+      );
+
+      const workerData: WorkerShiftReportDto[] = workers.map((worker) => ({
+        workerId: worker.id,
+        name: worker.name,
+        surname: worker.surname,
+        middlename: worker.middlename || '',
+        position: worker.position,
+      }));
+      return {
+        id: shiftReport.id,
+        posId: shiftReport.posId!,
+        startDate: shiftReport.startDate,
+        endDate: shiftReport.endDate,
+        workers: workerData,
+      };
+    } catch (e) {
+      if (e instanceof FinanceException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

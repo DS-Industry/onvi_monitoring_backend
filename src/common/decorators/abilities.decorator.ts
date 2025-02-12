@@ -134,3 +134,23 @@ export class DeleteCashCollectionAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'CashCollection';
 }
+export class ManageShiftReportAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'ShiftReport';
+}
+export class ReadShiftReportAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'ShiftReport';
+}
+export class CreateShiftReportAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'ShiftReport';
+}
+export class UpdateShiftReportAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'ShiftReport';
+}
+export class DeleteShiftReportAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'ShiftReport';
+}

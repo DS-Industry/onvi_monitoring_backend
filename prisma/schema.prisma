@@ -108,6 +108,12 @@ model User {
   warehouseDocumentUpdated WarehouseDocument[]  @relation(name: "UpdateByUser")
   cashCollectionCreated CashCollection[]  @relation(name: "CreatedByUser")
   cashCollectionUpdated CashCollection[]  @relation(name: "UpdateByUser")
+  shiftReports          ShiftReport[]
+  shiftReportCreated    ShiftReport[]  @relation(name: "CreatedByUser")
+  shiftReportUpdated    ShiftReport[]  @relation(name: "UpdateByUser")
+  workDayShiftReportWorker     WorkDayShiftReport[]  @relation(name: "workerUser")
+  workDayShiftReportCreated    WorkDayShiftReport[]  @relation(name: "CreatedByUser")
+  workDayShiftReportUpdated    WorkDayShiftReport[]  @relation(name: "UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -189,6 +195,7 @@ model Pos {
   incident             Incident[]
   warehouse            Warehouse[]
   cashCollection       CashCollection[]
+  shiftReport          ShiftReport[]
 }
 
 model CarWashPos {
@@ -928,6 +935,60 @@ model CashCollectionDevice {
   sumCard                 Int
   carCount                Int
   virtualSum              Int
+}
+
+model ShiftReport {
+  id                      Int                      @id @default(autoincrement())
+  pos                     Pos?                     @relation(fields: [posId], references: [id])
+  posId                   Int?
+  startDate               DateTime
+  endDate                 DateTime
+  users                   User[]
+  workDayShiftReport      WorkDayShiftReport[]
+  createdAt                 DateTime
+  updatedAt                 DateTime
+  createdBy                 User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById               Int
+  updatedBy                 User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
+  updatedById               Int
+}
+
+model WorkDayShiftReport {
+  id                      Int                      @id @default(autoincrement())
+  shiftReport             ShiftReport?             @relation(fields: [shiftReportId], references: [id])
+  shiftReportId           Int?
+  workDate                DateTime
+  typeWorkDay             TypeWorkDay
+  startWorkingTime        DateTime?
+  endWorkingTime          DateTime?
+  estimation              TypeEstimation?
+  prize                   Int?
+  fine                    Int?
+  comment                 String?
+  worker                  User?                     @relation(name: "workerUser", fields: [workerId], references: [id])
+  workerId                Int?
+  createdAt                 DateTime
+  updatedAt                 DateTime
+  createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updatedBy               User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
+  updatedById             Int
+}
+
+enum TypeWorkDay {
+  WORKING
+  WEEKEND
+  MEDICAL
+  VACATION
+  TIMEOFF
+  TRUANCY
+}
+
+enum TypeEstimation {
+  NO_VIOLATION
+  GROSS_VIOLATION
+  MINOR_VIOLATION
+  ONE_REMARK
 }
 
 enum StatusUser {

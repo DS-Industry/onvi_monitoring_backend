@@ -55,6 +55,8 @@ import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/
 import {
   FindMethodsCashCollectionTypeUseCase
 } from "@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods";
+import { FindMethodsShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods";
+import { ShiftReport } from "@finance/shiftReport/shiftReport/domain/shiftReport";
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -97,6 +99,7 @@ export class ValidateLib {
     private readonly findMethodsCashCollectionUseCase: FindMethodsCashCollectionUseCase,
     private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
+    private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -729,6 +732,17 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'CashCollectionDeviceType item error' };
     }
     return { code: 200 };
+  }
+
+  public async shiftReportByIdExists(
+    shiftReportId: number,
+  ): Promise<ValidateResponse<ShiftReport>> {
+    const shiftReport =
+      await this.findMethodsShiftReportUseCase.getOneById(shiftReportId);
+    if (!shiftReport) {
+      return { code: 400, errorMessage: 'The shift report does not exist' };
+    }
+    return { code: 200, object: shiftReport };
   }
 
   public handlerArrayResponse(

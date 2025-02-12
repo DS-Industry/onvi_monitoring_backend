@@ -23,4 +23,8 @@ export const Objects = [
     id: 6,
     name: 'CashCollection',
   },
+  {
+    id: 7,
+    name: 'ShiftReport',
+  },
 ];

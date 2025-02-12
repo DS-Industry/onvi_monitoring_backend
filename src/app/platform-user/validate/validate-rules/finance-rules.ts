@@ -12,6 +12,7 @@ import {
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
+import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
 
 @Injectable()
 export class FinanceValidateRules {
@@ -127,5 +128,47 @@ export class FinanceValidateRules {
       cashCollectionCheck.object,
     );
     return cashCollectionCheck.object;
+  }
+
+  public async addWorkerShiftReport(
+    shiftReportId: number,
+    userId: number,
+    ability: any,
+  ): Promise<void> {
+    const response = [];
+    const shiftReport =
+      await this.validateLib.shiftReportByIdExists(shiftReportId);
+    response.push(shiftReport);
+    response.push(await this.validateLib.userByIdExists(userId));
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      shiftReport.object,
+    );
+  }
+
+  public async getOneByIdShiftReport(
+    shiftReportId: number,
+    ability: any,
+  ): Promise<ShiftReport> {
+    const response = [];
+    const shiftReport =
+      await this.validateLib.shiftReportByIdExists(shiftReportId);
+    response.push(shiftReport);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      shiftReport.object,
+    );
+    return shiftReport.object;
   }
 }

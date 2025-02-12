@@ -10,38 +10,30 @@ import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/
 import { CreateManyCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-create-many';
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 import { UpdateCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-update';
+import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
+import { RecalculateCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-recalculate';
+import { UpdateCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-update';
+import { UpdateManyCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-update-many';
+import { UpdateCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-update';
+import { UpdateManyCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-update-many';
+import { GetAllByFilterCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-all-by-filter';
+import { GetOneFullDataCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data';
+import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
+import { ShiftReportRepositoryProvider } from '@finance/shiftReport/shiftReport/provider/shiftReport';
+import { WorkDayShiftReportRepositoryProvider } from '@finance/shiftReport/workDayShiftReport/provider/workDayShiftReport';
+import { CreateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-create';
+import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
+import { AddWorkerShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-add-worker';
 import {
-  FindMethodsCashCollectionUseCase
-} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods";
-import {
-  RecalculateCashCollectionUseCase
-} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-recalculate";
-import {
-  UpdateCashCollectionDeviceUseCase
-} from "@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-update";
-import {
-  UpdateManyCashCollectionDeviceUseCase
-} from "@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-update-many";
-import {
-  UpdateCashCollectionTypeUseCase
-} from "@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-update";
-import {
-  UpdateManyCashCollectionTypeUseCase
-} from "@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-update-many";
-import {
-  GetAllByFilterCashCollectionUseCase
-} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-get-all-by-filter";
-import {
-  GetOneFullDataCashCollectionUseCase
-} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data";
-import {
-  CalculateMethodsCashCollectionUseCase
-} from "@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods";
+  GetAllByFilterShiftReportUseCase
+} from "@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
   CashCollectionDeviceRepositoryProvider,
   CashCollectionDeviceTypeRepositoryProvider,
+  ShiftReportRepositoryProvider,
+  WorkDayShiftReportRepositoryProvider,
 ];
 
 const cashCollectionUseCase: Provider[] = [
@@ -68,6 +60,13 @@ const cashCollectionDeviceTypeUseCase: Provider[] = [
   UpdateManyCashCollectionTypeUseCase,
 ];
 
+const shiftReportUseCase: Provider[] = [
+  CreateShiftReportUseCase,
+  FindMethodsShiftReportUseCase,
+  AddWorkerShiftReportUseCase,
+  GetAllByFilterShiftReportUseCase,
+];
+
 @Module({
   imports: [PrismaModule, BusinessCoreModule],
   providers: [
@@ -75,11 +74,13 @@ const cashCollectionDeviceTypeUseCase: Provider[] = [
     ...cashCollectionUseCase,
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
+    ...shiftReportUseCase,
   ],
   exports: [
     ...cashCollectionUseCase,
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
+    ...shiftReportUseCase,
   ],
 })
 export class FinanceCoreModule {}
