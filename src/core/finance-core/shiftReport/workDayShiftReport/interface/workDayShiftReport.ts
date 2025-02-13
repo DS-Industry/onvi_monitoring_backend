@@ -6,5 +6,10 @@ export abstract class IWorkDayShiftReportRepository {
   abstract findAllByShiftReportId(
     shiftReportId: number,
   ): Promise<WorkDayShiftReport[]>;
+  abstract findOneByShiftIdAndWorkerIdAndDate(
+    shiftReportId: number,
+    workerId: number,
+    workDate: Date,
+  ): Promise<WorkDayShiftReport>;
   abstract update(input: WorkDayShiftReport): Promise<WorkDayShiftReport>;
 }

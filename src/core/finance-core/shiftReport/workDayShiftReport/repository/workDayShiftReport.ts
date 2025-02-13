@@ -36,6 +36,20 @@ export class WorkDayShiftReportRepository extends IWorkDayShiftReportRepository 
       PrismaWorkDayShiftReportMapper.toDomain(item),
     );
   }
+  public async findOneByShiftIdAndWorkerIdAndDate(
+    shiftReportId: number,
+    workerId: number,
+    workDate: Date,
+  ): Promise<WorkDayShiftReport> {
+    const workDayShiftReport = await this.prisma.workDayShiftReport.findFirst({
+      where: {
+        shiftReportId,
+        workerId,
+        workDate,
+      },
+    });
+    return PrismaWorkDayShiftReportMapper.toDomain(workDayShiftReport);
+  }
   public async update(input: WorkDayShiftReport): Promise<WorkDayShiftReport> {
     const workDayShiftReportEntity =
       PrismaWorkDayShiftReportMapper.toPrisma(input);

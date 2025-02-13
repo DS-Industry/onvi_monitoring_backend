@@ -24,9 +24,12 @@ import { WorkDayShiftReportRepositoryProvider } from '@finance/shiftReport/workD
 import { CreateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-create';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { AddWorkerShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-add-worker';
-import {
-  GetAllByFilterShiftReportUseCase
-} from "@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter";
+import { GetAllByFilterShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter';
+import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-find-methods';
+import { GetByFilterWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-by-filter';
+import { GetOneFullShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-one-full';
+import { UpdateWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-update';
+import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -65,6 +68,14 @@ const shiftReportUseCase: Provider[] = [
   FindMethodsShiftReportUseCase,
   AddWorkerShiftReportUseCase,
   GetAllByFilterShiftReportUseCase,
+  GetOneFullShiftReportUseCase,
+  UpdateShiftReportUseCase,
+];
+
+const workDayShiftReportUseCase: Provider[] = [
+  FindMethodsWorkDayShiftReportUseCase,
+  GetByFilterWorkDayShiftReportUseCase,
+  UpdateWorkDayShiftReportUseCase,
 ];
 
 @Module({
@@ -75,12 +86,14 @@ const shiftReportUseCase: Provider[] = [
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
+    ...workDayShiftReportUseCase,
   ],
   exports: [
     ...cashCollectionUseCase,
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
+    ...workDayShiftReportUseCase,
   ],
 })
 export class FinanceCoreModule {}

@@ -7,6 +7,7 @@ export interface WorkDayShiftReportProps {
   workerId: number;
   workDate: Date;
   typeWorkDay: TypeWorkDay;
+  timeWorkedOut?: string;
   startWorkingTime?: Date;
   endWorkingTime?: Date;
   estimation?: TypeEstimation;
@@ -41,6 +42,10 @@ export class WorkDayShiftReport extends BaseEntity<WorkDayShiftReportProps> {
 
   get typeWorkDay(): TypeWorkDay {
     return this.props.typeWorkDay;
+  }
+
+  get timeWorkedOut(): string {
+    return this.props.timeWorkedOut;
   }
 
   get startWorkingTime(): Date {
@@ -85,6 +90,10 @@ export class WorkDayShiftReport extends BaseEntity<WorkDayShiftReportProps> {
 
   set typeWorkDay(typeWorkDay: TypeWorkDay) {
     this.props.typeWorkDay = typeWorkDay;
+  }
+
+  set timeWorkedOut(timeWorkedOut: string) {
+    this.props.timeWorkedOut = timeWorkedOut;
   }
 
   set startWorkingTime(startWorkingTime: Date) {

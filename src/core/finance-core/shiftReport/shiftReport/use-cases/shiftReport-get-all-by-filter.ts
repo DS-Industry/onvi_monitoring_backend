@@ -36,6 +36,7 @@ export class GetAllByFilterShiftReportUseCase {
     shiftReports.map((shiftReport) =>
       response.push({
         id: shiftReport.id,
+        posId: shiftReport.posId,
         period:
           shiftReport.startDate.toString() +
           '-' +

@@ -4,6 +4,7 @@ export interface ShiftReportsResponseDto {
 }
 export interface ShiftReportsDataResponseDto {
   id: number;
+  posId: number;
   period: string;
   createdAt: Date;
   updatedAt: Date;

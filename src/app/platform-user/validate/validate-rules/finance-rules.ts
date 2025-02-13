@@ -13,6 +13,7 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
+import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 
 @Injectable()
 export class FinanceValidateRules {
@@ -170,5 +171,51 @@ export class FinanceValidateRules {
       shiftReport.object,
     );
     return shiftReport.object;
+  }
+
+  public async getDayReportById(
+    dayReportId: number,
+    ability: any,
+  ): Promise<WorkDayShiftReport> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      shiftReport.object,
+    );
+    return workDayShiftReport.object;
+  }
+
+  public async updateDayReportById(
+    dayReportId: number,
+    ability: any,
+  ): Promise<WorkDayShiftReport> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      shiftReport.object,
+    );
+    return workDayShiftReport.object;
   }
 }
