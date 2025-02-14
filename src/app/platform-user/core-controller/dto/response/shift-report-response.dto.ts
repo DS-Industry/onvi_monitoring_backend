@@ -1,4 +1,4 @@
-import { TypeWorkDay } from '@prisma/client';
+import { TypeEstimation, TypeWorkDay } from "@prisma/client";
 
 export class ShiftReportResponseDto {
   id: number;
@@ -22,6 +22,7 @@ export class WorkDayShiftReportDto {
   workDate: Date;
   typeWorkDay: TypeWorkDay;
   timeWorkedOut?: string;
+  estimation?: TypeEstimation;
   prize?: number;
   fine?: number;
 }

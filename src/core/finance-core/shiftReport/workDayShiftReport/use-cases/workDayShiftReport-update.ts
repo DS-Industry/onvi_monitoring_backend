@@ -58,7 +58,7 @@ export class UpdateWorkDayShiftReportUseCase {
       oldWorkDayShiftReport,
     );
     const shiftReport = await this.findMethodsShiftReportUseCase.getOneById(
-      workDay.id,
+      workDay.shiftReportId,
     );
     await this.updateShiftReportUseCase.execute({}, shiftReport, user);
     return workDay;
