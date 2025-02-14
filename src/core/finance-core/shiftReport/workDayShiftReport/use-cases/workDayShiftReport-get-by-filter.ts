@@ -57,7 +57,7 @@ export class GetByFilterWorkDayShiftReportUseCase {
       workDayShiftReportData,
     );
     const shiftReport = await this.findMethodsShiftReportUseCase.getOneById(
-      workDayShiftReport.id,
+      workDayShiftReport.shiftReportId,
     );
     await this.updateShiftReportUseCase.execute({}, shiftReport, user);
     return {
