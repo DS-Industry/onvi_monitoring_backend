@@ -242,6 +242,7 @@ model CarWashDevice {
   DeviceRole                    DeviceRole?                    @relation(fields: [deviceRoleId], references: [id])
   deviceRoleId                  Int?
   cashCollectionDevice          CashCollectionDevice[]
+  workDayShiftReportCashOpers   WorkDayShiftReportCashOper[]
 }
 
 model CarWashDeviceType {
@@ -954,26 +955,30 @@ model ShiftReport {
 }
 
 model WorkDayShiftReport {
-  id                      Int                      @id @default(autoincrement())
-  shiftReport             ShiftReport?             @relation(fields: [shiftReportId], references: [id])
-  shiftReportId           Int?
-  workDate                DateTime
-  typeWorkDay             TypeWorkDay
-  timeWorkedOut           String?
-  startWorkingTime        DateTime?
-  endWorkingTime          DateTime?
-  estimation              TypeEstimation?
-  prize                   Int?
-  fine                    Int?
-  comment                 String?
-  worker                  User?                     @relation(name: "workerUser", fields: [workerId], references: [id])
-  workerId                Int?
-  createdAt                 DateTime
-  updatedAt                 DateTime
-  createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
-  createdById             Int
-  updatedBy               User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
-  updatedById             Int
+  id                              Int                      @id @default(autoincrement())
+  shiftReport                     ShiftReport?             @relation(fields: [shiftReportId], references: [id])
+  shiftReportId                   Int?
+  workDate                        DateTime
+  typeWorkDay                     TypeWorkDay
+  timeWorkedOut                   String?
+  startWorkingTime                DateTime?
+  endWorkingTime                  DateTime?
+  estimation                      TypeEstimation?
+  status                          StatusWorkDayShiftReport?
+  cashAtStart                     Int?
+  cashAtEnd                       Int?
+  prize                           Int?
+  fine                            Int?
+  comment                         String?
+  worker                          User?                     @relation(name: "workerUser", fields: [workerId], references: [id])
+  workerId                        Int?
+  createdAt                       DateTime
+  updatedAt                       DateTime
+  createdBy                       User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById                     Int
+  updatedBy                       User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
+  updatedById                     Int
+  workDayShiftReportCashOpers     WorkDayShiftReportCashOper[]
 }
 
 enum TypeWorkDay {
@@ -991,6 +996,30 @@ enum TypeEstimation {
   MINOR_VIOLATION
   ONE_REMARK
 }
+
+enum StatusWorkDayShiftReport {
+  CREATED
+  SAVED
+  SENT
+}
+
+model WorkDayShiftReportCashOper {
+  id                      Int                      @id @default(autoincrement())
+  workDayShiftReport      WorkDayShiftReport?      @relation(fields: [workDayShiftReportId], references: [id])
+  workDayShiftReportId    Int?
+  carWashDevice           CarWashDevice?                @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId         Int?
+  eventDate               DateTime?
+  type                    TypeWorkDayShiftReportCashOper
+  sum                     Int
+  comment                 String?
+}
+
+enum TypeWorkDayShiftReportCashOper {
+  REFUND
+  REPLENISHMENT
+}
+
 
 enum StatusUser {
   ACTIVE

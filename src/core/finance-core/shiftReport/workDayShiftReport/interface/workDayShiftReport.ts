@@ -11,5 +11,8 @@ export abstract class IWorkDayShiftReportRepository {
     workerId: number,
     workDate: Date,
   ): Promise<WorkDayShiftReport>;
+  abstract findLastByStatusSentAndPosId(
+    posId: number,
+  ): Promise<WorkDayShiftReport>;
   abstract update(input: WorkDayShiftReport): Promise<WorkDayShiftReport>;
 }

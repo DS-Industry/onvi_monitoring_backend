@@ -78,4 +78,18 @@ export class FindMethodsDeviceProgramUseCase {
       dateEnd,
     );
   }
+
+  async getAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    return await this.deviceProgramRepository.findAllByPosIdAndPaidTypeAndDate(
+      carWashPosId,
+      isPaid,
+      dateStart,
+      dateEnd,
+    );
+  }
 }

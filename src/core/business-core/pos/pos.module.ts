@@ -56,12 +56,12 @@ import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/d
 import { FindMethodsDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-find-methods';
 import { CountCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-count-car';
 import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
+import { GetAllTimeStampDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-get-all-time-stamp';
+import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
+import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
 import {
-  GetAllTimeStampDeviceEventUseCase
-} from "@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-get-all-time-stamp";
-import {
-  CreateDeviceEventUseCase
-} from "@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create";
+  SuspiciouslyDataDeviceProgramUseCase
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -135,6 +135,8 @@ const deviceDataUseCase: Provider[] = [
   CheckCarDeviceProgramUseCase,
   CountCarDeviceProgramUseCase,
   FindMethodsDeviceOperationCardUseCase,
+  CleanDataDeviceProgramUseCase,
+  SuspiciouslyDataDeviceProgramUseCase,
 ];
 
 const deviceDataRawHandlerUseCase: Provider[] = [

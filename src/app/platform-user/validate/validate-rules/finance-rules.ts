@@ -10,7 +10,7 @@ import {
   FINANCE_RETURN_EXCEPTION_CODE,
 } from '@constant/error.constants';
 import { ForbiddenError } from '@casl/ability';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction, StatusWorkDayShiftReport } from '@prisma/client';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
 import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
@@ -217,5 +217,95 @@ export class FinanceValidateRules {
       shiftReport.object,
     );
     return workDayShiftReport.object;
+  }
+
+  public async sendDayReportById(
+    dayReportId: number,
+    ability: any,
+  ): Promise<WorkDayShiftReport> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    if (
+      workDayShiftReport.object &&
+      workDayShiftReport.object.status == StatusWorkDayShiftReport.SENT
+    ) {
+      response.push({
+        code: 400,
+        errorMessage: 'The work day shift report can not send',
+      });
+    }
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      shiftReport.object,
+    );
+    return workDayShiftReport.object;
+  }
+
+  public async createCashOper(
+    dayReportId: number,
+    ability: any,
+  ): Promise<WorkDayShiftReport> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    if (
+      workDayShiftReport.object &&
+      workDayShiftReport.object.status == StatusWorkDayShiftReport.SENT
+    ) {
+      response.push({
+        code: 400,
+        errorMessage: 'You can not change the report',
+      });
+    }
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      shiftReport.object,
+    );
+    return workDayShiftReport.object;
+  }
+
+  public async getClean(
+    dayReportId: number,
+    ability: any,
+  ): Promise<{ workDay: WorkDayShiftReport; posId: number }> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      shiftReport.object,
+    );
+    return {
+      workDay: workDayShiftReport.object,
+      posId: shiftReport.object.posId,
+    };
   }
 }

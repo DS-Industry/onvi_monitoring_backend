@@ -5,7 +5,7 @@ import { WorkDayShiftReportGetByFilterDto } from '@finance/shiftReport/workDaySh
 import { User } from '@platform-user/user/domain/user';
 import { DayShiftReportGetByFilterResponseDto } from '@platform-user/core-controller/dto/response/day-shift-report-get-by-filter-response.dto';
 import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
-import { TypeWorkDay } from '@prisma/client';
+import { StatusWorkDayShiftReport, TypeWorkDay } from '@prisma/client';
 import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 
@@ -38,16 +38,28 @@ export class GetByFilterWorkDayShiftReportUseCase {
         startWorkingTime: workDayShiftReportCheck?.startWorkingTime,
         endWorkingTime: workDayShiftReportCheck?.endWorkingTime,
         estimation: workDayShiftReportCheck?.estimation,
+        status: workDayShiftReportCheck?.status,
+        cashAtStart: workDayShiftReportCheck?.cashAtStart,
+        cashAtEnd: workDayShiftReportCheck?.cashAtEnd,
         prize: workDayShiftReportCheck?.prize,
         fine: workDayShiftReportCheck?.fine,
         comment: workDayShiftReportCheck?.comment,
       };
     }
+    const shiftReport = await this.findMethodsShiftReportUseCase.getOneById(
+      data.shiftReportId,
+    );
+    const oldWorkDayShift =
+      await this.findMethodsWorkDayShiftReportUseCase.getLastByStatusSentAndPosId(
+        shiftReport.posId,
+      );
     const workDayShiftReportData = new WorkDayShiftReport({
       shiftReportId: data.shiftReportId,
       workerId: data.userId,
       workDate: data.workDate,
       typeWorkDay: TypeWorkDay.WEEKEND,
+      status: StatusWorkDayShiftReport.SAVED,
+      cashAtStart: oldWorkDayShift?.cashAtEnd || 0,
       createdById: user.id,
       updatedById: user.id,
       createdAt: new Date(Date.now()),
@@ -55,9 +67,6 @@ export class GetByFilterWorkDayShiftReportUseCase {
     });
     const workDayShiftReport = await this.workDayShiftReportRepository.create(
       workDayShiftReportData,
-    );
-    const shiftReport = await this.findMethodsShiftReportUseCase.getOneById(
-      workDayShiftReport.shiftReportId,
     );
     await this.updateShiftReportUseCase.execute({}, shiftReport, user);
     return {
@@ -69,6 +78,9 @@ export class GetByFilterWorkDayShiftReportUseCase {
       startWorkingTime: workDayShiftReport?.startWorkingTime,
       endWorkingTime: workDayShiftReport?.endWorkingTime,
       estimation: workDayShiftReport?.estimation,
+      status: workDayShiftReport?.status,
+      cashAtStart: workDayShiftReport?.cashAtStart,
+      cashAtEnd: workDayShiftReport?.cashAtEnd,
       prize: workDayShiftReport?.prize,
       fine: workDayShiftReport?.fine,
       comment: workDayShiftReport?.comment,

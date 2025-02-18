@@ -115,16 +115,14 @@ export class TechTaskRepository extends ITechTaskRepository {
 
   public async findAllForHandler(): Promise<TechTask[]> {
     const today = moment().startOf('day').toISOString();
-    const tomorrow = moment().startOf('day').add(1, 'day').toISOString();
 
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         nextCreateDate: {
-          gte: today, // Дата равна или больше сегодняшней
-          lt: tomorrow, // Дата меньше следующего дня
+          gte: today,
         },
         status: {
-          not: StatusTechTask.PAUSE, // Исключаем задачи со статусом PAUSE
+          not: StatusTechTask.PAUSE,
         },
       },
       orderBy: {

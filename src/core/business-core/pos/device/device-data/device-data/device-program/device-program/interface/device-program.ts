@@ -20,6 +20,12 @@ export abstract class IDeviceProgramRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]>;
+  abstract findAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]>;
   abstract findAllByDeviceIdAndDate(
     carWashDeviceId: number,
     dateStart: Date,

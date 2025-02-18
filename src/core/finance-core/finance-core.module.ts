@@ -30,6 +30,24 @@ import { GetByFilterWorkDayShiftReportUseCase } from '@finance/shiftReport/workD
 import { GetOneFullShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-one-full';
 import { UpdateWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-update';
 import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
+import {
+  SendWorkDayShiftReportUseCase
+} from "@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-send";
+import {
+  WorkDayShiftReportCashOperRepositoryProvider
+} from "@finance/shiftReport/workDayShiftReportCashOper/provider/workDayShiftReportCashOper";
+import {
+  CreateWorkDayShiftReportCashOperUseCase
+} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-create";
+import {
+  CalculateWorkDayShiftReportCashOperUseCase
+} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-calculate";
+import {
+  GetOperDataWorkDayShiftReportUseCase
+} from "@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-oper-data";
+import {
+  FindMethodsWorkDayShiftReportCashOperUseCase
+} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-find-methods";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -37,6 +55,7 @@ const repositories: Provider[] = [
   CashCollectionDeviceTypeRepositoryProvider,
   ShiftReportRepositoryProvider,
   WorkDayShiftReportRepositoryProvider,
+  WorkDayShiftReportCashOperRepositoryProvider,
 ];
 
 const cashCollectionUseCase: Provider[] = [
@@ -76,8 +95,15 @@ const workDayShiftReportUseCase: Provider[] = [
   FindMethodsWorkDayShiftReportUseCase,
   GetByFilterWorkDayShiftReportUseCase,
   UpdateWorkDayShiftReportUseCase,
+  SendWorkDayShiftReportUseCase,
+  GetOperDataWorkDayShiftReportUseCase,
 ];
 
+const workDayShiftReportCashOperUseCase: Provider[] = [
+  CreateWorkDayShiftReportCashOperUseCase,
+  CalculateWorkDayShiftReportCashOperUseCase,
+  FindMethodsWorkDayShiftReportCashOperUseCase,
+]
 @Module({
   imports: [PrismaModule, BusinessCoreModule],
   providers: [
@@ -87,6 +113,7 @@ const workDayShiftReportUseCase: Provider[] = [
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
     ...workDayShiftReportUseCase,
+    ...workDayShiftReportCashOperUseCase,
   ],
   exports: [
     ...cashCollectionUseCase,
@@ -94,6 +121,7 @@ const workDayShiftReportUseCase: Provider[] = [
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
     ...workDayShiftReportUseCase,
+    ...workDayShiftReportCashOperUseCase,
   ],
 })
 export class FinanceCoreModule {}

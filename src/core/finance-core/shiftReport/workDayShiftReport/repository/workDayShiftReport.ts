@@ -3,6 +3,7 @@ import { IWorkDayShiftReportRepository } from '@finance/shiftReport/workDayShift
 import { PrismaService } from '@db/prisma/prisma.service';
 import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 import { PrismaWorkDayShiftReportMapper } from '@db/mapper/prisma-work-day-shift-report-mapper';
+import { StatusWorkDayShiftReport } from '@prisma/client';
 
 @Injectable()
 export class WorkDayShiftReportRepository extends IWorkDayShiftReportRepository {
@@ -46,6 +47,22 @@ export class WorkDayShiftReportRepository extends IWorkDayShiftReportRepository 
         shiftReportId,
         workerId,
         workDate,
+      },
+    });
+    return PrismaWorkDayShiftReportMapper.toDomain(workDayShiftReport);
+  }
+  public async findLastByStatusSentAndPosId(
+    posId: number,
+  ): Promise<WorkDayShiftReport> {
+    const workDayShiftReport = await this.prisma.workDayShiftReport.findFirst({
+      where: {
+        shiftReport: {
+          posId,
+        },
+        status: StatusWorkDayShiftReport.SENT,
+      },
+      orderBy: {
+        workDate: 'desc',
       },
     });
     return PrismaWorkDayShiftReportMapper.toDomain(workDayShiftReport);

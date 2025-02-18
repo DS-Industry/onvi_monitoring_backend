@@ -1,4 +1,4 @@
-import { TypeEstimation, TypeWorkDay } from "@prisma/client";
+import { StatusWorkDayShiftReport, TypeEstimation, TypeWorkDay } from "@prisma/client";
 
 export class DayShiftReportGetByFilterResponseDto {
   id: number;
@@ -9,6 +9,9 @@ export class DayShiftReportGetByFilterResponseDto {
   startWorkingTime?: Date;
   endWorkingTime?: Date;
   estimation?: TypeEstimation;
+  status?: StatusWorkDayShiftReport;
+  cashAtStart?: number;
+  cashAtEnd?: number;
   prize?: number;
   fine?: number;
   comment?: string;

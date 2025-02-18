@@ -31,4 +31,12 @@ export class FindMethodsWorkDayShiftReportUseCase {
       shiftReportId,
     );
   }
+
+  async getLastByStatusSentAndPosId(
+    posId: number,
+  ): Promise<WorkDayShiftReport> {
+    return await this.workDayShiftReportRepository.findLastByStatusSentAndPosId(
+      posId,
+    );
+  }
 }

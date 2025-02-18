@@ -25,6 +25,9 @@ export class UpdateWorkDayShiftReportUseCase {
       startWorkingTime,
       endWorkingTime,
       estimation,
+      status,
+      cashAtStart,
+      cashAtEnd,
       prize,
       fine,
       comment,
@@ -45,6 +48,15 @@ export class UpdateWorkDayShiftReportUseCase {
     oldWorkDayShiftReport.estimation = estimation
       ? estimation
       : oldWorkDayShiftReport.estimation;
+    oldWorkDayShiftReport.status = status
+      ? status
+      : oldWorkDayShiftReport.status;
+    oldWorkDayShiftReport.cashAtStart = cashAtStart
+      ? cashAtStart
+      : oldWorkDayShiftReport.cashAtStart;
+    oldWorkDayShiftReport.cashAtEnd = cashAtEnd
+      ? cashAtEnd
+      : oldWorkDayShiftReport.cashAtEnd;
     oldWorkDayShiftReport.prize = prize ? prize : oldWorkDayShiftReport.prize;
     oldWorkDayShiftReport.fine = fine ? fine : oldWorkDayShiftReport.fine;
     oldWorkDayShiftReport.comment = comment

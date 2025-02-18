@@ -1,4 +1,8 @@
-import { TypeEstimation, TypeWorkDay } from '@prisma/client';
+import {
+  StatusWorkDayShiftReport,
+  TypeEstimation,
+  TypeWorkDay,
+} from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface WorkDayShiftReportProps {
@@ -11,6 +15,9 @@ export interface WorkDayShiftReportProps {
   startWorkingTime?: Date;
   endWorkingTime?: Date;
   estimation?: TypeEstimation;
+  status?: StatusWorkDayShiftReport;
+  cashAtStart?: number;
+  cashAtEnd?: number;
   prize?: number;
   fine?: number;
   comment?: string;
@@ -60,6 +67,18 @@ export class WorkDayShiftReport extends BaseEntity<WorkDayShiftReportProps> {
     return this.props.estimation;
   }
 
+  get status(): StatusWorkDayShiftReport {
+    return this.props.status;
+  }
+
+  get cashAtStart(): number {
+    return this.props.cashAtStart;
+  }
+
+  get cashAtEnd(): number {
+    return this.props.cashAtEnd;
+  }
+
   get prize(): number {
     return this.props.prize;
   }
@@ -106,6 +125,18 @@ export class WorkDayShiftReport extends BaseEntity<WorkDayShiftReportProps> {
 
   set estimation(estimation: TypeEstimation) {
     this.props.estimation = estimation;
+  }
+
+  set status(status: StatusWorkDayShiftReport) {
+    this.props.status = status;
+  }
+
+  set cashAtStart(cashAtStart: number) {
+    this.props.cashAtStart = cashAtStart;
+  }
+
+  set cashAtEnd(cashAtEnd: number) {
+    this.props.cashAtEnd = cashAtEnd;
   }
 
   set prize(prize: number) {

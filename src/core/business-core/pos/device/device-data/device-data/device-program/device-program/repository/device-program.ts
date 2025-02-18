@@ -130,6 +130,36 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     );
   }
 
+  public async findAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    const devicePrograms =
+      await this.prisma.carWashDeviceProgramsEvent.findMany({
+        where: {
+          carWashDevice: {
+            carWashPosId,
+          },
+          isPaid,
+          beginDate: {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+        include: {
+          carWashDeviceProgramsType: true,
+        },
+        orderBy: {
+          beginDate: 'asc',
+        },
+      });
+    return devicePrograms.map((item) =>
+      PrismaCarWashDeviceProgramMapper.toDomain(item),
+    );
+  }
+
   public async findAllByDeviceIdAndDate(
     carWashDeviceId: number,
     dateStart: Date,
