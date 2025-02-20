@@ -251,6 +251,38 @@ export class FinanceValidateRules {
     return workDayShiftReport.object;
   }
 
+  public async returnDayReportById(
+    dayReportId: number,
+    ability: any,
+  ): Promise<WorkDayShiftReport> {
+    const response = [];
+    const workDayShiftReport =
+      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
+    response.push(workDayShiftReport);
+    if (
+      workDayShiftReport.object &&
+      workDayShiftReport.object.status != StatusWorkDayShiftReport.SENT
+    ) {
+      response.push({
+        code: 400,
+        errorMessage: 'The work day shift report can not send',
+      });
+    }
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    const shiftReport = await this.validateLib.shiftReportByIdExists(
+      workDayShiftReport.object.shiftReportId,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      shiftReport.object,
+    );
+    return workDayShiftReport.object;
+  }
+
   public async createCashOper(
     dayReportId: number,
     ability: any,

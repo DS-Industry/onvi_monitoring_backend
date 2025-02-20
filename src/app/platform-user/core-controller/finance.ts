@@ -75,12 +75,8 @@ import { GetOperDataWorkDayShiftReportUseCase } from '@finance/shiftReport/workD
 import { FindMethodsWorkDayShiftReportCashOperUseCase } from '@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-find-methods';
 import { CleanDataResponseDto } from '@platform-user/core-controller/dto/response/clean-data-response.dto';
 import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
-import {
-  SuspiciouslyDataDeviceProgramUseCase
-} from "@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data";
-import {
-  SuspiciouslyDataResponseDto
-} from "@platform-user/core-controller/dto/response/suspiciously-data-response.dto";
+import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
+import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
 
 @Controller('finance')
 export class FinanceController {
@@ -748,7 +744,7 @@ export class FinanceController {
   //Send DayShiftReport by id
   @Post('shift-report/day-report/send/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async sendDayReportById(
     @Request() req: any,
@@ -796,10 +792,51 @@ export class FinanceController {
       }
     }
   }
+  //Return DayShiftReport by id
+  @Patch('shift-report/day-report/return/:dayReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateShiftReportAbility())
+  @HttpCode(201)
+  async returnDayReportById(
+    @Request() req: any,
+    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability, user } = req;
+      const workDayShiftReport =
+        await this.financeValidateRules.returnDayReportById(
+          dayReportId,
+          ability,
+        );
+      await this.updateWorkDayShiftReportUseCase.execute(
+        {
+          status: StatusCashCollection.SAVED,
+        },
+        workDayShiftReport,
+        user,
+      );
+
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Create cash oper
   @Post('shift-report/day-report/oper/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async createCashOper(
     @Request() req: any,
