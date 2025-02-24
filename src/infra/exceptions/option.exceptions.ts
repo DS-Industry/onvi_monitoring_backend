@@ -80,6 +80,16 @@ export class FinanceException extends BaseException {
   }
 }
 
+export class ReportTemplateException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_report', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
 export class WarehouseDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
     super('domain_warehouse', innerCode, message);

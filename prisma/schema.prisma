@@ -114,6 +114,7 @@ model User {
   workDayShiftReportWorker     WorkDayShiftReport[]  @relation(name: "workerUser")
   workDayShiftReportCreated    WorkDayShiftReport[]  @relation(name: "CreatedByUser")
   workDayShiftReportUpdated    WorkDayShiftReport[]  @relation(name: "UpdateByUser")
+  reportTemplateTransactions   ReportTemplateTransaction[]
 }
 
 model UserMailConfirm {
@@ -1020,6 +1021,39 @@ enum TypeWorkDayShiftReportCashOper {
   REPLENISHMENT
 }
 
+model ReportTemplate {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  category                CategoryReportTemplate
+  description             String?
+  query                   String
+  params                  Json
+  createdAt               DateTime
+  updatedAt               DateTime
+  reportTemplateTransactions    ReportTemplateTransaction[]
+}
+
+enum CategoryReportTemplate {
+  POS
+}
+
+model ReportTemplateTransaction {
+  id                      Int                      @id @default(autoincrement())
+  reportTemplate          ReportTemplate?          @relation(fields: [reportTemplateId], references: [id])
+  reportTemplateId        Int?
+  user                    User                     @relation(fields: [userId], references: [id])
+  userId                  Int
+  reportKey               String?
+  startTemplateAt         DateTime
+  endTemplateAt           DateTime?
+  status                  StatusReportTemplate
+}
+
+enum StatusReportTemplate {
+  PROGRESS
+  DONE
+  ERROR
+}
 
 enum StatusUser {
   ACTIVE

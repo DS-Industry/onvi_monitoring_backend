@@ -41,7 +41,8 @@
       "@tech-task/*": ["src/core/equipment-core/techTask/*"],
       "@equipment/*": ["src/core/equipment-core/equipment/*"],
       "@warehouse/*": ["src/core/warehouse-core/*"],
-      "@finance/*": ["src/core/finance-core/*"]
+      "@finance/*": ["src/core/finance-core/*"],
+      "@report/*": ["src/core/report-core/*"]
     }
   }
 }

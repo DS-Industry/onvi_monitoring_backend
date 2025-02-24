@@ -45,6 +45,7 @@ import {
   IncidentException,
   OrganizationException,
   PosException,
+  ReportTemplateException,
   TechTaskException,
   UserException,
   WarehouseException,
@@ -57,6 +58,8 @@ import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
 import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-find-methods';
 import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
+import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
+import { ReportTemplate } from '@report/report/domain/reportTemplate';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -71,6 +74,7 @@ export enum ExceptionType {
   TECH_TASK = 'TechTask',
   WAREHOUSE = 'Warehouse',
   FINANCE = 'Finance',
+  REPORT_TEMPLATE = 'ReportTemplate',
 }
 @Injectable()
 export class ValidateLib {
@@ -101,6 +105,7 @@ export class ValidateLib {
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly findMethodsWorkDayShiftReportUseCase: FindMethodsWorkDayShiftReportUseCase,
+    private readonly findMethodsReportUseCase: FindMethodsReportUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -762,6 +767,40 @@ export class ValidateLib {
     return { code: 200, object: workDayShiftReport };
   }
 
+  public async reportByIdExists(
+    reportId: number,
+  ): Promise<ValidateResponse<ReportTemplate>> {
+    const report = await this.findMethodsReportUseCase.getOneById(reportId);
+    if (!report) {
+      return { code: 400, errorMessage: 'The report does not exist' };
+    }
+    return { code: 200, object: report };
+  }
+
+  public async paramsValidate(
+    requiredParams: any,
+    clientData: any,
+  ): Promise<ValidateResponse<any[]>> {
+    const missingParams: string[] = [];
+    const paramsArray: any[] = [];
+
+    for (const key of Object.keys(requiredParams)) {
+      if (!(key in clientData)) {
+        missingParams.push(key);
+      } else {
+        paramsArray.push(clientData[key]);
+      }
+    }
+
+    if (missingParams.length > 0) {
+      return {
+        code: 400,
+        errorMessage: 'Missing parameters: ' + missingParams.join(', '),
+      };
+    }
+    return { code: 200, object: paramsArray };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -789,6 +828,8 @@ export class ValidateLib {
         throw new WarehouseException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.FINANCE) {
         throw new FinanceException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.REPORT_TEMPLATE) {
+        throw new ReportTemplateException(exceptionCode, errorCodes);
       }
     }
   }
