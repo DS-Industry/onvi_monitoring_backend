@@ -38,7 +38,7 @@ export class ReportController {
     @Body() data: any,
     @Param('reportId', ParseIntPipe) reportId: number,
     @Request() req: any,
-  ): Promise<any> {
+  ): Promise<ReportTransactionResponseDto> {
     try {
       const { user } = req;
       const reportData = await this.reportValidateRules.applyValidate(
