@@ -1,18 +1,15 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
-export class CategoryCreateDto {
+export class CategoryUpdateDto {
   @IsString()
-  @IsNotEmpty({ message: 'name is required' })
+  @IsOptional()
   @Transform(({ value }) => {
     value = value.trim();
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
   })
-  name: string;
+  name?: string;
   @IsString()
   @IsOptional()
   description?: string;
-  @IsNumber()
-  @IsOptional()
-  ownerCategoryId?: number;
 }

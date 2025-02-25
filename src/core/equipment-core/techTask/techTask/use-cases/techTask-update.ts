@@ -21,12 +21,15 @@ export class UpdateTechTaskUseCase {
     oldTechTask: TechTask,
     user?: User,
   ): Promise<TechTask> {
-    const { name, type, status, period } = input;
+    const { name, type, status, period, endSpecifiedDate } = input;
 
     oldTechTask.name = name ? name : oldTechTask.name;
     oldTechTask.type = type ? type : oldTechTask.type;
     oldTechTask.status = status ? status : oldTechTask.status;
     oldTechTask.period = period ? period : oldTechTask.period;
+    oldTechTask.endSpecifiedDate = endSpecifiedDate
+      ? endSpecifiedDate
+      : oldTechTask.endSpecifiedDate;
     oldTechTask.updatedAt = new Date(Date.now());
 
     if (status && status == StatusTechTask.PAUSE) {

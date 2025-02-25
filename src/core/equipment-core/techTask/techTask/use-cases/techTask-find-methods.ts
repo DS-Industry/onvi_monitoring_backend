@@ -58,4 +58,8 @@ export class FindMethodsTechTaskUseCase {
   async getAllForHandler(): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllForHandler();
   }
+
+  async getAllForOverdue(): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllForOverdue();
+  }
 }

@@ -41,6 +41,8 @@ import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techT
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { TechTaskManageInfoResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto";
+import { TechTaskShapeResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-read-response.dto";
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -131,7 +133,7 @@ export class TechTaskController {
   async getAllForManage(
     @Request() req: any,
     @Param('posId', ParseIntPipe) posId: number,
-  ) {
+  ): Promise<TechTaskManageInfoResponseDto[]> {
     try {
       const { ability } = req;
       await this.posValidateRules.getOneByIdValidate(posId, ability);
@@ -163,7 +165,7 @@ export class TechTaskController {
   async getAllForRead(
     @Request() req: any,
     @Param('posId', ParseIntPipe) posId: number,
-  ) {
+  ): Promise<TechTaskShapeResponseDto[]> {
     try {
       const { ability } = req;
       await this.posValidateRules.getOneByIdValidate(posId, ability);
@@ -215,7 +217,7 @@ export class TechTaskController {
   async getShapeById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<any> {
+  ): Promise<TechTaskShapeResponseDto> {
     try {
       const { ability } = req;
       const techTask = await this.techTaskValidateRules.getShapeByIdValidate(

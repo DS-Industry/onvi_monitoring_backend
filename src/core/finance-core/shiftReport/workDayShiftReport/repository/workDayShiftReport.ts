@@ -53,6 +53,7 @@ export class WorkDayShiftReportRepository extends IWorkDayShiftReportRepository 
   }
   public async findLastByStatusSentAndPosId(
     posId: number,
+    workDate: Date,
   ): Promise<WorkDayShiftReport> {
     const workDayShiftReport = await this.prisma.workDayShiftReport.findFirst({
       where: {
@@ -60,6 +61,9 @@ export class WorkDayShiftReportRepository extends IWorkDayShiftReportRepository 
           posId,
         },
         status: StatusWorkDayShiftReport.SENT,
+        workDate: {
+          lt: workDate,
+        },
       },
       orderBy: {
         workDate: 'desc',

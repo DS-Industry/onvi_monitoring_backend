@@ -48,6 +48,7 @@ export class ShapeTechTaskUseCase {
       posId: techTask.posId,
       type: techTask.type,
       status: techTask.status,
+      endSpecifiedDate: techTask?.endSpecifiedDate,
       startWorkDate: techTask?.startWorkDate,
       sendWorkDate: techTask?.sendWorkDate,
       executorId: techTask?.executorId,

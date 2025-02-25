@@ -32,16 +32,22 @@ export class HandlerTechTaskUseCase {
         });*/
 
     const activeTasksWithFutureStartDate =
-      await this.findMethodsTechTaskUseCase.getAllForHandler();
+      await this.findMethodsTechTaskUseCase.getAllForOverdue();
 
     await Promise.all(
       activeTasksWithFutureStartDate.map(async (item) => {
-        if (item.status == StatusTechTask.ACTIVE) {
-          await this.updateTechTaskUseCase.execute(
-            { status: StatusTechTask.OVERDUE },
-            item,
-          );
-        }
+        await this.updateTechTaskUseCase.execute(
+          { status: StatusTechTask.OVERDUE },
+          item,
+        );
+      }),
+    );
+
+    const nextCreateTasksWithFutureStartDate =
+      await this.findMethodsTechTaskUseCase.getAllForHandler();
+
+    await Promise.all(
+      nextCreateTasksWithFutureStartDate.map(async (item) => {
         const itemToTechTask =
           await this.findMethodsItemTemplateToTechTaskUseCase.findAllByTaskId(
             item.id,

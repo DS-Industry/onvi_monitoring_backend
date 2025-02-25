@@ -52,6 +52,7 @@ export class GetByFilterWorkDayShiftReportUseCase {
     const oldWorkDayShift =
       await this.findMethodsWorkDayShiftReportUseCase.getLastByStatusSentAndPosId(
         shiftReport.posId,
+        data.workDate,
       );
     const workDayShiftReportData = new WorkDayShiftReport({
       shiftReportId: data.shiftReportId,

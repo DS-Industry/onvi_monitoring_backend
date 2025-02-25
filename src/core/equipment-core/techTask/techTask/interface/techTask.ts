@@ -22,5 +22,6 @@ export abstract class ITechTaskRepository {
   ): Promise<TechTask[]>;
   abstract findAllByStatus(status: StatusTechTask): Promise<TechTask[]>;
   abstract findAllForHandler(): Promise<TechTask[]>;
+  abstract findAllForOverdue(): Promise<TechTask[]>;
   abstract update(input: TechTask): Promise<TechTask>;
 }

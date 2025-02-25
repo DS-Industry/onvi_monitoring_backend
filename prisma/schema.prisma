@@ -624,6 +624,7 @@ model TechTask {
   period                  PeriodTechTask
   startDate               DateTime
   nextCreateDate          DateTime?
+  endSpecifiedDate        DateTime?
   startWorkDate           DateTime?
   sendWorkDate            DateTime?
   executor                User?                    @relation(name: "Executor", fields: [executorId], references: [id])

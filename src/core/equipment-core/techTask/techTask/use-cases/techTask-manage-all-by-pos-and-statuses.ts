@@ -51,6 +51,7 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
           status: techTask.status,
           period: techTask.period,
           nextCreateDate: techTask?.nextCreateDate,
+          endSpecifiedDate: techTask?.endSpecifiedDate,
           startDate: techTask.startDate,
           items: items,
           createdAt: techTask.createdAt,

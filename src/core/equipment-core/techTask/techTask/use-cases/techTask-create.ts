@@ -35,6 +35,7 @@ export class CreateTechTaskUseCase {
       status: StatusTechTask.ACTIVE,
       period: input.period,
       nextCreateDate: nextCreateDate,
+      endSpecifiedDate: input?.endSpecifiedDate,
       startDate: input.startDate,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),

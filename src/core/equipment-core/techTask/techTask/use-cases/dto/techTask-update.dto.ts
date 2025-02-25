@@ -5,5 +5,6 @@ export class TechTaskUpdateDto {
   type?: TypeTechTask;
   status?: StatusTechTask;
   period?: PeriodTechTask;
+  endSpecifiedDate?: Date;
   techTaskItem?: number[];
 }

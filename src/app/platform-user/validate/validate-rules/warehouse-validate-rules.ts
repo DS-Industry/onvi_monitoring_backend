@@ -176,6 +176,13 @@ export class WarehouseValidateRules {
 
     response.push(await this.validateLib.nomenclatureExel(headers, columnMappings))
 
+    jsonData = jsonData.map((row) => {
+      if (row.category) {
+        row.category = row.category.trim();
+        row.category = row.category.charAt(0).toUpperCase() + row.category.slice(1).toLowerCase();
+      }
+      return row;
+    });
     const organizations = Array.from(
       new Set(jsonData.map((row) => row.organization)),
     );
@@ -210,8 +217,13 @@ export class WarehouseValidateRules {
     jsonData = jsonData.map((row) => {
       const organizationId = organizationMap.get(row.organization);
       const categoryId = categoriesMap.get(row.category);
+      const sku = row.sku.toString();
+      const name = row.name.toString();
+      const organization = row.organization;
       return {
-        ...row,
+        name,
+        sku,
+        organization,
         organizationId,
         categoryId,
       };
@@ -233,6 +245,14 @@ export class WarehouseValidateRules {
     if (categoryCheck.code !== 200) {
       throw new WarehouseException(WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE, categoryCheck.errorMessage);
     }
+  }
+
+  public async updateCategoryValidate(categoryId: number) {
+    const categoryCheck = await this.validateLib.categoryByIdExists(categoryId);
+    if (categoryCheck.code !== 200) {
+      throw new WarehouseException(WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE, categoryCheck.errorMessage);
+    }
+    return categoryCheck.object;
   }
 
   public async getAllNomenclatureByOrgIdValidate(orgId: number, ability: any) {

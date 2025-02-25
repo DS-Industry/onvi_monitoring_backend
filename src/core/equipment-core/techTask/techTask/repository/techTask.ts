@@ -115,15 +115,37 @@ export class TechTaskRepository extends ITechTaskRepository {
 
   public async findAllForHandler(): Promise<TechTask[]> {
     const today = moment().startOf('day').toISOString();
+    const tomorrow = moment().add(1, 'day').startOf('day').toISOString();
 
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         nextCreateDate: {
           gte: today,
+          lt: tomorrow,
         },
         status: {
           not: StatusTechTask.PAUSE,
         },
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllForOverdue(): Promise<TechTask[]> {
+    const today = moment().startOf('day').toISOString();
+    const tomorrow = moment().add(1, 'day').startOf('day').toISOString();
+
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        endSpecifiedDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+        status: StatusTechTask.ACTIVE,
       },
       orderBy: {
         startDate: 'asc',

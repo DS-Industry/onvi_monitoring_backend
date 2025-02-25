@@ -26,6 +26,7 @@ export class SendWorkDayShiftReportUseCase {
     const oldWorkDayShift =
       await this.findMethodsWorkDayShiftReportUseCase.getLastByStatusSentAndPosId(
         shiftReport.posId,
+        workDayShiftReport.workDate,
       );
     const cashOperData =
       await this.calculateWorkDayShiftReportCashOperUseCase.execute(

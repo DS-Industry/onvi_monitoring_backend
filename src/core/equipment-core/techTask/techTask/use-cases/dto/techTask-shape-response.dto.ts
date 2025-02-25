@@ -6,6 +6,7 @@ export class TechTaskShapeResponseDto {
   posId: number;
   type: TypeTechTask;
   status: StatusTechTask;
+  endSpecifiedDate?: Date;
   startWorkDate?: Date;
   sendWorkDate?: Date;
   executorId?: number;

@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
@@ -24,6 +25,9 @@ export class TechTaskCreateDto {
   @IsNotEmpty({ message: 'startDate is required' })
   @Transform(({ value }) => new Date(value))
   startDate: Date;
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  endSpecifiedDate?: Date;
   @IsArray()
   @IsNotEmpty({ message: 'posId is required' })
   techTaskItem: number[];

@@ -31,6 +31,7 @@ import { FileModule } from '@libs/file/module';
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 import { DeleteWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-delete';
 import { UpdateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-update';
+import { UpdateCategoryUseCase } from "@warehouse/category/use-cases/category-update";
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -78,6 +79,7 @@ const inventoryItemUseCase: Provider[] = [
 const categoryUseCase: Provider[] = [
   CreateCategoryUseCase,
   FindMethodsCategoryUseCase,
+  UpdateCategoryUseCase,
 ];
 
 const nomenclatureUseCase: Provider[] = [

@@ -5,6 +5,7 @@ export class TechTaskCreateDto {
   posId: number;
   type: TypeTechTask;
   period: PeriodTechTask;
+  endSpecifiedDate?: Date;
   startDate: Date;
   techTaskItem: number[];
 }

@@ -8,6 +8,7 @@ export class TechTaskManageInfoResponseDto {
   status: StatusTechTask;
   period: PeriodTechTask;
   nextCreateDate?: Date;
+  endSpecifiedDate?: Date;
   startDate: Date;
   items: TechTaskItemDto[];
   createdAt: Date;

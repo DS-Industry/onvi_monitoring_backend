@@ -2,7 +2,8 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode, HttpStatus,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -11,8 +12,8 @@ import {
   Request,
   UploadedFile,
   UseGuards,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreateWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-create';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
@@ -49,8 +50,14 @@ import { InventoryInventoryItemUseCase } from '@warehouse/inventoryItem/use-case
 import { WarehouseDocumentSaveDto } from '@platform-user/core-controller/dto/receive/warehouse-document-save.dto';
 import { CreateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-create';
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
-import { WarehouseDomainException, WarehouseException } from "@exception/option.exceptions";
-import { CustomHttpException } from "@exception/custom-http.exception";
+import {
+  WarehouseDomainException,
+  WarehouseException,
+} from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-update';
+import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/category-update.dto';
+import { Category } from "@warehouse/category/domain/category";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -60,6 +67,7 @@ export class WarehouseController {
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
     private readonly inventoryItemMonitoringUseCase: InventoryItemMonitoringUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
+    private readonly updateCategoryUseCase: UpdateCategoryUseCase,
     private readonly createSupplierUseCase: CreateSupplierUseCase,
     private readonly createNomenclatureUseCase: CreateNomenclatureUseCase,
     private readonly updateNomenclatureUseCase: UpdateNomenclatureUseCase,
@@ -269,6 +277,35 @@ export class WarehouseController {
         );
       }
       return await this.createCategoryUseCase.execute(data);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Update category
+  @Patch('category/:categoryId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async updateCategory(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+    @Body() data: CategoryUpdateDto,
+  ): Promise<Category> {
+    try {
+      const category =
+        await this.warehouseValidateRules.updateCategoryValidate(categoryId);
+      return await this.updateCategoryUseCase.execute(data, category);
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
