@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { HandlerReportUseCase } from '@report/report/use-cases/report-handler';
 import { Job } from 'bullmq';
 
-@Processor('reportTemplate')
+@Processor('reportTemplate', { concurrency: 5 })
 @Injectable()
 export class ReportTemplateConsumer extends WorkerHost {
   constructor(private readonly handlerReportUseCase: HandlerReportUseCase) {
