@@ -41,6 +41,16 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
+  public async findAllByOrgId(orgId: number): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { organizations: { some: { id: orgId } } },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
   public async findOneById(id: number): Promise<User> {
     const user = await this.prisma.user.findFirst({
       where: {
@@ -96,5 +106,23 @@ export class UserRepository extends IUserRepository {
       },
     });
     return user?.organizations?.map((item) => item.id) || [];
+  }
+
+  public async updateConnectionPos(
+    userId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any> {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        posesPermissions: {
+          disconnect: deletePosIds.map((id) => ({ id })),
+          connect: addPosIds.map((id) => ({ id })),
+        },
+      },
+    });
   }
 }

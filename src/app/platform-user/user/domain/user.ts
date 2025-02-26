@@ -4,6 +4,7 @@ import { BaseEntity } from '@utils/entity';
 export interface UserProps {
   id?: number;
   userRoleId: number;
+  userRoleName?: string;
   name: string;
   surname: string;
   middlename?: string;
@@ -35,6 +36,10 @@ export class User extends BaseEntity<UserProps> {
 
   get userRoleId(): number {
     return this.props.userRoleId;
+  }
+
+  get userRoleName(): string {
+    return this.props.userRoleName;
   }
 
   get name(): string {

@@ -128,6 +128,7 @@ model UserMailConfirm {
 model UserRole {
   id              Int              @id @default(autoincrement())
   name            String
+  description     String?
   users           User[]
   userPermissions UserPermission[]
 }

@@ -19,7 +19,7 @@ import { HandlerModule } from './infra/handler/handler.module';
 import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
-import { ReportCoreModule } from './core/report-core/report-core.module';
+import { ReportCoreModule } from "@report/report-core.module";
 
 @Module({
   imports: [

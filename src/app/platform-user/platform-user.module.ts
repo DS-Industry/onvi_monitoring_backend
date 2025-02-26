@@ -53,15 +53,17 @@ import { EquipmentController } from '@platform-user/core-controller/equipment';
 import { TechTaskController } from '@platform-user/core-controller/techTask';
 import { EquipmentCoreModule } from '../../core/equipment-core/equipment-core.module';
 import { TechTaskValidateRules } from '@platform-user/validate/validate-rules/techTask-rules';
-import { WarehouseCoreModule } from '../../core/warehouse-core/warehouse-core.module';
+import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { WarehouseController } from '@platform-user/core-controller/warehouse';
 import { WarehouseValidateRules } from '@platform-user/validate/validate-rules/warehouse-validate-rules';
 import { FinanceController } from '@platform-user/core-controller/finance';
 import { FinanceCoreModule } from '@finance/finance-core.module';
 import { FinanceValidateRules } from '@platform-user/validate/validate-rules/finance-rules';
-import { ReportCoreModule } from '../../core/report-core/report-core.module';
+import { ReportCoreModule } from '@report/report-core.module';
 import { ReportController } from '@platform-user/core-controller/report';
-import { ReportValidateRules } from "@platform-user/validate/validate-rules/report-validate-rules";
+import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
+import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { ConnectionUserPosUseCase } from "@platform-user/user/use-cases/user-pos-connection";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -105,6 +107,8 @@ const userUseCase: Provider[] = [
   UpdateUserUseCase,
   DownloadAvatarUserUseCase,
   OrganizationManageUserUseCase,
+  PosManageUserUseCase,
+  ConnectionUserPosUseCase,
 ];
 
 const confirmMailUseCase: Provider[] = [

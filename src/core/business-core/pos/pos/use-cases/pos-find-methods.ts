@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { IPosRepository } from "@pos/pos/interface/pos";
-import { CreateFullDataPosUseCase } from "@pos/pos/use-cases/pos-create-full-data";
-import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
-import { Pos } from "@pos/pos/domain/pos";
+import { Injectable } from '@nestjs/common';
+import { IPosRepository } from '@pos/pos/interface/pos';
+import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class FindMethodsPosUseCase {
@@ -31,6 +31,14 @@ export class FindMethodsPosUseCase {
         async (pos) => await this.posCreateFullDataUseCase.execute(pos),
       ),
     );
+  }
+
+  async getAllByOrgId(orgId: number): Promise<Pos[]> {
+    return await this.posRepository.findAllByOrgId(orgId);
+  }
+
+  async getAllByUserId(userId: number): Promise<Pos[]> {
+    return await this.posRepository.findAllByUserId(userId);
   }
 
   async getAllByAbility(input: any): Promise<PosResponseDto[]> {

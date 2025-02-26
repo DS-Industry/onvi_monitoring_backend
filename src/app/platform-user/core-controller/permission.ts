@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Patch,
   Request,
   UseGuards,
@@ -23,6 +25,13 @@ import {
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { UserException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { UserRoleResponseDto } from '@platform-user/core-controller/dto/response/user-role-response.dto';
+import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
+import { PosPermissionsResponseDto } from '@platform-user/core-controller/dto/response/pos-permissions-response.dto';
+import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { ConnectedPodUserDto } from '@platform-user/core-controller/dto/receive/connected-pod-user.dto';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 
 @Controller('permission')
 export class PermissionController {
@@ -31,8 +40,40 @@ export class PermissionController {
     private readonly userUpdate: UpdateUserUseCase,
     private readonly userPermissionValidateRules: UserPermissionValidateRules,
     private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
+    private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
+    private readonly posManageUserUseCase: PosManageUserUseCase,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+    private readonly connectionUserPosUseCase: ConnectionUserPosUseCase,
   ) {}
-  @Get('role')
+  @Get('roles')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
+  @HttpCode(200)
+  async getRoles(): Promise<UserRoleResponseDto[]> {
+    try {
+      const roles = await this.findMethodsRoleUseCase.getAll();
+      return roles.map((role) => ({
+        id: role.id,
+        name: role.name,
+        description: role.description,
+      }));
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('role-permission-info')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ManageOrgAbility())
   @HttpCode(200)
@@ -82,9 +123,96 @@ export class PermissionController {
       }
     }
   }
+  //All pos for userId
+  @Get('pos/:userId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
+  @HttpCode(200)
+  async getPosByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<PosPermissionsResponseDto[]> {
+    try {
+      const poses = await this.findMethodsPosUseCase.getAllByUserId(userId);
+      return poses.map((pos) => ({
+        id: pos.id,
+        name: pos.name,
+      }));
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //All pos for permission org
+  @Get('pos')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
+  @HttpCode(200)
+  async getPos(@Request() req: any): Promise<PosPermissionsResponseDto[]> {
+    try {
+      const { ability } = req;
+      return await this.posManageUserUseCase.execute(ability);
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Connection Pos
+  @Patch('pos-user/:userId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ManageOrgAbility())
+  @HttpCode(201)
+  async updateConnectedUserPos(
+    @Request() req: any,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: ConnectedPodUserDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.userPermissionValidateRules.updateConnectedUserPosValidate(
+        body.posIds,
+        ability,
+      );
+      return await this.connectionUserPosUseCase.execute(body.posIds, userId);
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Update worker role
   @Patch('')
-  @UseGuards(JwtGuard)
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ManageOrgAbility())
   @HttpCode(201)

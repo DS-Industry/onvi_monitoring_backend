@@ -60,6 +60,7 @@ import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workD
 import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
+import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -106,6 +107,7 @@ export class ValidateLib {
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly findMethodsWorkDayShiftReportUseCase: FindMethodsWorkDayShiftReportUseCase,
     private readonly findMethodsReportUseCase: FindMethodsReportUseCase,
+    private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -799,6 +801,19 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: paramsArray };
+  }
+
+  public async posIdAndPermissionsPosIdComparison(
+    posIds: number[],
+    ability: any,
+  ): Promise<ValidateResponse> {
+    const permissionPoses = await this.posManageUserUseCase.execute(ability);
+    const posIdsCheck = permissionPoses.map((item) => item.id);
+    const unnecessaryPos = posIds.filter((item) => !posIdsCheck.includes(item));
+    if (unnecessaryPos.length > 0) {
+      return { code: 400, errorMessage: 'posId connection error' };
+    }
+    return { code: 200 };
   }
 
   public handlerArrayResponse(

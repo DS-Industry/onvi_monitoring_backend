@@ -27,6 +27,20 @@ export class PosRepository extends IPosRepository {
     return pos.map((item) => PrismaPosMapper.toDomain(item));
   }
 
+  public async findAllByOrgId(orgId: number): Promise<Pos[]> {
+    const pos = await this.prisma.pos.findMany({
+      where: { organizationId: orgId },
+    });
+    return pos.map((item) => PrismaPosMapper.toDomain(item));
+  }
+
+  public async findAllByUserId(userId: number): Promise<Pos[]> {
+    const pos = await this.prisma.pos.findMany({
+      where: { usersPermissions: { some: { id: userId } } },
+    });
+    return pos.map((item) => PrismaPosMapper.toDomain(item));
+  }
+
   public async findOneById(id: number): Promise<Pos> {
     const pos = await this.prisma.pos.findFirst({
       where: {

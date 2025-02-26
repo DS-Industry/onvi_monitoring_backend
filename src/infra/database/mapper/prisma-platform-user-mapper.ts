@@ -1,14 +1,24 @@
 import { User } from '@platform-user/user/domain/user';
 import { User as PrismaPlatformUser, Prisma } from '@prisma/client';
-
+export type PrismaPlatformUserWithRole = Prisma.UserGetPayload<{
+  include: { userRole: true };
+}>;
 export class PrismaPlatformUserMapper {
-  static toDomain(entity: PrismaPlatformUser): User {
+  static toDomain(
+    entity: PrismaPlatformUser | PrismaPlatformUserWithRole,
+  ): User {
     if (!entity) {
       return null;
     }
+    const roleName =
+      'userRole' in entity && entity.userRole
+        ? entity.userRole.name
+        : undefined;
+
     return new User({
       id: entity.id,
       userRoleId: entity.userRoleId,
+      userRoleName: roleName,
       name: entity.name,
       surname: entity.surname,
       middlename: entity.middlename,
