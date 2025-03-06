@@ -3,7 +3,7 @@ import { IWarehouseRepository } from '@warehouse/warehouse/interface/warehouse';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { PrismaWarehouseMapper } from '@db/mapper/prisma-warehouse-mapper';
-import { accessibleBy } from "@casl/prisma";
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class WarehouseRepository extends IWarehouseRepository {
@@ -37,10 +37,18 @@ export class WarehouseRepository extends IWarehouseRepository {
     return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
   }
 
-  public async findAllByPermission(ability: any): Promise<Warehouse[]> {
+  public async findAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
-      where: accessibleBy(ability).Warehouse,
-    })
+      where: {
+        AND: [
+          accessibleBy(ability).Warehouse,
+          placementId !== '*' ? { pos: { placementId } } : {},
+        ],
+      },
+    });
     return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
   }
 

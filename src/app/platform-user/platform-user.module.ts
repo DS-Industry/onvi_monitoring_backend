@@ -63,7 +63,8 @@ import { ReportCoreModule } from '@report/report-core.module';
 import { ReportController } from '@platform-user/core-controller/report';
 import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
-import { ConnectionUserPosUseCase } from "@platform-user/user/use-cases/user-pos-connection";
+import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { PlacementController } from '@platform-user/core-controller/placement';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -84,6 +85,7 @@ const controllers = [
   WarehouseController,
   FinanceController,
   ReportController,
+  PlacementController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,

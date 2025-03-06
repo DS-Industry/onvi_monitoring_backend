@@ -45,6 +45,7 @@ import {
 import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 
 @Controller('organization')
 export class OrganizationController {
@@ -68,10 +69,14 @@ export class OrganizationController {
   @HttpCode(200)
   async filterViewOrganizationByUser(
     @Request() req: any,
+    @Query() data: PlacementFilterDto,
   ): Promise<OrganizationFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.filterByUserOrganizationUseCase.execute(ability);
+      return await this.filterByUserOrganizationUseCase.execute(
+        ability,
+        data.placementId,
+      );
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

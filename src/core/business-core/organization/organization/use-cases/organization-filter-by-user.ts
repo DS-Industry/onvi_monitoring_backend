@@ -8,14 +8,19 @@ export class FilterByUserOrganizationUseCase {
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
   ) {}
 
-  async execute(ability: any): Promise<OrganizationFilterResponseDto[]> {
+  async execute(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<OrganizationFilterResponseDto[]> {
     const organizations =
-      await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
+      await this.findMethodsOrganizationUseCase.getAllByAbility(
+        ability,
+        placementId,
+      );
     const organizationFilters: OrganizationFilterResponseDto[] = [];
 
     await Promise.all(
       organizations.map(async (organization) => {
-
         organizationFilters.push({
           id: organization.id,
           name: organization.name,

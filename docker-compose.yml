@@ -10,3 +10,11 @@ services:
       - "5000:5000"
     build: .
     restart: always
+  onvi-business-worker:
+    container_name: onvi-business-worker
+    command: npm run worker:start:prod
+    env_file: /config/env/.env.production
+    ports:
+      - "4000:4000"
+    build: .
+    restart: always

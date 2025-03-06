@@ -14,7 +14,13 @@ export class FindMethodsWarehouseUseCase {
     return await this.warehouseRepository.findAllByPosId(posId);
   }
 
-  async geyAllByPermission(ability: any): Promise<Warehouse[]> {
-    return await this.warehouseRepository.findAllByPermission(ability);
+  async geyAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Warehouse[]> {
+    return await this.warehouseRepository.findAllByPermission(
+      ability,
+      placementId,
+    );
   }
 }

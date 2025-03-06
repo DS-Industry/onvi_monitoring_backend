@@ -15,6 +15,7 @@ export class AllByFilterWarehouseDocumentUseCase {
     dateStart: Date,
     dateEnd: Date,
     ability: any,
+    placementId: number | '*',
     warehouse?: Warehouse,
   ): Promise<WarehouseDocumentAllByFilterResponseDto[]> {
     const response: WarehouseDocumentAllByFilterResponseDto[] = [];
@@ -23,7 +24,7 @@ export class AllByFilterWarehouseDocumentUseCase {
       warehouses.push(warehouse);
     } else {
       warehouses =
-        await this.findMethodsWarehouseUseCase.geyAllByPermission(ability);
+        await this.findMethodsWarehouseUseCase.geyAllByPermission(ability, placementId);
     }
     await Promise.all(
       warehouses.map(async (warehouse) => {

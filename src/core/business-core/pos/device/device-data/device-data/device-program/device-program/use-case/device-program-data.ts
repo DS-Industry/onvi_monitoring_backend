@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { PosProgramInfo } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
-import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 
 @Injectable()
 export class DataDeviceProgramUseCase {

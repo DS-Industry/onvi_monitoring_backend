@@ -37,8 +37,9 @@ import {
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
 import { PosConnectionProgramTypeDto } from '@platform-user/core-controller/dto/receive/pos-connection-programType.dto';
-import { DeviceException, PosException } from '@exception/option.exceptions';
+import { PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 
 @Controller('pos')
 export class PosController {
@@ -96,10 +97,14 @@ export class PosController {
   @HttpCode(200)
   async filterViewPosByUser(
     @Request() req: any,
+    @Query() data: PlacementFilterDto,
   ): Promise<PosFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.filterByUserPosUseCase.execute(ability);
+      return await this.filterByUserPosUseCase.execute(
+        ability,
+        data.placementId,
+      );
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -128,7 +133,7 @@ export class PosController {
     try {
       const { ability } = req;
       let pos = null;
-      if (params.posId) {
+      if (params.posId != '*') {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -138,6 +143,7 @@ export class PosController {
         params.dateStart,
         params.dateEnd,
         ability,
+        params.placementId,
         pos,
       );
     } catch (e) {
@@ -202,7 +208,7 @@ export class PosController {
     try {
       const { ability } = req;
       let pos = null;
-      if (params.posId) {
+      if (params.posId != '*') {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -212,6 +218,7 @@ export class PosController {
         params.dateStart,
         params.dateEnd,
         ability,
+        params.placementId,
         pos,
       );
     } catch (e) {

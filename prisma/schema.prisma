@@ -21,6 +21,8 @@ model Organization {
   updatedAt             DateTime
   owner                 User      ?     @relation(name: "Owner", fields: [ownerId], references: [id])
   ownerId               Int?
+  placement             Placement?      @relation(fields: [placementId], references: [id])
+  placementId           Int?
   users                 User[]
   poses                 Pos[]
   organizationMailConfirms OrganizationMailConfirm[]
@@ -35,6 +37,16 @@ model Address {
   pos          Pos?
   lat          Int?
   lon          Int?
+}
+
+model Placement {
+  id           Int           @id @default(autoincrement())
+  country      String
+  region       String
+  city         String
+  utc          String
+  organization Organization[]
+  pos          Pos[]
 }
 
 model OrganizationDocument {
@@ -182,6 +194,8 @@ model Pos {
   image                String?
   rating               Int?
   status               StatusPos            @default(VERIFICATE)
+  placement            Placement?           @relation(fields: [placementId], references: [id])
+  placementId          Int?
   createdAt            DateTime
   updatedAt            DateTime
   createdBy            User                  @relation(name: "CreatedByUser", fields: [createdById], references: [id])

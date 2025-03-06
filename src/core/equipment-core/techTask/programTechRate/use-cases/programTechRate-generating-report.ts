@@ -99,9 +99,9 @@ export class GeneratingReportProgramTechRate {
     );
 
     const spent =
-      Number(oldLevel.value) -
-      Number(currentLevel.value) +
-      Number(oldAdd.value);
+      Number(oldLevel?.value ?? 0) -
+      Number(currentLevel?.value ?? 0) +
+      Number(oldAdd?.value ?? 0);
 
     const coef =
       await this.programTechRateRepository.findOneByCWPosIdAndProgramTypeCode(

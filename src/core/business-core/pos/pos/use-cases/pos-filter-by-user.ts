@@ -10,10 +10,16 @@ export class FilterByUserPosUseCase {
     private readonly getByIdAddressUseCase: GetByIdAddressUseCase,
   ) {}
 
-  async execute(ability: any): Promise<PosFilterResponseDto[]> {
+  async execute(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<PosFilterResponseDto[]> {
     const poses: PosFilterResponseDto[] = [];
 
-    const accessPoses = await this.posRepository.findAllByPermission(ability);
+    const accessPoses = await this.posRepository.findAllByPermission(
+      ability,
+      placementId,
+    );
     await Promise.all(
       accessPoses.map(async (pos) => {
         const address = await this.getByIdAddressUseCase.execute(pos.addressId);

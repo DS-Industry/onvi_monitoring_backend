@@ -123,7 +123,7 @@ export class IncidentController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (params.posId) {
+      if (params.posId != '*') {
         await this.incidentValidateRules.getAllIncidentByFilterValidate(
           params.posId,
           ability,

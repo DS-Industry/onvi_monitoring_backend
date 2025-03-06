@@ -106,9 +106,17 @@ export class OrganizationRepository extends IOrganizationRepository {
     return poses.map((item) => PrismaPosMapper.toDomain(item));
   }
 
-  public async findAllByPermission(ability: any): Promise<Organization[]> {
+  public async findAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
-      where: accessibleBy(ability).Organization,
+      where: {
+        AND: [
+          accessibleBy(ability).Organization,
+          placementId !== '*' ? { placementId } : {},
+        ],
+      },
     });
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }

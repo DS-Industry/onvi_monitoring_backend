@@ -18,11 +18,11 @@ export class GetAllByFilterIncidentUseCase {
   async execute(
     dateStart: Date,
     dateEnd: Date,
-    posId?: number,
+    posId: number | '*',
   ): Promise<IncidentGetAllByFilterResponseDto[]> {
     const response: IncidentGetAllByFilterResponseDto[] = [];
     let incidents: Incident[] = [];
-    if (posId) {
+    if (posId != '*') {
       incidents = await this.incidentRepository.findAllByPosIdAndDate(
         posId,
         dateStart,

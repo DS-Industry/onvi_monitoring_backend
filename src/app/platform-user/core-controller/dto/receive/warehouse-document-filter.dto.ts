@@ -8,7 +8,16 @@ export class WarehouseDocumentFilterDto {
   @IsNotEmpty({ message: 'dateEnd is required' })
   @Transform(({ value }) => new Date(value))
   dateEnd: Date;
-  @IsOptional()
-  @Transform(({ value }) => parseInt(value, 10))
-  warehouseId?: number;
+  @IsNotEmpty({ message: 'warehouseId is required' })
+  @Transform(({ value }) => {
+    if (value === '*') return value;
+    return parseInt(value);
+  })
+  warehouseId: number | '*';
+  @IsNotEmpty({ message: 'placementId is required' })
+  @Transform(({ value }) => {
+    if (value === '*') return value;
+    return parseInt(value);
+  })
+  placementId: number | '*';
 }

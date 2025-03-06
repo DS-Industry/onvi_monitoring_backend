@@ -664,7 +664,7 @@ export class WarehouseController {
     try {
       const { ability } = req;
       let warehouse = null;
-      if (params.warehouseId) {
+      if (params.warehouseId != '*') {
         warehouse = await this.warehouseValidateRules.getOneByIdValidate(
           params.warehouseId,
           ability,
@@ -674,6 +674,7 @@ export class WarehouseController {
         params.dateStart,
         params.dateEnd,
         ability,
+        params.placementId,
         warehouse,
       );
     } catch (e) {

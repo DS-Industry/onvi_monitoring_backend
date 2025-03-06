@@ -6,13 +6,11 @@ import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/devic
 import { Pos } from '@pos/pos/domain/pos';
 import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
 import { CurrencyType } from '@prisma/client';
-import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
 
 @Injectable()
 export class MonitoringPosUseCase {
   constructor(
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
-    private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
@@ -21,6 +19,7 @@ export class MonitoringPosUseCase {
     dateStart: Date,
     dateEnd: Date,
     ability: any,
+    placementId: number | '*',
     pos?: Pos,
   ): Promise<PosMonitoringResponseDto[]> {
     const response: PosMonitoringResponseDto[] = [];
@@ -28,7 +27,10 @@ export class MonitoringPosUseCase {
     if (pos) {
       poses.push(await this.posCreateFullDataUseCase.execute(pos));
     } else {
-      poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
+      poses = await this.findMethodsPosUseCase.getAllByAbility(
+        ability,
+        placementId,
+      );
     }
 
     const cashSumMap = new Map<number, number>();

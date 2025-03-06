@@ -3,7 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { HandlerDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-handler';
 
-@Processor('deviceDataRaw', { concurrency: 5 })
+@Processor('deviceDataRaw')
 @Injectable()
 export class DeviceDataRawConsumer extends WorkerHost {
 

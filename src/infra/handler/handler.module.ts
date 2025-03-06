@@ -13,7 +13,7 @@ const deviceDataRawUseCase: Provider[] = [
   DeviceDataRawConsumer,
 ];
 
-const reportTemplateUseCase: Provider[] = [ReportTemplateConsumer];
+//const reportTemplateUseCase: Provider[] = [ReportTemplateConsumer];
 
 const techTaskUseCase: Provider[] = [HandlerTechTaskCron];
 
@@ -27,7 +27,7 @@ const techTaskUseCase: Provider[] = [HandlerTechTaskCron];
   providers: [
     ...deviceDataRawUseCase,
     ...techTaskUseCase,
-    ...reportTemplateUseCase,
+//    ...reportTemplateUseCase,
   ],
   exports: [],
 })

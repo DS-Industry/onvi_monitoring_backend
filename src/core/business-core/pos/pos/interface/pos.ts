@@ -8,6 +8,9 @@ export abstract class IPosRepository {
   abstract findAll(): Promise<Pos[]>;
   abstract findAllByOrgId(orgId: number): Promise<Pos[]>;
   abstract findAllByUserId(userId: number): Promise<Pos[]>;
-  abstract findAllByPermission(ability: any): Promise<Pos[]>;
+  abstract findAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Pos[]>;
   abstract update(input: Pos): Promise<Pos>;
 }

@@ -4,6 +4,8 @@ export const configuration = () => ({
   NODE_ENV: process.env.NODE_ENV,
   port: parseInt(process.env.APP_PORT, 10) || 5001,
   appName: process.env.APP_NAME,
+  portWorker: parseInt(process.env.APP_PORT_WORKER, 10) || 4001,
+  appNameWorker: process.env.APP_NAME_WORKER,
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpirationTime: process.env.JWT_EXPIRATION_TIME,

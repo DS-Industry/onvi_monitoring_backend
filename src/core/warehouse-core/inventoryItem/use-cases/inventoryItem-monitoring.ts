@@ -9,7 +9,7 @@ import {
 import { FindMethodsCategoryUseCase } from '@warehouse/category/use-cases/category-find-methods';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
-import { InventoryItemMonitoringDto } from '@warehouse/inventoryItem/use-cases/dto/inventoryItem-monitoring.dto';
+import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
 
 @Injectable()
 export class InventoryItemMonitoringUseCase {
@@ -25,7 +25,7 @@ export class InventoryItemMonitoringUseCase {
   ): Promise<InventoryItemMonitoringResponseDto[]> {
     let nomenclatures: Nomenclature[];
     let warehouses: Warehouse[] = [];
-    if (data.categoryId) {
+    if (data.categoryId != '*') {
       nomenclatures =
         await this.findMethodsNomenclatureUseCase.getAllByCategoryIdAndOrganizationId(
           data.categoryId,
@@ -37,13 +37,14 @@ export class InventoryItemMonitoringUseCase {
           data.orgId,
         );
     }
-    if (data.warehouseId) {
+    if (data.warehouseId != '*') {
       warehouses.push(
         await this.findMethodsWarehouseUseCase.getById(data.warehouseId),
       );
     } else {
       warehouses = await this.findMethodsWarehouseUseCase.geyAllByPermission(
         data.ability,
+        data.placementId,
       );
     }
 

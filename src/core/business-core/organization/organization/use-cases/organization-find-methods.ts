@@ -45,7 +45,10 @@ export class FindMethodsOrganizationUseCase {
     );
   }
 
-  async getAllByAbility(input: any): Promise<Organization[]> {
-    return this.organizationRepository.findAllByPermission(input);
+  async getAllByAbility(
+    input: any,
+    placementId?: number | '*',
+  ): Promise<Organization[]> {
+    return this.organizationRepository.findAllByPermission(input, placementId);
   }
 }

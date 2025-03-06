@@ -37,12 +37,9 @@ import {
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
-import {
-  DeviceException,
-  PosException,
-  UserException,
-} from '@exception/option.exceptions';
+import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 
 @Controller('device')
 export class DeviceController {
@@ -283,10 +280,14 @@ export class DeviceController {
   @CheckAbilities(new ReadPosAbility())
   async filterViewDeviceByUser(
     @Request() req: any,
+    @Query() data: PlacementFilterDto,
   ): Promise<DeviceFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.dataByPermissionCarWashDeviceUseCase.execute(ability);
+      return await this.dataByPermissionCarWashDeviceUseCase.execute(
+        ability,
+        data.placementId,
+      );
     } catch (e) {
       if (e instanceof DeviceException) {
         throw new CustomHttpException({

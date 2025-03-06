@@ -82,9 +82,17 @@ export class PosRepository extends IPosRepository {
     return PrismaPosMapper.toDomain(pos);
   }
 
-  public async findAllByPermission(ability: any): Promise<Pos[]> {
+  public async findAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Pos[]> {
     const pos = await this.prisma.pos.findMany({
-      where: accessibleBy(ability).Pos,
+      where: {
+        AND: [
+          accessibleBy(ability).Pos,
+          placementId !== '*' ? { placementId } : {},
+        ],
+      },
     });
     return pos.map((item) => PrismaPosMapper.toDomain(item));
   }

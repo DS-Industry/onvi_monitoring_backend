@@ -12,9 +12,15 @@ export class DataByPermissionCarWashDeviceUseCase {
     private readonly findMethodsCarWashDeviceTypeUseCase: FindMethodsCarWashDeviceTypeUseCase,
   ) {}
 
-  async execute(ability: any): Promise<DeviceFilterResponseDto[]> {
+  async execute(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<DeviceFilterResponseDto[]> {
     const devices: DeviceFilterResponseDto[] = [];
-    const poses = await this.findMethodsPosUseCase.getAllByAbility(ability);
+    const poses = await this.findMethodsPosUseCase.getAllByAbility(
+      ability,
+      placementId,
+    );
     await Promise.all(
       poses.map(async (pos) => {
         const devicesPos =
