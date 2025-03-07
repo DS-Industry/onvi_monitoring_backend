@@ -68,13 +68,21 @@ model OrganizationDocument {
 }
 
 model OrganizationMailConfirm {
-  id            Int      @id @default(autoincrement())
-  email         String   @unique
-  organization Organization @relation(fields: [organizationId], references: [id])
-  organizationId Int
-  confirmString String
-  createdAt     DateTime
-  expireAt      DateTime
+  id                Int             @id @default(autoincrement())
+  email             String          @unique
+  organization      Organization    @relation(fields: [organizationId], references: [id])
+  organizationId    Int
+  confirmString     String          @unique
+  name              String
+  surname           String?
+  middlename        String?
+  birthday          DateTime
+  phone             String
+  roleId            Int
+  position          PositionUser
+  status            StatusDeviceDataRaw
+  createdAt         DateTime
+  expireAt          DateTime
 }
 
 model User {

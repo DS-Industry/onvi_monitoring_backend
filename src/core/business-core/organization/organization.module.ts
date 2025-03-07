@@ -18,6 +18,7 @@ import { DateModule } from '@libs/date/module';
 import { MailModule } from '@libs/mail/module';
 import { FileModule } from '@libs/file/module';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
+import { UpdateConfirmMailUseCase } from "@organization/confirmMail/use-case/confirm-mail-update";
 
 const repositories: Provider[] = [
   OrganizationRepositoryProvider,
@@ -38,6 +39,7 @@ const organizationUseCase: Provider[] = [
 const confirmMailOrganizationUseCase: Provider[] = [
   SendOrganizationConfirmMailUseCase,
   ValidateOrganizationConfirmMailUseCase,
+  UpdateConfirmMailUseCase,
 ];
 
 const documentOrganizationUseCase: Provider[] = [

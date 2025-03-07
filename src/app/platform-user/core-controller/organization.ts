@@ -170,9 +170,8 @@ export class OrganizationController {
         user.id,
       );
       return await this.sendOrganizationConfirmMailUseCase.execute(
-        data.email,
+        data,
         'Приглашение в организацию:',
-        data.organizationId,
       );
     } catch (e) {
       throw new Error(e);

@@ -61,6 +61,7 @@ import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/doma
 import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -112,13 +113,10 @@ export class ValidateLib {
   ) {}
 
   public async workerConfirmMailExists(
-    email: string,
     confirmString: string,
-  ): Promise<ValidateResponse<number>> {
-    const confirmMail = await this.validateOrganizationMail.execute(
-      email,
-      confirmString,
-    );
+  ): Promise<ValidateResponse<OrganizationConfirmMail>> {
+    const confirmMail =
+      await this.validateOrganizationMail.execute(confirmString);
     if (!confirmMail) {
       return {
         code: 400,

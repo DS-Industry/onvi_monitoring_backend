@@ -9,7 +9,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' nest build",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "worker:start:dev": "dotenv -e ./config/env/.env.development -- cross-env NODE_ENV=development nest start --watch --config nest-cli-worker.json",

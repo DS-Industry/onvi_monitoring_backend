@@ -9,6 +9,7 @@ import {
   USER_REGISTER_WORKER_EXCEPTION_CODE,
 } from '@constant/error.constants';
 import { UserException } from '@exception/option.exceptions';
+import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
 
 @Injectable()
 export class AuthValidateRules {
@@ -36,11 +37,10 @@ export class AuthValidateRules {
     }
   }
 
-  public async registerWorkerValidate(email: string, confirmString: string) {
+  public async registerWorkerValidate(confirmString: string) {
     const response = [];
-    response.push(await this.validateLib.userByEmailNotExists(email));
     response.push(
-      await this.validateLib.workerConfirmMailExists(email, confirmString),
+      await this.validateLib.workerConfirmMailExists(confirmString),
     );
 
     this.validateLib.handlerArrayResponse(
@@ -49,5 +49,26 @@ export class AuthValidateRules {
       USER_REGISTER_WORKER_EXCEPTION_CODE,
     );
     return response.find((item) => item.object !== undefined)?.object;
+  }
+
+  public async registerWorker(
+    confirmString: string,
+  ): Promise<OrganizationConfirmMail> {
+    const response = [];
+    const confirmMailCheck =
+      await this.validateLib.workerConfirmMailExists(confirmString);
+    response.push(confirmMailCheck);
+    if (confirmMailCheck.object) {
+      await this.validateLib.userByEmailNotExists(
+        confirmMailCheck.object.email,
+      );
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.USER,
+      USER_REGISTER_WORKER_EXCEPTION_CODE,
+    );
+    return confirmMailCheck.object;
   }
 }

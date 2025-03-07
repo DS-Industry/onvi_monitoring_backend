@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Req,
   Request,
@@ -106,23 +109,47 @@ export class Auth {
     }
   }
   //Register worker in org on confirm string
-  @Post('/worker')
+  @Post('/worker/:confirmString')
   @HttpCode(201)
-  async registerWorker(@Body() body: AuthRegisterWorkerDto): Promise<any> {
+  async registerWorker(
+    @Body() body: AuthRegisterWorkerDto,
+    @Param('confirmString') confirmString: string,
+  ): Promise<any> {
     try {
       const organizationIdConfirmMail =
-        await this.authValidateRules.registerWorkerValidate(
-          body.email,
-          body.confirmString,
-        );
-      const { correctUser, sendMail } = await this.authRegisterWorker.execute(
+        await this.authValidateRules.registerWorker(confirmString);
+      const { user, tokens } = await this.authRegisterWorker.execute(
         body,
         organizationIdConfirmMail,
       );
       return {
-        user: correctUser,
-        statusMail: sendMail,
+        user: user,
+        tokens: tokens,
       };
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('/worker/valid/:confirmString')
+  @HttpCode(201)
+  async validWorker(
+    @Param('confirmString') confirmString: string,
+  ): Promise<any> {
+    try {
+      await this.authValidateRules.registerWorkerValidate(confirmString);
+      return { status: 'SUCCESS' };
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({

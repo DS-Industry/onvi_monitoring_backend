@@ -30,11 +30,36 @@ export class OrganizationConfirmMailRepository extends IOrganizationConfirmMailR
     return PrismaOrganizationMailConfirmMapper.toDomain(confirmMail);
   }
 
+  public async findOneByConfirmString(
+    confirmString: string,
+  ): Promise<OrganizationConfirmMail> {
+    const confirmMail = await this.prisma.organizationMailConfirm.findFirst({
+      where: {
+        confirmString,
+      },
+    });
+    return PrismaOrganizationMailConfirmMapper.toDomain(confirmMail);
+  }
+
   public async removeOne(email: string): Promise<void> {
     await this.prisma.organizationMailConfirm.delete({
       where: {
         email,
       },
     });
+  }
+
+  public async update(
+    input: OrganizationConfirmMail,
+  ): Promise<OrganizationConfirmMail> {
+    const confirmMailEntity =
+      PrismaOrganizationMailConfirmMapper.toPrisma(input);
+    const confirmMail = await this.prisma.organizationMailConfirm.update({
+      where: {
+        id: input.id,
+      },
+      data: confirmMailEntity,
+    });
+    return PrismaOrganizationMailConfirmMapper.toDomain(confirmMail);
   }
 }
