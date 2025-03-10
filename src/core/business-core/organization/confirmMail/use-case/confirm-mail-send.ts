@@ -44,7 +44,7 @@ export class SendOrganizationConfirmMailUseCase {
     return await this.mailService.send(
       data.email,
       subject,
-      'Код-приглашение в организацию: ' + confirmMail.confirmString,
+      `Для окончания регистрации перейдите по ссылке: https://ds-industry.github.io/onvi-monitoring-frontend/#/inviteUser?key=${confirmMail.confirmString}`,
     );
   }
 }

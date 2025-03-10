@@ -1,13 +1,12 @@
 import { Address } from '@address/domain/address';
 import { BaseEntity } from '@utils/entity';
-import { StatusPos } from "@prisma/client";
+import { StatusPos } from '@prisma/client';
 
 
 export interface PosProps {
   id?: number;
   name: string;
   slug: string;
-  monthlyPlan: number;
   timeWork: string;
   organizationId: number;
   posMetaData?: string;
@@ -38,10 +37,6 @@ export class Pos extends BaseEntity<PosProps> {
 
   get slug(): string {
     return this.props.slug;
-  }
-
-  get monthlyPlan(): number {
-    return this.props.monthlyPlan;
   }
 
   get timeWork(): string {
@@ -102,10 +97,6 @@ export class Pos extends BaseEntity<PosProps> {
 
   set slug(slug: string) {
     this.props.slug = slug;
-  }
-
-  set monthlyPlan(monthlyPlan: number) {
-    this.props.monthlyPlan = monthlyPlan;
   }
 
   set timeWork(timeWork: string) {

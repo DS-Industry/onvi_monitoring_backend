@@ -59,9 +59,10 @@ import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/d
 import { GetAllTimeStampDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-get-all-time-stamp';
 import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
 import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
-import {
-  SuspiciouslyDataDeviceProgramUseCase
-} from "@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data";
+import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
+import { MonthlyPlanPosProvider } from '@pos/monthlyPlanPos/provider/monthlyPlanPos';
+import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
+import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -79,6 +80,7 @@ const repositories: Provider[] = [
   DeviceProgramRepositoryProvider,
   DeviceOperationRepositoryProvider,
   DeviceDataRawRepositoryProvider,
+  MonthlyPlanPosProvider,
 ];
 
 const posUseCase: Provider[] = [
@@ -91,6 +93,11 @@ const posUseCase: Provider[] = [
   PosProgramFullUseCase,
   FindMethodsPosUseCase,
   PosChemistryProductionUseCase,
+];
+
+const monthlyPlanPos: Provider[] = [
+  FindMethodsMonthlyPlanPosUseCase,
+  PlanFactPosUseCase,
 ];
 
 const carWashPosUseCase: Provider[] = [FindMethodsCarWashPosUseCase];
@@ -163,6 +170,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataHandlerUseCase,
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
+    ...monthlyPlanPos,
   ],
   exports: [
     ...carWashPosUseCase,
@@ -172,6 +180,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataUseCase,
     ...deviceTypeUseCase,
     ...deviceDataHandlerUseCase,
+    ...monthlyPlanPos,
   ],
 })
 export class PosModule {}

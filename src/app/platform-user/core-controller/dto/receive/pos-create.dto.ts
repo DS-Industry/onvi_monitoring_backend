@@ -14,9 +14,6 @@ export class PosCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
-  @IsNumber()
-  @IsNotEmpty({ message: 'monthlyPlan is required' })
-  monthlyPlan: number;
   @IsString()
   @IsNotEmpty({ message: 'timeWork is required' })
   timeWork: string;

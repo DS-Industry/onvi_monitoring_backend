@@ -40,6 +40,8 @@ import { PosConnectionProgramTypeDto } from '@platform-user/core-controller/dto/
 import { PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
+import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 
 @Controller('pos')
 export class PosController {
@@ -48,6 +50,7 @@ export class PosController {
     private readonly filterByUserPosUseCase: FilterByUserPosUseCase,
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
+    private readonly planFactPosUseCase: PlanFactPosUseCase,
     private readonly programPosUseCase: ProgramPosUseCase,
     private readonly connectionPosDeviceProgramTypeUseCase: ConnectionPosDeviceProgramTypeUseCase,
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
@@ -253,6 +256,47 @@ export class PosController {
       return await this.posProgramFullUseCase.execute(
         data.dateStart,
         data.dateEnd,
+        pos,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Plan-fact pos all or certain
+  @Get('plan-fact')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async planFact(
+    @Request() req: any,
+    @Query() params: PosMonitoringDto,
+  ): Promise<PosPlanFactResponseDto[]> {
+    try {
+      const { ability } = req;
+      let pos = null;
+      if (params.posId != '*') {
+        pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
+      }
+      return await this.planFactPosUseCase.execute(
+        params.dateStart,
+        params.dateEnd,
+        ability,
+        params.placementId,
         pos,
       );
     } catch (e) {

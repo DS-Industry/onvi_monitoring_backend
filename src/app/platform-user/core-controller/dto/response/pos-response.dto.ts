@@ -4,7 +4,6 @@ export interface PosResponseDto {
   id: number;
   name: string;
   slug: string;
-  monthlyPlan: number;
   timeWork: string;
   organizationId: number;
   posMetaData: string;

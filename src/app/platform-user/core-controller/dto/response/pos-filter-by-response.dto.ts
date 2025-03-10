@@ -3,7 +3,6 @@ export class PosFilterResponseDto {
   name: string;
   slug: string;
   address: string;
-  monthlyPlan: number;
   organizationId: number;
   timeZone: number;
   posStatus: string;

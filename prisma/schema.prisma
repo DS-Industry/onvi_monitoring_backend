@@ -191,7 +191,6 @@ model Pos {
   loyaltyProgramId     Int?
   name                 String
   slug                 String
-  monthlyPlan          Int?
   timeWork             String                @default("24")
   organization         Organization          @relation(fields: [organizationId], references: [id])
   organizationId       Int
@@ -220,6 +219,15 @@ model Pos {
   warehouse            Warehouse[]
   cashCollection       CashCollection[]
   shiftReport          ShiftReport[]
+  monthlyPlans         MonthlyPlanPos[]
+}
+
+model MonthlyPlanPos {
+  id                   Int                   @id @default(autoincrement())
+  pos                  Pos                   @relation(fields: [posId], references: [id])
+  posId                Int
+  monthDate            DateTime
+  monthlyPlan          Int
 }
 
 model CarWashPos {

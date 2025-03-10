@@ -19,7 +19,6 @@ export class CreateFullDataPosUseCase {
       id: pos.id,
       name: pos.name,
       slug: pos.slug,
-      monthlyPlan: pos.monthlyPlan,
       timeWork: pos.timeWork,
       organizationId: pos.organizationId,
       posMetaData: pos.posMetaData,
