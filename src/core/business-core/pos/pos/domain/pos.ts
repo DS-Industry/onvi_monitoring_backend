@@ -12,6 +12,7 @@ export interface PosProps {
   posMetaData?: string;
   timezone: number;
   addressId?: number;
+  placementId?: number;
   address?: Address;
   image?: string;
   rating?: number;
@@ -45,6 +46,10 @@ export class Pos extends BaseEntity<PosProps> {
 
   get organizationId(): number {
     return this.props.organizationId;
+  }
+
+  get placementId(): number {
+    return this.props.placementId;
   }
 
   get posMetaData(): string {

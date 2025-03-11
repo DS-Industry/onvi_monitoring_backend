@@ -29,6 +29,7 @@ export class FilterByUserPosUseCase {
           slug: pos.slug,
           address: address.location,
           organizationId: pos.organizationId,
+          placementId: pos.placementId,
           timeZone: pos.timezone,
           posStatus: pos.status,
           createdAt: pos.createdAt,

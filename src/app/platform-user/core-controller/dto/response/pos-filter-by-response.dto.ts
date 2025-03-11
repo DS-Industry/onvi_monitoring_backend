@@ -4,6 +4,7 @@ export class PosFilterResponseDto {
   slug: string;
   address: string;
   organizationId: number;
+  placementId: number;
   timeZone: number;
   posStatus: string;
   createdAt: Date;
