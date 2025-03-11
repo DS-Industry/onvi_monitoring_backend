@@ -42,7 +42,7 @@ import {
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
-import { OrganizationException } from '@exception/option.exceptions';
+import { OrganizationException, UserException } from "@exception/option.exceptions";
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
@@ -380,6 +380,34 @@ export class OrganizationController {
   ): Promise<any> {
     try {
       return await this.findMethodsOrganizationUseCase.getAllByOwner(id);
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('contact/:id')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getContactData(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    try {
+      const organization = await this.organizationValidateRules.getContact(id);
+      return {
+        name: organization.name,
+        address: organization?.address,
+        status: organization.organizationStatus,
+        type: organization.organizationType,
+      };
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

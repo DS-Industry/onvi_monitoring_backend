@@ -104,7 +104,7 @@ export class PlanFactPosUseCase {
         const sumFact = cashFact + virtualSumFact + yandexSumFact;
 
         const completedPercent =
-          totalPlan > 0 ? (sumFact / totalPlan) * 100 : 100;
+          totalPlan > 0 ? Math.round((sumFact / totalPlan) * 100) : 100;
         const notCompletedPercent =
           completedPercent >= 100 ? 0 : 100 - completedPercent;
 

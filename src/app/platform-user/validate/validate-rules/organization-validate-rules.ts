@@ -10,9 +10,9 @@ import {
   ORGANIZATION_CREATE_EXCEPTION_CODE,
   ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
   ORGANIZATION_UPDATE_EXCEPTION_CODE,
-  ORGANIZATION_VERIFICATE_EXCEPTION_CODE
+  ORGANIZATION_VERIFICATE_EXCEPTION_CODE, USER_GET_CONTACT_EXCEPTION_CODE
 } from "@constant/error.constants";
-import { OrganizationException } from '@exception/option.exceptions';
+import { OrganizationException, UserException } from "@exception/option.exceptions";
 
 @Injectable()
 export class OrganizationValidateRules {
@@ -80,6 +80,17 @@ export class OrganizationValidateRules {
       PermissionAction.read,
       response.object,
     );
+    return response.object;
+  }
+
+  public async getContact(id: number) {
+    const response = await this.validateLib.organizationByIdExists(id);
+    if (response.code !== 200) {
+      throw new UserException(
+        ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
     return response.object;
   }
 
