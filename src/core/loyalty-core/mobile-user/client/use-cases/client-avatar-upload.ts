@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IFileAdapter } from '@libs/file/adapter';
-import { UpdateClientUseCase } from '@mobile-user/client/use-cases/client-update';
-import { GetByIdClientUseCase } from '@mobile-user/client/use-cases/client-get-by-id';
+import { UpdateClientUseCase } from './client-update';
+import { GetByIdClientUseCase } from './client-get-by-id';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -18,8 +18,7 @@ export class UploadAvatarClientUseCase {
       await this.fileService.delete('avatar/client/' + client.avatar);
     }
     const key = uuid();
-    client.avatar = key;
-    await this.updateClient.execute(client);
+    await this.updateClient.execute({ avatar: key }, client);
     const keyWay = 'avatar/client/' + key;
     return await this.fileService.upload(file, keyWay);
   }

@@ -88,6 +88,32 @@ export class ShiftReportRepository extends IShiftReportRepository {
     );
   }
 
+  public async findAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<ShiftReport[]> {
+    const shiftReports = await this.prisma.shiftReport.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      where: {
+        posId: { in: posIds },
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return shiftReports.map((item) =>
+      PrismaShiftReportMapper.toDomain(item),
+    );
+  }
+
   public async countAllByPosIdAndDate(
     posId: number,
     dateStart: Date,
@@ -96,6 +122,22 @@ export class ShiftReportRepository extends IShiftReportRepository {
     return this.prisma.shiftReport.count({
       where: {
         posId,
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+      },
+    });
+  }
+
+  public async countAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return this.prisma.shiftReport.count({
+      where: {
+        posId: { in: posIds },
         startDate: {
           gte: dateStart,
           lte: dateEnd,

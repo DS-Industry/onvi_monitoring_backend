@@ -12,6 +12,9 @@ import { CarWashPosType } from '@prisma/client';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { DeviceOperationProps } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import {
+  FindMethodsDeviceOperationCardUseCase
+} from "@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods";
 
 @Injectable()
 export class PosProgramFullUseCase {
@@ -88,8 +91,10 @@ export class PosProgramFullUseCase {
       const program = devicePrograms[i];
       const programName = program.programName;
 
-      const previousProgramEnd = i > 0 ? devicePrograms[i - 1].endDate : null;
       const currentProgramStart = program.beginDate;
+      const previousProgramEnd = new Date(
+        currentProgramStart.getTime() - 5 * 60 * 1000,
+      );
 
       const operationsForProgram = deviceOperations.filter((operation) => {
         if (previousProgramEnd) {

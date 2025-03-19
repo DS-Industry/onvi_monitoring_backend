@@ -1,5 +1,6 @@
 import { BaseEntity } from '@utils/entity';
-import { MeasurementNomenclature } from '@prisma/client';
+import { MeasurementNomenclature, NomenclatureStatus } from "@prisma/client";
+import { NomenclatureMeta } from "@warehouse/nomenclature/interface/nomenclatureMeta";
 
 export interface NomenclatureProps {
   id?: number;
@@ -10,6 +11,8 @@ export interface NomenclatureProps {
   supplierId?: number;
   measurement: MeasurementNomenclature;
   image?: string;
+  status: NomenclatureStatus;
+  metaData?: NomenclatureMeta;
   createdAt?: Date;
   updatedAt?: Date;
   createdById: number;
@@ -68,6 +71,14 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
     return this.props.updatedById;
   }
 
+  get status(): NomenclatureStatus {
+    return this.props.status;
+  }
+
+  get metaData(): NomenclatureMeta {
+    return this.props.metaData;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -102,5 +113,13 @@ export class Nomenclature extends BaseEntity<NomenclatureProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set status(status: NomenclatureStatus) {
+    this.props.status = status;
+  }
+
+  set metaData(metaData: NomenclatureMeta) {
+    this.props.metaData = metaData;
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
 import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
 import { StatusTechTask } from '@prisma/client';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class ReadAllByPosTechTaskUseCase {
@@ -9,10 +10,10 @@ export class ReadAllByPosTechTaskUseCase {
     private readonly findMethodsTechTaskUseCase: FindMethodsTechTaskUseCase,
   ) {}
 
-  async execute(posId: number): Promise<TechTaskShapeResponseDto[]> {
+  async execute(posIds: number[]): Promise<TechTaskShapeResponseDto[]> {
     const response: TechTaskShapeResponseDto[] = [];
     const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllByPosIdAndStatuses(posId, [
+      await this.findMethodsTechTaskUseCase.getAllByPosIdsAndStatuses(posIds, [
         StatusTechTask.ACTIVE,
         StatusTechTask.OVERDUE,
         StatusTechTask.FINISHED,
@@ -32,6 +33,7 @@ export class ReadAllByPosTechTaskUseCase {
         });
       }),
     );
+
     return response;
   }
 }

@@ -3,6 +3,7 @@ import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomen
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { PrismaNomenclatureMapper } from '@db/mapper/prisma-nomenclature-mapper';
+import { NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class NomenclatureRepository extends INomenclatureRepository {
@@ -44,6 +45,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
       where: {
         sku,
         organizationId,
+        status: NomenclatureStatus.ACTIVE,
       },
     });
     return PrismaNomenclatureMapper.toDomain(nomenclature);
@@ -57,6 +59,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
       where: {
         name,
         organizationId,
+        status: NomenclatureStatus.ACTIVE,
       },
     });
     return PrismaNomenclatureMapper.toDomain(nomenclature);
@@ -68,6 +71,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
     const nomenclatures = await this.prisma.nomenclature.findMany({
       where: {
         organizationId,
+        status: NomenclatureStatus.ACTIVE,
       },
     });
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
@@ -81,6 +85,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
       where: {
         categoryId,
         organizationId,
+        status: NomenclatureStatus.ACTIVE,
       },
     });
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
@@ -94,6 +99,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
       where: {
         supplierId,
         organizationId,
+        status: NomenclatureStatus.ACTIVE,
       },
     });
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));

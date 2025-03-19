@@ -8,6 +8,7 @@ import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTa
 import { TypeTechTask } from '@prisma/client';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
 import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-shape-response.dto';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class GeneratingReportProgramTechRate {
@@ -18,15 +19,15 @@ export class GeneratingReportProgramTechRate {
   ) {}
 
   async execute(
-    posId: number,
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
   ): Promise<ProgramTechRateGeneratingMethodsResponseDto[]> {
     dateStart.setDate(dateStart.getDate() - 1);
     const response: ProgramTechRateGeneratingMethodsResponseDto[] = [];
     const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllAllByTypeAndPosIdAndDate(
-        posId,
+      await this.findMethodsTechTaskUseCase.getAllAllByTypeAndPosIdsAndDate(
+        posIds,
         TypeTechTask.Routine,
         dateStart,
         dateEnd,
@@ -73,7 +74,7 @@ export class GeneratingReportProgramTechRate {
 
         response.push({
           techTaskId: techTasks[i].id,
-          posId: posId,
+          posId: techTasks[i].posId,
           dateStart: techTasks[i - 1].startWorkDate,
           dateEnd: techTasks[i].startWorkDate,
           techRateInfos: [soap, presoak, tire, brush, wax, tpower],

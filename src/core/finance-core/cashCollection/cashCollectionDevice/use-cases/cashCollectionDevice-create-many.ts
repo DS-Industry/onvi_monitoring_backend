@@ -54,7 +54,7 @@ export class CreateManyCashCollectionDeviceUseCase {
         } = await this.calculateMethodsCashCollectionUseCase.calculateDeviceSumsAndOperations(
           device.id,
           oldRecordsMap.get(device.id) || yesterdayAt8AM,
-          lastEventDevice.eventDate,
+          lastEventDevice?.eventDate || yesterdayAt8AM,
         );
 
         cashCollectionDevicesData.push(
@@ -62,7 +62,7 @@ export class CreateManyCashCollectionDeviceUseCase {
             cashCollectionId,
             carWashDeviceId: device.id,
             oldTookMoneyTime: oldRecordsMap.get(device.id) || yesterdayAt8AM,
-            tookMoneyTime: lastEventDevice.eventDate,
+            tookMoneyTime: lastEventDevice?.eventDate || yesterdayAt8AM,
             sum: sumCoin + sumPaper,
             sumCoin,
             sumPaper,

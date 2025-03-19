@@ -25,7 +25,7 @@ export class GetAllTimeStampDeviceEventUseCase {
         response.push({
           deviceId: device.id,
           deviceName: device.name,
-          oldTookMoneyTime: lastDeviceEvent.eventDate || undefined,
+          oldTookMoneyTime: lastDeviceEvent?.eventDate || null,
         });
       }),
     );

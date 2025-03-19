@@ -28,7 +28,7 @@ export class FindMethodsDeviceProgramUseCase {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByDeviceIdAndDate(
+    return await this.deviceProgramRepository.findAllByOrgIdAndDate(
       organizationId,
       dateStart,
       dateEnd,

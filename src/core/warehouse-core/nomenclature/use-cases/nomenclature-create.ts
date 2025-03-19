@@ -5,6 +5,7 @@ import { NomenclatureCreateDto } from '@warehouse/nomenclature/use-cases/dto/nom
 import { User } from '@platform-user/user/domain/user';
 import { v4 as uuid } from 'uuid';
 import { IFileAdapter } from '@libs/file/adapter';
+import { NomenclatureStatus } from "@prisma/client";
 
 @Injectable()
 export class CreateNomenclatureUseCase {
@@ -25,6 +26,8 @@ export class CreateNomenclatureUseCase {
       categoryId: input.categoryId,
       supplierId: input?.supplierId,
       measurement: input.measurement,
+      status: NomenclatureStatus.ACTIVE,
+      metaData: input?.metaData,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
       createdById: user.id,
@@ -50,6 +53,7 @@ export class CreateNomenclatureUseCase {
             organizationId: item.organizationId,
             categoryId: item.categoryId,
             measurement: item.measurement,
+            status: NomenclatureStatus.ACTIVE,
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
             createdById: user.id,

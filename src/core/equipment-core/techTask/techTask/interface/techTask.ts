@@ -9,6 +9,10 @@ export abstract class ITechTaskRepository {
     posId: number,
     statuses: StatusTechTask[],
   ): Promise<TechTask[]>;
+  abstract findAllByPosIdsAndStatuses(
+    posIds: number[],
+    statuses: StatusTechTask[],
+  ): Promise<TechTask[]>;
   abstract findAllByPosIdAndDate(
     posId: number,
     dateStart: Date,
@@ -16,6 +20,12 @@ export abstract class ITechTaskRepository {
   ): Promise<TechTask[]>;
   abstract findAllByTypeAndPosIdAndDate(
     posId: number,
+    type: TypeTechTask,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]>;
+  abstract findAllByTypeAndPosIdsAndDate(
+    posIds: number[],
     type: TypeTechTask,
     dateStart: Date,
     dateEnd: Date,

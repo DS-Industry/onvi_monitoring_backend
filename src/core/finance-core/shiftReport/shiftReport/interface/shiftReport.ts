@@ -14,8 +14,20 @@ export abstract class IShiftReportRepository {
     skip?: number,
     take?: number,
   ): Promise<ShiftReport[]>;
+  abstract findAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<ShiftReport[]>;
   abstract countAllByPosIdAndDate(
     posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number>;
+  abstract countAllByPosIdsAndDate(
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
   ): Promise<number>;

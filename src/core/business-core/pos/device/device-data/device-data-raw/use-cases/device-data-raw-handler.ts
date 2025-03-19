@@ -44,22 +44,16 @@ export class HandlerDeviceDataRawUseCase {
           const data = this.parseStr(onceRow);
           console.log(data);
           if (data.oper === 3) {
-            console.log('program');
             await this.deviceProgramHandlerUseCase.execute(data);
           } else if (data.oper === 4) {
-            console.log('event');
             await this.deviceEventHandlerUseCase.execute(data);
           } else if (data.oper >= 7 && data.oper <= 10) {
-            console.log('operCard');
             await this.deviceOperationCardHandlerUseCase.execute(data);
           } else if (data.oper === 6) {
-            console.log('service');
             await this.deviceServiceHandlerUseCase.execute(data);
           } else if (data.oper === 0) {
-            console.log('MFU');
             await this.deviceMfuHandlerUseCase.execute(data);
           } else {
-            console.log('oper');
             await this.deviceOperationHandler.execute(data);
           }
         } catch (error) {

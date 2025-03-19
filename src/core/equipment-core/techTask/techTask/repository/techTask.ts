@@ -85,6 +85,29 @@ export class TechTaskRepository extends ITechTaskRepository {
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 
+  public async findAllByTypeAndPosIdsAndDate(
+    posIds: number[],
+    type: TypeTechTask,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId: { in: posIds },
+        type,
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        status: StatusTechTask.FINISHED,
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
   public async findAllByPosIdAndStatuses(
     posId: number,
     statuses: StatusTechTask[],
@@ -92,6 +115,22 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         posId,
+        status: { in: statuses },
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllByPosIdsAndStatuses(
+    posIds: number[],
+    statuses: StatusTechTask[],
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId: { in: posIds },
         status: { in: statuses },
       },
       orderBy: {

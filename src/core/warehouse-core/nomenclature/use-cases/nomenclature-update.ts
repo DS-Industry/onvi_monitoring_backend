@@ -19,8 +19,16 @@ export class UpdateNomenclatureUseCase {
     user?: User,
     file?: Express.Multer.File,
   ): Promise<Nomenclature> {
-    const { name, sku, organizationId, categoryId, supplierId, measurement } =
-      input;
+    const {
+      name,
+      sku,
+      organizationId,
+      categoryId,
+      supplierId,
+      measurement,
+      status,
+      metaData,
+    } = input;
 
     if (file) {
       if (oldNomenclature.image) {
@@ -48,6 +56,24 @@ export class UpdateNomenclatureUseCase {
     oldNomenclature.measurement = measurement
       ? measurement
       : oldNomenclature.measurement;
+    oldNomenclature.status = status ? status : oldNomenclature.status;
+
+    if (metaData) {
+      const { description, weight, height, width, length, purpose } = metaData;
+
+      oldNomenclature.metaData = oldNomenclature.metaData || {};
+      oldNomenclature.metaData.description =
+        description ?? oldNomenclature.metaData.description;
+      oldNomenclature.metaData.weight =
+        weight ?? oldNomenclature.metaData.weight;
+      oldNomenclature.metaData.height =
+        height ?? oldNomenclature.metaData.height;
+      oldNomenclature.metaData.width = width ?? oldNomenclature.metaData.width;
+      oldNomenclature.metaData.length =
+        length ?? oldNomenclature.metaData.length;
+      oldNomenclature.metaData.purpose =
+        purpose ?? oldNomenclature.metaData.purpose;
+    }
 
     oldNomenclature.updatedAt = new Date(Date.now());
     oldNomenclature.updatedById = user.id;

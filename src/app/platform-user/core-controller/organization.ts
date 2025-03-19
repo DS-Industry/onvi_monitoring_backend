@@ -42,7 +42,7 @@ import {
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
-import { OrganizationException, UserException } from "@exception/option.exceptions";
+import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
@@ -229,22 +229,19 @@ export class OrganizationController {
   }
   //Rating for organization
   @Get('rating')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
   async ratingPosByOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
   ): Promise<any> {
     try {
-      const { user } = req;
-      const organizationId =
-        await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
-      const input = {
-        dateStart: data.dateStart,
-        dateEnd: data.dateEnd,
-        organizationId: organizationId[0],
-      };
-      return await this.getRatingOrganizationUseCase.execute(input);
+      const { ability } = req;
+      return await this.getRatingOrganizationUseCase.execute(
+        data.dateStart,
+        data.dateEnd,
+        ability,
+      );
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

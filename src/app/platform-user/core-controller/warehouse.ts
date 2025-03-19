@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -20,6 +21,7 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   CreateWarehouseAbility,
+  DeleteWarehouseAbility,
   ReadWarehouseAbility,
   UpdateWarehouseAbility,
 } from '@common/decorators/abilities.decorator';
@@ -57,7 +59,9 @@ import {
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-update';
 import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/category-update.dto';
-import { Category } from "@warehouse/category/domain/category";
+import { Category } from '@warehouse/category/domain/category';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
+import { NomenclatureStatus } from '@prisma/client';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -176,6 +180,43 @@ export class WarehouseController {
         oldNomenclature,
         user,
         file,
+      );
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Delete nomenclature
+  @Delete('nomenclature/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteWarehouseAbility())
+  @HttpCode(201)
+  async deleteNomenclature(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    try {
+      const { user, ability } = req;
+      const oldNomenclature =
+        await this.warehouseValidateRules.deleteNomenclatureValidate(
+          id,
+          ability,
+        );
+      return await this.updateNomenclatureUseCase.execute(
+        { status: NomenclatureStatus.DELETED },
+        oldNomenclature,
+        user,
       );
     } catch (e) {
       if (e instanceof WarehouseException) {
@@ -467,19 +508,28 @@ export class WarehouseController {
       }
     }
   }
-  //Get all by PosId
-  @Get('pos/:posId')
+  //Get all
+  @Get('')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
   async getAllByPosId(
     @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
+    @Query() params: PlacementFilterDto,
   ): Promise<any> {
     try {
       const { ability } = req;
-      await this.warehouseValidateRules.getAllByPosId(posId, ability);
-      return await this.findMethodsWarehouseUseCase.getAllByPosId(posId);
+      if (params.posId != '*') {
+        await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
+        return await this.findMethodsWarehouseUseCase.getAllByPosId(
+          params.posId,
+        );
+      } else {
+        return await this.findMethodsWarehouseUseCase.geyAllByPermission(
+          ability,
+          params.placementId,
+        );
+      }
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({

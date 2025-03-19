@@ -20,6 +20,7 @@ import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
 import { ReportCoreModule } from "@report/report-core.module";
+import { LoyaltyCoreModule } from "./core/loyalty-core/loyalty-core.module";
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { ReportCoreModule } from "@report/report-core.module";
     PlatformAdminModule,
     PlatformUserModule,
     MobileUserModule,
+    LoyaltyCoreModule,
     PlatformDeviceModule,
     BusinessCoreModule,
     EquipmentCoreModule,

@@ -4,12 +4,14 @@ import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/ca
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/device-program/device-program/interface/device-program';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
+import { FindMethodsDeviceProgramChangeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods';
 
 @Injectable()
 export class DeviceProgramHandlerUseCase {
   constructor(
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
+    private readonly findMethodsDeviceProgramChangeUseCase: FindMethodsDeviceProgramChangeUseCase,
     private readonly deviceProgramRepository: IDeviceProgramRepository,
   ) {}
 
@@ -43,6 +45,15 @@ export class DeviceProgramHandlerUseCase {
     if (!programType) {
       errNumId = 6;
       program = null;
+    } else {
+      const changeProgram =
+        await this.findMethodsDeviceProgramChangeUseCase.getOneByDeviceIdAndFromId(
+          deviceId,
+          program,
+        );
+      if (changeProgram) {
+        program = changeProgram.carWashDeviceProgramsTypeToId;
+      }
     }
 
     const loadDate = new Date(Date.now());

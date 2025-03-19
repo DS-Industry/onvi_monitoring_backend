@@ -32,6 +32,22 @@ export class FindMethodsCashCollectionUseCase {
     );
   }
 
+  async getAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<CashCollection[]> {
+    return await this.cashCollectionRepository.findAllByPosIdsAndDate(
+      posIds,
+      dateStart,
+      dateEnd,
+      skip,
+      take,
+    );
+  }
+
   async getCountAllByPosIdAndDate(
     posId: number,
     dateStart: Date,
@@ -39,6 +55,18 @@ export class FindMethodsCashCollectionUseCase {
   ): Promise<number> {
     return await this.cashCollectionRepository.countAllByPosIdAndDate(
       posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getCountAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return await this.cashCollectionRepository.countAllByPosIdsAndDate(
+      posIds,
       dateStart,
       dateEnd,
     );

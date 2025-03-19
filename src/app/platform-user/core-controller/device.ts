@@ -40,6 +40,7 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
 
 @Controller('device')
 export class DeviceController {
@@ -131,11 +132,23 @@ export class DeviceController {
   }
   //Get all program type
   @Get('program/type')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  async getAllProgramType(): Promise<any> {
+  async getAllProgramType(
+    @Request() req: any,
+    @Query() data: PosFilterDto,
+  ): Promise<any> {
     try {
-      return await this.findMethodsDeviceProgramTypeUseCase.getAll();
+      const { ability } = req;
+      if (data.posId != '*') {
+        await this.posValidateRules.getOneByIdValidate(data.posId, ability);
+        return await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(
+          data.posId,
+        );
+      } else {
+        return await this.findMethodsDeviceProgramTypeUseCase.getAll();
+      }
     } catch (e) {
       if (e instanceof DeviceException) {
         throw new CustomHttpException({

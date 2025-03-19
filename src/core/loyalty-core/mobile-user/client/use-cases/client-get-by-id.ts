@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IClientRepository } from '@mobile-user/client/interfaces/client';
+import { IClientRepository } from '../interfaces/client';
 
 @Injectable()
 export class GetByIdClientUseCase {

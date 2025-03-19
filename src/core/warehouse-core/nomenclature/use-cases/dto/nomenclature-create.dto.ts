@@ -1,4 +1,5 @@
-import { MeasurementNomenclature } from "@prisma/client";
+import { MeasurementNomenclature } from '@prisma/client';
+import { NomenclatureMeta } from '@warehouse/nomenclature/interface/nomenclatureMeta';
 
 export class NomenclatureCreateDto {
   name: string;
@@ -7,4 +8,5 @@ export class NomenclatureCreateDto {
   categoryId: number;
   supplierId?: number;
   measurement: MeasurementNomenclature;
+  metaData?: NomenclatureMeta;
 }

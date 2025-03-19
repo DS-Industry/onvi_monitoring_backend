@@ -7,6 +7,7 @@ import {
 } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class ManageAllByPosAndStatusesTechTaskUseCase {
@@ -17,13 +18,13 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
   ) {}
 
   async execute(
-    posId: number,
+    posIds: number[],
     statuses: StatusTechTask[],
   ): Promise<TechTaskManageInfoResponseDto[]> {
     const response: TechTaskManageInfoResponseDto[] = [];
     const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllByPosIdAndStatuses(
-        posId,
+      await this.findMethodsTechTaskUseCase.getAllByPosIdsAndStatuses(
+        posIds,
         statuses,
       );
     await Promise.all(

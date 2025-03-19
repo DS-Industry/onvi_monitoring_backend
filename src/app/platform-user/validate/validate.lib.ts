@@ -43,6 +43,7 @@ import {
   DeviceException,
   FinanceException,
   IncidentException,
+  LoyaltyException,
   OrganizationException,
   PosException,
   ReportTemplateException,
@@ -62,6 +63,12 @@ import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-m
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
+import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
+import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
+import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { FindMethodsClientUseCase } from "@loyalty/mobile-user/client/use-cases/client-find-methods";
+import { Client } from "@loyalty/mobile-user/client/domain/client";
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -77,6 +84,7 @@ export enum ExceptionType {
   WAREHOUSE = 'Warehouse',
   FINANCE = 'Finance',
   REPORT_TEMPLATE = 'ReportTemplate',
+  LOYALTY = 'Loyalty',
 }
 @Injectable()
 export class ValidateLib {
@@ -102,12 +110,16 @@ export class ValidateLib {
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
     private readonly findMethodsSupplierUseCase: FindMethodsSupplierUseCase,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
+    private readonly findMethodsInventoryItemUseCase: FindMethodsInventoryItemUseCase,
     private readonly findMethodsCashCollectionUseCase: FindMethodsCashCollectionUseCase,
     private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly findMethodsWorkDayShiftReportUseCase: FindMethodsWorkDayShiftReportUseCase,
     private readonly findMethodsReportUseCase: FindMethodsReportUseCase,
+    private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
@@ -479,6 +491,20 @@ export class ValidateLib {
     return { code: 200, object: nomenclature };
   }
 
+  public async nomenclatureCheckDelete(
+    nomenclatureId: number,
+  ): Promise<ValidateResponse> {
+    const inventoryItems =
+      await this.findMethodsInventoryItemUseCase.getAllByNomenclatureId(
+        nomenclatureId,
+      );
+    const hasItemsInStock = inventoryItems.some((item) => item.quantity > 0);
+    if (hasItemsInStock) {
+      return { code: 400, errorMessage: 'The nomenclature available in stock' };
+    }
+    return { code: 200 };
+  }
+
   public async warehouseDocumentByIdExists(
     id: number,
   ): Promise<ValidateResponse<WarehouseDocument>> {
@@ -814,6 +840,93 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async tegByNameNotExists(name: string): Promise<ValidateResponse> {
+    const checkTag = await this.findMethodsTagUseCase.getByName(name);
+    if (checkTag) {
+      return {
+        code: 400,
+        errorMessage: 'The tag already exists in the system',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async tegByIdExists(id: number): Promise<ValidateResponse<Tag>> {
+    const checkTag = await this.findMethodsTagUseCase.getById(id);
+    if (!checkTag) {
+      return {
+        code: 400,
+        errorMessage: 'The tag does not exist',
+      };
+    }
+    return { code: 200, object: checkTag };
+  }
+
+  public async tagIdsExists(tagIds: number[]): Promise<ValidateResponse> {
+    const allTagIds = await this.findMethodsTagUseCase.getAll();
+    const tagIdsCheck = allTagIds.map((item) => item.id);
+    const unnecessaryTagIds = tagIds.filter(
+      (item) => !tagIdsCheck.includes(item),
+    );
+    if (unnecessaryTagIds.length > 0) {
+      return { code: 400, errorMessage: 'tagId connection error' };
+    }
+    return { code: 200 };
+  }
+
+  public async cardByDevNumberNotExists(
+    devNumber: number,
+  ): Promise<ValidateResponse> {
+    const checkCard =
+      await this.findMethodsCardUseCase.getByDevNumber(devNumber);
+    if (checkCard) {
+      return {
+        code: 400,
+        errorMessage: 'The card already exists in the system',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async cardByNumberNotExists(
+    number: number,
+  ): Promise<ValidateResponse> {
+    const checkCard = await this.findMethodsCardUseCase.getByNumber(number);
+    if (checkCard) {
+      return {
+        code: 400,
+        errorMessage: 'The card already exists in the system',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async clientByPhoneNotExists(
+    phone: string,
+  ): Promise<ValidateResponse> {
+    const checkClient = await this.findMethodsClientUseCase.getByPhone(phone);
+    if (checkClient) {
+      return {
+        code: 400,
+        errorMessage: 'The phone already exists in the system',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async clientByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Client>> {
+    const checkClient = await this.findMethodsClientUseCase.getById(id);
+    if (!checkClient) {
+      return {
+        code: 400,
+        errorMessage: 'The client does not exist',
+      };
+    }
+    return { code: 200, object: checkClient };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -843,6 +956,8 @@ export class ValidateLib {
         throw new FinanceException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.REPORT_TEMPLATE) {
         throw new ReportTemplateException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.LOYALTY) {
+        throw new LoyaltyException(exceptionCode, errorCodes);
       }
     }
   }

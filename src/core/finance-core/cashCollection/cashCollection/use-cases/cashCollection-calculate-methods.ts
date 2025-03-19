@@ -13,9 +13,7 @@ import {
 @Injectable()
 export class CalculateMethodsCashCollectionUseCase {
   constructor(
-    private readonly cashCollectionDeviceRepository: ICashCollectionDeviceRepository,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
-    private readonly findMethodsDeviceEventUseCase: FindMethodsDeviceEventUseCase,
     private readonly countCarDeviceProgramUseCase: CountCarDeviceProgramUseCase,
     private readonly findMethodsDeviceOperationCardUseCase: FindMethodsDeviceOperationCardUseCase,
   ) {}

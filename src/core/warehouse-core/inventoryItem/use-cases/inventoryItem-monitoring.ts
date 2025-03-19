@@ -99,6 +99,6 @@ export class InventoryItemMonitoringUseCase {
       }),
     );
 
-    return response;
+    return response.filter((result) => result.sum > 0);
   }
 }

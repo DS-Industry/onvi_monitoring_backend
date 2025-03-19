@@ -41,7 +41,6 @@ import {
   TypeWorkDayShiftReportCashOper,
 } from '@prisma/client';
 import { UpdateCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-update';
-import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { CashCollectionsResponseDto } from '@platform-user/core-controller/dto/response/cash-collections-response.dto';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { GetAllByFilterCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-all-by-filter';
@@ -77,6 +76,9 @@ import { CleanDataResponseDto } from '@platform-user/core-controller/dto/respons
 import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
 import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
 import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
+import { DataFullFilterDto } from '@platform-user/core-controller/dto/receive/data-full-filter.dto';
+import { Pos } from '@pos/pos/domain/pos';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 
 @Controller('finance')
 export class FinanceController {
@@ -102,6 +104,7 @@ export class FinanceController {
     private readonly findMethodsWorkDayShiftReportCashOperUseCase: FindMethodsWorkDayShiftReportCashOperUseCase,
     private readonly cleanDataDeviceProgramUseCase: CleanDataDeviceProgramUseCase,
     private readonly suspiciouslyDataDeviceProgramUseCase: SuspiciouslyDataDeviceProgramUseCase,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly posValidateRules: PosValidateRules,
     private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
@@ -337,26 +340,38 @@ export class FinanceController {
     }
   }
   //GetCashCollections
-  @Get('cash-collections/:posId')
+  @Get('cash-collections')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
   @HttpCode(200)
   async getCashCollections(
     @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
-    @Query() data: DataFilterDto,
+    @Query() data: DataFullFilterDto,
   ): Promise<CashCollectionsResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;
       const { ability } = req;
-      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      let poses: Pos[] = [];
+      if (data.posId != '*') {
+        const pos = await this.posValidateRules.getOneByIdValidate(
+          data.posId,
+          ability,
+        );
+        poses.push(pos);
+      } else {
+        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
+          ability,
+          data.placementId,
+        );
+      }
+      const posIds = poses.map((pos) => pos.id);
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;
       }
       return await this.getAllByFilterCashCollectionUseCase.execute(
-        posId,
+        posIds,
         data.dateStart,
         data.dateEnd,
         skip,
@@ -526,26 +541,38 @@ export class FinanceController {
     }
   }
   //Get Shift Reports
-  @Get('shift-reports/:posId')
+  @Get('shift-reports')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
   @HttpCode(200)
   async getShiftReports(
     @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
-    @Query() data: DataFilterDto,
+    @Query() data: DataFullFilterDto,
   ): Promise<ShiftReportsResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;
       const { ability } = req;
-      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      let poses: Pos[] = [];
+      if (data.posId != '*') {
+        const pos = await this.posValidateRules.getOneByIdValidate(
+          data.posId,
+          ability,
+        );
+        poses.push(pos);
+      } else {
+        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
+          ability,
+          data.placementId,
+        );
+      }
+      const posIds = poses.map((pos) => pos.id);
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;
       }
       return await this.getAllByFilterShiftReportUseCase.execute(
-        posId,
+        posIds,
         data.dateStart,
         data.dateEnd,
         skip,

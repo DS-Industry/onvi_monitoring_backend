@@ -12,7 +12,7 @@ export class GetAllByFilterShiftReportUseCase {
   ) {}
 
   async execute(
-    posId: number,
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
     skip?: number,
@@ -20,14 +20,14 @@ export class GetAllByFilterShiftReportUseCase {
   ): Promise<ShiftReportsResponseDto> {
     const response: ShiftReportsDataResponseDto[] = [];
     const count =
-      await this.findMethodsShiftReportUseCase.getCountAllByPosIdAndDate(
-        posId,
+      await this.findMethodsShiftReportUseCase.getCountAllByPosIdsAndDate(
+        posIds,
         dateStart,
         dateEnd,
       );
     const shiftReports =
-      await this.findMethodsShiftReportUseCase.getAllByPosIdAndDate(
-        posId,
+      await this.findMethodsShiftReportUseCase.getAllByPosIdsAndDate(
+        posIds,
         dateStart,
         dateEnd,
         skip,

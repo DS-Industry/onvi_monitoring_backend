@@ -31,6 +31,22 @@ export class FindMethodsShiftReportUseCase {
     );
   }
 
+  async getAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<ShiftReport[]> {
+    return await this.shiftReportRepository.findAllByPosIdsAndDate(
+      posIds,
+      dateStart,
+      dateEnd,
+      skip,
+      take,
+    );
+  }
+
   async getCountAllByPosIdAndDate(
     posId: number,
     dateStart: Date,
@@ -38,6 +54,18 @@ export class FindMethodsShiftReportUseCase {
   ): Promise<number> {
     return await this.shiftReportRepository.countAllByPosIdAndDate(
       posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getCountAllByPosIdsAndDate(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return await this.shiftReportRepository.countAllByPosIdsAndDate(
+      posIds,
       dateStart,
       dateEnd,
     );

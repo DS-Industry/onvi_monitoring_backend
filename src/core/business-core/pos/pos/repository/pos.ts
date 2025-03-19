@@ -84,7 +84,7 @@ export class PosRepository extends IPosRepository {
 
   public async findAllByPermission(
     ability: any,
-    placementId: number | '*',
+    placementId?: number | '*',
   ): Promise<Pos[]> {
     const pos = await this.prisma.pos.findMany({
       where: {

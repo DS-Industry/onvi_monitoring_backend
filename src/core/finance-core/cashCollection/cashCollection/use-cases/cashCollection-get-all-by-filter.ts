@@ -4,7 +4,6 @@ import {
   CashCollectionsDataResponseDto,
   CashCollectionsResponseDto,
 } from '@platform-user/core-controller/dto/response/cash-collections-response.dto';
-import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 
@@ -15,7 +14,7 @@ export class GetAllByFilterCashCollectionUseCase {
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
   ) {}
   async execute(
-    posId: number,
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
     skip?: number,
@@ -23,14 +22,14 @@ export class GetAllByFilterCashCollectionUseCase {
   ): Promise<CashCollectionsResponseDto> {
     const response: CashCollectionsDataResponseDto[] = [];
     const count =
-      await this.findMethodsCashCollectionUseCase.getCountAllByPosIdAndDate(
-        posId,
+      await this.findMethodsCashCollectionUseCase.getCountAllByPosIdsAndDate(
+        posIds,
         dateStart,
         dateEnd,
       );
     const cashCollections =
-      await this.findMethodsCashCollectionUseCase.getAllByPosIdAndDate(
-        posId,
+      await this.findMethodsCashCollectionUseCase.getAllByPosIdsAndDate(
+        posIds,
         dateStart,
         dateEnd,
         skip,

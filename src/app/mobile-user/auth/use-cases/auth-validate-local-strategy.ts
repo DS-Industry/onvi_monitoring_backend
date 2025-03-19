@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IClientRepository } from '@mobile-user/client/interfaces/client';
-import { Client } from '@mobile-user/client/domain/client';
+import { IClientRepository } from '../../../../core/loyalty-core/mobile-user/client/interfaces/client';
+import { Client } from '../../../../core/loyalty-core/mobile-user/client/domain/client';
 import { IOtpRepository } from '@mobile-user/otp/interfaces/otp';
 import { IDateAdapter } from '@libs/date/adapter';
 import { OTP_EXPIRY_TIME } from '@constant/constants';

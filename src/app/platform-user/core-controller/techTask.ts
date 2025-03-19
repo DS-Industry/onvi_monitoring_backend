@@ -33,7 +33,6 @@ import { StatusTechTask } from '@prisma/client';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
 import { TechTaskCompletionShapeDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
 import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
-import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
@@ -41,8 +40,12 @@ import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techT
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
-import { TechTaskManageInfoResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto";
-import { TechTaskShapeResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-read-response.dto";
+import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
+import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
+import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos-monitoring';
+import { Pos } from '@pos/pos/domain/pos';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -57,6 +60,7 @@ export class TechTaskController {
     private readonly posChemistryProductionUseCase: PosChemistryProductionUseCase,
     private readonly completionShapeTechTaskUseCase: CompletionShapeTechTaskUseCase,
     private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
   //Create techTask
@@ -125,20 +129,34 @@ export class TechTaskController {
       }
     }
   }
-  //Get all techTask for manage by id
-  @Get('manage/:posId')
+  //Get all techTask for manage
+  @Get('manage')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
   @HttpCode(200)
   async getAllForManage(
     @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
+    @Query() params: PlacementFilterDto,
   ): Promise<TechTaskManageInfoResponseDto[]> {
     try {
       const { ability } = req;
-      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      let poses: Pos[] = [];
+      if (params.posId != '*') {
+        const pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
+        poses.push(pos);
+      } else {
+        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
+          ability,
+          params.placementId,
+        );
+      }
+      const posIds = poses.map((pos) => pos.id);
+
       return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(
-        posId,
+        posIds,
         [StatusTechTask.ACTIVE, StatusTechTask.PAUSE],
       );
     } catch (e) {
@@ -157,19 +175,33 @@ export class TechTaskController {
       }
     }
   }
-  //Get all techTask for read by id
-  @Get('read/:posId')
+  //Get all techTask for read
+  @Get('read')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
   @HttpCode(200)
   async getAllForRead(
     @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
+    @Query() params: PlacementFilterDto,
   ): Promise<TechTaskShapeResponseDto[]> {
     try {
       const { ability } = req;
-      await this.posValidateRules.getOneByIdValidate(posId, ability);
-      return await this.readAllByPosTechTaskUseCase.execute(posId);
+      let poses: Pos[] = [];
+      if (params.posId != '*') {
+        const pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
+        poses.push(pos);
+      } else {
+        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
+          ability,
+          params.placementId,
+        );
+      }
+      const posIds = poses.map((pos) => pos.id);
+
+      return await this.readAllByPosTechTaskUseCase.execute(posIds);
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -195,6 +227,54 @@ export class TechTaskController {
       return await this.findMethodsItemTemplateUseCase.getAll();
     } catch (e) {
       if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //TechRate generating report
+  @Get('chemistry-report')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(200)
+  async chemistryReport(
+    @Request() req: any,
+    @Query() data: PosMonitoringDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      let poses: Pos[] = [];
+      if (data.posId != '*') {
+        const pos = await this.posValidateRules.getOneByIdValidate(
+          data.posId,
+          ability,
+        );
+        poses.push(pos);
+      } else {
+        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
+          ability,
+          data.placementId,
+        );
+      }
+      const posIds = poses.map((pos) => pos.id);
+
+      const techRateInfo = await this.generatingReportProgramTechRate.execute(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      );
+      return await this.posChemistryProductionUseCase.execute(techRateInfo);
+    } catch (e) {
+      if (e instanceof PosException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,
@@ -284,41 +364,6 @@ export class TechTaskController {
       );
     } catch (e) {
       if (e instanceof TechTaskException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //TechRate generating report
-  @Get('chemistry-report/:posId')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadTechTaskAbility())
-  @HttpCode(200)
-  async chemistryReport(
-    @Request() req: any,
-    @Param('posId', ParseIntPipe) posId: number,
-    @Query() data: DataFilterDto,
-  ): Promise<any> {
-    try {
-      const { ability } = req;
-      await this.posValidateRules.getOneByIdValidate(posId, ability);
-      const techRateInfo = await this.generatingReportProgramTechRate.execute(
-        posId,
-        data.dateStart,
-        data.dateEnd,
-      );
-      return await this.posChemistryProductionUseCase.execute(techRateInfo);
-    } catch (e) {
-      if (e instanceof PosException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

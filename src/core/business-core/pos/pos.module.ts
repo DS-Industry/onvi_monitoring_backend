@@ -37,7 +37,6 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { DeviceProgramRepositoryProvider } from '@pos/device/device-data/device-data/device-program/device-program/provider/device-program';
 import { DeviceProgramHandlerUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-handler';
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
-import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { DeviceOperationRepositoryProvider } from '@pos/device/device-data/device-data/device-operation/provider/device-operation';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
@@ -63,6 +62,12 @@ import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/de
 import { MonthlyPlanPosProvider } from '@pos/monthlyPlanPos/provider/monthlyPlanPos';
 import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
 import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
+import {
+  DeviceProgramChangeRepositoryProvider
+} from "@pos/device/device-data/device-data/device-program/device-program-change/provider/device-program-change";
+import {
+  FindMethodsDeviceProgramChangeUseCase
+} from "@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -77,6 +82,7 @@ const repositories: Provider[] = [
   DeviceOperationCardRepositoryProvider,
   DeviceServiceRepositoryProvider,
   DeviceProgramTypeRepositoryProvider,
+  DeviceProgramChangeRepositoryProvider,
   DeviceProgramRepositoryProvider,
   DeviceOperationRepositoryProvider,
   DeviceDataRawRepositoryProvider,
@@ -131,6 +137,7 @@ const deviceDataHandlerUseCase: Provider[] = [
   FindMethodsDeviceEventUseCase,
   GetAllTimeStampDeviceEventUseCase,
   CreateDeviceEventUseCase,
+  FindMethodsDeviceProgramChangeUseCase,
 ];
 
 const deviceDataUseCase: Provider[] = [
@@ -139,7 +146,6 @@ const deviceDataUseCase: Provider[] = [
   DataByDeviceOperationUseCase,
   FindMethodsDeviceProgramUseCase,
   FindMethodsDeviceOperationUseCase,
-  CheckCarDeviceProgramUseCase,
   CountCarDeviceProgramUseCase,
   FindMethodsDeviceOperationCardUseCase,
   CleanDataDeviceProgramUseCase,

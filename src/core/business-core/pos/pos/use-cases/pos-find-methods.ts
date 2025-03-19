@@ -55,7 +55,7 @@ export class FindMethodsPosUseCase {
 
   async getAllByAbilityPos(
     input: any,
-    placementId: number | '*',
+    placementId?: number | '*',
   ): Promise<Pos[]> {
     return await this.posRepository.findAllByPermission(input, placementId);
   }

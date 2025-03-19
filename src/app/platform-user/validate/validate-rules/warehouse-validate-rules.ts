@@ -20,6 +20,7 @@ import {
   WAREHOUSE_CREATE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE,
+  WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE,
@@ -143,6 +144,39 @@ export class WarehouseValidateRules {
         response,
         ExceptionType.WAREHOUSE,
         WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
+      );
+    }
+  }
+
+  public async deleteNomenclatureValidate(
+    id: number,
+    ability: any,
+  ): Promise<Nomenclature> {
+    const response: ValidateResponse[] = [];
+    const nomenclatureCheck = await this.validateLib.nomenclatureByIdExists(id);
+    response.push(nomenclatureCheck);
+    if (nomenclatureCheck.object) {
+      const organizationCheck = await this.validateLib.organizationByIdExists(
+        nomenclatureCheck.object.organizationId,
+      );
+
+      response.push(await this.validateLib.nomenclatureCheckDelete(id));
+
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.WAREHOUSE,
+        WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE,
+      );
+      ForbiddenError.from(ability).throwUnlessCan(
+        PermissionAction.update,
+        organizationCheck.object,
+      );
+      return nomenclatureCheck.object;
+    } else {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.WAREHOUSE,
+        WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE,
       );
     }
   }

@@ -65,6 +65,9 @@ import { ReportValidateRules } from '@platform-user/validate/validate-rules/repo
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 import { PlacementController } from '@platform-user/core-controller/placement';
+import { LoyaltyValidateRules } from "@platform-user/validate/validate-rules/loyalty-validate-rules";
+import { LoyaltyCoreModule } from "@loyalty/loyalty-core.module";
+import { LoyaltyController } from "@platform-user/core-controller/loyalty";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -86,6 +89,7 @@ const controllers = [
   FinanceController,
   ReportController,
   PlacementController,
+  LoyaltyController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -131,6 +135,7 @@ const validate: Provider[] = [
   WarehouseValidateRules,
   FinanceValidateRules,
   ReportValidateRules,
+  LoyaltyValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -151,6 +156,7 @@ const permission: Provider[] = [
     WarehouseCoreModule,
     FinanceCoreModule,
     ReportCoreModule,
+    LoyaltyCoreModule,
     ObjectModule,
     FileModule,
   ],

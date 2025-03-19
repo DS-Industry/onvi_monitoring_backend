@@ -35,14 +35,16 @@ export class DeviceValidateRules {
     response.push(
       await this.validateLib.deviceByNameAndPosIdNotExists(posId, name),
     );
-    response.push(await this.validateLib.deviceTypeByIdExists(deviceTypeId));
+    const deviceType =
+      await this.validateLib.deviceTypeByIdExists(deviceTypeId);
+    response.push(deviceType);
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.DEVICE,
       DEVICE_CREATE_EXCEPTION_CODE,
     );
-    return response.find((item) => item.object !== undefined)?.object;
+    return deviceType.object;
   }
   public async createTypeValidate(name: string, code: string) {
     const response = [];

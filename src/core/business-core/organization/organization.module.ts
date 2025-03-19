@@ -2,7 +2,6 @@ import { Module, Provider } from '@nestjs/common';
 import { OrganizationRepositoryProvider } from './organization/provider/organization';
 import { CreateOrganizationUseCase } from './organization/use-cases/organization-create';
 import { PrismaModule } from '@db/prisma/prisma.module';
-import { AddressModule } from '@address/address.module';
 import { AddDocumentUseCase } from './organization/use-cases/organization-add-documents';
 import { UpdateOrganizationUseCase } from './organization/use-cases/organization-update';
 import { PosModule } from '@pos/pos.module';

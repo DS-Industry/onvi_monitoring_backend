@@ -1,5 +1,28 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { MeasurementNomenclature } from '@prisma/client';
+import { Type } from "class-transformer";
+import { PurposeType } from "@warehouse/nomenclature/interface/nomenclatureMeta";
+
+export class NomenclatureMetaDto {
+  @IsString()
+  @IsOptional()
+  description?: string;
+  @IsNumber()
+  @IsOptional()
+  weight?: number;
+  @IsNumber()
+  @IsOptional()
+  height?: number;
+  @IsNumber()
+  @IsOptional()
+  width?: number;
+  @IsNumber()
+  @IsOptional()
+  length?: number;
+  @IsEnum(PurposeType)
+  @IsOptional()
+  purpose?: PurposeType;
+}
 
 export class NomenclatureUpdateDto {
   @IsNumber()
@@ -17,4 +40,8 @@ export class NomenclatureUpdateDto {
   @IsEnum(MeasurementNomenclature)
   @IsOptional()
   measurement?: MeasurementNomenclature;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => Object)
+  metaData?: NomenclatureMetaDto;
 }

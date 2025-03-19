@@ -1,20 +1,19 @@
-import { StatusUser } from '@prisma/client';
+import { StatusUser, UserType } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface ClientProps {
   id?: number;
   name: string;
-  surname?: string;
-  middlename?: string;
   birthday?: Date;
   phone: string;
   email?: string;
   gender?: string;
   status?: StatusUser;
   avatar?: string;
-  country?: string;
-  countryCode?: number;
-  timezone?: number;
+  type: UserType;
+  inn?: string;
+  comment?: string;
+  placementId?: number;
   refreshTokenId?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -33,14 +32,6 @@ export class Client extends BaseEntity<ClientProps> {
 
   get name(): string {
     return this.props.name;
-  }
-
-  get surname(): string {
-    return this.props.surname;
-  }
-
-  get middlename(): string {
-    return this.props.middlename;
   }
 
   get birthday(): Date {
@@ -67,16 +58,20 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.avatar;
   }
 
-  get country(): string {
-    return this.props.country;
+  get type(): UserType {
+    return this.props.type;
   }
 
-  get countryCode(): number {
-    return this.props.countryCode;
+  get inn(): string {
+    return this.props.inn;
   }
 
-  get timezone(): number {
-    return this.props.timezone;
+  get comment(): string {
+    return this.props.comment;
+  }
+
+  get placementId(): number {
+    return this.props.placementId;
   }
 
   get refreshTokenId(): string {
@@ -103,36 +98,40 @@ export class Client extends BaseEntity<ClientProps> {
     this.props.name = name;
   }
 
-  set surname(surname: string) {
-    this.props.surname = surname;
-  }
-
-  set middlename(middlename: string) {
-    this.props.middlename = middlename;
-  }
-
   set avatar(avatar: string) {
     this.props.avatar = avatar;
+  }
+
+  set birthday(birthday: Date) {
+    this.props.birthday = birthday;
   }
 
   set status(status: StatusUser) {
     this.props.status = status;
   }
 
-  set country(country: string) {
-    this.props.country = country;
+  set type(type: UserType) {
+    this.props.type = type;
   }
 
-  set countryCode(countryCode: number) {
-    this.props.countryCode = countryCode;
+  set comment(comment: string) {
+    this.props.comment = comment;
   }
 
-  set timezone(timezone: number) {
-    this.props.timezone = timezone;
+  set inn(inn: string) {
+    this.props.inn = inn;
+  }
+
+  set placementId(placementId: number) {
+    this.props.placementId = placementId;
   }
 
   set refreshTokenId(refreshTokenId: string) {
     this.props.refreshTokenId = refreshTokenId;
+  }
+
+  set updatedAt(updatedAt: Date) {
+    this.props.updatedAt = updatedAt;
   }
 
   set loyaltyCardId(loyaltyCardId: number) {

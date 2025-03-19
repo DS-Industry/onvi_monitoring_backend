@@ -36,6 +36,9 @@ export class ReportTemplateTransactionRepository extends IReportTemplateTransact
         where: {
           userId,
         },
+        orderBy: {
+          startTemplateAt: 'desc',
+        },
       });
     return reportTemplateTransactions.map((item) =>
       PrismaReportTemplateTransactionMapper.toDomain(item),

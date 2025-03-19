@@ -47,6 +47,7 @@ model Placement {
   utc          String
   organization Organization[]
   pos          Pos[]
+  client       MobileUser[]
 }
 
 model OrganizationDocument {
@@ -245,6 +246,7 @@ model CarWashPos {
   currencyCarWashPoses          CurrencyCarWashPos[]
   programTechRates              ProgramTechRate[]
   carWashDeviceProgramTypes            CarWashDeviceProgramsType[]
+  programChanges                ProgramChange[]
 }
 
 model CarWashService {
@@ -275,6 +277,7 @@ model CarWashDevice {
   deviceRoleId                  Int?
   cashCollectionDevice          CashCollectionDevice[]
   workDayShiftReportCashOpers   WorkDayShiftReportCashOper[]
+  programChanges                ProgramChange[]
 }
 
 model CarWashDeviceType {
@@ -312,6 +315,8 @@ model CarWashDeviceOperationsEvent {
   isBoxOffice                  Int
   errNum                       ErrNum?                       @relation(fields: [errNumId], references: [id])
   errNumId                     Int?
+
+  @@unique([carWashDeviceId, operDate, operSum, localId], name: "unique_device_oper_fields")
 }
 
 model CarWashDeviceOperationsCardEvent {
@@ -333,6 +338,8 @@ model CarWashDeviceOperationsCardEvent {
   cashbackPercent              Int?
   errNum                       ErrNum?                       @relation(fields: [errNumId], references: [id])
   errNumId                     Int?
+
+  @@unique([carWashDeviceId, operDate, sum, localId], name: "unique_device_oper_card_fields")
 }
 
 model CarWashDeviceProgramsEvent {
@@ -351,6 +358,8 @@ model CarWashDeviceProgramsEvent {
   minute                         Decimal?
   errNum                         ErrNum?                       @relation(fields: [errNumId], references: [id])
   errNumId                       Int?
+
+  @@unique([carWashDeviceId, beginDate, endDate, localId], name: "unique_device_program_fields")
 }
 
 model CarWashDeviceProgramsType {
@@ -366,6 +375,8 @@ model CarWashDeviceProgramsType {
   incident                      Incident[]
   programTechRates              ProgramTechRate[]
   carWashPoses                  CarWashPos[]
+  programChangeFroms            ProgramChange[]   @relation(name: "programFrom")
+  programChangeTos              ProgramChange[]   @relation(name: "programTo")
 }
 
 model CarWashDeviceEvent {
@@ -379,6 +390,8 @@ model CarWashDeviceEvent {
   localId                  Int
   errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
   errNumId                 Int?
+
+  @@unique([carWashDeviceId, eventDate, localId], name: "unique_device_event_fields")
 }
 
 model CarWashDeviceEventType {
@@ -400,6 +413,8 @@ model CarWashDeviceServiceEvent {
   counter                  BigInt
   errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
   errNumId                 Int?
+
+  @@unique([carWashDeviceId, beginDate, endDate, localId], name: "unique_device_service_fields")
 }
 
 model CarWashDeviceMfuEvent {
@@ -414,6 +429,8 @@ model CarWashDeviceMfuEvent {
   localId                  Int
   errNum                   ErrNum?                  @relation(fields: [errNumId], references: [id])
   errNumId                 Int?
+
+  @@unique([carWashDeviceId, beginDate, endDate, localId], name: "unique_device_mfu_fields")
 }
 
 model Currency {
@@ -545,17 +562,19 @@ model LoyaltyCardTier {
 model MobileUser {
   id                   Int                    @id @default(autoincrement())
   name                 String
-  surname              String?
-  middlename           String?
   birthday             DateTime?
   phone                String                 @unique
   email                String?                @unique
   gender               String?
   status               StatusUser?            @default(ACTIVE)
   avatar               String?
-  country              String?
-  countryCode          Int?
-  timezone             Int?
+  type                 UserType               @default(PHYSICAL)
+  comment              String?
+  inn                  String?
+  tags                 UserTag[]
+  placement            Placement?           @relation(fields: [placementId], references: [id])
+  placementId          Int?
+  card                 CardMobileUser?
   refreshTokenId       String?
   createdAt            DateTime?
   updatedAt            DateTime?
@@ -564,6 +583,30 @@ model MobileUser {
   promocodeTransaction PromocodeTransaction[]
   mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
   mobileUserRoleId     Int?
+}
+
+enum UserType {
+  PHYSICAL
+  LEGAL
+}
+
+model UserTag {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  color                String
+  clients              MobileUser[]
+}
+
+model CardMobileUser {
+  id                   Int                    @id @default(autoincrement())
+  balance              Int                    @default(0)
+  mobileUser           MobileUser?            @relation(fields: [mobileUserId], references: [id])
+  mobileUserId         Int?                   @unique
+  devNumber            Int
+  number               Int
+  monthlyLimit         Int?
+  createdAt            DateTime?
+  updatedAt            DateTime?
 }
 
 model Otp {
@@ -795,6 +838,18 @@ model ProgramTechRate {
   concentration                  Int?
 }
 
+model ProgramChange {
+  id                                Int                            @id @default(autoincrement())
+  carWashPos                        CarWashPos                     @relation(fields: [carWashPosId], references: [id])
+  carWashPosId                      Int
+  carWashDevice                     CarWashDevice                  @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId                   Int
+  carWashDeviceProgramsTypeFrom     CarWashDeviceProgramsType      @relation(name: "programFrom", fields: [carWashDeviceProgramsTypeFromId], references: [id])
+  carWashDeviceProgramsTypeFromId   Int
+  carWashDeviceProgramsTypeTo       CarWashDeviceProgramsType      @relation(name: "programTo",fields: [carWashDeviceProgramsTypeToId], references: [id])
+  carWashDeviceProgramsTypeToId     Int
+}
+
 model Warehouse {
   id                      Int                      @id @default(autoincrement())
   name                    String
@@ -825,6 +880,8 @@ model Nomenclature {
   supplierId              Int?
   measurement             MeasurementNomenclature?
   image                   String?
+  status                  NomenclatureStatus?        @default(ACTIVE)
+  metaData                Json?
   createdAt               DateTime
   createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
   createdById             Int
@@ -833,6 +890,11 @@ model Nomenclature {
   updatedAt               DateTime
   inventoryItems          InventoryItem[]
   warehouseDocumentDetails      WarehouseDocumentDetail[]
+}
+
+enum NomenclatureStatus {
+  ACTIVE
+  DELETED
 }
 
 enum MeasurementNomenclature {
@@ -1088,6 +1150,7 @@ enum StatusReportTemplate {
 }
 
 enum StatusUser {
+  VERIFICATE
   ACTIVE
   BLOCKED
   DELETED
