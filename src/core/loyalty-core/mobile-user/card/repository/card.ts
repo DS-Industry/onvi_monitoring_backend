@@ -52,6 +52,17 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
+  public async findOneByClientPhone(phone: string): Promise<Card> {
+    const card = await this.prisma.cardMobileUser.findFirst({
+      where: {
+        mobileUser: {
+          phone,
+        },
+      },
+    });
+    return PrismaCardMobileUserMapper.toDomain(card);
+  }
+
   public async update(input: Card): Promise<Card> {
     const cardEntity = PrismaCardMobileUserMapper.toPrisma(input);
     const card = await this.prisma.cardMobileUser.update({

@@ -29,6 +29,6 @@ export class TechTaskCreateDto {
   @Transform(({ value }) => new Date(value))
   endSpecifiedDate?: Date;
   @IsArray()
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsNotEmpty({ message: 'techTaskItemId is required' })
   techTaskItem: number[];
 }

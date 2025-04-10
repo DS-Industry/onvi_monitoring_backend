@@ -17,7 +17,6 @@ export interface ClientProps {
   refreshTokenId?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  loyaltyCardId?: number;
   mobileUserRoleId?: number;
 }
 
@@ -86,10 +85,6 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.updatedAt;
   }
 
-  get loyaltyCardId(): number {
-    return this.props.loyaltyCardId;
-  }
-
   get mobileUserRoleId(): number {
     return this.props.mobileUserRoleId;
   }
@@ -132,10 +127,6 @@ export class Client extends BaseEntity<ClientProps> {
 
   set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
-  }
-
-  set loyaltyCardId(loyaltyCardId: number) {
-    this.props.loyaltyCardId = loyaltyCardId;
   }
 
   set mobileUserRoleId(mobileUserRoleId: number) {

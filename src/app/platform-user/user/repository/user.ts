@@ -96,6 +96,18 @@ export class UserRepository extends IUserRepository {
     return user?.posesPermissions?.map((item) => item.id) || [];
   }
 
+  public async getAllLoyaltyProgramPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        loyaltyPrograms: true,
+      },
+    });
+    return user?.loyaltyPrograms?.map((item) => item.id) || [];
+  }
+
   public async getAllOrganizationPermissions(id: number): Promise<number[]> {
     const user = await this.prisma.user.findFirst({
       where: {

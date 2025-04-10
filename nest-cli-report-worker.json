@@ -1,7 +1,7 @@
 {
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
-  "entryFile": "worker",
+  "entryFile": "report-worker",
   "compilerOptions": {
     "watchAssets": true
   }

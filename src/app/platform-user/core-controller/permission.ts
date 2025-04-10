@@ -21,6 +21,7 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   ManageOrgAbility,
+  ReadOrgAbility,
 } from '@common/decorators/abilities.decorator';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { UserException } from '@exception/option.exceptions';
@@ -99,7 +100,7 @@ export class PermissionController {
   //All worker for permission org
   @Get('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
+  @CheckAbilities(new ReadOrgAbility())
   @HttpCode(200)
   async getWorker(
     @Request() req: any,

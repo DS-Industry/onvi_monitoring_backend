@@ -10,11 +10,21 @@ services:
       - "5000:5000"
     build: .
     restart: always
-  onvi-business-worker:
-    container_name: onvi-business-worker
-    command: npm run worker:start:prod
+  onvi-business-report-worker:
+    container_name: onvi-business-report-worker
+    command: npm run report-worker:start:prod
     env_file: ./config/env/.env.production
-    ports:
-      - "4000:4000"
+    build: .
+    restart: always
+  onvi-business-data-raw-worker:
+    container_name: onvi-business-data-raw-worker
+    command: npm run data-raw-worker:start:prod
+    env_file: ./config/env/.env.production
+    build: .
+    restart: always
+  onvi-business-data-raw-cron:
+    container_name: onvi-business-data-raw-cron
+    command: npm run data-raw-cron:start:prod
+    env_file: ./config/env/.env.production
     build: .
     restart: always

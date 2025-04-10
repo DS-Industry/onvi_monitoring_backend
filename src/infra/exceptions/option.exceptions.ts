@@ -109,3 +109,13 @@ export class WarehouseDomainException extends BaseException {
     return HttpStatus.CONFLICT;
   }
 }
+
+export class LoyaltyDomainException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('loyalty_warehouse', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.CONFLICT;
+  }
+}

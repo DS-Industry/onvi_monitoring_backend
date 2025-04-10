@@ -13,6 +13,7 @@ export class PrismaCardMobileUserMapper {
       devNumber: entity.devNumber,
       number: entity.number,
       monthlyLimit: entity.monthlyLimit,
+      loyaltyCardTierId: entity.loyaltyCardTierId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -26,6 +27,7 @@ export class PrismaCardMobileUserMapper {
       devNumber: card.devNumber,
       number: card.number,
       monthlyLimit: card?.monthlyLimit,
+      loyaltyCardTierId: card?.loyaltyCardTierId,
       createdAt: card?.createdAt,
       updatedAt: card?.updatedAt,
     };

@@ -32,6 +32,9 @@ export class ClientUpdateDto {
   @IsNumber()
   @IsOptional()
   monthlyLimit?: number;
+  @IsNumber()
+  @IsOptional()
+  loyaltyCardTierId?: number;
   @IsArray()
   @IsOptional()
   tagIds?: number[];

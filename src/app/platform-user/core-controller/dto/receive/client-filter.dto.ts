@@ -27,6 +27,9 @@ export class ClientFilterDto {
   @IsString()
   @IsOptional()
   phone?: string;
+  @IsString()
+  @IsOptional()
+  name?: string;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;

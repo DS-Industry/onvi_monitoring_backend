@@ -21,4 +21,8 @@ export class FindMethodsCardUseCase {
   async getByNumber(number: number): Promise<Card> {
     return await this.cardRepository.findOneByNumber(number);
   }
+
+  async getByClientPhone(phone: string): Promise<Card> {
+    return await this.cardRepository.findOneByClientPhone(phone);
+  }
 }

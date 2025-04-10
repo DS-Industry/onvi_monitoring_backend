@@ -22,7 +22,6 @@ export class PrismaMobileUserMapper {
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      loyaltyCardId: entity.loyaltyCardId,
       mobileUserRoleId: entity.mobileUserRoleId,
     });
   }
@@ -44,7 +43,6 @@ export class PrismaMobileUserMapper {
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
-      loyaltyCardId: client?.loyaltyCardId,
       mobileUserRoleId: client?.mobileUserRoleId,
     };
   }

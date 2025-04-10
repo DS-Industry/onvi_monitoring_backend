@@ -8,10 +8,13 @@ export class UpdateCardUseCase {
   constructor(private readonly cardRepository: ICardRepository) {}
 
   async execute(input: CardUpdateDto, oldCard: Card): Promise<Card> {
-    const { balance, monthlyLimit } = input;
+    const { balance, monthlyLimit, loyaltyCardTierId } = input;
 
     oldCard.balance = balance ? balance : oldCard.balance;
     oldCard.monthlyLimit = monthlyLimit ? monthlyLimit : oldCard.monthlyLimit;
+    oldCard.loyaltyCardTierId = loyaltyCardTierId
+      ? loyaltyCardTierId
+      : oldCard.loyaltyCardTierId;
 
     oldCard.updatedAt = new Date(Date.now());
     return await this.cardRepository.update(oldCard);

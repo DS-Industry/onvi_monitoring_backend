@@ -9,25 +9,27 @@ datasource db {
 }
 
 model Organization {
-  id                    Int       @id @default(autoincrement())
-  name                  String    @unique
-  slug                  String    @unique
-  address               String?
-  organizationDocument  OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
-  organizationDocumentId Int?     @unique
-  organizationStatus    StatusOrganization
-  organizationType      TypeOrganization
-  createdAt             DateTime
-  updatedAt             DateTime
-  owner                 User      ?     @relation(name: "Owner", fields: [ownerId], references: [id])
-  ownerId               Int?
-  placement             Placement?      @relation(fields: [placementId], references: [id])
-  placementId           Int?
-  users                 User[]
-  poses                 Pos[]
-  organizationMailConfirms OrganizationMailConfirm[]
-  DeviceApiKey          DeviceApiKey[]
-  nomenclatures          Nomenclature[]
+  id                          Int       @id @default(autoincrement())
+  name                        String    @unique
+  slug                        String    @unique
+  address                     String?
+  organizationDocument        OrganizationDocument?  @relation(fields: [organizationDocumentId], references: [id])
+  organizationDocumentId      Int?     @unique
+  organizationStatus          StatusOrganization
+  organizationType            TypeOrganization
+  createdAt                   DateTime
+  updatedAt                   DateTime
+  owner                       User      ?     @relation(name: "Owner", fields: [ownerId], references: [id])
+  ownerId                     Int?
+  placement                   Placement?      @relation(fields: [placementId], references: [id])
+  placementId                 Int?
+  users                       User[]
+  poses                       Pos[]
+  organizationMailConfirms    OrganizationMailConfirm[]
+  DeviceApiKey                DeviceApiKey[]
+  nomenclatures               Nomenclature[]
+  loyaltyProgram              LoyaltyProgram?    @relation(fields: [loyaltyProgramId], references: [id])
+  loyaltyProgramId            Int?
 }
 
 model Address {
@@ -136,6 +138,8 @@ model User {
   workDayShiftReportCreated    WorkDayShiftReport[]  @relation(name: "CreatedByUser")
   workDayShiftReportUpdated    WorkDayShiftReport[]  @relation(name: "UpdateByUser")
   reportTemplateTransactions   ReportTemplateTransaction[]
+  cardBonusOpers               CardBonusOper[]
+  loyaltyPrograms              LoyaltyProgram[]
 }
 
 model UserMailConfirm {
@@ -188,8 +192,6 @@ model ObjectPermissions {
 
 model Pos {
   id                   Int                   @id @default(autoincrement())
-  loyaltyProgram       LoyaltyProgram?        @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId     Int?
   name                 String
   slug                 String
   timeWork             String                @default("24")
@@ -210,7 +212,6 @@ model Pos {
   createdById          Int
   updateBy             User                  @relation(name: "UpdateByUser", fields: [updateById], references: [id])
   updateById           Int
-  posBenefit           PosBenefit?
   loyaltyPosPromocodes LoyaltyPosPromocode[]
   carWashPos           CarWashPos?
   usersPermissions     User[]
@@ -278,6 +279,8 @@ model CarWashDevice {
   cashCollectionDevice          CashCollectionDevice[]
   workDayShiftReportCashOpers   WorkDayShiftReportCashOper[]
   programChanges                ProgramChange[]
+  cardBonusOpers                CardBonusOper[]
+  orderMobileUsers              OrderMobileUser[]
 }
 
 model CarWashDeviceType {
@@ -467,18 +470,19 @@ model ErrNum {
 }
 
 model LoyaltyProgram {
-  id               Int               @id @default(autoincrement())
-  name             String
-  poses            Pos[]
-  loyaltyCardTiers LoyaltyCardTier[]
+  id                        Int               @id @default(autoincrement())
+  name                      String
+  status                    LoyaltyProgramStatus
+  startDate                 DateTime
+  lifetimeBonusDays         Int?
+  loyaltyCardTiers          LoyaltyCardTier[]
+  organizations             Organization[]
+  managers                  User[]
 }
 
-model PosBenefit {
-  id           Int           @id @default(autoincrement())
-  pos          Pos           @relation(fields: [posId], references: [id])
-  posId        Int           @unique
-  benefits     Benefit[]
-  benefitTypes BenefitType[]
+enum LoyaltyProgramStatus {
+  ACTIVE
+  PAUSE
 }
 
 model LoyaltyPosPromocode {
@@ -508,54 +512,35 @@ model PromocodeTransaction {
 
 model Benefit {
   id                  Int               @id @default(autoincrement())
-  benefitType         BenefitType       @relation(fields: [benefitTypeId], references: [id])
-  benefitTypeId       Int
+  benefitType         BenefitType
   name                String
-  code                String
-  bonus               String
-  benefitActionType   BenefitActionType @relation(fields: [benefitActionTypeId], references: [id])
-  benefitActionTypeId Int
-  posBenefit          PosBenefit        @relation(fields: [posBenefitId], references: [id])
-  posBenefitId        Int
+  bonus               Int
+  benefitActionType   BenefitActionType? @relation(fields: [benefitActionTypeId], references: [id])
+  benefitActionTypeId Int?
   loyaltyCardTiers    LoyaltyCardTier[]
 }
 
-model BenefitType {
-  id           Int        @id @default(autoincrement())
-  benefites    Benefit[]
-  name         String
-  code         String
-  bonus        String
-  posBenefit   PosBenefit @relation(fields: [posBenefitId], references: [id])
-  posBenefitId Int
+enum BenefitType {
+  CASHBACK
+  DISCOUNT
+  GIFT_POINTS
 }
 
 model BenefitActionType {
   id          Int       @id @default(autoincrement())
-  benefites   Benefit[]
   name        String
-  description String
-}
-
-model LoyaltyCard {
-  id                Int             @id @default(autoincrement())
-  balance           Int
-  statuc            String
-  dateBegin         DateTime
-  dateEnd           DateTime
-  loyaltyCardTier   LoyaltyCardTier @relation(fields: [loyaltyCardTierId], references: [id])
-  loyaltyCardTierId Int
-  uncNumber         String
-  note              String
-  mobileUser        MobileUser?
+  benefites   Benefit[]
+  description String?
 }
 
 model LoyaltyCardTier {
   id               Int            @id @default(autoincrement())
   name             String
-  loyaltyCard      LoyaltyCard[]
+  description      String?
+  cards            CardMobileUser[]
   loyaltyProgram   LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id])
   loyaltyProgramId Int
+  limitBenefit     Int
   benefits         Benefit[]
 }
 
@@ -578,8 +563,6 @@ model MobileUser {
   refreshTokenId       String?
   createdAt            DateTime?
   updatedAt            DateTime?
-  loyaltyCard          LoyaltyCard?           @relation(fields: [loyaltyCardId], references: [id])
-  loyaltyCardId        Int?                   @unique
   promocodeTransaction PromocodeTransaction[]
   mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
   mobileUserRoleId     Int?
@@ -607,6 +590,107 @@ model CardMobileUser {
   monthlyLimit         Int?
   createdAt            DateTime?
   updatedAt            DateTime?
+  loyaltyCardTier      LoyaltyCardTier? @relation(fields: [loyaltyCardTierId], references: [id])
+  loyaltyCardTierId    Int?
+  cardBonusBanks       CardBonusBank[]
+  cardBonusOpers       CardBonusOper[]
+  orderMobileUsers     OrderMobileUser[]
+
+}
+
+model CardBonusBank {
+  id                   Int                    @id @default(autoincrement())
+  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
+  cardMobileUserId     Int?
+  sum                  Int
+  accrualAt            DateTime
+  expiryAt             DateTime
+}
+
+model CardBonusOper {
+  id                   Int                    @id @default(autoincrement())
+  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
+  cardMobileUserId     Int?
+  carWashDevice        CarWashDevice?         @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId      Int?
+  typeOper             CardBonusOperType?     @relation(fields: [typeOperId], references: [id])
+  typeOperId           Int?
+  operDate             DateTime
+  loadDate             DateTime
+  sum                  Int
+  comment              String?
+  creator              User?                  @relation(fields: [creatorId], references: [id])
+  creatorId            Int?
+  orderMobileUser      OrderMobileUser?       @relation(fields: [orderMobileUserId], references: [id])
+  orderMobileUserId    Int?
+}
+
+model CardBonusOperType {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  signOper             SignOperType
+  cardBonusOpers       CardBonusOper[]
+}
+
+enum SignOperType {
+  REPLENISHMENT
+  DEDUCTION
+}
+
+model OrderMobileUser {
+  id                   Int                    @id @default(autoincrement())
+  transactionId        String
+  sumFull              Int
+  sumReal              Int
+  sumBonus             Int
+  sumDiscount          Int
+  sumCashback          Int
+  carWashDevice        CarWashDevice          @relation(fields: [carWashDeviceId], references: [id])
+  carWashDeviceId      Int
+  platform             PlatformType
+  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
+  cardMobileUserId     Int?
+  typeMobileUser       UserType               @default(PHYSICAL)
+  orderData            DateTime
+  createData           DateTime
+  orderHandlerStatus   OrderHandlerStatus?
+  orderStatus          OrderStatus
+  sendAnswerStatus     SendAnswerStatus?
+  sendTime             DateTime?
+  debitingMoney        DateTime?
+  executionStatus      ExecutionStatus?
+  reasonError          String?
+  executionError       String?
+  handlerError         String?
+  cardBonusOpers       CardBonusOper[]
+}
+
+enum PlatformType {
+  ONVI
+  YANDEX
+  LUKOIL
+}
+
+enum OrderHandlerStatus {
+  CREATED
+  COMPLETED
+  ERROR
+}
+
+enum OrderStatus {
+  CREATED
+  COMPLETED
+  CANCELED
+}
+
+enum ExecutionStatus {
+  COMPLETED
+  ERROR
+}
+
+enum SendAnswerStatus {
+  SENT
+  NOT_SENT
 }
 
 model Otp {

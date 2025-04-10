@@ -156,21 +156,21 @@ export class DeleteShiftReportAbility implements RequiredRule {
 }
 export class ManageLoyaltyReportAbility implements RequiredRule {
   action = PermissionAction.manage;
-  subject = 'Loyalty';
+  subject = 'LoyaltyProgram';
 }
 export class ReadLoyaltyAbility implements RequiredRule {
   action = PermissionAction.read;
-  subject = 'Loyalty';
+  subject = 'LoyaltyProgram';
 }
 export class CreateLoyaltyAbility implements RequiredRule {
   action = PermissionAction.create;
-  subject = 'Loyalty';
+  subject = 'LoyaltyProgram';
 }
 export class UpdateLoyaltyAbility implements RequiredRule {
   action = PermissionAction.update;
-  subject = 'Loyalty';
+  subject = 'LoyaltyProgram';
 }
 export class DeleteLoyaltyAbility implements RequiredRule {
   action = PermissionAction.delete;
-  subject = 'Loyalty';
+  subject = 'LoyaltyProgram';
 }

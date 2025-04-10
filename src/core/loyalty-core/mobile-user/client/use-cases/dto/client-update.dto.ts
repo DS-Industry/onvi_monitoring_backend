@@ -13,4 +13,5 @@ export interface ClientUpdateDto {
   refreshTokenId?: string;
   balance?: number;
   monthlyLimit?: number;
+  loyaltyCardTierId?: number;
 }

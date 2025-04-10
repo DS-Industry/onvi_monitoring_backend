@@ -6,5 +6,6 @@ export abstract class ICardRepository {
   abstract findOneByClientId(id: number): Promise<Card>;
   abstract findOneByDevNumber(devNumber: number): Promise<Card>;
   abstract findOneByNumber(number: number): Promise<Card>;
+  abstract findOneByClientPhone(phone: string): Promise<Card>;
   abstract update(input: Card): Promise<Card>;
 }

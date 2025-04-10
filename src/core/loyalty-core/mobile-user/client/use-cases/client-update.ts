@@ -44,7 +44,11 @@ export class UpdateClientUseCase {
     const client = await this.clientRepository.update(oldClient);
     const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
     const card = await this.updateCardUseCase.execute(
-      { balance: input?.balance, monthlyLimit: input?.monthlyLimit },
+      {
+        balance: input?.balance,
+        monthlyLimit: input?.monthlyLimit,
+        loyaltyCardTierId: input?.loyaltyCardTierId,
+      },
       oldCard,
     );
 

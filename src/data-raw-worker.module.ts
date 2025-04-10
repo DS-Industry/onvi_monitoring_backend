@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import process from 'process';
 import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
-import { ReportCoreModule } from '@report/report-core.module';
-import { ReportTemplateConsumer } from './infra/handler/reportTemplate/comsumer/report-template.consumer';
+import { DeviceDataRawConsumer } from './infra/handler/device-data-raw/consumer/device-data-raw.consumer';
+import { PosModule } from '@pos/pos.module';
 
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { ReportTemplateConsumer } from './infra/handler/reportTemplate/comsumer/
         retryStrategy: (times) => Math.min(times * 100, 3000),
       },
     }),
-    ReportCoreModule,
+    PosModule,
   ],
   controllers: [],
-  providers: [ReportTemplateConsumer],
+  providers: [DeviceDataRawConsumer],
 })
-export class WorkerModule {}
+export class DataRawWorkerModule {}

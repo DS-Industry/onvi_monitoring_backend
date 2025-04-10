@@ -22,6 +22,10 @@ export class FindMethodsUserUseCase {
     return await this.userRepository.getAllPosPermissions(input);
   }
 
+  async getLoyaltyProgramPermissionById(input: number): Promise<number[]> {
+    return await this.userRepository.getAllLoyaltyProgramPermissions(input);
+  }
+
   async getAllByOrgId(orgId: number): Promise<User[]> {
     return await this.userRepository.findAllByOrgId(orgId);
   }

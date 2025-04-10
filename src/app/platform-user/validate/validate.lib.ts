@@ -67,8 +67,17 @@ import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-ca
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { FindMethodsClientUseCase } from "@loyalty/mobile-user/client/use-cases/client-find-methods";
-import { Client } from "@loyalty/mobile-user/client/domain/client";
+import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
+import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
+import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
+import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
+import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
+import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
+import { FindMethodsBenefitActionUseCase } from '@loyalty/loyalty/benefit/benefitAction/use-case/benefitAction-find-methods';
+import { Card } from '@loyalty/mobile-user/card/domain/card';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -120,6 +129,10 @@ export class ValidateLib {
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
+    private readonly findMethodsLoyaltyProgramUseCase: FindMethodsLoyaltyProgramUseCase,
+    private readonly findMethodsLoyaltyTierUseCase: FindMethodsLoyaltyTierUseCase,
+    private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
+    private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
@@ -874,6 +887,17 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async cardByIdExists(id: number): Promise<ValidateResponse<Card>> {
+    const checkCard = await this.findMethodsCardUseCase.getById(id);
+    if (!checkCard) {
+      return {
+        code: 400,
+        errorMessage: 'The card does not exist',
+      };
+    }
+    return { code: 200, object: checkCard };
+  }
+
   public async cardByDevNumberNotExists(
     devNumber: number,
   ): Promise<ValidateResponse> {
@@ -914,9 +938,7 @@ export class ValidateLib {
     return { code: 200 };
   }
 
-  public async clientByIdExists(
-    id: number,
-  ): Promise<ValidateResponse<Client>> {
+  public async clientByIdExists(id: number): Promise<ValidateResponse<Client>> {
     const checkClient = await this.findMethodsClientUseCase.getById(id);
     if (!checkClient) {
       return {
@@ -925,6 +947,96 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkClient };
+  }
+
+  public async loyaltyProgramByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<LoyaltyProgram>> {
+    const checkLoyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneById(id);
+    if (!checkLoyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage: 'The loyaltyProgram does not exist',
+      };
+    }
+    return { code: 200, object: checkLoyaltyProgram };
+  }
+
+  public async loyaltyProgramByOrganizationIdNotExists(
+    organizationId: number,
+  ): Promise<ValidateResponse> {
+    const checkLoyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByOrganizationId(
+        organizationId,
+      );
+    if (checkLoyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage:
+          'The loyaltyProgram exists for the specified organization',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async loyaltyProgramByOrganizationIdAndProgramIdNotExists(
+    organizationId: number,
+    loyaltyProgramId: number,
+  ): Promise<ValidateResponse> {
+    const checkLoyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByOrganizationId(
+        organizationId,
+      );
+    if (checkLoyaltyProgram && checkLoyaltyProgram.id != loyaltyProgramId) {
+      return {
+        code: 400,
+        errorMessage:
+          'The loyaltyProgram exists for the specified organization',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async loyaltyTierByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<LoyaltyTier>> {
+    const checkLoyaltyTier =
+      await this.findMethodsLoyaltyTierUseCase.getOneById(id);
+    if (!checkLoyaltyTier) {
+      return {
+        code: 400,
+        errorMessage: 'The loyaltyTier does not exist',
+      };
+    }
+    return { code: 200, object: checkLoyaltyTier };
+  }
+
+  public async benefitByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Benefit>> {
+    const checkBenefit = await this.findMethodsBenefitUseCase.getOneById(id);
+    if (!checkBenefit) {
+      return {
+        code: 400,
+        errorMessage: 'The benefit does not exist',
+      };
+    }
+    return { code: 200, object: checkBenefit };
+  }
+
+  public async benefitActionByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<BenefitAction>> {
+    const checkBenefitAction =
+      await this.findMethodsBenefitActionUseCase.getOneById(id);
+    if (!checkBenefitAction) {
+      return {
+        code: 400,
+        errorMessage: 'The benefitAction does not exist',
+      };
+    }
+    return { code: 200, object: checkBenefitAction };
   }
 
   public handlerArrayResponse(

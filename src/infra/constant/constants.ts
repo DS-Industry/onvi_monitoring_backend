@@ -7,3 +7,7 @@ export const PROGRAM_TYPE_ID_CHECK_AUTO = 5;
 export const PORTAL_PROGRAM_TYPES = [8, 9, 13];
 
 export const EVENT_TYPE_CASH_COLLECTION_ID = 9;
+
+export const USING_BONUSES_OPER_TYPE_ID = 5;
+export const CASHBACK_BONUSES_OPER_TYPE_ID = 2;
+export const EXPIRATION_BONUSES_OPER_TYPE_ID = 3;

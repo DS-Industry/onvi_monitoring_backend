@@ -1,4 +1,6 @@
 import { BaseEntity } from '@utils/entity';
+import { LoyaltyDomainException } from '@exception/option.exceptions';
+import { LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE } from '@constant/error.constants';
 
 export interface CardProps {
   id?: number;
@@ -7,6 +9,7 @@ export interface CardProps {
   devNumber: number;
   number: number;
   monthlyLimit?: number;
+  loyaltyCardTierId?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -40,6 +43,10 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.monthlyLimit;
   }
 
+  get loyaltyCardTierId(): number {
+    return this.props.loyaltyCardTierId;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -56,11 +63,26 @@ export class Card extends BaseEntity<CardProps> {
     this.props.monthlyLimit = monthlyLimit;
   }
 
+  set loyaltyCardTierId(loyaltyCardTierId: number) {
+    this.props.loyaltyCardTierId = loyaltyCardTierId;
+  }
+
   set createdAt(createdAt: Date) {
     this.props.createdAt = createdAt;
   }
 
   set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
+  }
+
+  adjustSum(sum: number): void {
+    const newBalance = this.balance + sum;
+    if (newBalance < 0) {
+      throw new LoyaltyDomainException(
+        LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE,
+        'Card debiting balance error',
+      );
+    }
+    this.balance = newBalance;
   }
 }
