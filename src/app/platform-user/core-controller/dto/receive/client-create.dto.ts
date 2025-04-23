@@ -4,7 +4,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString,
+  IsString, Length,
   Matches
 } from "class-validator";
 import { Transform } from 'class-transformer';
@@ -41,12 +41,14 @@ export class ClientCreateDto {
   @IsNumber()
   @IsOptional()
   placementId?: number;
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  devNumber?: number;
-  @IsNumber()
+  @Length(10, 10, { message: 'devNumber must be exactly 10 characters long' })
+  devNumber?: string;
+  @IsString()
   @IsOptional()
-  number?: number;
+  @Length(10, 10, { message: 'number must be exactly 10 characters long' })
+  number?: string;
   @IsNumber()
   @IsOptional()
   monthlyLimit?: number;

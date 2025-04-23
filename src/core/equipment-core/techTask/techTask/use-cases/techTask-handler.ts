@@ -4,7 +4,7 @@ import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTa
 import { StatusTechTask } from '@prisma/client';
 import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
-import moment from 'moment';
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 
 @Injectable()
 export class HandlerTechTaskUseCase {
@@ -13,13 +13,12 @@ export class HandlerTechTaskUseCase {
     private readonly findMethodsTechTaskUseCase: FindMethodsTechTaskUseCase,
     private readonly updateTechTaskUseCase: UpdateTechTaskUseCase,
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
+    private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
   ) {}
 
   async execute() {
-    const year = moment().year().toString();
-    const month = ('0' + (moment().month() + 1)).slice(-2);
-    const day = ('0' + moment().date()).slice(-2);
-    const today = new Date(year + '-' + month + '-' + day + ' 03:00:00');
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
     /*
         const techTaskActive = await this.findMethodsTechTaskUseCase.getAllByStatus(
           StatusTechTask.ACTIVE,       );
@@ -53,14 +52,19 @@ export class HandlerTechTaskUseCase {
             item.id,
           );
         const items = itemToTechTask.map((item) => item.techTaskItemTemplateId);
+
+        const techTags =
+          await this.findMethodsTechTagUseCase.getAllByTechTaskId(item.id);
+        const tagIds = techTags.map((item) => item.id);
         await this.createTechTaskUseCase.execute(
           {
             name: item.name,
             posId: item.posId,
             type: item.type,
             period: item.period,
-            startDate: today,
+            startDate: todayUTC,
             techTaskItem: items,
+            tagIds: tagIds,
           },
           item.createdById,
         );

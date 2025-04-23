@@ -1,6 +1,6 @@
 export interface CardCreateDto {
   mobileUserId: number;
-  devNumber?: number;
-  number?: number;
+  devNumber?: string;
+  number?: string;
   monthlyLimit?: number;
 }

@@ -258,8 +258,8 @@ export class LoyaltyValidateRules {
   public async createClientValidate(
     phone: string,
     tagIds: number[],
-    devNumber?: number,
-    number?: number,
+    devNumber?: string,
+    number?: string,
   ) {
     const response = [];
     response.push(await this.validateLib.clientByPhoneNotExists(phone));

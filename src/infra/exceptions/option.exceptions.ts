@@ -100,6 +100,16 @@ export class LoyaltyException extends BaseException {
   }
 }
 
+export class HrException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_Hr', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
 export class WarehouseDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
     super('domain_warehouse', innerCode, message);

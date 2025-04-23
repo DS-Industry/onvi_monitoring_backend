@@ -28,6 +28,8 @@ model Organization {
   organizationMailConfirms    OrganizationMailConfirm[]
   DeviceApiKey                DeviceApiKey[]
   nomenclatures               Nomenclature[]
+  hrWorker                    HrWorker[]
+  hrPositions                 HrPosition[]
   loyaltyProgram              LoyaltyProgram?    @relation(fields: [loyaltyProgramId], references: [id])
   loyaltyProgramId            Int?
 }
@@ -50,6 +52,7 @@ model Placement {
   organization Organization[]
   pos          Pos[]
   client       MobileUser[]
+  hrWorkers    HrWorker[]
 }
 
 model OrganizationDocument {
@@ -140,6 +143,8 @@ model User {
   reportTemplateTransactions   ReportTemplateTransaction[]
   cardBonusOpers               CardBonusOper[]
   loyaltyPrograms              LoyaltyProgram[]
+  hrPaymentCreated             HrPayment[]      @relation(name: "CreatedByUser")
+  hrPaymentUpdated             HrPayment[]      @relation(name: "UpdatedByUser")
 }
 
 model UserMailConfirm {
@@ -585,8 +590,8 @@ model CardMobileUser {
   balance              Int                    @default(0)
   mobileUser           MobileUser?            @relation(fields: [mobileUserId], references: [id])
   mobileUserId         Int?                   @unique
-  devNumber            Int
-  number               Int
+  devNumber            String
+  number               String
   monthlyLimit         Int?
   createdAt            DateTime?
   updatedAt            DateTime?
@@ -779,7 +784,8 @@ model TechTask {
   posId                   Int?
   type                    TypeTechTask
   status                  StatusTechTask
-  period                  PeriodTechTask
+  period                  Int?
+  markdownDescription     String?
   startDate               DateTime
   nextCreateDate          DateTime?
   endSpecifiedDate        DateTime?
@@ -794,11 +800,19 @@ model TechTask {
   updateBy                User                     @relation(name: "UpdateByUser", fields: [updateById], references: [id])
   updateById              Int
   techTaskItemValueToTechTasks       TechTaskItemValueToTechTask[]
+  tags                    TechTaskTag[]
+}
+
+model TechTaskTag {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  code                 String?
+  techTasks            TechTask[]
 }
 
 enum TypeTechTask {
-  Routine
-  Regulation
+  ONETIME
+  REGULAR
 }
 
 enum StatusTechTask {
@@ -806,12 +820,6 @@ enum StatusTechTask {
   FINISHED
   PAUSE
   OVERDUE
-}
-
-enum PeriodTechTask {
-  Daily
-  Weekly
-  Monthly
 }
 
 model TechTaskItemTemplate {
@@ -1231,6 +1239,67 @@ enum StatusReportTemplate {
   PROGRESS
   DONE
   ERROR
+}
+
+model HrWorker {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  hrPosition              HrPosition               @relation(fields: [hrPositionId], references: [id])
+  hrPositionId            Int
+  placement               Placement                @relation(fields: [placementId], references: [id])
+  placementId             Int
+  organization            Organization             @relation(fields: [organizationId], references: [id])
+  organizationId          Int
+  startWorkDate           DateTime?
+  phone                   String?
+  email                   String?
+  description             String?
+  avatar                  String?
+  monthlySalary           Int
+  dailySalary             Int
+  percentageSalary        Int
+  gender                  String?
+  citizenship             String?
+  passportSeries          String?
+  passportNumber          String?
+  passportExtradition     String?
+  passportDateIssue       DateTime?
+  inn                     String?
+  snils                   String?
+  hrPayment               HrPayment[]
+}
+
+model HrPosition {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  description             String?
+  hrWorkers               HrWorker[]
+  organization            Organization?             @relation(fields: [organizationId], references: [id])
+  organizationId          Int?
+}
+
+model HrPayment {
+  id                      Int                      @id @default(autoincrement())
+  hrWorker                HrWorker                 @relation(fields: [hrWorkerId], references: [id])
+  hrWorkerId              Int
+  paymentType             PaymentType
+  paymentDate             DateTime
+  billingMonth            DateTime
+  countShifts             Int
+  sum                     Int
+  prize                   Int
+  fine                    Int
+  createdAt               DateTime
+  updatedAt               DateTime?
+  createdBy               User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById             Int
+  updatedBy               User?                      @relation(name: "UpdatedByUser", fields: [updatedById], references: [id])
+  updatedById             Int?
+}
+
+enum PaymentType {
+  PAYMENT
+  PREPAYMENT
 }
 
 enum StatusUser {

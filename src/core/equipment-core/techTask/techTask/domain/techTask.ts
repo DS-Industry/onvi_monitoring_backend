@@ -1,4 +1,4 @@
-import { PeriodTechTask, StatusTechTask, TypeTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface TechTaskProps {
@@ -7,7 +7,8 @@ export interface TechTaskProps {
   posId: number;
   type: TypeTechTask;
   status: StatusTechTask;
-  period: PeriodTechTask;
+  period?: number;
+  markdownDescription?: string;
   nextCreateDate?: Date;
   endSpecifiedDate?: Date;
   startDate: Date;
@@ -45,8 +46,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.status;
   }
 
-  get period(): PeriodTechTask {
+  get period(): number {
     return this.props.period;
+  }
+
+  get markdownDescription(): string {
+    return this.props.markdownDescription;
   }
 
   get nextCreateDate(): Date {
@@ -105,8 +110,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     this.props.status = status;
   }
 
-  set period(period: PeriodTechTask) {
+  set period(period: number) {
     this.props.period = period;
+  }
+
+  set markdownDescription(markdownDescription: string) {
+    this.props.markdownDescription = markdownDescription;
   }
 
   set nextCreateDate(nextCreateDate: Date) {

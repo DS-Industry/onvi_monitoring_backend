@@ -1,4 +1,4 @@
-import { PeriodTechTask, TypeTechTask } from '@prisma/client';
+import { TypeTechTask } from '@prisma/client';
 import {
   IsArray,
   IsEnum,
@@ -19,9 +19,12 @@ export class TechTaskCreateDto {
   @IsEnum(TypeTechTask)
   @IsNotEmpty({ message: 'Type pos is required' })
   type: TypeTechTask;
-  @IsEnum(PeriodTechTask)
-  @IsNotEmpty({ message: 'Type pos is required' })
-  period: PeriodTechTask;
+  @IsNumber()
+  @IsOptional()
+  period?: number;
+  @IsString()
+  @IsOptional()
+  markdownDescription?: string;
   @IsNotEmpty({ message: 'startDate is required' })
   @Transform(({ value }) => new Date(value))
   startDate: Date;
@@ -31,4 +34,7 @@ export class TechTaskCreateDto {
   @IsArray()
   @IsNotEmpty({ message: 'techTaskItemId is required' })
   techTaskItem: number[];
+  @IsArray()
+  @IsNotEmpty({ message: 'tagIds is required' })
+  tagIds: number[];
 }

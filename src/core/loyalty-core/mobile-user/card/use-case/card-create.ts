@@ -28,22 +28,22 @@ export class CreateCardUseCase {
   }
 
   private async generateDevNomerCard() {
-    let newNomer = 0;
+    let newNomer = '';
     do {
       newNomer = this.generateRandom12DigitNumber();
     } while (await this.findMethodsCardUseCase.getByDevNumber(newNomer));
     return newNomer;
   }
   private async generateNomerCard() {
-    let newNomer = 0;
+    let newNomer = '';
     do {
       newNomer = this.generateRandom12DigitNumber();
     } while (await this.findMethodsCardUseCase.getByNumber(newNomer));
     return newNomer;
   }
   private generateRandom12DigitNumber() {
-    const min = 10000000;
-    const max = 99999999;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    const min = 1000000000;
+    const max = 9999999999;
+    return (Math.floor(Math.random() * (max - min + 1)) + min).toString();
   }
 }

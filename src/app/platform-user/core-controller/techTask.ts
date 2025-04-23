@@ -41,11 +41,15 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
-import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
+import { TechTaskReadAllResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
 import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos-monitoring';
 import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
+import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-shape-response.dto';
+import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { TechTagCreateDto } from '@platform-user/core-controller/dto/receive/techTag-create.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -61,6 +65,8 @@ export class TechTaskController {
     private readonly completionShapeTechTaskUseCase: CompletionShapeTechTaskUseCase,
     private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+    private readonly createTechTagUseCase: CreateTechTagUseCase,
+    private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
   //Create techTask
@@ -183,7 +189,7 @@ export class TechTaskController {
   async getAllForRead(
     @Request() req: any,
     @Query() params: PlacementFilterDto,
-  ): Promise<TechTaskShapeResponseDto[]> {
+  ): Promise<TechTaskReadAllResponseDto[]> {
     try {
       const { ability } = req;
       let poses: Pos[] = [];
@@ -275,6 +281,54 @@ export class TechTaskController {
       return await this.posChemistryProductionUseCase.execute(techRateInfo);
     } catch (e) {
       if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Post('tag')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(200)
+  async createTechTag(@Body() data: TechTagCreateDto): Promise<any> {
+    try {
+      await this.techTaskValidateRules.createTechTagValidate(data.name);
+      return await this.createTechTagUseCase.execute(data.name, data?.code);
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('tag')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(200)
+  async getAllTechTags(): Promise<any> {
+    try {
+      return await this.findMethodsTechTagUseCase.getAll();
+    } catch (e) {
+      if (e instanceof TechTaskException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

@@ -35,15 +35,17 @@ export class FindMethodsTechTaskUseCase {
     );
   }
 
-  async getAllAllByPosIdAndDate(
+  async getAllByPosIdAndDate(
     posId: number,
     dateStart: Date,
     dateEnd: Date,
+    status: StatusTechTask,
   ): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllByPosIdAndDate(
       posId,
       dateStart,
       dateEnd,
+      status,
     );
   }
 
@@ -70,6 +72,20 @@ export class FindMethodsTechTaskUseCase {
     return await this.techTaskRepository.findAllByTypeAndPosIdsAndDate(
       posIds,
       type,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getAllByCodeTagAndPosIdsAndDate(
+    posIds: number[],
+    code: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllCodeTagAndPosIdsAndDate(
+      posIds,
+      code,
       dateStart,
       dateEnd,
     );

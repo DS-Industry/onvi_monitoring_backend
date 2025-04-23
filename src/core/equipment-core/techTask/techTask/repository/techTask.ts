@@ -3,8 +3,7 @@ import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { PrismaTechTaskMapper } from '@db/mapper/prisma-tech-task-mapper';
-import { StatusTechTask, TypeTechTask } from "@prisma/client";
-import moment from 'moment';
+import { StatusTechTask, TypeTechTask } from '@prisma/client';
 
 @Injectable()
 export class TechTaskRepository extends ITechTaskRepository {
@@ -45,6 +44,7 @@ export class TechTaskRepository extends ITechTaskRepository {
     posId: number,
     dateStart: Date,
     dateEnd: Date,
+    status: StatusTechTask,
   ): Promise<TechTask[]> {
     const techTasks = await this.prisma.techTask.findMany({
       where: {
@@ -53,7 +53,7 @@ export class TechTaskRepository extends ITechTaskRepository {
           gte: dateStart,
           lte: dateEnd,
         },
-        status: StatusTechTask.FINISHED,
+        status: status,
       },
       orderBy: {
         startDate: 'asc',
@@ -95,6 +95,33 @@ export class TechTaskRepository extends ITechTaskRepository {
       where: {
         posId: { in: posIds },
         type,
+        startDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        status: StatusTechTask.FINISHED,
+      },
+      orderBy: {
+        startDate: 'asc',
+      },
+    });
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+  }
+
+  public async findAllCodeTagAndPosIdsAndDate(
+    posIds: number[],
+    codeTag: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<TechTask[]> {
+    const techTasks = await this.prisma.techTask.findMany({
+      where: {
+        posId: { in: posIds },
+        tags: {
+          some: {
+            code: codeTag,
+          },
+        },
         startDate: {
           gte: dateStart,
           lte: dateEnd,
@@ -153,14 +180,16 @@ export class TechTaskRepository extends ITechTaskRepository {
   }
 
   public async findAllForHandler(): Promise<TechTask[]> {
-    const today = moment().startOf('day').toISOString();
-    const tomorrow = moment().add(1, 'day').startOf('day').toISOString();
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+    const tomorrowUTC = new Date(todayUTC);
+    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
 
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         nextCreateDate: {
-          gte: today,
-          lt: tomorrow,
+          gte: todayUTC,
+          lt: tomorrowUTC,
         },
         status: {
           not: StatusTechTask.PAUSE,
@@ -175,14 +204,16 @@ export class TechTaskRepository extends ITechTaskRepository {
   }
 
   public async findAllForOverdue(): Promise<TechTask[]> {
-    const today = moment().startOf('day').toISOString();
-    const tomorrow = moment().add(1, 'day').startOf('day').toISOString();
+    const todayUTC = new Date();
+    todayUTC.setUTCHours(0, 0, 0, 0);
+    const tomorrowUTC = new Date(todayUTC);
+    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
 
     const techTasks = await this.prisma.techTask.findMany({
       where: {
         endSpecifiedDate: {
-          gte: today,
-          lt: tomorrow,
+          gte: todayUTC,
+          lt: tomorrowUTC,
         },
         status: StatusTechTask.ACTIVE,
       },
@@ -203,5 +234,23 @@ export class TechTaskRepository extends ITechTaskRepository {
       data: techTaskEntity,
     });
     return PrismaTechTaskMapper.toDomain(techTask);
+  }
+
+  public async updateConnectionTag(
+    techTagId: number,
+    addTagIds: number[],
+    deleteTagIds: number[],
+  ): Promise<any> {
+    await this.prisma.techTask.update({
+      where: {
+        id: techTagId,
+      },
+      data: {
+        tags: {
+          disconnect: deleteTagIds.map((id) => ({ id })),
+          connect: addTagIds.map((id) => ({ id })),
+        },
+      },
+    });
   }
 }

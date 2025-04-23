@@ -6,8 +6,8 @@ export interface CardProps {
   id?: number;
   balance: number;
   mobileUserId: number;
-  devNumber: number;
-  number: number;
+  devNumber: string;
+  number: string;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
   createdAt?: Date;
@@ -31,11 +31,11 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.mobileUserId;
   }
 
-  get devNumber(): number {
+  get devNumber(): string {
     return this.props.devNumber;
   }
 
-  get number(): number {
+  get number(): string {
     return this.props.number;
   }
 

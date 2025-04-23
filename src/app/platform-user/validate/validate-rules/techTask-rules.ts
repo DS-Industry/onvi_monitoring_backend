@@ -8,11 +8,12 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import {
+  LOYALTY_CREATE_TAG_EXCEPTION_CODE,
   TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_CREATE_EXCEPTION_CODE,
+  TECH_TASK_CREATE_EXCEPTION_CODE, TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
   TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_UPDATE_EXCEPTION_CODE,
-} from '@constant/error.constants';
+  TECH_TASK_UPDATE_EXCEPTION_CODE
+} from "@constant/error.constants";
 import { TechTaskException } from '@exception/option.exceptions';
 
 @Injectable()
@@ -115,5 +116,15 @@ export class TechTaskValidateRules {
       techTaskCheck.object,
     );
     return techTaskCheck.object;
+  }
+
+  public async createTechTagValidate(name: string) {
+    const response = [];
+    response.push(await this.validateLib.techTegByNameNotExists(name));
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
+    );
   }
 }

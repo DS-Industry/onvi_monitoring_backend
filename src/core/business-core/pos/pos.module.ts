@@ -68,6 +68,8 @@ import {
 import {
   FindMethodsDeviceProgramChangeUseCase
 } from "@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods";
+import { TestDataCron } from "../../../infra/handler/testData/cron/testData";
+import { ScheduleModule } from "@nestjs/schedule";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -165,6 +167,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     BullModule.registerQueue({
       name: 'deviceDataRaw',
     }),
+    ScheduleModule.forRoot(),
   ],
   providers: [
     ...repositories,
@@ -177,6 +180,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
     ...monthlyPlanPos,
+    TestDataCron,
   ],
   exports: [
     ...carWashPosUseCase,

@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { PeriodTechTask, StatusTechTask, TypeTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from '@prisma/client';
 import { Transform } from "class-transformer";
 
 export class TechTaskUpdateDto {
@@ -17,14 +17,14 @@ export class TechTaskUpdateDto {
   @IsString()
   name?: string;
   @IsOptional()
-  @IsEnum(TypeTechTask)
-  type?: TypeTechTask;
-  @IsOptional()
   @IsEnum(StatusTechTask)
   status?: StatusTechTask;
+  @IsNumber()
   @IsOptional()
-  @IsEnum(PeriodTechTask)
-  period?: PeriodTechTask;
+  period?: number;
+  @IsString()
+  @IsOptional()
+  markdownDescription?: string;
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   endSpecifiedDate?: Date;

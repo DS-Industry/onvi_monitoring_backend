@@ -6,6 +6,7 @@ import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-
 import { ValidateOrganizationConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-validate';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import {
+  PaymentType,
   PositionUser,
   StatusCashCollection,
   StatusTechTask,
@@ -42,6 +43,7 @@ import { WarehouseDocument } from '@warehouse/document/document/domain/warehouse
 import {
   DeviceException,
   FinanceException,
+  HrException,
   IncidentException,
   LoyaltyException,
   OrganizationException,
@@ -78,6 +80,12 @@ import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
 import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
 import { FindMethodsBenefitActionUseCase } from '@loyalty/loyalty/benefit/benefitAction/use-case/benefitAction-find-methods';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-methods';
+import { Position } from '@hr/position/domain/position';
+import { Worker } from '@hr/worker/domain/worker';
+import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
+import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
+import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -94,6 +102,7 @@ export enum ExceptionType {
   FINANCE = 'Finance',
   REPORT_TEMPLATE = 'ReportTemplate',
   LOYALTY = 'Loyalty',
+  HR = 'Hr',
 }
 @Injectable()
 export class ValidateLib {
@@ -134,6 +143,10 @@ export class ValidateLib {
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
+    private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
+    private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
+    private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
+    private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -899,7 +912,7 @@ export class ValidateLib {
   }
 
   public async cardByDevNumberNotExists(
-    devNumber: number,
+    devNumber: string,
   ): Promise<ValidateResponse> {
     const checkCard =
       await this.findMethodsCardUseCase.getByDevNumber(devNumber);
@@ -913,7 +926,7 @@ export class ValidateLib {
   }
 
   public async cardByNumberNotExists(
-    number: number,
+    number: string,
   ): Promise<ValidateResponse> {
     const checkCard = await this.findMethodsCardUseCase.getByNumber(number);
     if (checkCard) {
@@ -1039,6 +1052,62 @@ export class ValidateLib {
     return { code: 200, object: checkBenefitAction };
   }
 
+  public async positionByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Position>> {
+    const checkPosition = await this.findMethodsPositionUseCase.getById(id);
+    if (!checkPosition) {
+      return {
+        code: 400,
+        errorMessage: 'The position does not exist',
+      };
+    }
+    return { code: 200, object: checkPosition };
+  }
+
+  public async workerByIdExists(id: number): Promise<ValidateResponse<Worker>> {
+    const checkWorker = await this.findMethodsWorkerUseCase.getById(id);
+    if (!checkWorker) {
+      return {
+        code: 400,
+        errorMessage: 'The worker does not exist',
+      };
+    }
+    return { code: 200, object: checkWorker };
+  }
+
+  public async prepaymentForMonthAndWorker(
+    workerId: number,
+    billingMonth: Date,
+  ): Promise<ValidateResponse> {
+    const checkPrepayment = await this.findMethodsPaymentUseCase.getAllByFilter(
+      '*',
+      '*',
+      workerId,
+      PaymentType.PREPAYMENT,
+      billingMonth,
+    );
+    if (checkPrepayment.length > 0) {
+      return {
+        code: 400,
+        errorMessage:
+          'The advance payment for this month has already been issued',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async techTegByNameNotExists(name: string): Promise<ValidateResponse> {
+    const checkTag = await this.findMethodsTechTagUseCase.getByName(name);
+    if (checkTag) {
+      return {
+        code: 400,
+        errorMessage: 'The tag already exists in the system',
+      };
+    }
+    return { code: 200 };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -1070,6 +1139,8 @@ export class ValidateLib {
         throw new ReportTemplateException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.LOYALTY) {
         throw new LoyaltyException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.HR) {
+        throw new HrException(exceptionCode, errorCodes);
       }
     }
   }

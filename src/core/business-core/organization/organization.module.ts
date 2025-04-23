@@ -18,6 +18,9 @@ import { MailModule } from '@libs/mail/module';
 import { FileModule } from '@libs/file/module';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
 import { UpdateConfirmMailUseCase } from "@organization/confirmMail/use-case/confirm-mail-update";
+import {
+  GetStatisticsGrafOrganizationUseCase
+} from "@organization/organization/use-cases/organization-get-statistics-graf";
 
 const repositories: Provider[] = [
   OrganizationRepositoryProvider,
@@ -33,6 +36,7 @@ const organizationUseCase: Provider[] = [
   GetRatingOrganizationUseCase,
   GetStatisticsOrganizationUseCase,
   FilterByUserOrganizationUseCase,
+  GetStatisticsGrafOrganizationUseCase,
 ];
 
 const confirmMailOrganizationUseCase: Provider[] = [

@@ -14,11 +14,11 @@ export class FindMethodsCardUseCase {
     return await this.cardRepository.findOneByClientId(clientId);
   }
 
-  async getByDevNumber(devNumber: number): Promise<Card> {
+  async getByDevNumber(devNumber: string): Promise<Card> {
     return await this.cardRepository.findOneByDevNumber(devNumber);
   }
 
-  async getByNumber(number: number): Promise<Card> {
+  async getByNumber(number: string): Promise<Card> {
     return await this.cardRepository.findOneByNumber(number);
   }
 

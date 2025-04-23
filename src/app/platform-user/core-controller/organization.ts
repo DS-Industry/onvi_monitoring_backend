@@ -46,6 +46,8 @@ import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { OrganizationStatisticGrafResponseDto } from '@platform-user/core-controller/dto/response/organization-statistic-graf-response.dto';
+import { GetStatisticsGrafOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics-graf';
 
 @Controller('organization')
 export class OrganizationController {
@@ -61,6 +63,7 @@ export class OrganizationController {
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly findMethodsDocumentUseCase: FindMethodsDocumentUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
+    private readonly getStatisticsGrafOrganizationUseCase: GetStatisticsGrafOrganizationUseCase,
   ) {}
   //All organization for user
   @Get('filter')
@@ -211,6 +214,37 @@ export class OrganizationController {
         organizationId: organizationId[0],
       };
       return await this.getStatisticsOrganizationUseCase.execute(input);
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Statistics-graf for organization
+  @Get('statistics-graf')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @HttpCode(200)
+  async statisticsGrafOrg(
+    @Request() req: any,
+    @Query() data: DataFilterDto,
+  ): Promise<OrganizationStatisticGrafResponseDto[]> {
+    try {
+      const { ability } = req;
+      return await this.getStatisticsGrafOrganizationUseCase.execute(
+        data.dateStart,
+        data.dateEnd,
+        ability,
+      );
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

@@ -13,10 +13,11 @@ import { TechTaskItemTemplate } from './seedData/techTaskItemTemplate';
 import { Organizations } from './seedData/organization';
 import { Poses } from './seedData/pos';
 import { Devices } from './seedData/device';
+import { test } from "./seedData/test";
 
 async function main() {
   //DeviceType
-  await Promise.all(
+  /*await Promise.all(
     DeviceTypes.map(async (deviceType) => {
       await prisma.carWashDeviceType.upsert({
         where: { id: deviceType.id },
@@ -144,7 +145,17 @@ async function main() {
       });
     }),
   );
-  console.log('Device create');
+  console.log('Device create');*/
+  await Promise.all(
+    test.map(async (test) => {
+      await prisma.carWashDevice.upsert({
+        where: { id: test.id },
+        update: {},
+        create: test,
+      });
+    }),
+  );
+  console.log('Organization create');
 }
 main()
   .then(async () => {

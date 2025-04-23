@@ -49,6 +49,8 @@ export class ShapeTechTaskUseCase {
       type: techTask.type,
       status: techTask.status,
       endSpecifiedDate: techTask?.endSpecifiedDate,
+      period: techTask?.period,
+      markdownDescription: techTask?.markdownDescription,
       startWorkDate: techTask?.startWorkDate,
       sendWorkDate: techTask?.sendWorkDate,
       executorId: techTask?.executorId,

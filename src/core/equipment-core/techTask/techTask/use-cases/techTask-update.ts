@@ -7,6 +7,8 @@ import { StatusTechTask } from '@prisma/client';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { TechTaskItemValueToTechTask } from '@tech-task/itemTemplateToTechTask/domain/itemValueToTechTask';
 import { ITechTaskItemValueToTechTaskRepository } from '@tech-task/itemTemplateToTechTask/interface/itemValueToTechTask';
+import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 
 @Injectable()
 export class UpdateTechTaskUseCase {
@@ -14,19 +16,30 @@ export class UpdateTechTaskUseCase {
     private readonly techTaskRepository: ITechTaskRepository,
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
     private readonly techTaskItemValueToTechTaskRepository: ITechTaskItemValueToTechTaskRepository,
+    private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
   ) {}
 
   async execute(
     input: TechTaskUpdateDto,
     oldTechTask: TechTask,
     user?: User,
-  ): Promise<TechTask> {
-    const { name, type, status, period, endSpecifiedDate } = input;
+  ): Promise<TechTaskResponseDto> {
+    const {
+      name,
+      type,
+      status,
+      period,
+      markdownDescription,
+      endSpecifiedDate,
+    } = input;
 
     oldTechTask.name = name ? name : oldTechTask.name;
     oldTechTask.type = type ? type : oldTechTask.type;
     oldTechTask.status = status ? status : oldTechTask.status;
     oldTechTask.period = period ? period : oldTechTask.period;
+    oldTechTask.markdownDescription = markdownDescription
+      ? markdownDescription
+      : oldTechTask.markdownDescription;
     oldTechTask.endSpecifiedDate = endSpecifiedDate
       ? endSpecifiedDate
       : oldTechTask.endSpecifiedDate;
@@ -77,6 +90,50 @@ export class UpdateTechTaskUseCase {
         );
       }
     }
-    return await this.techTaskRepository.update(oldTechTask);
+
+    const techTask = await this.techTaskRepository.update(oldTechTask);
+    let techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
+      techTask.id,
+    );
+    if (input.tagIds) {
+      const existingTagIds = techTags.map((tag) => tag.id);
+
+      const deleteTagIds = existingTagIds.filter(
+        (id) => !input.tagIds.includes(id),
+      );
+      const addTagIds = input.tagIds.filter(
+        (id) => !existingTagIds.includes(id),
+      );
+      await this.techTaskRepository.updateConnectionTag(
+        techTask.id,
+        addTagIds,
+        deleteTagIds,
+      );
+
+      techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
+        techTask.id,
+      );
+    }
+
+    return {
+      id: techTask.id,
+      name: techTask.name,
+      posId: techTask.posId,
+      type: techTask.type,
+      status: techTask.status,
+      period: techTask?.period,
+      markdownDescription: techTask?.markdownDescription,
+      nextCreateDate: techTask?.nextCreateDate,
+      endSpecifiedDate: techTask?.endSpecifiedDate,
+      startDate: techTask.startDate,
+      startWorkDate: techTask?.startWorkDate,
+      sendWorkDate: techTask?.sendWorkDate,
+      executorId: techTask?.executorId,
+      createdAt: techTask?.createdAt,
+      updatedAt: techTask?.updatedAt,
+      createdById: techTask.createdById,
+      updatedById: techTask.updatedById,
+      tags: techTags.map((tag) => tag.getProps()),
+    };
   }
 }

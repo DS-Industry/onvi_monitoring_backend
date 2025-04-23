@@ -68,6 +68,9 @@ import { PlacementController } from '@platform-user/core-controller/placement';
 import { LoyaltyValidateRules } from "@platform-user/validate/validate-rules/loyalty-validate-rules";
 import { LoyaltyCoreModule } from "@loyalty/loyalty-core.module";
 import { LoyaltyController } from "@platform-user/core-controller/loyalty";
+import { HrController } from "@platform-user/core-controller/hr";
+import { HrCoreModule } from "@hr/hr-core.module";
+import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-validate-rules";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -90,6 +93,7 @@ const controllers = [
   ReportController,
   PlacementController,
   LoyaltyController,
+  HrController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -136,6 +140,7 @@ const validate: Provider[] = [
   FinanceValidateRules,
   ReportValidateRules,
   LoyaltyValidateRules,
+  HrValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -157,6 +162,7 @@ const permission: Provider[] = [
     FinanceCoreModule,
     ReportCoreModule,
     LoyaltyCoreModule,
+    HrCoreModule,
     ObjectModule,
     FileModule,
   ],

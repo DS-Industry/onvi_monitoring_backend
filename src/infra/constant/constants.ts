@@ -11,3 +11,5 @@ export const EVENT_TYPE_CASH_COLLECTION_ID = 9;
 export const USING_BONUSES_OPER_TYPE_ID = 5;
 export const CASHBACK_BONUSES_OPER_TYPE_ID = 2;
 export const EXPIRATION_BONUSES_OPER_TYPE_ID = 3;
+
+export const TECH_RATE_CODE = 'TECH_RATE';

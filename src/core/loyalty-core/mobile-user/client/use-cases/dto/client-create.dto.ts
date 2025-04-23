@@ -10,8 +10,8 @@ export interface ClientCreateDto {
   inn?: string;
   comment?: string;
   placementId?: number;
-  devNumber?: number;
-  number?: number;
+  devNumber?: string;
+  number?: string;
   monthlyLimit?: number;
   tagIds: number[];
 }

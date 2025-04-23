@@ -43,7 +43,8 @@
       "@warehouse/*": ["src/core/warehouse-core/*"],
       "@finance/*": ["src/core/finance-core/*"],
       "@report/*": ["src/core/report-core/*"],
-      "@loyalty/*": ["src/core/loyalty-core/*"]
+      "@loyalty/*": ["src/core/loyalty-core/*"],
+      "@hr/*": ["src/core/hr-core/*"]
     }
   }
 }

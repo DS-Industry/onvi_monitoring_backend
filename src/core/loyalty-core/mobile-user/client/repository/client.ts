@@ -58,6 +58,9 @@ export class ClientRepository extends IClientRepository {
       skip: skip ?? undefined,
       take: take ?? undefined,
       where,
+      orderBy: {
+        id: 'asc',
+      },
     });
     return clients.map((item) => PrismaMobileUserMapper.toDomain(item));
   }

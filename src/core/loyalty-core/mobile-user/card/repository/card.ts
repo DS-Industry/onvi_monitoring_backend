@@ -34,7 +34,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByDevNumber(devNumber: number): Promise<Card> {
+  public async findOneByDevNumber(devNumber: string): Promise<Card> {
     const card = await this.prisma.cardMobileUser.findFirst({
       where: {
         devNumber,
@@ -43,7 +43,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByNumber(number: number): Promise<Card> {
+  public async findOneByNumber(number: string): Promise<Card> {
     const card = await this.prisma.cardMobileUser.findFirst({
       where: {
         number,

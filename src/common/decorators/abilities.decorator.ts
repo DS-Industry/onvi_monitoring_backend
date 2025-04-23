@@ -174,3 +174,23 @@ export class DeleteLoyaltyAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'LoyaltyProgram';
 }
+export class ManageHrAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'Hr';
+}
+export class ReadHrAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'Hr';
+}
+export class CreateHrAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'Hr';
+}
+export class UpdateHrAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'Hr';
+}
+export class DeleteHrAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'Hr';
+}

@@ -24,8 +24,8 @@ export class CardResponseDto {
   id?: number;
   balance: number;
   mobileUserId: number;
-  devNumber: number;
-  number: number;
+  devNumber: string;
+  number: string;
   monthlyLimit?: number;
   createdAt?: Date;
   updatedAt?: Date;

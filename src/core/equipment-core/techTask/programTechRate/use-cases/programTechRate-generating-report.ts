@@ -5,10 +5,9 @@ import {
   TechRateInfoDto,
 } from '@tech-task/programTechRate/use-cases/dto/programTechRate-generating-methods-response.dto';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
-import { TypeTechTask } from '@prisma/client';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
 import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-shape-response.dto';
-import { Pos } from '@pos/pos/domain/pos';
+import { TECH_RATE_CODE } from '@constant/constants';
 
 @Injectable()
 export class GeneratingReportProgramTechRate {
@@ -26,9 +25,9 @@ export class GeneratingReportProgramTechRate {
     dateStart.setDate(dateStart.getDate() - 1);
     const response: ProgramTechRateGeneratingMethodsResponseDto[] = [];
     const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllAllByTypeAndPosIdsAndDate(
+      await this.findMethodsTechTaskUseCase.getAllByCodeTagAndPosIdsAndDate(
         posIds,
-        TypeTechTask.Routine,
+        TECH_RATE_CODE,
         dateStart,
         dateEnd,
       );

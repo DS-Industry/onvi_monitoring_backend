@@ -15,18 +15,22 @@ import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/te
 import { ProgramTechRateProvider } from '@tech-task/programTechRate/provider/programTechRate';
 import { FindMethodsProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-find-methods';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
-import { ReadAllByPosTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-read-all-by-pos";
-import {
-  GetAllByPosIdProgramTechRateUseCase
-} from "@tech-task/programTechRate/use-cases/programTechRate-get-all-by-pos-id";
-import { UpdateProgramTechRateUseCase } from "@tech-task/programTechRate/use-cases/programTechRate-update";
-import { FileModule } from "@libs/file/module";
+import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
+import { GetAllByPosIdProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-get-all-by-pos-id';
+import { UpdateProgramTechRateUseCase } from '@tech-task/programTechRate/use-cases/programTechRate-update';
+import { FileModule } from '@libs/file/module';
+import { TechTagRepositoryProvider } from '@tech-task/tag/provider/techTag';
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
+import { TestDataTechTaskCron } from '../../../infra/handler/testData/cron/testDataTechTask';
+import { ScheduleModule } from '@nestjs/schedule';
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
   TechTaskItemTemplateProvider,
   TechTaskItemValueToTechTaskProvider,
   ProgramTechRateProvider,
+  TechTagRepositoryProvider,
 ];
 
 const techTaskUseCases: Provider[] = [
@@ -53,20 +57,28 @@ const programTechRateUseCases: Provider[] = [
   UpdateProgramTechRateUseCase,
 ];
 
+const tagUseCases: Provider[] = [
+  CreateTechTagUseCase,
+  FindMethodsTechTagUseCase,
+];
+
 @Module({
-  imports: [PrismaModule, FileModule],
+  imports: [PrismaModule, FileModule, ScheduleModule.forRoot()],
   providers: [
     ...repositories,
     ...techTaskUseCases,
     ...itemTemplateUseCases,
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
+    ...tagUseCases,
+    TestDataTechTaskCron,
   ],
   exports: [
     ...techTaskUseCases,
     ...itemTemplateUseCases,
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
+    ...tagUseCases,
   ],
 })
 export class TechTaskModule {}
