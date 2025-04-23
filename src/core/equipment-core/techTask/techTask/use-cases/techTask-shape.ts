@@ -7,6 +7,7 @@ import {
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
+import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
 
 @Injectable()
 export class ShapeTechTaskUseCase {
@@ -14,6 +15,7 @@ export class ShapeTechTaskUseCase {
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
     private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
     private readonly techTaskRepository: ITechTaskRepository,
+    private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
   ) {}
 
   async execute(techTask: TechTask): Promise<TechTaskShapeResponseDto> {
@@ -42,6 +44,9 @@ export class ShapeTechTaskUseCase {
       techTask.startWorkDate = new Date();
       await this.techTaskRepository.update(techTask);
     }
+    const techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
+      techTask.id,
+    );
     return {
       id: techTask.id,
       name: techTask.name,
@@ -55,6 +60,7 @@ export class ShapeTechTaskUseCase {
       sendWorkDate: techTask?.sendWorkDate,
       executorId: techTask?.executorId,
       items: items,
+      tags: techTags.map((tag) => tag.getProps()),
     };
   }
 }

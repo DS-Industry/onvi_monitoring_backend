@@ -5,7 +5,7 @@ import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/te
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { User } from '@platform-user/user/domain/user';
 import { TechTaskCompletionShapeValueDto } from '@tech-task/techTask/use-cases/dto/techTask-completion-shape-value.dto';
-import { StatusTechTask } from "@prisma/client";
+import { StatusTechTask } from '@prisma/client';
 
 @Injectable()
 export class TestDataTechTaskCron {
@@ -15,7 +15,7 @@ export class TestDataTechTaskCron {
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
   ) {}
 
-  @Cron('30 6 * * *')
+  @Cron('30 20 * * *')
   async execute(): Promise<void> {
     console.log('start dataTestTechTask');
     const today = new Date();
@@ -30,7 +30,7 @@ export class TestDataTechTaskCron {
         StatusTechTask.ACTIVE,
       );
 
-    console.log(techTasks)
+    console.log(techTasks);
     const user: User = new User({
       id: 7,
       userRoleId: 1,
@@ -49,7 +49,7 @@ export class TestDataTechTaskCron {
             techTask.id,
           );
 
-        console.log(itemTemplates)
+        console.log(itemTemplates);
         // 3. Формируем массив значений
         const values: TechTaskCompletionShapeValueDto[] = itemTemplates.map(
           (item) => ({
@@ -58,7 +58,7 @@ export class TestDataTechTaskCron {
           }),
         );
 
-        console.log(values)
+        console.log(values);
         // 5. Выполняем завершение задачи
         await this.completionShapeTechTaskUseCase.execute(
           techTask,
