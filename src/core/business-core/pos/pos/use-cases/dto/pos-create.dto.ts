@@ -2,7 +2,6 @@ import { CarWashPosType } from '@prisma/client';
 
 export class PosCreateDto {
   name: string;
-  monthlyPlan: number;
   timeWork: string;
   posMetaData?: string;
   address: {

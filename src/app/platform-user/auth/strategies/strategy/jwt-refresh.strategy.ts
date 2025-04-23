@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-user/auth/domain/jwt-payload';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
+import { UserException } from "@exception/option.exceptions";
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -40,7 +42,10 @@ export class JwtRefreshStrategy extends PassportStrategy(
         return user;
       }
     } catch (e) {
-      throw new Error('error');
+      throw new UserException(
+        USER_AUTHORIZATION_EXCEPTION_CODE,
+        'Unauthorized',
+      );
     }
   }
 }

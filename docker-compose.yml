@@ -5,8 +5,26 @@ services:
   onvi-business-backend:
     container_name: onvi-business-backend
     command: npm run start:prod
-    env_file: /config/env/.env.production
+    env_file: ./config/env/.env.production
     ports:
       - "5000:5000"
+    build: .
+    restart: always
+  onvi-business-report-worker:
+    container_name: onvi-business-report-worker
+    command: npm run report-worker:start:prod
+    env_file: ./config/env/.env.production
+    build: .
+    restart: always
+  onvi-business-data-raw-worker:
+    container_name: onvi-business-data-raw-worker
+    command: npm run data-raw-worker:start:prod
+    env_file: ./config/env/.env.production
+    build: .
+    restart: always
+  onvi-business-data-raw-cron:
+    container_name: onvi-business-data-raw-cron
+    command: npm run data-raw-cron:start:prod
+    env_file: ./config/env/.env.production
     build: .
     restart: always

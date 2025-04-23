@@ -18,4 +18,8 @@ export class FindMethodsCarWashDeviceTypeUseCase {
   async getByCodeWithNull(input: string): Promise<CarWashDeviceType> {
     return await this.carWashDeviceTypeRepository.findOneByCode(input);
   }
+
+  async getAllByPosId(posId: number): Promise<CarWashDeviceType[]> {
+    return await this.carWashDeviceTypeRepository.findAllByPosId(posId);
+  }
 }

@@ -27,11 +27,15 @@ export class FindMethodsDeviceOperationUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceOperation[]> {
     return await this.deviceOperationRepository.findAllByDeviceIdAndDate(
       deviceId,
       dateStart,
       dateEnd,
+      skip,
+      take,
     );
   }
 
@@ -67,5 +71,17 @@ export class FindMethodsDeviceOperationUseCase {
 
   async getLastByPosIdUseCase(posId: number): Promise<DeviceOperation> {
     return await this.deviceOperationRepository.findLastOperByPosId(posId);
+  }
+
+  async getCountAllByDeviceIdAndDateOper(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return await this.deviceOperationRepository.countAllByDeviceIdAndDateOper(
+      deviceId,
+      dateStart,
+      dateEnd,
+    );
   }
 }

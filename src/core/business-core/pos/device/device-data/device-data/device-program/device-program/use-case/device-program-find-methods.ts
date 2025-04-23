@@ -12,11 +12,15 @@ export class FindMethodsDeviceProgramUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]> {
     return await this.deviceProgramRepository.findAllByDeviceIdAndDate(
       deviceId,
       dateStart,
       dateEnd,
+      skip,
+      take,
     );
   }
   async getAllByOrgIdAndDateProgram(
@@ -24,19 +28,32 @@ export class FindMethodsDeviceProgramUseCase {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByDeviceIdAndDate(
+    return await this.deviceProgramRepository.findAllByOrgIdAndDate(
       organizationId,
       dateStart,
       dateEnd,
     );
   }
   async getAllByPosIdAndDateProgram(
-    organizationId: number,
+    posId: number,
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]> {
     return await this.deviceProgramRepository.findAllByPosIdAndDate(
-      organizationId,
+      posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getAllByPosIdAndProgramCodeAndDate(
+    posId: number,
+    code: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    return await this.deviceProgramRepository.findAllByPosIdAndProgramCodeAndDate(
+      posId,
+      code,
       dateStart,
       dateEnd,
     );
@@ -48,5 +65,31 @@ export class FindMethodsDeviceProgramUseCase {
   }
   async getLastByPosId(posId: number): Promise<DeviceProgram> {
     return await this.deviceProgramRepository.findLastProgramByPosId(posId);
+  }
+
+  async getCountAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return await this.deviceProgramRepository.countAllByDeviceIdAndDateProgram(
+      deviceId,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    return await this.deviceProgramRepository.findAllByPosIdAndPaidTypeAndDate(
+      carWashPosId,
+      isPaid,
+      dateStart,
+      dateEnd,
+    );
   }
 }

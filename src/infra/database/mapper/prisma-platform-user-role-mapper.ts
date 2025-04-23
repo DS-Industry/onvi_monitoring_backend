@@ -9,6 +9,7 @@ export class PrismaUserRoleMapper {
     return new UserRole({
       id: entity.id,
       name: entity.name,
+      description: entity.description,
     });
   }
 
@@ -16,6 +17,7 @@ export class PrismaUserRoleMapper {
     return {
       id: role?.id,
       name: role.name,
+      description: role?.description,
     };
   }
 }

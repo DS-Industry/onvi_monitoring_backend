@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Request,
@@ -30,8 +32,16 @@ import {
   CheckAbilities,
   CreatePosAbility,
   ReadPosAbility,
+  UpdatePosAbility,
 } from '@common/decorators/abilities.decorator';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
+import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
+import { PosConnectionProgramTypeDto } from '@platform-user/core-controller/dto/receive/pos-connection-programType.dto';
+import { PosException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
+import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 
 @Controller('pos')
 export class PosController {
@@ -40,7 +50,9 @@ export class PosController {
     private readonly filterByUserPosUseCase: FilterByUserPosUseCase,
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
+    private readonly planFactPosUseCase: PlanFactPosUseCase,
     private readonly programPosUseCase: ProgramPosUseCase,
+    private readonly connectionPosDeviceProgramTypeUseCase: ConnectionPosDeviceProgramTypeUseCase,
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
@@ -66,7 +78,91 @@ export class PosController {
       }
       return await this.createPosUseCase.execute(data, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get all pos for permission user
+  @Get('filter')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async filterViewPosByUser(
+    @Request() req: any,
+    @Query() data: PlacementFilterDto,
+  ): Promise<PosFilterResponseDto[]> {
+    try {
+      const { ability } = req;
+      return await this.filterByUserPosUseCase.execute(
+        ability,
+        data.placementId,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Monitoring pos all or certain
+  @Get('monitoring')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async monitoringPos(
+    @Request() req: any,
+    @Query() params: PosMonitoringDto,
+  ): Promise<PosMonitoringResponseDto[]> {
+    try {
+      const { ability } = req;
+      let pos = null;
+      if (params.posId != '*') {
+        pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
+      }
+      return await this.monitoringPosUseCase.execute(
+        params.dateStart,
+        params.dateEnd,
+        ability,
+        params.placementId,
+        pos,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Monitoring pos in detail
@@ -88,35 +184,19 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
-    }
-  }
-  //Monitoring pos all or certain
-  @Get('monitoring')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  @HttpCode(200)
-  async monitoringPos(
-    @Request() req: any,
-    @Query() params: PosMonitoringDto,
-  ): Promise<PosMonitoringResponseDto[]> {
-    try {
-      const { ability } = req;
-      let pos = null;
-      if (params.posId) {
-        pos = await this.posValidateRules.getOneByIdValidate(
-          params.posId,
-          ability,
-        );
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
       }
-      return await this.monitoringPosUseCase.execute(
-        params.dateStart,
-        params.dateEnd,
-        ability,
-        pos,
-      );
-    } catch (e) {
-      throw new Error(e);
     }
   }
   //Program pos all or certain
@@ -131,7 +211,7 @@ export class PosController {
     try {
       const { ability } = req;
       let pos = null;
-      if (params.posId) {
+      if (params.posId != '*') {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -141,10 +221,23 @@ export class PosController {
         params.dateStart,
         params.dateEnd,
         ability,
+        params.placementId,
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Program pos in detail
@@ -166,9 +259,100 @@ export class PosController {
         pos,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
+  //Plan-fact pos all or certain
+  @Get('plan-fact')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async planFact(
+    @Request() req: any,
+    @Query() params: PosMonitoringDto,
+  ): Promise<PosPlanFactResponseDto[]> {
+    try {
+      const { ability } = req;
+      let pos = null;
+      if (params.posId != '*') {
+        pos = await this.posValidateRules.getOneByIdValidate(
+          params.posId,
+          ability,
+        );
+      }
+      return await this.planFactPosUseCase.execute(
+        params.dateStart,
+        params.dateEnd,
+        ability,
+        params.placementId,
+        pos,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Connection ProgramTypes
+  @Patch('connection-program/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdatePosAbility())
+  @HttpCode(201)
+  async connectionProgramTypes(
+    @Request() req: any,
+    @Param('posId', ParseIntPipe) id: number,
+    @Body() data: PosConnectionProgramTypeDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.posValidateRules.connectionProgramTypesValidate(
+        id,
+        data.programTypeIds,
+        ability,
+      );
+      return await this.connectionPosDeviceProgramTypeUseCase.execute(
+        id,
+        data.programTypeIds,
+      );
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Get pos by id
   @Get(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -182,22 +366,19 @@ export class PosController {
       const { ability } = req;
       return await this.posValidateRules.getOneByIdValidate(id, ability);
     } catch (e) {
-      throw new Error(e);
-    }
-  }
-  //Get all pos for permission user
-  @Get('filter')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  @HttpCode(200)
-  async filterViewPosByUser(
-    @Request() req: any,
-  ): Promise<PosFilterResponseDto[]> {
-    try {
-      const { ability } = req;
-      return await this.filterByUserPosUseCase.execute(ability);
-    } catch (e) {
-      throw new Error(e);
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

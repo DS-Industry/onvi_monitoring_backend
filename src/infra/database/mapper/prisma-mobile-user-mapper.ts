@@ -1,4 +1,4 @@
-import { Client } from '@mobile-user/client/domain/client';
+import { Client } from "@loyalty/mobile-user/client/domain/client";
 import { MobileUser as PrismaMobileUser, Prisma } from '@prisma/client';
 
 export class PrismaMobileUserMapper {
@@ -9,21 +9,19 @@ export class PrismaMobileUserMapper {
     return new Client({
       id: entity.id,
       name: entity.name,
-      surname: entity.surname,
-      middlename: entity.middlename,
       birthday: entity.birthday,
       phone: entity.phone,
       email: entity.email,
       gender: entity.gender,
       status: entity.status,
       avatar: entity.avatar,
-      country: entity.country,
-      countryCode: entity.countryCode,
-      timezone: entity.timezone,
+      type: entity.type,
+      inn: entity.inn,
+      comment: entity.comment,
+      placementId: entity.placementId,
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      loyaltyCardId: entity.loyaltyCardId,
       mobileUserRoleId: entity.mobileUserRoleId,
     });
   }
@@ -32,21 +30,19 @@ export class PrismaMobileUserMapper {
     return {
       id: client?.id,
       name: client.name,
-      surname: client?.surname,
-      middlename: client?.middlename,
       birthday: client?.birthday,
       phone: client.phone,
       email: client?.email,
       gender: client?.gender,
       status: client?.status,
       avatar: client?.avatar,
-      country: client?.country,
-      countryCode: client?.countryCode,
-      timezone: client?.timezone,
+      type: client.type,
+      inn: client?.inn,
+      comment: client?.comment,
+      placementId: client?.placementId,
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
-      loyaltyCardId: client?.loyaltyCardId,
       mobileUserRoleId: client?.mobileUserRoleId,
     };
   }

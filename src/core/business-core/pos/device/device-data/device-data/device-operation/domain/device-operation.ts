@@ -1,11 +1,12 @@
 import { BaseEntity } from '@utils/entity';
+import { CurrencyType, CurrencyView } from "@prisma/client";
 
 export interface DeviceOperationProps {
   id?: number;
   carWashDeviceId: number;
   operDate: Date;
   loadDate: Date;
-  counter: bigint;
+  counter: string;
   operSum: number;
   confirm: number;
   isAgregate: number;
@@ -13,6 +14,9 @@ export interface DeviceOperationProps {
   currencyId: number;
   isBoxOffice: number;
   errNumId?: number;
+  currencyType?: CurrencyType;
+  currencyName?: string;
+  currencyView?: CurrencyView;
 }
 
 export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
@@ -36,7 +40,7 @@ export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
     return this.props.loadDate;
   }
 
-  get counter(): bigint {
+  get counter(): string {
     return this.props.counter;
   }
 
@@ -66,5 +70,17 @@ export class DeviceOperation extends BaseEntity<DeviceOperationProps> {
 
   get errNumId(): number {
     return this.props.errNumId;
+  }
+
+  get currencyType(): CurrencyType {
+    return this.props.currencyType;
+  }
+
+  get currencyName(): string {
+    return this.props.currencyName;
+  }
+
+  get currencyView(): CurrencyView {
+    return this.props.currencyView;
   }
 }

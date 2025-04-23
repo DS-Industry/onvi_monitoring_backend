@@ -28,7 +28,7 @@ export class ActivateAuthUseCase {
       refreshTokenId: hashedRefreshToken,
     });
     return {
-      user: activeUser,
+      admin: activeUser,
       tokens: {
         accessToken: accessToken.token,
         accessTokenExp: accessToken.expirationDate,

@@ -14,10 +14,24 @@ export abstract class IDeviceProgramRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgram[]>;
+  abstract findAllByPosIdAndProgramCodeAndDate(
+    carWashPosId: number,
+    code: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]>;
+  abstract findAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]>;
   abstract findAllByDeviceIdAndDate(
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]>;
   abstract findLastProgramByPosId(carWashPosId: number): Promise<DeviceProgram>;
   abstract findLastProgramByDeviceId(
@@ -28,4 +42,9 @@ export abstract class IDeviceProgramRepository {
     dateStart: Date,
     carWashDeviceProgramsTypeId: number,
   ): Promise<Date>;
+  abstract countAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number>;
 }

@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -35,6 +36,11 @@ import {
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
+import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
+import { DeviceException, PosException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
 
 @Controller('device')
 export class DeviceController {
@@ -46,6 +52,7 @@ export class DeviceController {
     private readonly dataByDeviceOperationUseCase: DataByDeviceOperationUseCase,
     private readonly dataByDeviceProgramUseCase: DataByDeviceProgramUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
+    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
     private readonly posValidateRules: PosValidateRules,
   ) {}
@@ -66,7 +73,19 @@ export class DeviceController {
         carWashDeviceType,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Monitoring operation on device
@@ -78,17 +97,97 @@ export class DeviceController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
-  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+  ): Promise<DeviceOperationMonitoringResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       await this.deviceValidateRules.getByIdValidate(id, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
       return await this.dataByDeviceOperationUseCase.execute(
         id,
         data.dateStart,
         data.dateEnd,
+        skip,
+        take,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get all program type
+  @Get('program/type')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getAllProgramType(
+    @Request() req: any,
+    @Query() data: PosFilterDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      if (data.posId != '*') {
+        await this.posValidateRules.getOneByIdValidate(data.posId, ability);
+        return await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(
+          data.posId,
+        );
+      } else {
+        return await this.findMethodsDeviceProgramTypeUseCase.getAll();
+      }
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get program type by id
+  @Get('program/type/:id')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getProgramTypeById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    try {
+      return await this.deviceValidateRules.getProgramTypeById(id);
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Program on device
@@ -100,17 +199,37 @@ export class DeviceController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
-  ): Promise<DeviceProgramResponseDto[]> {
+  ): Promise<DeviceProgramResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       await this.deviceValidateRules.getByIdValidate(id, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
       return await this.dataByDeviceProgramUseCase.execute(
         id,
         data.dateStart,
         data.dateEnd,
+        skip,
+        take,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create type device
@@ -123,7 +242,19 @@ export class DeviceController {
       await this.deviceValidateRules.createTypeValidate(data.name, data.code);
       return await this.carWashDeviceTypeCreate.execute(data.name, data.code);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update type device
@@ -140,7 +271,19 @@ export class DeviceController {
         carWashDeviceType,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //All device for user
@@ -150,12 +293,28 @@ export class DeviceController {
   @CheckAbilities(new ReadPosAbility())
   async filterViewDeviceByUser(
     @Request() req: any,
+    @Query() data: PlacementFilterDto,
   ): Promise<DeviceFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.dataByPermissionCarWashDeviceUseCase.execute(ability);
+      return await this.dataByPermissionCarWashDeviceUseCase.execute(
+        ability,
+        data.placementId,
+      );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //All device for pos
@@ -172,7 +331,26 @@ export class DeviceController {
       await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.findMethodsCarWashDeviceUseCase.getAllByPos(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

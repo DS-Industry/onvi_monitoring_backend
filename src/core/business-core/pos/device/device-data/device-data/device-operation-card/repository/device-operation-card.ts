@@ -45,4 +45,31 @@ export class DeviceOperationCardRepository extends IDeviceOperationCardRepositor
       });
     return PrismaCarWashDeviceOperCardMapper.toDomain(deviceOperationCard);
   }
+
+  public async findAllByDeviceIdAndDate(
+    carWashDeviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<DeviceOperationCard[]> {
+    const deviceOperationCards =
+      await this.prisma.carWashDeviceOperationsCardEvent.findMany({
+        skip: skip ?? undefined,
+        take: take ?? undefined,
+        where: {
+          carWashDeviceId,
+          operDate: {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+        orderBy: {
+          operDate: 'asc',
+        },
+      });
+    return deviceOperationCards.map((item) =>
+      PrismaCarWashDeviceOperCardMapper.toDomain(item),
+    );
+  }
 }

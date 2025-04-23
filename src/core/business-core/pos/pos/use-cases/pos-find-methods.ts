@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { IPosRepository } from "@pos/pos/interface/pos";
-import { CreateFullDataPosUseCase } from "@pos/pos/use-cases/pos-create-full-data";
-import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
-import { Pos } from "@pos/pos/domain/pos";
+import { Injectable } from '@nestjs/common';
+import { IPosRepository } from '@pos/pos/interface/pos';
+import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class FindMethodsPosUseCase {
@@ -33,8 +33,19 @@ export class FindMethodsPosUseCase {
     );
   }
 
-  async getAllByAbility(input: any): Promise<PosResponseDto[]> {
-    const poses = await this.posRepository.findAllByPermission(input);
+  async getAllByOrgId(orgId: number): Promise<Pos[]> {
+    return await this.posRepository.findAllByOrgId(orgId);
+  }
+
+  async getAllByUserId(userId: number): Promise<Pos[]> {
+    return await this.posRepository.findAllByUserId(userId);
+  }
+
+  async getAllByAbility(
+    input: any,
+    placementId: number | '*',
+  ): Promise<PosResponseDto[]> {
+    const poses = await this.posRepository.findAllByPermission(input, placementId);
     return await Promise.all(
       poses.map(
         async (pos) => await this.posCreateFullDataUseCase.execute(pos),
@@ -42,7 +53,10 @@ export class FindMethodsPosUseCase {
     );
   }
 
-  async getAllByAbilityPos(input: any): Promise<Pos[]> {
-    return await this.posRepository.findAllByPermission(input);
+  async getAllByAbilityPos(
+    input: any,
+    placementId?: number | '*',
+  ): Promise<Pos[]> {
+    return await this.posRepository.findAllByPermission(input, placementId);
   }
 }

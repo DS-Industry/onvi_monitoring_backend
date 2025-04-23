@@ -37,12 +37,10 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { DeviceProgramRepositoryProvider } from '@pos/device/device-data/device-data/device-program/device-program/provider/device-program';
 import { DeviceProgramHandlerUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-handler';
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
-import { CheckCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-check-car';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { DeviceOperationRepositoryProvider } from '@pos/device/device-data/device-data/device-operation/provider/device-operation';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { DeviceOperationHandlerUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-handler';
-import { DataDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data';
 import { CreateDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-create';
 import { CronDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-cron';
 import { HandlerDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-handler';
@@ -51,7 +49,27 @@ import { BullModule } from '@nestjs/bullmq';
 import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
-import { FileModule } from "@libs/file/module";
+import { FileModule } from '@libs/file/module';
+import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
+import { ConnectionPosDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-connection-pos';
+import { FindMethodsDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-find-methods';
+import { CountCarDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-count-car';
+import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
+import { GetAllTimeStampDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-get-all-time-stamp';
+import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
+import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
+import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
+import { MonthlyPlanPosProvider } from '@pos/monthlyPlanPos/provider/monthlyPlanPos';
+import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
+import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
+import {
+  DeviceProgramChangeRepositoryProvider
+} from "@pos/device/device-data/device-data/device-program/device-program-change/provider/device-program-change";
+import {
+  FindMethodsDeviceProgramChangeUseCase
+} from "@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods";
+import { TestDataCron } from "../../../infra/handler/testData/cron/testData";
+import { ScheduleModule } from "@nestjs/schedule";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -66,9 +84,11 @@ const repositories: Provider[] = [
   DeviceOperationCardRepositoryProvider,
   DeviceServiceRepositoryProvider,
   DeviceProgramTypeRepositoryProvider,
+  DeviceProgramChangeRepositoryProvider,
   DeviceProgramRepositoryProvider,
   DeviceOperationRepositoryProvider,
   DeviceDataRawRepositoryProvider,
+  MonthlyPlanPosProvider,
 ];
 
 const posUseCase: Provider[] = [
@@ -80,6 +100,12 @@ const posUseCase: Provider[] = [
   ProgramPosUseCase,
   PosProgramFullUseCase,
   FindMethodsPosUseCase,
+  PosChemistryProductionUseCase,
+];
+
+const monthlyPlanPos: Provider[] = [
+  FindMethodsMonthlyPlanPosUseCase,
+  PlanFactPosUseCase,
 ];
 
 const carWashPosUseCase: Provider[] = [FindMethodsCarWashPosUseCase];
@@ -107,18 +133,25 @@ const deviceDataHandlerUseCase: Provider[] = [
   DeviceOperationCardHandlerUseCase,
   DeviceServiceHandlerUseCase,
   FindMethodsDeviceProgramTypeUseCase,
+  ConnectionPosDeviceProgramTypeUseCase,
   DeviceProgramHandlerUseCase,
   DeviceOperationHandlerUseCase,
+  FindMethodsDeviceEventUseCase,
+  GetAllTimeStampDeviceEventUseCase,
+  CreateDeviceEventUseCase,
+  FindMethodsDeviceProgramChangeUseCase,
 ];
 
 const deviceDataUseCase: Provider[] = [
   DataDeviceProgramUseCase,
-  DataDeviceOperationUseCase,
   DataByDeviceProgramUseCase,
   DataByDeviceOperationUseCase,
   FindMethodsDeviceProgramUseCase,
   FindMethodsDeviceOperationUseCase,
-  CheckCarDeviceProgramUseCase,
+  CountCarDeviceProgramUseCase,
+  FindMethodsDeviceOperationCardUseCase,
+  CleanDataDeviceProgramUseCase,
+  SuspiciouslyDataDeviceProgramUseCase,
 ];
 
 const deviceDataRawHandlerUseCase: Provider[] = [
@@ -134,6 +167,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     BullModule.registerQueue({
       name: 'deviceDataRaw',
     }),
+    ScheduleModule.forRoot(),
   ],
   providers: [
     ...repositories,
@@ -145,6 +179,8 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataHandlerUseCase,
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
+    ...monthlyPlanPos,
+    TestDataCron,
   ],
   exports: [
     ...carWashPosUseCase,
@@ -153,6 +189,8 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
     ...deviceTypeUseCase,
+    ...deviceDataHandlerUseCase,
+    ...monthlyPlanPos,
   ],
 })
 export class PosModule {}

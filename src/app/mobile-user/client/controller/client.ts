@@ -8,11 +8,11 @@ import {
   UploadedFile,
   UseInterceptors
 } from '@nestjs/common';
-import { GetByIdClientUseCase } from '@mobile-user/client/use-cases/client-get-by-id';
+import { GetByIdClientUseCase } from '../../../../core/loyalty-core/mobile-user/client/use-cases/client-get-by-id';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadAvatarClientDto } from '@mobile-user/client/controller/dto/client-upload-avatar';
-import { UploadAvatarClientUseCase } from '@mobile-user/client/use-cases/client-avatar-upload';
-import { DownloadAvatarClientUseCase } from '@mobile-user/client/use-cases/client-avatar-download';
+import { UploadAvatarClientUseCase } from '../../../../core/loyalty-core/mobile-user/client/use-cases/client-avatar-upload';
+import { DownloadAvatarClientUseCase } from '../../../../core/loyalty-core/mobile-user/client/use-cases/client-avatar-download';
 
 @Controller('client')
 export class ClientController {

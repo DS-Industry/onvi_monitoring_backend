@@ -13,8 +13,15 @@ import { BusinessCoreModule } from '@business-core/business-core.module';
 import { PlatformDeviceModule } from '@platform-device/platform-device.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerDeviceDataRawModule } from './infra/handler-device-data-raw/handler-device-data-raw.module';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
+import { EquipmentCoreModule } from './core/equipment-core/equipment-core.module';
+import { HandlerModule } from './infra/handler/handler.module';
+import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { FinanceCoreModule } from '@finance/finance-core.module';
+import { ReportCoreModule } from "@report/report-core.module";
+import { LoyaltyCoreModule } from "./core/loyalty-core/loyalty-core.module";
+import { HrCoreModule } from "@hr/hr-core.module";
 
 @Module({
   imports: [
@@ -66,17 +73,27 @@ import { LoggerModule as Logger } from '../src/infra/logger/module';
         host: process.env.REDIS_HOST,
         port: Number(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
+        keepAlive: 30000,
+        connectTimeout: 60000,
+        retryStrategy: (times) => Math.min(times * 100, 3000),
       },
     }),
     RouterModule.register(routeConfig),
     ScheduleModule.forRoot(),
+    PrometheusModule.register(),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,
     MobileUserModule,
+    LoyaltyCoreModule,
     PlatformDeviceModule,
     BusinessCoreModule,
-    HandlerDeviceDataRawModule,
+    EquipmentCoreModule,
+    WarehouseCoreModule,
+    FinanceCoreModule,
+    HrCoreModule,
+    ReportCoreModule,
+    HandlerModule,
     Logger,
   ],
   controllers: [],

@@ -22,7 +22,7 @@ export class CronDeviceDataRawUseCase {
         await this.deviceDataRawRepository.update(deviceDataRaw);
       await this.dataQueue.add('deviceDataRaw', newDeviceDataRaw, {
         removeOnComplete: true,
-        removeOnFail: false,
+        removeOnFail: true,
       });
     }
   }

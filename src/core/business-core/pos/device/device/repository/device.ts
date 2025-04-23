@@ -32,6 +32,9 @@ export class CarWashDeviceRepository extends ICarWashDeviceRepository {
       where: {
         carWashPosId,
       },
+      include: {
+        carWashDeviceType: true,
+      },
     });
     return carWashDevice.map((item) =>
       PrismaCarWashDeviceMapper.toDomain(item),

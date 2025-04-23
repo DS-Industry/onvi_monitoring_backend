@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -41,6 +42,12 @@ import {
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
+import { OrganizationException } from '@exception/option.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
+import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
+import { OrganizationStatisticGrafResponseDto } from '@platform-user/core-controller/dto/response/organization-statistic-graf-response.dto';
+import { GetStatisticsGrafOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics-graf';
 
 @Controller('organization')
 export class OrganizationController {
@@ -54,7 +61,9 @@ export class OrganizationController {
     private readonly sendOrganizationConfirmMailUseCase: SendOrganizationConfirmMailUseCase,
     private readonly organizationValidateRules: OrganizationValidateRules,
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
+    private readonly findMethodsDocumentUseCase: FindMethodsDocumentUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
+    private readonly getStatisticsGrafOrganizationUseCase: GetStatisticsGrafOrganizationUseCase,
   ) {}
   //All organization for user
   @Get('filter')
@@ -63,12 +72,28 @@ export class OrganizationController {
   @HttpCode(200)
   async filterViewOrganizationByUser(
     @Request() req: any,
+    @Query() data: PlacementFilterDto,
   ): Promise<OrganizationFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.filterByUserOrganizationUseCase.execute(ability);
+      return await this.filterByUserOrganizationUseCase.execute(
+        ability,
+        data.placementId,
+      );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Create organization
@@ -85,7 +110,19 @@ export class OrganizationController {
       await this.organizationValidateRules.createValidate(data.fullName);
       return await this.organizationCreate.execute(data, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update organization
@@ -97,12 +134,28 @@ export class OrganizationController {
     @Request() req: any,
     @Body() data: OrganizationUpdateDto,
   ): Promise<any> {
-    const { ability } = req;
-    const organization = await this.organizationValidateRules.updateValidate(
-      data.organizationId,
-      ability,
-    );
-    return await this.updateOrganizationUseCase.execute(data, organization);
+    try {
+      const { ability } = req;
+      const organization = await this.organizationValidateRules.updateValidate(
+        data.organizationId,
+        ability,
+      );
+      return await this.updateOrganizationUseCase.execute(data, organization);
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
   }
   //Send email for add worker
   @Post('worker')
@@ -120,9 +173,8 @@ export class OrganizationController {
         user.id,
       );
       return await this.sendOrganizationConfirmMailUseCase.execute(
-        data.email,
+        data,
         'Приглашение в организацию:',
-        data.organizationId,
       );
     } catch (e) {
       throw new Error(e);
@@ -163,29 +215,81 @@ export class OrganizationController {
       };
       return await this.getStatisticsOrganizationUseCase.execute(input);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Statistics-graf for organization
+  @Get('statistics-graf')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @HttpCode(200)
+  async statisticsGrafOrg(
+    @Request() req: any,
+    @Query() data: DataFilterDto,
+  ): Promise<OrganizationStatisticGrafResponseDto[]> {
+    try {
+      const { ability } = req;
+      return await this.getStatisticsGrafOrganizationUseCase.execute(
+        data.dateStart,
+        data.dateEnd,
+        ability,
+      );
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Rating for organization
   @Get('rating')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
   async ratingPosByOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
   ): Promise<any> {
     try {
-      const { user } = req;
-      const organizationId =
-        await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
-      const input = {
-        dateStart: data.dateStart,
-        dateEnd: data.dateEnd,
-        organizationId: organizationId[0],
-      };
-      return await this.getRatingOrganizationUseCase.execute(input);
+      const { ability } = req;
+      return await this.getRatingOrganizationUseCase.execute(
+        data.dateStart,
+        data.dateEnd,
+        ability,
+      );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get org by id
@@ -204,7 +308,19 @@ export class OrganizationController {
         ability,
       );
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all worker for org
@@ -214,7 +330,51 @@ export class OrganizationController {
     try {
       return this.findMethodsOrganizationUseCase.getAllWorker(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Get all worker for org
+  @Get('document/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getDocumentById(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      const organization =
+        await this.organizationValidateRules.getOneByIdValidate(id, ability);
+      return await this.findMethodsDocumentUseCase.getById(
+        organization.organizationDocumentId,
+      );
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all pos for org
@@ -228,7 +388,19 @@ export class OrganizationController {
     try {
       return this.findMethodsOrganizationUseCase.getAllPos(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Get all org for owner
@@ -240,7 +412,47 @@ export class OrganizationController {
     try {
       return await this.findMethodsOrganizationUseCase.getAllByOwner(id);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('contact/:id')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getContactData(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    try {
+      const organization = await this.organizationValidateRules.getContact(id);
+      return {
+        name: organization.name,
+        address: organization?.address,
+        status: organization.organizationStatus,
+        type: organization.organizationType,
+      };
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Add document for org
@@ -258,7 +470,19 @@ export class OrganizationController {
         );
       return await this.organizationAddDocuments.execute(organization, file);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

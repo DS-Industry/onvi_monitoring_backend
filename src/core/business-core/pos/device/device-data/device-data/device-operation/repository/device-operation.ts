@@ -113,6 +113,9 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
             lte: dateEnd,
           },
         },
+        include: {
+          currency: true,
+        },
         orderBy: {
           operDate: 'asc',
         },
@@ -126,15 +129,22 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceOperation[]> {
     const deviceOperations =
       await this.prisma.carWashDeviceOperationsEvent.findMany({
+        skip: skip ?? undefined,
+        take: take ?? undefined,
         where: {
           carWashDeviceId,
           operDate: {
             gte: dateStart,
             lte: dateEnd,
           },
+        },
+        include: {
+          currency: true,
         },
         orderBy: {
           operDate: 'asc',
@@ -175,5 +185,18 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
         },
       });
     return PrismaCarWashDeviceOperMapper.toDomain(deviceOperation);
+  }
+
+  public async countAllByDeviceIdAndDateOper(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return this.prisma.carWashDeviceOperationsEvent.count({
+      where: {
+        carWashDeviceId: deviceId,
+        operDate: { gte: dateStart, lte: dateEnd },
+      },
+    });
   }
 }

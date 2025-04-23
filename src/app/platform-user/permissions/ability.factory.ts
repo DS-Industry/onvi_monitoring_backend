@@ -24,6 +24,10 @@ export class AbilityFactory {
     const posCondition = await this.findMethodsUserUseCase.getPosPermissionById(
       user.id,
     );
+    const loyaltyProgramCondition =
+      await this.findMethodsUserUseCase.getLoyaltyProgramPermissionById(
+        user.id,
+      );
 
     const objectMap = {};
     for (const permission of permissions) {
@@ -40,9 +44,23 @@ export class AbilityFactory {
           id: { in: posCondition },
           organizationId: { in: organizationCondition },
         };
+      } else if (objectMap[permission.objectId].name == 'LoyaltyProgram') {
+        condition = {
+          id: { in: loyaltyProgramCondition },
+        };
       } else if (objectMap[permission.objectId].name == 'Organization') {
         condition = {
           id: { in: organizationCondition },
+        };
+      } else if (
+        objectMap[permission.objectId].name == 'Incident' ||
+        objectMap[permission.objectId].name == 'TechTask' ||
+        objectMap[permission.objectId].name == 'Warehouse' ||
+        objectMap[permission.objectId].name == 'CashCollection' ||
+        objectMap[permission.objectId].name == 'ShiftReport'
+      ) {
+        condition = {
+          posId: { in: posCondition },
         };
       }
       return {

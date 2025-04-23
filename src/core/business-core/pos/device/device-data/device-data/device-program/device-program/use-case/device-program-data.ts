@@ -1,41 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { PosProgramInfo } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
-import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 
 @Injectable()
 export class DataDeviceProgramUseCase {
-  constructor(
-    private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
-  ) {}
+  constructor() {}
 
   async execute(
     input: DeviceProgram[],
     lastProg: DeviceProgram,
   ): Promise<PosProgramInfo[]> {
     const groupedPrograms: { [key: string]: PosProgramInfo } = {};
+
     await Promise.all(
       input.map(async (deviceProgram) => {
-        const programType =
-          await this.findMethodsDeviceProgramTypeUseCase.getById(
-            deviceProgram.carWashDeviceProgramsTypeId,
-          );
-        if (groupedPrograms[programType.name]) {
-          groupedPrograms[programType.name].counter += 1;
-          groupedPrograms[programType.name].totalTime += Math.trunc(
+        const programName = deviceProgram.programName;
+
+        if (groupedPrograms[programName]) {
+          groupedPrograms[programName].counter += 1;
+          groupedPrograms[programName].totalTime += Math.trunc(
             (deviceProgram.endDate.getTime() -
               deviceProgram.beginDate.getTime()) /
               1000,
           );
-          if (
-            groupedPrograms[programType.name].lastOper < deviceProgram.beginDate
-          ) {
-            groupedPrograms[programType.name].lastOper =
-              deviceProgram.beginDate;
+          if (groupedPrograms[programName].lastOper < deviceProgram.beginDate) {
+            groupedPrograms[programName].lastOper = deviceProgram.beginDate;
           }
         } else {
-          groupedPrograms[programType.name] = {
-            programName: programType.name,
+          groupedPrograms[programName] = {
+            programName: programName,
             counter: 1,
             totalTime: Math.trunc(
               (deviceProgram.endDate.getTime() -

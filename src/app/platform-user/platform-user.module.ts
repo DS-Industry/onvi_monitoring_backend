@@ -47,6 +47,30 @@ import { OrganizationManageUserUseCase } from '@platform-user/user/use-cases/use
 import { PermissionController } from '@platform-user/core-controller/permission';
 import { UserPermissionValidateRules } from '@platform-user/validate/validate-rules/user-permission-validate-rules';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { IncidentController } from '@platform-user/core-controller/incident';
+import { IncidentValidateRules } from '@platform-user/validate/validate-rules/incident-validate-rules';
+import { EquipmentController } from '@platform-user/core-controller/equipment';
+import { TechTaskController } from '@platform-user/core-controller/techTask';
+import { EquipmentCoreModule } from '../../core/equipment-core/equipment-core.module';
+import { TechTaskValidateRules } from '@platform-user/validate/validate-rules/techTask-rules';
+import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
+import { WarehouseController } from '@platform-user/core-controller/warehouse';
+import { WarehouseValidateRules } from '@platform-user/validate/validate-rules/warehouse-validate-rules';
+import { FinanceController } from '@platform-user/core-controller/finance';
+import { FinanceCoreModule } from '@finance/finance-core.module';
+import { FinanceValidateRules } from '@platform-user/validate/validate-rules/finance-rules';
+import { ReportCoreModule } from '@report/report-core.module';
+import { ReportController } from '@platform-user/core-controller/report';
+import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
+import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { PlacementController } from '@platform-user/core-controller/placement';
+import { LoyaltyValidateRules } from "@platform-user/validate/validate-rules/loyalty-validate-rules";
+import { LoyaltyCoreModule } from "@loyalty/loyalty-core.module";
+import { LoyaltyController } from "@platform-user/core-controller/loyalty";
+import { HrController } from "@platform-user/core-controller/hr";
+import { HrCoreModule } from "@hr/hr-core.module";
+import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-validate-rules";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -61,6 +85,15 @@ const controllers = [
   PosController,
   UserController,
   PermissionController,
+  IncidentController,
+  TechTaskController,
+  EquipmentController,
+  WarehouseController,
+  FinanceController,
+  ReportController,
+  PlacementController,
+  LoyaltyController,
+  HrController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -84,6 +117,8 @@ const userUseCase: Provider[] = [
   UpdateUserUseCase,
   DownloadAvatarUserUseCase,
   OrganizationManageUserUseCase,
+  PosManageUserUseCase,
+  ConnectionUserPosUseCase,
 ];
 
 const confirmMailUseCase: Provider[] = [
@@ -99,6 +134,13 @@ const validate: Provider[] = [
   AuthValidateRules,
   UserValidateRules,
   UserPermissionValidateRules,
+  IncidentValidateRules,
+  TechTaskValidateRules,
+  WarehouseValidateRules,
+  FinanceValidateRules,
+  ReportValidateRules,
+  LoyaltyValidateRules,
+  HrValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -115,6 +157,12 @@ const permission: Provider[] = [
     DateModule,
     MailModule,
     BusinessCoreModule,
+    EquipmentCoreModule,
+    WarehouseCoreModule,
+    FinanceCoreModule,
+    ReportCoreModule,
+    LoyaltyCoreModule,
+    HrCoreModule,
     ObjectModule,
     FileModule,
   ],

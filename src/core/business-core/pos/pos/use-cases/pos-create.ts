@@ -40,7 +40,6 @@ export class CreatePosUseCase {
     const posData = new Pos({
       name: input.name,
       slug: slugify(input.name, '_'),
-      monthlyPlan: input.monthlyPlan,
       timeWork: input.timeWork,
       addressId: address.id,
       organizationId: input.organizationId,
@@ -64,6 +63,7 @@ export class CreatePosUseCase {
 
     const nameCarWashPos = pos.name + ' Car Wash';
     const carWashPosData = new CarWashPos({
+      id: pos.id,
       name: nameCarWashPos,
       slug: slugify(nameCarWashPos, '_'),
       posId: pos.id,

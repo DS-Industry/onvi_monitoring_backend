@@ -89,6 +89,68 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
             lte: dateEnd,
           },
         },
+        include: {
+          carWashDeviceProgramsType: true,
+        },
+        orderBy: {
+          beginDate: 'asc',
+        },
+      });
+    return devicePrograms.map((item) =>
+      PrismaCarWashDeviceProgramMapper.toDomain(item),
+    );
+  }
+
+  public async findAllByPosIdAndProgramCodeAndDate(
+    carWashPosId: number,
+    code: string,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    const devicePrograms =
+      await this.prisma.carWashDeviceProgramsEvent.findMany({
+        where: {
+          carWashDevice: {
+            carWashPosId,
+          },
+          carWashDeviceProgramsType: {
+            code,
+          },
+          beginDate: {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+        orderBy: {
+          beginDate: 'asc',
+        },
+      });
+    return devicePrograms.map((item) =>
+      PrismaCarWashDeviceProgramMapper.toDomain(item),
+    );
+  }
+
+  public async findAllByPosIdAndPaidTypeAndDate(
+    carWashPosId: number,
+    isPaid: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgram[]> {
+    const devicePrograms =
+      await this.prisma.carWashDeviceProgramsEvent.findMany({
+        where: {
+          carWashDevice: {
+            carWashPosId,
+          },
+          isPaid,
+          beginDate: {
+            gte: dateStart,
+            lte: dateEnd,
+          },
+        },
+        include: {
+          carWashDeviceProgramsType: true,
+        },
         orderBy: {
           beginDate: 'asc',
         },
@@ -102,15 +164,22 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    skip?: number,
+    take?: number,
   ): Promise<DeviceProgram[]> {
     const devicePrograms =
       await this.prisma.carWashDeviceProgramsEvent.findMany({
+        skip: skip,
+        take: take,
         where: {
           carWashDeviceId,
           beginDate: {
             gte: dateStart,
             lte: dateEnd,
           },
+        },
+        include: {
+          carWashDeviceProgramsType: true,
         },
         orderBy: {
           beginDate: 'asc',
@@ -173,5 +242,18 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
       return null;
     }
     return deviceProgram.beginDate;
+  }
+
+  public async countAllByDeviceIdAndDateProgram(
+    deviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<number> {
+    return this.prisma.carWashDeviceProgramsEvent.count({
+      where: {
+        carWashDeviceId: deviceId,
+        beginDate: { gte: dateStart, lte: dateEnd },
+      },
+    });
   }
 }

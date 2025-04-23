@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-user/auth/domain/jwt-payload';
 import { User } from '@platform-user/user/domain/user';
 import { ValidateUserForJwtStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-jwt-strategy';
+import { UserException } from "@exception/option.exceptions";
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
@@ -22,7 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
     try {
       return await this.validateJwtStrategyUseCase.execute(payload.email);
     } catch (e) {
-      throw new Error('error');
+      throw new UserException(
+        USER_AUTHORIZATION_EXCEPTION_CODE,
+        'Unauthorized',
+      );
     }
   }
 }

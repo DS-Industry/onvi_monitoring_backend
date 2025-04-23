@@ -1,7 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Req,
   Request,
@@ -25,6 +29,8 @@ import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-re
 import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { UserException } from '@exception/option.exceptions';
 
 @Controller('auth')
 export class Auth {
@@ -60,7 +66,19 @@ export class Auth {
         );
       return { ...response, permissionInfo };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //register
@@ -75,29 +93,77 @@ export class Auth {
         statusMail: sendMail,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Register worker in org on confirm string
-  @Post('/worker')
+  @Post('/worker/:confirmString')
   @HttpCode(201)
-  async registerWorker(@Body() body: AuthRegisterWorkerDto): Promise<any> {
+  async registerWorker(
+    @Body() body: AuthRegisterWorkerDto,
+    @Param('confirmString') confirmString: string,
+  ): Promise<any> {
     try {
       const organizationIdConfirmMail =
-        await this.authValidateRules.registerWorkerValidate(
-          body.email,
-          body.confirmString,
-        );
-      const { correctUser, sendMail } = await this.authRegisterWorker.execute(
+        await this.authValidateRules.registerWorker(confirmString);
+      const { user, tokens } = await this.authRegisterWorker.execute(
         body,
         organizationIdConfirmMail,
       );
       return {
-        user: correctUser,
-        statusMail: sendMail,
+        user: user,
+        tokens: tokens,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('/worker/valid/:confirmString')
+  @HttpCode(201)
+  async validWorker(
+    @Param('confirmString') confirmString: string,
+  ): Promise<any> {
+    try {
+      await this.authValidateRules.registerWorkerValidate(confirmString);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Activation account
@@ -117,9 +183,26 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authActive.execute(user);
+      const response = await this.authActive.execute(user);
+      const permissionInfo =
+        await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
+          response.admin,
+        );
+      return { ...response, permissionInfo };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Update refresh
@@ -138,7 +221,19 @@ export class Auth {
         accessTokenExp: accessToken.expirationDate,
       };
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Reset password
@@ -160,7 +255,19 @@ export class Auth {
       }
       return await this.passwordReset.execute(user, body.newPassword);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Send email for reset password
@@ -171,7 +278,19 @@ export class Auth {
       await this.authValidateRules.passwordConfirmValidate(body.email);
       return await this.sendConfirm.execute(body.email, 'Смена пароля');
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
   //Valid confirm string
@@ -182,7 +301,19 @@ export class Auth {
     try {
       return true;
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 }

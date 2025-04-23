@@ -14,6 +14,7 @@ export interface DeviceProgramProps {
   isAgregate?: number;
   minute?: Prisma.Decimal;
   errNumId?: number;
+  programName?: string;
 }
 
 export class DeviceProgram extends BaseEntity<DeviceProgramProps> {
@@ -67,5 +68,9 @@ export class DeviceProgram extends BaseEntity<DeviceProgramProps> {
 
   get errNumId(): number {
     return this.props.errNumId;
+  }
+
+  get programName(): string {
+    return this.props.programName;
   }
 }
