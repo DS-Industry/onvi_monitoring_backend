@@ -1,5 +1,5 @@
-import { PlatformUserObjects as PrismaObject, Prisma } from '@prisma/client';
-import { ObjectPermissions } from '@platform-admin/object/domain/object';
+import { ObjectPermissions as PrismaObject, Prisma } from '@prisma/client';
+import { ObjectPermissions } from '../../object/domain/object';
 
 export class PrismaObjectMapper {
   static toDomain(entity: PrismaObject): ObjectPermissions {
@@ -14,7 +14,7 @@ export class PrismaObjectMapper {
 
   static toPrisma(
     object: ObjectPermissions,
-  ): Prisma.PlatformUserObjectsUncheckedCreateInput {
+  ): Prisma.ObjectPermissionsUncheckedCreateInput {
     return {
       id: object?.id,
       name: object.name,

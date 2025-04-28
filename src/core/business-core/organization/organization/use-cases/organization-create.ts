@@ -1,42 +1,69 @@
 import { Injectable } from '@nestjs/common';
 import { IOrganizationRepository } from '../interfaces/organization';
-import { CreateAddressUseCase } from '@address/use-case/address-create';
-import { OrganizationCreateDto } from '@platform-user/organization/controller/dto/organization-create.dto';
 import { Organization } from '../domain/organization';
 import { StatusOrganization } from '@prisma/client';
 import slugify from 'slugify';
 import { User } from '@platform-user/user/domain/user';
+import { OrganizationCreateDto } from '@organization/organization/use-cases/dto/organization-create.dto';
+import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
+import {
+  Documents,
+  DocumentsProps,
+} from '@organization/documents/domain/documents';
 
 @Injectable()
 export class CreateOrganizationUseCase {
   constructor(
     private readonly organizationRepository: IOrganizationRepository,
-    private readonly createAddressUseCase: CreateAddressUseCase,
+    private readonly documentRepository: IDocumentsRepository,
   ) {}
 
   async execute(
     input: OrganizationCreateDto,
     owner: User,
   ): Promise<Organization> {
-    const checkOrganization = await this.organizationRepository.findOneByName(
-      input.name,
-    );
-    if (checkOrganization) {
-      throw new Error('organization exists');
+    let documentPropsDate: DocumentsProps;
+    if (input.organizationType == 'LegalEntity') {
+      documentPropsDate = {
+        rateVat: input.rateVat,
+        inn: input.inn,
+        okpo: input.okpo,
+        kpp: input.kpp,
+        ogrn: input.ogrn,
+        bik: input.bik,
+        correspondentAccount: input.correspondentAccount,
+        bank: input.bank,
+        settlementAccount: input.settlementAccount,
+        addressBank: input.addressBank,
+      };
+    } else {
+      documentPropsDate = {
+        rateVat: input.rateVat,
+        inn: input.inn,
+        okpo: input.okpo,
+        ogrn: input.ogrn,
+        bik: input.bik,
+        correspondentAccount: input.correspondentAccount,
+        bank: input.bank,
+        settlementAccount: input.settlementAccount,
+        addressBank: input.addressBank,
+        certificateNumber: input.certificateNumber,
+        dateCertificate: input.dateCertificate,
+      };
     }
-
-    const address = await this.createAddressUseCase.execute(input.address);
+    const documentData = new Documents(documentPropsDate);
+    const document = await this.documentRepository.create(documentData);
     const organizationData = new Organization({
-      name: input.name,
-      slug: slugify(input.name, '_'),
-      addressId: address.id,
+      name: input.fullName,
+      slug: slugify(input.fullName, '_'),
+      address: input.addressRegistration,
       organizationStatus: StatusOrganization.VERIFICATE,
       organizationType: input.organizationType,
+      organizationDocumentId: document.id,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
       ownerId: owner.id,
     });
-
     return await this.organizationRepository.create(organizationData);
   }
 }

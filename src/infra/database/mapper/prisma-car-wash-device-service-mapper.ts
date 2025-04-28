@@ -2,7 +2,7 @@ import {
   CarWashDeviceServiceEvent as PrismaCarWashDeviceServiceEvent,
   Prisma,
 } from '@prisma/client';
-import { DeviceService } from '@device/device-service/domain/device-service';
+import { DeviceService } from '@pos/device/device-data/device-data/device-service/domain/device-service';
 
 export class PrismaCarWashDeviceServiceMapper {
   static toDomain(entity: PrismaCarWashDeviceServiceEvent): DeviceService {
@@ -16,7 +16,7 @@ export class PrismaCarWashDeviceServiceMapper {
       beginDate: entity.beginDate,
       endDate: entity.endDate,
       loadDate: entity.loadDate,
-      counter: entity.counter,
+      counter: entity.counter.toString(),
       localId: entity.localId,
       errNumId: entity.errNumId,
     });
@@ -32,7 +32,7 @@ export class PrismaCarWashDeviceServiceMapper {
       beginDate: deviceService.beginDate,
       endDate: deviceService.endDate,
       loadDate: deviceService.loadDate,
-      counter: deviceService.counter,
+      counter: BigInt(deviceService.counter),
       localId: deviceService.localId,
       errNumId: deviceService.errNumId,
     };

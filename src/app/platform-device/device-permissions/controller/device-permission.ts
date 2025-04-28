@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, Get, Param } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Get, Param, ParseIntPipe } from "@nestjs/common";
 import { CreateDevicePermissionUseCase } from '../use-cases/permission-create';
 import { GetAllDevicePermissionsUseCase } from '../use-cases/permission-get-all';
 import { GetDevicePermissionByIdUseCase } from '../use-cases/permission-get-by-id';
@@ -31,7 +31,7 @@ export class DevicePermissionsController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: number): Promise<any> {
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       return await this.getDevicePermissionByIdUseCase.execute(id);
     } catch (e) {

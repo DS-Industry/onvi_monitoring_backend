@@ -8,26 +8,27 @@ import {
   Matches,
 } from 'class-validator';
 import { StatusUser } from '@prisma/client';
+import { Transform } from "class-transformer";
 
 export class AuthRegisterDto {
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
   @IsString()
-  @IsNotEmpty({ message: 'Surname is required' })
-  surname: string;
+  @IsOptional()
+  surname?: string;
   @IsString()
   @IsOptional()
   middlename?: string;
-  @IsDate()
-  @IsOptional()
-  birthday?: Date;
+  @IsNotEmpty({ message: 'birthday is required' })
+  @Transform(({ value }) => new Date(value))
+  birthday: Date;
   @IsString()
-  @IsOptional()
+  @IsNotEmpty({ message: 'phone is required' })
   @Matches(/^\+7(9\d{9})$/, {
     message: 'Phone number must be valid',
   })
-  phone?: string;
+  phone: string;
   @IsEmail()
   @IsNotEmpty({ message: 'Email is required' })
   email: string;
@@ -35,21 +36,18 @@ export class AuthRegisterDto {
   @IsNotEmpty({ message: 'Password number is required' })
   password: string;
   @IsString()
-  @IsNotEmpty({ message: 'Password number is required' })
-  checkPassword: string;
-  @IsString()
-  @IsNotEmpty({ message: 'Gender is required' })
-  gender: string;
+  @IsOptional()
+  gender?: string;
   @IsString()
   @IsOptional()
   avatar?: string;
   @IsString()
-  @IsNotEmpty({ message: 'Country is required' })
-  country: string;
+  @IsOptional()
+  country?: string;
   @IsNumber()
-  @IsNotEmpty({ message: 'Country code is required' })
-  countryCode: number;
+  @IsOptional()
+  countryCode?: number;
   @IsNumber()
-  @IsNotEmpty({ message: 'Timezone is required' })
-  timezone: number;
+  @IsOptional()
+  timezone?: number;
 }

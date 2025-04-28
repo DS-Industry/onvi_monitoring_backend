@@ -11,6 +11,10 @@ export class PrismaCarWashPosMapper {
       name: entity.name,
       slug: entity.slug,
       posId: entity.posId,
+      carWashPosType: entity.carWashPosType,
+      minSumOrder: entity.minSumOrder,
+      maxSumOrder: entity.maxSumOrder,
+      stepSumOrder: entity.stepSumOrder,
     });
   }
 
@@ -22,6 +26,10 @@ export class PrismaCarWashPosMapper {
       name: carWashPos.name,
       slug: carWashPos.slug,
       posId: carWashPos.posId,
+      carWashPosType: carWashPos.carWashPosType,
+      minSumOrder: carWashPos.minSumOrder,
+      maxSumOrder: carWashPos.maxSumOrder,
+      stepSumOrder: carWashPos.stepSumOrder,
     };
   }
 }

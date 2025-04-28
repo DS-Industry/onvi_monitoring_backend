@@ -15,7 +15,7 @@ export class SendConfirmMailUseCase {
 
   async execute(email: string, subject: string): Promise<any> {
     const confirmTime = this.dateService.generateOtpTime();
-    const confirmString = randomstring.generate(15);
+    const confirmString = `${randomstring.generate({ charset: 'numeric', length: 3 })}-${randomstring.generate({ charset: 'numeric', length: 3 })}`;
     const confirmModel = new ConfirmMail({
       email: email,
       confirmString: confirmString,

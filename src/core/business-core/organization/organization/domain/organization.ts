@@ -1,13 +1,11 @@
 import { BaseEntity } from '@utils/entity';
 import { StatusOrganization, TypeOrganization } from '@prisma/client';
-import { Address } from "../../../address/domain/address";
 
 export interface OrganizationProps {
   id?: number;
   name: string;
   slug: string;
-  addressId?: number;
-  address?: Address;
+  address?: string;
   organizationDocumentId?: number;
   organizationStatus: StatusOrganization;
   organizationType: TypeOrganization;
@@ -33,11 +31,7 @@ export class Organization extends BaseEntity<OrganizationProps> {
     return this.props.slug;
   }
 
-  get addressId(): number {
-    return this.props.addressId;
-  }
-
-  get address(): Address {
+  get address(): string {
     return this.props.address;
   }
 
@@ -73,11 +67,7 @@ export class Organization extends BaseEntity<OrganizationProps> {
     this.props.slug = slug;
   }
 
-  set addressId(addressId: number) {
-    this.props.addressId = addressId;
-  }
-
-  set address(address: Address) {
+  set address(address: string) {
     this.props.address = address;
   }
 

@@ -1,5 +1,5 @@
 import { DeviceDataRaw as PrismaDeviceDataRaw, Prisma } from '@prisma/client';
-import { DeviceDataRaw } from '@device/device-data-raw/domain/device-data-raw';
+import { DeviceDataRaw } from '@pos/device/device-data/device-data-raw/domain/device-data-raw';
 
 export class PrismaDeviceDataRawMapper {
   static toDomain(entity: PrismaDeviceDataRaw): DeviceDataRaw {

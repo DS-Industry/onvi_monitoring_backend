@@ -2,7 +2,7 @@ import {
   CarWashDeviceOperationsCardEvent as PrismaCarWashDeviceOperCard,
   Prisma,
 } from '@prisma/client';
-import { DeviceOperationCard } from '@device/device-operation-card/domain/device-operation-card';
+import { DeviceOperationCard } from '@pos/device/device-data/device-data/device-operation-card/domain/device-operation-card';
 
 export class PrismaCarWashDeviceOperCardMapper {
   static toDomain(entity: PrismaCarWashDeviceOperCard): DeviceOperationCard {

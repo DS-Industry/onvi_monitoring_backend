@@ -1,36 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateOrganizationUseCase } from './organization-update';
-import { GetByIdOrganizationUseCase } from './organization-get-by-id';
-import { CreateDocumentDto } from '@platform-user/organization/controller/dto/document-create.dto';
-import { CreateDocumentUseCase } from '../../documents/use-cases/document-create';
 import { StatusOrganization } from '@prisma/client';
+import { v4 as uuid } from 'uuid';
+import { IFileAdapter } from '@libs/file/adapter';
+import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
+import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
+import { Organization } from "@organization/organization/domain/organization";
 
 @Injectable()
 export class AddDocumentUseCase {
   constructor(
-    private readonly organizationUpdateUseCase: UpdateOrganizationUseCase,
-    private readonly organizationGetByIdUseCase: GetByIdOrganizationUseCase,
-    private readonly documentCreateUseCase: CreateDocumentUseCase,
+    private readonly organizationRepository: IOrganizationRepository,
+    private readonly documentRepository: IDocumentsRepository,
+    private readonly fileService: IFileAdapter,
   ) {}
 
-  async execute(input: CreateDocumentDto, file: Express.Multer.File) {
-    const organization = await this.organizationGetByIdUseCase.execute(
-      input.organizationId,
+  async execute(organization: Organization, file: Express.Multer.File) {
+    const document = await this.documentRepository.findOneById(
+      organization.organizationDocumentId,
     );
-    if (organization.organizationDocumentId) {
-      throw new Error('organizationDocument exists');
-    }
 
-    const document = await this.documentCreateUseCase.execute(
-      input,
-      file,
-      organization.slug,
-    );
-    const updateOrganizationData = {
-      id: organization.id,
-      organizationDocumentId: document.id,
-      organizationStatus: StatusOrganization.PENDING,
-    };
-    return await this.organizationUpdateUseCase.execute(updateOrganizationData);
+    const keyDocument = uuid();
+    document.documentDoc = keyDocument;
+    const keyWay =
+      'organization/document/' + organization.name + '/' + keyDocument;
+    await this.fileService.upload(file, keyWay);
+
+    await this.documentRepository.update(document);
+    organization.organizationStatus = StatusOrganization.PENDING;
+    return await this.organizationRepository.update(organization);
   }
 }

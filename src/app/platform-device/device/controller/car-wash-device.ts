@@ -1,22 +1,26 @@
-import { Controller, Post, Body, Param, Get } from '@nestjs/common';
-import { CreateCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-create';
-import { GetByIdCarWashDeviceUseCase } from '@device/device/use-cases/car-wash-device-get-by-id';
-import { CarWashDeviceCreateDto } from '@platform-user/device/controller/dto/car-wash-device-create.dto';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Get,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
+import { DeviceValidateRules } from '@platform-device/device/controller/validate/device-validate-rules';
+import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 
 @Controller('device')
 export class CarWashDeviceController {
   constructor(
     private readonly createCarWashDeviceUseCase: CreateCarWashDeviceUseCase,
-    private readonly getByIdCarWashDeviceUseCase: GetByIdCarWashDeviceUseCase,
+    private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
+    private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
 
-  @Post()
-  async create(@Body() input: CarWashDeviceCreateDto) {
-    return await this.createCarWashDeviceUseCase.execute(input);
-  }
-
   @Get(':id')
-  async getById(@Param('id') id: number) {
-    return this.getByIdCarWashDeviceUseCase.execute(id);
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    await this.deviceValidateRules.getByIdValidate(id);
+    return this.findMethodsCarWashDeviceUseCase.getById(id);
   }
 }

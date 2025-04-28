@@ -2,12 +2,23 @@ import {
   CarWashDeviceProgramsEvent as PrismaCarWashDeviceProgram,
   Prisma,
 } from '@prisma/client';
-import { DeviceProgram } from '@device/device-program/device-program/domain/device-program';
+import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+export type PrismaCarWashDeviceProgramWithType =
+  Prisma.CarWashDeviceProgramsEventGetPayload<{
+    include: { carWashDeviceProgramsType: true };
+  }>;
 export class PrismaCarWashDeviceProgramMapper {
-  static toDomain(entity: PrismaCarWashDeviceProgram): DeviceProgram {
+  static toDomain(
+    entity: PrismaCarWashDeviceProgram | PrismaCarWashDeviceProgramWithType,
+  ): DeviceProgram {
     if (!entity) {
       return null;
     }
+    const programName =
+      'carWashDeviceProgramsType' in entity && entity.carWashDeviceProgramsType
+        ? entity.carWashDeviceProgramsType.name
+        : undefined;
+
     return new DeviceProgram({
       id: entity.id,
       carWashDeviceId: entity.carWashDeviceId,
@@ -21,6 +32,7 @@ export class PrismaCarWashDeviceProgramMapper {
       isAgregate: entity.isAgregate,
       minute: entity.minute,
       errNumId: entity.errNumId,
+      programName: programName
     });
   }
 

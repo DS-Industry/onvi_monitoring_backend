@@ -4,17 +4,17 @@ export interface DocumentsProps {
   id?: number;
   rateVat: string;
   inn: string;
-  fullName: string;
   okpo: string;
-  kpp: string;
-  addressRegistration: string;
+  kpp?: string;
   ogrn: string;
   bik: string;
   correspondentAccount: string;
   bank: string;
   settlementAccount: string;
-  address: string;
+  addressBank: string;
   documentDoc?: string;
+  certificateNumber?: string;
+  dateCertificate?: Date;
 }
 
 export class Documents extends BaseEntity<DocumentsProps> {
@@ -34,9 +34,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     return this.props.inn;
   }
 
-  get fullName(): string {
-    return this.props.fullName;
-  }
 
   get okpo(): string {
     return this.props.okpo;
@@ -46,9 +43,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     return this.props.kpp;
   }
 
-  get addressRegistration(): string {
-    return this.props.addressRegistration;
-  }
 
   get ogrn(): string {
     return this.props.ogrn;
@@ -70,12 +64,20 @@ export class Documents extends BaseEntity<DocumentsProps> {
     return this.props.settlementAccount;
   }
 
-  get address(): string {
-    return this.props.address;
+  get addressBank(): string {
+    return this.props.addressBank;
   }
 
   get documentDoc(): string {
     return this.props.documentDoc;
+  }
+
+  get certificateNumber(): string {
+    return this.props.certificateNumber;
+  }
+
+  get dateCertificate(): Date {
+    return this.props.dateCertificate;
   }
 
   set rateVat(rateVat: string) {
@@ -86,9 +88,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     this.props.inn = inn;
   }
 
-  set fullName(fullName: string) {
-    this.props.fullName = fullName;
-  }
 
   set okpo(okpo: string) {
     this.props.okpo = okpo;
@@ -98,9 +97,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     this.props.kpp = kpp;
   }
 
-  set addressRegistration(addressRegistration: string) {
-    this.props.addressRegistration = addressRegistration;
-  }
 
   set ogrn(ogrn: string) {
     this.props.ogrn = ogrn;
@@ -122,11 +118,19 @@ export class Documents extends BaseEntity<DocumentsProps> {
     this.props.settlementAccount = settlementAccount;
   }
 
-  set address(address: string) {
-    this.props.address = address;
+  set addressBank(addressBank: string) {
+    this.props.addressBank = addressBank;
   }
 
   set documentDoc(documentDoc: string) {
     this.props.documentDoc = documentDoc;
+  }
+
+  set certificateNumber(certificateNumber: string) {
+    this.props.certificateNumber = certificateNumber;
+  }
+
+  set dateCertificate(dateCertificate: Date) {
+    this.props.dateCertificate = dateCertificate;
   }
 }

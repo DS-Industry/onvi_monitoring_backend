@@ -2,8 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
-import { ILoggerAdapter } from '../src/infra/logger/adapter';
-import { ExceptionFilter } from '../src/observables/filters';
+import { ILoggerAdapter } from './infra/logger';
+import { AllExceptionFilter } from '@exception/exception.filter';
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule, {
@@ -24,14 +24,18 @@ async function bootstrap() {
   loggerService.setApplication('');
   app.useLogger(loggerService);
 
-  app.useGlobalFilters(new ExceptionFilter(loggerService));
-
+  app.useGlobalFilters(new AllExceptionFilter());
+  /*
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: [
+      'http://localhost:5173',
+      'https://d5dgrl80pu15j74ov536.apigw.yandexcloud.net',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // if you need to send cookies or credentials,
+    allowedHeaders: 'Content-Type, Accept',
   });
-
+*/
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

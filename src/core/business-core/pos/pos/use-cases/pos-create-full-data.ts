@@ -1,24 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { GetByIdAddressUseCase } from '@address/use-case/address-get-by-id';
-import { GetByPosIdCarWashPosUseCase } from '@pos/carWashPos/use-cases/car-wash-pos-get-by-pos-id';
 import { Pos } from '@pos/pos/domain/pos';
-import { PosResponseDto } from '@platform-user/pos/controller/dto/pos-response.dto';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import { ICarWashPosRepository } from '@pos/carWashPos/interface/carWashPos';
+import { CarWashPosType } from '@prisma/client';
 
 @Injectable()
 export class CreateFullDataPosUseCase {
   constructor(
     private readonly addressGetByIdUseCase: GetByIdAddressUseCase,
-    private readonly carWashPosByPosIdUseCase: GetByPosIdCarWashPosUseCase,
+    private readonly carWashPosRepository: ICarWashPosRepository,
   ) {}
 
   async execute(pos: Pos): Promise<PosResponseDto> {
     const address = await this.addressGetByIdUseCase.execute(pos.addressId);
-    const carWashPos = await this.carWashPosByPosIdUseCase.execute(pos.id);
+    const carWashPos = await this.carWashPosRepository.findOneByPosId(pos.id);
     return {
       id: pos.id,
       name: pos.name,
       slug: pos.slug,
-      monthlyPlan: pos.monthlyPlan,
+      timeWork: pos.timeWork,
       organizationId: pos.organizationId,
       posMetaData: pos.posMetaData,
       timezone: pos.timezone,
@@ -40,6 +41,10 @@ export class CreateFullDataPosUseCase {
         id: carWashPos.id,
         name: carWashPos.name,
         slug: carWashPos.slug,
+        carWashPosType: carWashPos.carWashPosType,
+        minSumOrder: carWashPos.minSumOrder,
+        maxSumOrder: carWashPos.maxSumOrder,
+        stepSumOrder: carWashPos.stepSumOrder,
       },
     };
   }

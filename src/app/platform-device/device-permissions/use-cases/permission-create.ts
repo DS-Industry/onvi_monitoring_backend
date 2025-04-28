@@ -13,7 +13,6 @@ export class CreateDevicePermissionUseCase {
     const permissionData = new DevicePermission({
       action: input.action,
       objectId: input.objectId,
-      condition: input.condition,
     });
 
     const rolesId = input.roles.map((roleId) => ({ id: roleId }));

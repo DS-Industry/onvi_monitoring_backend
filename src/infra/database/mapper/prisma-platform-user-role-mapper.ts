@@ -1,4 +1,4 @@
-import { UserRole } from '@platform-user/user-role/domain/user-role';
+import { UserRole } from '@platform-user/permissions/user-role/domain/user-role';
 import { UserRole as PrismaUserRole, Prisma } from '@prisma/client';
 
 export class PrismaUserRoleMapper {
@@ -9,6 +9,7 @@ export class PrismaUserRoleMapper {
     return new UserRole({
       id: entity.id,
       name: entity.name,
+      description: entity.description,
     });
   }
 
@@ -16,6 +17,7 @@ export class PrismaUserRoleMapper {
     return {
       id: role?.id,
       name: role.name,
+      description: role?.description,
     };
   }
 }

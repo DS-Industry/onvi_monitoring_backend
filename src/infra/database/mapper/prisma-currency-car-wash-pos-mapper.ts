@@ -2,7 +2,7 @@ import {
   CurrencyCarWashPos as PrismaCurrencyCarWashPos,
   Prisma,
 } from '@prisma/client';
-import { CurrencyCarWashPos } from '@device/currency/currency-car-wash-pos/domain/currency-car-wash-pos';
+import { CurrencyCarWashPos } from '@pos/device/device-data/currency/currency-car-wash-pos/domain/currency-car-wash-pos';
 
 export class PrismaCurrencyCarWashPosMapper {
   static toDomain(entity: PrismaCurrencyCarWashPos): CurrencyCarWashPos {

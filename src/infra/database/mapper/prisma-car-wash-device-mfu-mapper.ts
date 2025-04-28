@@ -2,7 +2,7 @@ import {
   CarWashDeviceMfuEvent as PrismaCarWashDeviceMfuEvent,
   Prisma,
 } from '@prisma/client';
-import { DeviceMfy } from '@device/device-mfu/domain/device-mfu';
+import { DeviceMfy } from '@pos/device/device-data/device-data/device-mfu/domain/device-mfu';
 
 export class PrismaCarWashDeviceMfuMapper {
   static toDomain(entity: PrismaCarWashDeviceMfuEvent): DeviceMfy {

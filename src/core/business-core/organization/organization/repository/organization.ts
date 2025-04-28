@@ -7,6 +7,7 @@ import { User } from '@platform-user/user/domain/user';
 import { PrismaPlatformUserMapper } from '@db/mapper/prisma-platform-user-mapper';
 import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
 import { Pos } from '@pos/pos/domain/pos';
+import { accessibleBy } from '@casl/prisma';
 
 @Injectable()
 export class OrganizationRepository extends IOrganizationRepository {
@@ -79,6 +80,17 @@ export class OrganizationRepository extends IOrganizationRepository {
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 
+  public async findAllByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<Organization[]> {
+    const organization = await this.prisma.organization.findMany({
+      where: {
+        loyaltyProgramId,
+      },
+    });
+    return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
+  }
+
   public async findAllUser(id: number): Promise<User[]> {
     const organization = await this.prisma.organization.findFirst({
       where: {
@@ -105,11 +117,26 @@ export class OrganizationRepository extends IOrganizationRepository {
     return poses.map((item) => PrismaPosMapper.toDomain(item));
   }
 
-  public async update(id: number, input: Organization): Promise<Organization> {
+  public async findAllByPermission(
+    ability: any,
+    placementId: number | '*',
+  ): Promise<Organization[]> {
+    const organization = await this.prisma.organization.findMany({
+      where: {
+        AND: [
+          accessibleBy(ability).Organization,
+          placementId !== '*' ? { placementId } : {},
+        ],
+      },
+    });
+    return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
+  }
+
+  public async update(input: Organization): Promise<Organization> {
     const organizationPrismaEntity = PrismaOrganizationMapper.toPrisma(input);
     const organization = await this.prisma.organization.update({
       where: {
-        id: id,
+        id: input.id,
       },
       data: organizationPrismaEntity,
     });

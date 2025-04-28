@@ -1,210 +1,161 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StatusPos } from '@prisma/client';
 
 const prisma = new PrismaClient();
-async function main() {
-  const org = await prisma.organization.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      name: 'org',
-      slug: 'org',
-      address: {
-        create: {
-          city: 'Voronez',
-          location: 'dom 36',
-          lat: 3,
-          lon: 4,
-        },
-      },
-      organizationStatus: 'ACTIVE',
-      organizationType: 'LegalEntity',
-      createdAt: '2024-01-24T12:00:00Z',
-      updatedAt: '2024-01-24T12:00:00Z',
-      owner: {
-        create: {
-          userRole: {
-            create: {
-              name: 'Owner',
-              userPermissions: {
-                create: [
-                  {
-                    action: 'manage',
-                    object: {
-                      create: {
-                        name: 'subscription',
-                      },
-                    },
-                  },
-                  {
-                    action: 'create',
-                    object: {
-                      create: {
-                        name: 'subscription',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          name: 'Dima',
-          surname: 'Bychenko',
-          middlename: 'Andr',
-          birthday: '2024-01-24T12:00:00Z',
-          phone: '123456',
-          email: 'test@mail.ru',
-          password: '123',
-          gender: 'men',
-          status: 'ACTIVE',
-          avatar: 'png',
-          country: 'Voronez',
-          countryCode: 36,
-          timezone: 1,
-          refreshTokenId: 'dsafnfjknj32njnj',
-          createdAt: '2024-01-24T12:00:00Z',
-          updatedAt: '2024-01-24T12:00:00Z',
-        },
-      },
-      users: {
-        create: [
-          {
-            name: 'Pypa',
-            surname: 'Dupa',
-            middlename: 'lol',
-            birthday: '2024-01-24T12:00:00Z',
-            phone: '43245425',
-            email: 'pupa@mail.ru',
-            password: '123',
-            gender: 'man',
-            status: 'ACTIVE',
-            avatar: 'png',
-            country: 'Voronez',
-            countryCode: 36,
-            timezone: 1,
-            refreshTokenId: 'dsafnfjknj32njnj',
-            createdAt: '2024-01-24T12:00:00Z',
-            updatedAt: '2024-01-24T12:00:00Z',
-            userRoleId: 2,
-          },
-          {
-            name: 'Lypa',
-            surname: 'Kupa',
-            middlename: 'kek',
-            birthday: '2024-01-24T12:00:00Z',
-            phone: '89480840',
-            email: 'lupa@mail.ru',
-            password: '123',
-            gender: 'man',
-            status: 'ACTIVE',
-            avatar: 'png',
-            country: 'Voronez',
-            countryCode: 36,
-            timezone: 1,
-            refreshTokenId: 'dsafnfjknj32njnj',
-            createdAt: '2024-01-24T12:00:00Z',
-            updatedAt: '2024-01-24T12:00:00Z',
-            userRoleId: 2,
-          },
-        ],
-      },
-    },
-  });
-  const pos = await prisma.pos.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      loyaltyProgram: {
-        create: {
-          name: 'Gold',
-        },
-      },
-      name: 'Brusilova',
-      slug: 'Brus',
-      monthlyPlan: 10000,
-      organization: {
-        connect: {
-          id: 1,
-        },
-      },
-      posMetaData: 'META',
-      timezone: 1,
-      address: {
-        create: {
-          city: 'Voronez',
-          location: 'Brysilova',
-          lat: 300,
-          lon: 400,
-        },
-      },
-      image: 'png',
-      rating: 5,
-      status: 'Active',
-      createdAt: '2024-01-24T12:00:00Z',
-      updatedAt: '2024-01-24T12:00:00Z',
-      createdBy: {
-        connect: {
-          id: 1,
-        },
-      },
-      updateBy: {
-        connect: {
-          id: 1,
-        },
-      },
-    },
-  });
+import { DeviceTypes } from './seedData/deviceType';
+import { Errs } from './seedData/err';
+import { Currencies } from './seedData/currency';
+import { EventTypes } from './seedData/eventType';
+import { ProgramTypes } from './seedData/programType';
+import { Objects } from './seedData/object';
+import { UserPermissions } from './seedData/userPermission';
+import { UserRoles } from './seedData/userRole';
+import { TechTaskItemTemplate } from './seedData/techTaskItemTemplate';
+import { Organizations } from './seedData/organization';
+import { Poses } from './seedData/pos';
+import { Devices } from './seedData/device';
+import { test } from "./seedData/test";
 
-  const cw = await prisma.carWashPos.upsert({
-    where: { id: 1 },
-    update: {},
-    create: {
-      name: 'CarWash',
-      slug: 'CW',
-      pos: {
-        connect: {
-          id: 1,
-        },
-      },
-      carWashDevices: {
-        create: [
-          {
-            name: 'Post 1',
-            carWashDeviceMetaData: 'Good',
-            status: 'Active',
-            ipAddress: '12.34.3424',
-            carWashDeviceType: {
-              create: {
-                name: 'Portal',
-                code: 'PORTAL',
-              },
-            },
-          },
-          {
-            name: 'Post 2',
-            carWashDeviceMetaData: 'Bad',
-            status: 'No active',
-            ipAddress: '15.84.3424',
-            carWashDeviceType: {
-              create: {
-                name: 'Fen',
-                code: 'FEN',
-              },
-            },
-          },
-        ],
-      },
-      carWashServices: {
-        create: [
-          {
-            name: 'Clean',
-            code: 'CLEAN',
-            description: 'Best',
-          },
-        ],
-      },
-    },
-  });
-  console.log({ org, pos });
+async function main() {
+  //DeviceType
+  /*await Promise.all(
+    DeviceTypes.map(async (deviceType) => {
+      await prisma.carWashDeviceType.upsert({
+        where: { id: deviceType.id },
+        update: {},
+        create: deviceType,
+      });
+    }),
+  );
+  console.log('DeviceType create');
+  //Err
+  await Promise.all(
+    Errs.map(async (err) => {
+      await prisma.errNum.upsert({
+        where: { id: err.id },
+        update: {},
+        create: err,
+      });
+    }),
+  );
+  console.log('Err create');
+
+  //Currency
+  await Promise.all(
+    Currencies.map(async (currency) => {
+      await prisma.currency.upsert({
+        where: { id: currency.id },
+        update: {},
+        create: currency,
+      });
+    }),
+  );
+  console.log('Currency create');
+  //EventTypes
+  await Promise.all(
+    EventTypes.map(async (eventType) => {
+      await prisma.carWashDeviceEventType.upsert({
+        where: { id: eventType.id },
+        update: {},
+        create: eventType,
+      });
+    }),
+  );
+  console.log('EventType create');
+  //ProgramTypes
+  await Promise.all(
+    ProgramTypes.map(async (programType) => {
+      await prisma.carWashDeviceProgramsType.upsert({
+        where: { id: programType.id },
+        update: {},
+        create: programType,
+      });
+    }),
+  );
+  console.log('ProgramType create');
+  //Objects
+  await Promise.all(
+    Objects.map(async (object) => {
+      await prisma.objectPermissions.upsert({
+        where: { id: object.id },
+        update: {},
+        create: object,
+      });
+    }),
+  );
+  console.log('Object create');
+  //UserPermissions
+  await Promise.all(
+    UserPermissions.map(async (userPermission) => {
+      await prisma.userPermission.upsert({
+        where: { id: userPermission.id },
+        update: {},
+        create: userPermission,
+      });
+    }),
+  );
+  console.log('UserPermission create');
+  //UserRoles
+  await Promise.all(
+    UserRoles.map(async (userRole) => {
+      await prisma.userRole.upsert({
+        where: { id: userRole.id },
+        update: userRole,
+        create: userRole,
+      });
+    }),
+  );
+  console.log('UserRole create');
+  //TechTaskItemTemplate
+  await Promise.all(
+    TechTaskItemTemplate.map(async (itemTemplate) => {
+      await prisma.techTaskItemTemplate.upsert({
+        where: { id: itemTemplate.id },
+        update: itemTemplate,
+        create: itemTemplate,
+      });
+    }),
+  );
+  console.log('TechTaskItemTemplate create');
+  await Promise.all(
+    Organizations.map(async (organization) => {
+      await prisma.organization.upsert({
+        where: { id: organization.id },
+        update: {},
+        create: organization,
+      });
+    }),
+  );
+  console.log('Organization create');
+  await Promise.all(
+    Poses.map(async (pos) => {
+      prisma.pos.upsert({
+        where: { id: pos.id },
+        update: {},
+        create: pos,
+      });
+    }),
+  );
+  console.log('Pos create');
+  await Promise.all(
+    Devices.map(async (device) => {
+      prisma.carWashDevice.upsert({
+        where: { id: device.id },
+        update: {},
+        create: device,
+      });
+    }),
+  );
+  console.log('Device create');*/
+  await Promise.all(
+    test.map(async (test) => {
+      await prisma.carWashDevice.upsert({
+        where: { id: test.id },
+        update: {},
+        create: test,
+      });
+    }),
+  );
+  console.log('Organization create');
 }
 main()
   .then(async () => {
