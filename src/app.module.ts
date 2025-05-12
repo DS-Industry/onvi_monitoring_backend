@@ -19,9 +19,9 @@ import { HandlerModule } from './infra/handler/handler.module';
 import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
-import { ReportCoreModule } from "@report/report-core.module";
-import { LoyaltyCoreModule } from "./core/loyalty-core/loyalty-core.module";
-import { HrCoreModule } from "@hr/hr-core.module";
+import { ReportCoreModule } from '@report/report-core.module';
+import { LoyaltyCoreModule } from './core/loyalty-core/loyalty-core.module';
+import { HrCoreModule } from '@hr/hr-core.module';
 
 @Module({
   imports: [
@@ -68,15 +68,27 @@ import { HrCoreModule } from "@hr/hr-core.module";
       load: [configuration],
       isGlobal: true,
     }),
-    BullModule.forRoot({
+    BullModule.forRoot('data_raw', {
       connection: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
+        host: process.env.REDIS_DEVICE_DATA_HOST,
+        port: Number(process.env.REDIS_DEVICE_DATA_PORT),
+        username: process.env.REDIS_DEVICE_DATA_USER,
+        password: process.env.REDIS_DEVICE_DATA_PASSWORD,
         keepAlive: 30000,
         connectTimeout: 60000,
         retryStrategy: (times) => Math.min(times * 100, 3000),
-      },
+      }
+    }),
+    BullModule.forRoot('worker', {
+      connection: {
+        host: process.env.REDIS_WORKER_DATA_HOST,
+        port: Number(process.env.REDIS_WORKER_DATA_PORT),
+        username: process.env.REDIS_WORKER_DATA_USER,
+        password: process.env.REDIS_WORKER_DATA_PASSWORD,
+        keepAlive: 30000,
+        connectTimeout: 60000,
+        retryStrategy: (times) => Math.min(times * 100, 3000),
+      }
     }),
     RouterModule.register(routeConfig),
     ScheduleModule.forRoot(),
