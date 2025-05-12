@@ -64,8 +64,7 @@ export class Auth {
   @Post('/send/otp')
   async sendOtp(@Body() body: AuthSendOtpDto) {
     try {
-      const phone = body.phone;
-      const otp = await this.authSendOtp.execute(phone);
+      const otp = await this.authSendOtp.execute(body.phone);
       return {
         status: 'SUCCESS',
         target: otp.phone,

@@ -1,18 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
-import { ClientRepositoryProvider } from '@mobile-user/client/provider/client';
 import { ClientController } from '@mobile-user/client/controller/client';
-import { UpdateClientUseCase } from '@mobile-user/client/use-cases/client-update';
-import { GetByIdClientUseCase } from '@mobile-user/client/use-cases/client-get-by-id';
+import { FileModule } from '@libs/file/module';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, FileModule, LoyaltyCoreModule],
   controllers: [ClientController],
-  providers: [
-    ClientRepositoryProvider,
-    UpdateClientUseCase,
-    GetByIdClientUseCase,
-  ],
-  exports: [ClientRepositoryProvider, UpdateClientUseCase],
+  exports: [LoyaltyCoreModule],
 })
 export class ClientModule {}

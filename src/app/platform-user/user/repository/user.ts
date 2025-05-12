@@ -18,12 +18,36 @@ export class UserRepository extends IUserRepository {
     return PrismaPlatformUserMapper.toDomain(user);
   }
 
+  public async createWorker(
+    input: User,
+    organizationId: number,
+  ): Promise<User> {
+    const userPrismaEntity = PrismaPlatformUserMapper.toPrisma(input);
+    const user = await this.prisma.user.create({
+      data: {
+        ...userPrismaEntity,
+        organizations: { connect: { id: organizationId } },
+      },
+    });
+    return PrismaPlatformUserMapper.toDomain(user);
+  }
+
   public async createMany(input: User[]): Promise<User[]> {
     return Promise.resolve([]);
   }
 
   public async findAll(): Promise<User[]> {
     const users = await this.prisma.user.findMany();
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findAllByOrgId(orgId: number): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { organizations: { some: { id: orgId } } },
+      include: {
+        userRole: true,
+      },
+    });
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
@@ -58,5 +82,59 @@ export class UserRepository extends IUserRepository {
       data: userPrismaEntity,
     });
     return PrismaPlatformUserMapper.toDomain(user);
+  }
+
+  public async getAllPosPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        posesPermissions: true,
+      },
+    });
+    return user?.posesPermissions?.map((item) => item.id) || [];
+  }
+
+  public async getAllLoyaltyProgramPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        loyaltyPrograms: true,
+      },
+    });
+    return user?.loyaltyPrograms?.map((item) => item.id) || [];
+  }
+
+  public async getAllOrganizationPermissions(id: number): Promise<number[]> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        organizations: true,
+      },
+    });
+    return user?.organizations?.map((item) => item.id) || [];
+  }
+
+  public async updateConnectionPos(
+    userId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any> {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        posesPermissions: {
+          disconnect: deletePosIds.map((id) => ({ id })),
+          connect: addPosIds.map((id) => ({ id })),
+        },
+      },
+    });
   }
 }

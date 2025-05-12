@@ -22,6 +22,7 @@ export class UpdateAdminUseCase {
       refreshTokenId,
       password,
       status,
+      platformUserRoleId,
     } = input;
 
     admin.name = name ? name : admin.name;
@@ -30,12 +31,15 @@ export class UpdateAdminUseCase {
     admin.country = country ? country : admin.country;
     admin.countryCode = countryCode ? countryCode : admin.countryCode;
     admin.timezone = timezone ? timezone : admin.timezone;
-    admin.avatar = middlename ? avatar : admin.avatar;
+    admin.avatar = avatar ? avatar : admin.avatar;
     admin.refreshTokenId = refreshTokenId
       ? refreshTokenId
       : admin.refreshTokenId;
     admin.password = password ? password : admin.password;
     admin.status = status ? status : admin.status;
+    admin.platformUserRoleId = platformUserRoleId
+      ? platformUserRoleId
+      : admin.platformUserRoleId;
 
     return await this.adminRepository.update(admin.id, admin);
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as moment from 'moment';
+import moment from 'moment';
 import { OTP_TIME } from '@constant/constants';
 import { IDateAdapter } from '@libs/date/adapter';
 

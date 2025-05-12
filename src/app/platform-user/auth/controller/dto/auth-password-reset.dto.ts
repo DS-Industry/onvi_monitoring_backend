@@ -10,7 +10,4 @@ export class AuthPasswordResetDto {
   @IsString()
   @IsNotEmpty({ message: 'New password number is required' })
   newPassword: string;
-  @IsString()
-  @IsNotEmpty({ message: 'New password number is required' })
-  checkNewPassword: string;
 }

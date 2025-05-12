@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { IClientRepository } from '@mobile-user/client/interfaces/client';
-import { Client } from '@mobile-user/client/domain/client';
+import { IClientRepository } from '../../../../core/loyalty-core/mobile-user/client/interfaces/client';
+import { Client } from '../../../../core/loyalty-core/mobile-user/client/domain/client';
 
 @Injectable()
 export class GetClientIfRefreshTokenMatchesUseCase {

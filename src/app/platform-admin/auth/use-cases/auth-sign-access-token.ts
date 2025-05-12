@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+  import { Injectable } from '@nestjs/common';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
 import { IJwtAdapter } from '@libs/auth/adapter';
 import { ConfigService } from '@nestjs/config';

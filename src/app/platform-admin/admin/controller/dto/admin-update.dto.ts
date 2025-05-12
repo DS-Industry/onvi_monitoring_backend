@@ -40,4 +40,7 @@ export class UpdateAdminDto {
   @IsString()
   @IsOptional()
   status?: StatusUser;
+  @IsNumber()
+  @IsOptional()
+  platformUserRoleId?: number;
 }

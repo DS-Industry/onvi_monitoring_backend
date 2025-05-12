@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
 import { ValidateClientForLocalStrategyUseCase } from '@mobile-user/auth/use-cases/auth-validate-local-strategy';
-import { Client } from '@mobile-user/client/domain/client';
+import { Client } from '../../../../core/loyalty-core/mobile-user/client/domain/client';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'clientLocal') {
