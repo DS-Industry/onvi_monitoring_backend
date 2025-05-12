@@ -84,7 +84,7 @@ export class MonitoringFullByIdPosUseCase {
           yandexSum: yandexSumMap.get(device.id) || 0,
           mobileSum: 0,
           cardSum: 0,
-          lastOper: lastOper ? lastOper.operDate : undefined,
+          lastOper: lastOper ? lastOper.operDate : null,
           discountSum: 0,
           cashbackSumCard: 0,
           cashbackSumMub: 0,

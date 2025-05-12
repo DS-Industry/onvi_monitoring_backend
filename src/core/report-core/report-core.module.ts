@@ -31,6 +31,7 @@ const transactionUseCase: Provider[] = [
   imports: [
     PrismaModule,
     BullModule.registerQueue({
+      configKey: 'worker',
       name: 'reportTemplate',
     }),
     FileModule,

@@ -1,4 +1,5 @@
 import { GroupTechTaskItemTemplate, StatusTechTask, TypeTechTask, TypeTechTaskItemTemplate } from "@prisma/client";
+import { TechTagProps } from "@tech-task/tag/domain/techTag";
 
 export class TechTaskShapeResponseDto {
   id: number;
@@ -13,6 +14,7 @@ export class TechTaskShapeResponseDto {
   sendWorkDate?: Date;
   executorId?: number;
   items: TechTaskItemDto[];
+  tags: TechTagProps[];
 }
 
 export class TechTaskItemDto {

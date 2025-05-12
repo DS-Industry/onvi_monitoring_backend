@@ -1,7 +1,12 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class TechTaskCompletionShapeDto {
-  @IsArray()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') return JSON.parse(value);
+    return [];
+  })
   valueData: itemValueDto[];
 }
 
