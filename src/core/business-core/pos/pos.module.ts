@@ -165,6 +165,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     AddressModule,
     FileModule,
     BullModule.registerQueue({
+      configKey: 'data_raw',
       name: 'deviceDataRaw',
     }),
     ScheduleModule.forRoot(),
