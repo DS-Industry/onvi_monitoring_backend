@@ -4,9 +4,9 @@ import process from 'process';
 import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { PosModule } from '@pos/pos.module';
-import { HandlerDeviceDataRawCron } from './infra/handler/device-data-raw/cron/handler-device-data-raw';
+import { HandlerDeviceDataRawCron } from '../../infra/handler/device-data-raw/cron/handler-device-data-raw';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerModule } from './infra/handler/handler.module';
+import { HandlerModule } from '../../infra/handler/handler.module';
 
 @Module({
   imports: [

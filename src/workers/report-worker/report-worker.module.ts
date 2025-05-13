@@ -4,7 +4,7 @@ import process from 'process';
 import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { ReportCoreModule } from '@report/report-core.module';
-import { ReportTemplateConsumer } from './infra/handler/reportTemplate/comsumer/report-template.consumer';
+import { ReportTemplateConsumer } from '../../infra/handler/reportTemplate/comsumer/report-template.consumer';
 
 @Module({
   imports: [

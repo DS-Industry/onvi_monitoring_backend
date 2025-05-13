@@ -1,6 +1,6 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "src/cron/raw-data-cron",
   "entryFile": "data-raw-cron",
   "compilerOptions": {
     "watchAssets": true

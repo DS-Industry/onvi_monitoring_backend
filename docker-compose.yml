@@ -1,30 +1,44 @@
-version: "3"
-
+version: '3'
 
 services:
   onvi-business-backend:
     container_name: onvi-business-backend
-    command: npm run start:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: ./config/env/.env.production
+    environment:
+      - APP_ROLE=app
     ports:
-      - "5000:5000"
-    build: .
+      - "5001:5001"
     restart: always
+
   onvi-business-report-worker:
     container_name: onvi-business-report-worker
-    command: npm run report-worker:start:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: ./config/env/.env.production
-    build: .
+    environment:
+      - APP_ROLE=reportWorker
     restart: always
+
   onvi-business-data-raw-worker:
     container_name: onvi-business-data-raw-worker
-    command: npm run data-raw-worker:start:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: ./config/env/.env.production
-    build: .
+    environment:
+      - APP_ROLE=dataRawWorker
     restart: always
+
   onvi-business-data-raw-cron:
     container_name: onvi-business-data-raw-cron
-    command: npm run data-raw-cron:start:prod
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: ./config/env/.env.production
-    build: .
+    environment:
+      - APP_ROLE=dataRawCron
     restart: always

@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import process from 'process';
 import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
-import { DeviceDataRawConsumer } from './infra/handler/device-data-raw/consumer/device-data-raw.consumer';
+import { DeviceDataRawConsumer } from '../../infra/handler/device-data-raw/consumer/device-data-raw.consumer';
 import { PosModule } from '@pos/pos.module';
 
 @Module({
