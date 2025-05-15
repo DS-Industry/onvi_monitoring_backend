@@ -836,11 +836,13 @@ export class ValidateLib {
     const missingParams: string[] = [];
     const paramsArray: any[] = [];
 
-    for (const key of Object.keys(requiredParams)) {
-      if (!(key in clientData)) {
-        missingParams.push(key);
+    for (const param of requiredParams.params) {
+      const paramName = param.name;
+
+      if (!(paramName in clientData)) {
+        missingParams.push(paramName);
       } else {
-        paramsArray.push(clientData[key]);
+        paramsArray.push(clientData[paramName]);
       }
     }
 
