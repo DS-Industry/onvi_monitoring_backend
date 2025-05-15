@@ -40,5 +40,5 @@ services:
       dockerfile: Dockerfile
     env_file: ./config/env/.env.production
     environment:
-      - APP_ROLE=dataRawCron
+      - APP_ROLE=cron
     restart: always
