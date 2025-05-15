@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionFilter } from '@exception/exception.filter';
-import { DataRawCronModule } from "./data-raw-cron.module";
+import { CronModule } from "./cron.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(DataRawCronModule);
+  const app = await NestFactory.create(CronModule);
   const configService = app.get(ConfigService);
 
-  const appNameDataRawCron = configService.get<string>(
-    'appNameDataRawCron',
+  const appNameCron = configService.get<string>(
+    'appNameCron',
   );
   const portCron = configService.get<number>('portCron');
 
@@ -17,6 +17,6 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
   await app.listen(portCron);
-  console.log(`Application ${appNameDataRawCron} ready port ${portCron}`);
+  console.log(`Application ${appNameCron} ready port ${portCron}`);
 }
 bootstrap();

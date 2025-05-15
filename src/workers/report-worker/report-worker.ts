@@ -8,10 +8,12 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   const appNameReportWorker = configService.get<string>('appNameReportWorker');
+  const portWorkerReport = configService.get<number>('portWorkerReport');
 
   app.useGlobalFilters(new AllExceptionFilter());
-
   app.enableShutdownHooks();
+  await app.listen(portWorkerReport);
+
   console.log(`Application ${appNameReportWorker} ready`);
 }
 bootstrap();

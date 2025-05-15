@@ -181,7 +181,6 @@ const deviceDataRawHandlerUseCase: Provider[] = [
     ...deviceDataRawHandlerUseCase,
     ...deviceDataUseCase,
     ...monthlyPlanPos,
-    TestDataCron,
   ],
   exports: [
     ...carWashPosUseCase,

@@ -10,12 +10,12 @@ async function bootstrap() {
   const appNameDataRawWorker = configService.get<string>(
     'appNameDataRawWorker',
   );
-  const portWorker = configService.get<number>('portWorker');
+  const portWorkerDataRaw = configService.get<number>('portWorkerDataRaw');
 
   app.useGlobalFilters(new AllExceptionFilter());
 
   app.enableShutdownHooks();
-  await app.listen(portWorker);
+  await app.listen(portWorkerDataRaw);
   console.log(`Application ${appNameDataRawWorker} ready`);
 }
 bootstrap();

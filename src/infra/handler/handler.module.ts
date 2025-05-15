@@ -3,7 +3,7 @@ import { Module, Provider } from '@nestjs/common';
 //import { DeviceDataRawConsumer } from './device-data-raw/consumer/device-data-raw.consumer';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerTechTaskCron } from './techTask/cron/handler-techTask';
+//import { HandlerTechTaskCron } from './techTask/cron/handler-techTask';
 import { EquipmentCoreModule } from '../../core/equipment-core/equipment-core.module';
 //import { ReportTemplateConsumer } from './reportTemplate/comsumer/report-template.consumer';
 import { ReportCoreModule } from '@report/report-core.module';
@@ -17,7 +17,9 @@ const reportTemplateUseCase: Provider[] = [
   //ReportTemplateConsumer
 ];
 
-const techTaskUseCase: Provider[] = [HandlerTechTaskCron];
+const techTaskUseCase: Provider[] = [
+  //HandlerTechTaskCron
+];
 
 @Module({
   imports: [

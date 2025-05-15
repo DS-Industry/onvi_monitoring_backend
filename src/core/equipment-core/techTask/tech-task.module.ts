@@ -22,7 +22,6 @@ import { FileModule } from '@libs/file/module';
 import { TechTagRepositoryProvider } from '@tech-task/tag/provider/techTag';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
-import { TestDataTechTaskCron } from '../../../infra/handler/testData/cron/testDataTechTask';
 import { ScheduleModule } from '@nestjs/schedule';
 
 const repositories: Provider[] = [
@@ -71,7 +70,6 @@ const tagUseCases: Provider[] = [
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
     ...tagUseCases,
-    TestDataTechTaskCron,
   ],
   exports: [
     ...techTaskUseCases,

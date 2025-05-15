@@ -42,7 +42,6 @@ export class HandlerDeviceDataRawUseCase {
             count + LEN_DEVICE_DATA_RAW,
           );
           const data = this.parseStr(onceRow);
-          console.log(data);
           if (data.oper === 3) {
             await this.deviceProgramHandlerUseCase.execute(data);
           } else if (data.oper === 4) {

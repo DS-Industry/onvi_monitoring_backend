@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Provider } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import process from 'process';
 import { configuration } from '@config/configuration';
@@ -6,7 +6,17 @@ import { BullModule } from '@nestjs/bullmq';
 import { PosModule } from '@pos/pos.module';
 import { HandlerDeviceDataRawCron } from '../../infra/handler/device-data-raw/cron/handler-device-data-raw';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerModule } from '../../infra/handler/handler.module';
+import { HandlerTechTaskCron } from '../../infra/handler/techTask/cron/handler-techTask';
+import { TechTaskModule } from '@tech-task/tech-task.module';
+import { TestDataCron } from '../../infra/handler/testData/cron/testData';
+import { TestDataTechTaskCron } from '../../infra/handler/testData/cron/testDataTechTask';
+
+const cronUseCases: Provider[] = [
+  HandlerDeviceDataRawCron,
+  HandlerTechTaskCron,
+  TestDataCron,
+  TestDataTechTaskCron,
+];
 
 @Module({
   imports: [
@@ -39,8 +49,9 @@ import { HandlerModule } from '../../infra/handler/handler.module';
     }),
     ScheduleModule.forRoot(),
     PosModule,
+    TechTaskModule,
   ],
   controllers: [],
-  providers: [HandlerDeviceDataRawCron],
+  providers: [...cronUseCases],
 })
-export class DataRawCronModule {}
+export class CronModule {}

@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { AllExceptionFilter } from '@exception/exception.filter';
 import { ReportWorkerModule } from './workers/report-worker/report-worker.module';
 import { DataRawWorkerModule } from './workers/data-raw-worker/data-raw-worker.module';
-import { DataRawCronModule } from './cron/raw-data-cron/data-raw-cron.module';
+import { CronModule } from './cron/raw-data-cron/cron.module';
+import { ValidationError, ValidationPipe } from '@nestjs/common';
 
 export const rolesMapBootstrap = {
   app: async () => {
@@ -16,6 +17,17 @@ export const rolesMapBootstrap = {
     const appName = configService.get<string>('appName');
 
     app.useGlobalFilters(new AllExceptionFilter());
+
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        exceptionFactory: (errors: ValidationError[]) => {
+          return new Error(
+            errors.map((error) => Object.values(error.constraints)).join(', '),
+          );
+        },
+      }),
+    );
 
     app.enableShutdownHooks();
     await app.listen(PORT);
@@ -32,9 +44,11 @@ export const rolesMapBootstrap = {
     const appNameReportWorker = configService.get<string>(
       'appNameReportWorker',
     );
+    const portWorkerReport = configService.get<number>('portWorkerReport');
 
     app.useGlobalFilters(new AllExceptionFilter());
     app.enableShutdownHooks();
+    await app.listen(portWorkerReport);
 
     console.log(`Application ${appNameReportWorker} ready`);
     return app;
@@ -47,26 +61,28 @@ export const rolesMapBootstrap = {
     const appNameDataRawWorker = configService.get<string>(
       'appNameDataRawWorker',
     );
+    const portWorkerDataRaw = configService.get<number>('portWorkerDataRaw');
 
     app.useGlobalFilters(new AllExceptionFilter());
     app.enableShutdownHooks();
+    await app.listen(portWorkerDataRaw);
 
     console.log(`Application ${appNameDataRawWorker} ready`);
     return app;
   },
 
-  dataRawCron: async () => {
-    const app = await NestFactory.create(DataRawCronModule);
+  cron: async () => {
+    const app = await NestFactory.create(CronModule);
     const configService = app.get(ConfigService);
 
-    const appNameDataRawCron = configService.get<string>('appNameDataRawCron');
+    const appNameCron = configService.get<string>('appNameCron');
     const portCron = configService.get<number>('portCron');
 
     app.useGlobalFilters(new AllExceptionFilter());
     app.enableShutdownHooks();
 
     await app.listen(portCron);
-    console.log(`Application ${appNameDataRawCron} ready port ${portCron}`);
+    console.log(`Application ${appNameCron} ready port ${portCron}`);
     return app;
   },
 };
