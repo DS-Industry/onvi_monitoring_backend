@@ -21,7 +21,10 @@ import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos
 import { MonitoringFullByIdPosUseCase } from '@pos/pos/use-cases/pos-monitoring-full-by-id';
 import { PosMonitoringFullResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-full-response.dto';
 import { ProgramPosUseCase } from '@pos/pos/use-cases/pos-program';
-import { PosProgramResponseDto } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
+import {
+  PosProgramDto,
+  PosProgramResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-program-response.dto';
 import { PosProgramFullUseCase } from '@pos/pos/use-cases/pos-program-full';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { CreatePosUseCase } from '@pos/pos/use-cases/pos-create';
@@ -132,8 +135,10 @@ export class PosController {
   async monitoringPos(
     @Request() req: any,
     @Query() params: PosMonitoringDto,
-  ): Promise<PosMonitoringResponseDto[]> {
+  ): Promise<PosMonitoringResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       let pos = null;
       if (params.posId != '*') {
@@ -142,13 +147,19 @@ export class PosController {
           ability,
         );
       }
-      return await this.monitoringPosUseCase.execute(
-        params.dateStart,
-        params.dateEnd,
-        ability,
-        params.placementId,
-        pos,
-      );
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      return await this.monitoringPosUseCase.execute({
+        dateStart: params.dateStart,
+        dateEnd: params.dateEnd,
+        ability: ability,
+        placementId: params.placementId,
+        pos: pos,
+        skip: skip,
+        take: take,
+      });
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -207,8 +218,10 @@ export class PosController {
   async programPos(
     @Request() req: any,
     @Query() params: PosMonitoringDto,
-  ): Promise<PosProgramResponseDto[]> {
+  ): Promise<PosProgramResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       let pos = null;
       if (params.posId != '*') {
@@ -217,13 +230,19 @@ export class PosController {
           ability,
         );
       }
-      return await this.programPosUseCase.execute(
-        params.dateStart,
-        params.dateEnd,
-        ability,
-        params.placementId,
-        pos,
-      );
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      return await this.programPosUseCase.execute({
+        dateStart: params.dateStart,
+        dateEnd: params.dateEnd,
+        ability: ability,
+        placementId: params.placementId,
+        pos: pos,
+        skip: skip,
+        take: take,
+      });
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -249,7 +268,7 @@ export class PosController {
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Query() data: DataFilterDto,
-  ): Promise<PosProgramResponseDto[]> {
+  ): Promise<PosProgramDto[]> {
     try {
       const { ability } = req;
       const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
@@ -282,8 +301,10 @@ export class PosController {
   async planFact(
     @Request() req: any,
     @Query() params: PosMonitoringDto,
-  ): Promise<PosPlanFactResponseDto[]> {
+  ): Promise<PosPlanFactResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
       let pos = null;
       if (params.posId != '*') {
@@ -292,13 +313,19 @@ export class PosController {
           ability,
         );
       }
-      return await this.planFactPosUseCase.execute(
-        params.dateStart,
-        params.dateEnd,
-        ability,
-        params.placementId,
-        pos,
-      );
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      return await this.planFactPosUseCase.execute({
+        dateStart: params.dateStart,
+        dateEnd: params.dateEnd,
+        ability: ability,
+        placementId: params.placementId,
+        pos: pos,
+        skip: skip,
+        take: take,
+      });
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({

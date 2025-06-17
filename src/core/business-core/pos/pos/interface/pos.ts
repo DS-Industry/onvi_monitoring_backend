@@ -11,6 +11,12 @@ export abstract class IPosRepository {
   abstract findAllByPermission(
     ability: any,
     placementId?: number | '*',
+    skip?: number,
+    take?: number,
   ): Promise<Pos[]>;
   abstract update(input: Pos): Promise<Pos>;
+  abstract countAllByAbilityAndPlacement(
+    ability: any,
+    placementId?: number | '*',
+  ): Promise<number>;
 }

@@ -1,6 +1,11 @@
 import { CarWashPosType } from '@prisma/client';
 
 export class PosProgramResponseDto {
+  prog: PosProgramDto[];
+  totalCount: number;
+}
+
+export class PosProgramDto {
   id: number;
   name: string;
   posType?: CarWashPosType;

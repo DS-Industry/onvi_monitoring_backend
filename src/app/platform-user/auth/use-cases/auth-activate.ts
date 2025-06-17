@@ -24,7 +24,7 @@ export class ActivateAuthUseCase {
     const hashedRefreshToken = await this.bcrypt.hash(refreshToken.token);
     const activeUser = await this.userUpdate.execute({
       id: user.id,
-      status: StatusUser.ACTIVE,
+      status: StatusUser.VERIFICATE,
       refreshTokenId: hashedRefreshToken,
     });
     return {

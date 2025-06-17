@@ -7,10 +7,10 @@ export class AddressCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'location is required' })
   location: string;
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  lat?: number;
-  @IsNumber()
+  lat?: string;
+  @IsString()
   @IsOptional()
-  lon?: number;
+  lon?: string;
 }

@@ -37,17 +37,5 @@ export class AuthRegisterDto {
   password: string;
   @IsString()
   @IsOptional()
-  gender?: string;
-  @IsString()
-  @IsOptional()
-  avatar?: string;
-  @IsString()
-  @IsOptional()
-  country?: string;
-  @IsNumber()
-  @IsOptional()
-  countryCode?: number;
-  @IsNumber()
-  @IsOptional()
-  timezone?: number;
+  fcmToken?: string;
 }

@@ -15,7 +15,7 @@ export class TestDataTechTaskCron {
     private readonly findMethodsItemTemplateToTechTaskUseCase: FindMethodsItemTemplateToTechTaskUseCase,
   ) {}
 
-  @Cron('30 20 * * *')
+  @Cron('30 20 * * *', { timeZone: 'UTC' })
   async execute(): Promise<void> {
     console.log('start dataTestTechTask');
     const today = new Date();
@@ -32,7 +32,7 @@ export class TestDataTechTaskCron {
 
     console.log(techTasks);
     const user: User = new User({
-      id: 7,
+      id: 1,
       userRoleId: 1,
       name: 'Джон',
       surname: 'Уик',

@@ -1,4 +1,9 @@
 export class PosMonitoringResponseDto {
+  oper: PosMonitoringDto[];
+  totalCount: number;
+}
+
+export class PosMonitoringDto {
   id: number;
   name: string;
   city: string;

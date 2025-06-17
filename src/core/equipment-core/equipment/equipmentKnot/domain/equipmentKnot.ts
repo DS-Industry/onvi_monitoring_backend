@@ -3,7 +3,6 @@ import { BaseEntity } from '@utils/entity';
 export interface EquipmentKnotProps {
   id?: number;
   name: string;
-  posId: number;
 }
 
 export class EquipmentKnot extends BaseEntity<EquipmentKnotProps> {
@@ -19,15 +18,7 @@ export class EquipmentKnot extends BaseEntity<EquipmentKnotProps> {
     return this.props.name;
   }
 
-  get posId(): number {
-    return this.props.posId;
-  }
-
   set name(name: string) {
     this.props.name = name;
-  }
-
-  set posId(posId: number) {
-    this.props.posId = posId;
   }
 }

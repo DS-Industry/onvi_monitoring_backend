@@ -20,4 +20,10 @@ export class PosMonitoringDto {
     return parseInt(value);
   })
   placementId: number | '*';
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }

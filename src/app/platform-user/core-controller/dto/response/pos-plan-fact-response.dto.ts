@@ -1,4 +1,9 @@
 export class PosPlanFactResponseDto {
+  plan: PosPlanFactDto[];
+  totalCount: number;
+}
+
+export class PosPlanFactDto {
   posId: number;
   plan: number;
   cashFact: number;

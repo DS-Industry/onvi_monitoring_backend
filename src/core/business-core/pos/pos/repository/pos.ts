@@ -85,8 +85,30 @@ export class PosRepository extends IPosRepository {
   public async findAllByPermission(
     ability: any,
     placementId?: number | '*',
+    skip?: number,
+    take?: number,
   ): Promise<Pos[]> {
     const pos = await this.prisma.pos.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      where: {
+        AND: [
+          accessibleBy(ability).Pos,
+          placementId !== '*' ? { placementId } : {},
+        ],
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+    return pos.map((item) => PrismaPosMapper.toDomain(item));
+  }
+
+  public async countAllByAbilityAndPlacement(
+    ability: any,
+    placementId?: number | '*',
+  ): Promise<number> {
+    return this.prisma.pos.count({
       where: {
         AND: [
           accessibleBy(ability).Pos,
@@ -94,6 +116,5 @@ export class PosRepository extends IPosRepository {
         ],
       },
     });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
   }
 }

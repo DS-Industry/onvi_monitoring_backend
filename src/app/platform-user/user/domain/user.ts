@@ -20,6 +20,7 @@ export interface UserProps {
   countryCode?: number;
   timezone?: number;
   refreshTokenId?: string;
+  fcmToken?: string;
   receiveNotifications?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -106,6 +107,10 @@ export class User extends BaseEntity<UserProps> {
     return this.props.refreshTokenId;
   }
 
+  get fcmToken(): string {
+    return this.props.fcmToken;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -172,5 +177,9 @@ export class User extends BaseEntity<UserProps> {
 
   set refreshTokenId(refreshTokenId: string) {
     this.props.refreshTokenId = refreshTokenId;
+  }
+
+  set fcmToken(fcmToken: string) {
+    this.props.fcmToken = fcmToken;
   }
 }

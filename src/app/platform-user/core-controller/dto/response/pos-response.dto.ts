@@ -19,8 +19,8 @@ export interface PosResponseDto {
     id: number;
     city: string;
     location: string;
-    lat: number;
-    lon: number;
+    lat: string;
+    lon: string;
   };
   posType: {
     id: number;

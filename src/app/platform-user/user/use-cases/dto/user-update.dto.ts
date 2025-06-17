@@ -11,6 +11,7 @@ export class UpdateUserDto {
   position?: PositionUser;
   status?: StatusUser;
   refreshTokenId?: string;
+  fcmToken?: string;
   receiveNotifications?: number;
   roleId?: number;
 }

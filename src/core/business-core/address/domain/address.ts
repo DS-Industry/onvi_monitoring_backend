@@ -4,8 +4,8 @@ export interface AddressProps {
   id?: number;
   city: string;
   location: string;
-  lat?: number;
-  lon?: number;
+  lat?: string;
+  lon?: string;
 }
 
 export class Address extends BaseEntity<AddressProps> {
@@ -25,11 +25,11 @@ export class Address extends BaseEntity<AddressProps> {
     return this.props.location;
   }
 
-  get lat(): number {
+  get lat(): string {
     return this.props.lat;
   }
 
-  get lon(): number {
+  get lon(): string {
     return this.props.lon;
   }
 
@@ -41,11 +41,11 @@ export class Address extends BaseEntity<AddressProps> {
     this.props.location = location;
   }
 
-  set lat(lat: number) {
+  set lat(lat: string) {
     this.props.lat = lat;
   }
 
-  set lon(lon: number) {
+  set lon(lon: string) {
     this.props.lon = lon;
   }
 }

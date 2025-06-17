@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PosProgramResponseDto } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
+import {
+  PosProgramDto, PosProgramInfo,
+  PosProgramResponseDto
+} from "@platform-user/core-controller/dto/response/pos-program-response.dto";
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
@@ -15,21 +18,31 @@ export class ProgramPosUseCase {
     private readonly dataDeviceProgramUseCase: DataDeviceProgramUseCase,
   ) {}
 
-  async execute(
-    dateStart: Date,
-    dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
-    pos?: Pos,
-  ): Promise<PosProgramResponseDto[]> {
-    const response: PosProgramResponseDto[] = [];
+  async execute(data: {
+    dateStart: Date;
+    dateEnd: Date;
+    ability: any;
+    placementId: number | '*';
+    pos?: Pos;
+    skip?: number;
+    take?: number;
+  }): Promise<PosProgramResponseDto> {
+    const response: PosProgramDto[] = [];
     let poses: Pos[] = [];
-    if (pos) {
-      poses.push(pos);
+    let totalCount = 1;
+    if (data.pos) {
+      poses.push(data.pos);
     } else {
+      totalCount =
+        await this.findMethodsPosUseCase.countAllByAbilityAndPlacement(
+          data.ability,
+          data.placementId,
+        );
       poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-        ability,
-        placementId,
+        data.ability,
+        data.placementId,
+        data.skip,
+        data.take,
       );
     }
 
@@ -41,26 +54,27 @@ export class ProgramPosUseCase {
         const devicePrograms =
           await this.findMethodsDeviceProgramUseCase.getAllByPosIdAndDateProgram(
             pos.id,
-            dateStart,
-            dateEnd,
+            data.dateStart,
+            data.dateEnd,
           );
         const lastProg =
           await this.findMethodsDeviceProgramUseCase.getLastByPosId(pos.id);
+        let programs: PosProgramInfo[] = [];
         if (devicePrograms.length > 0) {
-          const programs = await this.dataDeviceProgramUseCase.execute(
+          programs = await this.dataDeviceProgramUseCase.execute(
             devicePrograms,
             lastProg,
           );
-          response.push({
-            id: pos.id,
-            name: pos.name,
-            posType: carWashPos.carWashPosType,
-            programsInfo: programs,
-          });
         }
+        response.push({
+          id: pos.id,
+          name: pos.name,
+          posType: carWashPos.carWashPosType,
+          programsInfo: programs,
+        });
       }),
     );
 
-    return response;
+    return { prog: response, totalCount: totalCount };
   }
 }

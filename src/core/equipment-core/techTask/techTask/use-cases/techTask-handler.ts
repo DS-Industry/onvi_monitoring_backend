@@ -19,6 +19,7 @@ export class HandlerTechTaskUseCase {
   async execute() {
     const todayUTC = new Date();
     todayUTC.setUTCHours(0, 0, 0, 0);
+    console.log('start ' + todayUTC);
     /*
         const techTaskActive = await this.findMethodsTechTaskUseCase.getAllByStatus(
           StatusTechTask.ACTIVE,       );

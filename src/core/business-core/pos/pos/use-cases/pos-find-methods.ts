@@ -44,8 +44,15 @@ export class FindMethodsPosUseCase {
   async getAllByAbility(
     input: any,
     placementId: number | '*',
+    skip?: number,
+    take?: number,
   ): Promise<PosResponseDto[]> {
-    const poses = await this.posRepository.findAllByPermission(input, placementId);
+    const poses = await this.posRepository.findAllByPermission(
+      input,
+      placementId,
+      skip,
+      take,
+    );
     return await Promise.all(
       poses.map(
         async (pos) => await this.posCreateFullDataUseCase.execute(pos),
@@ -56,7 +63,24 @@ export class FindMethodsPosUseCase {
   async getAllByAbilityPos(
     input: any,
     placementId?: number | '*',
+    skip?: number,
+    take?: number,
   ): Promise<Pos[]> {
-    return await this.posRepository.findAllByPermission(input, placementId);
+    return await this.posRepository.findAllByPermission(
+      input,
+      placementId,
+      skip,
+      take,
+    );
+  }
+
+  async countAllByAbilityAndPlacement(
+    ability: any,
+    placementId?: number | '*',
+  ): Promise<number> {
+    return await this.posRepository.countAllByAbilityAndPlacement(
+      ability,
+      placementId,
+    );
   }
 }

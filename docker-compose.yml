@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./config/env/.env.production
+    env_file: config/env/.env.production
     environment:
       - APP_ROLE=app
     ports:
@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./config/env/.env.production
+    env_file: config/env/.env.production
     environment:
       - APP_ROLE=reportWorker
     restart: always
@@ -28,7 +28,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./config/env/.env.production
+    env_file: config/env/.env.production
     environment:
       - APP_ROLE=dataRawWorker
     restart: always
@@ -38,7 +38,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: ./config/env/.env.production
+    env_file: config/env/.env.production
     environment:
       - APP_ROLE=cron
     restart: always

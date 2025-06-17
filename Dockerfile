@@ -18,6 +18,7 @@ ENV NODE_ENV dev
 # Copy source code into app folder
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node ./prisma prisma
+COPY --chown=node:node ./config/firebase/onvione-firebase-adminsdk-rrg9o-77420b683d.json ./config/firebase/
 
 # Install dependencies
 RUN npm ci
@@ -45,6 +46,7 @@ ENV NODE_ENV production
 # Copy source code into app folder
 COPY --chown=node:node package*.json ./
 COPY --chown=node:node ./prisma prisma
+COPY --chown=node:node --from=development /usr/src/app/config/firebase/onvione-firebase-adminsdk-rrg9o-77420b683d.json ./config/firebase/
 
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
 
@@ -78,6 +80,8 @@ ENV NODE_ENV production
 # Copy the bundled code from the build stage to the production image
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/config/firebase/onvione-firebase-adminsdk-rrg9o-77420b683d.json ./config/firebase/
+
 
 # Set Docker as non-root user
 USER node

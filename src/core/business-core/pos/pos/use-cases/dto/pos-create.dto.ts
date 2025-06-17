@@ -7,8 +7,8 @@ export class PosCreateDto {
   address: {
     city: string;
     location: string;
-    lat?: number;
-    lon?: number;
+    lat?: string;
+    lon?: string;
   };
   organizationId: number;
   carWashPosType: CarWashPosType;

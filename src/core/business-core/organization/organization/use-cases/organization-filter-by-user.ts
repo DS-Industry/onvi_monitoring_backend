@@ -26,6 +26,7 @@ export class FilterByUserOrganizationUseCase {
           name: organization.name,
           slug: organization.slug,
           address: organization.address,
+          organizationDocumentId: organization?.organizationDocumentId,
           organizationStatus: organization.organizationStatus,
           organizationType: organization.organizationType,
           createdAt: organization.createdAt,

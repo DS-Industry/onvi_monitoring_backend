@@ -28,28 +28,30 @@ export class GetStatisticsGrafOrganizationUseCase {
     );
 
     const flattenedOperations = allOperations.flat();
-    const operationsByMonth = new Map<
+    const operationsByDay = new Map<
       string,
-      { year: number; month: number; sum: number }
+      { year: number; month: number; day: number; sum: number }
     >();
     flattenedOperations.forEach((operation) => {
       const date = new Date(operation.operDate);
       const year = date.getFullYear();
       const month = date.getMonth();
-      const key = `${year}-${month}`;
-      if (!operationsByMonth.has(key)) {
-        operationsByMonth.set(key, { year, month, sum: 0 });
+      const day = date.getDate();
+      const key = `${year}-${month}-${day}`;
+      if (!operationsByDay.has(key)) {
+        operationsByDay.set(key, { year, month, day, sum: 0 });
       }
-      operationsByMonth.get(key)!.sum += operation.operSum;
+      operationsByDay.get(key)!.sum += operation.operSum;
     });
 
-    return Array.from(operationsByMonth.values())
+    return Array.from(operationsByDay.values())
       .sort((a, b) => {
         if (a.year !== b.year) return a.year - b.year;
-        return a.month - b.month;
+        if (a.month !== b.month) return a.month - b.month;
+        return a.day - b.day;
       })
       .map((item) => ({
-        date: new Date(Date.UTC(item.year, item.month, 1)),
+        date: new Date(Date.UTC(item.year, item.month, item.day)),
         sum: item.sum,
       }));
   }

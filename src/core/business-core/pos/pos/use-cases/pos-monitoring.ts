@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PosMonitoringResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
+import {
+  PosMonitoringDto,
+  PosMonitoringResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
@@ -15,21 +18,31 @@ export class MonitoringPosUseCase {
     private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
-  async execute(
-    dateStart: Date,
-    dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
-    pos?: Pos,
-  ): Promise<PosMonitoringResponseDto[]> {
-    const response: PosMonitoringResponseDto[] = [];
+  async execute(data: {
+    dateStart: Date;
+    dateEnd: Date;
+    ability: any;
+    placementId: number | '*';
+    pos?: Pos;
+    skip?: number;
+    take?: number;
+  }): Promise<PosMonitoringResponseDto> {
+    const response: PosMonitoringDto[] = [];
     let poses: PosResponseDto[] = [];
-    if (pos) {
-      poses.push(await this.posCreateFullDataUseCase.execute(pos));
+    let totalCount = 1;
+    if (data.pos) {
+      poses.push(await this.posCreateFullDataUseCase.execute(data.pos));
     } else {
+      totalCount =
+        await this.findMethodsPosUseCase.countAllByAbilityAndPlacement(
+          data.ability,
+          data.placementId,
+        );
       poses = await this.findMethodsPosUseCase.getAllByAbility(
-        ability,
-        placementId,
+        data.ability,
+        data.placementId,
+        data.skip,
+        data.take,
       );
     }
 
@@ -42,8 +55,8 @@ export class MonitoringPosUseCase {
         const posOperations =
           await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
             pos.id,
-            dateStart,
-            dateEnd,
+            data.dateStart,
+            data.dateEnd,
           );
         const lastOper =
           await this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(
@@ -84,6 +97,6 @@ export class MonitoringPosUseCase {
         });
       }),
     );
-    return response;
+    return { oper: response, totalCount: totalCount };
   }
 }

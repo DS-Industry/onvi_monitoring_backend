@@ -21,6 +21,7 @@ import { UpdateConfirmMailUseCase } from "@organization/confirmMail/use-case/con
 import {
   GetStatisticsGrafOrganizationUseCase
 } from "@organization/organization/use-cases/organization-get-statistics-graf";
+import { PreCreateOrganizationUseCase } from "@organization/organization/use-cases/organization-pre-create";
 
 const repositories: Provider[] = [
   OrganizationRepositoryProvider,
@@ -37,6 +38,7 @@ const organizationUseCase: Provider[] = [
   GetStatisticsOrganizationUseCase,
   FilterByUserOrganizationUseCase,
   GetStatisticsGrafOrganizationUseCase,
+  PreCreateOrganizationUseCase,
 ];
 
 const confirmMailOrganizationUseCase: Provider[] = [

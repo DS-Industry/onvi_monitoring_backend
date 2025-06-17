@@ -71,6 +71,9 @@ import { LoyaltyController } from "@platform-user/core-controller/loyalty";
 import { HrController } from "@platform-user/core-controller/hr";
 import { HrCoreModule } from "@hr/hr-core.module";
 import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-validate-rules";
+import { NotificationController } from "@platform-user/core-controller/notification";
+import { NotificationValidateRules } from "@platform-user/validate/validate-rules/notification-validate-rules";
+import { NotificationCoreModule } from "@notification/notification-core.module";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -94,6 +97,7 @@ const controllers = [
   PlacementController,
   LoyaltyController,
   HrController,
+  NotificationController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -141,6 +145,7 @@ const validate: Provider[] = [
   ReportValidateRules,
   LoyaltyValidateRules,
   HrValidateRules,
+  NotificationValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -163,6 +168,7 @@ const permission: Provider[] = [
     ReportCoreModule,
     LoyaltyCoreModule,
     HrCoreModule,
+    NotificationCoreModule,
     ObjectModule,
     FileModule,
   ],

@@ -26,7 +26,6 @@ export class PlacementController {
         id: placement.id,
         country: placement.country,
         region: placement.region,
-        city: placement.city,
         utc: placement.utc,
       }));
     } catch (e) {

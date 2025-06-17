@@ -35,6 +35,7 @@ export class PrismaPlatformUserMapper {
       timezone: entity.timezone,
       refreshTokenId: entity.refreshTokenId,
       receiveNotifications: entity.receiveNotifications,
+      fcmToken: entity.fcmToken,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -59,6 +60,7 @@ export class PrismaPlatformUserMapper {
       countryCode: user?.countryCode,
       timezone: user?.timezone,
       refreshTokenId: user?.refreshTokenId,
+      fcmToken: user?.fcmToken,
       receiveNotifications: user?.receiveNotifications,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

@@ -2,9 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { User } from '@platform-user/user/domain/user';
-import { StatusUser } from "@prisma/client";
-import { UserException } from "@exception/option.exceptions";
-import { USER_AUTHORIZATION_EXCEPTION_CODE, USER_PASSWORD_CONFIRM_EXCEPTION_CODE } from "@constant/error.constants";
+import { StatusUser } from '@prisma/client';
+import { UserException } from '@exception/option.exceptions';
+import {
+  USER_AUTHORIZATION_EXCEPTION_CODE,
+  USER_PASSWORD_CONFIRM_EXCEPTION_CODE,
+} from '@constant/error.constants';
 
 @Injectable()
 export class ValidateUserForLocalStrategyUseCase {
@@ -18,7 +21,12 @@ export class ValidateUserForLocalStrategyUseCase {
     if (!user) {
       return null;
     }
-    if (user.status !== StatusUser.ACTIVE) {
+    const ALLOWED_STATUSES: StatusUser[] = [
+      StatusUser.ACTIVE,
+      StatusUser.VERIFICATE,
+    ];
+
+    if (!ALLOWED_STATUSES.includes(user.status)) {
       throw new UserException(
         USER_AUTHORIZATION_EXCEPTION_CODE,
         'Unauthorized',

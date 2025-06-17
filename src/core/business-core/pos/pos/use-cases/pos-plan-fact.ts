@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Pos } from '@pos/pos/domain/pos';
-import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
+import {
+  PosPlanFactDto,
+  PosPlanFactResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { CurrencyType } from '@prisma/client';
@@ -14,26 +17,36 @@ export class PlanFactPosUseCase {
     private readonly findMethodsMonthlyPlanPosUseCase: FindMethodsMonthlyPlanPosUseCase,
   ) {}
 
-  async execute(
-    dateStart: Date,
-    dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
-    pos?: Pos,
-  ): Promise<PosPlanFactResponseDto[]> {
-    const response: PosPlanFactResponseDto[] = [];
+  async execute(data: {
+    dateStart: Date;
+    dateEnd: Date;
+    ability: any;
+    placementId: number | '*';
+    pos?: Pos;
+    skip?: number;
+    take?: number;
+  }): Promise<PosPlanFactResponseDto> {
+    const response: PosPlanFactDto[] = [];
     let poses: Pos[] = [];
-    if (pos) {
-      poses.push(pos);
+    let totalCount = 1;
+    if (data.pos) {
+      poses.push(data.pos);
     } else {
+      totalCount =
+        await this.findMethodsPosUseCase.countAllByAbilityAndPlacement(
+          data.ability,
+          data.placementId,
+        );
       poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-        ability,
-        placementId,
+        data.ability,
+        data.placementId,
+        data.skip,
+        data.take,
       );
     }
 
-    const adjustedDateStart = this.getFirstDayOfMonth(dateStart);
-    const adjustedDateEnd = this.getLastDayOfMonth(dateEnd);
+    const adjustedDateStart = this.getFirstDayOfMonth(data.dateStart);
+    const adjustedDateEnd = this.getLastDayOfMonth(data.dateEnd);
 
     const cashSumMap = new Map<number, number>();
     const virtualSumMap = new Map<number, number>();
@@ -44,8 +57,8 @@ export class PlanFactPosUseCase {
         const posOperations =
           await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
             pos.id,
-            dateStart,
-            dateEnd,
+            data.dateStart,
+            data.dateEnd,
           );
         await Promise.all(
           posOperations.map(async (posOperation) => {
@@ -81,8 +94,9 @@ export class PlanFactPosUseCase {
           ); // Конец месяца
 
           // Определяем пересечение плана с указанным периодом
-          const periodStart = dateStart > planStart ? dateStart : planStart;
-          const periodEnd = dateEnd < planEnd ? dateEnd : planEnd;
+          const periodStart =
+            data.dateStart > planStart ? data.dateStart : planStart;
+          const periodEnd = data.dateEnd < planEnd ? data.dateEnd : planEnd;
 
           // Количество дней в плане и в периоде
           const planDays =
@@ -121,7 +135,7 @@ export class PlanFactPosUseCase {
       }),
     );
 
-    return response;
+    return { plan: response, totalCount: totalCount };
   }
 
   private getFirstDayOfMonth(date: Date): Date {

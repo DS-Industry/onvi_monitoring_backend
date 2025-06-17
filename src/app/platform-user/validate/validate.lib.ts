@@ -85,7 +85,11 @@ import { Position } from '@hr/position/domain/position';
 import { Worker } from '@hr/worker/domain/worker';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
-import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { FindMethodsUserNotificationTagUseCase } from '@notification/userNotificationTag/use-case/userNotificationTag-find-methods';
+import { UserNotificationTag } from '@notification/userNotificationTag/domain/userNotificationTag';
+import { UserNotification } from '@notification/userNotification/domain/userNotification';
+import { FindMethodsUserNotificationUseCase } from '@notification/userNotification/use-case/userNotification-find-methods';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -103,6 +107,7 @@ export enum ExceptionType {
   REPORT_TEMPLATE = 'ReportTemplate',
   LOYALTY = 'Loyalty',
   HR = 'Hr',
+  NOTIFICATION = 'Notification',
 }
 @Injectable()
 export class ValidateLib {
@@ -147,6 +152,8 @@ export class ValidateLib {
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
+    private readonly findMethodsUserNotificationTagUseCase: FindMethodsUserNotificationTagUseCase,
+    private readonly findMethodsUserNotificationUseCase: FindMethodsUserNotificationUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -612,9 +619,10 @@ export class ValidateLib {
     id: number,
     posId: number,
   ): Promise<ValidateResponse> {
-    const equipmentKnot =
-      await this.findMethodsEquipmentKnotUseCase.getById(id);
-    if (!equipmentKnot || equipmentKnot.posId != posId) {
+    const equipmentKnots =
+      await this.findMethodsEquipmentKnotUseCase.getAllByPosId(posId);
+    const exists = equipmentKnots.some((knot) => knot.id === id);
+    if (!exists) {
       return { code: 400, errorMessage: 'POS doesnt have a program type' };
     }
     return { code: 200 };
@@ -1110,6 +1118,72 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async notificationTegByNameNotExists(
+    name: string,
+    userId: number,
+  ): Promise<ValidateResponse> {
+    const checkTag =
+      await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
+        authorUserId: userId,
+        name: name,
+      });
+    if (checkTag.length > 0) {
+      return {
+        code: 400,
+        errorMessage: 'The tag already exists in the system for this user',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async notificationTegByIdExists(
+    id: number,
+    userId: number,
+  ): Promise<ValidateResponse<UserNotificationTag>> {
+    const checkTag =
+      await this.findMethodsUserNotificationTagUseCase.getOneById(id);
+    if (!checkTag || checkTag.authorUserId !== userId) {
+      return {
+        code: 400,
+        errorMessage: 'The tag does not exist',
+      };
+    }
+    return { code: 200, object: checkTag };
+  }
+
+  public async userNotificationByIdExists(
+    id: number,
+    userId: number,
+  ): Promise<ValidateResponse<UserNotification>> {
+    const checkUserNotification =
+      await this.findMethodsUserNotificationUseCase.getById(id);
+    if (!checkUserNotification || checkUserNotification.userId !== userId) {
+      return {
+        code: 400,
+        errorMessage: 'The userNotification does not exist',
+      };
+    }
+    return { code: 200, object: checkUserNotification };
+  }
+
+  public async userNotificationTagIdsExists(
+    tagIds: number[],
+    userId: number,
+  ): Promise<ValidateResponse> {
+    const allTagIds =
+      await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
+        authorUserId: userId,
+      });
+    const tagIdsCheck = allTagIds.map((item) => item.id);
+    const unnecessaryTagIds = tagIds.filter(
+      (item) => !tagIdsCheck.includes(item),
+    );
+    if (unnecessaryTagIds.length > 0) {
+      return { code: 400, errorMessage: 'tagId connection error' };
+    }
+    return { code: 200 };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -1142,6 +1216,8 @@ export class ValidateLib {
       } else if (exceptionType == ExceptionType.LOYALTY) {
         throw new LoyaltyException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.HR) {
+        throw new HrException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.NOTIFICATION) {
         throw new HrException(exceptionCode, errorCodes);
       }
     }

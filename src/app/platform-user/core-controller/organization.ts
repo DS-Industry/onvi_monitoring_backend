@@ -48,11 +48,16 @@ import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/do
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 import { OrganizationStatisticGrafResponseDto } from '@platform-user/core-controller/dto/response/organization-statistic-graf-response.dto';
 import { GetStatisticsGrafOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics-graf';
+import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
+import { StatusUser } from '@prisma/client';
+import { OrganizationPreCreateDto } from '@platform-user/core-controller/dto/receive/organization-pre-create.dto';
+import { PreCreateOrganizationUseCase } from '@organization/organization/use-cases/organization-pre-create';
 
 @Controller('organization')
 export class OrganizationController {
   constructor(
     private readonly organizationCreate: CreateOrganizationUseCase,
+    private readonly preCreateOrganizationUseCase: PreCreateOrganizationUseCase,
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly organizationAddDocuments: AddDocumentUseCase,
     private readonly filterByUserOrganizationUseCase: FilterByUserOrganizationUseCase,
@@ -64,6 +69,7 @@ export class OrganizationController {
     private readonly findMethodsDocumentUseCase: FindMethodsDocumentUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
     private readonly getStatisticsGrafOrganizationUseCase: GetStatisticsGrafOrganizationUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
   //All organization for user
   @Get('filter')
@@ -108,7 +114,43 @@ export class OrganizationController {
     try {
       const { user } = req;
       await this.organizationValidateRules.createValidate(data.fullName);
-      return await this.organizationCreate.execute(data, user);
+      const newOrganization = await this.organizationCreate.execute(data, user);
+      if (user.status == StatusUser.VERIFICATE) {
+        await this.updateUserUseCase.execute({
+          id: user.id,
+          status: StatusUser.ACTIVE,
+        });
+      }
+      return newOrganization;
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //PreCreate organization
+  @Post('pre-create')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateOrgAbility())
+  @HttpCode(201)
+  async preCreate(
+    @Body() data: OrganizationPreCreateDto,
+    @Request() req: any,
+  ): Promise<any> {
+    try {
+      const { user } = req;
+      await this.organizationValidateRules.createValidate(data.fullName);
+      return await this.preCreateOrganizationUseCase.execute(data, user);
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({
@@ -135,12 +177,22 @@ export class OrganizationController {
     @Body() data: OrganizationUpdateDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       const organization = await this.organizationValidateRules.updateValidate(
         data.organizationId,
         ability,
       );
-      return await this.updateOrganizationUseCase.execute(data, organization);
+      const newOrganization = await this.updateOrganizationUseCase.execute(
+        data,
+        organization,
+      );
+      if (user.status == StatusUser.VERIFICATE) {
+        await this.updateUserUseCase.execute({
+          id: user.id,
+          status: StatusUser.ACTIVE,
+        });
+      }
+      return newOrganization;
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

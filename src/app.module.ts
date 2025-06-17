@@ -20,8 +20,10 @@ import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
 import { ReportCoreModule } from '@report/report-core.module';
-import { LoyaltyCoreModule } from './core/loyalty-core/loyalty-core.module';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { HrCoreModule } from '@hr/hr-core.module';
+import { NotificationCoreModule } from '@notification/notification-core.module';
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 @Module({
   imports: [
@@ -77,7 +79,7 @@ import { HrCoreModule } from '@hr/hr-core.module';
         keepAlive: 30000,
         connectTimeout: 60000,
         retryStrategy: (times) => Math.min(times * 100, 3000),
-      }
+      },
     }),
     BullModule.forRoot('worker', {
       connection: {
@@ -88,11 +90,14 @@ import { HrCoreModule } from '@hr/hr-core.module';
         keepAlive: 30000,
         connectTimeout: 60000,
         retryStrategy: (times) => Math.min(times * 100, 3000),
-      }
+      },
     }),
     RouterModule.register(routeConfig),
     ScheduleModule.forRoot(),
     PrometheusModule.register(),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,
@@ -106,6 +111,7 @@ import { HrCoreModule } from '@hr/hr-core.module';
     HrCoreModule,
     ReportCoreModule,
     HandlerModule,
+    NotificationCoreModule,
     Logger,
   ],
   controllers: [],

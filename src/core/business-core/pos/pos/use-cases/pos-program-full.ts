@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import {
+  PosProgramDto,
   PosProgramInfo,
-  PosProgramResponseDto,
-} from '@platform-user/core-controller/dto/response/pos-program-response.dto';
+  PosProgramResponseDto
+} from "@platform-user/core-controller/dto/response/pos-program-response.dto";
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { Pos } from '@pos/pos/domain/pos';
@@ -30,8 +31,8 @@ export class PosProgramFullUseCase {
     dateStart: Date,
     dateEnd: Date,
     pos: Pos,
-  ): Promise<PosProgramResponseDto[]> {
-    const response: PosProgramResponseDto[] = [];
+  ): Promise<PosProgramDto[]> {
+    const response: PosProgramDto[] = [];
     const carWashPos = await this.findMethodsCarWashPosUseCase.getById(pos.id);
     const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
       pos.id,

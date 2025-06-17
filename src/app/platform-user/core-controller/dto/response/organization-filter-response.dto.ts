@@ -5,6 +5,7 @@ export class OrganizationFilterResponseDto {
   name: string;
   slug: string;
   address: string;
+  organizationDocumentId?: number;
   organizationStatus: StatusOrganization;
   organizationType: TypeOrganization;
   createdAt: Date;

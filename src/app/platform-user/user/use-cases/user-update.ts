@@ -25,6 +25,7 @@ export class UpdateUserUseCase {
       position,
       status,
       refreshTokenId,
+      fcmToken,
       receiveNotifications,
       roleId,
     } = input;
@@ -54,6 +55,7 @@ export class UpdateUserUseCase {
     user.receiveNotifications = receiveNotifications
       ? receiveNotifications
       : user.receiveNotifications;
+    user.fcmToken = fcmToken ? fcmToken : user.fcmToken;
     user.userRoleId = roleId ? roleId : user.userRoleId;
 
     return await this.userRepository.update(user.id, user);

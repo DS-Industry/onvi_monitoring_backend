@@ -8,7 +8,7 @@ export class HandlerTechTaskCron {
     private readonly handlerTechTaskUseCase: HandlerTechTaskUseCase,
   ) {}
 
-  @Cron('0 0 * * *')
+  @Cron('0 0 * * *', { timeZone: 'UTC' })
   async execute(): Promise<void> {
     await this.handlerTechTaskUseCase.execute();
   }
