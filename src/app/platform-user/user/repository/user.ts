@@ -51,6 +51,26 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
+  public async findAllByPosId(posId: number): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { posesPermissions: { some: { id: posId } } },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findAllByRoleIds(roleIds: number[]): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { userRoleId: { in: roleIds } },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
   public async findOneById(id: number): Promise<User> {
     const user = await this.prisma.user.findFirst({
       where: {
@@ -102,10 +122,10 @@ export class UserRepository extends IUserRepository {
         id,
       },
       include: {
-        loyaltyPrograms: true,
+        ltyPrograms: true,
       },
     });
-    return user?.loyaltyPrograms?.map((item) => item.id) || [];
+    return user?.ltyPrograms?.map((item) => item.id) || [];
   }
 
   public async getAllOrganizationPermissions(id: number): Promise<number[]> {

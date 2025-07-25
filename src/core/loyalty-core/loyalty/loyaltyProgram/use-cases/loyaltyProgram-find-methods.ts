@@ -27,7 +27,7 @@ export class FindMethodsLoyaltyProgramUseCase {
   async getOneByLoyaltyCardTierId(
     loyaltyCardTierId: number,
   ): Promise<LoyaltyProgram> {
-    return await this.loyaltyProgramRepository.findOneByLoyaltyCardTierId(
+    return await this.loyaltyProgramRepository.findOneByCardTierId(
       loyaltyCardTierId,
     );
   }

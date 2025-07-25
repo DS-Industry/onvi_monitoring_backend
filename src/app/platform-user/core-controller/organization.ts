@@ -73,17 +73,16 @@ export class OrganizationController {
   ) {}
   //All organization for user
   @Get('filter')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadOrgAbility())
+  @UseGuards(JwtGuard)
   @HttpCode(200)
   async filterViewOrganizationByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
   ): Promise<OrganizationFilterResponseDto[]> {
     try {
-      const { ability } = req;
+      const { user } = req;
       return await this.filterByUserOrganizationUseCase.execute(
-        ability,
+        user,
         data.placementId,
       );
     } catch (e) {
@@ -170,7 +169,7 @@ export class OrganizationController {
   //Update organization
   @Patch('')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateOrgAbility())
+  @CheckAbilities(new CreateOrgAbility())
   @HttpCode(201)
   async update(
     @Request() req: any,
@@ -211,18 +210,14 @@ export class OrganizationController {
   }
   //Send email for add worker
   @Post('worker')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(201)
-  async addWorker(
-    @Body() data: AddWorkerOrganizationDto,
-    @Request() req: any,
-  ): Promise<any> {
+  async addWorker(@Body() data: AddWorkerOrganizationDto): Promise<any> {
     try {
-      const { user } = req;
       await this.organizationValidateRules.addWorkerValidate(
         data.email,
         data.organizationId,
-        user.id,
       );
       return await this.sendOrganizationConfirmMailUseCase.execute(
         data,
@@ -344,7 +339,7 @@ export class OrganizationController {
       }
     }
   }
-  //Get org by id
+  //Get org by id DELETE?
   @Get(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -397,7 +392,7 @@ export class OrganizationController {
       }
     }
   }
-  //Get all worker for org
+  //Get document for org
   @Get('document/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -429,7 +424,7 @@ export class OrganizationController {
       }
     }
   }
-  //Get all pos for org
+  //Get all pos for org DELETE?
   @Get('pos/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())

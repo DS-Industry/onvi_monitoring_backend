@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { UserPermissionDataResponseDto } from '@platform-user/user/use-cases/dto/user-permission-data-response.dto';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
+import { User } from "@platform-user/user/domain/user";
 
 @Injectable()
 export class OrganizationManageUserUseCase {
@@ -10,12 +11,12 @@ export class OrganizationManageUserUseCase {
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
   ) {}
 
-  async execute(ability: any): Promise<UserPermissionDataResponseDto[]> {
+  async execute(user: User): Promise<UserPermissionDataResponseDto[]> {
     const response: UserPermissionDataResponseDto[] = [];
     const uniqueUserIds = new Set<number>();
 
     const organizations =
-      await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
+      await this.findMethodsOrganizationUseCase.getAllByUser(user);
 
     await Promise.all(
       organizations.map(async (org) => {

@@ -7,7 +7,7 @@ import { SignAccessTokenUseCase } from '@mobile-user/auth/use-cases/auth-sign-ac
 import { SignRefreshTokenUseCase } from '@mobile-user/auth/use-cases/auth-sign-refresh-token';
 import { Client } from '../../../../core/loyalty-core/mobile-user/client/domain/client';
 import { SetRefreshTokenUseCase } from '@mobile-user/auth/use-cases/auth-set-refresh-token';
-import { UserType } from '@prisma/client';
+import { ContractType } from '@prisma/client';
 
 @Injectable()
 export class RegisterAuthUseCase {
@@ -40,7 +40,7 @@ export class RegisterAuthUseCase {
     const clientData = new Client({
       name: `Onvi ${phone}`,
       phone: phone,
-      type: UserType.PHYSICAL,
+      type: ContractType.INDIVIDUAL,
     });
 
     const client = await this.clientRepository.create(clientData);

@@ -31,6 +31,8 @@ export class GetOneFullShiftReportUseCase {
           workDate: workDay.workDate,
           typeWorkDay: workDay.typeWorkDay,
           timeWorkedOut: workDay?.timeWorkedOut,
+          startWorkingTime: workDay?.startWorkingTime,
+          endWorkingTime: workDay?.endWorkingTime,
           estimation: workDay?.estimation,
           prize: workDay?.prize,
           fine: workDay?.fine,

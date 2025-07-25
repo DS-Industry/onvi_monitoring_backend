@@ -38,20 +38,13 @@ export class UpdateCashCollectionUseCase {
       ? sendDate
       : oldCashCollection.sendDate;
     oldCashCollection.status = status ? status : oldCashCollection.status;
-    oldCashCollection.sumFact = sumFact ? sumFact : oldCashCollection.sumFact;
-    oldCashCollection.shortage = shortage
-      ? shortage
-      : oldCashCollection.shortage;
-    oldCashCollection.sumCard = sumCard ? sumCard : oldCashCollection.sumCard;
-    oldCashCollection.countCar = countCar
-      ? countCar
-      : oldCashCollection.countCar;
-    oldCashCollection.virtualSum = virtualSum
-      ? virtualSum
-      : oldCashCollection.virtualSum;
-    oldCashCollection.averageCheck = averageCheck
-      ? averageCheck
-      : oldCashCollection.averageCheck;
+    oldCashCollection.sumFact = sumFact ?? oldCashCollection.sumFact;
+    oldCashCollection.shortage = shortage ?? oldCashCollection.shortage;
+    oldCashCollection.sumCard = sumCard ?? oldCashCollection.sumCard;
+    oldCashCollection.countCar = countCar ?? oldCashCollection.countCar;
+    oldCashCollection.virtualSum = virtualSum ?? oldCashCollection.virtualSum;
+    oldCashCollection.averageCheck =
+      averageCheck ?? oldCashCollection.averageCheck;
 
     oldCashCollection.updatedAt = new Date(Date.now());
     oldCashCollection.updatedById = user.id;

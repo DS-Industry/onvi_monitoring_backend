@@ -10,6 +10,7 @@ import { UpdateManyCashCollectionTypeUseCase } from '@finance/cashCollection/cas
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 import { User } from '@platform-user/user/domain/user';
 import { StatusCashCollection } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class RecalculateCashCollectionUseCase {
@@ -19,6 +20,7 @@ export class RecalculateCashCollectionUseCase {
     private readonly updateManyCashCollectionDeviceUseCase: UpdateManyCashCollectionDeviceUseCase,
     private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
     private readonly updateManyCashCollectionTypeUseCase: UpdateManyCashCollectionTypeUseCase,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async execute(
@@ -93,6 +95,13 @@ export class RecalculateCashCollectionUseCase {
 
     if (status == StatusCashCollection.SENT) {
       sendDate = new Date(Date.now());
+      this.eventEmitter.emit('manager-paper.created-cash-collection', {
+        posId: cashCollection.posId,
+        eventDate: cashCollection.cashCollectionDate,
+        sum: sumFactCashCollection,
+        user: user,
+        cashCollectionId: cashCollection.id,
+      });
     }
 
     const cashCollectionUpdate = await this.updateCashCollectionUseCase.execute(

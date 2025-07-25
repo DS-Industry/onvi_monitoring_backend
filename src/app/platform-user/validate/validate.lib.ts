@@ -46,6 +46,7 @@ import {
   HrException,
   IncidentException,
   LoyaltyException,
+  ManagerPaperException,
   OrganizationException,
   PosException,
   ReportTemplateException,
@@ -90,6 +91,12 @@ import { FindMethodsUserNotificationTagUseCase } from '@notification/userNotific
 import { UserNotificationTag } from '@notification/userNotificationTag/domain/userNotificationTag';
 import { UserNotification } from '@notification/userNotification/domain/userNotification';
 import { FindMethodsUserNotificationUseCase } from '@notification/userNotification/use-case/userNotification-find-methods';
+import { FindMethodsManagerPaperUseCase } from '@manager-paper/managerPaper/use-case/managerPaper-find-methods';
+import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
+import { FindMethodsManagerReportPeriodUseCase } from '@manager-paper/managerReportPeriod/use-case/managerReportPeriod-find-methods';
+import { ManagerReportPeriod } from '@manager-paper/managerReportPeriod/domain/managerReportPeriod';
+import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-find-methods';
+import { ManagerPaperType } from '@manager-paper/managerPaperType/domain/managerPaperType';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -108,6 +115,7 @@ export enum ExceptionType {
   LOYALTY = 'Loyalty',
   HR = 'Hr',
   NOTIFICATION = 'Notification',
+  MANAGER_PAPER = 'ManagerPaper',
 }
 @Injectable()
 export class ValidateLib {
@@ -154,6 +162,9 @@ export class ValidateLib {
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly findMethodsUserNotificationTagUseCase: FindMethodsUserNotificationTagUseCase,
     private readonly findMethodsUserNotificationUseCase: FindMethodsUserNotificationUseCase,
+    private readonly findMethodsManagerReportPeriodUseCase: FindMethodsManagerReportPeriodUseCase,
+    private readonly findMethodsManagerPaperUseCase: FindMethodsManagerPaperUseCase,
+    private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -760,6 +771,18 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async cashCollectionDeleteStatus(
+    cashCollection: CashCollection,
+  ): Promise<ValidateResponse> {
+    if (cashCollection.status == StatusCashCollection.SENT) {
+      return {
+        code: 400,
+        errorMessage: 'The cashCollection can`t be delete',
+      };
+    }
+    return { code: 200 };
+  }
+
   public async cashCollectionDeviceComparisonByIdAndList(
     cashCollectionId: number,
     cashCollectionDeviceIds: number[],
@@ -1184,6 +1207,52 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async managerPaperExists(
+    managerPaperId: number,
+  ): Promise<ValidateResponse<ManagerPaper>> {
+    const managerPaper =
+      await this.findMethodsManagerPaperUseCase.getOneById(managerPaperId);
+    if (!managerPaper) {
+      return {
+        code: 400,
+        errorMessage: 'The managerPaper does not exist',
+      };
+    }
+    return { code: 200, object: managerPaper };
+  }
+
+  public async managerPaperTypeExists(
+    managerPaperTypeId: number,
+  ): Promise<ValidateResponse<ManagerPaperType>> {
+    const managerPaperType =
+      await this.findMethodsManagerPaperTypeUseCase.getOneById(
+        managerPaperTypeId,
+      );
+    if (!managerPaperType) {
+      return {
+        code: 400,
+        errorMessage: 'The managerPaperType does not exist',
+      };
+    }
+    return { code: 200, object: managerPaperType };
+  }
+
+  public async managerReportPeriodExists(
+    managerReportPeriodId: number,
+  ): Promise<ValidateResponse<ManagerReportPeriod>> {
+    const managerReportPeriod =
+      await this.findMethodsManagerReportPeriodUseCase.getOneById(
+        managerReportPeriodId,
+      );
+    if (!managerReportPeriod) {
+      return {
+        code: 400,
+        errorMessage: 'The managerReportPeriod does not exist',
+      };
+    }
+    return { code: 200, object: managerReportPeriod };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -1219,6 +1288,8 @@ export class ValidateLib {
         throw new HrException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.NOTIFICATION) {
         throw new HrException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.MANAGER_PAPER) {
+        throw new ManagerPaperException(exceptionCode, errorCodes);
       }
     }
   }

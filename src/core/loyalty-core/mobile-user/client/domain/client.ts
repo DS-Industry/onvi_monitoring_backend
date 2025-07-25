@@ -1,4 +1,4 @@
-import { StatusUser, UserType } from '@prisma/client';
+import { StatusUser, ContractType } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface ClientProps {
@@ -10,7 +10,7 @@ export interface ClientProps {
   gender?: string;
   status?: StatusUser;
   avatar?: string;
-  type: UserType;
+  type: ContractType;
   inn?: string;
   comment?: string;
   placementId?: number;
@@ -57,7 +57,7 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.avatar;
   }
 
-  get type(): UserType {
+  get type(): ContractType {
     return this.props.type;
   }
 
@@ -105,7 +105,7 @@ export class Client extends BaseEntity<ClientProps> {
     this.props.status = status;
   }
 
-  set type(type: UserType) {
+  set type(type: ContractType) {
     this.props.type = type;
   }
 

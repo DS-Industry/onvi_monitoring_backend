@@ -131,6 +131,31 @@ export class FinanceValidateRules {
     return cashCollectionCheck.object;
   }
 
+  public async deleteCashCollectionValidate(
+    cashCollectionId: number,
+    ability: any,
+  ): Promise<CashCollection> {
+    const response = [];
+    const cashCollectionCheck =
+      await this.validateLib.cashCollectionByIdExists(cashCollectionId);
+    response.push(cashCollectionCheck);
+    response.push(
+      await this.validateLib.cashCollectionDeleteStatus(
+        cashCollectionCheck.object,
+      ),
+    );
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      cashCollectionCheck.object,
+    );
+    return cashCollectionCheck.object;
+  }
+
   public async addWorkerShiftReport(
     shiftReportId: number,
     userId: number,

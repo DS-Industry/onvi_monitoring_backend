@@ -12,14 +12,14 @@ export class BenefitRepository extends IBenefitRepository {
 
   public async create(input: Benefit): Promise<Benefit> {
     const benefitEntity = PrismaBenefitMapper.toPrisma(input);
-    const benefit = await this.prisma.benefit.create({
+    const benefit = await this.prisma.lTYBenefit.create({
       data: benefitEntity,
     });
     return PrismaBenefitMapper.toDomain(benefit);
   }
 
   public async findOneById(id: number): Promise<Benefit> {
-    const benefit = await this.prisma.benefit.findFirst({
+    const benefit = await this.prisma.lTYBenefit.findFirst({
       where: {
         id,
       },
@@ -27,12 +27,12 @@ export class BenefitRepository extends IBenefitRepository {
     return PrismaBenefitMapper.toDomain(benefit);
   }
 
-  public async findAllByLoyaltyTierId(loyaltyTierId: number): Promise<Benefit[]> {
-    const benefits = await this.prisma.benefit.findMany({
+  public async findAllByLoyaltyTierId(tierId: number): Promise<Benefit[]> {
+    const benefits = await this.prisma.lTYBenefit.findMany({
       where: {
-        loyaltyCardTiers: {
+        cardTiers: {
           some: {
-            id: loyaltyTierId,
+            id: tierId,
           },
         },
       },
@@ -41,13 +41,13 @@ export class BenefitRepository extends IBenefitRepository {
   }
 
   public async findAll(): Promise<Benefit[]> {
-    const benefits = await this.prisma.benefit.findMany();
+    const benefits = await this.prisma.lTYBenefit.findMany();
     return benefits.map((item) => PrismaBenefitMapper.toDomain(item));
   }
 
   public async update(input: Benefit): Promise<Benefit> {
     const benefitEntity = PrismaBenefitMapper.toPrisma(input);
-    const benefit = await this.prisma.benefit.update({
+    const benefit = await this.prisma.lTYBenefit.update({
       where: { id: input.id },
       data: benefitEntity,
     });

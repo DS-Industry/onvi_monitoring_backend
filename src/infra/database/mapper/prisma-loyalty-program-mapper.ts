@@ -1,4 +1,4 @@
-import { LoyaltyProgram as PrismaLoyaltyProgram, Prisma } from '@prisma/client';
+import { LTYProgram as PrismaLoyaltyProgram, Prisma } from '@prisma/client';
 import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 export class PrismaLoyaltyProgramMapper {
@@ -17,7 +17,7 @@ export class PrismaLoyaltyProgramMapper {
 
   static toPrisma(
     loyaltyProgram: LoyaltyProgram,
-  ): Prisma.LoyaltyProgramUncheckedCreateInput {
+  ): Prisma.LTYProgramUncheckedCreateInput {
     return {
       id: loyaltyProgram?.id,
       name: loyaltyProgram.name,

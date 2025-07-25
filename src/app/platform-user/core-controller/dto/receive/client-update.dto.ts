@@ -1,14 +1,12 @@
 import {
   IsArray,
-  IsEmail, IsEnum,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  Matches
 } from "class-validator";
-import { Transform } from 'class-transformer';
-import { UserType } from "@prisma/client";
+import { ContractType } from "@prisma/client";
 
 export class ClientUpdateDto {
   @IsNumber()
@@ -17,9 +15,9 @@ export class ClientUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsEnum(UserType)
+  @IsEnum(ContractType)
   @IsOptional()
-  type?: UserType;
+  type?: ContractType;
   @IsString()
   @IsOptional()
   inn?: string;

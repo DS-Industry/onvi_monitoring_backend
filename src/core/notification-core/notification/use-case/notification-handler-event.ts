@@ -13,7 +13,6 @@ export class NotificationHandlerEventUseCase {
   @OnEvent('notification.*')
   async handlerNotificationEvent(payload: EventHandlerDto) {
     try {
-      console.log('notification event ' + payload.eventType);
       await this.createNotificationUseCase.execute({
         heading: payload.heading,
         body: payload.body,

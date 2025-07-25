@@ -11,95 +11,85 @@ export class FindMethodsTechTaskUseCase {
     return await this.techTaskRepository.findOneById(input);
   }
 
-  async getAllByPosId(posId: number): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosId(posId);
+  async getAllByFilter(data: {
+    posId?: number;
+    gteStartDate?: Date;
+    lteStartDate?: Date;
+    gteEndSpecifiedDate?: Date;
+    lteEndSpecifiedDate?: Date;
+    gteNextCreateDate?: Date;
+    lteNextCreateDate?: Date;
+    type?: TypeTechTask;
+    statuses?: StatusTechTask[];
+    codeTag?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllByFilter(
+      data.posId,
+      data.gteStartDate,
+      data.lteStartDate,
+      data.gteEndSpecifiedDate,
+      data.lteEndSpecifiedDate,
+      data.gteNextCreateDate,
+      data.lteNextCreateDate,
+      data.type,
+      data.statuses,
+      data.codeTag,
+      data.skip,
+      data.take,
+    );
   }
 
-  async getAllByPosIdAndStatuses(
-    posId: number,
+  async getCountByFilter(data: {
+    posId?: number;
+    gteStartDate?: Date;
+    lteStartDate?: Date;
+    gteEndSpecifiedDate?: Date;
+    lteEndSpecifiedDate?: Date;
+    gteNextCreateDate?: Date;
+    lteNextCreateDate?: Date;
+    type?: TypeTechTask;
+    statuses?: StatusTechTask[];
+    codeTag?: string;
+    skip?: number;
+    take?: number;
+  }): Promise<number> {
+    return await this.techTaskRepository.countAllByFilter(
+      data.posId,
+      data.gteStartDate,
+      data.lteStartDate,
+      data.gteEndSpecifiedDate,
+      data.lteEndSpecifiedDate,
+      data.gteNextCreateDate,
+      data.lteNextCreateDate,
+      data.type,
+      data.statuses,
+      data.codeTag,
+    );
+  }
+
+  async getAllForUser(
+    userId: number,
     statuses: StatusTechTask[],
+    skip?: number,
+    take?: number,
   ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdAndStatuses(
-      posId,
+    return await this.techTaskRepository.findAllForUser(
+      userId,
+      statuses,
+      skip,
+      take,
+    );
+  }
+
+  async getCountForUser(
+    userId: number,
+    statuses: StatusTechTask[],
+  ): Promise<number> {
+    return await this.techTaskRepository.countAllForUser(
+      userId,
       statuses,
     );
-  }
-
-  async getAllByPosIdsAndStatuses(
-    posIds: number[],
-    statuses: StatusTechTask[],
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdsAndStatuses(
-      posIds,
-      statuses,
-    );
-  }
-
-  async getAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    status: StatusTechTask,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdAndDate(
-      posId,
-      dateStart,
-      dateEnd,
-      status,
-    );
-  }
-
-  async getAllAllByTypeAndPosIdAndDate(
-    posId: number,
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByTypeAndPosIdAndDate(
-      posId,
-      type,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllAllByTypeAndPosIdsAndDate(
-    posIds: number[],
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByTypeAndPosIdsAndDate(
-      posIds,
-      type,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByCodeTagAndPosIdsAndDate(
-    posIds: number[],
-    code: string,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllCodeTagAndPosIdsAndDate(
-      posIds,
-      code,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByStatus(status);
-  }
-
-  async getAllForHandler(): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllForHandler();
-  }
-
-  async getAllForOverdue(): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllForOverdue();
   }
 }

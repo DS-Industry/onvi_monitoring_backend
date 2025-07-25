@@ -3,7 +3,7 @@ import { IOrderRepository } from '@loyalty/order/interface/order';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Order } from '@loyalty/order/domain/order';
 import { PrismaOrderMapper } from '@db/mapper/prisma-order-mapper';
-import { OrderStatus, PlatformType, UserType } from '@prisma/client';
+import { OrderStatus, PlatformType, ContractType } from '@prisma/client';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {
@@ -13,14 +13,14 @@ export class OrderRepository extends IOrderRepository {
 
   public async create(input: Order): Promise<Order> {
     const orderEntity = PrismaOrderMapper.toPrisma(input);
-    const order = await this.prisma.orderMobileUser.create({
+    const order = await this.prisma.lTYOrder.create({
       data: orderEntity,
     });
     return PrismaOrderMapper.toDomain(order);
   }
 
   public async findOneById(id: number): Promise<Order> {
-    const order = await this.prisma.orderMobileUser.findFirst({
+    const order = await this.prisma.lTYOrder.findFirst({
       where: {
         id,
       },
@@ -32,7 +32,7 @@ export class OrderRepository extends IOrderRepository {
     dateStart: Date,
     dateEnd: Date,
     platformType: PlatformType | '*',
-    typeMobileUser: UserType | '*',
+    typeMobileUser: ContractType | '*',
     orderStatus: OrderStatus | '*',
     carWashDeviceId: number | '*',
     cardId?: number,
@@ -64,7 +64,7 @@ export class OrderRepository extends IOrderRepository {
       where.carWashDeviceId = cardId;
     }
 
-    const orders = await this.prisma.orderMobileUser.findMany({
+    const orders = await this.prisma.lTYOrder.findMany({
       where,
     });
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
@@ -72,7 +72,7 @@ export class OrderRepository extends IOrderRepository {
 
   public async update(input: Order): Promise<Order> {
     const orderEntity = PrismaOrderMapper.toPrisma(input);
-    const order = await this.prisma.orderMobileUser.update({
+    const order = await this.prisma.lTYOrder.update({
       where: {
         id: input.id,
       },

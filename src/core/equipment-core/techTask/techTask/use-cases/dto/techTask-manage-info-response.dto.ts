@@ -2,6 +2,11 @@ import { StatusTechTask, TypeTechTask } from '@prisma/client';
 import { TechTagProps } from "@tech-task/tag/domain/techTag";
 
 export class TechTaskManageInfoResponseDto {
+  techTaskManageInfo: TechTaskManageInfoResponse[];
+  totalCount: number;
+}
+
+export class TechTaskManageInfoResponse {
   id: number;
   name: string;
   posId: number;

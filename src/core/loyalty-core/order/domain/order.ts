@@ -4,7 +4,7 @@ import {
   OrderStatus,
   PlatformType,
   SendAnswerStatus,
-  UserType,
+  ContractType,
 } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
@@ -19,7 +19,7 @@ export interface OrderProps {
   carWashDeviceId: number;
   platform: PlatformType;
   cardMobileUserId?: number;
-  typeMobileUser: UserType;
+  typeMobileUser: ContractType;
   orderData: Date;
   createData: Date;
   orderStatus: OrderStatus;
@@ -78,7 +78,7 @@ export class Order extends BaseEntity<OrderProps> {
     return this.props.cardMobileUserId;
   }
 
-  get typeMobileUser(): UserType {
+  get typeMobileUser(): ContractType {
     return this.props.typeMobileUser;
   }
 

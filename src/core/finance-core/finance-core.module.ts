@@ -48,6 +48,7 @@ import {
 import {
   FindMethodsWorkDayShiftReportCashOperUseCase
 } from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-find-methods";
+import { DeleteCashCollectionUseCase } from "@finance/cashCollection/cashCollection/use-cases/cashCollection-delete";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -66,6 +67,7 @@ const cashCollectionUseCase: Provider[] = [
   GetAllByFilterCashCollectionUseCase,
   GetOneFullDataCashCollectionUseCase,
   CalculateMethodsCashCollectionUseCase,
+  DeleteCashCollectionUseCase,
 ];
 
 const cashCollectionDeviceUseCase: Provider[] = [

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
-import { TechTaskReadAllResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
+import {
+  TechTaskReadAllResponse,
+  TechTaskReadAllResponseDto,
+} from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
 import { StatusTechTask } from '@prisma/client';
-import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class ReadAllByPosTechTaskUseCase {
@@ -11,14 +15,22 @@ export class ReadAllByPosTechTaskUseCase {
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
   ) {}
 
-  async execute(posIds: number[]): Promise<TechTaskReadAllResponseDto[]> {
-    const response: TechTaskReadAllResponseDto[] = [];
-    const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllByPosIdsAndStatuses(posIds, [
-        StatusTechTask.ACTIVE,
-        StatusTechTask.OVERDUE,
-        StatusTechTask.FINISHED,
-      ]);
+  async execute(
+    user: User,
+    skip?: number,
+    take?: number,
+  ): Promise<TechTaskReadAllResponseDto> {
+    const response: TechTaskReadAllResponse[] = [];
+    const totalCount = await this.findMethodsTechTaskUseCase.getCountForUser(
+      user.id,
+      [StatusTechTask.ACTIVE, StatusTechTask.OVERDUE, StatusTechTask.RETURNED],
+    );
+    const techTasks = await this.findMethodsTechTaskUseCase.getAllForUser(
+      user.id,
+      [StatusTechTask.ACTIVE, StatusTechTask.OVERDUE, StatusTechTask.RETURNED],
+      skip,
+      take,
+    );
     await Promise.all(
       techTasks.map(async (techTask) => {
         const techTags =
@@ -38,6 +50,9 @@ export class ReadAllByPosTechTaskUseCase {
       }),
     );
 
-    return response;
+    return {
+      techTaskReadAll: response,
+      totalCount: totalCount,
+    };
   }
 }

@@ -3,7 +3,7 @@ import {
   OrderStatus,
   PlatformType,
   SendAnswerStatus,
-  UserType,
+  ContractType,
 } from '@prisma/client';
 
 export class CreateDto {
@@ -16,7 +16,7 @@ export class CreateDto {
   carWashDeviceId: number;
   platform: PlatformType;
   orderData: Date;
-  typeMobileUser?: UserType;
+  typeMobileUser?: ContractType;
   cardMobileUserId?: number;
   orderStatus: OrderStatus;
   sendAnswerStatus?: SendAnswerStatus;

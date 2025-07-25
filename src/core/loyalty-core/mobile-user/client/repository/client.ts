@@ -3,7 +3,7 @@ import { IClientRepository } from '../interfaces/client';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Client } from '../domain/client';
 import { PrismaMobileUserMapper } from '@db/mapper/prisma-mobile-user-mapper';
-import { UserType } from '@prisma/client';
+import { ContractType } from '@prisma/client';
 
 @Injectable()
 export class ClientRepository extends IClientRepository {
@@ -13,7 +13,7 @@ export class ClientRepository extends IClientRepository {
 
   public async create(input: Client): Promise<Client> {
     const clientPrismaEntity = PrismaMobileUserMapper.toPrisma(input);
-    const client = await this.prisma.mobileUser.create({
+    const client = await this.prisma.lTYUser.create({
       data: clientPrismaEntity,
     });
     return PrismaMobileUserMapper.toDomain(client);
@@ -24,14 +24,14 @@ export class ClientRepository extends IClientRepository {
   }
 
   public async findAll(): Promise<Client[]> {
-    const clients = await this.prisma.mobileUser.findMany();
+    const clients = await this.prisma.lTYUser.findMany();
     return clients.map((item) => PrismaMobileUserMapper.toDomain(item));
   }
 
   public async findAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: UserType,
+    type?: ContractType,
     phone?: string,
     skip?: number,
     take?: number,
@@ -54,7 +54,7 @@ export class ClientRepository extends IClientRepository {
       where.tags = { some: { id: { in: tagIds } } };
     }
 
-    const clients = await this.prisma.mobileUser.findMany({
+    const clients = await this.prisma.lTYUser.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
       where,
@@ -66,7 +66,7 @@ export class ClientRepository extends IClientRepository {
   }
 
   public async findOneById(id: number): Promise<Client> {
-    const client = await this.prisma.mobileUser.findFirst({
+    const client = await this.prisma.lTYUser.findFirst({
       where: {
         id,
       },
@@ -75,7 +75,7 @@ export class ClientRepository extends IClientRepository {
   }
 
   public async findOneByPhone(phone: string): Promise<Client> {
-    const client = await this.prisma.mobileUser.findFirst({
+    const client = await this.prisma.lTYUser.findFirst({
       where: {
         phone,
       },
@@ -92,7 +92,7 @@ export class ClientRepository extends IClientRepository {
     addTagIds: number[],
     deleteTagIds: number[],
   ): Promise<any> {
-    await this.prisma.mobileUser.update({
+    await this.prisma.lTYUser.update({
       where: {
         id: userId,
       },
@@ -107,7 +107,7 @@ export class ClientRepository extends IClientRepository {
 
   public async update(input: Client): Promise<Client> {
     const clientPrismaEntity = PrismaMobileUserMapper.toPrisma(input);
-    const admin = await this.prisma.mobileUser.update({
+    const admin = await this.prisma.lTYUser.update({
       where: {
         id: input.id,
       },

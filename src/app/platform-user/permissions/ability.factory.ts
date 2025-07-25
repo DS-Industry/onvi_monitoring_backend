@@ -44,7 +44,7 @@ export class AbilityFactory {
           id: { in: posCondition },
           organizationId: { in: organizationCondition },
         };
-      } else if (objectMap[permission.objectId].name == 'LoyaltyProgram') {
+      } else if (objectMap[permission.objectId].name == 'LTYProgram') {
         condition = {
           id: { in: loyaltyProgramCondition },
         };
@@ -57,7 +57,8 @@ export class AbilityFactory {
         objectMap[permission.objectId].name == 'TechTask' ||
         objectMap[permission.objectId].name == 'Warehouse' ||
         objectMap[permission.objectId].name == 'CashCollection' ||
-        objectMap[permission.objectId].name == 'ShiftReport'
+        objectMap[permission.objectId].name == 'ShiftReport' ||
+        objectMap[permission.objectId].name == 'ManagerPaper'
       ) {
         condition = {
           posId: { in: posCondition },

@@ -23,6 +23,7 @@ export const configuration = () => ({
   emailApiKey: process.env.EMAIL_API_KEY,
   emailName: process.env.EMAIL_NAME,
   emailFrom: process.env.EMAIL_FROM,
+  emailConfirmPrefix: process.env.EMAIL_CONFIRM_PREFIX,
   bucketName: process.env.BUCKET_NAME,
   endpointFile: process.env.ENDPOINT_FILE,
   storageUrl: process.env.STORAGE_URL,

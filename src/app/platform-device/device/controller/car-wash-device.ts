@@ -7,10 +7,10 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
-import { DeviceValidateRules } from '@platform-device/device/controller/validate/device-validate-rules';
+import { DeviceValidateRules } from '@platform-device/validate/validate-rules/device-validate-rules';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 
-@Controller('device')
+@Controller('')
 export class CarWashDeviceController {
   constructor(
     private readonly createCarWashDeviceUseCase: CreateCarWashDeviceUseCase,

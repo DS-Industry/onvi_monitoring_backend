@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDto } from '@loyalty/order/use-cases/dto/create.dto';
 import { Order } from '@loyalty/order/domain/order';
-import { OrderHandlerStatus, OrderStatus, UserType } from '@prisma/client';
+import { OrderHandlerStatus, ContractType } from '@prisma/client';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class CreateOrderUseCase {
       orderData: input.orderData,
       createData: new Date(Date.now()),
       cardMobileUserId: input?.cardMobileUserId,
-      typeMobileUser: input?.typeMobileUser ?? UserType.PHYSICAL,
+      typeMobileUser: input?.typeMobileUser ?? ContractType.INDIVIDUAL,
       orderStatus: input.orderStatus,
       sendAnswerStatus: input?.sendAnswerStatus,
       sendTime: input?.sendTime,

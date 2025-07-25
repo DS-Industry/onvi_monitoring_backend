@@ -15,23 +15,6 @@ export class FindMethodsCashCollectionUseCase {
   async getOneById(cashCollectionId: number): Promise<CashCollection> {
     return await this.cashCollectionRepository.findOneById(cashCollectionId);
   }
-
-  async getAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<CashCollection[]> {
-    return await this.cashCollectionRepository.findAllByPosIdAndDate(
-      posId,
-      dateStart,
-      dateEnd,
-      skip,
-      take,
-    );
-  }
-
   async getAllByPosIdsAndDate(
     posIds: number[],
     dateStart: Date,
@@ -45,18 +28,6 @@ export class FindMethodsCashCollectionUseCase {
       dateEnd,
       skip,
       take,
-    );
-  }
-
-  async getCountAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return await this.cashCollectionRepository.countAllByPosIdAndDate(
-      posId,
-      dateStart,
-      dateEnd,
     );
   }
 

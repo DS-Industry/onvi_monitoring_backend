@@ -3,6 +3,7 @@ import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTa
 import { StatusTechTask } from '@prisma/client';
 import {
   TechTaskItemDto,
+  TechTaskManageInfoResponse,
   TechTaskManageInfoResponseDto,
 } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
@@ -19,15 +20,23 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
   ) {}
 
   async execute(
-    posIds: number[],
-    statuses: StatusTechTask[],
-  ): Promise<TechTaskManageInfoResponseDto[]> {
-    const response: TechTaskManageInfoResponseDto[] = [];
-    const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllByPosIdsAndStatuses(
-        posIds,
-        statuses,
-      );
+    posId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<TechTaskManageInfoResponseDto> {
+    const response: TechTaskManageInfoResponse[] = [];
+    const totalCount = await this.findMethodsTechTaskUseCase.getCountByFilter({
+        posId: posId,
+        statuses: [StatusTechTask.ACTIVE],
+        skip: skip,
+        take: take,
+      });
+    const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
+      posId: posId,
+      statuses: [StatusTechTask.ACTIVE],
+      skip: skip,
+      take: take,
+    });
     await Promise.all(
       techTasks.map(async (techTask) => {
         const items: TechTaskItemDto[] = [];
@@ -67,6 +76,9 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
         });
       }),
     );
-    return response;
+    return {
+      techTaskManageInfo: response,
+      totalCount: totalCount,
+    };
   }
 }

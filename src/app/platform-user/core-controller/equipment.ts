@@ -7,7 +7,6 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +16,7 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   ReadPosAbility,
-  UpdatePosAbility,
+  UpdateIncidentAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { FullInfoByEquipmentKnotIncidentUseCase } from '@equipment/incident/incidentName/use-cases/incident-full-info-by-equipment-knot';
@@ -38,7 +37,6 @@ export class EquipmentController {
     private readonly updateProgramTechRateUseCase: UpdateProgramTechRateUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
-  //Get all knot by Pos
   @Get('pos/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -67,7 +65,6 @@ export class EquipmentController {
       }
     }
   }
-
   @Get('incident-info/:id')
   @UseGuards(JwtGuard)
   @HttpCode(200)
@@ -92,10 +89,9 @@ export class EquipmentController {
       }
     }
   }
-
   @Get('rate/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
+  @CheckAbilities(new UpdateIncidentAbility())
   @HttpCode(200)
   async getProgramRate(
     @Request() req: any,
@@ -126,10 +122,9 @@ export class EquipmentController {
       }
     }
   }
-
   @Patch('rate/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdatePosAbility())
+  @CheckAbilities(new UpdateIncidentAbility())
   @HttpCode(200)
   async patchProgramRate(
     @Request() req: any,

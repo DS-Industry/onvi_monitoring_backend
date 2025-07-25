@@ -120,6 +120,16 @@ export class NotificationException extends BaseException {
   }
 }
 
+export class ManagerPaperException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_ManagerPaper', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
 export class WarehouseDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
     super('domain_warehouse', innerCode, message);
@@ -132,7 +142,7 @@ export class WarehouseDomainException extends BaseException {
 
 export class LoyaltyDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
-    super('loyalty_warehouse', innerCode, message);
+    super('domain_loyalty', innerCode, message);
   }
 
   getHttpStatus(): number {

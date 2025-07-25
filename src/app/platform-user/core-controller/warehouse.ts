@@ -89,7 +89,7 @@ export class WarehouseController {
   //Create warehouse
   @Post()
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateWarehouseAbility())
+  @CheckAbilities(new UpdateWarehouseAbility())
   @HttpCode(201)
   async createWarehouse(
     @Body() data: WarehouseCreateDto,
@@ -244,10 +244,8 @@ export class WarehouseController {
     @Param('orgId', ParseIntPipe) orgId: number,
   ): Promise<any> {
     try {
-      const { ability } = req;
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
-        ability,
       );
       return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
         orgId,
@@ -549,7 +547,7 @@ export class WarehouseController {
   //Create Document
   @Post('document')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async createDocument(
     @Request() req: any,
@@ -577,7 +575,7 @@ export class WarehouseController {
   //Save Document
   @Post('document/save/:documentId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async saveDocument(
     @Request() req: any,
@@ -619,7 +617,7 @@ export class WarehouseController {
   //Send Document
   @Post('document/send/:documentId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async sendDocument(
     @Request() req: any,

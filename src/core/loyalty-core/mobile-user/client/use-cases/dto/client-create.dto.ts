@@ -1,4 +1,4 @@
-import { UserType } from "@prisma/client";
+import { ContractType } from "@prisma/client";
 
 export interface ClientCreateDto {
   name: string;
@@ -6,7 +6,7 @@ export interface ClientCreateDto {
   phone: string;
   email?: string;
   gender?: string;
-  type: UserType;
+  type: ContractType;
   inn?: string;
   comment?: string;
   placementId?: number;

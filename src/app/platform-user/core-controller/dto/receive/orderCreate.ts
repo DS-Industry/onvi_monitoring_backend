@@ -11,7 +11,7 @@ import {
   OrderStatus,
   PlatformType,
   SendAnswerStatus,
-  UserType,
+  ContractType,
 } from '@prisma/client';
 
 export class OrderCreateDto {
@@ -42,9 +42,9 @@ export class OrderCreateDto {
   @Transform(({ value }) => new Date(value))
   @IsNotEmpty({ message: 'orderData is required' })
   orderData: Date;
-  @IsEnum(UserType)
+  @IsEnum(ContractType)
   @IsOptional()
-  typeMobileUser?: UserType;
+  typeMobileUser?: ContractType;
   @IsNumber()
   @IsOptional()
   cardMobileUserId?: number;

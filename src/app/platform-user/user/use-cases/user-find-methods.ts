@@ -29,4 +29,12 @@ export class FindMethodsUserUseCase {
   async getAllByOrgId(orgId: number): Promise<User[]> {
     return await this.userRepository.findAllByOrgId(orgId);
   }
+
+  async getAllByPosId(posId: number): Promise<User[]> {
+    return await this.userRepository.findAllByPosId(posId);
+  }
+
+  async getAllByRoleIds(roleIds: number[]): Promise<User[]> {
+    return await this.userRepository.findAllByRoleIds(roleIds);
+  }
 }

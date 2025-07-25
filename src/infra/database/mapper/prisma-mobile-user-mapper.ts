@@ -1,5 +1,5 @@
-import { Client } from "@loyalty/mobile-user/client/domain/client";
-import { MobileUser as PrismaMobileUser, Prisma } from '@prisma/client';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { LTYUser as PrismaMobileUser, Prisma } from '@prisma/client';
 
 export class PrismaMobileUserMapper {
   static toDomain(entity: PrismaMobileUser): Client {
@@ -15,8 +15,7 @@ export class PrismaMobileUserMapper {
       gender: entity.gender,
       status: entity.status,
       avatar: entity.avatar,
-      type: entity.type,
-      inn: entity.inn,
+      type: entity.contractType,
       comment: entity.comment,
       placementId: entity.placementId,
       refreshTokenId: entity.refreshTokenId,
@@ -26,7 +25,7 @@ export class PrismaMobileUserMapper {
     });
   }
 
-  static toPrisma(client: Client): Prisma.MobileUserUncheckedCreateInput {
+  static toPrisma(client: Client): Prisma.LTYUserUncheckedCreateInput {
     return {
       id: client?.id,
       name: client.name,
@@ -36,8 +35,7 @@ export class PrismaMobileUserMapper {
       gender: client?.gender,
       status: client?.status,
       avatar: client?.avatar,
-      type: client.type,
-      inn: client?.inn,
+      contractType: client.type,
       comment: client?.comment,
       placementId: client?.placementId,
       refreshTokenId: client?.refreshTokenId,

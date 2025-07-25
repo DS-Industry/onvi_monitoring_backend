@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OrganizationFilterResponseDto } from '@platform-user/core-controller/dto/response/organization-filter-response.dto';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class FilterByUserOrganizationUseCase {
@@ -9,14 +10,11 @@ export class FilterByUserOrganizationUseCase {
   ) {}
 
   async execute(
-    ability: any,
+    user: User,
     placementId: number | '*',
   ): Promise<OrganizationFilterResponseDto[]> {
     const organizations =
-      await this.findMethodsOrganizationUseCase.getAllByAbility(
-        ability,
-        placementId,
-      );
+      await this.findMethodsOrganizationUseCase.getAllByUser(user, placementId);
     const organizationFilters: OrganizationFilterResponseDto[] = [];
 
     await Promise.all(

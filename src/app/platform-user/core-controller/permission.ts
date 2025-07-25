@@ -22,6 +22,8 @@ import {
   CheckAbilities,
   ManageOrgAbility,
   ReadOrgAbility,
+  ReadPosAbility,
+  UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { UserException } from '@exception/option.exceptions';
@@ -33,12 +35,14 @@ import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-man
 import { ConnectedPodUserDto } from '@platform-user/core-controller/dto/receive/connected-pod-user.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 
 @Controller('permission')
 export class PermissionController {
   constructor(
     private readonly organizationManageUserUseCase: OrganizationManageUserUseCase,
     private readonly userUpdate: UpdateUserUseCase,
+    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly userPermissionValidateRules: UserPermissionValidateRules,
     private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
     private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
@@ -48,7 +52,6 @@ export class PermissionController {
   ) {}
   @Get('roles')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
   @HttpCode(200)
   async getRoles(): Promise<UserRoleResponseDto[]> {
     try {
@@ -97,17 +100,15 @@ export class PermissionController {
       }
     }
   }
-  //All worker for permission org
   @Get('worker')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadOrgAbility())
+  @UseGuards(JwtGuard)
   @HttpCode(200)
   async getWorker(
     @Request() req: any,
   ): Promise<UserPermissionDataResponseDto[]> {
     try {
-      const { ability } = req;
-      return await this.organizationManageUserUseCase.execute(ability);
+      const { user } = req;
+      return await this.organizationManageUserUseCase.execute(user);
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({
@@ -124,10 +125,34 @@ export class PermissionController {
       }
     }
   }
-  //All pos for userId
+  @Get('worker-by-pos/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getWorkerByPos(
+    @Param('posId', ParseIntPipe) posId: number,
+  ): Promise<User[]> {
+    try {
+      return await this.findMethodsUserUseCase.getAllByPosId(posId);
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('pos/:userId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(200)
   async getPosByUserId(
     @Param('userId', ParseIntPipe) userId: number,
@@ -154,10 +179,10 @@ export class PermissionController {
       }
     }
   }
-  //All pos for permission org
+  //All pos for permission org DELETE?
   @Get('pos')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(200)
   async getPos(@Request() req: any): Promise<PosPermissionsResponseDto[]> {
     try {
@@ -179,10 +204,9 @@ export class PermissionController {
       }
     }
   }
-  //Connection Pos
   @Patch('pos-user/:userId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(201)
   async updateConnectedUserPos(
     @Request() req: any,
@@ -212,10 +236,9 @@ export class PermissionController {
       }
     }
   }
-  //Update worker role
   @Patch('')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(201)
   async updateRole(
     @Request() req: any,

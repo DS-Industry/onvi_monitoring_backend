@@ -317,7 +317,7 @@ export class DeviceController {
       }
     }
   }
-  //All device for pos
+  //All device for pos DELETE?
   @Get('filter/pos/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())

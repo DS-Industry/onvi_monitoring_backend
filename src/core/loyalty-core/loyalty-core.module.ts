@@ -45,7 +45,9 @@ import { UpdateOrderUseCase } from '@loyalty/order/use-cases/order-update';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
-import { UpdateLoyaltyProgramUseCase } from "@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update";
+import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
+import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
+import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -81,7 +83,7 @@ const cardUseCase: Provider[] = [
   CreateCardUseCase,
   UpdateCardUseCase,
   FindMethodsCardUseCase,
-  GetBenefitsCardUseCase
+  GetBenefitsCardUseCase,
 ];
 
 const loyaltyProgramUseCase: Provider[] = [
@@ -124,6 +126,8 @@ const orderUseCase: Provider[] = [
   CreateOrderUseCase,
   UpdateOrderUseCase,
   HandlerOrderUseCase,
+  OrderGetBalanceForDeviceUseCase,
+  OrderOperForDeviceUseCase,
 ];
 @Module({
   imports: [PrismaModule, FileModule],

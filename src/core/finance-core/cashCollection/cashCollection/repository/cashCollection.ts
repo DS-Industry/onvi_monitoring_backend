@@ -52,32 +52,6 @@ export class CashCollectionRepository extends ICashCollectionRepository {
     return PrismaCashCollectionMapper.toDomain(cashCollection);
   }
 
-  public async findAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<CashCollection[]> {
-    const cashCollections = await this.prisma.cashCollection.findMany({
-      skip: skip ?? undefined,
-      take: take ?? undefined,
-      where: {
-        posId,
-        cashCollectionDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-      orderBy: {
-        cashCollectionDate: 'asc',
-      },
-    });
-    return cashCollections.map((item) =>
-      PrismaCashCollectionMapper.toDomain(item),
-    );
-  }
-
   public async findAllByPosIdsAndDate(
     posIds: number[],
     dateStart: Date,
@@ -104,22 +78,6 @@ export class CashCollectionRepository extends ICashCollectionRepository {
     );
   }
 
-  public async countAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return this.prisma.cashCollection.count({
-      where: {
-        posId,
-        cashCollectionDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-    });
-  }
-
   public async countAllByPosIdsAndDate(
     posIds: number[],
     dateStart: Date,
@@ -134,5 +92,9 @@ export class CashCollectionRepository extends ICashCollectionRepository {
         },
       },
     });
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.cashCollection.delete({ where: { id } });
   }
 }

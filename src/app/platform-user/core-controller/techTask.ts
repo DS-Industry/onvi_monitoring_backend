@@ -20,6 +20,7 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   CreateTechTaskAbility,
+  ReadIncidentAbility,
   ReadTechTaskAbility,
   UpdateTechTaskAbility,
 } from '@common/decorators/abilities.decorator';
@@ -29,7 +30,6 @@ import { TechTaskUpdateDto } from '@platform-user/core-controller/dto/receive/te
 import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
-import { StatusTechTask } from '@prisma/client';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
 import { TechTaskCompletionShapeDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
 import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
@@ -42,14 +42,20 @@ import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
 import { TechTaskReadAllResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
-import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos-monitoring';
-import { Pos } from '@pos/pos/domain/pos';
-import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
-import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-shape-response.dto';
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { TechTagCreateDto } from '@platform-user/core-controller/dto/receive/techTag-create.dto';
+import { PosChemistryProductionResponseDto } from '@pos/pos/use-cases/dto/pos-chemistry-production-response.dto';
+import { TechTaskPosFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-pos-filter.dto';
+import { TechTaskChemistryReportDto } from '@platform-user/core-controller/dto/receive/tech-task-chemistry-report.dto';
+import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
+import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { TechTaskReportDto } from '@platform-user/core-controller/dto/receive/tech-task-report.dto';
+import { ReportTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-report';
+import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplate';
+import { TechTag } from '@tech-task/tag/domain/techTag';
+import { TechTask } from '@tech-task/techTask/domain/techTask';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -64,12 +70,11 @@ export class TechTaskController {
     private readonly posChemistryProductionUseCase: PosChemistryProductionUseCase,
     private readonly completionShapeTechTaskUseCase: CompletionShapeTechTaskUseCase,
     private readonly findMethodsItemTemplateUseCase: FindMethodsItemTemplateUseCase,
-    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+    private readonly reportTechTaskUseCase: ReportTechTaskUseCase,
     private readonly createTechTagUseCase: CreateTechTagUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
-  //Create techTask
   @Post()
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateTechTaskAbility())
@@ -77,7 +82,7 @@ export class TechTaskController {
   async create(
     @Body() data: TechTaskCreateDto,
     @Request() req: any,
-  ): Promise<any> {
+  ): Promise<TechTaskResponseDto> {
     try {
       const { user, ability } = req;
       await this.techTaskValidateRules.createValidate(
@@ -102,7 +107,6 @@ export class TechTaskController {
       }
     }
   }
-  //Patch techTask
   @Patch()
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
@@ -110,7 +114,7 @@ export class TechTaskController {
   async update(
     @Body() data: TechTaskUpdateDto,
     @Request() req: any,
-  ): Promise<any> {
+  ): Promise<TechTaskResponseDto> {
     try {
       const { user, ability } = req;
       const techTask = await this.techTaskValidateRules.updateValidate(
@@ -135,35 +139,31 @@ export class TechTaskController {
       }
     }
   }
-  //Get all techTask for manage
-  @Get('manage')
+  @Get('mange-patterns')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
   @HttpCode(200)
-  async getAllForManage(
+  async getAllForManagePatterns(
     @Request() req: any,
-    @Query() params: PlacementFilterDto,
-  ): Promise<TechTaskManageInfoResponseDto[]> {
+    @Query() params: TechTaskPosFilterDto,
+  ): Promise<TechTaskManageInfoResponseDto> {
     try {
+      let skip = undefined;
+      let take = undefined;
       const { ability } = req;
-      let poses: Pos[] = [];
-      if (params.posId != '*') {
-        const pos = await this.posValidateRules.getOneByIdValidate(
-          params.posId,
-          ability,
-        );
-        poses.push(pos);
-      } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          params.placementId,
-        );
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
       }
-      const posIds = poses.map((pos) => pos.id);
+      const pos = await this.posValidateRules.getOneByIdValidate(
+        params.posId,
+        ability,
+      );
 
       return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(
-        posIds,
-        [StatusTechTask.ACTIVE, StatusTechTask.PAUSE],
+        pos.id,
+        skip,
+        take,
       );
     } catch (e) {
       if (e instanceof PosException) {
@@ -181,33 +181,23 @@ export class TechTaskController {
       }
     }
   }
-  //Get all techTask for read
-  @Get('read')
+  @Get('execution')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
   @HttpCode(200)
-  async getAllForRead(
+  async getAllForExecution(
     @Request() req: any,
-    @Query() params: PlacementFilterDto,
-  ): Promise<TechTaskReadAllResponseDto[]> {
+    @Query() params: PaginationDto,
+  ): Promise<TechTaskReadAllResponseDto> {
     try {
-      const { ability } = req;
-      let poses: Pos[] = [];
-      if (params.posId != '*') {
-        const pos = await this.posValidateRules.getOneByIdValidate(
-          params.posId,
-          ability,
-        );
-        poses.push(pos);
-      } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          params.placementId,
-        );
+      let skip = undefined;
+      let take = undefined;
+      const { user } = req;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
       }
-      const posIds = poses.map((pos) => pos.id);
-
-      return await this.readAllByPosTechTaskUseCase.execute(posIds);
+      return await this.readAllByPosTechTaskUseCase.execute(user, skip, take);
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -224,11 +214,52 @@ export class TechTaskController {
       }
     }
   }
-  //Get all items
+  @Get('report')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateTechTaskAbility())
+  @HttpCode(200)
+  async getAllForRead(
+    @Request() req: any,
+    @Query() params: TechTaskReportDto,
+  ): Promise<TechTaskReadAllResponseDto> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      let type = undefined;
+      const { ability } = req;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      if (params.type != '*') {
+        type = params.type;
+      }
+      const pos = await this.posValidateRules.getOneByIdValidate(
+        params.posId,
+        ability,
+      );
+
+      return await this.reportTechTaskUseCase.execute(pos.id, type, skip, take);
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('item')
   @UseGuards(JwtGuard)
   @HttpCode(200)
-  async getAllItems(): Promise<any> {
+  async getAllItems(): Promise<TechTaskItemTemplate[]> {
     try {
       return await this.findMethodsItemTemplateUseCase.getAll();
     } catch (e) {
@@ -247,34 +278,23 @@ export class TechTaskController {
       }
     }
   }
-  //TechRate generating report
   @Get('chemistry-report')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadTechTaskAbility())
+  @CheckAbilities(new ReadIncidentAbility())
   @HttpCode(200)
   async chemistryReport(
     @Request() req: any,
-    @Query() data: PosMonitoringDto,
-  ): Promise<any> {
+    @Query() data: TechTaskChemistryReportDto,
+  ): Promise<PosChemistryProductionResponseDto[]> {
     try {
       const { ability } = req;
-      let poses: Pos[] = [];
-      if (data.posId != '*') {
-        const pos = await this.posValidateRules.getOneByIdValidate(
-          data.posId,
-          ability,
-        );
-        poses.push(pos);
-      } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          data.placementId,
-        );
-      }
-      const posIds = poses.map((pos) => pos.id);
+      const pos = await this.posValidateRules.getOneByIdValidate(
+        data.posId,
+        ability,
+      );
 
       const techRateInfo = await this.generatingReportProgramTechRate.execute(
-        posIds,
+        pos.id,
         data.dateStart,
         data.dateEnd,
       );
@@ -299,7 +319,7 @@ export class TechTaskController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
   @HttpCode(200)
-  async createTechTag(@Body() data: TechTagCreateDto): Promise<any> {
+  async createTechTag(@Body() data: TechTagCreateDto): Promise<TechTag> {
     try {
       await this.techTaskValidateRules.createTechTagValidate(data.name);
       return await this.createTechTagUseCase.execute(data.name, data?.code);
@@ -319,12 +339,11 @@ export class TechTaskController {
       }
     }
   }
-
   @Get('tag')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
   @HttpCode(200)
-  async getAllTechTags(): Promise<any> {
+  async getAllTechTags(): Promise<TechTag[]> {
     try {
       return await this.findMethodsTechTagUseCase.getAll();
     } catch (e) {
@@ -343,7 +362,6 @@ export class TechTaskController {
       }
     }
   }
-  //Get shape techTask by id
   @Get(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
@@ -375,7 +393,6 @@ export class TechTaskController {
       }
     }
   }
-  //Completion shape techTask by id
   @Post(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
@@ -386,7 +403,7 @@ export class TechTaskController {
     @Param('id', ParseIntPipe) id: number,
     @Body() data: TechTaskCompletionShapeDto,
     @UploadedFiles() files?: Array<Express.Multer.File>,
-  ): Promise<any> {
+  ): Promise<TechTask> {
     try {
       const { ability, user } = req;
 

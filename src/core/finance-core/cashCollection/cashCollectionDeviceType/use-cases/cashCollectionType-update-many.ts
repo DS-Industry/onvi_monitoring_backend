@@ -20,7 +20,6 @@ export class UpdateManyCashCollectionTypeUseCase {
     cashCollectionDevices: CashCollectionDevice[],
     devices: CarWashDevice[],
   ): Promise<void> {
-    // Создаём мапу данных из DTO, чтобы не делать find() в цикле
     const dataMap = new Map<number, CashCollectionDeviceTypeDataDto>(
       data.map((d) => [d.cashCollectionDeviceTypeId, d]),
     );

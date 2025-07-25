@@ -1,10 +1,10 @@
 import { BaseEntity } from '@utils/entity';
-import { LoyaltyProgramStatus } from "@prisma/client";
+import { LTYProgramStatus } from "@prisma/client";
 
 export interface LoyaltyProgramProps {
   id?: number;
   name: string;
-  status: LoyaltyProgramStatus;
+  status: LTYProgramStatus;
   startDate: Date;
   lifetimeDays?: number;
 }
@@ -22,7 +22,7 @@ export class LoyaltyProgram extends BaseEntity<LoyaltyProgramProps> {
     return this.props.name;
   }
 
-  get status(): LoyaltyProgramStatus {
+  get status(): LTYProgramStatus {
     return this.props.status;
   }
 
@@ -38,7 +38,7 @@ export class LoyaltyProgram extends BaseEntity<LoyaltyProgramProps> {
     this.props.name = name;
   }
 
-  set status(status: LoyaltyProgramStatus) {
+  set status(status: LTYProgramStatus) {
     this.props.status = status;
   }
 

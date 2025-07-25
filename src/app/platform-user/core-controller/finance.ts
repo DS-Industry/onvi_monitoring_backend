@@ -11,6 +11,7 @@ import {
   Patch,
   Get,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import {
@@ -79,6 +80,8 @@ import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/
 import { DataFullFilterDto } from '@platform-user/core-controller/dto/receive/data-full-filter.dto';
 import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller('finance')
 export class FinanceController {
@@ -105,10 +108,11 @@ export class FinanceController {
     private readonly cleanDataDeviceProgramUseCase: CleanDataDeviceProgramUseCase,
     private readonly suspiciouslyDataDeviceProgramUseCase: SuspiciouslyDataDeviceProgramUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+    private readonly deleteCashCollectionUseCase: DeleteCashCollectionUseCase,
     private readonly posValidateRules: PosValidateRules,
     private readonly deviceValidateRules: DeviceValidateRules,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
-  //CreateCashCollection
   @Post('cash-collection')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -149,8 +153,6 @@ export class FinanceController {
       }
     }
   }
-
-  //RecalculateCashCollection
   @Post('cash-collection/recalculate/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -203,8 +205,6 @@ export class FinanceController {
       }
     }
   }
-
-  //RecalculateAndSendCashCollection
   @Post('cash-collection/send/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -257,8 +257,6 @@ export class FinanceController {
       }
     }
   }
-
-  //ReturnCashCollection
   @Patch('cash-collection/return/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateCashCollectionAbility())
@@ -274,7 +272,7 @@ export class FinanceController {
           cashCollectionId,
           ability,
         );
-      await this.updateCashCollectionUseCase.execute(
+      const newCashCollection = await this.updateCashCollectionUseCase.execute(
         {
           status: StatusCashCollection.SAVED,
           sendDate: undefined,
@@ -282,6 +280,11 @@ export class FinanceController {
         cashCollection,
         user,
       );
+
+      this.eventEmitter.emit('manager-paper.delete-cash-collection', {
+        cashCollectionId: newCashCollection.id,
+      });
+
       return { status: 'SUCCESS' };
     } catch (e) {
       if (e instanceof FinanceException) {
@@ -299,7 +302,39 @@ export class FinanceController {
       }
     }
   }
-  //GetCashCollection
+  @Delete('cash-collection/:cashCollectionId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateCashCollectionAbility())
+  @HttpCode(201)
+  async deleteCashCollection(
+    @Request() req: any,
+    @Param('cashCollectionId', ParseIntPipe) cashCollectionId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const cashCollection =
+        await this.financeValidateRules.deleteCashCollectionValidate(
+          cashCollectionId,
+          ability,
+        );
+      await this.deleteCashCollectionUseCase.execute(cashCollection);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('cash-collection/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
@@ -339,7 +374,6 @@ export class FinanceController {
       }
     }
   }
-  //GetCashCollections
   @Get('cash-collections')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
@@ -400,10 +434,9 @@ export class FinanceController {
       }
     }
   }
-  //Get TimeStamps by PosId
   @Get('time-stamp/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateCashCollectionAbility())
+  @CheckAbilities(new ReadCashCollectionAbility())
   @HttpCode(200)
   async getTimeStamps(
     @Request() req: any,
@@ -436,7 +469,6 @@ export class FinanceController {
       }
     }
   }
-  //Create TimeStamp by deviceId
   @Post('time-stamp/:deviceId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -474,7 +506,6 @@ export class FinanceController {
       }
     }
   }
-  //Create ShiftReport
   @Post('shift-report')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateShiftReportAbility())
@@ -503,10 +534,9 @@ export class FinanceController {
       }
     }
   }
-  //Add worker ShiftReport
   @Post('shift-report/worker/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async addWorker(
     @Request() req: any,
@@ -540,10 +570,9 @@ export class FinanceController {
       }
     }
   }
-  //Get Shift Reports
   @Get('shift-reports')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadCashCollectionAbility())
+  @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(200)
   async getShiftReports(
     @Request() req: any,
@@ -601,10 +630,9 @@ export class FinanceController {
       }
     }
   }
-  //Get one ShiftReport
   @Get('shift-report/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
   async getOneById(
     @Request() req: any,
@@ -633,10 +661,9 @@ export class FinanceController {
       }
     }
   }
-  //Get/Create DayShiftReport
   @Post('shift-report/day-report')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async getDayReportByFilter(
     @Request() req: any,
@@ -669,7 +696,6 @@ export class FinanceController {
       }
     }
   }
-  //Get DayShiftReport by id
   @Get('shift-report/day-report/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
@@ -712,7 +738,6 @@ export class FinanceController {
       }
     }
   }
-  //Update DayShiftReport by id
   @Patch('shift-report/day-report/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateShiftReportAbility())
@@ -768,7 +793,6 @@ export class FinanceController {
       }
     }
   }
-  //Send DayShiftReport by id
   @Post('shift-report/day-report/send/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateShiftReportAbility())
@@ -819,7 +843,6 @@ export class FinanceController {
       }
     }
   }
-  //Return DayShiftReport by id
   @Patch('shift-report/day-report/return/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateShiftReportAbility())
@@ -860,7 +883,6 @@ export class FinanceController {
       }
     }
   }
-  //Create cash oper
   @Post('shift-report/day-report/oper/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateShiftReportAbility())
@@ -897,7 +919,6 @@ export class FinanceController {
       }
     }
   }
-  //Get DataCashOper
   @Get('shift-report/day-report/oper/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
@@ -929,7 +950,6 @@ export class FinanceController {
       }
     }
   }
-  //Get DataCashOper refund
   @Get('shift-report/day-report/refund/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
@@ -962,7 +982,6 @@ export class FinanceController {
       }
     }
   }
-  //Get DayReport Cleans
   @Get('shift-report/day-report/clean/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
@@ -998,7 +1017,6 @@ export class FinanceController {
       }
     }
   }
-  //Get DayReport suspiciouslys
   @Get('shift-report/day-report/suspiciously/:dayReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())

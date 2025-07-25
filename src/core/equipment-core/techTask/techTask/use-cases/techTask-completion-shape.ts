@@ -20,7 +20,7 @@ export class CompletionShapeTechTaskUseCase {
     techTask: TechTask,
     value: TechTaskCompletionShapeValueDto[],
     user: User,
-  ): Promise<any> {
+  ): Promise<TechTask> {
     await Promise.all(
       value.map(async (itemValue) => {
         let key: string;

@@ -1,5 +1,5 @@
 import {
-  CardBonusOperType as PrismaCardBonusOperType,
+  LTYBonusOperType as PrismaCardBonusOperType,
   Prisma,
 } from '@prisma/client';
 import { CardBonusOperType } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOperType/domain/cardBonusOperType';
@@ -18,7 +18,7 @@ export class PrismaCardBonusOperTypeMapper {
 
   static toPrisma(
     cardBonusOperType: CardBonusOperType,
-  ): Prisma.CardBonusOperTypeUncheckedCreateInput {
+  ): Prisma.LTYBonusOperTypeUncheckedCreateInput {
     return {
       id: cardBonusOperType?.id,
       name: cardBonusOperType.name,

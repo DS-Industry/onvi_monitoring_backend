@@ -23,6 +23,7 @@ import { TechTagRepositoryProvider } from '@tech-task/tag/provider/techTag';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ReportTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-report";
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
@@ -41,6 +42,7 @@ const techTaskUseCases: Provider[] = [
   ReadAllByPosTechTaskUseCase,
   ShapeTechTaskUseCase,
   CompletionShapeTechTaskUseCase,
+  ReportTechTaskUseCase,
 ];
 
 const itemTemplateUseCases: Provider[] = [FindMethodsItemTemplateUseCase];

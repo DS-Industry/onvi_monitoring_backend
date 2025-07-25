@@ -74,6 +74,9 @@ import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-valid
 import { NotificationController } from "@platform-user/core-controller/notification";
 import { NotificationValidateRules } from "@platform-user/validate/validate-rules/notification-validate-rules";
 import { NotificationCoreModule } from "@notification/notification-core.module";
+import { ManagerPaperController } from "@platform-user/core-controller/managerPaper";
+import { ManagerPaperValidateRules } from "@platform-user/validate/validate-rules/manager-paper-validate-rules";
+import { ManagerPaperCoreModule } from "@manager-paper/manager-paper-core.module";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -98,6 +101,7 @@ const controllers = [
   LoyaltyController,
   HrController,
   NotificationController,
+  ManagerPaperController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -146,6 +150,7 @@ const validate: Provider[] = [
   LoyaltyValidateRules,
   HrValidateRules,
   NotificationValidateRules,
+  ManagerPaperValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -169,6 +174,7 @@ const permission: Provider[] = [
     LoyaltyCoreModule,
     HrCoreModule,
     NotificationCoreModule,
+    ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
   ],
@@ -181,5 +187,6 @@ const permission: Provider[] = [
     ...permission,
     ...userUseCase,
   ],
+  exports: [...userUseCase,]
 })
 export class PlatformUserModule {}

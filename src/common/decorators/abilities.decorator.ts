@@ -194,3 +194,23 @@ export class DeleteHrAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'Hr';
 }
+export class ManageManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'ManagerPaper';
+}
+export class ReadManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'ManagerPaper';
+}
+export class CreateManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'ManagerPaper';
+}
+export class UpdateManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'ManagerPaper';
+}
+export class DeleteManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'ManagerPaper';
+}

@@ -3,7 +3,7 @@ import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { CardBenefitDataDto } from '@loyalty/mobile-user/card/use-case/dto/card-benefit-data.dto';
 import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
-import { BenefitType } from '@prisma/client';
+import { LTYBenefitType } from '@prisma/client';
 
 @Injectable()
 export class GetBenefitsCardUseCase {
@@ -26,9 +26,9 @@ export class GetBenefitsCardUseCase {
         if (benefit.benefitActionTypeId) {
           return;
         } else {
-          if (benefit.benefitType === BenefitType.CASHBACK) {
+          if (benefit.benefitType === LTYBenefitType.CASHBACK) {
             result.cashback = Math.max(result.cashback, benefit.bonus);
-          } else if (benefit.benefitType === BenefitType.DISCOUNT) {
+          } else if (benefit.benefitType === LTYBenefitType.DISCOUNT) {
             result.discount = Math.max(result.discount, benefit.bonus);
           }
         }

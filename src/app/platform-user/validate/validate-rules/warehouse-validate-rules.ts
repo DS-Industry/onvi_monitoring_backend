@@ -230,10 +230,6 @@ export class WarehouseValidateRules {
         const organizationCheck = await this.validateLib.organizationByNameExists(item);
         response.push(organizationCheck);
         if (organizationCheck.object) {
-          ForbiddenError.from(ability).throwUnlessCan(
-            PermissionAction.read,
-            organizationCheck.object
-          );
           organizationMap.set(organizationCheck.object.name, organizationCheck.object.id);
         }
       })
@@ -289,15 +285,11 @@ export class WarehouseValidateRules {
     return categoryCheck.object;
   }
 
-  public async getAllNomenclatureByOrgIdValidate(orgId: number, ability: any) {
+  public async getAllNomenclatureByOrgIdValidate(orgId: number) {
     const orgCheck = await this.validateLib.organizationByIdExists(orgId);
     if (orgCheck.code !== 200) {
       throw new WarehouseException(WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE, orgCheck.errorMessage);
     }
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      orgCheck.object,
-    );
   }
 
   public async getAllByPosId(posId: number, ability: any) {
@@ -326,9 +318,7 @@ export class WarehouseValidateRules {
   public async getAllInventoryItemValidate(input: InventoryItemMonitoringDto) {
     const response = [];
 
-    const organizationCheck =
-      await this.validateLib.organizationByIdExists(input.orgId);
-    response.push(organizationCheck);
+    response.push(await this.validateLib.organizationByIdExists(input.orgId));
     if (input.categoryId != '*') {
       response.push(
         await this.validateLib.categoryByIdExists(input.categoryId),
@@ -348,10 +338,6 @@ export class WarehouseValidateRules {
       response,
       ExceptionType.WAREHOUSE,
       WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
-    );
-    ForbiddenError.from(input.ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
     );
   }
 

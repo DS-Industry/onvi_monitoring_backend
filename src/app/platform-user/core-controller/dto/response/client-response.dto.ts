@@ -1,11 +1,11 @@
-import { StatusUser, UserType } from "@prisma/client";
+import { StatusUser, ContractType } from "@prisma/client";
 import { TagProps } from "@loyalty/mobile-user/tag/domain/tag";
 
 export class ClientResponseDto {
   id: number;
   name: string;
   phone: string;
-  type: UserType;
+  type: ContractType;
   status: StatusUser;
   comment?: string;
   placementId?: number;

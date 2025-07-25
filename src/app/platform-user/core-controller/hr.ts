@@ -67,10 +67,9 @@ export class HrController {
     private readonly calculatePaymentUseCase: CalculatePaymentUseCase,
     private readonly getReportPaymentUseCase: GetReportPaymentUseCase,
   ) {}
-
   @Post('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateHrAbility())
+  @CheckAbilities(new UpdateHrAbility())
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(201)
   async createWorker(
@@ -106,7 +105,6 @@ export class HrController {
       }
     }
   }
-
   @Patch('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateHrAbility())
@@ -145,15 +143,11 @@ export class HrController {
       }
     }
   }
-
   @Get('workers')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
-  async getWorkers(
-    @Request() req: any,
-    @Query() data: WorkerFilterDto,
-  ): Promise<Position[]> {
+  async getWorkers(@Query() data: WorkerFilterDto): Promise<Worker[]> {
     try {
       let skip = undefined;
       let take = undefined;
@@ -197,7 +191,6 @@ export class HrController {
       }
     }
   }
-
   @Get('worker/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
@@ -224,10 +217,9 @@ export class HrController {
       }
     }
   }
-
   @Post('position')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateHrAbility())
+  @CheckAbilities(new UpdateHrAbility())
   @HttpCode(201)
   async createPosition(
     @Request() req: any,
@@ -260,7 +252,6 @@ export class HrController {
       }
     }
   }
-
   @Patch('position')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateHrAbility())
@@ -293,7 +284,6 @@ export class HrController {
       }
     }
   }
-
   @Get('position/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
@@ -320,15 +310,14 @@ export class HrController {
       }
     }
   }
-
   @Get('positions')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
   async getPositions(@Request() req: any): Promise<Position[]> {
     try {
-      const { ability } = req;
-      return await this.findMethodsPositionUseCase.getAllByAbility(ability);
+      const { user } = req;
+      return await this.findMethodsPositionUseCase.getAllByPermissionUser(user);
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -345,7 +334,7 @@ export class HrController {
       }
     }
   }
-
+  //DELETE(?)
   @Get('positions-org/:orgId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
@@ -371,7 +360,6 @@ export class HrController {
       }
     }
   }
-
   @Post('prepayment/calculate')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -398,7 +386,6 @@ export class HrController {
       }
     }
   }
-
   @Post('prepayment/calculate/workers')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -425,7 +412,6 @@ export class HrController {
       }
     }
   }
-
   @Post('payment/calculate')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -452,7 +438,6 @@ export class HrController {
       }
     }
   }
-
   @Post('payment/calculate/workers')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -479,7 +464,6 @@ export class HrController {
       }
     }
   }
-
   @Post('prepayment')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -520,7 +504,6 @@ export class HrController {
       }
     }
   }
-
   @Post('payment')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -559,7 +542,6 @@ export class HrController {
       }
     }
   }
-
   @Get('prepayments')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
@@ -596,7 +578,6 @@ export class HrController {
       }
     }
   }
-
   @Get('payments')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())

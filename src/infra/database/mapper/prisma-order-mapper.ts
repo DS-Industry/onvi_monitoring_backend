@@ -1,4 +1,4 @@
-import { OrderMobileUser as PrismaOrder, Prisma } from '@prisma/client';
+import { LTYOrder as PrismaOrder, Prisma } from '@prisma/client';
 import { Order } from '@loyalty/order/domain/order';
 
 export class PrismaOrderMapper {
@@ -16,8 +16,8 @@ export class PrismaOrderMapper {
       sumCashback: entity.sumCashback,
       carWashDeviceId: entity.carWashDeviceId,
       platform: entity.platform,
-      cardMobileUserId: entity.cardMobileUserId,
-      typeMobileUser: entity.typeMobileUser,
+      cardMobileUserId: entity.cardId,
+      typeMobileUser: entity.contractType,
       orderData: entity.orderData,
       createData: entity.createData,
       orderStatus: entity.orderStatus,
@@ -32,7 +32,7 @@ export class PrismaOrderMapper {
     });
   }
 
-  static toPrisma(order: Order): Prisma.OrderMobileUserUncheckedCreateInput {
+  static toPrisma(order: Order): Prisma.LTYOrderUncheckedCreateInput {
     return {
       id: order?.id,
       transactionId: order.transactionId,
@@ -43,8 +43,8 @@ export class PrismaOrderMapper {
       sumCashback: order.sumCashback,
       carWashDeviceId: order.carWashDeviceId,
       platform: order.platform,
-      cardMobileUserId: order?.cardMobileUserId,
-      typeMobileUser: order.typeMobileUser,
+      cardId: order?.cardMobileUserId,
+      contractType: order.typeMobileUser,
       orderData: order.orderData,
       createData: order.createData,
       orderStatus: order.orderStatus,

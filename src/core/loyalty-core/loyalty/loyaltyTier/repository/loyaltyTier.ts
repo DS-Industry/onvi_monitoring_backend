@@ -12,14 +12,14 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
 
   public async create(input: LoyaltyTier): Promise<LoyaltyTier> {
     const loyaltyTierEntity = PrismaLoyaltyTierMapper.toPrisma(input);
-    const loyaltyTier = await this.prisma.loyaltyCardTier.create({
+    const loyaltyTier = await this.prisma.lTYCardTier.create({
       data: loyaltyTierEntity,
     });
     return PrismaLoyaltyTierMapper.toDomain(loyaltyTier);
   }
 
   public async findOneById(id: number): Promise<LoyaltyTier> {
-    const loyaltyTier = await this.prisma.loyaltyCardTier.findFirst({
+    const loyaltyTier = await this.prisma.lTYCardTier.findFirst({
       where: {
         id,
       },
@@ -28,23 +28,23 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
   }
 
   public async findAllByLoyaltyProgramId(
-    loyaltyProgramId: number,
+    ltyProgramId: number,
   ): Promise<LoyaltyTier[]> {
-    const loyaltyTiers = await this.prisma.loyaltyCardTier.findMany({
+    const loyaltyTiers = await this.prisma.lTYCardTier.findMany({
       where: {
-        loyaltyProgramId,
+        ltyProgramId,
       },
     });
     return loyaltyTiers.map((item) => PrismaLoyaltyTierMapper.toDomain(item));
   }
 
   public async findAllByLoyaltyProgramIds(
-    loyaltyProgramIds: number[],
+    ltyProgramIds: number[],
   ): Promise<LoyaltyTier[]> {
-    const loyaltyTiers = await this.prisma.loyaltyCardTier.findMany({
+    const loyaltyTiers = await this.prisma.lTYCardTier.findMany({
       where: {
-        loyaltyProgramId: {
-          in: loyaltyProgramIds,
+        ltyProgramId: {
+          in: ltyProgramIds,
         },
       },
     });
@@ -53,7 +53,7 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
 
   public async update(input: LoyaltyTier): Promise<LoyaltyTier> {
     const loyaltyTierEntity = PrismaLoyaltyTierMapper.toPrisma(input);
-    const loyaltyTier = await this.prisma.loyaltyCardTier.update({
+    const loyaltyTier = await this.prisma.lTYCardTier.update({
       where: {
         id: input.id,
       },
@@ -67,7 +67,7 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
     addBenefitIds: number[],
     deleteBenefitIds: number[],
   ): Promise<any> {
-    await this.prisma.loyaltyCardTier.update({
+    await this.prisma.lTYCardTier.update({
       where: {
         id: loyaltyTierId,
       },

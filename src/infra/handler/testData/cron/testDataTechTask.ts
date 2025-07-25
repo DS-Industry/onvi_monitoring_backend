@@ -22,13 +22,12 @@ export class TestDataTechTaskCron {
     const startOfDay = new Date(today.setUTCHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setUTCHours(23, 59, 59, 999));
 
-    const techTasks =
-      await this.findMethodsTechTaskUseCase.getAllByPosIdAndDate(
-        9998,
-        startOfDay,
-        endOfDay,
-        StatusTechTask.ACTIVE,
-      );
+    const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
+      posId: 9998,
+      gteStartDate: startOfDay,
+      lteStartDate: endOfDay,
+      statuses: [StatusTechTask.ACTIVE],
+    });
 
     console.log(techTasks);
     const user: User = new User({

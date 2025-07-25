@@ -15,7 +15,6 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
 import { EquipmentCoreModule } from './core/equipment-core/equipment-core.module';
-import { HandlerModule } from './infra/handler/handler.module';
 import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
@@ -23,7 +22,8 @@ import { ReportCoreModule } from '@report/report-core.module';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { HrCoreModule } from '@hr/hr-core.module';
 import { NotificationCoreModule } from '@notification/notification-core.module';
-import { EventEmitterModule } from "@nestjs/event-emitter";
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 
 @Module({
   imports: [
@@ -110,8 +110,8 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
     FinanceCoreModule,
     HrCoreModule,
     ReportCoreModule,
-    HandlerModule,
     NotificationCoreModule,
+    ManagerPaperCoreModule,
     Logger,
   ],
   controllers: [],

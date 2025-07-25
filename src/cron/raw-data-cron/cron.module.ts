@@ -10,12 +10,17 @@ import { HandlerTechTaskCron } from '../../infra/handler/techTask/cron/handler-t
 import { TechTaskModule } from '@tech-task/tech-task.module';
 import { TestDataCron } from '../../infra/handler/testData/cron/testData';
 import { TestDataTechTaskCron } from '../../infra/handler/testData/cron/testDataTechTask';
+import { HandlerManagerPaperCron } from '../../infra/handler/managerPaper/cron/handler-managerPaper';
+import { PlatformUserModule } from '@platform-user/platform-user.module';
+import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 const cronUseCases: Provider[] = [
   HandlerDeviceDataRawCron,
   HandlerTechTaskCron,
   TestDataCron,
   TestDataTechTaskCron,
+  HandlerManagerPaperCron,
 ];
 
 @Module({
@@ -48,8 +53,13 @@ const cronUseCases: Provider[] = [
       },
     }),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
     PosModule,
     TechTaskModule,
+    ManagerPaperCoreModule,
+    PlatformUserModule,
   ],
   controllers: [],
   providers: [...cronUseCases],

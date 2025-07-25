@@ -1,5 +1,5 @@
 import { Order } from '@loyalty/order/domain/order';
-import { OrderStatus, PlatformType, UserType } from "@prisma/client";
+import { OrderStatus, PlatformType, ContractType } from "@prisma/client";
 
 export abstract class IOrderRepository {
   abstract create(input: Order): Promise<Order>;
@@ -8,7 +8,7 @@ export abstract class IOrderRepository {
     dateStart: Date,
     dateEnd: Date,
     platformType: PlatformType | '*',
-    typeMobileUser: UserType | '*',
+    typeMobileUser: ContractType | '*',
     orderStatus: OrderStatus | '*',
     carWashDeviceId: number | '*',
     cardId?: number,

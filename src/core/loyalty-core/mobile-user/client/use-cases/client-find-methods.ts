@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IClientRepository } from '@loyalty/mobile-user/client/interfaces/client';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { UserType } from '@prisma/client';
+import { ContractType } from '@prisma/client';
 
 @Injectable()
 export class FindMethodsClientUseCase {
@@ -18,7 +18,7 @@ export class FindMethodsClientUseCase {
   async getAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: UserType,
+    type?: ContractType,
     phone?: string,
     skip?: number,
     take?: number,

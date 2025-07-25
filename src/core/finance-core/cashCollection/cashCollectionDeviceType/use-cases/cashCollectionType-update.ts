@@ -15,21 +15,16 @@ export class UpdateCashCollectionTypeUseCase {
   ): Promise<CashCollectionDeviceType> {
     const { sumFact, sumCoin, sumPaper, shortage, virtualSum } = input;
 
-    oldCashCollectionDeviceType.sumFact = sumFact
-      ? sumFact
-      : oldCashCollectionDeviceType.sumFact;
-    oldCashCollectionDeviceType.sumCoin = sumCoin
-      ? sumCoin
-      : oldCashCollectionDeviceType.sumCoin;
-    oldCashCollectionDeviceType.sumPaper = sumPaper
-      ? sumPaper
-      : oldCashCollectionDeviceType.sumPaper;
-    oldCashCollectionDeviceType.shortage = shortage
-      ? shortage
-      : oldCashCollectionDeviceType.shortage;
-    oldCashCollectionDeviceType.virtualSum = virtualSum
-      ? virtualSum
-      : oldCashCollectionDeviceType.virtualSum;
+    oldCashCollectionDeviceType.sumFact =
+      sumFact ?? oldCashCollectionDeviceType.sumFact;
+    oldCashCollectionDeviceType.sumCoin =
+      sumCoin ?? oldCashCollectionDeviceType.sumCoin;
+    oldCashCollectionDeviceType.sumPaper =
+      sumPaper ?? oldCashCollectionDeviceType.sumPaper;
+    oldCashCollectionDeviceType.shortage =
+      shortage ?? oldCashCollectionDeviceType.shortage;
+    oldCashCollectionDeviceType.virtualSum =
+      virtualSum ?? oldCashCollectionDeviceType.virtualSum;
 
     return await this.cashCollectionDeviceTypeRepository.update(
       oldCashCollectionDeviceType,

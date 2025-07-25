@@ -4,10 +4,10 @@ export abstract class ILoyaltyTierRepository {
   abstract create(input: LoyaltyTier): Promise<LoyaltyTier>;
   abstract findOneById(id: number): Promise<LoyaltyTier>;
   abstract findAllByLoyaltyProgramId(
-    loyaltyProgramId: number,
+    ltyProgramId: number,
   ): Promise<LoyaltyTier[]>;
   abstract findAllByLoyaltyProgramIds(
-    loyaltyProgramIds: number[],
+    ltyProgramIds: number[],
   ): Promise<LoyaltyTier[]>;
   abstract update(input: LoyaltyTier): Promise<LoyaltyTier>;
   abstract updateConnectionBenefit(

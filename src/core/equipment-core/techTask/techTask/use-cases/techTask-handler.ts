@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
-import { StatusTechTask } from '@prisma/client';
+import { StatusTechTask, TypeTechTask } from "@prisma/client";
 import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
@@ -19,20 +19,15 @@ export class HandlerTechTaskUseCase {
   async execute() {
     const todayUTC = new Date();
     todayUTC.setUTCHours(0, 0, 0, 0);
-    console.log('start ' + todayUTC);
-    /*
-        const techTaskActive = await this.findMethodsTechTaskUseCase.getAllByStatus(
-          StatusTechTask.ACTIVE,       );
-    /*
-        const activeTasksWithFutureStartDate = techTaskActive.filter((task) => {
-          const nextCreateDate = new Date(task.nextCreateDate);
-          const nextCreateWithoutTime = nextCreateDate.toLocaleDateString();
-          const todayWithoutTime = today.toLocaleDateString();
-          return nextCreateWithoutTime == todayWithoutTime;
-        });*/
+    const tomorrowUTC = new Date(todayUTC);
+    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
 
     const activeTasksWithFutureStartDate =
-      await this.findMethodsTechTaskUseCase.getAllForOverdue();
+      await this.findMethodsTechTaskUseCase.getAllByFilter({
+        gteEndSpecifiedDate: todayUTC,
+        lteEndSpecifiedDate: tomorrowUTC,
+        statuses: [StatusTechTask.ACTIVE, StatusTechTask.RETURNED],
+      });
 
     await Promise.all(
       activeTasksWithFutureStartDate.map(async (item) => {
@@ -44,7 +39,12 @@ export class HandlerTechTaskUseCase {
     );
 
     const nextCreateTasksWithFutureStartDate =
-      await this.findMethodsTechTaskUseCase.getAllForHandler();
+      await this.findMethodsTechTaskUseCase.getAllByFilter({
+        gteNextCreateDate: todayUTC,
+        lteNextCreateDate: tomorrowUTC,
+        type: TypeTechTask.REGULAR,
+        statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE],
+      });
 
     await Promise.all(
       nextCreateTasksWithFutureStartDate.map(async (item) => {

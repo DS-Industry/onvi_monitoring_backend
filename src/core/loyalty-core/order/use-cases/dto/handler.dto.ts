@@ -1,4 +1,4 @@
-import { ExecutionStatus, OrderStatus, PlatformType, SendAnswerStatus, UserType } from "@prisma/client";
+import { ExecutionStatus, OrderStatus, PlatformType, SendAnswerStatus, ContractType } from "@prisma/client";
 
 export class HandlerDto {
   transactionId: string;
@@ -10,7 +10,7 @@ export class HandlerDto {
   carWashDeviceId: number;
   platform: PlatformType;
   orderData: Date;
-  typeMobileUser?: UserType;
+  typeMobileUser?: ContractType;
   cardMobileUserId?: number;
   orderStatus: OrderStatus;
   sendAnswerStatus?: SendAnswerStatus;

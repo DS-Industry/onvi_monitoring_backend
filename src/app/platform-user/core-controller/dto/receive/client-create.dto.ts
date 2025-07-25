@@ -8,7 +8,7 @@ import {
   Matches
 } from "class-validator";
 import { Transform } from 'class-transformer';
-import { UserType } from "@prisma/client";
+import { ContractType } from "@prisma/client";
 
 export class ClientCreateDto {
   @IsString()
@@ -29,9 +29,9 @@ export class ClientCreateDto {
   @IsString()
   @IsOptional()
   gender?: string;
-  @IsEnum(UserType)
+  @IsEnum(ContractType)
   @IsNotEmpty({ message: 'Type client is required' })
-  type: UserType;
+  type: ContractType;
   @IsString()
   @IsOptional()
   inn?: string;

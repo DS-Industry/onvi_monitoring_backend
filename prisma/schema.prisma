@@ -30,8 +30,8 @@ model Organization {
   nomenclatures               Nomenclature[]
   hrWorker                    HrWorker[]
   hrPositions                 HrPosition[]
-  loyaltyProgram              LoyaltyProgram?    @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId            Int?
+  ltyProgram                  LTYProgram?    @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramId                Int?
 }
 
 model Address {
@@ -50,7 +50,7 @@ model Placement {
   utc          String
   organization Organization[]
   pos          Pos[]
-  client       MobileUser[]
+  clients      LTYUser[]
   hrWorkers    HrWorker[]
 }
 
@@ -141,13 +141,19 @@ model User {
   workDayShiftReportCreated    WorkDayShiftReport[]  @relation(name: "CreatedByUser")
   workDayShiftReportUpdated    WorkDayShiftReport[]  @relation(name: "UpdateByUser")
   reportTemplateTransactions   ReportTemplateTransaction[]
-  cardBonusOpers               CardBonusOper[]
-  loyaltyPrograms              LoyaltyProgram[]
+  bonusOpers                   LTYBonusOper[]
+  ltyPrograms                  LTYProgram[]
   hrPaymentCreated             HrPayment[]      @relation(name: "CreatedByUser")
   hrPaymentUpdated             HrPayment[]      @relation(name: "UpdatedByUser")
   authorNotifications          Notification[]
   recipientNotifications       UserNotification[]
   notificationTags             UserNotificationTag[]
+  managerPapers                ManagerPaper[]
+  managerReportPeriod          ManagerReportPeriod[]
+  managerPaperCreated          ManagerPaper[]      @relation(name: "CreatedByUser")
+  managerPaperUpdated          ManagerPaper[]      @relation(name: "UpdatedByUser")
+  managerReportPeriodCreated          ManagerReportPeriod[]      @relation(name: "CreatedByUser")
+  managerReportPeriodUpdated          ManagerReportPeriod[]      @relation(name: "UpdatedByUser")
 }
 
 model UserMailConfirm {
@@ -230,6 +236,7 @@ model Pos {
   cashCollection       CashCollection[]
   shiftReport          ShiftReport[]
   monthlyPlans         MonthlyPlanPos[]
+  managerPaper         ManagerPaper[]
 }
 
 model MonthlyPlanPos {
@@ -287,8 +294,8 @@ model CarWashDevice {
   cashCollectionDevice          CashCollectionDevice[]
   workDayShiftReportCashOpers   WorkDayShiftReportCashOper[]
   programChanges                ProgramChange[]
-  cardBonusOpers                CardBonusOper[]
-  orderMobileUsers              OrderMobileUser[]
+  bonusOpers                    LTYBonusOper[]
+  orders                        LTYOrder[]
 }
 
 model CarWashDeviceType {
@@ -477,18 +484,18 @@ model ErrNum {
   carWashDeviceMfuEvent         CarWashDeviceMfuEvent[]
 }
 
-model LoyaltyProgram {
+model LTYProgram {
   id                        Int               @id @default(autoincrement())
   name                      String
-  status                    LoyaltyProgramStatus
+  status                    LTYProgramStatus
   startDate                 DateTime
   lifetimeBonusDays         Int?
-  loyaltyCardTiers          LoyaltyCardTier[]
+  cardTiers                 LTYCardTier[]
   organizations             Organization[]
   managers                  User[]
 }
 
-enum LoyaltyProgramStatus {
+enum LTYProgramStatus {
   ACTIVE
   PAUSE
 }
@@ -512,47 +519,47 @@ model PromocodeTransaction {
   id                    Int                 @id @default(autoincrement())
   loyaltyPosPromocode   LoyaltyPosPromocode @relation(fields: [loyaltyPosPromocodeId], references: [id])
   loyaltyPosPromocodeId Int                 @unique
-  mobileUser            MobileUser          @relation(fields: [mobileUserId], references: [id])
-  mobileUserId          Int                 @unique
+  client                LTYUser?               @relation(fields: [clientId], references: [id])
+  clientId              Int?                   @unique
   activationDate        DateTime
   status                String
 }
 
-model Benefit {
+model LTYBenefit {
   id                  Int               @id @default(autoincrement())
-  benefitType         BenefitType
+  benefitType         LTYBenefitType    @default(CASHBACK)
   name                String
   bonus               Int
-  benefitActionType   BenefitActionType? @relation(fields: [benefitActionTypeId], references: [id])
+  benefitActionType   LTYBenefitActionType? @relation(fields: [benefitActionTypeId], references: [id])
   benefitActionTypeId Int?
-  loyaltyCardTiers    LoyaltyCardTier[]
+  cardTiers           LTYCardTier[]
 }
 
-enum BenefitType {
+enum LTYBenefitType {
   CASHBACK
   DISCOUNT
   GIFT_POINTS
 }
 
-model BenefitActionType {
+model LTYBenefitActionType {
   id          Int       @id @default(autoincrement())
   name        String
-  benefites   Benefit[]
+  benefites   LTYBenefit[]
   description String?
 }
 
-model LoyaltyCardTier {
+model LTYCardTier {
   id               Int            @id @default(autoincrement())
   name             String
   description      String?
-  cards            CardMobileUser[]
-  loyaltyProgram   LoyaltyProgram @relation(fields: [loyaltyProgramId], references: [id])
-  loyaltyProgramId Int
+  cards            LTYCard[]
+  ltyProgram       LTYProgram     @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramId     Int
   limitBenefit     Int
-  benefits         Benefit[]
+  benefits         LTYBenefit[]
 }
 
-model MobileUser {
+model LTYUser {
   id                   Int                    @id @default(autoincrement())
   name                 String
   birthday             DateTime?
@@ -561,13 +568,12 @@ model MobileUser {
   gender               String?
   status               StatusUser?            @default(ACTIVE)
   avatar               String?
-  type                 UserType               @default(PHYSICAL)
+  contractType         ContractType           @default(INDIVIDUAL)
   comment              String?
-  inn                  String?
-  tags                 UserTag[]
+  tags                 LTYUserTag[]
   placement            Placement?           @relation(fields: [placementId], references: [id])
   placementId          Int?
-  card                 CardMobileUser?
+  card                 LTYCard?
   refreshTokenId       String?
   createdAt            DateTime?
   updatedAt            DateTime?
@@ -576,68 +582,75 @@ model MobileUser {
   mobileUserRoleId     Int?
 }
 
-enum UserType {
-  PHYSICAL
-  LEGAL
+enum ContractType {
+  INDIVIDUAL
+  CORPORATE
 }
 
-model UserTag {
+model LTYUserTag {
   id                   Int                    @id @default(autoincrement())
   name                 String
   color                String
-  clients              MobileUser[]
+  clients              LTYUser[]
 }
 
-model CardMobileUser {
+model LTYCard {
   id                   Int                    @id @default(autoincrement())
   balance              Int                    @default(0)
-  mobileUser           MobileUser?            @relation(fields: [mobileUserId], references: [id])
-  mobileUserId         Int?                   @unique
-  devNumber            String
+  client               LTYUser?               @relation(fields: [clientId], references: [id])
+  clientId             Int?                   @unique
+  unqNumber            String
   number               String
+  type                 LTYCardType            @default(VIRTUAL)
   monthlyLimit         Int?
   createdAt            DateTime?
   updatedAt            DateTime?
-  loyaltyCardTier      LoyaltyCardTier? @relation(fields: [loyaltyCardTierId], references: [id])
-  loyaltyCardTierId    Int?
-  cardBonusBanks       CardBonusBank[]
-  cardBonusOpers       CardBonusOper[]
-  orderMobileUsers     OrderMobileUser[]
-
+  cardTier             LTYCardTier? @relation(fields: [cardTierId], references: [id])
+  cardTierId           Int?
+  bonusBanks           LTYBonusBank[]
+  bonusOpers           LTYBonusOper[]
+  orders               LTYOrder[]
+  equarings            LTYEquaring[]
 }
 
-model CardBonusBank {
+enum LTYCardType {
+  VIRTUAL
+  PHYSICAL
+}
+
+model LTYBonusBank {
   id                   Int                    @id @default(autoincrement())
-  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
-  cardMobileUserId     Int?
+  card                 LTYCard?               @relation(fields: [cardId], references: [id])
+  cardId               Int?
   sum                  Int
   accrualAt            DateTime
   expiryAt             DateTime
 }
 
-model CardBonusOper {
+model LTYBonusOper {
   id                   Int                    @id @default(autoincrement())
-  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
-  cardMobileUserId     Int?
+  card                 LTYCard?               @relation(fields: [cardId], references: [id])
+  cardId               Int?
   carWashDevice        CarWashDevice?         @relation(fields: [carWashDeviceId], references: [id])
   carWashDeviceId      Int?
-  typeOper             CardBonusOperType?     @relation(fields: [typeOperId], references: [id])
-  typeOperId           Int?
+  type                 LTYBonusOperType?     @relation(fields: [typeId], references: [id])
+  typeId               Int?
   operDate             DateTime
   loadDate             DateTime
   sum                  Int
   comment              String?
   creator              User?                  @relation(fields: [creatorId], references: [id])
   creatorId            Int?
-  orderMobileUser      OrderMobileUser?       @relation(fields: [orderMobileUserId], references: [id])
-  orderMobileUserId    Int?
+  order                LTYOrder?       @relation(fields: [orderId], references: [id])
+  orderId              Int?
 }
 
-model CardBonusOperType {
+
+model LTYBonusOperType {
   id                   Int                    @id @default(autoincrement())
   name                 String
   signOper             SignOperType
-  cardBonusOpers       CardBonusOper[]
+  bonusOpers           LTYBonusOper[]
 }
 
 enum SignOperType {
@@ -645,7 +658,7 @@ enum SignOperType {
   DEDUCTION
 }
 
-model OrderMobileUser {
+model LTYOrder {
   id                   Int                    @id @default(autoincrement())
   transactionId        String
   sumFull              Int
@@ -656,9 +669,9 @@ model OrderMobileUser {
   carWashDevice        CarWashDevice          @relation(fields: [carWashDeviceId], references: [id])
   carWashDeviceId      Int
   platform             PlatformType
-  cardMobileUser       CardMobileUser?        @relation(fields: [cardMobileUserId], references: [id])
-  cardMobileUserId     Int?
-  typeMobileUser       UserType               @default(PHYSICAL)
+  card                 LTYCard?               @relation(fields: [cardId], references: [id])
+  cardId               Int?
+  contractType         ContractType           @default(INDIVIDUAL)
   orderData            DateTime
   createData           DateTime
   orderHandlerStatus   OrderHandlerStatus?
@@ -670,7 +683,17 @@ model OrderMobileUser {
   reasonError          String?
   executionError       String?
   handlerError         String?
-  cardBonusOpers       CardBonusOper[]
+  bonusOpers           LTYBonusOper[]
+}
+
+model LTYEquaring {
+  id                Int             @id @default(autoincrement())
+  card              LTYCard?               @relation(fields: [cardId], references: [id])
+  cardId            Int?
+  topUpSum          Int
+  totalBalance      Int
+  paymentGatewayId  String
+  createdAt         DateTime        @default(now())
 }
 
 enum PlatformType {
@@ -712,7 +735,7 @@ model Otp {
 model MobileUserRole {
   id                   Int                    @id @default(autoincrement())
   name                 String
-  mobileUsers          MobileUser[]
+  clients              LTYUser[]
   mobileUserPermission MobileUserPermission[]
 }
 
@@ -823,6 +846,7 @@ enum StatusTechTask {
   FINISHED
   PAUSE
   OVERDUE
+  RETURNED
 }
 
 model TechTaskItemTemplate {
@@ -1090,6 +1114,7 @@ model CashCollection {
   updatedById               Int
   cashCollectionDeviceTypes CashCollectionDeviceType[]
   cashCollectionDevices     CashCollectionDevice[]
+  managerPaper              ManagerPaper[]
 }
 
 enum StatusCashCollection {
@@ -1334,6 +1359,83 @@ model UserNotificationTag {
   authorUser           User                   @relation(fields: [authorUserId], references: [id])
   authorUserId         Int
   userNotifications    UserNotification[]
+}
+
+model ManagerPaper {
+  id                   Int                    @id @default(autoincrement())
+  group                ManagerPaperGroup
+  pos                  Pos                    @relation(fields: [posId], references: [id])
+  posId                Int
+  paperType            ManagerPaperType       @relation(fields: [paperTypeId], references: [id])
+  paperTypeId          Int
+  eventDate            DateTime
+  sum                  Int
+  user                 User                   @relation(fields: [userId], references: [id])
+  userId               Int
+  cashCollection       CashCollection?        @relation(fields: [cashCollectionId], references: [id])
+  cashCollectionId     Int?
+  imageProductReceipt  String?
+  comment              String?
+  createdAt            DateTime
+  updatedAt            DateTime
+  createdBy            User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById          Int
+  updatedBy            User?                      @relation(name: "UpdatedByUser", fields: [updatedById], references: [id])
+  updatedById          Int?
+}
+
+enum ManagerPaperGroup {
+  RENT
+  REVENUE
+  WAGES
+  INVESTMENT_DEVIDENTS
+  UTILITY_BILLS
+  TAXES
+  ACCOUNTABLE_FUNDS
+  REPRESENTATIVE_EXPENSES
+  SALE_EQUIPMENT
+  MANUFACTURE
+  OTHER
+  SUPPLIES
+  P_C
+  WAREHOUSE
+  CONSTRUCTION
+  MAINTENANCE_REPAIR
+  TRANSPORTATION_COSTS
+}
+
+model ManagerPaperType {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  type                 ManagerPaperTypeClass
+  managerPaper         ManagerPaper[]
+}
+
+enum ManagerPaperTypeClass {
+  RECEIPT
+  EXPENDITURE
+}
+
+model ManagerReportPeriod {
+  id                   Int                    @id @default(autoincrement())
+  status               ManagerReportPeriodStatus
+  startPeriod          DateTime
+  endPeriod            DateTime
+  sumStartPeriod       Int
+  sumEndPeriod         Int
+  user                 User                   @relation(fields: [userId], references: [id])
+  userId               Int
+  createdAt            DateTime
+  updatedAt            DateTime
+  createdBy            User?                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
+  createdById          Int?
+  updatedBy            User?                      @relation(name: "UpdatedByUser", fields: [updatedById], references: [id])
+  updatedById          Int?
+}
+
+enum ManagerReportPeriodStatus {
+  SAVE
+  SENT
 }
 
 enum PaymentType {

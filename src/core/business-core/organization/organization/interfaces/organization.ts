@@ -9,7 +9,10 @@ export abstract class IOrganizationRepository {
   abstract findOneBySlug(slug: string): Promise<Organization>;
   abstract findAll(): Promise<Organization[]>;
   abstract findAllByOwner(ownerId: number): Promise<Organization[]>;
-  abstract findAllByUser(userId: number): Promise<Organization[]>;
+  abstract findAllByUser(
+    userId: number,
+    placementId: number | '*',
+  ): Promise<Organization[]>;
   abstract findAllByLoyaltyProgramId(
     loyaltyProgramId: number,
   ): Promise<Organization[]>;

@@ -17,7 +17,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     userId: number,
   ): Promise<LoyaltyProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
-    const loyaltyProgram = await this.prisma.loyaltyProgram.create({
+    const loyaltyProgram = await this.prisma.lTYProgram.create({
       data: {
         ...LoyaltyProgramEntity,
         organizations: { connect: organizationIds.map((id) => ({ id })) },
@@ -28,7 +28,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   }
 
   public async findOneById(id: number): Promise<LoyaltyProgram> {
-    const loyaltyProgram = await this.prisma.loyaltyProgram.findFirst({
+    const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
     });
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
@@ -37,7 +37,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async findOneByOrganizationId(
     organizationId: number,
   ): Promise<LoyaltyProgram> {
-    const loyaltyProgram = await this.prisma.loyaltyProgram.findFirst({
+    const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
         organizations: {
           some: {
@@ -49,14 +49,14 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
 
-  public async findOneByLoyaltyCardTierId(
-    loyaltyCardTierId: number,
+  public async findOneByCardTierId(
+    cardTierId: number,
   ): Promise<LoyaltyProgram> {
-    const loyaltyProgram = await this.prisma.loyaltyProgram.findFirst({
+    const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
-        loyaltyCardTiers: {
+        cardTiers: {
           some: {
-            id: loyaltyCardTierId,
+            id: cardTierId,
           },
         },
       },
@@ -65,15 +65,15 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   }
 
   public async findAll(): Promise<LoyaltyProgram[]> {
-    const loyaltyPrograms = await this.prisma.loyaltyProgram.findMany();
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany();
     return loyaltyPrograms.map((item) =>
       PrismaLoyaltyProgramMapper.toDomain(item),
     );
   }
 
   public async findAllByPermission(ability: any): Promise<LoyaltyProgram[]> {
-    const loyaltyPrograms = await this.prisma.loyaltyProgram.findMany({
-      where: accessibleBy(ability).LoyaltyProgram,
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
+      where: accessibleBy(ability).LTYProgram,
     });
     return loyaltyPrograms.map((item) =>
       PrismaLoyaltyProgramMapper.toDomain(item),
@@ -86,7 +86,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     deleteOrganizationIds: number[],
   ): Promise<LoyaltyProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
-    const loyaltyProgram = await this.prisma.loyaltyProgram.update({
+    const loyaltyProgram = await this.prisma.lTYProgram.update({
       where: {
         id: input.id,
       },

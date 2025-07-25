@@ -3,6 +3,7 @@ import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { PrismaCardMobileUserMapper } from '@db/mapper/prisma-card-mobile-user-mapper';
+import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -12,12 +13,12 @@ export class CardRepository extends ICardRepository {
 
   public async create(input: Card): Promise<Card> {
     const cardEntity = PrismaCardMobileUserMapper.toPrisma(input);
-    const card = await this.prisma.cardMobileUser.create({ data: cardEntity });
+    const card = await this.prisma.lTYCard.create({ data: cardEntity });
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
   public async findOneById(id: number): Promise<Card> {
-    const card = await this.prisma.cardMobileUser.findFirst({
+    const card = await this.prisma.lTYCard.findFirst({
       where: {
         id,
       },
@@ -26,25 +27,25 @@ export class CardRepository extends ICardRepository {
   }
 
   public async findOneByClientId(id: number): Promise<Card> {
-    const card = await this.prisma.cardMobileUser.findFirst({
+    const card = await this.prisma.lTYCard.findFirst({
       where: {
-        mobileUserId: id,
+        clientId: id,
       },
     });
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByDevNumber(devNumber: string): Promise<Card> {
-    const card = await this.prisma.cardMobileUser.findFirst({
+  public async findOneByUnqNumber(unqNumber: string): Promise<Card> {
+    const card = await this.prisma.lTYCard.findFirst({
       where: {
-        devNumber,
+        unqNumber,
       },
     });
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
   public async findOneByNumber(number: string): Promise<Card> {
-    const card = await this.prisma.cardMobileUser.findFirst({
+    const card = await this.prisma.lTYCard.findFirst({
       where: {
         number,
       },
@@ -53,9 +54,9 @@ export class CardRepository extends ICardRepository {
   }
 
   public async findOneByClientPhone(phone: string): Promise<Card> {
-    const card = await this.prisma.cardMobileUser.findFirst({
+    const card = await this.prisma.lTYCard.findFirst({
       where: {
-        mobileUser: {
+        client: {
           phone,
         },
       },
@@ -63,9 +64,36 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
+  public async findFullCardInfoForDevice(
+    unqNumber: string,
+  ): Promise<LoyaltyCardInfoFullResponseDto> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: { unqNumber },
+      include: {
+        client: true,
+        cardTier: {
+          include: {
+            benefits: true,
+            ltyProgram: {
+              include: {
+                organizations: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return PrismaCardMobileUserMapper.toLoyaltyCardInfoFullDto(card);
+  }
+
   public async update(input: Card): Promise<Card> {
     const cardEntity = PrismaCardMobileUserMapper.toPrisma(input);
-    const card = await this.prisma.cardMobileUser.update({
+    const card = await this.prisma.lTYCard.update({
       where: { id: input.id },
       data: cardEntity,
     });

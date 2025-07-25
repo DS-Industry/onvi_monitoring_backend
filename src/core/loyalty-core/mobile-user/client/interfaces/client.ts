@@ -1,5 +1,5 @@
 import { Client } from '../domain/client';
-import { UserType } from '@prisma/client';
+import { ContractType } from '@prisma/client';
 
 export abstract class IClientRepository {
   abstract create(input: Client): Promise<Client>;
@@ -10,7 +10,7 @@ export abstract class IClientRepository {
   abstract findAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: UserType,
+    type?: ContractType,
     phone?: string,
     skip?: number,
     take?: number,

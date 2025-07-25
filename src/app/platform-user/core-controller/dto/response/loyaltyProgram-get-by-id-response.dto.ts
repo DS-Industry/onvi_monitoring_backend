@@ -1,9 +1,9 @@
-import { LoyaltyProgramStatus } from "@prisma/client";
+import { LTYProgramStatus } from "@prisma/client";
 
 export class LoyaltyProgramGetByIdResponseDto {
   id: number;
   name: string;
-  status: LoyaltyProgramStatus;
+  status: LTYProgramStatus;
   startDate: Date;
   organizationIds: number[];
   lifetimeDays?: number;
