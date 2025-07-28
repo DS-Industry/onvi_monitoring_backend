@@ -11,7 +11,13 @@ export class ClientFilterDto {
   placementId: number | '*';
   @IsNotEmpty({ message: 'type is required' })
   @IsString()
-  type: ContractType | '*';
+  contractType: ContractType | '*';
+  @IsNotEmpty({ message: 'workerCorporateId is required' })
+  @Transform(({ value }) => {
+    if (value === '*') return value;
+    return parseInt(value);
+  })
+  workerCorporateId: number | '*';
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') {

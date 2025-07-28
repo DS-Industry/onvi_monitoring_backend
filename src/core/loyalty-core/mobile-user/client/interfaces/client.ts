@@ -10,7 +10,8 @@ export abstract class IClientRepository {
   abstract findAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: ContractType,
+    contractType?: ContractType,
+    workerCorporateId?: number,
     phone?: string,
     skip?: number,
     take?: number,

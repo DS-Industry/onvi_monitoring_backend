@@ -17,10 +17,7 @@ export class ClientUpdateDto {
   name?: string;
   @IsEnum(ContractType)
   @IsOptional()
-  type?: ContractType;
-  @IsString()
-  @IsOptional()
-  inn?: string;
+  contractType?: ContractType;
   @IsString()
   @IsOptional()
   comment?: string;

@@ -31,7 +31,8 @@ export class ClientRepository extends IClientRepository {
   public async findAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: ContractType,
+    contractType?: ContractType,
+    workerCorporateId?: number,
     phone?: string,
     skip?: number,
     take?: number,
@@ -42,8 +43,12 @@ export class ClientRepository extends IClientRepository {
       where.placementId = placementId;
     }
 
-    if (type !== undefined) {
-      where.type = type;
+    if (contractType !== undefined) {
+      where.contractType = contractType;
+    }
+
+    if (workerCorporateId !== undefined) {
+      where.workerCorporateId = workerCorporateId;
     }
 
     if (phone !== undefined) {

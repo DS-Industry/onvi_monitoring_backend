@@ -10,8 +10,7 @@ export interface ClientProps {
   gender?: string;
   status?: StatusUser;
   avatar?: string;
-  type: ContractType;
-  inn?: string;
+  contractType: ContractType;
   comment?: string;
   placementId?: number;
   refreshTokenId?: string;
@@ -57,12 +56,8 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.avatar;
   }
 
-  get type(): ContractType {
-    return this.props.type;
-  }
-
-  get inn(): string {
-    return this.props.inn;
+  get contractType(): ContractType {
+    return this.props.contractType;
   }
 
   get comment(): string {
@@ -105,16 +100,12 @@ export class Client extends BaseEntity<ClientProps> {
     this.props.status = status;
   }
 
-  set type(type: ContractType) {
-    this.props.type = type;
+  set contractType(contractType: ContractType) {
+    this.props.contractType = contractType;
   }
 
   set comment(comment: string) {
     this.props.comment = comment;
-  }
-
-  set inn(inn: string) {
-    this.props.inn = inn;
   }
 
   set placementId(placementId: number) {

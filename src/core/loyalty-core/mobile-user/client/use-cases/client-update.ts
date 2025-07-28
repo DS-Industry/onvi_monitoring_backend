@@ -21,8 +21,7 @@ export class UpdateClientUseCase {
       birthday,
       status,
       avatar,
-      type,
-      inn,
+      contractType,
       comment,
       placementId,
       refreshTokenId,
@@ -35,8 +34,9 @@ export class UpdateClientUseCase {
       ? refreshTokenId
       : oldClient.refreshTokenId;
     oldClient.status = status ? status : oldClient.status;
-    oldClient.type = type ? type : oldClient.type;
-    oldClient.inn = inn ? inn : oldClient.inn;
+    oldClient.contractType = contractType
+      ? contractType
+      : oldClient.contractType;
     oldClient.comment = comment ? comment : oldClient.comment;
     oldClient.placementId = placementId ? placementId : oldClient.placementId;
 
@@ -80,8 +80,7 @@ export class UpdateClientUseCase {
       email: client?.email,
       gender: client?.gender,
       status: client.status,
-      type: client.type,
-      inn: client?.inn,
+      contractType: client.contractType,
       comment: client?.comment,
       refreshTokenId: client?.refreshTokenId,
       placementId: client?.placementId,

@@ -2,7 +2,8 @@ import { ContractType } from '@prisma/client';
 
 export class ClientFilterDto {
   placementId: number | '*';
-  type: ContractType | '*';
+  contractType: ContractType | '*';
+  workerCorporateId: number | '*';
   tagIds: number[];
   phone?: string;
   skip?: number;

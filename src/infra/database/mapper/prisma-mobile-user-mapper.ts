@@ -15,13 +15,12 @@ export class PrismaMobileUserMapper {
       gender: entity.gender,
       status: entity.status,
       avatar: entity.avatar,
-      type: entity.contractType,
+      contractType: entity.contractType,
       comment: entity.comment,
       placementId: entity.placementId,
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      mobileUserRoleId: entity.mobileUserRoleId,
     });
   }
 
@@ -35,13 +34,12 @@ export class PrismaMobileUserMapper {
       gender: client?.gender,
       status: client?.status,
       avatar: client?.avatar,
-      contractType: client.type,
+      contractType: client.contractType,
       comment: client?.comment,
       placementId: client?.placementId,
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
-      mobileUserRoleId: client?.mobileUserRoleId,
     };
   }
 }

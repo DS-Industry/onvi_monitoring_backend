@@ -48,6 +48,7 @@ import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-
 import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
+import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -61,6 +62,7 @@ const repositories: Provider[] = [
   CardBonusOperTypeProvider,
   CardBonusOperProvider,
   OrderProvider,
+  CorporateRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [

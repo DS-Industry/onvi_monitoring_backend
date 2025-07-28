@@ -6,8 +6,7 @@ export interface ClientCreateDto {
   phone: string;
   email?: string;
   gender?: string;
-  type: ContractType;
-  inn?: string;
+  contractType: ContractType;
   comment?: string;
   placementId?: number;
   devNumber?: string;

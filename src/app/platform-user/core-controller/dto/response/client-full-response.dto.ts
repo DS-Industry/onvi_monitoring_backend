@@ -9,8 +9,7 @@ export class ClientFullResponseDto {
   email?: string;
   gender?: string;
   status: StatusUser;
-  type: ContractType;
-  inn?: string;
+  contractType: ContractType;
   comment?: string;
   refreshTokenId?: string;
   placementId?: number;

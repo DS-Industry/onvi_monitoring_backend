@@ -40,7 +40,7 @@ export class RegisterAuthUseCase {
     const clientData = new Client({
       name: `Onvi ${phone}`,
       phone: phone,
-      type: ContractType.INDIVIDUAL,
+      contractType: ContractType.INDIVIDUAL,
     });
 
     const client = await this.clientRepository.create(clientData);

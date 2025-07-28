@@ -5,7 +5,7 @@ import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { StatusUser } from '@prisma/client';
 import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-create';
 import { ClientFullResponseDto } from '@platform-user/core-controller/dto/response/client-full-response.dto';
-import { FindMethodsTagUseCase } from "@loyalty/mobile-user/tag/use-cases/tag-find-methods";
+import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 
 @Injectable()
 export class CreateClientUseCase {
@@ -23,8 +23,7 @@ export class CreateClientUseCase {
       email: data?.email,
       gender: data?.gender,
       status: StatusUser.VERIFICATE,
-      type: data?.type,
-      inn: data?.inn,
+      contractType: data?.contractType,
       comment: data?.comment,
       placementId: data?.placementId,
       createdAt: new Date(Date.now()),
@@ -50,8 +49,7 @@ export class CreateClientUseCase {
       email: client?.email,
       gender: client?.gender,
       status: client.status,
-      type: client.type,
-      inn: client?.inn,
+      contractType: client.contractType,
       comment: client?.comment,
       refreshTokenId: client?.refreshTokenId,
       placementId: client?.placementId,

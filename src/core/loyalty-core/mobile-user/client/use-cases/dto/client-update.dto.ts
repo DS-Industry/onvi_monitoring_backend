@@ -5,8 +5,7 @@ export interface ClientUpdateDto {
   birthday?: Date;
   status?: StatusUser;
   avatar?: string;
-  type?: ContractType;
-  inn?: string;
+  contractType?: ContractType;
   comment?: string;
   placementId?: number;
   tagIds?: number[];

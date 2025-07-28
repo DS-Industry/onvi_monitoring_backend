@@ -5,7 +5,7 @@ export class ClientResponseDto {
   id: number;
   name: string;
   phone: string;
-  type: ContractType;
+  contractType: ContractType;
   status: StatusUser;
   comment?: string;
   placementId?: number;

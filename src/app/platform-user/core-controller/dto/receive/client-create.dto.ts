@@ -31,10 +31,7 @@ export class ClientCreateDto {
   gender?: string;
   @IsEnum(ContractType)
   @IsNotEmpty({ message: 'Type client is required' })
-  type: ContractType;
-  @IsString()
-  @IsOptional()
-  inn?: string;
+  contractType: ContractType;
   @IsString()
   @IsOptional()
   comment?: string;

@@ -13,17 +13,22 @@ export class FindByFilterClientUseCase {
 
   async execute(data: ClientFilterDto): Promise<ClientResponseDto[]> {
     let placementId = undefined;
-    let type = undefined;
+    let contractType = undefined;
+    let workerCorporateId = undefined;
     if (data.placementId != '*') {
       placementId = data.placementId;
     }
-    if (data.type != '*') {
-      type = data.type;
+    if (data.contractType != '*') {
+      contractType = data.contractType;
+    }
+    if (data.workerCorporateId != '*') {
+      workerCorporateId = data.workerCorporateId;
     }
     const clients = await this.findMethodsClientUseCase.getAllByFilter(
       placementId,
       data.tagIds,
-      type,
+      contractType,
+      workerCorporateId,
       data?.phone,
       data?.skip,
       data?.take,
@@ -38,7 +43,7 @@ export class FindByFilterClientUseCase {
           id: client.id,
           name: client.name,
           phone: client.phone,
-          type: client.type,
+          contractType: client.contractType,
           status: client.status,
           comment: client.comment,
           placementId: client.placementId,

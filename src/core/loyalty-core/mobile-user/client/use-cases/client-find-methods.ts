@@ -18,7 +18,8 @@ export class FindMethodsClientUseCase {
   async getAllByFilter(
     placementId?: number,
     tagIds?: number[],
-    type?: ContractType,
+    contractType?: ContractType,
+    workerCorporateId?: number,
     phone?: string,
     skip?: number,
     take?: number,
@@ -26,7 +27,8 @@ export class FindMethodsClientUseCase {
     return await this.clientRepository.findAllByFilter(
       placementId,
       tagIds,
-      type,
+      contractType,
+      workerCorporateId,
       phone,
       skip,
       take,

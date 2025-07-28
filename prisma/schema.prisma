@@ -569,6 +569,8 @@ model LTYUser {
   status               StatusUser?            @default(ACTIVE)
   avatar               String?
   contractType         ContractType           @default(INDIVIDUAL)
+  workerCorporate      LTYCorporate?          @relation(fields: [workerCorporateId], references: [id], name: "Worker")
+  workerCorporateId    Int?
   comment              String?
   tags                 LTYUserTag[]
   placement            Placement?           @relation(fields: [placementId], references: [id])
@@ -578,13 +580,24 @@ model LTYUser {
   createdAt            DateTime?
   updatedAt            DateTime?
   promocodeTransaction PromocodeTransaction[]
-  mobileUserRole       MobileUserRole?        @relation(fields: [mobileUserRoleId], references: [id])
-  mobileUserRoleId     Int?
+  ownerCorporates      LTYCorporate[]         @relation(name: "Owner")
 }
 
 enum ContractType {
   INDIVIDUAL
   CORPORATE
+}
+
+model LTYCorporate {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  inn                  String
+  address              String
+  owner                LTYUser?               @relation(fields: [ownerId], references: [id], name: "Owner")
+  ownerId              Int?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now())
+  workers              LTYUser[]              @relation(name: "Worker")
 }
 
 model LTYUserTag {
@@ -644,7 +657,6 @@ model LTYBonusOper {
   order                LTYOrder?       @relation(fields: [orderId], references: [id])
   orderId              Int?
 }
-
 
 model LTYBonusOperType {
   id                   Int                    @id @default(autoincrement())
@@ -730,20 +742,6 @@ model Otp {
   confirmCode String
   createdAt   DateTime
   expireAt    DateTime
-}
-
-model MobileUserRole {
-  id                   Int                    @id @default(autoincrement())
-  name                 String
-  clients              LTYUser[]
-  mobileUserPermission MobileUserPermission[]
-}
-
-model MobileUserPermission {
-  id               Int              @id @default(autoincrement())
-  name             String
-  permissionModule String
-  mobileUserRoles  MobileUserRole[]
 }
 
 model PlatformUser {
