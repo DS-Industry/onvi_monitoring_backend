@@ -117,4 +117,22 @@ export class PosRepository extends IPosRepository {
       },
     });
   }
+
+  public async updateConnectionWorker(
+    posId: number,
+    addWorkerIds: number[],
+    deleteWorkerIds: number[],
+  ): Promise<any> {
+    await this.prisma.pos.update({
+      where: {
+        id: posId,
+      },
+      data: {
+        workers: {
+          disconnect: deleteWorkerIds.map((id) => ({ id })),
+          connect: addWorkerIds.map((id) => ({ id })),
+        },
+      },
+    });
+  }
 }

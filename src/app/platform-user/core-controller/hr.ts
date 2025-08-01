@@ -44,7 +44,6 @@ import { CreatePaymentUseCase } from '@hr/payment/use-case/payment-create';
 import { PaymentType } from '@prisma/client';
 import { PaymentReportFilterDto } from '@platform-user/core-controller/dto/receive/payment-report-filter.dto';
 import { PaymentCalculateDto } from '@platform-user/core-controller/dto/receive/payment-calculate.dto';
-import { PrepaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/prepayment-calculate-response.dro';
 import { PaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/payment-calculate-response.dro';
 import { CalculatePaymentUseCase } from '@hr/payment/use-case/payment-calculate';
 import { PaymentCreateDto } from '@platform-user/core-controller/dto/receive/payment-create.dto';
@@ -52,6 +51,8 @@ import { PaymentsGetResponseDto } from '@platform-user/core-controller/dto/respo
 import { GetReportPaymentUseCase } from '@hr/payment/use-case/payment-get-report';
 import { PrepaymentsGetResponseDto } from '@platform-user/core-controller/dto/response/prepayments-get-response.dto';
 import { PaymentCalculateWorkersDto } from '@platform-user/core-controller/dto/receive/payment-calculate-workers.dto';
+import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
+import { ShiftReportCalculationPaymentResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/shiftReport-calculation-payment-response.dto';
 
 @Controller('hr')
 export class HrController {
@@ -66,6 +67,7 @@ export class HrController {
     private readonly createPaymentUseCase: CreatePaymentUseCase,
     private readonly calculatePaymentUseCase: CalculatePaymentUseCase,
     private readonly getReportPaymentUseCase: GetReportPaymentUseCase,
+    private readonly calculationPaymentShiftReportUseCase: CalculationPaymentShiftReportUseCase,
   ) {}
   @Post('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -365,11 +367,20 @@ export class HrController {
   @CheckAbilities(new CreateHrAbility())
   @HttpCode(201)
   async calculatePrepayment(
-    @Request() req: any,
     @Body() data: PaymentCalculateDto,
-  ): Promise<PrepaymentCalculateResponseDro[]> {
+  ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
     try {
-      return await this.calculatePaymentUseCase.prepayment(data);
+      const workers =
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
+          data.organizationId,
+          data.billingMonth,
+          data.hrPositionId,
+          '*',
+        );
+      return await this.calculationPaymentShiftReportUseCase.execute(
+        data.billingMonth,
+        workers,
+      );
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -393,9 +404,22 @@ export class HrController {
   async calculatePrepaymentWorkers(
     @Request() req: any,
     @Body() data: PaymentCalculateWorkersDto,
-  ): Promise<PrepaymentCalculateResponseDro[]> {
+  ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
     try {
-      return await this.calculatePaymentUseCase.prepaymentWorker(data);
+      const workers =
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
+          data.organizationId,
+          data.billingMonth,
+          '*',
+          '*',
+        );
+      const filteredWorkers = workers.filter(
+        (worker) => !data.workerIds.includes(worker.id),
+      );
+      return await this.calculationPaymentShiftReportUseCase.execute(
+        data.billingMonth,
+        filteredWorkers,
+      );
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -421,7 +445,19 @@ export class HrController {
     @Body() data: PaymentCalculateDto,
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
-      return await this.calculatePaymentUseCase.payment(data);
+      const workers =
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
+          data.organizationId,
+          data.billingMonth,
+          data.hrPositionId,
+          PaymentType.PAYMENT,
+        );
+      const calculateDate =
+        await this.calculationPaymentShiftReportUseCase.execute(
+          data.billingMonth,
+          workers,
+        );
+      return await this.calculatePaymentUseCase.payment(calculateDate);
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -447,7 +483,22 @@ export class HrController {
     @Body() data: PaymentCalculateWorkersDto,
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
-      return await this.calculatePaymentUseCase.paymentWorker(data);
+      const workers =
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
+          data.organizationId,
+          data.billingMonth,
+          '*',
+          PaymentType.PAYMENT,
+        );
+      const filteredWorkers = workers.filter(
+        (worker) => !data.workerIds.includes(worker.id),
+      );
+      const calculateDate =
+        await this.calculationPaymentShiftReportUseCase.execute(
+          data.billingMonth,
+          filteredWorkers,
+        );
+      return await this.calculatePaymentUseCase.payment(calculateDate);
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({

@@ -6,6 +6,7 @@ import {
 } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
 import { StatusTechTask, TypeTechTask } from '@prisma/client';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { User } from "@platform-user/user/domain/user";
 
 @Injectable()
 export class ReportTechTaskUseCase {
@@ -15,7 +16,8 @@ export class ReportTechTaskUseCase {
   ) {}
 
   async execute(
-    posId: number,
+    user: User,
+    posId?: number,
     type?: TypeTechTask,
     skip?: number,
     take?: number,
@@ -23,11 +25,13 @@ export class ReportTechTaskUseCase {
     const response: TechTaskReadAllResponse[] = [];
     const totalCount = await this.findMethodsTechTaskUseCase.getCountByFilter({
       posId: posId,
+      userId: user.id,
       statuses: [StatusTechTask.FINISHED],
       type: type,
     });
     const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
       posId: posId,
+      userId: user.id,
       statuses: [StatusTechTask.FINISHED],
       type: type,
       skip: skip,

@@ -6,6 +6,7 @@ export abstract class ITechTaskRepository {
   abstract findOneById(id: number): Promise<TechTask>;
   abstract findAllByFilter(
     posId?: number,
+    userId?: number,
     gteStartDate?: Date,
     lteStartDate?: Date,
     gteEndSpecifiedDate?: Date,
@@ -20,6 +21,7 @@ export abstract class ITechTaskRepository {
   ): Promise<TechTask[]>;
   abstract countAllByFilter(
     posId?: number,
+    userId?: number,
     gteStartDate?: Date,
     lteStartDate?: Date,
     gteEndSpecifiedDate?: Date,
@@ -29,16 +31,6 @@ export abstract class ITechTaskRepository {
     type?: TypeTechTask,
     statuses?: StatusTechTask[],
     codeTag?: string,
-  ): Promise<number>;
-  abstract findAllForUser(
-    userId: number,
-    statuses: StatusTechTask[],
-    skip?: number,
-    take?: number,
-  ): Promise<TechTask[]>;
-  abstract countAllForUser(
-    userId: number,
-    statuses: StatusTechTask[],
   ): Promise<number>;
   abstract update(input: TechTask): Promise<TechTask>;
   abstract updateConnectionTag(

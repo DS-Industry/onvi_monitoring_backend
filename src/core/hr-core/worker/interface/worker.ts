@@ -1,10 +1,11 @@
 import { Worker } from '@hr/worker/domain/worker';
-import { PaymentType } from "@prisma/client";
+import { PaymentType } from '@prisma/client';
 
 export abstract class IWorkerRepository {
   abstract create(input: Worker): Promise<Worker>;
   abstract findOneById(id: number): Promise<Worker>;
   abstract findAllByIds(ids: number[]): Promise<Worker[]>;
+  abstract findAllByPosId(posId: number): Promise<Worker[]>;
   abstract findAllByFilter(
     placementId?: number,
     hrPositionId?: number,

@@ -19,4 +19,9 @@ export abstract class IPosRepository {
     ability: any,
     placementId?: number | '*',
   ): Promise<number>;
+  abstract updateConnectionWorker(
+    posId: number,
+    addWorkerIds: number[],
+    deleteWorkerIds: number[],
+  ): Promise<any>;
 }

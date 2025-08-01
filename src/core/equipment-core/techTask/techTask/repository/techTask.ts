@@ -29,6 +29,7 @@ export class TechTaskRepository extends ITechTaskRepository {
   }
   public async findAllByFilter(
     posId?: number,
+    userId?: number,
     gteStartDate?: Date,
     lteStartDate?: Date,
     gteEndSpecifiedDate?: Date,
@@ -45,6 +46,14 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else {
+      where.pos = {
+        usersPermissions: {
+          some: {
+            id: userId,
+          },
+        },
+      };
     }
 
     if (gteStartDate !== undefined && lteStartDate !== undefined) {
@@ -102,6 +111,7 @@ export class TechTaskRepository extends ITechTaskRepository {
 
   public async countAllByFilter(
     posId?: number,
+    userId?: number,
     gteStartDate?: Date,
     lteStartDate?: Date,
     gteEndSpecifiedDate?: Date,
@@ -116,6 +126,14 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else {
+      where.pos = {
+        usersPermissions: {
+          some: {
+            id: userId,
+          },
+        },
+      };
     }
 
     if (gteStartDate !== undefined && lteStartDate !== undefined) {
@@ -162,54 +180,6 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     return this.prisma.techTask.count({
       where: where,
-    });
-  }
-
-  public async findAllForUser(
-    userId: number,
-    statuses: StatusTechTask[],
-    skip?: number,
-    take?: number,
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      skip: skip ?? undefined,
-      take: take ?? undefined,
-      where: {
-        pos: {
-          usersPermissions: {
-            some: {
-              id: userId,
-            },
-          },
-        },
-        status: {
-          in: statuses,
-        },
-      },
-      orderBy: {
-        endSpecifiedDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async countAllForUser(
-    userId: number,
-    statuses: StatusTechTask[],
-  ): Promise<number> {
-    return await this.prisma.techTask.count({
-      where: {
-        pos: {
-          usersPermissions: {
-            some: {
-              id: userId,
-            },
-          },
-        },
-        status: {
-          in: statuses,
-        },
-      },
     });
   }
 

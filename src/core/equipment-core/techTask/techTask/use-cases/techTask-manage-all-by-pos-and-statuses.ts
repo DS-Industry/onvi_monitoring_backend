@@ -9,6 +9,7 @@ import {
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class ManageAllByPosAndStatusesTechTaskUseCase {
@@ -20,19 +21,20 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
   ) {}
 
   async execute(
-    posId: number,
+    user: User,
+    posId?: number,
     skip?: number,
     take?: number,
   ): Promise<TechTaskManageInfoResponseDto> {
     const response: TechTaskManageInfoResponse[] = [];
     const totalCount = await this.findMethodsTechTaskUseCase.getCountByFilter({
-        posId: posId,
-        statuses: [StatusTechTask.ACTIVE],
-        skip: skip,
-        take: take,
-      });
+      posId: posId,
+      userId: user.id,
+      statuses: [StatusTechTask.ACTIVE],
+    });
     const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
       posId: posId,
+      userId: user.id,
       statuses: [StatusTechTask.ACTIVE],
       skip: skip,
       take: take,

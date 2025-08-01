@@ -3,13 +3,13 @@ import { Transform } from 'class-transformer';
 import { TypeTechTask } from '@prisma/client';
 
 export class TechTaskReportDto {
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
     return parseInt(value);
   })
-  posId: number;
-  @IsNotEmpty({ message: 'Type pos is required' })
-  type: TypeTechTask | '*';
+  posId?: number;
+  @IsOptional()
+  type?: TypeTechTask;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;

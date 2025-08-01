@@ -1,12 +1,12 @@
-import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class TechTaskPosFilterDto {
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
     return parseInt(value);
   })
-  posId: number;
+  posId?: number;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;

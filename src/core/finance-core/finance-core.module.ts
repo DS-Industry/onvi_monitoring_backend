@@ -20,43 +20,36 @@ import { GetAllByFilterCashCollectionUseCase } from '@finance/cashCollection/cas
 import { GetOneFullDataCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data';
 import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
 import { ShiftReportRepositoryProvider } from '@finance/shiftReport/shiftReport/provider/shiftReport';
-import { WorkDayShiftReportRepositoryProvider } from '@finance/shiftReport/workDayShiftReport/provider/workDayShiftReport';
-import { CreateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-create';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
-import { AddWorkerShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-add-worker';
-import { GetAllByFilterShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter';
-import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-find-methods';
-import { GetByFilterWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-by-filter';
-import { GetOneFullShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-one-full';
-import { UpdateWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-update';
+import { ReceiverShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-receiver';
 import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
+import { ShiftReportCashOperRepositoryProvider } from '@finance/shiftReport/shiftReportCashOper/provider/shiftReportCashOper';
+import { CreateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-create';
+import { CalculateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-calculate';
+import { FindMethodsShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-find-methods';
+import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
+import { GetOperDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-oper-data';
+import { SendShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-send';
+import { GradingEstimationRepositoryProvider } from '@finance/shiftReport/gradingEstimation/provider/gradingEstimation';
+import { GradingParameterRepositoryProvider } from '@finance/shiftReport/gradingParameter/provider/gradingParameter';
+import { ShiftGradingRepositoryProvider } from '@finance/shiftReport/shiftGrading/provider/shiftGrading';
+import { FindMethodsShiftGradingUseCase } from '@finance/shiftReport/shiftGrading/use-cases/shiftGrading-find-methods';
+import { FindMethodsGradingParameterUseCase } from '@finance/shiftReport/gradingParameter/use-cases/gradingParameter-find-methods';
+import { FindMethodsGradingEstimationUseCase } from '@finance/shiftReport/gradingEstimation/use-cases/gradingEstimation-find-methods';
+import { FullDataShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data";
 import {
-  SendWorkDayShiftReportUseCase
-} from "@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-send";
-import {
-  WorkDayShiftReportCashOperRepositoryProvider
-} from "@finance/shiftReport/workDayShiftReportCashOper/provider/workDayShiftReportCashOper";
-import {
-  CreateWorkDayShiftReportCashOperUseCase
-} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-create";
-import {
-  CalculateWorkDayShiftReportCashOperUseCase
-} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-calculate";
-import {
-  GetOperDataWorkDayShiftReportUseCase
-} from "@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-oper-data";
-import {
-  FindMethodsWorkDayShiftReportCashOperUseCase
-} from "@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-find-methods";
-import { DeleteCashCollectionUseCase } from "@finance/cashCollection/cashCollection/use-cases/cashCollection-delete";
+  CalculationPaymentShiftReportUseCase
+} from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
   CashCollectionDeviceRepositoryProvider,
   CashCollectionDeviceTypeRepositoryProvider,
   ShiftReportRepositoryProvider,
-  WorkDayShiftReportRepositoryProvider,
-  WorkDayShiftReportCashOperRepositoryProvider,
+  ShiftReportCashOperRepositoryProvider,
+  GradingEstimationRepositoryProvider,
+  GradingParameterRepositoryProvider,
+  ShiftGradingRepositoryProvider,
 ];
 
 const cashCollectionUseCase: Provider[] = [
@@ -85,27 +78,26 @@ const cashCollectionDeviceTypeUseCase: Provider[] = [
 ];
 
 const shiftReportUseCase: Provider[] = [
-  CreateShiftReportUseCase,
   FindMethodsShiftReportUseCase,
-  AddWorkerShiftReportUseCase,
-  GetAllByFilterShiftReportUseCase,
-  GetOneFullShiftReportUseCase,
+  GetOperDataShiftReportUseCase,
+  ReceiverShiftReportUseCase,
   UpdateShiftReportUseCase,
+  SendShiftReportUseCase,
+  FullDataShiftReportUseCase,
+  CalculationPaymentShiftReportUseCase,
 ];
 
-const workDayShiftReportUseCase: Provider[] = [
-  FindMethodsWorkDayShiftReportUseCase,
-  GetByFilterWorkDayShiftReportUseCase,
-  UpdateWorkDayShiftReportUseCase,
-  SendWorkDayShiftReportUseCase,
-  GetOperDataWorkDayShiftReportUseCase,
+const shiftReportCashOperUseCase: Provider[] = [
+  CreateShiftReportCashOperUseCase,
+  CalculateShiftReportCashOperUseCase,
+  FindMethodsShiftReportCashOperUseCase,
 ];
 
-const workDayShiftReportCashOperUseCase: Provider[] = [
-  CreateWorkDayShiftReportCashOperUseCase,
-  CalculateWorkDayShiftReportCashOperUseCase,
-  FindMethodsWorkDayShiftReportCashOperUseCase,
-]
+const shiftGradingUseCase: Provider[] = [
+  FindMethodsShiftGradingUseCase,
+  FindMethodsGradingParameterUseCase,
+  FindMethodsGradingEstimationUseCase,
+];
 @Module({
   imports: [PrismaModule, BusinessCoreModule],
   providers: [
@@ -114,16 +106,15 @@ const workDayShiftReportCashOperUseCase: Provider[] = [
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
-    ...workDayShiftReportUseCase,
-    ...workDayShiftReportCashOperUseCase,
+    ...shiftReportCashOperUseCase,
+    ...shiftGradingUseCase,
   ],
   exports: [
     ...cashCollectionUseCase,
     ...cashCollectionDeviceUseCase,
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
-    ...workDayShiftReportUseCase,
-    ...workDayShiftReportCashOperUseCase,
+    ...shiftReportCashOperUseCase,
   ],
 })
 export class FinanceCoreModule {}

@@ -134,12 +134,8 @@ model User {
   warehouseDocumentUpdated WarehouseDocument[]  @relation(name: "UpdateByUser")
   cashCollectionCreated CashCollection[]  @relation(name: "CreatedByUser")
   cashCollectionUpdated CashCollection[]  @relation(name: "UpdateByUser")
-  shiftReports          ShiftReport[]
-  shiftReportCreated    ShiftReport[]  @relation(name: "CreatedByUser")
-  shiftReportUpdated    ShiftReport[]  @relation(name: "UpdateByUser")
-  workDayShiftReportWorker     WorkDayShiftReport[]  @relation(name: "workerUser")
-  workDayShiftReportCreated    WorkDayShiftReport[]  @relation(name: "CreatedByUser")
-  workDayShiftReportUpdated    WorkDayShiftReport[]  @relation(name: "UpdateByUser")
+  workDayShiftReportCreated    MNGShiftReport[]  @relation(name: "CreatedByUser")
+  workDayShiftReportUpdated    MNGShiftReport[]  @relation(name: "UpdateByUser")
   reportTemplateTransactions   ReportTemplateTransaction[]
   bonusOpers                   LTYBonusOper[]
   ltyPrograms                  LTYProgram[]
@@ -203,7 +199,6 @@ model ObjectPermissions {
   devicePermissions       DevicePermissions[]
 }
 
-
 model Pos {
   id                   Int                   @id @default(autoincrement())
   name                 String
@@ -229,12 +224,13 @@ model Pos {
   loyaltyPosPromocodes LoyaltyPosPromocode[]
   carWashPos           CarWashPos?
   usersPermissions     User[]
+  workers              HrWorker[]
   techTasks            TechTask[]
   equipmentKnots       EquipmentKnot[]
   incident             Incident[]
   warehouse            Warehouse[]
   cashCollection       CashCollection[]
-  shiftReport          ShiftReport[]
+  shiftReport          MNGShiftReport[]
   monthlyPlans         MonthlyPlanPos[]
   managerPaper         ManagerPaper[]
 }
@@ -292,7 +288,7 @@ model CarWashDevice {
   DeviceRole                    DeviceRole?                    @relation(fields: [deviceRoleId], references: [id])
   deviceRoleId                  Int?
   cashCollectionDevice          CashCollectionDevice[]
-  workDayShiftReportCashOpers   WorkDayShiftReportCashOper[]
+  workDayShiftReportCashOpers   MNGShiftReportCashOper[]
   programChanges                ProgramChange[]
   bonusOpers                    LTYBonusOper[]
   orders                        LTYOrder[]
@@ -699,13 +695,26 @@ model LTYOrder {
 }
 
 model LTYEquaring {
-  id                Int             @id @default(autoincrement())
+  id                Int                    @id @default(autoincrement())
   card              LTYCard?               @relation(fields: [cardId], references: [id])
   cardId            Int?
   topUpSum          Int
   totalBalance      Int
-  paymentGatewayId  String
-  createdAt         DateTime        @default(now())
+  paymentStatus     PaymentStatus          @default(CREATED)
+  paymentGatewayId  String                 @unique
+  createdAt         DateTime               @default(now())
+}
+
+enum PaymentStatus {
+  CREATED
+  PAYMENT_PROCESSING
+  WAITING_PAYMENT
+  PAYMENT_AUTHORIZED
+  PAYED
+  FAILED
+  COMPLETED
+  CANCELED
+  REFUNDED
 }
 
 enum PlatformType {
@@ -1150,26 +1159,12 @@ model CashCollectionDevice {
   virtualSum              Int
 }
 
-model ShiftReport {
-  id                      Int                      @id @default(autoincrement())
-  pos                     Pos?                     @relation(fields: [posId], references: [id])
-  posId                   Int?
-  startDate               DateTime
-  endDate                 DateTime
-  users                   User[]
-  workDayShiftReport      WorkDayShiftReport[]
-  createdAt                 DateTime
-  updatedAt                 DateTime
-  createdBy                 User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
-  createdById               Int
-  updatedBy                 User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
-  updatedById               Int
-}
-
-model WorkDayShiftReport {
+model MNGShiftReport {
   id                              Int                      @id @default(autoincrement())
-  shiftReport                     ShiftReport?             @relation(fields: [shiftReportId], references: [id])
-  shiftReportId                   Int?
+  pos                             Pos?                     @relation(fields: [posId], references: [id])
+  posId                           Int?
+  worker                          HrWorker?                @relation(fields: [workerId], references: [id])
+  workerId                        Int?
   workDate                        DateTime
   typeWorkDay                     TypeWorkDay
   timeWorkedOut                   String?
@@ -1179,18 +1174,40 @@ model WorkDayShiftReport {
   status                          StatusWorkDayShiftReport?
   cashAtStart                     Int?
   cashAtEnd                       Int?
-  prize                           Int?
-  fine                            Int?
   comment                         String?
-  worker                          User?                     @relation(name: "workerUser", fields: [workerId], references: [id])
-  workerId                        Int?
   createdAt                       DateTime
   updatedAt                       DateTime
   createdBy                       User                      @relation(name: "CreatedByUser", fields: [createdById], references: [id])
   createdById                     Int
   updatedBy                       User                      @relation(name: "UpdateByUser", fields: [updatedById], references: [id])
   updatedById                     Int
-  workDayShiftReportCashOpers     WorkDayShiftReportCashOper[]
+  workDayShiftReportCashOpers     MNGShiftReportCashOper[]
+  shiftGrading                    MNGShiftGrading[]
+}
+
+model MNGGradingParameter {
+  id                              Int                      @id @default(autoincrement())
+  name                            String
+  description                     String?
+  weightPercent                   Int
+  shiftGrading                    MNGShiftGrading[]
+}
+
+model MNGShiftGrading {
+  id                              Int                      @id @default(autoincrement())
+  shiftReport                     MNGShiftReport?          @relation(fields: [shiftReportId], references: [id])
+  shiftReportId                   Int?
+  gradingParameter                MNGGradingParameter?     @relation(fields: [gradingParameterId], references: [id])
+  gradingParameterId              Int?
+  gradingEstimation               MNGGradingEstimation?    @relation(fields: [gradingEstimationId], references: [id])
+  gradingEstimationId             Int?
+}
+
+model MNGGradingEstimation {
+  id                              Int                      @id @default(autoincrement())
+  name                            String
+  weightPercent                   Int
+  shiftGrading                    MNGShiftGrading[]
 }
 
 enum TypeWorkDay {
@@ -1215,10 +1232,10 @@ enum StatusWorkDayShiftReport {
   SENT
 }
 
-model WorkDayShiftReportCashOper {
-  id                      Int                      @id @default(autoincrement())
-  workDayShiftReport      WorkDayShiftReport?      @relation(fields: [workDayShiftReportId], references: [id])
-  workDayShiftReportId    Int?
+model MNGShiftReportCashOper {
+  id                      Int                           @id @default(autoincrement())
+  shiftReport             MNGShiftReport?                  @relation(fields: [shiftReportId], references: [id])
+  shiftReportId           Int?
   carWashDevice           CarWashDevice?                @relation(fields: [carWashDeviceId], references: [id])
   carWashDeviceId         Int?
   eventDate               DateTime?
@@ -1292,6 +1309,8 @@ model HrWorker {
   inn                     String?
   snils                   String?
   hrPayment               HrPayment[]
+  shiftReports            MNGShiftReport[]
+  posWorks                Pos[]
 }
 
 model HrPosition {

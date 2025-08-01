@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { CalculateDto } from '@hr/payment/use-case/dto/calculate.dto';
-import { PrepaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/prepayment-calculate-response.dro';
 import { PaymentType } from '@prisma/client';
 import { PaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/payment-calculate-response.dro';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
-import { CalculateWorkersDto } from '@hr/payment/use-case/dto/calculate-workers.dto';
+import { ShiftReportCalculationPaymentResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/shiftReport-calculation-payment-response.dto';
 
 @Injectable()
 export class CalculatePaymentUseCase {
@@ -14,120 +13,17 @@ export class CalculatePaymentUseCase {
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
   ) {}
 
-  async prepayment(
-    data: CalculateDto,
-  ): Promise<PrepaymentCalculateResponseDro[]> {
-    const workers =
-      await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-        data.organizationId,
-        data.billingMonth,
-        data.hrPositionId,
-        '*',
-      );
-    return workers.map((worker) => ({
-      hrWorkerId: worker.id,
-      name: worker.name,
-      hrPositionId: worker.hrPositionId,
-      billingMonth: data.billingMonth,
-      monthlySalary: worker.monthlySalary,
-      dailySalary: worker.dailySalary,
-      percentageSalary: worker.percentageSalary,
-    }));
-  }
-
-  async prepaymentWorker(
-    data: CalculateWorkersDto,
-  ): Promise<PrepaymentCalculateResponseDro[]> {
-    const workers =
-      await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-        data.organizationId,
-        data.billingMonth,
-        '*',
-        '*',
-      );
-    const filteredWorkers = workers.filter(
-      (worker) => !data.workerIds.includes(worker.id),
-    );
-
-    return filteredWorkers.map((worker) => ({
-      hrWorkerId: worker.id,
-      name: worker.name,
-      hrPositionId: worker.hrPositionId,
-      billingMonth: data.billingMonth,
-      monthlySalary: worker.monthlySalary,
-      dailySalary: worker.dailySalary,
-      percentageSalary: worker.percentageSalary,
-    }));
-  }
-
-  async payment(data: CalculateDto): Promise<PaymentCalculateResponseDro[]> {
-    const workers =
-      await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-        data.organizationId,
-        data.billingMonth,
-        data.hrPositionId,
-        PaymentType.PAYMENT,
-      );
-    if (workers.length === 0) {
-      return [];
-    }
-
-    const prepayments = await this.findMethodsPaymentUseCase.getAllForCalculate(
-      workers.map((w) => w.id),
-      PaymentType.PREPAYMENT,
-      data.billingMonth,
-    );
-
-    const prepaymentSumMap = new Map<number, number>();
-    const prepaymentCountShiftsMap = new Map<number, number>();
-
-    prepayments.forEach((payment) => {
-      const currentSum = prepaymentSumMap.get(payment.hrWorkerId) || 0;
-      prepaymentSumMap.set(payment.hrWorkerId, currentSum + payment.sum);
-
-      const currentCount =
-        prepaymentCountShiftsMap.get(payment.hrWorkerId) || 0;
-      prepaymentCountShiftsMap.set(
-        payment.hrWorkerId,
-        currentCount + payment.countShifts,
-      );
-    });
-
-    return workers.map((worker) => ({
-      hrWorkerId: worker.id,
-      name: worker.name,
-      hrPositionId: worker.hrPositionId,
-      billingMonth: data.billingMonth,
-      monthlySalary: worker.monthlySalary,
-      dailySalary: worker.dailySalary,
-      percentageSalary: worker.percentageSalary,
-      prepaymentSum: prepaymentSumMap.get(worker.id) || 0,
-      prepaymentCountShifts: prepaymentCountShiftsMap.get(worker.id) || 0,
-    }));
-  }
-
-  async paymentWorker(
-    data: CalculateWorkersDto,
+  async payment(
+    data: ShiftReportCalculationPaymentResponseDto[],
   ): Promise<PaymentCalculateResponseDro[]> {
-    const workers =
-      await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-        data.organizationId,
-        data.billingMonth,
-        '*',
-        PaymentType.PAYMENT,
-      );
-    if (workers.length === 0) {
+    if (data.length === 0) {
       return [];
     }
 
-    const filteredWorkers = workers.filter(
-      (worker) => !data.workerIds.includes(worker.id),
-    );
-
     const prepayments = await this.findMethodsPaymentUseCase.getAllForCalculate(
-      filteredWorkers.map((w) => w.id),
+      data.map((w) => w.hrWorkerId),
       PaymentType.PREPAYMENT,
-      data.billingMonth,
+      data[0].billingMonth,
     );
 
     const prepaymentSumMap = new Map<number, number>();
@@ -145,16 +41,22 @@ export class CalculatePaymentUseCase {
       );
     });
 
-    return filteredWorkers.map((worker) => ({
-      hrWorkerId: worker.id,
-      name: worker.name,
-      hrPositionId: worker.hrPositionId,
-      billingMonth: data.billingMonth,
-      monthlySalary: worker.monthlySalary,
-      dailySalary: worker.dailySalary,
-      percentageSalary: worker.percentageSalary,
-      prepaymentSum: prepaymentSumMap.get(worker.id) || 0,
-      prepaymentCountShifts: prepaymentCountShiftsMap.get(worker.id) || 0,
+    return data.map((calculateDate) => ({
+      hrWorkerId: calculateDate.hrWorkerId,
+      name: calculateDate.name,
+      hrPositionId: calculateDate.hrPositionId,
+      billingMonth: calculateDate.billingMonth,
+      dailySalary: calculateDate.dailySalary,
+      maxBonusSalary: calculateDate.maxBonusSalary,
+      prepaymentSum: prepaymentSumMap.get(calculateDate.hrWorkerId) || 0,
+      prepaymentCountShifts:
+        prepaymentCountShiftsMap.get(calculateDate.hrWorkerId) || 0,
+      sum:
+        calculateDate.sum -
+        (prepaymentSumMap.get(calculateDate.hrWorkerId) || 0),
+      countShifts:
+        calculateDate.countShifts -
+        (prepaymentCountShiftsMap.get(calculateDate.hrWorkerId) || 0),
     }));
   }
 }

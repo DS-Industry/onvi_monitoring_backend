@@ -55,4 +55,8 @@ export class FindMethodsWorkerUseCase {
   async getAllByIds(ids: number[]): Promise<Worker[]> {
     return await this.workerRepository.findAllByIds(ids);
   }
+
+  async getAllByPosId(posId: number): Promise<Worker[]> {
+    return await this.workerRepository.findAllByPosId(posId);
+  }
 }

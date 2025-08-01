@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IShiftReportRepository } from '@finance/shiftReport/shiftReport/interface/shiftReport';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { User } from '@platform-user/user/domain/user';
+import { DataForCalculationResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto';
 
 @Injectable()
 export class FindMethodsShiftReportUseCase {
@@ -11,63 +11,46 @@ export class FindMethodsShiftReportUseCase {
     return await this.shiftReportRepository.findOneById(id);
   }
 
-  async getAllWorkerById(id: number): Promise<User[]> {
-    return await this.shiftReportRepository.findAllWorkerById(id);
-  }
-
-  async getAllByPosIdAndDate(
+  async getAllByFilter(
+    dateStart: Date,
+    dateEnd: Date,
     posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
   ): Promise<ShiftReport[]> {
-    return await this.shiftReportRepository.findAllByPosIdAndDate(
+    return await this.shiftReportRepository.findAllByFilter(
+      dateStart,
+      dateEnd,
       posId,
-      dateStart,
-      dateEnd,
-      skip,
-      take,
     );
   }
-
-  async getAllByPosIdsAndDate(
-    posIds: number[],
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<ShiftReport[]> {
-    return await this.shiftReportRepository.findAllByPosIdsAndDate(
-      posIds,
-      dateStart,
-      dateEnd,
-      skip,
-      take,
-    );
-  }
-
-  async getCountAllByPosIdAndDate(
+  async getOneWorkerIdAndDate(
     posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return await this.shiftReportRepository.countAllByPosIdAndDate(
+    workerId: number,
+    workDate: Date,
+  ): Promise<ShiftReport> {
+    return await this.shiftReportRepository.findOnePosIdAndWorkerIdAndDate(
       posId,
-      dateStart,
-      dateEnd,
+      workerId,
+      workDate,
     );
   }
-
-  async getCountAllByPosIdsAndDate(
-    posIds: number[],
+  async getLastByStatusSentAndPosId(
+    posId: number,
+    workDate: Date,
+  ): Promise<ShiftReport> {
+    return await this.shiftReportRepository.findLastByStatusSentAndPosId(
+      posId,
+      workDate,
+    );
+  }
+  async getDataForCalculation(
     dateStart: Date,
     dateEnd: Date,
-  ): Promise<number> {
-    return await this.shiftReportRepository.countAllByPosIdsAndDate(
-      posIds,
+    workerIds: number[],
+  ): Promise<DataForCalculationResponseDto[]> {
+    return await this.shiftReportRepository.findAllForCalculation(
       dateStart,
       dateEnd,
+      workerIds,
     );
   }
 }

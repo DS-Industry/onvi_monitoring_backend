@@ -50,12 +50,12 @@ import { PosChemistryProductionResponseDto } from '@pos/pos/use-cases/dto/pos-ch
 import { TechTaskPosFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-pos-filter.dto';
 import { TechTaskChemistryReportDto } from '@platform-user/core-controller/dto/receive/tech-task-chemistry-report.dto';
 import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
-import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
 import { TechTaskReportDto } from '@platform-user/core-controller/dto/receive/tech-task-report.dto';
 import { ReportTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-report';
 import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplate';
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
+import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-me-filter.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -139,7 +139,7 @@ export class TechTaskController {
       }
     }
   }
-  @Get('mange-patterns')
+  @Get('manage')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
   @HttpCode(200)
@@ -150,18 +150,15 @@ export class TechTaskController {
     try {
       let skip = undefined;
       let take = undefined;
-      const { ability } = req;
+      const { user } = req;
       if (params.page && params.size) {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
-      const pos = await this.posValidateRules.getOneByIdValidate(
-        params.posId,
-        ability,
-      );
 
       return await this.manageAllByPosAndStatusesTechTaskUseCase.execute(
-        pos.id,
+        user,
+        params.posId,
         skip,
         take,
       );
@@ -181,13 +178,13 @@ export class TechTaskController {
       }
     }
   }
-  @Get('execution')
+  @Get('me')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
   @HttpCode(200)
   async getAllForExecution(
     @Request() req: any,
-    @Query() params: PaginationDto,
+    @Query() params: TechTaskMeFilterDto,
   ): Promise<TechTaskReadAllResponseDto> {
     try {
       let skip = undefined;
@@ -197,7 +194,12 @@ export class TechTaskController {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
-      return await this.readAllByPosTechTaskUseCase.execute(user, skip, take);
+      return await this.readAllByPosTechTaskUseCase.execute(
+        user,
+        { posId: params.posId, status: params.status },
+        skip,
+        take,
+      );
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -225,21 +227,19 @@ export class TechTaskController {
     try {
       let skip = undefined;
       let take = undefined;
-      let type = undefined;
-      const { ability } = req;
+      const { user } = req;
       if (params.page && params.size) {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
-      if (params.type != '*') {
-        type = params.type;
-      }
-      const pos = await this.posValidateRules.getOneByIdValidate(
-        params.posId,
-        ability,
-      );
 
-      return await this.reportTechTaskUseCase.execute(pos.id, type, skip, take);
+      return await this.reportTechTaskUseCase.execute(
+        user,
+        params.posId,
+        params.type,
+        skip,
+        take,
+      );
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({

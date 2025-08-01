@@ -3,9 +3,10 @@ export interface PaymentCalculateResponseDro {
   name: string;
   hrPositionId: number;
   billingMonth: Date;
-  monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  maxBonusSalary: number;
   prepaymentSum: number;
   prepaymentCountShifts: number;
+  sum: number;
+  countShifts: number;
 }

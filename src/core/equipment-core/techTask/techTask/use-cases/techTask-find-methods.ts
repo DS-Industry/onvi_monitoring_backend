@@ -13,6 +13,7 @@ export class FindMethodsTechTaskUseCase {
 
   async getAllByFilter(data: {
     posId?: number;
+    userId?: number;
     gteStartDate?: Date;
     lteStartDate?: Date;
     gteEndSpecifiedDate?: Date;
@@ -27,6 +28,7 @@ export class FindMethodsTechTaskUseCase {
   }): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllByFilter(
       data.posId,
+      data.userId,
       data.gteStartDate,
       data.lteStartDate,
       data.gteEndSpecifiedDate,
@@ -43,6 +45,7 @@ export class FindMethodsTechTaskUseCase {
 
   async getCountByFilter(data: {
     posId?: number;
+    userId?: number;
     gteStartDate?: Date;
     lteStartDate?: Date;
     gteEndSpecifiedDate?: Date;
@@ -52,11 +55,10 @@ export class FindMethodsTechTaskUseCase {
     type?: TypeTechTask;
     statuses?: StatusTechTask[];
     codeTag?: string;
-    skip?: number;
-    take?: number;
   }): Promise<number> {
     return await this.techTaskRepository.countAllByFilter(
       data.posId,
+      data.userId,
       data.gteStartDate,
       data.lteStartDate,
       data.gteEndSpecifiedDate,
@@ -66,30 +68,6 @@ export class FindMethodsTechTaskUseCase {
       data.type,
       data.statuses,
       data.codeTag,
-    );
-  }
-
-  async getAllForUser(
-    userId: number,
-    statuses: StatusTechTask[],
-    skip?: number,
-    take?: number,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllForUser(
-      userId,
-      statuses,
-      skip,
-      take,
-    );
-  }
-
-  async getCountForUser(
-    userId: number,
-    statuses: StatusTechTask[],
-  ): Promise<number> {
-    return await this.techTaskRepository.countAllForUser(
-      userId,
-      statuses,
     );
   }
 }

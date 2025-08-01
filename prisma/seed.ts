@@ -17,6 +17,8 @@ import { test } from './seedData/test';
 import { EquipmentKnot } from "./seedData/equipmentKnot";
 import { IncidentInfos } from "./seedData/incidentInfo";
 import { IncidentNames } from "./seedData/incidentName";
+import { Warehouses } from "./seedData/warehouse";
+import { ManagerPaperTypes } from "./seedData/managerPaperType";
 
 async function main() {
   //DeviceType
@@ -96,7 +98,7 @@ async function main() {
       });
     }),
   );
-  console.log('UserPermission create');*/
+  console.log('UserPermission create');
   //UserRoles
   await Promise.all(
     UserRoles.map(async (userRole) => {
@@ -109,7 +111,7 @@ async function main() {
   );
   console.log('UserRole create');
   //TechTaskItemTemplate
-  /*await Promise.all(
+  await Promise.all(
     TechTaskItemTemplate.map(async (itemTemplate) => {
       await prisma.techTaskItemTemplate.upsert({
         where: { id: itemTemplate.id },
@@ -151,7 +153,18 @@ async function main() {
       });
     }),
   );
-  console.log('incidentInfo create');;*/
+  console.log('incidentInfo create');*/
+  //ManagerPaperType
+  await Promise.all(
+    ManagerPaperTypes.map(async (managerPaperType) => {
+      await prisma.managerPaperType.upsert({
+        where: { id: managerPaperType.id },
+        update: managerPaperType,
+        create: managerPaperType,
+      });
+    }),
+  );
+  console.log('managerPaperType create');
   /*await Promise.all(
     Organizations.map(async (organization) => {
       await prisma.organization.upsert({
@@ -182,7 +195,18 @@ async function main() {
     }),
   );
   console.log('Device create');
+    //Warehouse
   await Promise.all(
+    Warehouses.map(async (warehouse) => {
+      await prisma.warehouse.upsert({
+        where: { id: warehouse.id },
+        update: warehouse,
+        create: warehouse,
+      });
+    }),
+  );
+  console.log('Warehouse create');*/
+  /*await Promise.all(
     test.map(async (test) => {
       await prisma.carWashDevice.upsert({
         where: { id: test.id },

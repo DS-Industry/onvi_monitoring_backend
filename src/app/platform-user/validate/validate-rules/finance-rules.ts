@@ -13,7 +13,6 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction, StatusWorkDayShiftReport } from '@prisma/client';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 
 @Injectable()
 export class FinanceValidateRules {
@@ -156,16 +155,15 @@ export class FinanceValidateRules {
     return cashCollectionCheck.object;
   }
 
-  public async addWorkerShiftReport(
-    shiftReportId: number,
-    userId: number,
+  public async receiverShiftReport(
+    posId: number,
+    workerId: number,
     ability: any,
   ): Promise<void> {
     const response = [];
-    const shiftReport =
-      await this.validateLib.shiftReportByIdExists(shiftReportId);
-    response.push(shiftReport);
-    response.push(await this.validateLib.userByIdExists(userId));
+    const posCheck = await this.validateLib.posByIdExists(posId);
+    response.push(posCheck);
+    response.push(await this.validateLib.workerByIdExists(workerId));
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -173,8 +171,8 @@ export class FinanceValidateRules {
       FINANCE_RETURN_EXCEPTION_CODE,
     );
     ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
-      shiftReport.object,
+      PermissionAction.read,
+      posCheck.object,
     );
   }
 
@@ -198,171 +196,60 @@ export class FinanceValidateRules {
     return shiftReport.object;
   }
 
-  public async getDayReportById(
-    dayReportId: number,
+  public async updateShiftReportById(
+    shiftReportId: number,
     ability: any,
-  ): Promise<WorkDayShiftReport> {
+  ): Promise<ShiftReport> {
     const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.FINANCE,
-      FINANCE_RETURN_EXCEPTION_CODE,
-    );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
-    );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      shiftReport.object,
-    );
-    return workDayShiftReport.object;
-  }
-
-  public async updateDayReportById(
-    dayReportId: number,
-    ability: any,
-  ): Promise<WorkDayShiftReport> {
-    const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.FINANCE,
-      FINANCE_RETURN_EXCEPTION_CODE,
-    );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
-    );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
-      shiftReport.object,
-    );
-    return workDayShiftReport.object;
-  }
-
-  public async sendDayReportById(
-    dayReportId: number,
-    ability: any,
-  ): Promise<WorkDayShiftReport> {
-    const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
+    const shiftReportCheck =
+      await this.validateLib.shiftReportByIdExists(shiftReportId);
     if (
-      workDayShiftReport.object &&
-      workDayShiftReport.object.status == StatusWorkDayShiftReport.SENT
+      shiftReportCheck.object &&
+      shiftReportCheck.object.status == StatusWorkDayShiftReport.SENT
     ) {
       response.push({
         code: 400,
-        errorMessage: 'The work day shift report can not send',
+        errorMessage: 'The shift report already sent',
       });
     }
+    response.push(shiftReportCheck);
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.FINANCE,
       FINANCE_RETURN_EXCEPTION_CODE,
     );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
-    );
     ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
-      shiftReport.object,
+      PermissionAction.create,
+      shiftReportCheck.object,
     );
-    return workDayShiftReport.object;
+    return shiftReportCheck.object;
   }
-
   public async returnDayReportById(
-    dayReportId: number,
+    shiftReportId: number,
     ability: any,
-  ): Promise<WorkDayShiftReport> {
+  ): Promise<ShiftReport> {
     const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
+    const shiftReportCheck =
+      await this.validateLib.shiftReportByIdExists(shiftReportId);
     if (
-      workDayShiftReport.object &&
-      workDayShiftReport.object.status != StatusWorkDayShiftReport.SENT
+      shiftReportCheck.object &&
+      shiftReportCheck.object.status != StatusWorkDayShiftReport.SENT
     ) {
       response.push({
         code: 400,
-        errorMessage: 'The work day shift report can not send',
+        errorMessage: 'The shift report not sent',
       });
     }
+    response.push(shiftReportCheck);
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.FINANCE,
       FINANCE_RETURN_EXCEPTION_CODE,
-    );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
     );
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
-      shiftReport.object,
+      shiftReportCheck.object,
     );
-    return workDayShiftReport.object;
-  }
-
-  public async createCashOper(
-    dayReportId: number,
-    ability: any,
-  ): Promise<WorkDayShiftReport> {
-    const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
-    if (
-      workDayShiftReport.object &&
-      workDayShiftReport.object.status == StatusWorkDayShiftReport.SENT
-    ) {
-      response.push({
-        code: 400,
-        errorMessage: 'You can not change the report',
-      });
-    }
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.FINANCE,
-      FINANCE_RETURN_EXCEPTION_CODE,
-    );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
-    );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      shiftReport.object,
-    );
-    return workDayShiftReport.object;
-  }
-
-  public async getClean(
-    dayReportId: number,
-    ability: any,
-  ): Promise<{ workDay: WorkDayShiftReport; posId: number }> {
-    const response = [];
-    const workDayShiftReport =
-      await this.validateLib.workDayShiftReportByIdExists(dayReportId);
-    response.push(workDayShiftReport);
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.FINANCE,
-      FINANCE_RETURN_EXCEPTION_CODE,
-    );
-    const shiftReport = await this.validateLib.shiftReportByIdExists(
-      workDayShiftReport.object.shiftReportId,
-    );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      shiftReport.object,
-    );
-    return {
-      workDay: workDayShiftReport.object,
-      posId: shiftReport.object.posId,
-    };
+    return shiftReportCheck.object;
   }
 }

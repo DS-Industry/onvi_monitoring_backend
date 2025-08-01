@@ -35,6 +35,13 @@ export class WorkerRepository extends IWorkerRepository {
     return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
   }
 
+  public async findAllByPosId(posId: number): Promise<Worker[]> {
+    const workers = await this.prisma.hrWorker.findMany({
+      where: { posWorks: { some: { id: posId } } },
+    });
+    return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
+  }
+
   public async findAllByFilter(
     placementId?: number,
     hrPositionId?: number,

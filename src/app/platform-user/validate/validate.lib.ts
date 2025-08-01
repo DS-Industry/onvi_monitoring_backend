@@ -60,8 +60,6 @@ import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-find-methods';
-import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
@@ -146,7 +144,6 @@ export class ValidateLib {
     private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
-    private readonly findMethodsWorkDayShiftReportUseCase: FindMethodsWorkDayShiftReportUseCase,
     private readonly findMethodsReportUseCase: FindMethodsReportUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
@@ -832,22 +829,6 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'The shift report does not exist' };
     }
     return { code: 200, object: shiftReport };
-  }
-
-  public async workDayShiftReportByIdExists(
-    workDayShiftReportId: number,
-  ): Promise<ValidateResponse<WorkDayShiftReport>> {
-    const workDayShiftReport =
-      await this.findMethodsWorkDayShiftReportUseCase.getOneById(
-        workDayShiftReportId,
-      );
-    if (!workDayShiftReport) {
-      return {
-        code: 400,
-        errorMessage: 'The work day shift report does not exist',
-      };
-    }
-    return { code: 200, object: workDayShiftReport };
   }
 
   public async reportByIdExists(

@@ -17,20 +17,33 @@ export class ReadAllByPosTechTaskUseCase {
 
   async execute(
     user: User,
+    filterData: { posId?: number; status?: StatusTechTask },
     skip?: number,
     take?: number,
   ): Promise<TechTaskReadAllResponseDto> {
     const response: TechTaskReadAllResponse[] = [];
-    const totalCount = await this.findMethodsTechTaskUseCase.getCountForUser(
-      user.id,
-      [StatusTechTask.ACTIVE, StatusTechTask.OVERDUE, StatusTechTask.RETURNED],
-    );
-    const techTasks = await this.findMethodsTechTaskUseCase.getAllForUser(
-      user.id,
-      [StatusTechTask.ACTIVE, StatusTechTask.OVERDUE, StatusTechTask.RETURNED],
-      skip,
-      take,
-    );
+
+    let statuses: StatusTechTask[] = [
+      StatusTechTask.ACTIVE,
+      StatusTechTask.OVERDUE,
+      StatusTechTask.RETURNED,
+    ];
+    if (filterData.status !== undefined) {
+      statuses = [filterData.status];
+    }
+
+    const totalCount = await this.findMethodsTechTaskUseCase.getCountByFilter({
+      userId: user.id,
+      statuses: statuses,
+      posId: filterData.posId,
+    });
+    const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
+      userId: user.id,
+      statuses: statuses,
+      posId: filterData.posId,
+      skip: skip,
+      take: take,
+    });
     await Promise.all(
       techTasks.map(async (techTask) => {
         const techTags =

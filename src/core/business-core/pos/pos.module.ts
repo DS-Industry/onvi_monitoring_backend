@@ -70,6 +70,9 @@ import {
 } from "@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods";
 import { TestDataCron } from "../../../infra/handler/testData/cron/testData";
 import { ScheduleModule } from "@nestjs/schedule";
+import { ConnectionPosWorkerUseCase } from "@pos/pos/use-cases/pos-worker-connection";
+import { HrCoreModule } from "@hr/hr-core.module";
+import { CarStatisticPosUseCase } from "@pos/pos/use-cases/pos-car-statistic";
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -101,6 +104,8 @@ const posUseCase: Provider[] = [
   PosProgramFullUseCase,
   FindMethodsPosUseCase,
   PosChemistryProductionUseCase,
+  ConnectionPosWorkerUseCase,
+  CarStatisticPosUseCase,
 ];
 
 const monthlyPlanPos: Provider[] = [
@@ -163,6 +168,7 @@ const deviceDataRawHandlerUseCase: Provider[] = [
   imports: [
     PrismaModule,
     AddressModule,
+    HrCoreModule,
     FileModule,
     BullModule.registerQueue({
       configKey: 'data_raw',

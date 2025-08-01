@@ -8,6 +8,7 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import {
   POS_CONNECTION_PROGRAM_EXCEPTION_CODE,
+  POS_CONNECTION_WORKER_EXCEPTION_CODE,
   POS_CREATE_EXCEPTION_CODE,
   POS_GET_BY_ID_EXCEPTION_CODE,
   POS_PATCH_PROGRAM_RATE_EXCEPTION_CODE,
@@ -101,6 +102,20 @@ export class PosValidateRules {
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       pos.object,
+    );
+  }
+
+  public async updateConnectedWorkerPos(workerIds: number[], posId: number) {
+    const response: ValidateResponse[] = [];
+    response.push(await this.validateLib.posByIdExists(posId));
+    workerIds.map(async (workerId) =>
+      response.push(await this.validateLib.workerByIdExists(workerId)),
+    );
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.USER,
+      POS_CONNECTION_WORKER_EXCEPTION_CODE,
     );
   }
 }
