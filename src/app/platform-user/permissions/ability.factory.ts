@@ -23,10 +23,12 @@ export class AbilityFactory {
 
   async createForPlatformManager(user: User): Promise<any> {
     const cacheKey = `ability:${user.id}`;
-    const cachedAbility = await this.cache.get(cacheKey);
-    if (cachedAbility) {
-      console.log('Using cached ability for user:', cachedAbility);
-      return cachedAbility;
+    const cachedRulesJson = await this.cache.get<string>(cacheKey);
+
+    if (cachedRulesJson) {
+      const rules = JSON.parse(cachedRulesJson);
+      console.log('Using cached ability for user:', user.id);
+      return createPrismaAbility(rules);
     }
 
     const permissions = await this.findMethodsRoleUseCase.getPermissionsById(
@@ -92,8 +94,8 @@ export class AbilityFactory {
     }
     const builtAbility = abilityBuilder.build();
 
-    // cache it
-    await this.cache.set(cacheKey, builtAbility, 3600); // 60s TTL
+    const serializedRules = JSON.stringify(builtAbility.rules);
+    await this.cache.set(cacheKey, serializedRules, 3600);
 
     return builtAbility;
   }
