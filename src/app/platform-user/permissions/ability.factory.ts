@@ -95,7 +95,7 @@ export class AbilityFactory {
     const builtAbility = abilityBuilder.build();
 
     const serializedRules = JSON.stringify(builtAbility.rules);
-    await this.cache.set(cacheKey, serializedRules, 3600);
+    await this.cache.set(cacheKey, serializedRules, 3600000);
 
     return builtAbility;
   }
