@@ -116,7 +116,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     ManagerPaperCoreModule,
     Logger,
     CacheModule.register({
-      ttl: 3600,
+      ttl: 3600000,
       isGlobal: true,
     }),
   ],
