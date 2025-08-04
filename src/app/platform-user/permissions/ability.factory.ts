@@ -6,15 +6,29 @@ import { createPrismaAbility } from '@casl/prisma';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
 
+import { Inject } from '@nestjs/common';
+
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
 @Injectable()
 export class AbilityFactory {
   constructor(
     private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
     private readonly objectGetById: GetByIdObjectUseCase,
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
+
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async createForPlatformManager(user: User): Promise<any> {
+    const cacheKey = `ability:${user.id}`;
+    const cachedAbility = await this.cache.get(cacheKey);
+    if (cachedAbility) {
+      console.log('Using cached ability for user:', cachedAbility);
+      return cachedAbility;
+    }
+
     const permissions = await this.findMethodsRoleUseCase.getPermissionsById(
       user.userRoleId,
     );
@@ -76,6 +90,11 @@ export class AbilityFactory {
     for (const p of dbPermissions) {
       abilityBuilder.can(p.action, p.permissionObject.name, p?.condition);
     }
-    return abilityBuilder.build();
+    const builtAbility = abilityBuilder.build();
+
+    // cache it
+    await this.cache.set(cacheKey, builtAbility, 3600); // 60s TTL
+
+    return builtAbility;
   }
 }
