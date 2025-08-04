@@ -26,13 +26,13 @@ export class DataByDeviceOperationUseCase {
         dateEnd,
       );
     const deviceOperations =
-      await this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
-        deviceId,
-        dateStart,
-        dateEnd,
-        skip,
-        take,
-      );
+      await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+        carWashDeviceId: deviceId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+        skip: skip,
+        take: take,
+      });
     deviceOperations.map((deviceOperation) => {
       response.push({
         id: deviceOperation.id,

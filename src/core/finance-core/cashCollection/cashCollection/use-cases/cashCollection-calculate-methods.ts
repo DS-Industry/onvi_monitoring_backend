@@ -31,17 +31,17 @@ export class CalculateMethodsCashCollectionUseCase {
   }> {
     const [deviceOperations, deviceOperationCards, carCount] =
       await Promise.all([
-        this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
-          deviceId,
-          oldTookMoneyTime,
-          newTookMoneyTime,
-        ),
+        this.findMethodsDeviceOperationUseCase.getAllByFilter({
+          carWashDeviceId: deviceId,
+          dateStart: oldTookMoneyTime,
+          dateEnd: newTookMoneyTime,
+        }),
         this.findMethodsDeviceOperationCardUseCase.getAllByDeviceIdAndDateUseCase(
           deviceId,
           oldTookMoneyTime,
           newTookMoneyTime,
         ),
-        this.countCarDeviceProgramUseCase.execute(
+        this.countCarDeviceProgramUseCase.executeByDevice(
           deviceId,
           oldTookMoneyTime,
           newTookMoneyTime,
@@ -75,10 +75,15 @@ export class CalculateMethodsCashCollectionUseCase {
     const cashSumMap = new Map<number, { sum: number; virtSum: number }>();
 
     for (const cashCollectionDevice of cashCollectionDevices) {
-      const device = devices.find((d) => d.id === cashCollectionDevice.carWashDeviceId);
+      const device = devices.find(
+        (d) => d.id === cashCollectionDevice.carWashDeviceId,
+      );
       if (!device) continue;
 
-      const currentSum = cashSumMap.get(device.carWashDeviceTypeId) || { sum: 0, virtSum: 0 };
+      const currentSum = cashSumMap.get(device.carWashDeviceTypeId) || {
+        sum: 0,
+        virtSum: 0,
+      };
       cashSumMap.set(device.carWashDeviceTypeId, {
         sum: currentSum.sum + cashCollectionDevice.sum,
         virtSum: currentSum.virtSum + cashCollectionDevice.virtualSum,

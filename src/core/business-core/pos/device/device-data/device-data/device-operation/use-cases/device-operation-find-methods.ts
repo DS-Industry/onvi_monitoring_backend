@@ -8,58 +8,27 @@ export class FindMethodsDeviceOperationUseCase {
   constructor(
     private readonly deviceOperationRepository: IDeviceOperationRepository,
   ) {}
-
-  async getAllByCurTypeIdAndDateUseCase(
-    currencyType: CurrencyType,
-    carWashDeviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByCurTypeAndDate(
-      currencyType,
-      carWashDeviceId,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByDeviceIdAndDateUseCase(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByDeviceIdAndDate(
-      deviceId,
-      dateStart,
-      dateEnd,
-      skip,
-      take,
-    );
-  }
-
-  async getAllByOrgIdAndDateUseCase(
-    organizationId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByOrgIdAndDate(
-      organizationId,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByPosIdAndDateUseCase(
-    carWashPosId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByPosIdAndDate(
-      carWashPosId,
-      dateStart,
-      dateEnd,
+  async getAllByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posId?: number;
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    currencyType?: CurrencyType;
+    skip?: number;
+    take?: number;
+  }): Promise<DeviceOperation[]> {
+    return await this.deviceOperationRepository.findAllByFilter(
+      data.ability,
+      data.organizationId,
+      data.posId,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.currencyType,
+      data.skip,
+      data.take,
     );
   }
 

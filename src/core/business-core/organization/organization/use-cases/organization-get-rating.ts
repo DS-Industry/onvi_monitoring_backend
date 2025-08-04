@@ -20,11 +20,11 @@ export class GetRatingOrganizationUseCase {
     await Promise.all(
       poses.map(async (pos) => {
         const operations =
-          await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
-            pos.id,
-            dateStart,
-            dateEnd,
-          );
+          await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+            posId: pos.id,
+            dateStart: dateStart,
+            dateEnd: dateEnd,
+          });
         const totalSum = operations.reduce(
           (sum, operation) => sum + operation.operSum,
           0,

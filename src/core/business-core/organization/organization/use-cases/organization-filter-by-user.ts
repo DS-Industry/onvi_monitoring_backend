@@ -15,25 +15,18 @@ export class FilterByUserOrganizationUseCase {
   ): Promise<OrganizationFilterResponseDto[]> {
     const organizations =
       await this.findMethodsOrganizationUseCase.getAllByUser(user, placementId);
-    const organizationFilters: OrganizationFilterResponseDto[] = [];
 
-    await Promise.all(
-      organizations.map(async (organization) => {
-        organizationFilters.push({
-          id: organization.id,
-          name: organization.name,
-          slug: organization.slug,
-          address: organization.address,
-          organizationDocumentId: organization?.organizationDocumentId,
-          organizationStatus: organization.organizationStatus,
-          organizationType: organization.organizationType,
-          createdAt: organization.createdAt,
-          updatedAt: organization.updatedAt,
-          ownerId: organization.ownerId,
-        });
-      }),
-    );
-
-    return organizationFilters;
+    return organizations.map((organization) => ({
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+      address: organization.address,
+      organizationDocumentId: organization?.organizationDocumentId,
+      organizationStatus: organization.organizationStatus,
+      organizationType: organization.organizationType,
+      createdAt: organization.createdAt,
+      updatedAt: organization.updatedAt,
+      ownerId: organization.ownerId,
+    }));
   }
 }

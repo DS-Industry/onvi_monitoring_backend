@@ -34,11 +34,11 @@ export class MonitoringFullByIdPosUseCase {
     await Promise.all(
       devices.map(async (device) => {
         const deviceOperations =
-          await this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
-            device.id,
-            dateStart,
-            dateEnd,
-          );
+          await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+            carWashDeviceId: device.id,
+            dateStart: dateStart,
+            dateEnd: dateEnd,
+          });
 
         const lastOper =
           await this.findMethodsDeviceOperationUseCase.getLastByDeviceIdUseCase(

@@ -53,11 +53,11 @@ export class MonitoringPosUseCase {
     await Promise.all(
       poses.map(async (pos) => {
         const posOperations =
-          await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
-            pos.id,
-            data.dateStart,
-            data.dateEnd,
-          );
+          await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+            posId: pos.id,
+            dateStart: data.dateStart,
+            dateEnd: data.dateEnd,
+          });
         const lastOper =
           await this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(
             pos.id,

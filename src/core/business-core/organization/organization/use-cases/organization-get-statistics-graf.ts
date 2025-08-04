@@ -19,11 +19,11 @@ export class GetStatisticsGrafOrganizationUseCase {
 
     const allOperations = await Promise.all(
       poses.map(async (pos) => {
-        return this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
-          pos.id,
-          dateStart,
-          dateEnd,
-        );
+        return this.findMethodsDeviceOperationUseCase.getAllByFilter({
+          ability: ability,
+          dateStart: dateStart,
+          dateEnd: dateEnd,
+        });
       }),
     );
 

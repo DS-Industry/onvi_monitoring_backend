@@ -4,29 +4,14 @@ import { CurrencyType } from '@prisma/client';
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
   abstract findOneById(id: number): Promise<DeviceOperation>;
-  abstract findAllByDeviceId(
-    carWashDeviceId: number,
-  ): Promise<DeviceOperation[]>;
-  abstract findAllByCurTypeAndDate(
-    currencyType: CurrencyType,
-    carWashDeviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]>;
-  abstract findAllByOrgIdAndDate(
-    organizationId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]>;
-  abstract findAllByPosIdAndDate(
-    carWashPosId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]>;
-  abstract findAllByDeviceIdAndDate(
-    carWashDeviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
+  abstract findAllByFilter(
+    ability?: any,
+    organizationId?: number,
+    posId?: number,
+    carWashDeviceId?: number,
+    dateStart?: Date,
+    dateEnd?: Date,
+    currencyType?: CurrencyType,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperation[]>;

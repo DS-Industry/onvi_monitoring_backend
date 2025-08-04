@@ -3,8 +3,8 @@ import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/de
 import {
   PosProgramDto,
   PosProgramInfo,
-  PosProgramResponseDto
-} from "@platform-user/core-controller/dto/response/pos-program-response.dto";
+  PosProgramResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-program-response.dto';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { Pos } from '@pos/pos/domain/pos';
@@ -13,9 +13,7 @@ import { CarWashPosType } from '@prisma/client';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { DeviceOperationProps } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
-import {
-  FindMethodsDeviceOperationCardUseCase
-} from "@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods";
+import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
 
 @Injectable()
 export class PosProgramFullUseCase {
@@ -60,11 +58,11 @@ export class PosProgramFullUseCase {
           }
         } else if (carWashPos.carWashPosType == CarWashPosType.Portal) {
           const deviceOperations =
-            await this.findMethodsDeviceOperationUseCase.getAllByDeviceIdAndDateUseCase(
-              device.id,
-              dateStart,
-              dateEnd,
-            );
+            await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+              carWashDeviceId: device.id,
+              dateStart: dateStart,
+              dateEnd: dateEnd,
+            });
           programs = await this.linkProgramsWithOperations(
             devicePrograms,
             deviceOperations,
