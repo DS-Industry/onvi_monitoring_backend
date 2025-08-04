@@ -25,6 +25,8 @@ import { NotificationCoreModule } from '@notification/notification-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 
+import { CacheModule } from '@nestjs/cache-manager';
+
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -113,6 +115,10 @@ import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module
     NotificationCoreModule,
     ManagerPaperCoreModule,
     Logger,
+    CacheModule.register({
+      ttl: 3600,
+      isGlobal: true,
+    }),
   ],
   controllers: [],
   providers: [],
