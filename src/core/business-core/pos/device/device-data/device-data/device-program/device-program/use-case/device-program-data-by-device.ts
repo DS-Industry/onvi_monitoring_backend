@@ -32,13 +32,13 @@ export class DataByDeviceProgramUseCase {
         dateEnd,
       );
     const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByDeviceIdAndDateProgram(
-        deviceId,
-        dateStart,
-        dateEnd,
-        skip,
-        take,
-      );
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        carWashDeviceId: deviceId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+        skip: skip,
+        take: take,
+      });
 
     const payTypeMapping = {
       1: 'Наличные',

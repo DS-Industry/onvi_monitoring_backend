@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { CurrencyType } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import {
+  DeviceOperationFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto";
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -18,7 +21,7 @@ export class FindMethodsDeviceOperationUseCase {
     currencyType?: CurrencyType;
     skip?: number;
     take?: number;
-  }): Promise<DeviceOperation[]> {
+  }): Promise<DeviceOperationFullDataResponseDto[]> {
     return await this.deviceOperationRepository.findAllByFilter(
       data.ability,
       data.organizationId,

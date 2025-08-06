@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PosMonitoringFullResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-full-response.dto';
-import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { CurrencyType } from '@prisma/client';
 import { Pos } from '@pos/pos/domain/pos';
-import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
+import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 
 @Injectable()
 export class MonitoringFullByIdPosUseCase {
   constructor(
-    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
-    private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
   ) {}
 
@@ -21,76 +18,69 @@ export class MonitoringFullByIdPosUseCase {
     dateEnd: Date,
     pos: Pos,
   ): Promise<PosMonitoringFullResponseDto[]> {
-    const response: PosMonitoringFullResponseDto[] = [];
     const devices = await this.findMethodsCarWashDeviceUseCase.getAllByPos(
       pos.id,
     );
+    const response: PosMonitoringFullResponseDto[] = [];
 
-    //const currencyCache = new Map<number, CurrencyType>();
-    const cashSumMap = new Map<number, number>();
-    const virtualSumMap = new Map<number, number>();
-    const yandexSumMap = new Map<number, number>();
+    const allOperations =
+      await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+        posId: pos.id,
+        dateStart,
+        dateEnd,
+      });
 
-    await Promise.all(
-      devices.map(async (device) => {
-        const deviceOperations =
-          await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-            carWashDeviceId: device.id,
-            dateStart: dateStart,
-            dateEnd: dateEnd,
-          });
+    const operationsByDevice = allOperations.reduce((map, operation) => {
+      const deviceId = operation.carWashDeviceId;
+      if (!map.has(deviceId)) {
+        map.set(deviceId, []);
+      }
+      map.get(deviceId).push(operation);
+      return map;
+    }, new Map<number, DeviceOperationFullDataResponseDto[]>());
 
-        const lastOper =
-          await this.findMethodsDeviceOperationUseCase.getLastByDeviceIdUseCase(
-            device.id,
-          );
+    for (const device of devices) {
+      const deviceOperations = operationsByDevice.get(device.id) || [];
 
-        await Promise.all(
-          deviceOperations.map(async (deviceOperation) => {
-            /*if (!currencyCache.has(deviceOperation.currencyId)) {
-              const cur = await this.findMethodsCurrencyUseCase.getById(
-                deviceOperation.currencyId,
-              );
-              currencyCache.set(deviceOperation.currencyId, cur.currencyType);
-            }
-            const curType = currencyCache.get(deviceOperation.currencyId);*/
-            const operSum = deviceOperation.operSum;
-            const deviceId = deviceOperation.carWashDeviceId;
-
-            if (deviceOperation.currencyType == CurrencyType.CASH) {
-              cashSumMap.set(
-                deviceId,
-                (cashSumMap.get(deviceId) || 0) + operSum,
-              );
-            } else if (deviceOperation.currencyType == CurrencyType.CASHLESS) {
-              virtualSumMap.set(
-                deviceId,
-                (virtualSumMap.get(deviceId) || 0) + operSum,
-              );
-            } else if (deviceOperation.currencyType == CurrencyType.VIRTUAL) {
-              yandexSumMap.set(
-                deviceId,
-                (yandexSumMap.get(deviceId) || 0) + operSum,
-              );
-            }
-          }),
+      const lastOper =
+        await this.findMethodsDeviceOperationUseCase.getLastByDeviceIdUseCase(
+          device.id,
         );
-        response.push({
-          id: device.id,
-          name: device.name,
-          counter: deviceOperations.length,
-          cashSum: cashSumMap.get(device.id) || 0,
-          virtualSum: virtualSumMap.get(device.id) || 0,
-          yandexSum: yandexSumMap.get(device.id) || 0,
-          mobileSum: 0,
-          cardSum: 0,
-          lastOper: lastOper ? lastOper.operDate : null,
-          discountSum: 0,
-          cashbackSumCard: 0,
-          cashbackSumMub: 0,
-        });
-      }),
-    );
+
+      const sums = deviceOperations.reduce(
+        (acc, operation) => {
+          const sum = operation.operSum;
+          switch (operation.currencyType) {
+            case CurrencyType.CASH:
+              acc.cash += sum;
+              break;
+            case CurrencyType.CASHLESS:
+              acc.virtual += sum;
+              break;
+            case CurrencyType.VIRTUAL:
+              acc.yandex += sum;
+              break;
+          }
+          return acc;
+        },
+        { cash: 0, virtual: 0, yandex: 0 },
+      );
+
+      response.push({
+        id: device.id,
+        name: device.name,
+        counter: deviceOperations.length,
+        cashSum: sums.cash,
+        virtualSum: sums.virtual,
+        yandexSum: sums.yandex,
+        mobileSum: 0,
+        cardSum: 0,
+        lastOper: lastOper?.operDate || null,
+        discountSum: 0,
+        cashbackSumCard: 0,
+        cashbackSumMub: 0,
+      });
+    }
 
     return response;
   }

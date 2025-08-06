@@ -38,14 +38,14 @@ export class MonthlyPlanPosRepository extends IMonthlyPlanPosRepository {
     );
   }
 
-  public async findAllByPosIdAndDate(
-    posId: number,
+  public async findAllByPosIdsAndDate(
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
   ): Promise<MonthlyPlanPos[]> {
     const monthlyPlanPoses = await this.prisma.monthlyPlanPos.findMany({
       where: {
-        posId,
+        posId: { in: posIds },
         monthDate: {
           gte: dateStart,
           lte: dateEnd,

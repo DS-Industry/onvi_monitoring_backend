@@ -64,7 +64,6 @@ import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-da
 import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
 import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
 import { DataFullFilterDto } from '@platform-user/core-controller/dto/receive/data-full-filter.dto';
-import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -388,20 +387,20 @@ export class FinanceController {
       let skip = undefined;
       let take = undefined;
       const { ability } = req;
-      let poses: Pos[] = [];
-      if (data.posId != '*') {
+      let posIds: number[] = [];
+      if (data.posId != undefined) {
         const pos = await this.posValidateRules.getOneByIdValidate(
           data.posId,
           ability,
         );
-        poses.push(pos);
+        posIds.push(pos.id);
       } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          data.placementId,
-        );
+        const poses = await this.findMethodsPosUseCase.getAllByFilter({
+          ability: ability,
+          placementId: data?.placementId,
+        });
+        posIds = poses.map((pos) => pos.id);
       }
-      const posIds = poses.map((pos) => pos.id);
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;

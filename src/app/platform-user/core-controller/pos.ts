@@ -14,7 +14,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
-import { FilterByUserPosUseCase } from '@pos/pos/use-cases/pos-filter-by-user';
 import { PosMonitoringResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
 import { MonitoringPosUseCase } from '@pos/pos/use-cases/pos-monitoring';
 import { PosMonitoringDto } from '@platform-user/core-controller/dto/receive/pos-monitoring';
@@ -45,12 +44,14 @@ import { CustomHttpException } from '@exception/custom-http.exception';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
 import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
 
 @Controller('pos')
 export class PosController {
   constructor(
     private readonly createPosUseCase: CreatePosUseCase,
-    private readonly filterByUserPosUseCase: FilterByUserPosUseCase,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
     private readonly planFactPosUseCase: PlanFactPosUseCase,
@@ -68,7 +69,7 @@ export class PosController {
     @Body() data: PosCreateDto,
     @Request() req: any,
     @UploadedFile() file?: Express.Multer.File,
-  ): Promise<any> {
+  ): Promise<PosResponseDto> {
     try {
       const { user, ability } = req;
       await this.posValidateRules.createValidate(
@@ -107,10 +108,24 @@ export class PosController {
   ): Promise<PosFilterResponseDto[]> {
     try {
       const { ability } = req;
-      return await this.filterByUserPosUseCase.execute(
-        ability,
-        data.placementId,
-      );
+      const poses = await this.findMethodsPosUseCase.getAllByFilter({
+        ability: ability,
+        placementId: data?.placementId,
+      });
+      return poses.map((pos) => ({
+        id: pos.id,
+        name: pos.name,
+        slug: pos.slug,
+        address: pos.address?.location || '',
+        organizationId: pos.organizationId,
+        placementId: pos.address?.id || 0,
+        timeZone: pos.timezone,
+        posStatus: pos.status,
+        createdAt: pos.createdAt,
+        updatedAt: pos.updatedAt,
+        createdById: pos.createdById,
+        updatedById: pos.updatedById,
+      }));
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
@@ -141,7 +156,7 @@ export class PosController {
       let take = undefined;
       const { ability } = req;
       let pos = null;
-      if (params.posId != '*') {
+      if (params.posId) {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -224,7 +239,7 @@ export class PosController {
       let take = undefined;
       const { ability } = req;
       let pos = null;
-      if (params.posId != '*') {
+      if (params.posId) {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -238,7 +253,7 @@ export class PosController {
         dateStart: params.dateStart,
         dateEnd: params.dateEnd,
         ability: ability,
-        placementId: params.placementId,
+        placementId: params?.placementId,
         pos: pos,
         skip: skip,
         take: take,
@@ -307,7 +322,7 @@ export class PosController {
       let take = undefined;
       const { ability } = req;
       let pos = null;
-      if (params.posId != '*') {
+      if (params.posId) {
         pos = await this.posValidateRules.getOneByIdValidate(
           params.posId,
           ability,
@@ -321,7 +336,7 @@ export class PosController {
         dateStart: params.dateStart,
         dateEnd: params.dateEnd,
         ability: ability,
-        placementId: params.placementId,
+        placementId: params?.placementId,
         pos: pos,
         skip: skip,
         take: take,
@@ -351,7 +366,7 @@ export class PosController {
     @Request() req: any,
     @Param('posId', ParseIntPipe) id: number,
     @Body() data: PosConnectionProgramTypeDto,
-  ): Promise<any> {
+  ): Promise<{ status: string }> {
     try {
       const { ability } = req;
       await this.posValidateRules.connectionProgramTypesValidate(

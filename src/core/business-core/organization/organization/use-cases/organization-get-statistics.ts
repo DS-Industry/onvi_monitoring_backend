@@ -22,11 +22,11 @@ export class GetStatisticsOrganizationUseCase {
         dateStart: input.dateStart,
         dateEnd: input.dateEnd,
       }),
-      this.findMethodsDeviceProgramUseCase.getAllByOrgIdAndDateProgram(
-        input.organizationId,
-        input.dateStart,
-        input.dateEnd,
-      ),
+      this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        organizationId: input.organizationId,
+        dateStart: input.dateStart,
+        dateEnd: input.dateEnd,
+      }),
     ]);
     const totalSum = deviceOperations.reduce(
       (sum, operation) => sum + operation.operSum,

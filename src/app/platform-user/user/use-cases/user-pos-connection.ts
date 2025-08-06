@@ -11,7 +11,7 @@ export class ConnectionUserPosUseCase {
 
   async execute(posIds: number[], userId: number) {
     const existingPoses =
-      await this.findMethodsPosUseCase.getAllByUserId(userId);
+      await this.findMethodsPosUseCase.getAllByFilter({ userId: userId });
     const existingPosIds = existingPoses.map((pos) => pos.id);
 
     const deletePosIds = existingPosIds.filter((id) => !posIds.includes(id)); // Удалить

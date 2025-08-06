@@ -6,7 +6,9 @@ import {
   PROGRAM_TIME_CHECK_AUTO,
   PROGRAM_TYPE_ID_CHECK_AUTO,
 } from '@constant/constants';
-import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+import {
+  DeviceProgramFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
 
 @Injectable()
 export class CountCarDeviceProgramUseCase {
@@ -21,11 +23,11 @@ export class CountCarDeviceProgramUseCase {
     dateEnd: Date,
   ): Promise<number> {
     const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByDeviceIdAndDateProgram(
-        deviceId,
-        dateStart,
-        dateEnd,
-      );
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        carWashDeviceId: deviceId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+      });
 
     let lastCheckAutoTime = null;
     let carCount = 0;
@@ -65,7 +67,7 @@ export class CountCarDeviceProgramUseCase {
   }
 
   async executeByDeviceProgram(
-    devicePrograms: DeviceProgram[],
+    devicePrograms: DeviceProgramFullDataResponseDto[],
   ): Promise<number> {
     const lastCheckAutoTimeMap = new Map<number, Date>();
     let totalCars = 0;

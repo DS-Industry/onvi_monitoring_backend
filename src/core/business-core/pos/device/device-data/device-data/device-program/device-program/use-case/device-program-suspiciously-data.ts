@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+import {
+  DeviceProgramFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
 
 @Injectable()
 export class SuspiciouslyDataDeviceProgramUseCase {
@@ -15,11 +18,11 @@ export class SuspiciouslyDataDeviceProgramUseCase {
     dateEnd: Date,
   ): Promise<SuspiciouslyDataResponseDto[]> {
     const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByPosIdAndDateProgram(
-        posId,
-        dateStart,
-        dateEnd,
-      );
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        posId: posId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+      });
     const groupedByDevice = devicePrograms
       .sort(
         (a, b) =>
@@ -33,7 +36,7 @@ export class SuspiciouslyDataDeviceProgramUseCase {
           acc[program.carWashDeviceId].push(program);
           return acc;
         },
-        {} as Record<number, DeviceProgram[]>,
+        {} as Record<number, DeviceProgramFullDataResponseDto[]>,
       );
 
     const suspiciousOperations: SuspiciouslyDataResponseDto[] = [];
@@ -45,8 +48,8 @@ export class SuspiciouslyDataDeviceProgramUseCase {
 
         if (
           currentProgram.programName === 'Ополаскивание' &&
-          currentProgram.isPaid === 0 && // Не оплачена
-          prevProgram.isPaid === 1 && // Предыдущая оплачена
+          currentProgram.isPaid === 0 &&
+          prevProgram.isPaid === 1 &&
           ![
             'Ополаскивание',
             'Воск + защита',

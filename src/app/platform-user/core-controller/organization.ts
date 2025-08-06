@@ -424,32 +424,6 @@ export class OrganizationController {
       }
     }
   }
-  //Get all pos for org DELETE?
-  @Get('pos/:id')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  @HttpCode(200)
-  async getPosesById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<PosResponseDto[]> {
-    try {
-      return this.findMethodsOrganizationUseCase.getAllPos(id);
-    } catch (e) {
-      if (e instanceof OrganizationException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
   //Get all org for owner
   @Get('owner/:id')
   @HttpCode(200)

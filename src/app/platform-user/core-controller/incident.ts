@@ -123,13 +123,14 @@ export class IncidentController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (params.posId != '*') {
+      if (params.posId) {
         await this.incidentValidateRules.getAllIncidentByFilterValidate(
           params.posId,
           ability,
         );
       }
       return await this.getAllByFilterIncidentUseCase.execute(
+        ability,
         params.dateStart,
         params.dateEnd,
         params.posId,

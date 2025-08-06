@@ -3,6 +3,10 @@ import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/de
 import { PrismaService } from '@db/prisma/prisma.service';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { PrismaCarWashDeviceProgramMapper } from '@db/mapper/prisma-car-wash-device-program-mapper';
+import { accessibleBy } from '@casl/prisma';
+import {
+  DeviceProgramFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
 
 @Injectable()
 export class DeviceProgramRepository extends IDeviceProgramRepository {
@@ -19,21 +23,6 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     return PrismaCarWashDeviceProgramMapper.toDomain(deviceProgram);
   }
 
-  public async findAllByDeviceId(
-    carWashDeviceId: number,
-  ): Promise<DeviceProgram[]> {
-    const deviceProgram = await this.prisma.carWashDeviceProgramsEvent.findMany(
-      {
-        where: {
-          carWashDeviceId,
-        },
-      },
-    );
-    return deviceProgram.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
-    );
-  }
-
   public async findOneById(id: number): Promise<DeviceProgram> {
     const deviceProgram =
       await this.prisma.carWashDeviceProgramsEvent.findFirst({
@@ -44,149 +33,111 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     return PrismaCarWashDeviceProgramMapper.toDomain(deviceProgram);
   }
 
-  public async findAllByOrgIdAndDate(
-    organizationId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
+  public async findAllByFilter(
+    ability?: any,
+    organizationId?: number,
+    posId?: number,
+    carWashDeviceId?: number,
+    dateStart?: Date,
+    dateEnd?: Date,
+    programCode?: string,
+    isPaid?: number,
+    skip?: number,
+    take?: number,
+  ): Promise<DeviceProgramFullDataResponseDto[]> {
+    const where: any = {};
+
+    if (organizationId !== undefined) {
+      where.carWashDevice = {
+        carWasPos: {
+          pos: {
+            organizationId,
+          },
+        },
+      };
+    }
+
+    if (posId !== undefined) {
+      where.carWashDevice = {
+        carWasPos: {
+          posId,
+        },
+      };
+    }
+
+    if (carWashDeviceId !== undefined) {
+      where.carWashDeviceId = carWashDeviceId;
+    }
+
+    if (dateStart !== undefined && dateEnd !== undefined) {
+      where.beginDate = {
+        gte: dateStart,
+        lte: dateEnd,
+      };
+    }
+
+    if (organizationId !== undefined) {
+      where.carWashDevice = {
+        carWasPos: {
+          pos: {
+            organizationId,
+          },
+        },
+      };
+    }
+
+    if (isPaid !== undefined) {
+      where.isPaid = isPaid;
+    }
+
+    if (programCode !== undefined) {
+      where.carWashDeviceProgramsType = {
+        code: programCode,
+      };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [
+            {
+              carWashDevice: {
+                carWasPos: {
+                  pos: accessibleBy(ability).Pos,
+                },
+              },
+            },
+            where,
+          ],
+        }
+      : where;
+
     const devicePrograms =
       await this.prisma.carWashDeviceProgramsEvent.findMany({
-        where: {
+        skip: skip ?? undefined,
+        take: take ?? undefined,
+        where: finalWhere,
+        include: {
+          carWashDeviceProgramsType: true,
           carWashDevice: {
-            carWasPos: {
-              pos: {
-                organizationId,
+            include: {
+              carWasPos: {
+                select: {
+                  pos: {
+                    select: {
+                      id: true,
+                    },
+                  },
+                },
               },
             },
           },
-          beginDate: {
-            gte: dateStart,
-            lte: dateEnd,
-          },
         },
         orderBy: {
           beginDate: 'asc',
         },
       });
     return devicePrograms.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
-    );
-  }
-
-  public async findAllByPosIdAndDate(
-    carWashPosId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    const devicePrograms =
-      await this.prisma.carWashDeviceProgramsEvent.findMany({
-        where: {
-          carWashDevice: {
-            carWashPosId,
-          },
-          beginDate: {
-            gte: dateStart,
-            lte: dateEnd,
-          },
-        },
-        include: {
-          carWashDeviceProgramsType: true,
-        },
-        orderBy: {
-          beginDate: 'asc',
-        },
-      });
-    return devicePrograms.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
-    );
-  }
-
-  public async findAllByPosIdAndProgramCodeAndDate(
-    carWashPosId: number,
-    code: string,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    const devicePrograms =
-      await this.prisma.carWashDeviceProgramsEvent.findMany({
-        where: {
-          carWashDevice: {
-            carWashPosId,
-          },
-          carWashDeviceProgramsType: {
-            code,
-          },
-          beginDate: {
-            gte: dateStart,
-            lte: dateEnd,
-          },
-        },
-        orderBy: {
-          beginDate: 'asc',
-        },
-      });
-    return devicePrograms.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
-    );
-  }
-
-  public async findAllByPosIdAndPaidTypeAndDate(
-    carWashPosId: number,
-    isPaid: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    const devicePrograms =
-      await this.prisma.carWashDeviceProgramsEvent.findMany({
-        where: {
-          carWashDevice: {
-            carWashPosId,
-          },
-          isPaid,
-          beginDate: {
-            gte: dateStart,
-            lte: dateEnd,
-          },
-        },
-        include: {
-          carWashDeviceProgramsType: true,
-        },
-        orderBy: {
-          beginDate: 'asc',
-        },
-      });
-    return devicePrograms.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
-    );
-  }
-
-  public async findAllByDeviceIdAndDate(
-    carWashDeviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<DeviceProgram[]> {
-    const devicePrograms =
-      await this.prisma.carWashDeviceProgramsEvent.findMany({
-        skip: skip,
-        take: take,
-        where: {
-          carWashDeviceId,
-          beginDate: {
-            gte: dateStart,
-            lte: dateEnd,
-          },
-        },
-        include: {
-          carWashDeviceProgramsType: true,
-        },
-        orderBy: {
-          beginDate: 'asc',
-        },
-      });
-    return devicePrograms.map((item) =>
-      PrismaCarWashDeviceProgramMapper.toDomain(item),
+      PrismaCarWashDeviceProgramMapper.toDomainWithPos(item),
     );
   }
 

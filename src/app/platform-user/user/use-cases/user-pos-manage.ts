@@ -16,7 +16,9 @@ export class PosManageUserUseCase {
       await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
     await Promise.all(
       organizations.map(async (org) => {
-        const poses = await this.findMethodsPosUseCase.getAllByOrgId(org.id);
+        const poses = await this.findMethodsPosUseCase.getAllByFilter({
+          organizationId: org.id,
+        });
 
         poses.forEach((pos) => {
           response.push({

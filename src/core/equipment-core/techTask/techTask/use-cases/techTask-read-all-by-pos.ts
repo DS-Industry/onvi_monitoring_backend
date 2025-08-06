@@ -23,45 +23,46 @@ export class ReadAllByPosTechTaskUseCase {
   ): Promise<TechTaskReadAllResponseDto> {
     const response: TechTaskReadAllResponse[] = [];
 
-    let statuses: StatusTechTask[] = [
-      StatusTechTask.ACTIVE,
-      StatusTechTask.OVERDUE,
-      StatusTechTask.RETURNED,
-    ];
-    if (filterData.status !== undefined) {
-      statuses = [filterData.status];
-    }
+    const statuses =
+      filterData.status !== undefined
+        ? [filterData.status]
+        : [
+            StatusTechTask.ACTIVE,
+            StatusTechTask.OVERDUE,
+            StatusTechTask.RETURNED,
+          ];
 
-    const totalCount = await this.findMethodsTechTaskUseCase.getCountByFilter({
-      userId: user.id,
-      statuses: statuses,
-      posId: filterData.posId,
-    });
-    const techTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
-      userId: user.id,
-      statuses: statuses,
-      posId: filterData.posId,
-      skip: skip,
-      take: take,
-    });
-    await Promise.all(
-      techTasks.map(async (techTask) => {
-        const techTags =
-          await this.findMethodsTechTagUseCase.getAllByTechTaskId(techTask.id);
-        response.push({
-          id: techTask.id,
-          name: techTask.name,
-          posId: techTask.posId,
-          type: techTask.type,
-          status: techTask.status,
-          endSpecifiedDate: techTask?.endSpecifiedDate,
-          startWorkDate: techTask.startWorkDate,
-          sendWorkDate: techTask.sendWorkDate,
-          executorId: techTask.executorId,
-          tags: techTags.map((tag) => tag.getProps()),
-        });
+    const [totalCount, techTasks] = await Promise.all([
+      this.findMethodsTechTaskUseCase.getCountByFilter({
+        userId: user.id,
+        statuses,
+        posId: filterData.posId,
       }),
-    );
+      this.findMethodsTechTaskUseCase.getAllByFilter({
+        userId: user.id,
+        statuses,
+        posId: filterData.posId,
+        skip,
+        take,
+      }),
+    ]);
+    for (const techTask of techTasks) {
+      const techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
+        techTask.id,
+      );
+      response.push({
+        id: techTask.id,
+        name: techTask.name,
+        posId: techTask.posId,
+        type: techTask.type,
+        status: techTask.status,
+        endSpecifiedDate: techTask?.endSpecifiedDate,
+        startWorkDate: techTask.startWorkDate,
+        sendWorkDate: techTask.sendWorkDate,
+        executorId: techTask.executorId,
+        tags: techTags.map((tag) => tag.getProps()),
+      });
+    }
 
     return {
       techTaskReadAll: response,

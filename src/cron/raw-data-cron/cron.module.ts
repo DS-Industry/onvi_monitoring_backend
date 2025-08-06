@@ -14,6 +14,7 @@ import { HandlerManagerPaperCron } from '../../infra/handler/managerPaper/cron/h
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 import { EventEmitterModule } from "@nestjs/event-emitter";
+import { CacheModule } from "@nestjs/cache-manager";
 
 const cronUseCases: Provider[] = [
   HandlerDeviceDataRawCron,
@@ -55,6 +56,10 @@ const cronUseCases: Provider[] = [
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot({
       wildcard: true,
+    }),
+    CacheModule.register({
+      ttl: 3600000,
+      isGlobal: true,
     }),
     PosModule,
     TechTaskModule,

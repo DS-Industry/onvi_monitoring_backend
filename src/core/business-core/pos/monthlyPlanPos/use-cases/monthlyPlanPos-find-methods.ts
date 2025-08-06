@@ -16,13 +16,13 @@ export class FindMethodsMonthlyPlanPosUseCase {
     return await this.monthlyPlanPosRepository.findAllByPosId(posId);
   }
 
-  async getAllByPosIdAndDate(
-    posId: number,
+  async getAllByPosIdsAndDate(
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
   ): Promise<MonthlyPlanPos[]> {
-    return await this.monthlyPlanPosRepository.findAllByPosIdAndDate(
-      posId,
+    return await this.monthlyPlanPosRepository.findAllByPosIdsAndDate(
+      posIds,
       dateStart,
       dateEnd,
     );

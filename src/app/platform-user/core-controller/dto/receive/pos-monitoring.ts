@@ -8,18 +8,16 @@ export class PosMonitoringDto {
   @IsNotEmpty({ message: 'dateEnd is required' })
   @Transform(({ value }) => new Date(value))
   dateEnd: Date;
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  posId: number | '*';
-  @IsNotEmpty({ message: 'placementId is required' })
+  posId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  placementId: number | '*';
+  placementId?: number;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;

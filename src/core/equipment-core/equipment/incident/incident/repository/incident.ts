@@ -3,6 +3,8 @@ import { IIncidentRepository } from '@equipment/incident/incident/interface/inci
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Incident } from '@equipment/incident/incident/domain/incident';
 import { PrismaIncidentMapper } from '@db/mapper/prisma-incident-mapper';
+import { accessibleBy } from '@casl/prisma';
+import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
 
 @Injectable()
 export class IncidentRepository extends IIncidentRepository {
@@ -28,6 +30,49 @@ export class IncidentRepository extends IIncidentRepository {
       },
     });
     return PrismaIncidentMapper.toDomain(incident);
+  }
+
+  public async findAllByFilter(
+    ability?: any,
+    posId?: number,
+    dateStart?: Date,
+    dateEnd?: Date,
+  ): Promise<IncidentWithInfoDataDto[]> {
+    const where: any = {};
+
+    if (posId !== undefined) {
+      where.posId = posId;
+    }
+
+    if (dateStart !== undefined && dateEnd !== undefined) {
+      where.appearanceDate = {
+        gte: dateStart,
+        lte: dateEnd,
+      };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [
+            {
+              pos: accessibleBy(ability).Pos,
+            },
+            where,
+          ],
+        }
+      : where;
+
+    const incidents = await this.prisma.incident.findMany({
+      where: finalWhere,
+      include: {
+        equipmentKnot: true,
+        incidentName: true,
+        incidentReason: true,
+        incidentSolution: true,
+      },
+    });
+
+    return incidents.map((item) => PrismaIncidentMapper.toDomainWithInfo(item));
   }
 
   public async findAllByPosId(id: number): Promise<Incident[]> {

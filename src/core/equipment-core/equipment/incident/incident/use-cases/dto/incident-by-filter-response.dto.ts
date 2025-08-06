@@ -1,4 +1,4 @@
-export class IncidentGetAllByFilterResponseDto {
+export class IncidentByFilterResponseDto {
   id: number;
   workerId: number;
   posId: number;

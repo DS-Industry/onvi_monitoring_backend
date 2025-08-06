@@ -2,9 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import {
   CleanDataResponseDto,
-  ProgramDataDto
+  ProgramDataDto,
 } from '@platform-user/core-controller/dto/response/clean-data-response.dto';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+import {
+  DeviceProgramFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
 
 @Injectable()
 export class CleanDataDeviceProgramUseCase {
@@ -18,12 +21,12 @@ export class CleanDataDeviceProgramUseCase {
     dateEnd: Date,
   ): Promise<CleanDataResponseDto[]> {
     const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByPosIdAndPaidTypeAndDate(
-        posId,
-        0,
-        dateStart,
-        dateEnd,
-      );
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        posId: posId,
+        isPaid: 0,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+      });
 
     const groupedByDevice = devicePrograms.reduce(
       (acc, program) => {
@@ -33,7 +36,7 @@ export class CleanDataDeviceProgramUseCase {
         acc[program.carWashDeviceId].push(program);
         return acc;
       },
-      {} as Record<number, DeviceProgram[]>,
+      {} as Record<number, DeviceProgramFullDataResponseDto[]>,
     );
 
     return Object.entries(groupedByDevice).map(([deviceId, programs]) => {

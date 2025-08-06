@@ -23,7 +23,6 @@ import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-f
 import { DeviceValidateRules } from '@platform-user/validate/validate-rules/device-validate-rules';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
-import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
@@ -48,7 +47,6 @@ export class DeviceController {
     private readonly carWashDeviceTypeCreate: CreateCarWashDeviceTypeUseCase,
     private readonly carWashDeviceTypeUpdate: UpdateCarWashDeviceTypeUseCase,
     private readonly deviceCreateCarWashDevice: CreateCarWashDeviceUseCase,
-    private readonly dataByPermissionCarWashDeviceUseCase: DataByPermissionCarWashDeviceUseCase,
     private readonly dataByDeviceOperationUseCase: DataByDeviceOperationUseCase,
     private readonly dataByDeviceProgramUseCase: DataByDeviceProgramUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
@@ -269,37 +267,6 @@ export class DeviceController {
       return await this.carWashDeviceTypeUpdate.execute(
         data,
         carWashDeviceType,
-      );
-    } catch (e) {
-      if (e instanceof DeviceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //All device for user
-  @Get('filter')
-  @HttpCode(200)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  async filterViewDeviceByUser(
-    @Request() req: any,
-    @Query() data: PlacementFilterDto,
-  ): Promise<DeviceFilterResponseDto[]> {
-    try {
-      const { ability } = req;
-      return await this.dataByPermissionCarWashDeviceUseCase.execute(
-        ability,
-        data.placementId,
       );
     } catch (e) {
       if (e instanceof DeviceException) {

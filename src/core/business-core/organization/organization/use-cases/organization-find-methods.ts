@@ -2,14 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
 import { Organization } from '@organization/organization/domain/organization';
 import { User } from '@platform-user/user/domain/user';
-import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
-import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 @Injectable()
 export class FindMethodsOrganizationUseCase {
   constructor(
     private readonly organizationRepository: IOrganizationRepository,
-    private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
   async getById(input: number): Promise<any> {
@@ -48,15 +45,6 @@ export class FindMethodsOrganizationUseCase {
 
   async getAllWorker(input: number): Promise<User[]> {
     return await this.organizationRepository.findAllUser(input);
-  }
-
-  async getAllPos(input: number): Promise<PosResponseDto[]> {
-    const poses = await this.organizationRepository.findAllPos(input);
-    return await Promise.all(
-      poses.map(
-        async (item) => await this.posCreateFullDataUseCase.execute(item),
-      ),
-    );
   }
 
   async getAllByAbility(

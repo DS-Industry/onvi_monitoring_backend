@@ -158,7 +158,7 @@ export class PermissionController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PosPermissionsResponseDto[]> {
     try {
-      const poses = await this.findMethodsPosUseCase.getAllByUserId(userId);
+      const poses = await this.findMethodsPosUseCase.getAllByFilter({ userId: userId });
       return poses.map((pos) => ({
         id: pos.id,
         name: pos.name,

@@ -75,16 +75,14 @@ export class UpdateTechTaskUseCase {
       if (createItems.length > 0) {
         const itemValueToTechTask: TechTaskItemValueToTechTask[] = [];
 
-        await Promise.all(
-          createItems.map(async (item) => {
-            itemValueToTechTask.push(
-              new TechTaskItemValueToTechTask({
-                techTaskId: oldTechTask.id,
-                techTaskItemTemplateId: item,
-              }),
-            );
-          }),
-        );
+        for (const item of createItems) {
+          itemValueToTechTask.push(
+            new TechTaskItemValueToTechTask({
+              techTaskId: oldTechTask.id,
+              techTaskItemTemplateId: item,
+            }),
+          );
+        }
         this.techTaskItemValueToTechTaskRepository.createMany(
           itemValueToTechTask,
         );

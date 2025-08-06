@@ -3,9 +3,25 @@ import {
   Prisma,
 } from '@prisma/client';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
 export type PrismaCarWashDeviceProgramWithType =
   Prisma.CarWashDeviceProgramsEventGetPayload<{
     include: { carWashDeviceProgramsType: true };
+  }>;
+export type PrismaCarWashDeviceProgramWithPos =
+  Prisma.CarWashDeviceProgramsEventGetPayload<{
+    include: {
+      carWashDeviceProgramsType: true;
+      carWashDevice: {
+        include: {
+          carWasPos: {
+            include: {
+              pos: true;
+            };
+          };
+        };
+      };
+    };
   }>;
 export class PrismaCarWashDeviceProgramMapper {
   static toDomain(
@@ -32,8 +48,42 @@ export class PrismaCarWashDeviceProgramMapper {
       isAgregate: entity.isAgregate,
       minute: entity.minute,
       errNumId: entity.errNumId,
-      programName: programName
+      programName: programName,
     });
+  }
+
+  static toDomainWithPos(
+    entity: PrismaCarWashDeviceProgram | PrismaCarWashDeviceProgramWithPos,
+  ): DeviceProgramFullDataResponseDto {
+    if (!entity) {
+      return null;
+    }
+    const programName =
+      'carWashDeviceProgramsType' in entity && entity.carWashDeviceProgramsType
+        ? entity.carWashDeviceProgramsType.name
+        : undefined;
+
+    let posId: number | undefined;
+    if ('carWashDevice' in entity && entity.carWashDevice?.carWasPos?.pos) {
+      posId = entity.carWashDevice.carWasPos.pos.id;
+    }
+
+    return {
+      id: entity.id,
+      carWashDeviceId: entity.carWashDeviceId,
+      carWashDeviceProgramsTypeId: entity.carWashDeviceProgramsTypeId,
+      beginDate: entity.beginDate,
+      loadDate: entity.loadDate,
+      endDate: entity.endDate,
+      confirm: entity.confirm,
+      isPaid: entity.isPaid,
+      localId: entity.localId,
+      isAgregate: entity.isAgregate,
+      minute: entity.minute,
+      errNumId: entity.errNumId,
+      programName: programName,
+      posId: posId,
+    };
   }
 
   static toPrisma(

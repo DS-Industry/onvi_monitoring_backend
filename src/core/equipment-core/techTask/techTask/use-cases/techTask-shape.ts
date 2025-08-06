@@ -7,7 +7,7 @@ import {
 import { FindMethodsItemTemplateToTechTaskUseCase } from '@tech-task/itemTemplateToTechTask/use-cases/itemTemplateToTechTask-find-methods';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
-import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 
 @Injectable()
 export class ShapeTechTaskUseCase {
@@ -20,33 +20,31 @@ export class ShapeTechTaskUseCase {
 
   async execute(techTask: TechTask): Promise<TechTaskShapeResponseDto> {
     const items: TechTaskItemDto[] = [];
-    const itemsValueToTechTask =
-      await this.findMethodsItemTemplateToTechTaskUseCase.findAllByTaskId(
+    const [itemsValueToTechTask, techTags] = await Promise.all([
+      this.findMethodsItemTemplateToTechTaskUseCase.findAllByTaskId(
         techTask.id,
+      ),
+      this.findMethodsTechTagUseCase.getAllByTechTaskId(techTask.id),
+    ]);
+    for (const itemValue of itemsValueToTechTask) {
+      const itemTechTask = await this.findMethodsItemTemplateUseCase.getById(
+        itemValue.techTaskItemTemplateId,
       );
-    await Promise.all(
-      itemsValueToTechTask.map(async (itemValue) => {
-        const itemTechTask = await this.findMethodsItemTemplateUseCase.getById(
-          itemValue.techTaskItemTemplateId,
-        );
-        items.push({
-          id: itemValue.id,
-          title: itemTechTask.title,
-          type: itemTechTask.type,
-          group: itemTechTask.group,
-          code: itemTechTask.code,
-          value: itemValue.value,
-          image: itemValue.image,
-        });
-      }),
-    );
+      items.push({
+        id: itemValue.id,
+        title: itemTechTask.title,
+        type: itemTechTask.type,
+        group: itemTechTask.group,
+        code: itemTechTask.code,
+        value: itemValue.value,
+        image: itemValue.image,
+      });
+    }
+
     if (!techTask.startWorkDate) {
       techTask.startWorkDate = new Date();
       await this.techTaskRepository.update(techTask);
     }
-    const techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
-      techTask.id,
-    );
     return {
       id: techTask.id,
       name: techTask.name,

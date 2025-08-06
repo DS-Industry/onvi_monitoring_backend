@@ -12,23 +12,22 @@ export class GetAllTimeStampDeviceEventUseCase {
   ) {}
 
   async execute(posId: number): Promise<FinanceGetTimeStampResponseDto[]> {
-    const response: FinanceGetTimeStampResponseDto[] = [];
     const devices =
       await this.findMethodsCarWashDeviceUseCase.getAllByPos(posId);
-    await Promise.all(
-      devices.map(async (device) => {
-        const lastDeviceEvent =
-          await this.findMethodsDeviceEventUseCase.getLastEventByDeviceIdAndTypeId(
-            device.id,
-            EVENT_TYPE_CASH_COLLECTION_ID,
-          );
-        response.push({
-          deviceId: device.id,
-          deviceName: device.name,
-          oldTookMoneyTime: lastDeviceEvent?.eventDate || null,
-        });
-      }),
-    );
+    const response: FinanceGetTimeStampResponseDto[] = [];
+
+    for (const device of devices) {
+      const lastDeviceEvent =
+        await this.findMethodsDeviceEventUseCase.getLastEventByDeviceIdAndTypeId(
+          device.id,
+          EVENT_TYPE_CASH_COLLECTION_ID,
+        );
+      response.push({
+        deviceId: device.id,
+        deviceName: device.name,
+        oldTookMoneyTime: lastDeviceEvent?.eventDate || null,
+      });
+    }
 
     return response;
   }

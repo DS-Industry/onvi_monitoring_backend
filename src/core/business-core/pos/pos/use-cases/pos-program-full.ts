@@ -3,7 +3,6 @@ import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/de
 import {
   PosProgramDto,
   PosProgramInfo,
-  PosProgramResponseDto,
 } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
@@ -11,9 +10,8 @@ import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsCarWashPosUseCase } from '@pos/carWashPos/use-cases/car-wash-pos-find-methods';
 import { CarWashPosType } from '@prisma/client';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
-import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
-import { DeviceOperationProps } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
-import { FindMethodsDeviceOperationCardUseCase } from '@pos/device/device-data/device-data/device-operation-card/use-cases/device-operation-card-find-methods';
+import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
+import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 
 @Injectable()
 export class PosProgramFullUseCase {
@@ -36,53 +34,90 @@ export class PosProgramFullUseCase {
       pos.id,
     );
 
-    await Promise.all(
-      devices.map(async (device) => {
-        let programs: PosProgramInfo[];
-        const devicePrograms =
-          await this.findMethodsDeviceProgramUseCase.getAllByDeviceIdAndDateProgram(
+    const allDevicePrograms =
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        posId: pos.id,
+        dateStart,
+        dateEnd,
+      });
+
+    const programsByDevice = this.groupProgramsByDevice(allDevicePrograms);
+
+    let operationsByDevice: Map<number, DeviceOperationFullDataResponseDto[]> =
+      new Map();
+    if (carWashPos.carWashPosType === CarWashPosType.Portal) {
+      const allOperations =
+        await this.findMethodsDeviceOperationUseCase.getAllByFilter({
+          posId: pos.id,
+          dateStart,
+          dateEnd,
+        });
+      operationsByDevice = this.groupOperationsByDevice(allOperations);
+    }
+
+    for (const device of devices) {
+      const devicePrograms = programsByDevice.get(device.id) || [];
+      let programs: PosProgramInfo[] = [];
+
+      if (carWashPos.carWashPosType === CarWashPosType.SelfService) {
+        const lastProg =
+          await this.findMethodsDeviceProgramUseCase.getLastByDeviceId(
             device.id,
-            dateStart,
-            dateEnd,
           );
-        if (carWashPos.carWashPosType == CarWashPosType.SelfService) {
-          const lastProg =
-            await this.findMethodsDeviceProgramUseCase.getLastByDeviceId(
-              device.id,
-            );
-          if (devicePrograms.length > 0) {
-            programs = await this.dataDeviceProgramUseCase.execute(
-              devicePrograms,
-              lastProg,
-            );
-          }
-        } else if (carWashPos.carWashPosType == CarWashPosType.Portal) {
-          const deviceOperations =
-            await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-              carWashDeviceId: device.id,
-              dateStart: dateStart,
-              dateEnd: dateEnd,
-            });
-          programs = await this.linkProgramsWithOperations(
+        if (devicePrograms.length > 0) {
+          programs = await this.dataDeviceProgramUseCase.execute(
             devicePrograms,
-            deviceOperations,
+            lastProg,
           );
         }
-        response.push({
-          id: device.id,
-          name: device.name,
-          posType: carWashPos.carWashPosType,
-          programsInfo: programs,
-        });
-      }),
-    );
+      } else if (carWashPos.carWashPosType === CarWashPosType.Portal) {
+        const deviceOperations = operationsByDevice.get(device.id) || [];
+        programs = await this.linkProgramsWithOperations(
+          devicePrograms,
+          deviceOperations,
+        );
+      }
+
+      response.push({
+        id: device.id,
+        name: device.name,
+        posType: carWashPos.carWashPosType,
+        programsInfo: programs || [],
+      });
+    }
 
     return response;
   }
 
+  private groupProgramsByDevice(
+    programs: DeviceProgramFullDataResponseDto[],
+  ): Map<number, DeviceProgramFullDataResponseDto[]> {
+    return programs.reduce((map, program) => {
+      const deviceId = program.carWashDeviceId;
+      if (!map.has(deviceId)) {
+        map.set(deviceId, []);
+      }
+      map.get(deviceId)!.push(program);
+      return map;
+    }, new Map<number, DeviceProgramFullDataResponseDto[]>());
+  }
+
+  private groupOperationsByDevice(
+    operations: DeviceOperationFullDataResponseDto[],
+  ): Map<number, DeviceOperationFullDataResponseDto[]> {
+    return operations.reduce((map, operation) => {
+      const deviceId = operation.carWashDeviceId;
+      if (!map.has(deviceId)) {
+        map.set(deviceId, []);
+      }
+      map.get(deviceId)!.push(operation);
+      return map;
+    }, new Map<number, DeviceOperationFullDataResponseDto[]>());
+  }
+
   private async linkProgramsWithOperations(
-    devicePrograms: DeviceProgram[],
-    deviceOperations: DeviceOperationProps[],
+    devicePrograms: DeviceProgramFullDataResponseDto[],
+    deviceOperations: DeviceOperationFullDataResponseDto[],
   ): Promise<PosProgramInfo[]> {
     const groupedPrograms: { [key: string]: PosProgramInfo } = {};
 

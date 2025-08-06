@@ -16,52 +16,46 @@ export class PosChemistryProductionUseCase {
     input: PosChemistryProductionDto[],
   ): Promise<PosChemistryProductionResponseDto[]> {
     const response: PosChemistryProductionResponseDto[] = [];
-    await Promise.all(
-      input.map(async (item) => {
-        const responseTechRateInfo: TechRateInfoDto[] = [];
-        const period =
-          item.dateStart.toLocaleString() +
-          ' - ' +
-          item.dateEnd.toLocaleString();
 
-        await Promise.all(
-          item.techRateInfos.map(async (techRateInfo) => {
-            const programs =
-              await this.findMethodsDeviceProgramUseCase.getAllByPosIdAndProgramCodeAndDate(
-                item.posId,
-                techRateInfo.code,
-                item.dateStart,
-                item.dateEnd,
-              );
-            const seconds = programs.reduce((acc, program) => {
-              const second = Math.trunc(
-                (program.endDate.getTime() - program.beginDate.getTime()) /
-                  1000,
-              );
-              return acc + second;
-            }, 0);
+    for (const item of input) {
+      const responseTechRateInfo: TechRateInfoDto[] = [];
+      const period = `${item.dateStart.toLocaleString()} - ${item.dateEnd.toLocaleString()}`;
 
-            const min = Math.round((100 * seconds) / 60) / 100;
-            const recalculation =
-              Math.round(100 * min * techRateInfo.coef) / 100;
+      for (const techRateInfo of item.techRateInfos) {
+        const programs =
+          await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+            posId: item.posId,
+            programCode: techRateInfo.code,
+            dateStart: item.dateStart,
+            dateEnd: item.dateEnd,
+          });
 
-            responseTechRateInfo.push({
-              code: techRateInfo.code,
-              spent: techRateInfo.spent.toString(),
-              time: this.formatSecondsToTime(seconds),
-              recalculation: recalculation.toString(),
-              service: techRateInfo.service,
-            });
-          }),
-        );
+        const seconds = programs.reduce((acc, program) => {
+          const second = Math.trunc(
+            (program.endDate.getTime() - program.beginDate.getTime()) / 1000,
+          );
+          return acc + second;
+        }, 0);
 
-        response.push({
-          techTaskId: item.techTaskId,
-          period: period,
-          techRateInfos: responseTechRateInfo,
+        const min = Math.round((100 * seconds) / 60) / 100;
+        const recalculation = Math.round(100 * min * techRateInfo.coef) / 100;
+
+        responseTechRateInfo.push({
+          code: techRateInfo.code,
+          spent: techRateInfo.spent.toString(),
+          time: this.formatSecondsToTime(seconds),
+          recalculation: recalculation.toString(),
+          service: techRateInfo.service,
         });
-      }),
-    );
+      }
+
+      response.push({
+        techTaskId: item.techTaskId,
+        period,
+        techRateInfos: responseTechRateInfo,
+      });
+    }
+
     return response;
   }
 

@@ -8,15 +8,13 @@ export class PrismaService
 {
   constructor() {
     super({
-      log: ['query', 'info', 'warn', 'error'],
+      log: ['query'],
     });
   }
   async onModuleInit() {
     await this.$connect();
   }
   async onModuleDestroy() {
-    console.log('start prisma connection destr');
     await this.$disconnect();
-    console.log('end prisma connection destr');
   }
 }

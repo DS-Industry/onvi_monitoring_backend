@@ -1,99 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { IncidentGetAllByFilterResponseDto } from '@equipment/incident/incident/use-cases/dto/incident-get-all-by-filter-response.dto';
-import { IIncidentRepository } from '@equipment/incident/incident/interface/incident';
-import { Incident } from '@equipment/incident/incident/domain/incident';
-import { FindMethodsIncidentInfoUseCase } from '@equipment/incident/incidentInfo/use-cases/incident-info-find-methods';
-import { FindMethodsIncidentNameUseCase } from '@equipment/incident/incidentName/use-cases/incident-name-find-methods';
-import { FindMethodsEquipmentKnotUseCase } from '@equipment/equipmentKnot/use-cases/equipment-knot-find-methods';
+import { IncidentByFilterResponseDto } from '@equipment/incident/incident/use-cases/dto/incident-by-filter-response.dto';
+import { FindMethodsIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-find-methods';
+import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
 
 @Injectable()
 export class GetAllByFilterIncidentUseCase {
   constructor(
-    private readonly incidentRepository: IIncidentRepository,
-    private readonly findMethodsIncidentInfoUseCase: FindMethodsIncidentInfoUseCase,
-    private readonly findMethodsIncidentNameUseCase: FindMethodsIncidentNameUseCase,
-    private readonly findMethodsEquipmentKnotUseCase: FindMethodsEquipmentKnotUseCase,
+    private readonly findMethodsIncidentUseCase: FindMethodsIncidentUseCase,
   ) {}
 
   async execute(
+    ability: any,
     dateStart: Date,
     dateEnd: Date,
-    posId: number | '*',
-  ): Promise<IncidentGetAllByFilterResponseDto[]> {
-    const response: IncidentGetAllByFilterResponseDto[] = [];
-    let incidents: Incident[] = [];
-    if (posId != '*') {
-      incidents = await this.incidentRepository.findAllByPosIdAndDate(
-        posId,
-        dateStart,
-        dateEnd,
-      );
-    } else {
-      incidents = await this.incidentRepository.findAllByDate(
-        dateStart,
-        dateEnd,
-      );
+    posId?: number,
+  ): Promise<IncidentByFilterResponseDto[]> {
+    const response: IncidentByFilterResponseDto[] = [];
+    const incidents = await this.findMethodsIncidentUseCase.getAllByFilter({
+      posId: posId,
+      ability: posId ? undefined : ability,
+      dateStart: dateStart,
+      dateEnd: dateEnd,
+    });
+
+    for (const incident of incidents) {
+      response.push({
+        id: incident.id,
+        workerId: incident.workerId,
+        posId: incident.posId,
+        objectName: incident.objectName,
+        appearanceDate: incident.appearanceDate,
+        startDate: incident.startDate,
+        finishDate: incident.finishDate,
+        repair: this.formatSecondsToTime(
+          incident.finishDate,
+          incident.appearanceDate,
+        ),
+        equipmentKnot: incident.equipmentKnot,
+        incidentName: incident.incidentName,
+        incidentReason: incident.incidentReason,
+        incidentSolution: incident.incidentSolution,
+        downtime: incident.downtime === 1 ? 'Да' : 'Нет',
+        comment: incident.comment,
+        programId: incident.carWashDeviceProgramsTypeId,
+      });
     }
-    await Promise.all(
-      incidents.map(async (incident) => {
-        let equipmentKnotName = null;
-        if (incident.equipmentKnotId) {
-          const equipmentKnot =
-            await this.findMethodsEquipmentKnotUseCase.getById(
-              incident.equipmentKnotId,
-            );
-          equipmentKnotName = equipmentKnot.name;
-        }
-
-        let incidentNameName = null;
-        if (incident.incidentNameId) {
-          const incidentName =
-            await this.findMethodsIncidentNameUseCase.getById(
-              incident.incidentNameId,
-            );
-          incidentNameName = incidentName.name;
-        }
-
-        let incidentReasonName = null;
-        if (incident.incidentReasonId) {
-          const incidentReason =
-            await this.findMethodsIncidentInfoUseCase.getById(
-              incident.incidentReasonId,
-            );
-          incidentReasonName = incidentReason.name;
-        }
-
-        let incidentSolutionName = null;
-        if (incident.incidentSolutionId) {
-          const incidentSolution =
-            await this.findMethodsIncidentInfoUseCase.getById(
-              incident.incidentSolutionId,
-            );
-          incidentSolutionName = incidentSolution.name;
-        }
-
-        response.push({
-          id: incident.id,
-          workerId: incident.workerId,
-          posId: incident.posId,
-          objectName: incident.objectName,
-          appearanceDate: incident.appearanceDate,
-          startDate: incident.startDate,
-          finishDate: incident.finishDate,
-          repair: this.formatSecondsToTime(
-            incident.finishDate,
-            incident.appearanceDate,
-          ),
-          equipmentKnot: equipmentKnotName,
-          incidentName: incidentNameName,
-          incidentReason: incidentReasonName,
-          incidentSolution: incidentSolutionName,
-          downtime: incident.downtime === 1 ? 'Да' : 'Нет',
-          comment: incident.comment,
-          programId: incident.carWashDeviceProgramsTypeId,
-        });
-      }),
-    );
     return response;
   }
 

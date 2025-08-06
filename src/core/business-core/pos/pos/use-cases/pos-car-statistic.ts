@@ -15,11 +15,11 @@ export class CarStatisticPosUseCase {
     dateEnd: Date,
   ): Promise<number> {
     const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByPosIdAndDateProgram(
-        posId,
-        dateStart,
-        dateEnd,
-      );
+      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
+        posId: posId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+      });
     return await this.countCarDeviceProgramUseCase.executeByDeviceProgram(
       devicePrograms,
     );

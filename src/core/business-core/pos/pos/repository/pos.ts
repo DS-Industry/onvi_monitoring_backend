@@ -4,6 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Pos } from '@pos/pos/domain/pos';
 import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
 import { accessibleBy } from '@casl/prisma';
+import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
 
 @Injectable()
 export class PosRepository extends IPosRepository {
@@ -20,25 +21,6 @@ export class PosRepository extends IPosRepository {
       },
     });
     return PrismaPosMapper.toDomain(pos);
-  }
-
-  public async findAll(): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany();
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
-  }
-
-  public async findAllByOrgId(orgId: number): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany({
-      where: { organizationId: orgId },
-    });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
-  }
-
-  public async findAllByUserId(userId: number): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany({
-      where: { usersPermissions: { some: { id: userId } } },
-    });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
   }
 
   public async findOneById(id: number): Promise<Pos> {
@@ -62,15 +44,6 @@ export class PosRepository extends IPosRepository {
     return PrismaPosMapper.toDomain(pos);
   }
 
-  public async findOneBySlug(slug: string): Promise<Pos> {
-    const pos = await this.prisma.pos.findFirst({
-      where: {
-        slug,
-      },
-    });
-    return PrismaPosMapper.toDomain(pos);
-  }
-
   public async update(input: Pos): Promise<Pos> {
     const posPrismaEntity = PrismaPosMapper.toPrisma(input);
     const pos = await this.prisma.pos.update({
@@ -82,26 +55,49 @@ export class PosRepository extends IPosRepository {
     return PrismaPosMapper.toDomain(pos);
   }
 
-  public async findAllByPermission(
-    ability: any,
-    placementId?: number | '*',
+  public async findAllByFilter(
+    ability?: any,
+    placementId?: number,
+    organizationId?: number,
+    userId?: number,
     skip?: number,
     take?: number,
-  ): Promise<Pos[]> {
+  ): Promise<PosResponseDto[]> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (userId !== undefined) {
+      where.usersPermissions = { some: { id: userId } };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [accessibleBy(ability).Pos, where],
+        }
+      : where;
+
     const pos = await this.prisma.pos.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
       where: {
-        AND: [
-          accessibleBy(ability).Pos,
-          placementId !== '*' ? { placementId } : {},
-        ],
+        AND: finalWhere,
       },
       orderBy: {
         id: 'asc',
       },
+      include: {
+        carWashPos: true,
+        address: true,
+      },
     });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
+    return pos.map((item) => PrismaPosMapper.toDomainFullData(item));
   }
 
   public async countAllByAbilityAndPlacement(

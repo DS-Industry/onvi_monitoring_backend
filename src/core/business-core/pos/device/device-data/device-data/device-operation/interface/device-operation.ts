@@ -1,5 +1,8 @@
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { CurrencyType } from '@prisma/client';
+import {
+  DeviceOperationFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto";
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
@@ -14,7 +17,7 @@ export abstract class IDeviceOperationRepository {
     currencyType?: CurrencyType,
     skip?: number,
     take?: number,
-  ): Promise<DeviceOperation[]>;
+  ): Promise<DeviceOperationFullDataResponseDto[]>;
   abstract findLastOperByPosId(byPosId: number): Promise<DeviceOperation>;
   abstract findLastOperByDeviceId(
     carWashDeviceId: number,

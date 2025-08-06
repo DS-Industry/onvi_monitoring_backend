@@ -3,9 +3,7 @@ import { PrismaModule } from '@db/prisma/prisma.module';
 import { PosRepositoryProvider } from '@pos/pos/provider/pos';
 import { CreatePosUseCase } from '@pos/pos/use-cases/pos-create';
 import { AddressModule } from '@address/address.module';
-import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
 import { MonitoringPosUseCase } from '@pos/pos/use-cases/pos-monitoring';
-import { FilterByUserPosUseCase } from '@pos/pos/use-cases/pos-filter-by-user';
 import { MonitoringFullByIdPosUseCase } from '@pos/pos/use-cases/pos-monitoring-full-by-id';
 import { ProgramPosUseCase } from '@pos/pos/use-cases/pos-program';
 import { PosProgramFullUseCase } from '@pos/pos/use-cases/pos-program-full';
@@ -46,7 +44,6 @@ import { CronDeviceDataRawUseCase } from '@pos/device/device-data/device-data-ra
 import { HandlerDeviceDataRawUseCase } from '@pos/device/device-data/device-data-raw/use-cases/device-data-raw-handler';
 import { DeviceDataRawRepositoryProvider } from '@pos/device/device-data/device-data-raw/provider/device-data-raw';
 import { BullModule } from '@nestjs/bullmq';
-import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
 import { FileModule } from '@libs/file/module';
@@ -96,9 +93,7 @@ const repositories: Provider[] = [
 
 const posUseCase: Provider[] = [
   CreatePosUseCase,
-  CreateFullDataPosUseCase,
   MonitoringPosUseCase,
-  FilterByUserPosUseCase,
   MonitoringFullByIdPosUseCase,
   ProgramPosUseCase,
   PosProgramFullUseCase,
@@ -118,7 +113,6 @@ const carWashPosUseCase: Provider[] = [FindMethodsCarWashPosUseCase];
 const deviceUseCase: Provider[] = [
   CreateCarWashDeviceUseCase,
   FindMethodsCarWashDeviceUseCase,
-  DataByPermissionCarWashDeviceUseCase,
 ];
 
 const deviceTypeUseCase: Provider[] = [

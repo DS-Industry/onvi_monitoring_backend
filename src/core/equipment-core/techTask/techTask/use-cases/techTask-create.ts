@@ -55,16 +55,14 @@ export class CreateTechTaskUseCase {
 
     const itemValueToTechTask: TechTaskItemValueToTechTask[] = [];
 
-    await Promise.all(
-      input.techTaskItem.map(async (item) => {
-        itemValueToTechTask.push(
-          new TechTaskItemValueToTechTask({
-            techTaskId: techTask.id,
-            techTaskItemTemplateId: item,
-          }),
-        );
-      }),
-    );
+    for (const item of input.techTaskItem) {
+      itemValueToTechTask.push(
+        new TechTaskItemValueToTechTask({
+          techTaskId: techTask.id,
+          techTaskItemTemplateId: item,
+        }),
+      );
+    }
     this.techTaskItemValueToTechTaskRepository.createMany(itemValueToTechTask);
     const techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
       techTask.id,

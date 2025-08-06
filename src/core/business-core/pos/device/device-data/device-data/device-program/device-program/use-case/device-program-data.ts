@@ -1,46 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { PosProgramInfo } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
+import {
+  DeviceProgramFullDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
 
 @Injectable()
 export class DataDeviceProgramUseCase {
   constructor() {}
 
   async execute(
-    input: DeviceProgram[],
+    input: DeviceProgramFullDataResponseDto[],
     lastProg: DeviceProgram,
   ): Promise<PosProgramInfo[]> {
     const groupedPrograms: { [key: string]: PosProgramInfo } = {};
 
-    await Promise.all(
-      input.map(async (deviceProgram) => {
-        const programName = deviceProgram.programName;
+    input.forEach((deviceProgram) => {
+      const programName = deviceProgram.programName;
 
-        if (groupedPrograms[programName]) {
-          groupedPrograms[programName].counter += 1;
-          groupedPrograms[programName].totalTime += Math.trunc(
+      if (groupedPrograms[programName]) {
+        groupedPrograms[programName].counter += 1;
+        groupedPrograms[programName].totalTime += Math.trunc(
+          (deviceProgram.endDate.getTime() -
+            deviceProgram.beginDate.getTime()) /
+            1000,
+        );
+        if (groupedPrograms[programName].lastOper < deviceProgram.beginDate) {
+          groupedPrograms[programName].lastOper = deviceProgram.beginDate;
+        }
+      } else {
+        groupedPrograms[programName] = {
+          programName: programName,
+          counter: 1,
+          totalTime: Math.trunc(
             (deviceProgram.endDate.getTime() -
               deviceProgram.beginDate.getTime()) /
               1000,
-          );
-          if (groupedPrograms[programName].lastOper < deviceProgram.beginDate) {
-            groupedPrograms[programName].lastOper = deviceProgram.beginDate;
-          }
-        } else {
-          groupedPrograms[programName] = {
-            programName: programName,
-            counter: 1,
-            totalTime: Math.trunc(
-              (deviceProgram.endDate.getTime() -
-                deviceProgram.beginDate.getTime()) /
-                1000,
-            ),
-            averageTime: '',
-            lastOper: lastProg ? lastProg.beginDate : undefined,
-          };
-        }
-      }),
-    );
+          ),
+          averageTime: '',
+          lastOper: lastProg ? lastProg.beginDate : undefined,
+        };
+      }
+    });
+
     const response: PosProgramInfo[] = Object.values(groupedPrograms);
 
     for (const program of response) {
@@ -49,9 +51,10 @@ export class DataDeviceProgramUseCase {
           program.totalTime / program.counter,
         );
         program.averageTime = this.formatSecondsToTime(averageTimeSeconds);
-        program.totalTime = Math.round(program.totalTime / 60);
+        program.totalTime = Math.round(program.totalTime / 60); // Переводим в минуты
       }
     }
+
     return response;
   }
 
