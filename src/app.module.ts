@@ -26,6 +26,8 @@ import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule } from '@infra/cache/redis.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheSWRInterceptor } from './common/interceptors/cache-swr.interceptor';
 
 @Module({
   imports: [
@@ -119,6 +121,11 @@ import { RedisModule } from '@infra/cache/redis.module';
   ],
   controllers: [],
 
-  providers: [],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheSWRInterceptor,
+    },
+  ],
 })
 export class AppModule {}

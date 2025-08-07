@@ -11,6 +11,7 @@ import { FindMethodsPlacementUseCase } from '@business-core/placement/use-case/p
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PlacementResponseDto } from '@platform-user/core-controller/dto/response/placement-response.dto';
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('placement')
 export class PlacementController {
@@ -22,18 +23,9 @@ export class PlacementController {
   @Get('')
   // @UseGuards(JwtGuard)
   @HttpCode(200)
+  @CacheSWR(3600)
   async getAll(): Promise<PlacementResponseDto[]> {
     try {
-      const cacheKey = 'placements:all';
-      const cachedPlacements = await this.redisService.get(cacheKey);
-
-      if (cachedPlacements) {
-        console.log('cached');
-        return JSON.parse(cachedPlacements);
-      }
-
-      console.log('No');
-
       const placements = await this.findMethodsPlacementUseCase.getAll();
       const result = placements.map((placement) => ({
         id: placement.id,
@@ -42,7 +34,6 @@ export class PlacementController {
         utc: placement.utc,
       }));
 
-      await this.redisService.set(cacheKey, JSON.stringify(result), 3600);
       return result;
     } catch (e) {
       throw new CustomHttpException({
