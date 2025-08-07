@@ -6,10 +6,7 @@ import { createPrismaAbility } from '@casl/prisma';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { FindMethodsRoleUseCase } from '@platform-user/permissions/user-role/use-cases/role-find-methods';
 
-import { Inject } from '@nestjs/common';
-
-import { Cache } from 'cache-manager';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RedisService } from '@infra/cache/redis.service';
 
 @Injectable()
 export class AbilityFactory {
@@ -18,12 +15,12 @@ export class AbilityFactory {
     private readonly objectGetById: GetByIdObjectUseCase,
     private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
 
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly redisService: RedisService,
   ) {}
 
   async createForPlatformManager(user: User): Promise<any> {
     const cacheKey = `ability:${user.id}`;
-    const cachedRulesJson = await this.cache.get<string>(cacheKey);
+    const cachedRulesJson = await this.redisService.get(cacheKey);
 
     if (cachedRulesJson) {
       const rules = JSON.parse(cachedRulesJson);
@@ -93,9 +90,9 @@ export class AbilityFactory {
       abilityBuilder.can(p.action, p.permissionObject.name, p?.condition);
     }
     const builtAbility = abilityBuilder.build();
-
+    console.log('');
     const serializedRules = JSON.stringify(builtAbility.rules);
-    await this.cache.set(cacheKey, serializedRules, 3600000);
+    await this.redisService.set(cacheKey, serializedRules, 3600);
 
     return builtAbility;
   }

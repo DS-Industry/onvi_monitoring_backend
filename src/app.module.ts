@@ -24,10 +24,8 @@ import { NotificationCoreModule } from '@notification/notification-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 
-import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import Keyv from 'keyv';
-import KeyvRedis from '@keyv/redis';
+import { RedisModule } from '@infra/cache/redis.module';
 
 @Module({
   imports: [
@@ -117,54 +115,7 @@ import KeyvRedis from '@keyv/redis';
     NotificationCoreModule,
     ManagerPaperCoreModule,
     Logger,
-    CacheModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: (config) => {
-        // console.log('process.env: ', process.env);
-        console.log('config: ', config.internalConfig.redisCachePassword);
-        const redisConfig = {
-          host:
-            config.internalConfig.redisCacheHost || process.env.redisCacheHost,
-          port: Number(config.internalConfig.redisCachePort),
-          username: config.internalConfig.redisCacheUser,
-          password: config.internalConfig.redisCachePassword,
-        };
-
-        console.log('Redis Cache Config:', {
-          host: redisConfig.host,
-          port: redisConfig.port,
-          user: redisConfig.username,
-          password: redisConfig.password ? redisConfig.password : undefined,
-        });
-
-        const keyvRedis = new KeyvRedis(redisConfig);
-
-        // Test Redis connection
-        keyvRedis.on('connect', () => {
-          console.log('KeyvRedis connected successfully');
-        });
-
-        keyvRedis.on('error', (err) => {
-          console.error('KeyvRedis connection error:', err);
-        });
-
-        const keyv = new Keyv({
-          store: keyvRedis,
-        });
-
-        // Add error handling
-        keyv.on('error', (err) => {
-          console.error('Keyv Redis connection error:', err);
-        });
-
-        return {
-          store: keyv,
-
-          ttl: 3600000,
-        };
-      },
-      isGlobal: true,
-    }),
+    RedisModule,
   ],
   controllers: [],
 

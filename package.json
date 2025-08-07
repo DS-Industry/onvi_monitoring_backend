@@ -38,7 +38,6 @@
   "dependencies": {
     "@casl/ability": "^6.7.1",
     "@casl/prisma": "^1.4.1",
-    "@keyv/redis": "^5.1.0",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/bullmq": "^10.1.1",
     "@nestjs/cache-manager": "^3.0.1",
@@ -71,8 +70,7 @@
     "date-fns-tz": "^3.2.0",
     "dotenv-cli": "^7.3.0",
     "firebase-admin": "^13.4.0",
-    "ioredis": "^5.4.1",
-    "keyv": "^5.5.0",
+    "ioredis": "^5.7.0",
     "luxon": "^3.4.4",
     "module-alias": "^2.2.3",
     "moment": "^2.30.1",

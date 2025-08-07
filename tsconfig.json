@@ -46,7 +46,8 @@
       "@loyalty/*": ["src/core/loyalty-core/*"],
       "@hr/*": ["src/core/hr-core/*"],
       "@notification/*": ["src/core/notification-core/*"],
-      "@manager-paper/*": ["src/core/manager-paper-core/*"]
+      "@manager-paper/*": ["src/core/manager-paper-core/*"],
+      "@infra/*": ["src/infra/*"]
     }
   }
 }
