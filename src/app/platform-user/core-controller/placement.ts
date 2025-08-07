@@ -21,7 +21,7 @@ export class PlacementController {
   ) {}
   //findAll
   @Get('')
-  // @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard)
   @HttpCode(200)
   @CacheSWR(3600)
   async getAll(): Promise<PlacementResponseDto[]> {
