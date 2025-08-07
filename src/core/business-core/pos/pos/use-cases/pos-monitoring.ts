@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import pLimit from 'p-limit';
 import {
   PosMonitoringDto,
   PosMonitoringResponseDto,
@@ -7,8 +6,7 @@ import {
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { Pos } from '@pos/pos/domain/pos';
-import { CurrencyType } from '@prisma/client';
-import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 
 @Injectable()
 export class MonitoringPosUseCase {
@@ -27,18 +25,46 @@ export class MonitoringPosUseCase {
     take?: number;
   }): Promise<PosMonitoringResponseDto> {
     const { posData, totalCount } = await this.getPosData(data);
+    const posIds = posData.map((pos) => pos.id);
 
-    const allOperations =
-      await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-        posId: data.pos?.id,
-        ability: data.pos ? undefined : data.ability,
-        dateStart: data.dateStart,
-        dateEnd: data.dateEnd,
+    const operationData =
+      await this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      );
+
+    const operationsMap = new Map<
+      number,
+      DeviceOperationMonitoringResponseDto
+    >();
+    operationData.forEach((op) => operationsMap.set(op.posId, op));
+
+    const response: PosMonitoringDto[] = [];
+
+    for (const pos of posData) {
+      const posOperations = operationsMap.get(pos.id);
+      const lastOper =
+        await this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(
+          pos.id,
+        );
+
+      response.push({
+        id: pos.id,
+        name: pos.name,
+        city: pos.city,
+        counter: posOperations?.counter,
+        cashSum: posOperations?.cashSum,
+        virtualSum: posOperations?.virtualSum,
+        yandexSum: posOperations?.yandexSum,
+        mobileSum: 0,
+        cardSum: 0,
+        lastOper: lastOper?.operDate,
+        discountSum: 0,
+        cashbackSumCard: 0,
+        cashbackSumMub: 0,
       });
-
-    const operationsByPos = this.groupOperationsByPos(allOperations);
-
-    const response = await this.processPosData(posData, operationsByPos);
+    }
 
     return {
       oper: response,
@@ -90,79 +116,5 @@ export class MonitoringPosUseCase {
       })),
       totalCount,
     };
-  }
-
-  private groupOperationsByPos(
-    operations: DeviceOperationFullDataResponseDto[],
-  ): Map<number, DeviceOperationFullDataResponseDto[]> {
-    return operations.reduce((map, operation) => {
-      const posId = operation.posId;
-      if (!map.has(posId)) {
-        map.set(posId, []);
-      }
-      map.get(posId)!.push(operation);
-      return map;
-    }, new Map<number, DeviceOperationFullDataResponseDto[]>());
-  }
-
-  private async processPosData(
-    posData: { id: number; name: string; city: string }[],
-    operationsByPos: Map<number, DeviceOperationFullDataResponseDto[]>,
-  ): Promise<PosMonitoringDto[]> {
-    const response: PosMonitoringDto[] = [];
-    const limit = pLimit(10);
-
-    for (const pos of posData) {
-      const posOperations = operationsByPos.get(pos.id) || [];
-
-      const lastOper = await limit(() =>
-        this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(pos.id),
-      );
-
-      const sums = this.calculateSumsByCurrency(posOperations);
-
-      response.push({
-        id: pos.id,
-        name: pos.name,
-        city: pos.city,
-        counter: posOperations.length,
-        ...sums,
-        mobileSum: 0,
-        cardSum: 0,
-        lastOper: lastOper?.operDate,
-        discountSum: 0,
-        cashbackSumCard: 0,
-        cashbackSumMub: 0,
-      });
-    }
-
-    return response;
-  }
-
-  private calculateSumsByCurrency(
-    operations: DeviceOperationFullDataResponseDto[],
-  ): {
-    cashSum: number;
-    virtualSum: number;
-    yandexSum: number;
-  } {
-    return operations.reduce(
-      (acc, operation) => {
-        const sum = operation.operSum;
-        switch (operation.currencyType) {
-          case CurrencyType.CASH:
-            acc.cashSum += sum;
-            break;
-          case CurrencyType.CASHLESS:
-            acc.virtualSum += sum;
-            break;
-          case CurrencyType.VIRTUAL:
-            acc.yandexSum += sum;
-            break;
-        }
-        return acc;
-      },
-      { cashSum: 0, virtualSum: 0, yandexSum: 0 },
-    );
   }
 }

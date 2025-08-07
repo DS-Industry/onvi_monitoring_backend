@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { CurrencyType } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import {
-  DeviceOperationFullDataResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto";
+  DeviceOperationMonitoringResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto";
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -14,7 +15,7 @@ export class FindMethodsDeviceOperationUseCase {
   async getAllByFilter(data: {
     ability?: any;
     organizationId?: number;
-    posId?: number;
+    posIds?: number[];
     carWashDeviceId?: number;
     dateStart?: Date;
     dateEnd?: Date;
@@ -25,13 +26,25 @@ export class FindMethodsDeviceOperationUseCase {
     return await this.deviceOperationRepository.findAllByFilter(
       data.ability,
       data.organizationId,
-      data.posId,
+      data.posIds,
       data.carWashDeviceId,
       data.dateStart,
       data.dateEnd,
       data.currencyType,
       data.skip,
       data.take,
+    );
+  }
+
+  async getDataByMonitoring(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+    return await this.deviceOperationRepository.findDataByMonitoring(
+      posIds,
+      dateStart,
+      dateEnd,
     );
   }
 

@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
-import { PrismaCarWashDeviceOperMapper } from '@db/mapper/prisma-car-wash-device-oper-mapper';
+import {
+  PrismaCarWashDeviceOperMapper,
+  RawDeviceOperationsSummary,
+} from '@db/mapper/prisma-car-wash-device-oper-mapper';
 import { CurrencyType } from '@prisma/client';
 import { accessibleBy } from '@casl/prisma';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 
 @Injectable()
 export class DeviceOperationRepository extends IDeviceOperationRepository {
@@ -125,7 +129,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
   public async findAllByFilter(
     ability?: any,
     organizationId?: number,
-    posId?: number,
+    posIds?: number[],
     carWashDeviceId?: number,
     dateStart?: Date,
     dateEnd?: Date,
@@ -145,10 +149,12 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       };
     }
 
-    if (posId !== undefined) {
+    if (posIds !== undefined && posIds.length > 0) {
       where.carWashDevice = {
         carWasPos: {
-          posId,
+          posId: {
+            in: posIds,
+          },
         },
       };
     }
@@ -218,6 +224,57 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       });
     return deviceOperations.map((item) =>
       PrismaCarWashDeviceOperMapper.toDomainWithPosData(item),
+    );
+  }
+
+  public async findDataByMonitoring(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+    const monitoringData = await this.prisma.$queryRaw<
+      RawDeviceOperationsSummary[]
+    >`
+    WITH pos_list AS (
+      SELECT unnest(${posIds}::int[]) AS pos_id
+    ),
+    operations AS (
+      SELECT 
+        cwp."posId" AS pos_id,
+        COUNT(cwdoe.id) AS counter,
+        COALESCE(SUM(CASE WHEN c."currencyType" = 'CASH' THEN cwdoe."operSum" ELSE 0 END), 0) AS cash_sum,
+        COALESCE(SUM(CASE WHEN c."currencyType" = 'CASHLESS' THEN cwdoe."operSum" ELSE 0 END), 0) AS cashless_sum,
+        COALESCE(SUM(CASE WHEN c."currencyType" = 'VIRTUAL' THEN cwdoe."operSum" ELSE 0 END), 0) AS virtual_sum
+      FROM 
+        "CarWashDeviceOperationsEvent" cwdoe
+      JOIN 
+        "CarWashDevice" cwd ON cwdoe."carWashDeviceId" = cwd.id
+      JOIN 
+        "CarWashPos" cwp ON cwd."carWashPosId" = cwp.id
+      JOIN
+        "Currency" c ON cwdoe."currencyId" = c.id
+      WHERE 
+        cwp."posId" = ANY(${posIds}::int[])
+        AND cwdoe."operDate" BETWEEN ${dateStart}::timestamp AND ${dateEnd}::timestamp
+      GROUP BY 
+        cwp."posId"
+    )
+    SELECT 
+      pl.pos_id AS "posId",
+      COALESCE(op.counter, 0) AS "counter",
+      COALESCE(op.cash_sum, 0) AS "cashSum",
+      COALESCE(op.cashless_sum, 0) AS "cashlessSum",
+      COALESCE(op.virtual_sum, 0) AS "virtualSum"
+    FROM 
+      pos_list pl
+    LEFT JOIN 
+      operations op ON pl.pos_id = op.pos_id
+    ORDER BY 
+      pl.pos_id
+  `;
+
+    return monitoringData.map((item) =>
+      PrismaCarWashDeviceOperMapper.toMonitoringResponseDto(item),
     );
   }
 

@@ -4,10 +4,21 @@ import {
 } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
+import {
+  DeviceOperationMonitoringResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto";
 export type PrismaCarWashDeviceOperWithCurrency =
   Prisma.CarWashDeviceOperationsEventGetPayload<{
     include: { currency: true };
   }>;
+export type RawDeviceOperationsSummary = {
+  posId: number;
+  counter: bigint;
+  cashSum: bigint;
+  cashlessSum: bigint;
+  virtualSum: bigint;
+};
+
 export type PrismaCarWashDeviceOperWithCurrencyAndPos =
   Prisma.CarWashDeviceOperationsEventGetPayload<{
     include: {
@@ -110,6 +121,18 @@ export class PrismaCarWashDeviceOperMapper {
       currencyView: currencyView,
       posId: posId,
       posName: posName,
+    };
+  }
+
+  static toMonitoringResponseDto(
+    item: RawDeviceOperationsSummary,
+  ): DeviceOperationMonitoringResponseDto {
+    return {
+      posId: item.posId,
+      counter: Number(item.counter),
+      cashSum: Number(item.cashSum),
+      virtualSum: Number(item.cashlessSum),
+      yandexSum: Number(item.virtualSum),
     };
   }
 

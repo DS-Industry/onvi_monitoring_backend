@@ -48,7 +48,7 @@ export class PosProgramFullUseCase {
     if (carWashPos.carWashPosType === CarWashPosType.Portal) {
       const allOperations =
         await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-          posId: pos.id,
+          posIds: [pos.id],
           dateStart,
           dateEnd,
         });

@@ -30,16 +30,13 @@ export class PlanFactPosUseCase {
   }): Promise<PosPlanFactResponseDto> {
     const { posIds, totalCount } = await this.getPosData(data);
 
-    console.log(new Date())
     const allOperations =
       await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-        posId: data.pos?.id,
-        ability: data.pos ? undefined : data.ability,
+        posIds: posIds,
         dateStart: data.dateStart,
         dateEnd: data.dateEnd,
       });
 
-    console.log(new Date())
     const operationsByPos = this.groupOperationsByPos(allOperations);
 
     const adjustedDateStart = this.getFirstDayOfMonth(data.dateStart);
