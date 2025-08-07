@@ -90,7 +90,6 @@ export class AbilityFactory {
       abilityBuilder.can(p.action, p.permissionObject.name, p?.condition);
     }
     const builtAbility = abilityBuilder.build();
-    console.log('');
     const serializedRules = JSON.stringify(builtAbility.rules);
     await this.redisService.set(cacheKey, serializedRules, 3600);
 
