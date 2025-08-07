@@ -129,8 +129,8 @@ export class PosController {
   }
   //Monitoring pos all or certain
   @Get('monitoring')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
+  // @UseGuards(JwtGuard, AbilitiesGuard)
+  // @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   async monitoringPos(
     @Request() req: any,
