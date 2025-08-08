@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
-import { ConfigModule } from '@nestjs/config';
 import { configuration } from '@config/configuration';
 import * as process from 'process';
 import { RouterModule } from '@nestjs/core';
@@ -25,7 +24,10 @@ import { NotificationCoreModule } from '@notification/notification-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 
-import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisModule } from '@infra/cache/redis.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheSWRInterceptor } from './common/interceptors/cache-swr.interceptor';
 
 @Module({
   imports: [
@@ -115,12 +117,15 @@ import { CacheModule } from '@nestjs/cache-manager';
     NotificationCoreModule,
     ManagerPaperCoreModule,
     Logger,
-    CacheModule.register({
-      ttl: 3600000,
-      isGlobal: true,
-    }),
+    RedisModule,
   ],
   controllers: [],
-  providers: [],
+
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheSWRInterceptor,
+    },
+  ],
 })
 export class AppModule {}

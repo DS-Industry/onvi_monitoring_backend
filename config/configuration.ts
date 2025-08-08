@@ -31,5 +31,9 @@ export const configuration = () => ({
   apiExpirationTime: process.env.API_EXPIRATION_TIME,
   redisHost: process.env.REDIS_HOST,
   redisPort: process.env.REDIS_PORT,
+  redisCacheHost: process.env.REDIS_CACHE_HOST,
+  redisCachePort: process.env.REDIS_CACHE_PORT,
+  redisCacheUser: process.env.REDIS_CACHE_USER,
+  redisCachePassword: process.env.REDIS_CACHE_PASSWORD,
   firebaseAdminKeyPath: process.env.FIREBASE_ADMIN_KEY_PATH,
 });
