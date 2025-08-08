@@ -46,6 +46,7 @@ import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/respo
 import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('pos')
 export class PosController {
@@ -102,6 +103,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(86400)
   async filterViewPosByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
@@ -147,6 +149,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async monitoringPos(
     @Request() req: any,
     @Query() params: PosMonitoringDto,
@@ -196,6 +199,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async monitoringFullPos(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
@@ -230,6 +234,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async programPos(
     @Request() req: any,
     @Query() params: PosMonitoringDto,
@@ -279,6 +284,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async programFullPos(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
@@ -313,6 +319,7 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(3600)
   async planFact(
     @Request() req: any,
     @Query() params: PosMonitoringDto,

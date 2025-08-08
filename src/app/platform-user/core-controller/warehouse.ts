@@ -62,6 +62,7 @@ import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/ca
 import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 import { NomenclatureStatus } from '@prisma/client';
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -239,6 +240,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
+  @CacheSWR(30)
   async getAllNomenclatureByOrgId(
     @Request() req: any,
     @Param('orgId', ParseIntPipe) orgId: number,
@@ -366,6 +368,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
+  @CacheSWR(30)
   async getAllCategory(): Promise<any> {
     try {
       return await this.findMethodsCategoryUseCase.getAll();
@@ -417,6 +420,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
+  @CacheSWR(300)
   async getAllSupplier(): Promise<any> {
     try {
       return await this.findMethodsSupplierUseCase.getAll();
@@ -441,6 +445,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
+  @CacheSWR(60)
   async getAllInventoryItem(
     @Request() req: any,
     @Param('orgId', ParseIntPipe) orgId: number,
@@ -479,6 +484,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
+  @CacheSWR(60)
   async getAllInventoryItemByWarehouse(
     @Request() req: any,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
