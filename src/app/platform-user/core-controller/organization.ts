@@ -51,6 +51,7 @@ import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { StatusUser } from '@prisma/client';
 import { OrganizationPreCreateDto } from '@platform-user/core-controller/dto/receive/organization-pre-create.dto';
 import { PreCreateOrganizationUseCase } from '@organization/organization/use-cases/organization-pre-create';
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('organization')
 export class OrganizationController {
@@ -74,6 +75,7 @@ export class OrganizationController {
   @Get('filter')
   @UseGuards(JwtGuard)
   @HttpCode(200)
+  @CacheSWR(432000)
   async filterViewOrganizationByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
@@ -230,6 +232,7 @@ export class OrganizationController {
   @Get('statistics')
   @UseGuards(JwtGuard)
   @HttpCode(200)
+  @CacheSWR(120)
   async statisticsOrg(
     @Request() req: any,
   ): Promise<OrganizationStatisticsResponseDto> {
@@ -280,6 +283,7 @@ export class OrganizationController {
   @Get('statistics-graf')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
+  @CacheSWR(120)
   async statisticsGrafOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
@@ -311,6 +315,7 @@ export class OrganizationController {
   @Get('rating')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
+  @CacheSWR(120)
   async ratingPosByOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
@@ -372,6 +377,7 @@ export class OrganizationController {
   //Get all worker for org
   @Get('worker/:id')
   @HttpCode(200)
+  @CacheSWR(60)
   async getUsersById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       return this.findMethodsOrganizationUseCase.getAllWorker(id);
@@ -396,6 +402,7 @@ export class OrganizationController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(900)
   async getDocumentById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
@@ -426,6 +433,7 @@ export class OrganizationController {
   //Get all org for owner
   @Get('owner/:id')
   @HttpCode(200)
+  @CacheSWR(900)
   async getOrganizationByOwner(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<any> {
@@ -450,6 +458,7 @@ export class OrganizationController {
   @Get('contact/:id')
   @UseGuards(JwtGuard)
   @HttpCode(200)
+  @CacheSWR(900)
   async getContactData(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       const organization = await this.organizationValidateRules.getContact(id);

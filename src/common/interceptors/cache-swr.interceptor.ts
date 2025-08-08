@@ -21,32 +21,35 @@ export class CacheSWRInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const cacheConfig = this.reflector.get(CACHE_SWR_KEY, context.getHandler());
-
-    if (!cacheConfig) {
-      return next.handle();
-    }
-
-    const request = context.switchToHttp().getRequest();
-    const { method, url, headers, user } = request;
-
-    // Only cache GET requests
-    if (method !== 'GET') {
-      return next.handle();
-    }
-
-    // Generate cache key
-    const keyPrefix = cacheConfig.keyPrefix || 'swr';
-    const cacheKey = `${keyPrefix}:${user.id}:${url}`;
-
-    // Check cache control headers from React
-    const cacheControl = headers['cache-control'];
-    const shouldInvalidate =
-      cacheControl === 'no-cache' || headers['x-invalidate-cache'] === 'true';
-    const shouldSkipCache =
-      cacheControl === 'no-store' || headers['x-skip-cache'] === 'true';
-
     try {
+      const cacheConfig = this.reflector.get(
+        CACHE_SWR_KEY,
+        context.getHandler(),
+      );
+
+      if (!cacheConfig) {
+        return next.handle();
+      }
+
+      const request = context.switchToHttp().getRequest();
+      const { method, url, headers, user } = request;
+
+      // Only cache GET requests
+      if (method !== 'GET') {
+        return next.handle();
+      }
+
+      // Generate cache key
+      const keyPrefix = cacheConfig.keyPrefix || 'swr';
+      const cacheKey = `${keyPrefix}:${user.id}:${url}`;
+
+      // Check cache control headers from React
+      const cacheControl = headers['cache-control'];
+      const shouldInvalidate =
+        cacheControl === 'no-cache' || headers['x-invalidate-cache'] === 'true';
+      const shouldSkipCache =
+        cacheControl === 'no-store' || headers['x-skip-cache'] === 'true';
+
       // Invalidate cache if requested
       if (shouldInvalidate) {
         await this.redisService.del(cacheKey);
