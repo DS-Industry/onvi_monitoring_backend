@@ -19,7 +19,7 @@ export class AbilityFactory {
   ) {}
 
   async createForPlatformManager(user: User): Promise<any> {
-    const cacheKey = `ability:${user.id}`;
+    const cacheKey = `ability:${user.id}:`;
     const cachedRulesJson = await this.redisService.get(cacheKey);
 
     if (cachedRulesJson) {
