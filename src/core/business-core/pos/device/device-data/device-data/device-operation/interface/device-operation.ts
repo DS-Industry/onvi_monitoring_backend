@@ -3,6 +3,9 @@ import { CurrencyType } from '@prisma/client';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
+import {
+  DeviceOperationFullSumDyPosResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
@@ -28,6 +31,11 @@ export abstract class IDeviceOperationRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceOperationMonitoringResponseDto[]>;
+  abstract findAllSumByPos(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationFullSumDyPosResponseDto[]>;
   abstract findDataLastOperByPosIds(
     posIds: number[],
   ): Promise<DeviceOperationLastDataResponseDto[]>;

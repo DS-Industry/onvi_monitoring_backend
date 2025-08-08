@@ -11,6 +11,7 @@ import { accessibleBy } from '@casl/prisma';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
+import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 
 @Injectable()
 export class DeviceOperationRepository extends IDeviceOperationRepository {
@@ -274,6 +275,42 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     GROUP BY 
       cwd.id
   `;
+  }
+
+  public async findAllSumByPos(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationFullSumDyPosResponseDto[]> {
+    if (!posIds.length) {
+      return [];
+    }
+
+    const result = await this.prisma.$queryRaw<
+      DeviceOperationFullSumDyPosResponseDto[]
+    >`
+    SELECT 
+      cwp.name as "posName",
+      COALESCE(SUM(cwdoe."operSum"), 0) as "sum"
+    FROM 
+      "CarWashPos" cwp
+    LEFT JOIN 
+      "CarWashDevice" cwd ON cwp.id = cwd."carWashPosId"
+    LEFT JOIN 
+      "CarWashDeviceOperationsEvent" cwdoe ON cwd.id = cwdoe."carWashDeviceId"
+      AND cwdoe."operDate" BETWEEN ${dateStart}::timestamp AND ${dateEnd}::timestamp
+    WHERE 
+      cwp."posId" = ANY(${posIds}::int[])
+    GROUP BY 
+      cwp."posId", cwp.name
+    ORDER BY 
+      "sum" DESC
+  `;
+
+    return result.map((item) => ({
+      posName: item.posName,
+      sum: Number(item.sum),
+    }));
   }
 
   public async countAllByDeviceIdAndDateOper(

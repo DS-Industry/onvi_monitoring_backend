@@ -30,7 +30,6 @@ import { OrganizationCreateDto } from '@platform-user/core-controller/dto/receiv
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { OrganizationFilterResponseDto } from '@platform-user/core-controller/dto/response/organization-filter-response.dto';
-import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { OrganizationUpdateDto } from '@platform-user/core-controller/dto/receive/organization-update.dto';
 import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/organization-update';

@@ -5,6 +5,9 @@ import { DeviceOperation } from '@pos/device/device-data/device-data/device-oper
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
+import {
+  DeviceOperationFullSumDyPosResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -41,6 +44,18 @@ export class FindMethodsDeviceOperationUseCase {
     dateEnd: Date,
   ): Promise<DeviceOperationMonitoringResponseDto[]> {
     return await this.deviceOperationRepository.findDataByMonitoring(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getAllSumByPos(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationFullSumDyPosResponseDto[]> {
+    return await this.deviceOperationRepository.findAllSumByPos(
       posIds,
       dateStart,
       dateEnd,
