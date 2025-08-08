@@ -28,7 +28,7 @@ export class CacheSWRInterceptor implements NestInterceptor {
     }
 
     const request = context.switchToHttp().getRequest();
-    const { method, url, headers } = request;
+    const { method, url, headers, user } = request;
 
     // Only cache GET requests
     if (method !== 'GET') {
@@ -37,7 +37,7 @@ export class CacheSWRInterceptor implements NestInterceptor {
 
     // Generate cache key
     const keyPrefix = cacheConfig.keyPrefix || 'swr';
-    const cacheKey = `${keyPrefix}:${url}`;
+    const cacheKey = `${keyPrefix}:${user.id}:${url}`;
 
     // Check cache control headers from React
     const cacheControl = headers['cache-control'];
