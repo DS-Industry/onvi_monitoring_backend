@@ -36,6 +36,7 @@ import { ConnectedPodUserDto } from '@platform-user/core-controller/dto/receive/
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
+import { RedisService } from '@infra/cache/redis.service';
 
 @Controller('permission')
 export class PermissionController {
@@ -49,7 +50,25 @@ export class PermissionController {
     private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly connectionUserPosUseCase: ConnectionUserPosUseCase,
+    private readonly redisService: RedisService,
   ) {}
+
+  private async deleteUserKeysSafely(userId: number) {
+    const pattern = `*:${userId}:*`;
+    let cursor = '0';
+
+    do {
+      const [nextCursor, keys] = await this.redisService.scan(cursor, 'MATCH', pattern, 'COUNT', '100');
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await this.redisService.delMultiple(...keys);
+      }
+    } while (cursor !== '0');
+
+    console.log(`Finished deleting keys for user ${userId}`);
+  }
+
   @Get('roles')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
@@ -158,7 +177,9 @@ export class PermissionController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PosPermissionsResponseDto[]> {
     try {
-      const poses = await this.findMethodsPosUseCase.getAllByFilter({ userId: userId });
+      const poses = await this.findMethodsPosUseCase.getAllByFilter({
+        userId: userId,
+      });
       return poses.map((pos) => ({
         id: pos.id,
         name: pos.name,
@@ -219,6 +240,9 @@ export class PermissionController {
         body.posIds,
         ability,
       );
+
+      await this.deleteUserKeysSafely(userId);
+
       return await this.connectionUserPosUseCase.execute(body.posIds, userId);
     } catch (e) {
       if (e instanceof UserException) {
@@ -249,6 +273,9 @@ export class PermissionController {
         body.userId,
         body.roleId,
       );
+      
+      await this.deleteUserKeysSafely(body.userId);
+      
       return await this.userUpdate.execute({
         id: body.userId,
         roleId: body.roleId,
