@@ -12,7 +12,7 @@ export type PrismaCarWashDeviceOperWithCurrency =
     include: { currency: true };
   }>;
 export type RawDeviceOperationsSummary = {
-  posId: number;
+  ownerId: number;
   counter: bigint;
   cashSum: bigint;
   cashlessSum: bigint;
@@ -128,7 +128,7 @@ export class PrismaCarWashDeviceOperMapper {
     item: RawDeviceOperationsSummary,
   ): DeviceOperationMonitoringResponseDto {
     return {
-      posId: item.posId,
+      ownerId: item.ownerId,
       counter: Number(item.counter),
       cashSum: Number(item.cashSum),
       virtualSum: Number(item.cashlessSum),

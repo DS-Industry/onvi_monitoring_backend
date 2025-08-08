@@ -3,9 +3,8 @@ import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/
 import { CurrencyType } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
-import {
-  DeviceOperationMonitoringResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto";
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
+import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -48,14 +47,32 @@ export class FindMethodsDeviceOperationUseCase {
     );
   }
 
-  async getLastByDeviceIdUseCase(deviceId: number): Promise<DeviceOperation> {
-    return await this.deviceOperationRepository.findLastOperByDeviceId(
-      deviceId,
+  async getDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+    return await this.deviceOperationRepository.findDataByMonitoringDetail(
+      deviceIds,
+      dateStart,
+      dateEnd,
     );
   }
 
-  async getLastByPosIdUseCase(posId: number): Promise<DeviceOperation> {
-    return await this.deviceOperationRepository.findLastOperByPosId(posId);
+  async getDataLastOperByPosIds(
+    posIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]> {
+    return await this.deviceOperationRepository.findDataLastOperByPosIds(
+      posIds,
+    );
+  }
+
+  async getDataLastOperByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]> {
+    return await this.deviceOperationRepository.findDataLastOperByDeviceIds(
+      deviceIds,
+    );
   }
 
   async getCountAllByDeviceIdAndDateOper(

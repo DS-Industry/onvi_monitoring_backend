@@ -1,9 +1,8 @@
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { CurrencyType } from '@prisma/client';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
-import {
-  DeviceOperationMonitoringResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto";
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
+import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
@@ -24,10 +23,17 @@ export abstract class IDeviceOperationRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceOperationMonitoringResponseDto[]>;
-  abstract findLastOperByPosId(byPosId: number): Promise<DeviceOperation>;
-  abstract findLastOperByDeviceId(
-    carWashDeviceId: number,
-  ): Promise<DeviceOperation>;
+  abstract findDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationMonitoringResponseDto[]>;
+  abstract findDataLastOperByPosIds(
+    posIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]>;
+  abstract findDataLastOperByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]>;
   abstract countAllByDeviceIdAndDateOper(
     deviceId: number,
     dateStart: Date,

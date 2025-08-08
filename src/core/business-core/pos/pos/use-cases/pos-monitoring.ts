@@ -27,27 +27,30 @@ export class MonitoringPosUseCase {
     const { posData, totalCount } = await this.getPosData(data);
     const posIds = posData.map((pos) => pos.id);
 
-    const operationData =
-      await this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
+    const [operations, lastOpers] = await Promise.all([
+      this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
         posIds,
         data.dateStart,
         data.dateEnd,
-      );
+      ),
+      this.findMethodsDeviceOperationUseCase.getDataLastOperByPosIds(posIds),
+    ]);
 
     const operationsMap = new Map<
       number,
       DeviceOperationMonitoringResponseDto
     >();
-    operationData.forEach((op) => operationsMap.set(op.posId, op));
+    operations.forEach((op) => operationsMap.set(op.ownerId, op));
+
+    const lastDatesMap = lastOpers.reduce((map, item) => {
+      map.set(item.ownerId, item.operDate);
+      return map;
+    }, new Map<number, Date>());
 
     const response: PosMonitoringDto[] = [];
 
     for (const pos of posData) {
       const posOperations = operationsMap.get(pos.id);
-      const lastOper =
-        await this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(
-          pos.id,
-        );
 
       response.push({
         id: pos.id,
@@ -59,7 +62,7 @@ export class MonitoringPosUseCase {
         yandexSum: posOperations?.yandexSum,
         mobileSum: 0,
         cardSum: 0,
-        lastOper: lastOper?.operDate,
+        lastOper: lastDatesMap.get(pos.id) || undefined,
         discountSum: 0,
         cashbackSumCard: 0,
         cashbackSumMub: 0,

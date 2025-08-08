@@ -1,5 +1,5 @@
 export class DeviceOperationMonitoringResponseDto {
-  posId: number;
+  ownerId: number;
   counter: number;
   cashSum: number;
   virtualSum: number;
