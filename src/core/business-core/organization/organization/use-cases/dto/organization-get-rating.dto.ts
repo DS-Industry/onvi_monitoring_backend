@@ -1,5 +1,5 @@
 export class OrganizationGetRatingDto{
-  organizationId: number;
+  ability: any;
   dateStart: Date;
   dateEnd: Date;
 }

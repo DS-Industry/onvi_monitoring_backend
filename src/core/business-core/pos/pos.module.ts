@@ -34,7 +34,6 @@ import { DeviceProgramTypeRepositoryProvider } from '@pos/device/device-data/dev
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { DeviceProgramRepositoryProvider } from '@pos/device/device-data/device-data/device-program/device-program/provider/device-program';
 import { DeviceProgramHandlerUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-handler';
-import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { DeviceOperationRepositoryProvider } from '@pos/device/device-data/device-data/device-operation/provider/device-operation';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
@@ -142,7 +141,6 @@ const deviceDataHandlerUseCase: Provider[] = [
 ];
 
 const deviceDataUseCase: Provider[] = [
-  DataDeviceProgramUseCase,
   DataByDeviceProgramUseCase,
   DataByDeviceOperationUseCase,
   FindMethodsDeviceProgramUseCase,

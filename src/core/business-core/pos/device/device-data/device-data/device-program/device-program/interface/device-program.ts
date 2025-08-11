@@ -8,6 +8,9 @@ import {
 import {
   DeviceProgramLastDataResponseDto
 } from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto";
+import {
+  DeviceProgramCleanDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-clean-data-response.dto";
 
 export abstract class IDeviceProgramRepository {
   abstract create(input: DeviceProgram): Promise<DeviceProgram>;
@@ -29,15 +32,27 @@ export abstract class IDeviceProgramRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByMonitoringDetailPortal(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByClean(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramCleanDataResponseDto[]>;
   abstract findDataLastProgByPosIds(
     posIds: number[],
   ): Promise<DeviceProgramLastDataResponseDto[]>;
   abstract findDataLastProgByDeviceIds(
     deviceIds: number[],
   ): Promise<DeviceProgramLastDataResponseDto[]>;
-  abstract findLastProgramByDeviceId(
-    carWashDeviceId: number,
-  ): Promise<DeviceProgram>;
   abstract findProgramForCheckCar(
     carWashDeviceId: number,
     dateStart: Date,

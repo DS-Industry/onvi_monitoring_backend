@@ -30,6 +30,8 @@ export type RawDeviceProgramsSummary = {
   counter: bigint;
   totalTime: bigint;
   averageTime: bigint;
+  totalProfit?: bigint;
+  averageProfit?: bigint;
 };
 export class PrismaCarWashDeviceProgramMapper {
   static toDomain(
@@ -103,6 +105,8 @@ export class PrismaCarWashDeviceProgramMapper {
       counter: Number(item.counter),
       totalTime: Number(item.totalTime),
       averageTime: Number(item.averageTime),
+      totalProfit: Number(item?.totalProfit),
+      averageProfit: Number(item?.averageProfit),
     };
   }
 

@@ -4,4 +4,6 @@ export class DeviceProgramMonitoringResponseDto {
   counter: number;
   totalTime: number;
   averageTime: number;
+  totalProfit?: number;
+  averageProfit?: number;
 }

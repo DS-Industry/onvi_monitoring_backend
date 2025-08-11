@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
-import {
-  CleanDataResponseDto,
-  ProgramDataDto,
-} from '@platform-user/core-controller/dto/response/clean-data-response.dto';
-import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
-import {
-  DeviceProgramFullDataResponseDto
-} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
+import { CleanDataResponseDto } from '@platform-user/core-controller/dto/response/clean-data-response.dto';
+import { DeviceProgramCleanDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-clean-data-response.dto';
 
 @Injectable()
 export class CleanDataDeviceProgramUseCase {
@@ -20,63 +14,32 @@ export class CleanDataDeviceProgramUseCase {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<CleanDataResponseDto[]> {
-    const devicePrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        posIds: [posId],
-        isPaid: 0,
-        dateStart: dateStart,
-        dateEnd: dateEnd,
-      });
-
-    const groupedByDevice = devicePrograms.reduce(
-      (acc, program) => {
-        if (!acc[program.carWashDeviceId]) {
-          acc[program.carWashDeviceId] = [];
-        }
-        acc[program.carWashDeviceId].push(program);
-        return acc;
-      },
-      {} as Record<number, DeviceProgramFullDataResponseDto[]>,
-    );
-
-    return Object.entries(groupedByDevice).map(([deviceId, programs]) => {
-      const groupedByProgramName = programs.reduce(
-        (acc, program) => {
-          if (!program.programName) return acc;
-          if (!acc[program.programName]) {
-            acc[program.programName] = {
-              countProgram: 0,
-              totalSeconds: 0,
-            };
-          }
-
-          acc[program.programName].countProgram += 1;
-          acc[program.programName].totalSeconds += Math.trunc(
-            (new Date(program.endDate).getTime() -
-              new Date(program.beginDate).getTime()) /
-              1000,
-          );
-
-          return acc;
-        },
-        {} as Record<string, { countProgram: number; totalSeconds: number }>,
+    const programCleans =
+      await this.findMethodsDeviceProgramUseCase.getDataByClean(
+        [posId],
+        dateStart,
+        dateEnd,
       );
 
-      const programData: ProgramDataDto[] = Object.entries(
-        groupedByProgramName,
-      ).map(([programName, data]) => {
-        return {
-          programName,
-          countProgram: data.countProgram,
-          time: this.formatSecondsToTime(data.totalSeconds),
-        };
-      });
+    const groupedByDevice = programCleans.reduce(
+      (acc, item) => {
+        if (!acc[item.deviceId]) {
+          acc[item.deviceId] = [];
+        }
+        acc[item.deviceId].push(item);
+        return acc;
+      },
+      {} as Record<number, DeviceProgramCleanDataResponseDto[]>,
+    );
 
-      return {
-        deviceId: +deviceId,
-        programData,
-      };
-    });
+    return Object.entries(groupedByDevice).map(([deviceId, programs]) => ({
+      deviceId: Number(deviceId),
+      programData: programs.map((program) => ({
+        programName: program.programName,
+        countProgram: program.counter,
+        time: this.formatSecondsToTime(program.totalTime),
+      })),
+    }));
   }
 
   private formatSecondsToTime(totalSeconds: number): string {

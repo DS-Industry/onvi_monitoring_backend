@@ -26,7 +26,6 @@ import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-was
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
-import { DeviceFilterResponseDto } from '@platform-user/core-controller/dto/response/device-filter-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto';
 import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
@@ -38,7 +37,6 @@ import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-val
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
-import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
 
 @Controller('device')

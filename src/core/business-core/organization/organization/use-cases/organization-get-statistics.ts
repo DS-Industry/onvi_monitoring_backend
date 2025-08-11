@@ -16,22 +16,36 @@ export class GetStatisticsOrganizationUseCase {
   async execute(
     input: OrganizationGetRatingDto,
   ): Promise<OrganizationStatisticsResponseDto> {
+    const posIds = input.ability.rules
+      .filter(
+        (rule: {
+          subject: string;
+          action: string;
+          conditions: { id: { in: any } };
+        }) =>
+          rule.action === 'read' &&
+          rule.subject === 'Pos' &&
+          rule.conditions?.id?.in,
+      )
+      .flatMap(
+        (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+      );
+    if (!posIds.length) {
+      return { sum: 0, cars: 0 };
+    }
     const [deviceOperations, devicePrograms] = await Promise.all([
-      this.findMethodsDeviceOperationUseCase.getAllByFilter({
-        organizationId: input.organizationId,
-        dateStart: input.dateStart,
-        dateEnd: input.dateEnd,
-      }),
+      this.findMethodsDeviceOperationUseCase.getAllSumByPos(
+        posIds,
+        input.dateStart,
+        input.dateEnd,
+      ),
       this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        organizationId: input.organizationId,
+        posIds: posIds,
         dateStart: input.dateStart,
         dateEnd: input.dateEnd,
       }),
     ]);
-    const totalSum = deviceOperations.reduce(
-      (sum, operation) => sum + operation.operSum,
-      0,
-    );
+    const totalSum = deviceOperations.reduce((sum, item) => sum + item.sum, 0);
 
     const countAuto =
       await this.countCarDeviceProgramUseCase.executeByDeviceProgram(

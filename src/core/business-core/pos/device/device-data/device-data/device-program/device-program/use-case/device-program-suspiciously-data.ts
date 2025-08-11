@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
-import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import {
   DeviceProgramFullDataResponseDto
 } from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";

@@ -3,9 +3,8 @@ import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/de
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
 import { DeviceProgramMonitoringResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-monitoring-response.dto';
-import {
-  DeviceProgramLastDataResponseDto
-} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto";
+import { DeviceProgramLastDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto';
+import { DeviceProgramCleanDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-clean-data-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceProgramUseCase {
@@ -48,9 +47,37 @@ export class FindMethodsDeviceProgramUseCase {
       dateEnd,
     );
   }
-  async getLastByDeviceId(deviceId: number): Promise<DeviceProgram> {
-    return await this.deviceProgramRepository.findLastProgramByDeviceId(
-      deviceId,
+  async getDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByMonitoringDetail(
+      deviceIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getDataByMonitoringDetailPortal(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByMonitoringDetailPortal(
+      deviceIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getDataByClean(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramCleanDataResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByClean(
+      posIds,
+      dateStart,
+      dateEnd,
     );
   }
 
@@ -58,6 +85,14 @@ export class FindMethodsDeviceProgramUseCase {
     posIds: number[],
   ): Promise<DeviceProgramLastDataResponseDto[]> {
     return await this.deviceProgramRepository.findDataLastProgByPosIds(posIds);
+  }
+
+  async getLastByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceProgramLastDataResponseDto[]> {
+    return await this.deviceProgramRepository.findDataLastProgByDeviceIds(
+      deviceIds,
+    );
   }
 
   async getCountAllByDeviceIdAndDateProgram(
