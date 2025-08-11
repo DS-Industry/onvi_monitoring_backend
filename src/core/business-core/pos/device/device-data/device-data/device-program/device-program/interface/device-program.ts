@@ -2,6 +2,15 @@ import { DeviceProgram } from '@pos/device/device-data/device-data/device-progra
 import {
   DeviceProgramFullDataResponseDto
 } from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto";
+import {
+  DeviceProgramMonitoringResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-monitoring-response.dto";
+import {
+  DeviceProgramLastDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto";
+import {
+  DeviceProgramCleanDataResponseDto
+} from "@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-clean-data-response.dto";
 
 export abstract class IDeviceProgramRepository {
   abstract create(input: DeviceProgram): Promise<DeviceProgram>;
@@ -9,7 +18,7 @@ export abstract class IDeviceProgramRepository {
   abstract findAllByFilter(
     ability?: any,
     organizationId?: number,
-    posId?: number,
+    posIds?: number[],
     carWashDeviceId?: number,
     dateStart?: Date,
     dateEnd?: Date,
@@ -18,10 +27,32 @@ export abstract class IDeviceProgramRepository {
     skip?: number,
     take?: number,
   ): Promise<DeviceProgramFullDataResponseDto[]>;
-  abstract findLastProgramByPosId(carWashPosId: number): Promise<DeviceProgram>;
-  abstract findLastProgramByDeviceId(
-    carWashDeviceId: number,
-  ): Promise<DeviceProgram>;
+  abstract findDataByMonitoring(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByMonitoringDetailPortal(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]>;
+  abstract findDataByClean(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramCleanDataResponseDto[]>;
+  abstract findDataLastProgByPosIds(
+    posIds: number[],
+  ): Promise<DeviceProgramLastDataResponseDto[]>;
+  abstract findDataLastProgByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceProgramLastDataResponseDto[]>;
   abstract findProgramForCheckCar(
     carWashDeviceId: number,
     dateStart: Date,

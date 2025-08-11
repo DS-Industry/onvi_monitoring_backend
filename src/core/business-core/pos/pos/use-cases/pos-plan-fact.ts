@@ -6,10 +6,9 @@ import {
 } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
-import { CurrencyType } from '@prisma/client';
 import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
-import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { MonthlyPlanPos } from '@pos/monthlyPlanPos/domain/monthlyPlanPos';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 
 @Injectable()
 export class PlanFactPosUseCase {
@@ -30,47 +29,52 @@ export class PlanFactPosUseCase {
   }): Promise<PosPlanFactResponseDto> {
     const { posIds, totalCount } = await this.getPosData(data);
 
-    const allOperations =
-      await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-        posIds: posIds,
-        dateStart: data.dateStart,
-        dateEnd: data.dateEnd,
-      });
-
-    const operationsByPos = this.groupOperationsByPos(allOperations);
-
     const adjustedDateStart = this.getFirstDayOfMonth(data.dateStart);
     const adjustedDateEnd = this.getLastDayOfMonth(data.dateEnd);
-    const allPlans =
-      await this.findMethodsMonthlyPlanPosUseCase.getAllByPosIdsAndDate(
+
+    const [operations, allPlans] = await Promise.all([
+      this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      ),
+      this.findMethodsMonthlyPlanPosUseCase.getAllByPosIdsAndDate(
         posIds,
         adjustedDateStart,
         adjustedDateEnd,
-      );
+      ),
+    ]);
+
+    const operationsMap = new Map<
+      number,
+      DeviceOperationMonitoringResponseDto
+    >();
+    operations.forEach((op) => operationsMap.set(op.ownerId, op));
 
     const response: PosPlanFactDto[] = [];
     for (const posId of posIds) {
-      const posOperations = operationsByPos.get(posId) || [];
+      const posOperations = operationsMap.get(posId);
       const posPlans = allPlans.filter((plan) => plan.posId === posId);
 
-      const sums = this.calculateSumsByCurrency(posOperations);
+      const cashSum = posOperations?.cashSum || 0;
+      const virtualSum = posOperations?.virtualSum || 0;
+      const yandexSum = posOperations?.yandexSum || 0;
+      const sumFact = cashSum + virtualSum + yandexSum;
 
       const totalPlan = this.calculateTotalPlan(
         posPlans,
         data.dateStart,
         data.dateEnd,
       );
-
-      const sumFact = sums.cashSum + sums.virtualSum + sums.yandexSum;
       const completedPercent =
         totalPlan > 0 ? Math.round((sumFact / totalPlan) * 100) : 100;
 
       response.push({
         posId: posId,
         plan: totalPlan,
-        cashFact: sums.cashSum,
-        virtualSumFact: sums.virtualSum,
-        yandexSumFact: sums.yandexSum,
+        cashFact: cashSum,
+        virtualSumFact: virtualSum,
+        yandexSumFact: yandexSum,
         sumFact: sumFact,
         completedPercent: completedPercent,
         notCompletedPercent:
@@ -101,53 +105,25 @@ export class PlanFactPosUseCase {
         data.placementId,
       );
 
-    const poses = await this.findMethodsPosUseCase.getAllByFilter({
-      ability: data.ability,
-      placementId: data.placementId,
-      skip: data.skip,
-      take: data.take,
-    });
+    const posIds = data.ability.rules
+      .filter(
+        (rule: {
+          subject: string;
+          action: string;
+          conditions: { id: { in: any } };
+        }) =>
+          rule.action === 'read' &&
+          rule.subject === 'Pos' &&
+          rule.conditions?.id?.in,
+      )
+      .flatMap(
+        (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+      );
 
     return {
-      posIds: poses.map((pos) => pos.id),
+      posIds,
       totalCount,
     };
-  }
-
-  private groupOperationsByPos(
-    operations: DeviceOperationFullDataResponseDto[],
-  ): Map<number, DeviceOperationFullDataResponseDto[]> {
-    return operations.reduce((map, operation) => {
-      const posId = operation.posId;
-      if (!map.has(posId)) {
-        map.set(posId, []);
-      }
-      map.get(posId).push(operation);
-      return map;
-    }, new Map<number, DeviceOperationFullDataResponseDto[]>());
-  }
-
-  private calculateSumsByCurrency(
-    operations: DeviceOperationFullDataResponseDto[],
-  ): { cashSum: number; virtualSum: number; yandexSum: number } {
-    return operations.reduce(
-      (acc, operation) => {
-        const sum = operation.operSum;
-        switch (operation.currencyType) {
-          case CurrencyType.CASH:
-            acc.cashSum += sum;
-            break;
-          case CurrencyType.CASHLESS:
-            acc.virtualSum += sum;
-            break;
-          case CurrencyType.VIRTUAL:
-            acc.yandexSum += sum;
-            break;
-        }
-        return acc;
-      },
-      { cashSum: 0, virtualSum: 0, yandexSum: 0 },
-    );
   }
 
   private calculateTotalPlan(

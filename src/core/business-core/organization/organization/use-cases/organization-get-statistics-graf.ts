@@ -13,42 +13,28 @@ export class GetStatisticsGrafOrganizationUseCase {
     dateEnd: Date,
     ability: any,
   ): Promise<OrganizationStatisticGrafResponseDto[]> {
-    const operations =
-      await this.findMethodsDeviceOperationUseCase.getAllByFilter({
-        ability: ability,
-        dateStart: dateStart,
-        dateEnd: dateEnd,
-      });
+    const posIds = ability.rules
+      .filter(
+        (rule: {
+          subject: string;
+          action: string;
+          conditions: { id: { in: any } };
+        }) =>
+          rule.action === 'read' &&
+          rule.subject === 'Pos' &&
+          rule.conditions?.id?.in,
+      )
+      .flatMap(
+        (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+      );
+    if (!posIds.length) {
+      return [];
+    }
 
-    const operationsByDay = operations.reduce((acc, operation) => {
-      const date = new Date(operation.operDate);
-      const year = date.getFullYear();
-      const month = date.getMonth();
-      const day = date.getDate();
-      const key = `${year}-${month}-${day}`;
-
-      if (!acc.has(key)) {
-        acc.set(key, {
-          year,
-          month,
-          day,
-          sum: 0,
-        });
-      }
-
-      acc.get(key)!.sum += operation.operSum;
-      return acc;
-    }, new Map<string, { year: number; month: number; day: number; sum: number }>());
-
-    return Array.from(operationsByDay.values())
-      .sort((a, b) => {
-        if (a.year !== b.year) return a.year - b.year;
-        if (a.month !== b.month) return a.month - b.month;
-        return a.day - b.day;
-      })
-      .map((item) => ({
-        date: new Date(Date.UTC(item.year, item.month, item.day)),
-        sum: item.sum,
-      }));
+    return await this.findMethodsDeviceOperationUseCase.getDailyStatistics(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
   }
 }

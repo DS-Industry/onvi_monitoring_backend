@@ -27,6 +27,9 @@ export class GetRatingOrganizationUseCase {
       .flatMap(
         (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
       );
+    if (!posIds.length) {
+      return [];
+    }
 
     return await this.findMethodsDeviceOperationUseCase.getAllSumByPos(
       posIds,

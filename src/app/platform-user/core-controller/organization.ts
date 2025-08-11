@@ -230,16 +230,14 @@ export class OrganizationController {
   }
   //Statistics for organization
   @Get('statistics')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
   @HttpCode(200)
   @CacheSWR(120)
   async statisticsOrg(
     @Request() req: any,
   ): Promise<OrganizationStatisticsResponseDto> {
     try {
-      const { user } = req;
-      const organizationId =
-        await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
+      const { ability } = req;
       const today = new Date();
       const input = {
         dateStart: new Date(
@@ -260,7 +258,7 @@ export class OrganizationController {
           59,
           999,
         ),
-        organizationId: organizationId[0],
+        ability: ability,
       };
       return await this.getStatisticsOrganizationUseCase.execute(input);
     } catch (e) {
