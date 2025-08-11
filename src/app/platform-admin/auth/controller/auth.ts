@@ -68,8 +68,7 @@ export class Auth {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        // maxAge: 15 * 60 * 1000, // 15 minutes
-        maxAge: 1 * 60 * 1000, // 15 minutes
+        maxAge: 15 * 60 * 1000, // 15 minutes
       });
 
       res.cookie('refreshToken', response.tokens.refreshToken, {
@@ -149,15 +148,28 @@ export class Auth {
   @UseGuards(RefreshGuard)
   @Post('/refresh')
   @HttpCode(200)
-  async refresh(@Body() body: any, @Req() req: any): Promise<any> {
+  async refresh(
+    @Body() body: any,
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
     try {
       const { user } = req;
       const accessToken = await this.singAccessToken.execute(
         user.props.email,
         user.props.id,
       );
+
+      // Set httpOnly cookie for new access token
+      res.cookie('accessToken', accessToken.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+
       return {
-        accessToken: accessToken.token,
+        success: true,
         accessTokenExp: accessToken.expirationDate,
       };
     } catch (e) {
