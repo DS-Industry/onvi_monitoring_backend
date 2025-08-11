@@ -15,10 +15,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'adminJwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback to Authorization header
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
-          return request?.cookies?.accessToken; // Extract from httpOnly cookie
-        }
+          return request?.cookies?.accessToken;
+        },
       ]),
       secretOrKey: configService.get<string>('jwtSecret'),
     });

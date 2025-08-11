@@ -5,8 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-user/auth/domain/jwt-payload';
 import { User } from '@platform-user/user/domain/user';
 import { ValidateUserForJwtStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-jwt-strategy';
-import { UserException } from "@exception/option.exceptions";
-import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
+import { UserException } from '@exception/option.exceptions';
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from '@constant/error.constants';
 import { Request } from 'express';
 
 @Injectable()
@@ -17,10 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback to Authorization header
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
-          return request?.cookies?.accessToken; // Extract from httpOnly cookie
-        }
+          return request?.cookies?.accessToken;
+        },
       ]),
       secretOrKey: configService.get<string>('jwtSecret'),
     });

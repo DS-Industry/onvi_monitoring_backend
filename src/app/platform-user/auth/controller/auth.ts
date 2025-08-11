@@ -72,7 +72,6 @@ export class Auth {
           response.admin,
         );
 
-      // Set httpOnly cookies for tokens
       res.cookie('accessToken', response.tokens.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -87,7 +86,6 @@ export class Auth {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
-      // Return response without tokens in body
       const { tokens, ...responseWithoutTokens } = response;
       return { ...responseWithoutTokens, permissionInfo };
     } catch (e) {
@@ -246,7 +244,6 @@ export class Auth {
         user.props.id,
       );
 
-      // Set httpOnly cookie for new access token
       res.cookie('accessToken', accessToken.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -355,7 +352,6 @@ export class Auth {
     }
   }
 
-  // Validate token endpoint
   @UseGuards(JwtGuard)
   @Get('/validate')
   @HttpCode(200)

@@ -18,15 +18,14 @@ export const rolesMapBootstrap = {
     const appName = configService.get<string>('appName');
 
     app.use(cookieParser());
-    
-    // Enable CORS with credentials support for cookies
+
     app.enableCors({
-      origin: true, // Allow all origins or specify your React app URL
-      credentials: true, // Required for cookies
+      origin: true,
+      credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     });
-    
+
     app.useGlobalFilters(new AllExceptionFilter());
 
     app.useGlobalPipes(
