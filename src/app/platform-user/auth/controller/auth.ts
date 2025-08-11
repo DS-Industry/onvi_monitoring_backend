@@ -52,7 +52,11 @@ export class Auth {
   @UseGuards(LocalGuard)
   @Post('/login')
   @HttpCode(201)
-  async login(@Body() body: AuthLoginDto, @Request() req: any, @Res({ passthrough: true }) res: Response): Promise<any> {
+  async login(
+    @Body() body: AuthLoginDto,
+    @Request() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
     try {
       const { user } = req;
       if (user.register) {
@@ -67,15 +71,16 @@ export class Auth {
         await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
           response.admin,
         );
-      
+
       // Set httpOnly cookies for tokens
       res.cookie('accessToken', response.tokens.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
+        // maxAge: 15 * 60 * 1000, // 15 minutes
+        maxAge: 1 * 60 * 1000, // 15 minutes
       });
-      
+
       res.cookie('refreshToken', response.tokens.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -345,12 +350,12 @@ export class Auth {
   async validate(@Request() req: any): Promise<any> {
     try {
       const { user } = req;
-      return { 
-        valid: true, 
+      return {
+        valid: true,
         user: {
           id: user.props.id,
-          email: user.props.email
-        }
+          email: user.props.email,
+        },
       };
     } catch (e) {
       throw new CustomHttpException({
