@@ -7,6 +7,7 @@ import { User } from '@platform-user/user/domain/user';
 import { ValidateUserForJwtStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-jwt-strategy';
 import { UserException } from "@exception/option.exceptions";
 import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
@@ -15,7 +16,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'userJwt') {
     private readonly validateJwtStrategyUseCase: ValidateUserForJwtStrategyUseCase,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback to Authorization header
+        (request: Request) => {
+          return request?.cookies?.accessToken; // Extract from httpOnly cookie
+        }
+      ]),
       secretOrKey: configService.get<string>('jwtSecret'),
     });
   }

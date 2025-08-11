@@ -10,7 +10,9 @@ import {
   Req,
   Request,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { LocalGuard } from '@platform-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@platform-user/auth/controller/dto/auth-login.dto';
@@ -31,6 +33,7 @@ import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/conf
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { UserException } from '@exception/option.exceptions';
+import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 
 @Controller('auth')
 export class Auth {
@@ -49,7 +52,7 @@ export class Auth {
   @UseGuards(LocalGuard)
   @Post('/login')
   @HttpCode(201)
-  async login(@Body() body: AuthLoginDto, @Request() req: any): Promise<any> {
+  async login(@Body() body: AuthLoginDto, @Request() req: any, @Res({ passthrough: true }) res: Response): Promise<any> {
     try {
       const { user } = req;
       if (user.register) {
@@ -64,7 +67,25 @@ export class Auth {
         await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
           response.admin,
         );
-      return { ...response, permissionInfo };
+      
+      // Set httpOnly cookies for tokens
+      res.cookie('accessToken', response.tokens.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+      
+      res.cookie('refreshToken', response.tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Return response without tokens in body
+      const { tokens, ...responseWithoutTokens } = response;
+      return { ...responseWithoutTokens, permissionInfo };
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({
@@ -314,6 +335,28 @@ export class Auth {
           code: HttpStatus.INTERNAL_SERVER_ERROR,
         });
       }
+    }
+  }
+
+  // Validate token endpoint
+  @UseGuards(JwtGuard)
+  @Get('/validate')
+  @HttpCode(200)
+  async validate(@Request() req: any): Promise<any> {
+    try {
+      const { user } = req;
+      return { 
+        valid: true, 
+        user: {
+          id: user.props.id,
+          email: user.props.email
+        }
+      };
+    } catch (e) {
+      throw new CustomHttpException({
+        message: 'Invalid token',
+        code: HttpStatus.UNAUTHORIZED,
+      });
     }
   }
 }

@@ -7,6 +7,7 @@ import { ReportWorkerModule } from './workers/report-worker/report-worker.module
 import { DataRawWorkerModule } from './workers/data-raw-worker/data-raw-worker.module';
 import { CronModule } from './cron/raw-data-cron/cron.module';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 export const rolesMapBootstrap = {
   app: async () => {
@@ -16,6 +17,16 @@ export const rolesMapBootstrap = {
     const PORT = configService.get<number>('port');
     const appName = configService.get<string>('appName');
 
+    app.use(cookieParser());
+    
+    // Enable CORS with credentials support for cookies
+    app.enableCors({
+      origin: true, // Allow all origins or specify your React app URL
+      credentials: true, // Required for cookies
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    });
+    
     app.useGlobalFilters(new AllExceptionFilter());
 
     app.useGlobalPipes(
