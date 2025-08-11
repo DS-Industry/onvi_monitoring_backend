@@ -22,7 +22,7 @@ export class CleanDataDeviceProgramUseCase {
   ): Promise<CleanDataResponseDto[]> {
     const devicePrograms =
       await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        posId: posId,
+        posIds: [posId],
         isPaid: 0,
         dateStart: dateStart,
         dateEnd: dateEnd,

@@ -12,6 +12,7 @@ import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/devi
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
+import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 
 @Injectable()
 export class DeviceOperationRepository extends IDeviceOperationRepository {
@@ -282,10 +283,6 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<DeviceOperationFullSumDyPosResponseDto[]> {
-    if (!posIds.length) {
-      return [];
-    }
-
     const result = await this.prisma.$queryRaw<
       DeviceOperationFullSumDyPosResponseDto[]
     >`
@@ -309,6 +306,36 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
 
     return result.map((item) => ({
       posName: item.posName,
+      sum: Number(item.sum),
+    }));
+  }
+
+  public async findDailyStatistics(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationDailyStatisticResponseDto[]> {
+    const result = await this.prisma.$queryRaw<{ date: Date; sum: number }[]>`
+    SELECT 
+      DATE_TRUNC('day', cwdoe."operDate") as "date",
+      COALESCE(SUM(cwdoe."operSum"), 0) as "sum"
+    FROM 
+      "CarWashDeviceOperationsEvent" cwdoe
+    JOIN 
+      "CarWashDevice" cwd ON cwdoe."carWashDeviceId" = cwd.id
+    JOIN 
+      "CarWashPos" cwp ON cwd."carWashPosId" = cwp.id
+    WHERE 
+      cwp."posId" = ANY(${posIds}::int[])
+      AND cwdoe."operDate" BETWEEN ${dateStart}::timestamp AND ${dateEnd}::timestamp
+    GROUP BY 
+      DATE_TRUNC('day', cwdoe."operDate")
+    ORDER BY 
+      "date" ASC
+  `;
+
+    return result.map((item) => ({
+      date: item.date,
       sum: Number(item.sum),
     }));
   }

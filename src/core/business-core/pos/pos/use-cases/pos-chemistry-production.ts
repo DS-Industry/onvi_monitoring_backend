@@ -24,7 +24,7 @@ export class PosChemistryProductionUseCase {
       for (const techRateInfo of item.techRateInfos) {
         const programs =
           await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-            posId: item.posId,
+            posIds: [item.posId],
             programCode: techRateInfo.code,
             dateStart: item.dateStart,
             dateEnd: item.dateEnd,

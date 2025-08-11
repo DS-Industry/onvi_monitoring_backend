@@ -19,7 +19,7 @@ export class SuspiciouslyDataDeviceProgramUseCase {
   ): Promise<SuspiciouslyDataResponseDto[]> {
     const devicePrograms =
       await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        posId: posId,
+        posIds: [posId],
         dateStart: dateStart,
         dateEnd: dateEnd,
       });

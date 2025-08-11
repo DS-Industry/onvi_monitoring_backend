@@ -13,8 +13,9 @@ import { TestDataTechTaskCron } from '../../infra/handler/testData/cron/testData
 import { HandlerManagerPaperCron } from '../../infra/handler/managerPaper/cron/handler-managerPaper';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
-import { EventEmitterModule } from "@nestjs/event-emitter";
-import { CacheModule } from "@nestjs/cache-manager";
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisModule } from '@infra/cache/redis.module';
 
 const cronUseCases: Provider[] = [
   HandlerDeviceDataRawCron,
@@ -65,6 +66,7 @@ const cronUseCases: Provider[] = [
     TechTaskModule,
     ManagerPaperCoreModule,
     PlatformUserModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [...cronUseCases],

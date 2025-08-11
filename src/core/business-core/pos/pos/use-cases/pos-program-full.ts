@@ -36,7 +36,7 @@ export class PosProgramFullUseCase {
 
     const allDevicePrograms =
       await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        posId: pos.id,
+        posIds: [pos.id],
         dateStart,
         dateEnd,
       });

@@ -8,6 +8,9 @@ import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/devi
 import {
   DeviceOperationFullSumDyPosResponseDto
 } from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
+import {
+  DeviceOperationDailyStatisticResponseDto
+} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto";
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -61,6 +64,19 @@ export class FindMethodsDeviceOperationUseCase {
       dateEnd,
     );
   }
+
+  async getDailyStatistics(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationDailyStatisticResponseDto[]> {
+    return await this.deviceOperationRepository.findDailyStatistics(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
 
   async getDataByMonitoringDetail(
     deviceIds: number[],

@@ -3,13 +3,13 @@ import {
   PosProgramDto,
   PosProgramResponseDto,
 } from '@platform-user/core-controller/dto/response/pos-program-response.dto';
-import { DataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-find-methods';
 import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsCarWashPosUseCase } from '@pos/carWashPos/use-cases/car-wash-pos-find-methods';
 import { CarWashPosType } from '@prisma/client';
-import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
+import { DeviceProgramMonitoringResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-monitoring-response.dto';
+import { DeviceProgramLastDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto';
 
 @Injectable()
 export class ProgramPosUseCase {
@@ -17,7 +17,6 @@ export class ProgramPosUseCase {
     private readonly findMethodsCarWashPosUseCase: FindMethodsCarWashPosUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly findMethodsDeviceProgramUseCase: FindMethodsDeviceProgramUseCase,
-    private readonly dataDeviceProgramUseCase: DataDeviceProgramUseCase,
   ) {}
 
   async execute(data: {
@@ -30,36 +29,43 @@ export class ProgramPosUseCase {
     take?: number;
   }): Promise<PosProgramResponseDto> {
     const { posData, totalCount } = await this.getPosData(data);
+    const posIds = posData.map((pos) => pos.id);
 
-    const allPrograms =
-      await this.findMethodsDeviceProgramUseCase.getAllByFilter({
-        posId: data.pos?.id,
-        ability: data.pos ? undefined : data.ability,
-        dateStart: data.dateStart,
-        dateEnd: data.dateEnd,
+    const [programs, lastPrograms] = await Promise.all([
+      this.findMethodsDeviceProgramUseCase.getDataByMonitoring(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      ),
+      this.findMethodsDeviceProgramUseCase.getLastByPosIds(posIds),
+    ]);
+
+    const programsByPos = this.groupProgramsByPosId(programs);
+    const lastProgramsByPos = this.groupLastProgramsByPosAndName(lastPrograms);
+
+    const response: PosProgramDto[] = posData.map((pos) => {
+      const posPrograms = programsByPos.get(pos.id) || [];
+      const posProgramsInfo = posPrograms.map((program) => {
+        const lastOper = lastProgramsByPos
+          .get(pos.id)
+          ?.find((p) => p.programName === program.programName)?.operDate;
+
+        return {
+          programName: program.programName,
+          counter: program.counter,
+          totalTime: Math.trunc(program.totalTime),
+          averageTime: this.formatSecondsToTime(program.averageTime * 60),
+          lastOper: lastOper,
+        };
       });
 
-    const programsByPos = this.groupProgramsByPos(allPrograms);
-
-    const response: PosProgramDto[] = [];
-    for (const pos of posData) {
-      const posPrograms = programsByPos.get(pos.id) || [];
-
-      const lastProg =
-        await this.findMethodsDeviceProgramUseCase.getLastByPosId(pos.id);
-
-      const programsInfo =
-        posPrograms.length > 0
-          ? await this.dataDeviceProgramUseCase.execute(posPrograms, lastProg)
-          : [];
-
-      response.push({
+      return {
         id: pos.id,
         name: pos.name,
         posType: pos.carWashPosType,
-        programsInfo,
-      });
-    }
+        programsInfo: posProgramsInfo,
+      };
+    });
 
     return { prog: response, totalCount };
   }
@@ -113,16 +119,60 @@ export class ProgramPosUseCase {
     };
   }
 
-  private groupProgramsByPos(
-    programs: DeviceProgramFullDataResponseDto[],
-  ): Map<number, DeviceProgramFullDataResponseDto[]> {
+  private groupProgramsByPosId(
+    programs: DeviceProgramMonitoringResponseDto[],
+  ): Map<number, DeviceProgramMonitoringResponseDto[]> {
     return programs.reduce((map, program) => {
-      const posId = program.posId;
+      const posId = program.ownerId;
       if (!map.has(posId)) {
         map.set(posId, []);
       }
       map.get(posId)!.push(program);
       return map;
-    }, new Map<number, DeviceProgramFullDataResponseDto[]>());
+    }, new Map<number, DeviceProgramMonitoringResponseDto[]>());
+  }
+
+  private groupLastProgramsByPosAndName(
+    lastPrograms: DeviceProgramLastDataResponseDto[],
+  ): Map<number, DeviceProgramLastDataResponseDto[]> {
+    return lastPrograms.reduce((map, program) => {
+      const posId = program.ownerId;
+      if (!map.has(posId)) {
+        map.set(posId, []);
+      }
+      map.get(posId)!.push(program);
+      return map;
+    }, new Map<number, DeviceProgramLastDataResponseDto[]>());
+  }
+
+  private formatSecondsToTime(seconds: number): string {
+    const days = Math.trunc(seconds / 86400);
+    const hours = Math.trunc((seconds % 86400) / 3600);
+    const minutes = Math.trunc((seconds % 3600) / 60);
+    const remainingSeconds = Math.trunc(seconds % 60);
+
+    let result = '';
+
+    if (days === 1) {
+      result += `${days} день `;
+    } else if (days > 1) {
+      result += `${days} дней `;
+    }
+
+    if (hours === 1) {
+      result += `${hours} час `;
+    } else if (hours > 1) {
+      result += `${hours} часа `;
+    }
+
+    if (minutes > 0) {
+      result += `${minutes} мин. `;
+    }
+
+    if (remainingSeconds > 0) {
+      result += `${remainingSeconds} сек.`;
+    }
+
+    return result.trim();
   }
 }

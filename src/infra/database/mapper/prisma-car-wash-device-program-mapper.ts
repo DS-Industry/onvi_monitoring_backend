@@ -4,6 +4,7 @@ import {
 } from '@prisma/client';
 import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
 import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
+import { DeviceProgramMonitoringResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-monitoring-response.dto';
 export type PrismaCarWashDeviceProgramWithType =
   Prisma.CarWashDeviceProgramsEventGetPayload<{
     include: { carWashDeviceProgramsType: true };
@@ -23,6 +24,13 @@ export type PrismaCarWashDeviceProgramWithPos =
       };
     };
   }>;
+export type RawDeviceProgramsSummary = {
+  ownerId: number;
+  programName: string;
+  counter: bigint;
+  totalTime: bigint;
+  averageTime: bigint;
+};
 export class PrismaCarWashDeviceProgramMapper {
   static toDomain(
     entity: PrismaCarWashDeviceProgram | PrismaCarWashDeviceProgramWithType,
@@ -83,6 +91,18 @@ export class PrismaCarWashDeviceProgramMapper {
       errNumId: entity.errNumId,
       programName: programName,
       posId: posId,
+    };
+  }
+
+  static toMonitoringRersponseDto(
+    item: RawDeviceProgramsSummary,
+  ): DeviceProgramMonitoringResponseDto {
+    return {
+      ownerId: item.ownerId,
+      programName: item.programName,
+      counter: Number(item.counter),
+      totalTime: Number(item.totalTime),
+      averageTime: Number(item.averageTime),
     };
   }
 
