@@ -240,7 +240,6 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  @CacheSWR(30)
   async getAllNomenclatureByOrgId(
     @Request() req: any,
     @Param('orgId', ParseIntPipe) orgId: number,
@@ -420,7 +419,6 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  @CacheSWR(300)
   async getAllSupplier(): Promise<any> {
     try {
       return await this.findMethodsSupplierUseCase.getAll();
