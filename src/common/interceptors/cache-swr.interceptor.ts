@@ -35,7 +35,7 @@ export class CacheSWRInterceptor implements NestInterceptor {
       const { method, url, headers, user } = request;
 
       // Only cache GET requests
-      if (method !== 'GET') {
+      if (method !== 'GET' || !user || !user.id) {
         return next.handle();
       }
 
