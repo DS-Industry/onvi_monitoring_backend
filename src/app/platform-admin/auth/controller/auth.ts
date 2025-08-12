@@ -16,6 +16,7 @@ import { LoginAuthUseCase } from '@platform-admin/auth/use-cases/auth-login';
 import { LocalGuard } from '@platform-admin/auth/guards/local.guard';
 import { RefreshGuard } from '@platform-admin/auth/guards/refresh.guard';
 import { SignAccessTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign-access-token';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
 import { EmailGuard } from '@platform-admin/auth/guards/email.guard';
 import { AuthActivationDto } from '@platform-admin/auth/controller/dto/auth-activation.dto';
 import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activate';
@@ -38,6 +39,7 @@ export class Auth {
     private readonly singAccessToken: SignAccessTokenUseCase,
     private readonly passwordConfirmMail: PasswordConfirmMailAdminUseCase,
     private readonly passwordReset: PasswordResetAdminUseCase,
+    private readonly setCookies: SetCookiesUseCase,
     private abilityFacrory: AbilityFactory,
   ) {}
   @UseGuards(LocalGuard)
@@ -63,19 +65,11 @@ export class Auth {
       console.log(check);
       const response = await this.authLogin.execute(body.email, user.props.id);
 
-      res.cookie('accessToken', response.tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
-
-      res.cookie('refreshToken', response.tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      this.setCookies.execute(
+        res,
+        response.tokens.accessToken,
+        response.tokens.refreshToken,
+      );
 
       const { tokens, ...responseWithoutTokens } = response;
       return responseWithoutTokens;
@@ -157,12 +151,7 @@ export class Auth {
         user.props.id,
       );
 
-      res.cookie('accessToken', accessToken.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
+      this.setCookies.execute(res, accessToken.token);
 
       return {
         success: true,
