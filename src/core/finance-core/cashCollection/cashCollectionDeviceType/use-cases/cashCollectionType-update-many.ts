@@ -4,12 +4,10 @@ import { CashCollectionDeviceTypeDataDto } from '@finance/cashCollection/cashCol
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
 import { CarWashDevice } from '@pos/device/device/domain/device';
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
-import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
 
 @Injectable()
 export class UpdateManyCashCollectionTypeUseCase {
   constructor(
-    private readonly calculateMethodsCashCollectionUseCase: CalculateMethodsCashCollectionUseCase,
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly updateCashCollectionTypeUseCase: UpdateCashCollectionTypeUseCase,
   ) {}
@@ -20,43 +18,61 @@ export class UpdateManyCashCollectionTypeUseCase {
     cashCollectionDevices: CashCollectionDevice[],
     devices: CarWashDevice[],
   ): Promise<void> {
-    const dataMap = new Map<number, CashCollectionDeviceTypeDataDto>(
-      data.map((d) => [d.cashCollectionDeviceTypeId, d]),
-    );
+    const dataMap = new Map(data.map((d) => [d.cashCollectionDeviceTypeId, d]));
+    const deviceMap = new Map(devices.map((d) => [d.id, d]));
 
-    const cashSumMap =
-      await this.calculateMethodsCashCollectionUseCase.calculateDeviceTypeSums(
-        cashCollectionDevices,
-        devices,
-      );
+    const cashSumMap = this.calculateDeviceTypeSums(
+      cashCollectionDevices,
+      deviceMap,
+    );
 
     const cashCollectionDeviceTypes =
       await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
         cashCollectionId,
       );
 
-    await Promise.all(
-      cashCollectionDeviceTypes.map(async (cashCollectionDeviceType) => {
-        const sums = cashSumMap.get(
-          cashCollectionDeviceType.carWashDeviceTypeId,
-        ) || { sum: 0, virtSum: 0 };
+    for (const cashCollectionDeviceType of cashCollectionDeviceTypes) {
+      const sums = cashSumMap.get(
+        cashCollectionDeviceType.carWashDeviceTypeId,
+      ) || { sum: 0, virtSum: 0 };
 
-        const cashData = dataMap.get(cashCollectionDeviceType.id);
-        const sumCoin = cashData?.sumCoin ?? cashCollectionDeviceType.sumCoin;
-        const sumPaper =
-          cashData?.sumPaper ?? cashCollectionDeviceType.sumPaper;
+      const cashData = dataMap.get(cashCollectionDeviceType.id);
+      const sumCoin = cashData?.sumCoin ?? cashCollectionDeviceType.sumCoin;
+      const sumPaper = cashData?.sumPaper ?? cashCollectionDeviceType.sumPaper;
+      const sumFact = sumCoin + sumPaper;
 
-        await this.updateCashCollectionTypeUseCase.execute(
-          {
-            sumFact: sumCoin + sumPaper,
-            sumCoin,
-            sumPaper,
-            shortage: sums.sum - (sumCoin + sumPaper),
-            virtualSum: sums.virtSum,
-          },
-          cashCollectionDeviceType,
-        );
-      }),
-    );
+      await this.updateCashCollectionTypeUseCase.execute(
+        {
+          sumFact,
+          sumCoin,
+          sumPaper,
+          shortage: sums.sum - sumFact,
+          virtualSum: sums.virtSum,
+        },
+        cashCollectionDeviceType,
+      );
+    }
+  }
+
+  private calculateDeviceTypeSums(
+    cashCollectionDevices: CashCollectionDevice[],
+    deviceMap: Map<number, CarWashDevice>,
+  ): Map<number, { sum: number; virtSum: number }> {
+    const cashSumMap = new Map<number, { sum: number; virtSum: number }>();
+
+    for (const device of cashCollectionDevices) {
+      const deviceInfo = deviceMap.get(device.carWashDeviceId);
+      if (!deviceInfo) continue;
+
+      const typeId = deviceInfo.carWashDeviceTypeId;
+      const current = cashSumMap.get(typeId) || { sum: 0, virtSum: 0 };
+
+      cashSumMap.set(typeId, {
+        sum: current.sum + device.sum,
+        virtSum: current.virtSum + device.virtualSum,
+      });
+    }
+
+    return cashSumMap;
   }
 }

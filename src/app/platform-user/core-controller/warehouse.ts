@@ -136,7 +136,6 @@ export class WarehouseController {
       await this.warehouseValidateRules.createNomenclatureValidate(
         data.sku,
         data.name,
-        data.organizationId,
         data.categoryId,
         ability,
         data?.supplierId,

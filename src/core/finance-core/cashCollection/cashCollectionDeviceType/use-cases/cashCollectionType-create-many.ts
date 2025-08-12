@@ -3,12 +3,10 @@ import { ICashCollectionDeviceTypeRepository } from '@finance/cashCollection/cas
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
 import { CarWashDevice } from '@pos/device/device/domain/device';
 import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
-import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
 
 @Injectable()
 export class CreateManyCashCollectionTypeUseCase {
   constructor(
-    private readonly calculateMethodsCashCollectionUseCase: CalculateMethodsCashCollectionUseCase,
     private readonly cashCollectionDeviceTypeRepository: ICashCollectionDeviceTypeRepository,
   ) {}
 
@@ -17,25 +15,41 @@ export class CreateManyCashCollectionTypeUseCase {
     cashCollectionDevices: CashCollectionDevice[],
     devices: CarWashDevice[],
   ): Promise<void> {
-    const cashSumMap =
-      await this.calculateMethodsCashCollectionUseCase.calculateDeviceTypeSums(
-        cashCollectionDevices,
-        devices,
-      );
+    const deviceMap = new Map(devices.map((d) => [d.id, d]));
 
-    const cashCollectionTypeData = Array.from(cashSumMap.entries()).map(
-      ([typeId, sums]) =>
+    const typeSums = cashCollectionDevices.reduce((acc, device) => {
+      const deviceType = deviceMap.get(
+        device.carWashDeviceId,
+      )?.carWashDeviceTypeId;
+      if (!deviceType) return acc;
+
+      if (!acc.has(deviceType)) {
+        acc.set(deviceType, {
+          sum: 0,
+          virtSum: 0,
+          typeName:
+            deviceMap.get(device.carWashDeviceId)?.carWashDeviceTypeName || '',
+        });
+      }
+
+      const sums = acc.get(deviceType)!;
+      sums.sum += device.sum;
+      sums.virtSum += device.virtualSum;
+
+      return acc;
+    }, new Map<number, { sum: number; virtSum: number; typeName: string }>());
+
+    const cashCollectionTypeData = Array.from(typeSums.entries()).map(
+      ([typeId, { sum, virtSum, typeName }]) =>
         new CashCollectionDeviceType({
           cashCollectionId,
           carWashDeviceTypeId: typeId,
-          carWashDeviceTypeName:
-            devices.find((d) => d.carWashDeviceTypeId === typeId)
-              ?.carWashDeviceTypeName || '',
+          carWashDeviceTypeName: typeName,
           sumFact: 0,
           sumCoin: 0,
           sumPaper: 0,
-          shortage: sums.sum,
-          virtualSum: sums.virtSum,
+          shortage: sum,
+          virtualSum: virtSum,
         }),
     );
 

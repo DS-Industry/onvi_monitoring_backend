@@ -18,7 +18,6 @@ import { UpdateCashCollectionTypeUseCase } from '@finance/cashCollection/cashCol
 import { UpdateManyCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-update-many';
 import { GetAllByFilterCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-all-by-filter';
 import { GetOneFullDataCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-get-one-full-data';
-import { CalculateMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-calculate-methods';
 import { ShiftReportRepositoryProvider } from '@finance/shiftReport/shiftReport/provider/shiftReport';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { ReceiverShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-receiver';
@@ -59,7 +58,6 @@ const cashCollectionUseCase: Provider[] = [
   RecalculateCashCollectionUseCase,
   GetAllByFilterCashCollectionUseCase,
   GetOneFullDataCashCollectionUseCase,
-  CalculateMethodsCashCollectionUseCase,
   DeleteCashCollectionUseCase,
 ];
 

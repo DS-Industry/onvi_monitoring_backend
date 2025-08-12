@@ -4,9 +4,7 @@ import {
 } from '@prisma/client';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
-import {
-  DeviceOperationMonitoringResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto";
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 export type PrismaCarWashDeviceOperWithCurrency =
   Prisma.CarWashDeviceOperationsEventGetPayload<{
     include: { currency: true };

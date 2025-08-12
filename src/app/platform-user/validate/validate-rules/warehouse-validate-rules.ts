@@ -59,7 +59,6 @@ export class WarehouseValidateRules {
     name: string,
     organizationId: number,
     categoryId: number,
-    ability: any,
     supplierId?: number,
   ) {
     const response = [];
@@ -87,10 +86,6 @@ export class WarehouseValidateRules {
       response,
       ExceptionType.WAREHOUSE,
       WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
-    );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
     );
   }
 

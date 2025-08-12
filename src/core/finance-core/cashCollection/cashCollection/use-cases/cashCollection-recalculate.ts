@@ -11,6 +11,10 @@ import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/ca
 import { User } from '@platform-user/user/domain/user';
 import { StatusCashCollection } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CashCollectionDevice } from "@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice";
+import {
+  CashCollectionDeviceType
+} from "@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType";
 
 @Injectable()
 export class RecalculateCashCollectionUseCase {
@@ -30,13 +34,6 @@ export class RecalculateCashCollectionUseCase {
     status: StatusCashCollection,
     user: User,
   ): Promise<CashCollectionResponseDto> {
-    let sumFactCashCollection = 0;
-    let virtualSumCashCollection = 0;
-    let shortageCashCollection = 0;
-    let carCount = 0;
-    let sumCard = 0;
-    let sendDate: Date = undefined;
-
     await this.updateManyCashCollectionDeviceUseCase.execute(
       data.cashCollectionDeviceData,
     );
@@ -44,18 +41,76 @@ export class RecalculateCashCollectionUseCase {
       await this.findMethodsCashCollectionDeviceUseCase.getAllByCashCollection(
         cashCollection.id,
       );
+
+    const deviceMap = new Map(devices.map((device) => [device.id, device]));
+    const { cashCollectionDeviceResponse, carCount, sumCard } =
+      this.processDevices(cashCollectionDevices, deviceMap);
+
+    await this.updateManyCashCollectionTypeUseCase.execute(
+      cashCollection.id,
+      data.cashCollectionDeviceTypeData,
+      cashCollectionDevices,
+      devices,
+    );
+    const cashCollectionDeviceTypes =
+      await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
+        cashCollection.id,
+      );
+
+    const {
+      cashCollectionDeviceTypeResponse,
+      sumFactCashCollection,
+      virtualSumCashCollection,
+      shortageCashCollection,
+    } = this.processDeviceTypes(cashCollectionDeviceTypes);
+
+    const sendDate =
+      status === StatusCashCollection.SENT
+        ? this.handleSentStatus(cashCollection, user, sumFactCashCollection)
+        : undefined;
+
+    const cashCollectionUpdate = await this.updateCashCollection(
+      sumFactCashCollection,
+      virtualSumCashCollection,
+      shortageCashCollection,
+      sumCard,
+      carCount,
+      status,
+      sendDate,
+      cashCollection,
+      user,
+    );
+
+    return this.buildResponse(
+      cashCollectionUpdate,
+      cashCollectionDeviceTypeResponse,
+      cashCollectionDeviceResponse,
+      status,
+    );
+  }
+
+  private processDevices(
+    cashCollectionDevices: CashCollectionDevice[],
+    deviceMap: Map<number, CarWashDevice>,
+  ): {
+    cashCollectionDeviceResponse: any[];
+    carCount: number;
+    sumCard: number;
+  } {
+    let carCount = 0;
+    let sumCard = 0;
+
     const cashCollectionDeviceResponse = cashCollectionDevices.map(
       (cashDevice) => {
-        const matchedDevice = devices.find(
-          (device) => device.id === cashDevice.carWashDeviceId,
-        );
+        const matchedDevice = deviceMap.get(cashDevice.carWashDeviceId);
         carCount += cashDevice.carCount;
         sumCard += cashDevice.sumCard;
+
         return {
           id: cashDevice.id!,
           deviceId: cashDevice.carWashDeviceId,
-          deviceName: matchedDevice.name,
-          deviceType: matchedDevice.carWashDeviceTypeName,
+          deviceName: matchedDevice?.name || '',
+          deviceType: matchedDevice?.carWashDeviceTypeName || '',
           oldTookMoneyTime: cashDevice.oldTookMoneyTime,
           tookMoneyTime: cashDevice.tookMoneyTime,
           sumDevice: cashDevice.sum,
@@ -66,21 +121,27 @@ export class RecalculateCashCollectionUseCase {
       },
     );
 
-    await this.updateManyCashCollectionTypeUseCase.execute(
-      cashCollection.id,
-      data.cashCollectionDeviceTypeData,
-      cashCollectionDevices,
-      devices,
-    );
-    const cashCollectionDeviceType =
-      await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
-        cashCollection.id,
-      );
-    const cashCollectionDeviceTypeResponse = cashCollectionDeviceType.map(
+    return { cashCollectionDeviceResponse, carCount, sumCard };
+  }
+
+  private processDeviceTypes(
+    cashCollectionDeviceTypes: CashCollectionDeviceType[],
+  ): {
+    cashCollectionDeviceTypeResponse: any[];
+    sumFactCashCollection: number;
+    virtualSumCashCollection: number;
+    shortageCashCollection: number;
+  } {
+    let sumFactCashCollection = 0;
+    let virtualSumCashCollection = 0;
+    let shortageCashCollection = 0;
+
+    const cashCollectionDeviceTypeResponse = cashCollectionDeviceTypes.map(
       (cashDeviceType) => {
         sumFactCashCollection += cashDeviceType.sumFact;
         virtualSumCashCollection += cashDeviceType.virtualSum;
         shortageCashCollection += cashDeviceType.shortage;
+
         return {
           id: cashDeviceType.id,
           typeName: cashDeviceType.carWashDeviceTypeName,
@@ -93,37 +154,68 @@ export class RecalculateCashCollectionUseCase {
       },
     );
 
-    if (status == StatusCashCollection.SENT) {
-      sendDate = new Date(Date.now());
-      this.eventEmitter.emit('manager-paper.created-cash-collection', {
-        posId: cashCollection.posId,
-        eventDate: cashCollection.cashCollectionDate,
-        sum: sumFactCashCollection,
-        user: user,
-        cashCollectionId: cashCollection.id,
-      });
-    }
+    return {
+      cashCollectionDeviceTypeResponse,
+      sumFactCashCollection,
+      virtualSumCashCollection,
+      shortageCashCollection,
+    };
+  }
 
-    const cashCollectionUpdate = await this.updateCashCollectionUseCase.execute(
+  private handleSentStatus(
+    cashCollection: CashCollection,
+    user: User,
+    sumFactCashCollection: number,
+  ): Date {
+    const sendDate = new Date(Date.now());
+    this.eventEmitter.emit('manager-paper.created-cash-collection', {
+      posId: cashCollection.posId,
+      eventDate: cashCollection.cashCollectionDate,
+      sum: sumFactCashCollection,
+      user: user,
+      cashCollectionId: cashCollection.id,
+    });
+    return sendDate;
+  }
+
+  private async updateCashCollection(
+    sumFact: number,
+    virtualSum: number,
+    shortage: number,
+    sumCard: number,
+    carCount: number,
+    status: StatusCashCollection,
+    sendDate: Date | undefined,
+    cashCollection: CashCollection,
+    user: User,
+  ): Promise<CashCollection> {
+    return this.updateCashCollectionUseCase.execute(
       {
-        sendDate: sendDate,
-        status: status,
-        sumFact: sumFactCashCollection,
-        shortage: shortageCashCollection,
-        sumCard: sumCard,
+        sendDate,
+        status,
+        sumFact,
+        shortage,
+        sumCard,
         countCar: carCount,
-        averageCheck:
-          (sumFactCashCollection + virtualSumCashCollection) / carCount,
-        virtualSum: virtualSumCashCollection,
+        averageCheck: carCount > 0 ? (sumFact + virtualSum) / carCount : 0,
+        virtualSum,
       },
       cashCollection,
       user,
     );
+  }
+
+  private buildResponse(
+    cashCollectionUpdate: CashCollection,
+    cashCollectionDeviceTypeResponse: any[],
+    cashCollectionDeviceResponse: any[],
+    status: StatusCashCollection,
+  ): CashCollectionResponseDto {
     return {
       id: cashCollectionUpdate.id,
       cashCollectionDate: cashCollectionUpdate.cashCollectionDate,
       oldCashCollectionDate: cashCollectionUpdate.oldCashCollectionDate,
-      status: status,
+      status,
       sumFact: cashCollectionUpdate.sumFact,
       virtualSum: cashCollectionUpdate.virtualSum,
       sumCard: cashCollectionUpdate.sumCard,
