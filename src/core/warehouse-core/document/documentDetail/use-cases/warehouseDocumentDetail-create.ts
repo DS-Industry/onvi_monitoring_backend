@@ -25,20 +25,19 @@ export class CreateWarehouseDocumentDetailUseCase {
   }
 
   async createMany(input: WarehouseDocumentDetailCreateDto[]): Promise<void> {
-    const warehouseDocumentDetails: WarehouseDocumentDetail[] = [];
-    await Promise.all(
-      input.map((item) => {
-        warehouseDocumentDetails.push(
-          new WarehouseDocumentDetail({
-            warehouseDocumentId: item.warehouseDocumentId,
-            nomenclatureId: item.nomenclatureId,
-            quantity: item.quantity,
-            comment: item?.comment,
-            metaData: item?.metaData,
-          }),
-        );
-      }),
+    const warehouseDocumentDetails = input.map(
+      (item) =>
+        new WarehouseDocumentDetail({
+          warehouseDocumentId: item.warehouseDocumentId,
+          nomenclatureId: item.nomenclatureId,
+          quantity: item.quantity,
+          comment: item?.comment,
+          metaData: item?.metaData,
+        }),
     );
-    this.warehouseDocumentDetailRepository.createMany(warehouseDocumentDetails);
+
+    await this.warehouseDocumentDetailRepository.createMany(
+      warehouseDocumentDetails,
+    );
   }
 }

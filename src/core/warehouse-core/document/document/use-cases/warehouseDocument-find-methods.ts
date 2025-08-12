@@ -35,6 +35,18 @@ export class FindMethodsWarehouseDocumentUseCase {
     );
   }
 
+  async getAllByWarehouseIdsAndDate(
+    warehouseIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<WarehouseDocument[]> {
+    return await this.warehouseDocumentRepository.getAllByWarehouseIdsAndDate(
+      warehouseIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
   async getAllByWarehouseIdAndType(
     warehouseId: number,
     type: WarehouseDocumentType,

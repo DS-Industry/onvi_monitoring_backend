@@ -73,6 +73,30 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
     );
   }
 
+  public async getAllByWarehouseIdsAndDate(
+    warehouseIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ) {
+    const warehouseDocuments = await this.prisma.warehouseDocument.findMany({
+      where: {
+        warehouseId: {
+          in: warehouseIds,
+        },
+        carryingAt: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+      },
+      orderBy: {
+        carryingAt: 'asc',
+      },
+    });
+    return warehouseDocuments.map((item) =>
+      PrismaWarehouseDocumentMapper.toDomain(item),
+    );
+  }
+
   public async findAllByWarehouseIdAndType(
     warehouseId: number,
     type: WarehouseDocumentType,

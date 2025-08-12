@@ -36,6 +36,17 @@ export class CategoryRepository extends ICategoryRepository {
     return PrismaCategoryMapper.toDomain(category);
   }
 
+  public async findManyByIds(ids: number[]): Promise<Category[]> {
+    const categories = await this.prisma.category.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+    return categories.map((item) => PrismaCategoryMapper.toDomain(item));
+  }
+
   public async findAllByOwnerCategoryId(
     ownerCategoryId: number,
   ): Promise<Category[]> {

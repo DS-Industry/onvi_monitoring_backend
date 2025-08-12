@@ -64,9 +64,18 @@ export class InventoryItemMonitoringUseCase {
         .set(item.warehouseId, item.quantity);
     });
 
+    const uniqueCategoryIds = [
+      ...new Set(nomenclatures.map((n) => n.categoryId)),
+    ];
+    const categories =
+      await this.findMethodsCategoryUseCase.getManyByIds(uniqueCategoryIds);
     const categoryMap = new Map<number, string>();
-    const response: InventoryItemMonitoringResponseDto[] = await Promise.all(
-      nomenclatures.map(async (nomenclature) => {
+    categories.forEach((category) =>
+      categoryMap.set(category.id, category.name),
+    );
+
+    const response: InventoryItemMonitoringResponseDto[] = nomenclatures.map(
+      (nomenclature) => {
         let sum = 0;
         const inventoryItemResponse: InventoryItemData[] = warehouses.map(
           (warehouse) => {
@@ -81,12 +90,6 @@ export class InventoryItemMonitoringUseCase {
             };
           },
         );
-        if (!categoryMap.has(nomenclature.categoryId)) {
-          const category = await this.findMethodsCategoryUseCase.getById(
-            nomenclature.categoryId,
-          );
-          categoryMap.set(nomenclature.categoryId, category.name);
-        }
 
         return {
           nomenclatureId: nomenclature.id,
@@ -96,7 +99,7 @@ export class InventoryItemMonitoringUseCase {
           sum: sum,
           inventoryItems: inventoryItemResponse,
         };
-      }),
+      },
     );
 
     return response.filter((result) => result.sum > 0);

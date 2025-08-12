@@ -4,6 +4,7 @@ export abstract class ICategoryRepository {
   abstract create(input: Category): Promise<Category>;
   abstract findOneById(id: number): Promise<Category>;
   abstract findOneByName(name: string): Promise<Category>;
+  abstract findManyByIds(ids: number[]): Promise<Category[]>;
   abstract findAllByOwnerCategoryId(
     ownerCategoryId: number,
   ): Promise<Category[]>;

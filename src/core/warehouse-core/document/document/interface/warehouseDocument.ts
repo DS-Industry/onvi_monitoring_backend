@@ -13,6 +13,11 @@ export abstract class IWarehouseDocumentRepository {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<WarehouseDocument[]>;
+  abstract getAllByWarehouseIdsAndDate(
+    warehouseIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  );
   abstract findAllByWarehouseIdAndType(
     warehouseId: number,
     type: WarehouseDocumentType,

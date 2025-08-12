@@ -18,19 +18,22 @@ export class InventoryInventoryItemUseCase {
         warehouseId,
       );
 
-    return await Promise.all(
-      inventoryItems.map(async (item) => {
-        const nomenclature =
-          await this.findMethodsNomenclatureUseCase.getOneById(
-            item.nomenclatureId,
-          );
+    const nomenclatureIds = inventoryItems.map((item) => item.nomenclatureId);
+    const nomenclatures =
+      await this.findMethodsNomenclatureUseCase.getManyByIds(nomenclatureIds);
 
-        return {
-          nomenclatureId: item.nomenclatureId,
-          nomenclatureName: nomenclature.name,
-          quantity: item.quantity,
-        };
-      }),
+    const nomenclatureMap = new Map(
+      nomenclatures.map((nomenclature) => [nomenclature.id, nomenclature]),
     );
+
+    return inventoryItems.map((item) => {
+      const nomenclature = nomenclatureMap.get(item.nomenclatureId);
+
+      return {
+        nomenclatureId: item.nomenclatureId,
+        nomenclatureName: nomenclature?.name || '',
+        quantity: item.quantity,
+      };
+    });
   }
 }
