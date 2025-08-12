@@ -31,6 +31,7 @@ import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-re
 import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { UserException } from '@exception/option.exceptions';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
@@ -47,6 +48,7 @@ export class Auth {
     private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
     private readonly authValidateRules: AuthValidateRules,
     private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
+    private readonly setCookies: SetCookiesUseCase,
   ) {}
   //Login
   @UseGuards(LocalGuard)
@@ -72,19 +74,7 @@ export class Auth {
           response.admin,
         );
 
-      res.cookie('accessToken', response.tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
-
-      res.cookie('refreshToken', response.tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
+      this.setCookies.execute(res, response.tokens.accessToken, response.tokens.refreshToken);
 
       const { tokens, ...responseWithoutTokens } = response;
       return { ...responseWithoutTokens, permissionInfo };
@@ -244,12 +234,7 @@ export class Auth {
         user.props.id,
       );
 
-      res.cookie('accessToken', accessToken.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000, // 15 minutes
-      });
+      this.setCookies.execute(res, accessToken.token);
 
       return {
         success: true,
