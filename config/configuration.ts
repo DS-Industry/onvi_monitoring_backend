@@ -36,10 +36,4 @@ export const configuration = () => ({
   redisCacheUser: process.env.REDIS_CACHE_USER,
   redisCachePassword: process.env.REDIS_CACHE_PASSWORD,
   firebaseAdminKeyPath: process.env.FIREBASE_ADMIN_KEY_PATH,
-  cors: {
-    origin: process.env.CORS_ORIGINS?.split(',') || [],
-    methods: process.env.CORS_METHODS?.split(',') || ['GET', 'POST', 'PATCH', 'DELETE'],
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  },
 });

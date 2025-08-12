@@ -19,9 +19,6 @@ export const rolesMapBootstrap = {
 
     app.use(cookieParser());
 
-    const corsConfig = configService.get('cors');
-    app.enableCors(corsConfig);
-
     app.useGlobalFilters(new AllExceptionFilter());
 
     app.useGlobalPipes(
