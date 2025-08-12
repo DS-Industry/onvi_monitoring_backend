@@ -14,6 +14,10 @@ export class FindMethodsCategoryUseCase {
     return await this.categoryRepository.findOneByName(input);
   }
 
+  async getManyByIds(ids: number[]): Promise<Category[]> {
+    return await this.categoryRepository.findManyByIds(ids);
+  }
+
   async getAllByOwnerCategoryId(ownerCategoryId: number): Promise<Category[]> {
     return await this.categoryRepository.findAllByOwnerCategoryId(
       ownerCategoryId,
