@@ -40,7 +40,6 @@ export class FindMethodsWarehouseDocumentUseCase {
     dateStart: Date,
     dateEnd: Date,
   ): Promise<WarehouseDocument[]> {
-    console.log('get all ids');
     return await this.warehouseDocumentRepository.getAllByWarehouseIdsAndDate(
       warehouseIds,
       dateStart,
