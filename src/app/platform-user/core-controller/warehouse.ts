@@ -132,12 +132,12 @@ export class WarehouseController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<any> {
     try {
-      const { user, ability } = req;
+      const { user } = req;
       await this.warehouseValidateRules.createNomenclatureValidate(
         data.sku,
         data.name,
+        data.organizationId,
         data.categoryId,
-        ability,
         data?.supplierId,
       );
       return await this.createNomenclatureUseCase.create(data, user, file);
