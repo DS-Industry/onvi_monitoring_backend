@@ -19,12 +19,8 @@ export const rolesMapBootstrap = {
 
     app.use(cookieParser());
 
-    app.enableCors({
-      origin: true,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    });
+    const corsConfig = configService.get('cors');
+    app.enableCors(corsConfig);
 
     app.useGlobalFilters(new AllExceptionFilter());
 
