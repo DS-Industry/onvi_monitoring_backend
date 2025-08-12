@@ -3,6 +3,7 @@ import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { WarehouseDocumentAllByFilterResponseDto } from '@warehouse/document/document/use-cases/dto/warehouseDocument-all-by-filter-response.dto';
 import { FindMethodsWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-find-methods';
 import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
+import { Abilities } from '@casl/ability';
 
 @Injectable()
 export class AllByFilterWarehouseDocumentUseCase {
@@ -14,39 +15,38 @@ export class AllByFilterWarehouseDocumentUseCase {
   async execute(
     dateStart: Date,
     dateEnd: Date,
-    ability: any,
+    ability: Abilities[0],
     placementId: number | '*',
     warehouse?: Warehouse,
   ): Promise<WarehouseDocumentAllByFilterResponseDto[]> {
-    const response: WarehouseDocumentAllByFilterResponseDto[] = [];
     let warehouses: Warehouse[] = [];
+
     if (warehouse) {
-      warehouses.push(warehouse);
+      warehouses = [warehouse];
     } else {
-      warehouses =
-        await this.findMethodsWarehouseUseCase.geyAllByPermission(ability, placementId);
+      warehouses = await this.findMethodsWarehouseUseCase.geyAllByPermission(
+        ability,
+        placementId,
+      );
     }
-    await Promise.all(
-      warehouses.map(async (warehouse) => {
-        const documents =
-          await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdAndDate(
-            warehouse.id,
-            dateStart,
-            dateEnd,
-          );
-        documents.map((document) => {
-          response.push({
-            id: document.id,
-            name: document.name,
-            type: document.type,
-            warehouseId: document.warehouseId,
-            responsibleId: document.responsibleId,
-            status: document.status,
-            carryingAt: document.carryingAt,
-          });
-        });
-      }),
-    );
-    return response;
+
+    const warehouseIds = warehouses.map((w) => w.id);
+
+    const documents =
+      await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdsAndDate(
+        warehouseIds,
+        dateStart,
+        dateEnd,
+      );
+
+    return documents.map((document) => ({
+      id: document.id,
+      name: document.name,
+      type: document.type,
+      warehouseId: document.warehouseId,
+      responsibleId: document.responsibleId,
+      status: document.status,
+      carryingAt: document.carryingAt,
+    }));
   }
 }
