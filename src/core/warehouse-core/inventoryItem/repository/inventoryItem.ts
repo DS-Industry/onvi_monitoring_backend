@@ -102,4 +102,14 @@ export class InventoryItemRepository extends IInventoryItemRepository {
 
     await this.prisma.$transaction(updates);
   }
+
+  public async createMany(input: InventoryItem[]): Promise<InventoryItem[]> {
+    const inventoryItemEntities = input.map((item) =>
+      PrismaInventoryItemMapper.toPrisma(item),
+    );
+    const inventoryItems = await this.prisma.inventoryItem.createMany({
+      data: inventoryItemEntities,
+    });
+    return input;
+  }
 }

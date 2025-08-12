@@ -102,13 +102,15 @@ export class SandWarehouseDocumentUseCase {
       .map((detail) => detail.nomenclatureId)
       .filter((nomenclatureId) => !existingNomenclatureIds.has(nomenclatureId));
 
-    return await Promise.all(
-      missingNomenclatureIds.map((nomenclatureId) =>
-        this.createInventoryItemUseCase.execute({
-          nomenclatureId,
-          warehouseId,
-        }),
-      ),
-    );
+    if (missingNomenclatureIds.length === 0) {
+      return [];
+    }
+
+    const createDtos = missingNomenclatureIds.map((nomenclatureId) => ({
+      nomenclatureId,
+      warehouseId,
+    }));
+
+    return await this.createInventoryItemUseCase.executeMany(createDtos);
   }
 }
