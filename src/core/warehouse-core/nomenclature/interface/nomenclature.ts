@@ -23,5 +23,6 @@ export abstract class INomenclatureRepository {
     supplierId: number,
     organizationId: number,
   ): Promise<Nomenclature[]>;
+  abstract findManyByIds(ids: number[]): Promise<Nomenclature[]>;
   abstract update(input: Nomenclature): Promise<Nomenclature>;
 }

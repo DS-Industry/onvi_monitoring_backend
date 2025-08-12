@@ -105,6 +105,17 @@ export class NomenclatureRepository extends INomenclatureRepository {
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
   }
 
+  public async findManyByIds(ids: number[]): Promise<Nomenclature[]> {
+    const nomenclatures = await this.prisma.nomenclature.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
+  }
+
   public async update(input: Nomenclature): Promise<Nomenclature> {
     const nomenclatureEntity = PrismaNomenclatureMapper.toPrisma(input);
     const nomenclature = await this.prisma.nomenclature.update({

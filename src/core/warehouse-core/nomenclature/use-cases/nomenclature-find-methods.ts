@@ -59,4 +59,8 @@ export class FindMethodsNomenclatureUseCase {
       organizationId,
     );
   }
+
+  async getManyByIds(ids: number[]): Promise<Nomenclature[]> {
+    return await this.nomenclatureRepository.findManyByIds(ids);
+  }
 }
