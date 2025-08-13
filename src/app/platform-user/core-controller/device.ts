@@ -137,7 +137,7 @@ export class DeviceController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (data.posId != '*') {
+      if (data.posId) {
         await this.posValidateRules.getOneByIdValidate(data.posId, ability);
         return await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(
           data.posId,

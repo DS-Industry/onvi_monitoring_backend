@@ -3,26 +3,23 @@ import { ManagerPaperGroup } from '@prisma/client';
 import { Transform } from 'class-transformer';
 
 export class ManagerPaperFilterDto {
-  @IsNotEmpty({ message: 'group is required' })
-  group: ManagerPaperGroup | '*';
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsOptional()
+  group?: ManagerPaperGroup;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  posId: number | '*';
-  @IsNotEmpty({ message: 'paperTypeId is required' })
+  posId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  paperTypeId: number | '*';
-  @IsNotEmpty({ message: 'userId is required' })
+  paperTypeId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  userId: number | '*';
+  userId?: number;
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   dateStartEvent?: Date;

@@ -58,7 +58,13 @@ export class PermissionController {
     let cursor = '0';
 
     do {
-      const [nextCursor, keys] = await this.redisService.scan(cursor, 'MATCH', pattern, 'COUNT', '100');
+      const [nextCursor, keys] = await this.redisService.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        '100',
+      );
       cursor = nextCursor;
 
       if (keys.length > 0) {
@@ -273,9 +279,9 @@ export class PermissionController {
         body.userId,
         body.roleId,
       );
-      
+
       await this.deleteUserKeysSafely(body.userId);
-      
+
       return await this.userUpdate.execute({
         id: body.userId,
         roleId: body.roleId,
