@@ -7,6 +7,7 @@ import { ReportWorkerModule } from './workers/report-worker/report-worker.module
 import { DataRawWorkerModule } from './workers/data-raw-worker/data-raw-worker.module';
 import { CronModule } from './cron/raw-data-cron/cron.module';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 export const rolesMapBootstrap = {
   app: async () => {
@@ -15,6 +16,17 @@ export const rolesMapBootstrap = {
 
     const PORT = configService.get<number>('port');
     const appName = configService.get<string>('appName');
+
+    // Enable CORS only for local development
+    if (process.env.NODE_ENV === 'development') {
+      app.enableCors({
+        origin: ['http://localhost:5173', 'https://ds-industry.github.io'],
+        methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
+        credentials: true,
+      });
+    }
+
+    app.use(cookieParser());
 
     app.useGlobalFilters(new AllExceptionFilter());
 

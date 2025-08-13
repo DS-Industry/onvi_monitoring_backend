@@ -10,7 +10,9 @@ import {
   Req,
   Request,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { SignAccessTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-access-token';
 import { LocalGuard } from '@platform-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@platform-user/auth/controller/dto/auth-login.dto';
@@ -29,8 +31,10 @@ import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-re
 import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-validate-rules';
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { UserException } from '@exception/option.exceptions';
+import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 
 @Controller('auth')
 export class Auth {
@@ -44,12 +48,17 @@ export class Auth {
     private readonly authRegisterWorker: AuthRegisterWorkerUseCase,
     private readonly authValidateRules: AuthValidateRules,
     private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
+    private readonly setCookies: SetCookiesUseCase,
   ) {}
   //Login
   @UseGuards(LocalGuard)
   @Post('/login')
   @HttpCode(201)
-  async login(@Body() body: AuthLoginDto, @Request() req: any): Promise<any> {
+  async login(
+    @Body() body: AuthLoginDto,
+    @Request() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
     try {
       const { user } = req;
       if (user.register) {
@@ -64,7 +73,11 @@ export class Auth {
         await this.getAllPermissionsInfoUseCases.getPermissionsInfoForUser(
           response.admin,
         );
-      return { ...response, permissionInfo };
+
+      this.setCookies.execute(res, response.tokens.accessToken, response.tokens.refreshToken);
+
+      const { tokens, ...responseWithoutTokens } = response;
+      return { ...responseWithoutTokens, permissionInfo };
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({
@@ -209,15 +222,22 @@ export class Auth {
   @UseGuards(RefreshGuard)
   @Post('/refresh')
   @HttpCode(200)
-  async refresh(@Body() body: any, @Req() req: any): Promise<any> {
+  async refresh(
+    @Body() body: any,
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
     try {
       const { user } = req;
       const accessToken = await this.singAccessToken.execute(
         user.props.email,
         user.props.id,
       );
+
+      this.setCookies.execute(res, accessToken.token);
+
       return {
-        accessToken: accessToken.token,
+        success: true,
         accessTokenExp: accessToken.expirationDate,
       };
     } catch (e) {
@@ -314,6 +334,27 @@ export class Auth {
           code: HttpStatus.INTERNAL_SERVER_ERROR,
         });
       }
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('/validate')
+  @HttpCode(200)
+  async validate(@Request() req: any): Promise<any> {
+    try {
+      const { user } = req;
+      return {
+        valid: true,
+        user: {
+          id: user.props.id,
+          email: user.props.email,
+        },
+      };
+    } catch (e) {
+      throw new CustomHttpException({
+        message: 'Invalid token',
+        code: HttpStatus.UNAUTHORIZED,
+      });
     }
   }
 }

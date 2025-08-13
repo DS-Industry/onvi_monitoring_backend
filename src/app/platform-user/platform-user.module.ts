@@ -15,6 +15,7 @@ import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate
 import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
 import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-email-strategy';
 import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-register-worker';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
 import { Auth } from '@platform-user/auth/controller/auth';
 import { BcryptModule } from '@libs/bcrypt/module';
 import { JwtModule } from '@libs/auth/module';
@@ -118,6 +119,7 @@ const authUseCase: Provider[] = [
   PasswordResetUserUseCase,
   ValidateUserEmailStrategyUseCase,
   AuthRegisterWorkerUseCase,
+  SetCookiesUseCase,
 ];
 
 const userUseCase: Provider[] = [
