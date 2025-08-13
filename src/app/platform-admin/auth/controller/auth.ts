@@ -17,6 +17,7 @@ import { LocalGuard } from '@platform-admin/auth/guards/local.guard';
 import { RefreshGuard } from '@platform-admin/auth/guards/refresh.guard';
 import { SignAccessTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign-access-token';
 import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
+import { LogoutUseCase } from '@platform-admin/auth/use-cases/auth-logout';
 import { EmailGuard } from '@platform-admin/auth/guards/email.guard';
 import { AuthActivationDto } from '@platform-admin/auth/controller/dto/auth-activation.dto';
 import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activate';
@@ -40,6 +41,7 @@ export class Auth {
     private readonly passwordConfirmMail: PasswordConfirmMailAdminUseCase,
     private readonly passwordReset: PasswordResetAdminUseCase,
     private readonly setCookies: SetCookiesUseCase,
+    private readonly logout: LogoutUseCase,
     private abilityFacrory: AbilityFactory,
   ) {}
   @UseGuards(LocalGuard)
@@ -177,6 +179,20 @@ export class Auth {
       };
     } catch (e) {
       throw new Error('Invalid token');
+    }
+  }
+
+  @Post('/logout')
+  @HttpCode(200)
+  async logoutAdmin(@Res({ passthrough: true }) res: Response): Promise<any> {
+    try {
+      this.logout.execute(res);
+      return {
+        success: true,
+        message: 'Logged out successfully',
+      };
+    } catch (e) {
+      throw new Error('Logout failed');
     }
   }
 }

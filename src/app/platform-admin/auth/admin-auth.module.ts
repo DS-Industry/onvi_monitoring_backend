@@ -21,6 +21,7 @@ import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/
 import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
 import { AbilityModule } from '@platform-admin/permissions/ability.module';
 import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
+import { LogoutUseCase } from '@platform-admin/auth/use-cases/auth-logout';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cooki
     ValidateAdminEmailStrategyUseCase,
     GetAdminIfRefreshTokenMatchesUseCase,
     SetCookiesUseCase,
+    LogoutUseCase,
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,

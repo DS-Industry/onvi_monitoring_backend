@@ -32,6 +32,7 @@ import { AuthValidateRules } from '@platform-user/validate/validate-rules/auth-v
 import { SendConfirmMailUseCase } from '@platform-user/confirmMail/use-case/confirm-mail-send';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
+import { LogoutUseCase } from '@platform-admin/auth/use-cases/auth-logout';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { UserException } from '@exception/option.exceptions';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
@@ -49,6 +50,7 @@ export class Auth {
     private readonly authValidateRules: AuthValidateRules,
     private readonly getAllPermissionsInfoUseCases: GetAllPermissionsInfoUseCases,
     private readonly setCookies: SetCookiesUseCase,
+    private readonly logout: LogoutUseCase,
   ) {}
   //Login
   @UseGuards(LocalGuard)
@@ -354,6 +356,31 @@ export class Auth {
       throw new CustomHttpException({
         message: 'Invalid token',
         code: HttpStatus.UNAUTHORIZED,
+      });
+    }
+  }
+
+  @Get('/csrf-token')
+  @HttpCode(200)
+  async getCsrfToken(@Req() req: any): Promise<any> {
+    return {
+      csrfToken: req.csrfToken(),
+    };
+  }
+
+  @Post('/logout')
+  @HttpCode(200)
+  async logoutUser(@Res({ passthrough: true }) res: Response): Promise<any> {
+    try {
+      this.logout.execute(res);
+      return {
+        success: true,
+        message: 'Logged out successfully',
+      };
+    } catch (e) {
+      throw new CustomHttpException({
+        message: 'Logout failed',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
   }
