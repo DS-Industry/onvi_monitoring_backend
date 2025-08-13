@@ -8,6 +8,7 @@ import { DataRawWorkerModule } from './workers/data-raw-worker/data-raw-worker.m
 import { CronModule } from './cron/raw-data-cron/cron.module';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import csurf from 'csurf';
 
 export const rolesMapBootstrap = {
   app: async () => {
@@ -25,6 +26,27 @@ export const rolesMapBootstrap = {
     });
 
     app.use(cookieParser());
+
+    // CSRF Protection - Skip auth endpoints
+    app.use((req, res, next) => {
+      if (
+        req.path.includes('/auth/login') ||
+        req.path.includes('/auth/register') ||
+        req.path.includes('/auth/refresh') ||
+        req.path.includes('/auth/logout')
+      ) {
+        return next();
+      }
+
+      // Apply CSRF protection to other routes
+      csurf({
+        cookie: {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+        },
+      })(req, res, next);
+    });
 
     app.useGlobalFilters(new AllExceptionFilter());
 
