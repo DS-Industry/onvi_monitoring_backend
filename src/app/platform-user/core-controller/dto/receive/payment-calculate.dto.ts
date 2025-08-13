@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
 import { Transform } from 'class-transformer';
 
 export class PaymentCalculateDto {
@@ -13,10 +13,9 @@ export class PaymentCalculateDto {
     return new Date(Date.UTC(year, month, 1));
   })
   billingMonth: Date;
-  @IsNotEmpty({ message: 'hrPositionId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  hrPositionId: number | '*';
+  hrPositionId?: number;
 }

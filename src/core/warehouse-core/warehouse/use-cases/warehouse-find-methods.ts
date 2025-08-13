@@ -16,7 +16,7 @@ export class FindMethodsWarehouseUseCase {
 
   async geyAllByPermission(
     ability: any,
-    placementId: number | '*',
+    placementId?: number,
   ): Promise<Warehouse[]> {
     return await this.warehouseRepository.findAllByPermission(
       ability,

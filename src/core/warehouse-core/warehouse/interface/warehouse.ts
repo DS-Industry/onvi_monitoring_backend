@@ -6,7 +6,7 @@ export abstract class IWarehouseRepository {
   abstract findAllByPosId(posId: number): Promise<Warehouse[]>;
   abstract findAllByPermission(
     ability: any,
-    placementId: number | '*',
+    placementId?: number,
   ): Promise<Warehouse[]>;
   abstract update(input: Warehouse): Promise<Warehouse>;
 }

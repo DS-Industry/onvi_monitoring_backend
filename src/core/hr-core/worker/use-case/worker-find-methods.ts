@@ -29,26 +29,17 @@ export class FindMethodsWorkerUseCase {
     );
   }
 
-  async getAllForCalculatePayment(
-    organizationId: number,
-    billingMonth: Date,
-    hrPositionId: number | '*',
-    paymentType: PaymentType | '*',
-  ): Promise<Worker[]> {
-    let hrPositionIdCorrect = undefined;
-    let paymentTypeCorrect = undefined;
-    if (hrPositionId != '*') {
-      hrPositionIdCorrect = hrPositionId;
-    }
-    if (paymentType != '*') {
-      paymentTypeCorrect = paymentType;
-    }
-
+  async getAllForCalculatePayment(data: {
+    organizationId: number;
+    billingMonth: Date;
+    hrPositionId?: number;
+    paymentType?: PaymentType;
+  }): Promise<Worker[]> {
     return await this.workerRepository.findAllForCalculatePayment(
-      organizationId,
-      billingMonth,
-      hrPositionIdCorrect,
-      paymentTypeCorrect,
+      data.organizationId,
+      data.billingMonth,
+      data.hrPositionId,
+      data.paymentType,
     );
   }
 

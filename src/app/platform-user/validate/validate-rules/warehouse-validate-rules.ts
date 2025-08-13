@@ -314,12 +314,12 @@ export class WarehouseValidateRules {
     const response = [];
 
     response.push(await this.validateLib.organizationByIdExists(input.orgId));
-    if (input.categoryId != '*') {
+    if (input.categoryId) {
       response.push(
         await this.validateLib.categoryByIdExists(input.categoryId),
       );
     }
-    if (input.warehouseId != '*') {
+    if (input.warehouseId) {
       const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
       response.push(warehouseCheck);
       if (warehouseCheck.object) {

@@ -25,7 +25,7 @@ export class InventoryItemMonitoringUseCase {
   ): Promise<InventoryItemMonitoringResponseDto[]> {
     let nomenclatures: Nomenclature[];
     let warehouses: Warehouse[] = [];
-    if (data.categoryId != '*') {
+    if (data.categoryId) {
       nomenclatures =
         await this.findMethodsNomenclatureUseCase.getAllByCategoryIdAndOrganizationId(
           data.categoryId,
@@ -37,7 +37,7 @@ export class InventoryItemMonitoringUseCase {
           data.orgId,
         );
     }
-    if (data.warehouseId != '*') {
+    if (data.warehouseId) {
       warehouses.push(
         await this.findMethodsWarehouseUseCase.getById(data.warehouseId),
       );

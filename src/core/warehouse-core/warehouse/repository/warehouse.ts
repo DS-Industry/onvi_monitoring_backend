@@ -39,13 +39,13 @@ export class WarehouseRepository extends IWarehouseRepository {
 
   public async findAllByPermission(
     ability: any,
-    placementId: number | '*',
+    placementId?: number,
   ): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
       where: {
         AND: [
           accessibleBy(ability).Warehouse,
-          placementId !== '*' ? { pos: { placementId } } : {},
+          placementId ? { pos: { placementId } } : {},
         ],
       },
     });

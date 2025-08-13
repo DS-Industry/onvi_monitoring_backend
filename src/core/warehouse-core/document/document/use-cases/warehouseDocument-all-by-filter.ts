@@ -16,7 +16,7 @@ export class AllByFilterWarehouseDocumentUseCase {
     dateStart: Date,
     dateEnd: Date,
     ability: Abilities[0],
-    placementId: number | '*',
+    placementId?: number,
     warehouse?: Warehouse,
   ): Promise<WarehouseDocumentAllByFilterResponseDto[]> {
     let warehouses: Warehouse[] = [];

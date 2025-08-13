@@ -520,7 +520,7 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (params.posId != '*') {
+      if (params.posId) {
         await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
         return await this.findMethodsWarehouseUseCase.getAllByPosId(
           params.posId,
@@ -528,7 +528,7 @@ export class WarehouseController {
       } else {
         return await this.findMethodsWarehouseUseCase.geyAllByPermission(
           ability,
-          params.placementId,
+          params?.placementId,
         );
       }
     } catch (e) {
@@ -715,7 +715,7 @@ export class WarehouseController {
     try {
       const { ability } = req;
       let warehouse = null;
-      if (params.warehouseId != '*') {
+      if (params.warehouseId) {
         warehouse = await this.warehouseValidateRules.getOneByIdValidate(
           params.warehouseId,
           ability,

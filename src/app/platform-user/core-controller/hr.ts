@@ -359,12 +359,11 @@ export class HrController {
   ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
     try {
       const workers =
-        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-          data.organizationId,
-          data.billingMonth,
-          data.hrPositionId,
-          '*',
-        );
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          organizationId: data.organizationId,
+          billingMonth: data.billingMonth,
+          hrPositionId: data.hrPositionId,
+        });
       return await this.calculationPaymentShiftReportUseCase.execute(
         data.billingMonth,
         workers,
@@ -395,12 +394,10 @@ export class HrController {
   ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
     try {
       const workers =
-        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-          data.organizationId,
-          data.billingMonth,
-          '*',
-          '*',
-        );
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          organizationId: data.organizationId,
+          billingMonth: data.billingMonth,
+        });
       const filteredWorkers = workers.filter(
         (worker) => !data.workerIds.includes(worker.id),
       );
@@ -434,12 +431,12 @@ export class HrController {
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
       const workers =
-        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-          data.organizationId,
-          data.billingMonth,
-          data.hrPositionId,
-          PaymentType.PAYMENT,
-        );
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          organizationId: data.organizationId,
+          billingMonth: data.billingMonth,
+          hrPositionId: data.hrPositionId,
+          paymentType: PaymentType.PAYMENT,
+        });
       const calculateDate =
         await this.calculationPaymentShiftReportUseCase.execute(
           data.billingMonth,
@@ -472,12 +469,11 @@ export class HrController {
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
       const workers =
-        await this.findMethodsWorkerUseCase.getAllForCalculatePayment(
-          data.organizationId,
-          data.billingMonth,
-          '*',
-          PaymentType.PAYMENT,
-        );
+        await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          organizationId: data.organizationId,
+          billingMonth: data.billingMonth,
+          paymentType: PaymentType.PAYMENT,
+        });
       const filteredWorkers = workers.filter(
         (worker) => !data.workerIds.includes(worker.id),
       );
