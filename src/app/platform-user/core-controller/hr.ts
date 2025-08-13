@@ -153,26 +153,14 @@ export class HrController {
     try {
       let skip = undefined;
       let take = undefined;
-      let placementId = undefined;
-      let hrPositionId = undefined;
-      let organizationId = undefined;
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;
       }
-      if (data.placementId != '*') {
-        placementId = data.placementId;
-      }
-      if (data.hrPositionId != '*') {
-        hrPositionId = data.hrPositionId;
-      }
-      if (data.organizationId != '*') {
-        organizationId = data.organizationId;
-      }
       return await this.findMethodsWorkerUseCase.getAllByFilter(
-        placementId,
-        hrPositionId,
-        organizationId,
+        data.placementId,
+        data.hrPositionId,
+        data.organizationId,
         data?.name,
         skip,
         take,
@@ -598,7 +586,6 @@ export class HrController {
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
   async getPrepayments(
-    @Request() req: any,
     @Query() data: PaymentReportFilterDto,
   ): Promise<PrepaymentsGetResponseDto[]> {
     try {

@@ -174,43 +174,27 @@ export class ManagerPaperController {
 
       let skip = undefined;
       let take = undefined;
-      let group = undefined;
-      let posId = undefined;
-      let paperTypeId = undefined;
-      let userId = undefined;
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;
       }
-      if (data.group != '*') {
-        group = data.group;
-      }
-      if (data.paperTypeId != '*') {
-        paperTypeId = data.paperTypeId;
-      }
-      if (data.userId != '*') {
-        userId = data.userId;
-      }
-      if (data.posId != '*') {
-        posId = data.posId;
-      }
       const totalCount =
         await this.findMethodsManagerPaperUseCase.getCountAllByFilter({
           ability,
-          group,
-          posId,
-          paperTypeId,
-          userId,
+          group: data.group,
+          posId: data.posId,
+          paperTypeId: data.paperTypeId,
+          userId: data.userId,
           dateStartEvent: data.dateStartEvent,
           dateEndEvent: data.dateEndEvent,
         });
       const managerPapers =
         await this.findMethodsManagerPaperUseCase.getAllByFilter({
           ability,
-          group,
-          posId,
-          paperTypeId,
-          userId,
+          group: data.group,
+          posId: data.posId,
+          paperTypeId: data.paperTypeId,
+          userId: data.userId,
           dateStartEvent: data.dateStartEvent,
           dateEndEvent: data.dateEndEvent,
           skip,
@@ -244,29 +228,12 @@ export class ManagerPaperController {
     try {
       const { ability } = req;
 
-      let group = undefined;
-      let posId = undefined;
-      let paperTypeId = undefined;
-      let userId = undefined;
-
-      if (data.group != '*') {
-        group = data.group;
-      }
-      if (data.paperTypeId != '*') {
-        paperTypeId = data.paperTypeId;
-      }
-      if (data.userId != '*') {
-        userId = data.userId;
-      }
-      if (data.posId != '*') {
-        posId = data.posId;
-      }
       return await this.statisticManagerPaperUseCase.execute({
         ability,
-        group,
-        posId,
-        paperTypeId,
-        userId,
+        group: data.group,
+        posId: data.posId,
+        paperTypeId: data.paperTypeId,
+        userId: data.userId,
         dateStartEvent: data.dateStartEvent,
         dateEndEvent: data.dateEndEvent,
       });

@@ -3,7 +3,6 @@
 /node_modules
 env
 /config/firebase
-/prisma/migrations
 
 # Logs
 logs
