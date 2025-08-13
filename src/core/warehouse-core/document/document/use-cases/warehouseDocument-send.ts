@@ -55,31 +55,31 @@ export class SandWarehouseDocumentUseCase {
       receiverInventoryItems.push(...createdItemsOnReceiverWarehouse);
     }
 
-    await Promise.all(
-      details.map(async (detail) => {
-        const inventoryItem = inventoryItems.find(
+    for (const detail of details) {
+      const inventoryItem = inventoryItems.find(
+        (item) => item.nomenclatureId === detail.nomenclatureId,
+      );
+
+      if (
+        oldDocument.type == WarehouseDocumentType.COMMISSIONING ||
+        oldDocument.type == WarehouseDocumentType.WRITEOFF
+      ) {
+        inventoryItem.adjustQuantity(-detail.quantity);
+      } else if (oldDocument.type == WarehouseDocumentType.INVENTORY) {
+        inventoryItem.quantity = detail.quantity;
+      } else if (oldDocument.type == WarehouseDocumentType.RECEIPT) {
+        inventoryItem.adjustQuantity(detail.quantity);
+      } else if (oldDocument.type == WarehouseDocumentType.MOVING) {
+        inventoryItem.adjustQuantity(-detail.quantity);
+        const receiverItem = receiverInventoryItems.find(
           (item) => item.nomenclatureId === detail.nomenclatureId,
         );
-        if (
-          oldDocument.type == WarehouseDocumentType.COMMISSIONING ||
-          oldDocument.type == WarehouseDocumentType.WRITEOFF
-        ) {
-          inventoryItem.adjustQuantity(-detail.quantity);
-        } else if (oldDocument.type == WarehouseDocumentType.INVENTORY) {
-          inventoryItem.quantity = detail.quantity;
-        } else if (oldDocument.type == WarehouseDocumentType.RECEIPT) {
-          inventoryItem.adjustQuantity(detail.quantity);
-        } else if (oldDocument.type == WarehouseDocumentType.MOVING) {
-          inventoryItem.adjustQuantity(-detail.quantity);
-          const receiverItem = receiverInventoryItems.find(
-            (item) => item.nomenclatureId === detail.nomenclatureId,
-          );
-          receiverItem.adjustQuantity(detail.quantity);
-          updatedInventoryItems.push(receiverItem);
-        }
-        updatedInventoryItems.push(inventoryItem);
-      }),
-    );
+        receiverItem.adjustQuantity(detail.quantity);
+        updatedInventoryItems.push(receiverItem);
+      }
+
+      updatedInventoryItems.push(inventoryItem);
+    }
 
     await this.updateInventoryItemUseCase.updateMany(updatedInventoryItems);
     await this.updateWarehouseDocumentUseCase.execute(
