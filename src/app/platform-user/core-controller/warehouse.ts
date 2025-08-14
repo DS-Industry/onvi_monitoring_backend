@@ -441,7 +441,6 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  @CacheSWR(60)
   async getAllInventoryItem(
     @Request() req: any,
     @Param('orgId', ParseIntPipe) orgId: number,
@@ -480,7 +479,6 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  @CacheSWR(60)
   async getAllInventoryItemByWarehouse(
     @Request() req: any,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,

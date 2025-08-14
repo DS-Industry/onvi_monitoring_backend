@@ -397,7 +397,6 @@ export class OrganizationController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  @CacheSWR(900)
   async getDocumentById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
