@@ -24,10 +24,10 @@ import { NotificationCoreModule } from '@notification/notification-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@infra/cache/redis.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { CacheSWRInterceptor } from './common/interceptors/cache-swr.interceptor';
+import { CacheSWRInterceptor } from '@common/interceptors/cache-swr.interceptor';
 
 @Module({
   imports: [

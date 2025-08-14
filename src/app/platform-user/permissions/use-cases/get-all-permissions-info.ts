@@ -7,6 +7,7 @@ import {
   PermissionsInfoResponseDto,
 } from '@platform-user/permissions/use-cases/dto/permissions-info-response.dto';
 import { GetByIdObjectUseCase } from '@object-permission/use-case/object-get-by-id';
+import { FindMethodsUserUseCase } from "@platform-user/user/use-cases/user-find-methods";
 
 @Injectable()
 export class GetAllPermissionsInfoUseCases {
@@ -14,14 +15,18 @@ export class GetAllPermissionsInfoUseCases {
     private readonly findMethodsRoleUseCase: FindMethodsRoleUseCase,
     private readonly caslAbilityFactory: AbilityFactory,
     private readonly objectGetById: GetByIdObjectUseCase,
+    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
   ) {}
 
   async getPermissionsInfoForUser(user: User) {
     const role = await this.findMethodsRoleUseCase.getById(user.userRoleId);
     const ability =
       await this.caslAbilityFactory.createForPlatformManager(user);
+    const organizationCondition =
+      await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
     return {
       role: role.name,
+      organizationIds: organizationCondition,
       permissions: ability.rules,
     };
   }

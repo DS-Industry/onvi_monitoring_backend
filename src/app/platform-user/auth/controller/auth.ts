@@ -76,7 +76,11 @@ export class Auth {
           response.admin,
         );
 
-      this.setCookies.execute(res, response.tokens.accessToken, response.tokens.refreshToken);
+      this.setCookies.execute(
+        res,
+        response.tokens.accessToken,
+        response.tokens.refreshToken,
+      );
 
       const { tokens, ...responseWithoutTokens } = response;
       return { ...responseWithoutTokens, permissionInfo };
@@ -359,7 +363,6 @@ export class Auth {
       });
     }
   }
-
 
   @Post('/logout')
   @HttpCode(200)

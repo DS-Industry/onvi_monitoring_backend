@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpCode,
-  HttpStatus,
   Post,
   UseGuards,
   Request,
@@ -28,8 +27,6 @@ import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-p
 import { AbilityFactory } from '@platform-admin/permissions/ability.factory';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { PermissionAction } from '@prisma/client';
-import { CheckAbilities } from '@common/decorators/abilities.decorator';
-import { AbilitiesGuard } from '@platform-admin/admin-permissions/guards/abilities.guard';
 import { JwtGuard } from '@platform-admin/auth/guards/jwt.guard';
 
 @Controller('auth')
@@ -102,8 +99,7 @@ export class Auth {
     }
   }
 
-  @UseGuards(EmailGuard, AbilitiesGuard)
-  @CheckAbilities({ action: PermissionAction.update, subject: 'Admin' })
+  @UseGuards(EmailGuard)
   @Post('/password/reset')
   @HttpCode(201)
   async reset(
