@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IWarehouseDocumentRepository } from '@warehouse/document/document/interface/warehouseDocument';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { WarehouseDocumentType } from '@prisma/client';
+import { PureAbility } from '@casl/ability';
 
 @Injectable()
 export class FindMethodsWarehouseDocumentUseCase {
@@ -36,14 +37,18 @@ export class FindMethodsWarehouseDocumentUseCase {
   }
 
   async getAllByWarehouseIdsAndDate(
-    warehouseIds: number[],
     dateStart: Date,
     dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
   ): Promise<WarehouseDocument[]> {
     return await this.warehouseDocumentRepository.getAllByWarehouseIdsAndDate(
-      warehouseIds,
       dateStart,
       dateEnd,
+      ability,
+      warehouseId,
+      placementId,
     );
   }
 

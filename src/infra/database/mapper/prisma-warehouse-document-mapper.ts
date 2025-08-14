@@ -1,11 +1,18 @@
 import {
   WarehouseDocument as PrismaWarehouseDocument,
   Prisma,
+  User,
+  Warehouse,
 } from '@prisma/client';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 
 export class PrismaWarehouseDocumentMapper {
-  static toDomain(entity: PrismaWarehouseDocument): WarehouseDocument {
+  static toDomain(
+    entity: PrismaWarehouseDocument & {
+      responsible?: User;
+      warehouse?: Warehouse;
+    },
+  ): WarehouseDocument {
     if (!entity) {
       return null;
     }
@@ -14,7 +21,11 @@ export class PrismaWarehouseDocumentMapper {
       name: entity.name,
       type: entity.warehouseDocumentType,
       warehouseId: entity.warehouseId,
+      warehouseName: entity.warehouse?.name ?? undefined,
       responsibleId: entity.responsibleId,
+      responsibleName:
+        entity.responsible?.name + ' ' + entity.responsible?.surname ??
+        undefined,
       status: entity.status,
       carryingAt: entity.carryingAt,
       createdAt: entity.createdAt,

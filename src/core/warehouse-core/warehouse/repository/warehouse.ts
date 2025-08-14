@@ -30,10 +30,14 @@ export class WarehouseRepository extends IWarehouseRepository {
 
   public async findAllByPosId(posId: number): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
+      include: {
+        manager: true,
+      },
       where: {
         posId,
       },
     });
+
     return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
   }
 
@@ -42,6 +46,9 @@ export class WarehouseRepository extends IWarehouseRepository {
     placementId?: number,
   ): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
+      include: {
+        manager: true,
+      },
       where: {
         AND: [
           accessibleBy(ability).Warehouse,
