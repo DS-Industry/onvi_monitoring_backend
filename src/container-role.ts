@@ -43,7 +43,7 @@ export const rolesMapBootstrap = {
         cookie: {
           httpOnly: true,
           secure: true,
-          sameSite: 'strict',
+          sameSite: 'none',
         },
       })(req, res, next);
     });
