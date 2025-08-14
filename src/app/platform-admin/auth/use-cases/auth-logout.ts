@@ -8,14 +8,13 @@ export class LogoutUseCase {
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
     });
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
     });
-
   }
 }
