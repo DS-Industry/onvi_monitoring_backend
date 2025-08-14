@@ -73,7 +73,6 @@ export class OrganizationController {
   @Get('filter')
   @UseGuards(JwtGuard)
   @HttpCode(200)
-  @CacheSWR(432000)
   async filterViewOrganizationByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,

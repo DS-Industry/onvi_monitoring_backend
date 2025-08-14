@@ -45,7 +45,7 @@ import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/p
 import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
 import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
-import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('pos')
@@ -103,7 +103,6 @@ export class PosController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  @CacheSWR(86400)
   async filterViewPosByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
