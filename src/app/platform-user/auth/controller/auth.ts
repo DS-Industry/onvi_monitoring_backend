@@ -360,13 +360,6 @@ export class Auth {
     }
   }
 
-  @Get('/csrf-token')
-  @HttpCode(200)
-  async getCsrfToken(@Req() req: any): Promise<any> {
-    return {
-      csrfToken: req.csrfToken(),
-    };
-  }
 
   @Post('/logout')
   @HttpCode(200)
