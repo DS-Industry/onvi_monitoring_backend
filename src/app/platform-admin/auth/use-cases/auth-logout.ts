@@ -17,11 +17,5 @@ export class LogoutUseCase {
       sameSite: 'none',
     });
 
-    // Clear CSRF token cookie
-    res.clearCookie('_csrf', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    });
   }
 }
