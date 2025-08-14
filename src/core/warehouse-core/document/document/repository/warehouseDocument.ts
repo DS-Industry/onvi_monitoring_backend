@@ -3,7 +3,9 @@ import { IWarehouseDocumentRepository } from '@warehouse/document/document/inter
 import { PrismaService } from '@db/prisma/prisma.service';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { PrismaWarehouseDocumentMapper } from '@db/mapper/prisma-warehouse-document-mapper';
-import { WarehouseDocumentType } from '@prisma/client';
+import { Prisma, WarehouseDocumentType } from '@prisma/client';
+import { accessibleBy } from '@casl/prisma';
+import { PureAbility } from '@casl/ability';
 
 @Injectable()
 export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
@@ -24,6 +26,9 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
     const warehouseDocument = await this.prisma.warehouseDocument.findFirst({
       where: {
         id,
+      },
+      include: {
+        responsible: true,
       },
     });
     return PrismaWarehouseDocumentMapper.toDomain(warehouseDocument);
@@ -74,19 +79,40 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
   }
 
   public async getAllByWarehouseIdsAndDate(
-    warehouseIds: number[],
     dateStart: Date,
     dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
   ) {
+    const whereClause: Prisma.WarehouseDocumentWhereInput = {
+      ...(warehouseId
+        ? { warehouseId }
+        : {
+            AND: [
+              {
+                warehouse: accessibleBy(ability).Warehouse,
+              },
+              {
+                warehouse: {
+                  pos: {
+                    placementId: placementId || undefined,
+                  },
+                },
+              },
+            ],
+          }),
+      carryingAt: {
+        gte: dateStart,
+        lte: dateEnd,
+      },
+    };
+
     const warehouseDocuments = await this.prisma.warehouseDocument.findMany({
-      where: {
-        warehouseId: {
-          in: warehouseIds,
-        },
-        carryingAt: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
+      where: whereClause,
+      include: {
+        responsible: true,
+        warehouse: true,
       },
       orderBy: {
         carryingAt: 'asc',

@@ -1,5 +1,6 @@
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { WarehouseDocumentType } from '@prisma/client';
+import { PureAbility } from '@casl/ability';
 
 export abstract class IWarehouseDocumentRepository {
   abstract create(input: WarehouseDocument): Promise<WarehouseDocument>;
@@ -14,9 +15,11 @@ export abstract class IWarehouseDocumentRepository {
     dateEnd: Date,
   ): Promise<WarehouseDocument[]>;
   abstract getAllByWarehouseIdsAndDate(
-    warehouseIds: number[],
     dateStart: Date,
     dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
   );
   abstract findAllByWarehouseIdAndType(
     warehouseId: number,

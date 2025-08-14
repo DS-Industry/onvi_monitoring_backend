@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
 
 export interface WarehouseProps {
@@ -5,6 +6,7 @@ export interface WarehouseProps {
   name: string;
   location: string;
   managerId: number;
+  managerName?: string;
   posId: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -31,6 +33,10 @@ export class Warehouse extends BaseEntity<WarehouseProps> {
 
   get managerId(): number {
     return this.props.managerId;
+  }
+
+  get managerName(): string {
+    return this.props.managerName;
   }
 
   get posId(): number {
@@ -67,6 +73,10 @@ export class Warehouse extends BaseEntity<WarehouseProps> {
 
   set managerId(managerId: number) {
     this.props.managerId = managerId;
+  }
+
+  set managerName(managerName: string) {
+    this.props.managerName = managerName;
   }
 
   set updatedAt(updatedAt: Date) {
