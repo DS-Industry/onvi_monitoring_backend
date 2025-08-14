@@ -366,7 +366,6 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  @CacheSWR(30)
   async getAllCategory(): Promise<any> {
     try {
       return await this.findMethodsCategoryUseCase.getAll();

@@ -19,7 +19,11 @@ export const rolesMapBootstrap = {
 
     // Enable CORS only for local development
     app.enableCors({
-      origin: ['http://localhost:5173', 'https://ds-industry.github.io'],
+      origin: [
+        'http://localhost:5173',
+        'https://ds-industry.github.io',
+        'https://app.onvione.ru/',
+      ],
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
       credentials: true,
     });
