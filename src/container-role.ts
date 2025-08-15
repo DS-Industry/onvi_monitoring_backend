@@ -23,6 +23,7 @@ export const rolesMapBootstrap = {
         'http://localhost:5173',
         'https://ds-industry.github.io',
         'https://app.onvione.ru/',
+        'https://st.app.onvione.ru/',
       ],
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
       credentials: true,
