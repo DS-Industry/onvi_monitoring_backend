@@ -67,28 +67,66 @@ export class NomenclatureRepository extends INomenclatureRepository {
 
   public async findAllByOrganizationId(
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]> {
     const nomenclatures = await this.prisma.nomenclature.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
       where: {
         organizationId,
         status: NomenclatureStatus.ACTIVE,
+      },
+      orderBy: {
+        sku: 'asc',
       },
     });
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
   }
 
+  public async countAllByOrganizationId(
+    organizationId: number,
+  ): Promise<number> {
+    return this.prisma.nomenclature.count({
+      where: {
+        organizationId,
+        status: NomenclatureStatus.ACTIVE,
+      },
+    });
+  }
+
   public async findAllByCategoryIdAndOrganizationId(
     categoryId: number,
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]> {
     const nomenclatures = await this.prisma.nomenclature.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      where: {
+        categoryId,
+        organizationId,
+        status: NomenclatureStatus.ACTIVE,
+      },
+      orderBy: {
+        sku: 'asc',
+      },
+    });
+    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
+  }
+
+  public async countAllByCategoryIdAndOrganizationId(
+    categoryId: number,
+    organizationId: number,
+  ): Promise<number> {
+    return this.prisma.nomenclature.count({
       where: {
         categoryId,
         organizationId,
         status: NomenclatureStatus.ACTIVE,
       },
     });
-    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
   }
 
   public async findAllBySupplierIdAndOrganizationId(

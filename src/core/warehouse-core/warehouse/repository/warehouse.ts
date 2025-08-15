@@ -28,24 +28,45 @@ export class WarehouseRepository extends IWarehouseRepository {
     return PrismaWarehouseMapper.toDomain(warehouse);
   }
 
-  public async findAllByPosId(posId: number): Promise<Warehouse[]> {
+  public async findAllByPosId(
+    posId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
       include: {
         manager: true,
       },
       where: {
         posId,
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
 
     return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
   }
 
+  public async findCountAllByPosId(posId: number): Promise<number> {
+    return this.prisma.warehouse.count({
+      where: {
+        posId,
+      },
+    });
+  }
+
   public async findAllByPermission(
     ability: any,
     placementId?: number,
+    skip?: number,
+    take?: number,
   ): Promise<Warehouse[]> {
     const warehouses = await this.prisma.warehouse.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
       include: {
         manager: true,
       },
@@ -55,8 +76,25 @@ export class WarehouseRepository extends IWarehouseRepository {
           placementId ? { pos: { placementId } } : {},
         ],
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
     return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
+  }
+
+  public async findCountAllByPermission(
+    ability: any,
+    placementId?: number,
+  ): Promise<number> {
+    return this.prisma.warehouse.count({
+      where: {
+        AND: [
+          accessibleBy(ability).Warehouse,
+          placementId ? { pos: { placementId } } : {},
+        ],
+      },
+    });
   }
 
   public async update(input: Warehouse): Promise<Warehouse> {

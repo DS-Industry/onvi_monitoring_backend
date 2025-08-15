@@ -10,7 +10,12 @@ export class FindMethodsSupplierUseCase {
     return await this.supplierRepository.findOneById(input);
   }
 
-  async getAll(): Promise<Supplier[]> {
-    return await this.supplierRepository.findAll();
+  async getAll(skip?: number, take?: number): Promise<Supplier[]> {
+    return await this.supplierRepository.findAll(skip, take);
+  }
+
+  async getCountAll(): Promise<{ count: number }> {
+    const count = await this.supplierRepository.countAll();
+    return { count };
   }
 }

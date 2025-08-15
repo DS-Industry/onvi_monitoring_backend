@@ -27,9 +27,19 @@ export class SupplierRepository extends ISupplierRepository {
     return PrismaSupplierMapper.toDomain(supplier);
   }
 
-  public async findAll(): Promise<Supplier[]> {
-    const suppliers = await this.prisma.supplier.findMany();
+  public async findAll(skip?: number, take?: number): Promise<Supplier[]> {
+    const suppliers = await this.prisma.supplier.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      orderBy: {
+        id: 'asc',
+      },
+    });
     return suppliers.map((item) => PrismaSupplierMapper.toDomain(item));
+  }
+
+  public async countAll(): Promise<number> {
+    return this.prisma.supplier.count();
   }
 
   public async update(input: Supplier): Promise<Supplier> {

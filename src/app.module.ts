@@ -33,7 +33,7 @@ import { CacheSWRInterceptor } from '@common/interceptors/cache-swr.interceptor'
   imports: [
     LoggerModule.forRoot({
       pinoHttp:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === 'developmen'
           ? {
               customProps: (req, res) => ({
                 context: 'HTTP',

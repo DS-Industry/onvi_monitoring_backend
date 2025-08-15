@@ -4,4 +4,6 @@ export class InventoryItemMonitoringDto {
   categoryId?: number;
   warehouseId?: number;
   placementId?: number;
+  skip?: number;
+  take?: number;
 }

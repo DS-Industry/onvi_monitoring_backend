@@ -34,30 +34,50 @@ export class FindMethodsNomenclatureUseCase {
 
   async getAllByOrganizationId(
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]> {
     return await this.nomenclatureRepository.findAllByOrganizationId(
       organizationId,
+      skip,
+      take,
     );
+  }
+
+  async getCountAllByOrganizationId(
+    organizationId: number,
+  ): Promise<{ count: number }> {
+    const count =
+      await this.nomenclatureRepository.countAllByOrganizationId(
+        organizationId,
+      );
+    return { count };
   }
 
   async getAllByCategoryIdAndOrganizationId(
     categoryId: number,
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]> {
     return await this.nomenclatureRepository.findAllByCategoryIdAndOrganizationId(
       categoryId,
       organizationId,
+      skip,
+      take,
     );
   }
 
-  async getAllBySupplierIdAndOrganizationId(
-    supplierId: number,
+  async getCountAllByCategoryIdAndOrganizationId(
+    categoryId: number,
     organizationId: number,
-  ): Promise<Nomenclature[]> {
-    return await this.nomenclatureRepository.findAllBySupplierIdAndOrganizationId(
-      supplierId,
-      organizationId,
-    );
+  ): Promise<{ count: number }> {
+    const count =
+      await this.nomenclatureRepository.countAllByCategoryIdAndOrganizationId(
+        categoryId,
+        organizationId,
+      );
+    return { count };
   }
 
   async getManyByIds(ids: number[]): Promise<Nomenclature[]> {

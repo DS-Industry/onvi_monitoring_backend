@@ -14,11 +14,22 @@ export abstract class INomenclatureRepository {
   ): Promise<Nomenclature>;
   abstract findAllByOrganizationId(
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]>;
+  abstract countAllByOrganizationId(
+    organizationId: number,
+  ): Promise<number>;
   abstract findAllByCategoryIdAndOrganizationId(
     categoryId: number,
     organizationId: number,
+    skip?: number,
+    take?: number,
   ): Promise<Nomenclature[]>;
+  abstract countAllByCategoryIdAndOrganizationId(
+    categoryId: number,
+    organizationId: number,
+  ): Promise<number>;
   abstract findAllBySupplierIdAndOrganizationId(
     supplierId: number,
     organizationId: number,

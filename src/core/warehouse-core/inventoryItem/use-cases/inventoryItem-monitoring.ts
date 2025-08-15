@@ -30,11 +30,15 @@ export class InventoryItemMonitoringUseCase {
         await this.findMethodsNomenclatureUseCase.getAllByCategoryIdAndOrganizationId(
           data.categoryId,
           data.orgId,
+          data.skip,
+          data.take,
         );
     } else {
       nomenclatures =
         await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
           data.orgId,
+          data.skip,
+          data.take,
         );
     }
     if (data.warehouseId) {

@@ -62,7 +62,7 @@ import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/ca
 import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 import { NomenclatureStatus } from '@prisma/client';
-import { CacheSWR } from '@common/decorators/cache-swr.decorator';
+import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -240,14 +240,52 @@ export class WarehouseController {
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
   async getAllNomenclatureByOrgId(
-    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: PaginationDto,
+  ): Promise<any> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
+        orgId,
+      );
+      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
+        orgId,
+        skip,
+        take,
+      );
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('nomenclature-count/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllNomenclatureByOrgId(
     @Param('orgId', ParseIntPipe) orgId: number,
   ): Promise<any> {
     try {
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
       );
-      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
+      return await this.findMethodsNomenclatureUseCase.getCountAllByOrganizationId(
         orgId,
       );
     } catch (e) {
@@ -417,9 +455,38 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  async getAllSupplier(): Promise<any> {
+  async getAllSupplier(@Query() params: PaginationDto): Promise<any> {
     try {
-      return await this.findMethodsSupplierUseCase.getAll();
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      return await this.findMethodsSupplierUseCase.getAll(skip, take);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('supplier-count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllSupplier(): Promise<{ count: number }> {
+    try {
+      return await this.findMethodsSupplierUseCase.getCountAll();
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -448,6 +515,14 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { ability } = req;
+
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+
       await this.warehouseValidateRules.getAllInventoryItemValidate({
         orgId,
         ability,
@@ -456,8 +531,53 @@ export class WarehouseController {
       return await this.inventoryItemMonitoringUseCase.execute({
         orgId,
         ability,
+        skip,
+        take,
         ...params,
       });
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('inventory-item-count/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllInventoryItem(
+    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: InventoryItemMonitoringDto,
+  ): Promise<{ count: number }> {
+    try {
+      const { ability } = req;
+
+      await this.warehouseValidateRules.getAllInventoryItemValidate({
+        orgId,
+        ability,
+        ...params,
+      });
+      if (params.categoryId) {
+        return await this.findMethodsNomenclatureUseCase.getCountAllByCategoryIdAndOrganizationId(
+          params.categoryId,
+          orgId,
+        );
+      } else {
+        return await this.findMethodsNomenclatureUseCase.getCountAllByOrganizationId(
+          orgId,
+        );
+      }
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -517,13 +637,63 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { ability } = req;
+
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+
       if (params.posId) {
         await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
         return await this.findMethodsWarehouseUseCase.getAllByPosId(
           params.posId,
+          skip,
+          take,
         );
       } else {
         return await this.findMethodsWarehouseUseCase.geyAllByPermission(
+          ability,
+          params?.placementId,
+          skip,
+          take,
+        );
+      }
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllByPosId(
+    @Request() req: any,
+    @Query() params: PlacementFilterDto,
+  ): Promise<{ count: number }> {
+    try {
+      const { ability } = req;
+
+      if (params.posId) {
+        await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
+        return await this.findMethodsWarehouseUseCase.getCountAllByPosId(
+          params.posId,
+        );
+      } else {
+        return await this.findMethodsWarehouseUseCase.getCountAllByPermission(
           ability,
           params?.placementId,
         );

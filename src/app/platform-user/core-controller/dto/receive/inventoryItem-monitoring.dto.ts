@@ -17,4 +17,10 @@ export class InventoryItemMonitoringDto {
     return parseInt(value);
   })
   placementId?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }

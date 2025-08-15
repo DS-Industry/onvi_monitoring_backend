@@ -12,4 +12,10 @@ export class PlacementFilterDto {
     return parseInt(value);
   })
   posId?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }
