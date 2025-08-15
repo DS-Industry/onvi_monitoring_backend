@@ -36,13 +36,13 @@ export class GetAllByFilterIncidentUseCase {
           incident.finishDate,
           incident.appearanceDate,
         ),
-        equipmentKnot: incident.equipmentKnot,
-        incidentName: incident.incidentName,
-        incidentReason: incident.incidentReason,
-        incidentSolution: incident.incidentSolution,
+        equipmentKnot: incident?.equipmentKnot,
+        incidentName: incident?.incidentName,
+        incidentReason: incident?.incidentReason,
+        incidentSolution: incident?.incidentSolution,
         downtime: incident.downtime === 1 ? 'Да' : 'Нет',
         comment: incident.comment,
-        programId: incident.carWashDeviceProgramsTypeId,
+        programId: incident?.carWashDeviceProgramsTypeId,
       });
     }
     return response;

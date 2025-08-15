@@ -82,6 +82,7 @@ export class Auth {
         response.tokens.refreshToken,
       );
 
+      console.log(response.tokens.accessToken)
       const { tokens, ...responseWithoutTokens } = response;
       return { ...responseWithoutTokens, permissionInfo };
     } catch (e) {

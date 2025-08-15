@@ -52,12 +52,12 @@ export class PrismaIncidentMapper {
       finishDate: entity.finishDate,
       objectName: entity.objectName,
       downtime: entity.downtime,
-      equipmentKnot: entity.equipmentKnot.name,
-      incidentName: entity.incidentName.name,
-      incidentReason: entity.incidentReason.name,
-      incidentSolution: entity.incidentSolution.name,
+      equipmentKnot: entity.equipmentKnot?.name,
+      incidentName: entity.incidentName?.name,
+      incidentReason: entity.incidentReason?.name,
+      incidentSolution: entity.incidentSolution?.name,
       comment: entity.comment,
-      carWashDeviceProgramsTypeId: entity.carWashDeviceProgramsTypeId,
+      carWashDeviceProgramsTypeId: entity?.carWashDeviceProgramsTypeId,
     };
   }
 

@@ -7,11 +7,11 @@ export class IncidentByFilterResponseDto {
   startDate: Date;
   finishDate: Date;
   repair: string;
-  equipmentKnot: string;
-  incidentName: string;
-  incidentReason: string;
-  incidentSolution: string;
+  equipmentKnot?: string;
+  incidentName?: string;
+  incidentReason?: string;
+  incidentSolution?: string;
   downtime: string;
   comment: string;
-  programId: number;
+  programId?: number;
 }

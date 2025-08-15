@@ -7,10 +7,10 @@ export class IncidentWithInfoDataDto{
   startDate: Date;
   finishDate: Date;
   downtime: number;
-  equipmentKnot: string;
-  incidentName: string;
-  incidentReason: string;
-  incidentSolution: string;
+  equipmentKnot?: string;
+  incidentName?: string;
+  incidentReason?: string;
+  incidentSolution?: string;
   comment: string;
-  carWashDeviceProgramsTypeId: number;
+  carWashDeviceProgramsTypeId?: number;
 }

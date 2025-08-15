@@ -112,7 +112,7 @@ export class PlanFactPosUseCase {
           action: string;
           conditions: { id: { in: any } };
         }) =>
-          rule.action === 'read' &&
+          (rule.action === 'read' || rule.action === 'manage') &&
           rule.subject === 'Pos' &&
           rule.conditions?.id?.in,
       )
