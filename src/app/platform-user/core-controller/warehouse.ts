@@ -63,6 +63,7 @@ import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 import { NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -280,7 +281,7 @@ export class WarehouseController {
   @HttpCode(200)
   async getCountAllNomenclatureByOrgId(
     @Param('orgId', ParseIntPipe) orgId: number,
-  ): Promise<any> {
+  ): Promise<{ count: number }> {
     try {
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
@@ -455,7 +456,7 @@ export class WarehouseController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  async getAllSupplier(@Query() params: PaginationDto): Promise<any> {
+  async getAllSupplier(@Query() params: SupplierGetAllDto): Promise<any> {
     try {
       let skip = undefined;
       let take = undefined;
@@ -463,7 +464,11 @@ export class WarehouseController {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
-      return await this.findMethodsSupplierUseCase.getAll(skip, take);
+      return await this.findMethodsSupplierUseCase.getAll(
+        params?.name,
+        skip,
+        take,
+      );
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
