@@ -14,7 +14,9 @@ export class FindMethodsUserUseCase {
     return await this.userRepository.findOneById(input);
   }
 
-  async getOrgPermissionById(input: number): Promise<number[]> {
+  async getOrgPermissionById(
+    input: number,
+  ): Promise<{ id: number; name: string }[]> {
     return await this.userRepository.getAllOrganizationPermissions(input);
   }
 
