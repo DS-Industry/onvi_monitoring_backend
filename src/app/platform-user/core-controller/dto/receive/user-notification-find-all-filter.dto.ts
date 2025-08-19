@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserNotificationType } from '@prisma/client';
 import { ReadStatus } from '@notification/userNotification/use-case/dto/userNotification-update.dto';
+import { UserNotificationType } from "@notification/notification/domain/userNotificationType";
 
 export class UserNotificationFindAllFilterDto {
   @IsOptional()

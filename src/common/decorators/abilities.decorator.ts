@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction } from '@platform-user/permissions/user-permissions/domain/permissionAction';
 
 export interface RequiredRule {
   action: PermissionAction;

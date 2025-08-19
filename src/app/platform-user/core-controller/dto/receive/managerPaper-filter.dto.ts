@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { ManagerPaperGroup } from '@prisma/client';
 import { Transform } from 'class-transformer';
+import { ManagerPaperGroup } from "@manager-paper/managerPaper/domain/managerPaperGroup";
 
 export class ManagerPaperFilterDto {
   @IsOptional()

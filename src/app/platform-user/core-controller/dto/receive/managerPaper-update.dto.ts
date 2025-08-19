@@ -1,6 +1,6 @@
 import { Transform } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { ManagerPaperGroup } from "@prisma/client";
+import { ManagerPaperGroup } from "@manager-paper/managerPaper/domain/managerPaperGroup";
 
 export class ManagerPaperUpdateDto {
   @Transform(({ value }) => parseInt(value))

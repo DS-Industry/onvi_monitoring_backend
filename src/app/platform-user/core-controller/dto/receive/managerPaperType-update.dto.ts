@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { ManagerPaperTypeClass } from "@prisma/client";
 import { Transform } from "class-transformer";
+import { ManagerPaperType } from "@manager-paper/managerPaper/domain/managerPaperType";
 
 export class ManagerPaperTypeUpdateDto {
   @Transform(({ value }) => parseInt(value))
@@ -9,7 +9,7 @@ export class ManagerPaperTypeUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsEnum(ManagerPaperTypeClass)
+  @IsEnum(ManagerPaperType)
   @IsOptional()
-  type?: ManagerPaperTypeClass;
+  type?: ManagerPaperType;
 }

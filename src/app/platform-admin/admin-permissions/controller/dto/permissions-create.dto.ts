@@ -6,7 +6,7 @@ import {
   IsString
 } from "class-validator";
 import { Type } from 'class-transformer';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction } from "@platform-user/permissions/user-permissions/domain/permissionAction";
 
 export class CreatePermissionsDto {
   @IsEnum(PermissionAction)

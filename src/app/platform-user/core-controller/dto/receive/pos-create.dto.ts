@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { AddressCreateDto } from '@platform-user/core-controller/dto/receive/address-create.dto';
-import { CarWashPosType } from '@prisma/client';
+import { CarWashPosType } from "@pos/carWashPos/domain/carWashPosType";
 
 export class PosCreateDto {
   @IsString()

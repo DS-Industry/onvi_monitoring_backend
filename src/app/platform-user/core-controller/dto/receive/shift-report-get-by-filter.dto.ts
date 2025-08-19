@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { TypeWorkDay } from '@prisma/client';
+import { TypeWorkDay } from "@finance/shiftReport/shiftReport/domain/typeWorkDay";
 
 export class ShiftReportGetByFilterDto {
   @IsNumber()

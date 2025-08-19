@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ReadStatus } from '@notification/userNotification/use-case/dto/userNotification-update.dto';
-import { UserNotificationType } from '@prisma/client';
+import { UserNotificationType } from "@notification/notification/domain/userNotificationType";
 
 export class UserNotificationUpdateDto {
   @IsNumber()

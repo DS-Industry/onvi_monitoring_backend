@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { StatusTechTask } from '@prisma/client';
+import { StatusTechTask } from "@tech-task/techTask/domain/statusTechTask";
 
 export class TechTaskMeFilterDto {
   @IsOptional()

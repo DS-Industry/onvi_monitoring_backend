@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { LTYBenefitType } from '@prisma/client';
+import { LTYBenefitType } from "@loyalty/loyalty/benefit/benefit/domain/benefitType";
 
 export class BenefitUpdateDto {
   @IsNumber()

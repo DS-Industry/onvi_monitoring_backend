@@ -1,0 +1,8 @@
+export enum TypeWorkDay {
+  WORKING = 'WORKING',
+  WEEKEND = 'WEEKEND',
+  MEDICAL = 'MEDICAL',
+  VACATION = 'VACATION',
+  TIMEOFF = 'TIMEOFF',
+  TRUANCY = 'TRUANCY',
+}

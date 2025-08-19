@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { Transform } from 'class-transformer';
-import { ContractType } from '@prisma/client';
+import { ContractType } from "@loyalty/mobile-user/client/domain/contractType";
 
 export class ClientFilterDto {
   @IsNotEmpty({ message: 'placementId is required' })

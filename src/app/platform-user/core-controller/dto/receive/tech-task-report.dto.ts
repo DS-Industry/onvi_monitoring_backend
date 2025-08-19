@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { TypeTechTask } from '@prisma/client';
+import { TypeTechTask } from "@tech-task/techTask/domain/typeTechTask";
 
 export class TechTaskReportDto {
   @IsOptional()

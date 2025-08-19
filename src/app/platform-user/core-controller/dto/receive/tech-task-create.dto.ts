@@ -1,4 +1,3 @@
-import { TypeTechTask } from '@prisma/client';
 import {
   IsArray,
   IsEnum,
@@ -8,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { TypeTechTask } from "@tech-task/techTask/domain/typeTechTask";
 
 export class TechTaskCreateDto {
   @IsString()

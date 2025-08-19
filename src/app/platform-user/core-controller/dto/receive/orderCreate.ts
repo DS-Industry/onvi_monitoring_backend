@@ -36,22 +36,22 @@ export class OrderCreateDto {
   @IsNumber()
   @IsNotEmpty({ message: 'carWashDeviceId is required' })
   carWashDeviceId: number;
-  @IsEnum(PlatformType)
+  //@IsEnum(PlatformType)
   @IsNotEmpty({ message: 'platform is required' })
   platform: PlatformType;
   @Transform(({ value }) => new Date(value))
   @IsNotEmpty({ message: 'orderData is required' })
   orderData: Date;
-  @IsEnum(ContractType)
+  //@IsEnum(ContractType)
   @IsOptional()
   typeMobileUser?: ContractType;
   @IsNumber()
   @IsOptional()
   cardMobileUserId?: number;
-  @IsEnum(OrderStatus)
+  //@IsEnum(OrderStatus)
   @IsNotEmpty({ message: 'orderStatus is required' })
   orderStatus: OrderStatus;
-  @IsEnum(SendAnswerStatus)
+  //@IsEnum(SendAnswerStatus)
   @IsOptional()
   sendAnswerStatus?: SendAnswerStatus;
   @Transform(({ value }) => new Date(value))
@@ -60,7 +60,7 @@ export class OrderCreateDto {
   @Transform(({ value }) => new Date(value))
   @IsOptional()
   debitingMoney?: Date;
-  @IsEnum(ExecutionStatus)
+  //@IsEnum(ExecutionStatus)
   @IsOptional()
   executionStatus?: ExecutionStatus;
   @IsString()

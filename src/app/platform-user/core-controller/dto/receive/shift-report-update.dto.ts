@@ -1,6 +1,7 @@
-import { TypeEstimation, TypeWorkDay } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { Transform } from 'class-transformer';
+import { TypeWorkDay } from "@finance/shiftReport/shiftReport/domain/typeWorkDay";
+import { TypeEstimation } from "@finance/shiftReport/shiftReport/domain/typeEstimation";
 
 export class ShiftReportUpdateDto {
   @IsOptional()

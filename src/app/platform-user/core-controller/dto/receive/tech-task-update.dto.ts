@@ -6,8 +6,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { StatusTechTask } from '@prisma/client';
 import { Transform } from "class-transformer";
+import { StatusTechTask } from "@tech-task/techTask/domain/statusTechTask";
 
 export class TechTaskUpdateDto {
   @IsNumber()

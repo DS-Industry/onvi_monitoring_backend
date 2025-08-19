@@ -7,7 +7,6 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import { StatusUser } from '@prisma/client';
 import { Transform } from "class-transformer";
 
 export class AuthRegisterDto {

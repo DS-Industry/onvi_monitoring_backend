@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from "class-validator";
-import { ContractType } from "@prisma/client";
+import { ContractType } from "@loyalty/mobile-user/client/domain/contractType";
 
 export class ClientUpdateDto {
   @IsNumber()
