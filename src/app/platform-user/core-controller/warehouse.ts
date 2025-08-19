@@ -61,9 +61,10 @@ import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-up
 import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/category-update.dto';
 import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
-import { NomenclatureStatus } from '@prisma/client';
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
 import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
+import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -141,7 +142,16 @@ export class WarehouseController {
         data.categoryId,
         data?.supplierId,
       );
-      return await this.createNomenclatureUseCase.create(data, user, file);
+      let destiny: DestinyNomenclature = DestinyNomenclature.INTERNAL;
+      if (data.metaData.purpose == PurposeType.SALE) {
+        destiny = DestinyNomenclature.SALE;
+      }
+
+      return await this.createNomenclatureUseCase.create(
+        { ...data, destiny },
+        user,
+        file,
+      );
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -176,8 +186,16 @@ export class WarehouseController {
           ...data,
           ability,
         });
+      let destiny: DestinyNomenclature;
+      if (data.metaData.purpose) {
+        if (data.metaData.purpose == PurposeType.SALE) {
+          destiny = DestinyNomenclature.SALE;
+        } else {
+          destiny = DestinyNomenclature.INTERNAL;
+        }
+      }
       return await this.updateNomenclatureUseCase.execute(
-        data,
+        { ...data, destiny },
         oldNomenclature,
         user,
         file,

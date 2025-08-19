@@ -31,7 +31,10 @@ import { FileModule } from '@libs/file/module';
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 import { DeleteWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-delete';
 import { UpdateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-update';
-import { UpdateCategoryUseCase } from "@warehouse/category/use-cases/category-update";
+import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-update';
+import { SaleDocumentRepositoryProvider } from '@warehouse/sale/MNGSaleDocument/provider/saleDocument';
+import { SaleItemRepositoryProvider } from '@warehouse/sale/MNGSaleItem/provider/saleItem';
+import { SalePriceRepositoryProvider } from '@warehouse/sale/MNGSalePrice/provider/salePrice';
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -41,6 +44,9 @@ const repositories: Provider[] = [
   SupplierRepositoryProvider,
   WarehouseDocumentRepositoryProvider,
   WarehouseDocumentDetailRepositoryProvider,
+  SaleDocumentRepositoryProvider,
+  SaleItemRepositoryProvider,
+  SalePriceRepositoryProvider,
 ];
 
 const warehouseUseCase: Provider[] = [

@@ -1,4 +1,4 @@
-import { MeasurementNomenclature, NomenclatureStatus } from "@prisma/client";
+import { DestinyNomenclature, MeasurementNomenclature, NomenclatureStatus } from "@prisma/client";
 import { NomenclatureMeta } from "@warehouse/nomenclature/interface/nomenclatureMeta";
 
 export class NomenclatureUpdateDto {
@@ -8,6 +8,7 @@ export class NomenclatureUpdateDto {
   categoryId?: number;
   supplierId?: number;
   measurement?: MeasurementNomenclature;
+  destiny?: DestinyNomenclature;
   metaData?: NomenclatureMeta;
   status?: NomenclatureStatus;
 }
