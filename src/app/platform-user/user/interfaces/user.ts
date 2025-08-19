@@ -14,7 +14,9 @@ export abstract class IUserRepository {
   abstract remove(id: number): Promise<any>;
   abstract getAllPosPermissions(id: number): Promise<number[]>;
   abstract getAllLoyaltyProgramPermissions(id: number): Promise<number[]>;
-  abstract getAllOrganizationPermissions(id: number): Promise<number[]>;
+  abstract getAllOrganizationPermissions(
+    id: number,
+  ): Promise<{ id: number; name: string }[]>;
   abstract updateConnectionPos(
     userId: number,
     addPosIds: number[],

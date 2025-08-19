@@ -128,7 +128,9 @@ export class UserRepository extends IUserRepository {
     return user?.ltyPrograms?.map((item) => item.id) || [];
   }
 
-  public async getAllOrganizationPermissions(id: number): Promise<number[]> {
+  public async getAllOrganizationPermissions(
+    id: number,
+  ): Promise<{ id: number; name: string }[]> {
     const user = await this.prisma.user.findFirst({
       where: {
         id,
@@ -137,7 +139,11 @@ export class UserRepository extends IUserRepository {
         organizations: true,
       },
     });
-    return user?.organizations?.map((item) => item.id) || [];
+    return (
+      user?.organizations?.map((item) => {
+        return { id: item.id, name: item.name };
+      }) || []
+    );
   }
 
   public async updateConnectionPos(

@@ -7,7 +7,7 @@ import {
   PermissionsInfoResponseDto,
 } from '@platform-user/permissions/use-cases/dto/permissions-info-response.dto';
 import { GetByIdObjectUseCase } from '@object-permission/use-case/object-get-by-id';
-import { FindMethodsUserUseCase } from "@platform-user/user/use-cases/user-find-methods";
+import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 
 @Injectable()
 export class GetAllPermissionsInfoUseCases {
@@ -26,7 +26,7 @@ export class GetAllPermissionsInfoUseCases {
       await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
     return {
       role: role.name,
-      organizationIds: organizationCondition,
+      organizations: organizationCondition,
       permissions: ability.rules,
     };
   }
