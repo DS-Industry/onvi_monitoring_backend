@@ -55,7 +55,7 @@ export class AbilityFactory {
       if (objectMap[permission.objectId].name == 'Pos') {
         condition = {
           id: { in: posCondition },
-          organizationId: { in: organizationCondition },
+          organizationId: { in: organizationCondition.map((org) => org.id) },
         };
       } else if (objectMap[permission.objectId].name == 'LTYProgram') {
         condition = {
@@ -63,7 +63,7 @@ export class AbilityFactory {
         };
       } else if (objectMap[permission.objectId].name == 'Organization') {
         condition = {
-          id: { in: organizationCondition },
+          id: { in: organizationCondition.map((org) => org.id) },
         };
       } else if (
         objectMap[permission.objectId].name == 'Incident' ||
