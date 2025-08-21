@@ -109,9 +109,13 @@ export class PosController {
   ): Promise<PosFilterResponseDto[]> {
     try {
       const { ability } = req;
+
       const poses = await this.findMethodsPosUseCase.getAllByFilter({
         ability: ability,
         placementId: data?.placementId,
+        organizationId: data?.organizationId
+          ? Number(data.organizationId)
+          : undefined,
       });
       return poses.map((pos) => ({
         id: pos.id,

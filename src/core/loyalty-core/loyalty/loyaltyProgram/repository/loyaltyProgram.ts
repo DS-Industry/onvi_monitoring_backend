@@ -71,9 +71,19 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     );
   }
 
-  public async findAllByPermission(ability: any): Promise<LoyaltyProgram[]> {
+  public async findAllByPermission(
+    ability: any,
+    organizationId?: number,
+  ): Promise<LoyaltyProgram[]> {
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
-      where: accessibleBy(ability).LTYProgram,
+      where: {
+        ...accessibleBy(ability).LTYProgram,
+        organizations: {
+          some: {
+            id: organizationId,
+          },
+        },
+      },
     });
     return loyaltyPrograms.map((item) =>
       PrismaLoyaltyProgramMapper.toDomain(item),

@@ -10,11 +10,12 @@ export abstract class ILoyaltyProgramRepository {
   abstract findOneByOrganizationId(
     organizationId: number,
   ): Promise<LoyaltyProgram>;
-  abstract findOneByCardTierId(
-    cardTierId: number,
-  ): Promise<LoyaltyProgram>;
+  abstract findOneByCardTierId(cardTierId: number): Promise<LoyaltyProgram>;
   abstract findAll(): Promise<LoyaltyProgram[]>;
-  abstract findAllByPermission(ability: any): Promise<LoyaltyProgram[]>;
+  abstract findAllByPermission(
+    ability: any,
+    organizationId?: number,
+  ): Promise<LoyaltyProgram[]>;
   abstract update(
     input: LoyaltyProgram,
     addOrganizationIds: number[],

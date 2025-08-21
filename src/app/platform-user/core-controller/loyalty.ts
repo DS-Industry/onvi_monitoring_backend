@@ -241,16 +241,21 @@ export class LoyaltyController {
       }
     }
   }
-  //Get programs by filter
+
   @Get('programs')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(201)
-  async getPrograms(@Request() req: any): Promise<LoyaltyProgram[]> {
+  async getPrograms(
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string,
+  ): Promise<LoyaltyProgram[]> {
     try {
       const { ability } = req;
+
       return await this.findMethodsLoyaltyProgramUseCase.getAllByAbility(
         ability,
+        organizationId ? Number(organizationId) : undefined,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -268,6 +273,7 @@ export class LoyaltyController {
       }
     }
   }
+
   //Get program by id
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
