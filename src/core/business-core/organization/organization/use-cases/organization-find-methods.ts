@@ -28,10 +28,12 @@ export class FindMethodsOrganizationUseCase {
   async getAllByUser(
     input: User,
     placementId?: number | '*',
+    noLoyaltyProgram?: boolean,
   ): Promise<Organization[]> {
     return await this.organizationRepository.findAllByUser(
       input.id,
       placementId,
+      noLoyaltyProgram,
     );
   }
 

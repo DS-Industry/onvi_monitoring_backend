@@ -12,9 +12,14 @@ export class FilterByUserOrganizationUseCase {
   async execute(
     user: User,
     placementId: number | '*',
+    noLoyaltyProgram?: boolean,
   ): Promise<OrganizationFilterResponseDto[]> {
     const organizations =
-      await this.findMethodsOrganizationUseCase.getAllByUser(user, placementId);
+      await this.findMethodsOrganizationUseCase.getAllByUser(
+        user,
+        placementId,
+        noLoyaltyProgram ?? false,
+      );
 
     return organizations.map((organization) => ({
       id: organization.id,
