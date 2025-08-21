@@ -285,13 +285,15 @@ export class LoyaltyController {
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
           loyaltyProgram.id,
         );
-      const organizationIds = organizations.map((item) => item.id);
+
       return {
         id: loyaltyProgram.id,
         name: loyaltyProgram.name,
         status: loyaltyProgram.status,
         startDate: loyaltyProgram.startDate,
-        organizationIds: organizationIds,
+        organizations: organizations.map((item) => {
+          return { id: item.id, name: item.name };
+        }),
         lifetimeDays: loyaltyProgram?.lifetimeDays,
       };
     } catch (e) {
