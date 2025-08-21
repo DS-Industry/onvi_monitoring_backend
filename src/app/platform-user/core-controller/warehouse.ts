@@ -65,6 +65,8 @@ import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
 import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
 import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
+import { SaleInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-sale";
+import { InventoryItemSaleResponseDto } from "@warehouse/inventoryItem/use-cases/dto/inventoryItem-sale-response.dto";
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -88,6 +90,7 @@ export class WarehouseController {
     private readonly allByFilterWarehouseDocumentUseCase: AllByFilterWarehouseDocumentUseCase,
     private readonly inventoryInventoryItemUseCase: InventoryInventoryItemUseCase,
     private readonly createWarehouseDocumentUseCase: CreateWarehouseDocumentUseCase,
+    private readonly saleInventoryItemUseCase: SaleInventoryItemUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -274,6 +277,46 @@ export class WarehouseController {
       );
       return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
         orgId,
+        skip,
+        take,
+      );
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('nomenclature-sale/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllNomenclatureForSale(
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: PaginationDto,
+  ): Promise<any> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
+        orgId,
+      );
+      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationIdAndDestiny(
+        orgId,
+        DestinyNomenclature.SALE,
         skip,
         take,
       );
@@ -633,6 +676,37 @@ export class WarehouseController {
         ability,
       );
       return await this.inventoryInventoryItemUseCase.execute(warehouseId);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('inventory-item/sale/:warehouseId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllInventoryItemBySale(
+    @Request() req: any,
+    @Param('warehouseId', ParseIntPipe) warehouseId: number,
+  ): Promise<InventoryItemSaleResponseDto[]> {
+    try {
+      const { ability } = req;
+      await this.warehouseValidateRules.getOneByIdValidate(
+        warehouseId,
+        ability,
+      );
+      return await this.saleInventoryItemUseCase.execute(warehouseId);
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({

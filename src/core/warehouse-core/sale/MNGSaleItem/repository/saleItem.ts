@@ -18,6 +18,16 @@ export class SaleItemRepository extends ISaleItemRepository {
     return PrismaSaleItemMapper.toDomain(saleItem);
   }
 
+  public async createMany(input: SaleItem[]): Promise<SaleItem[]> {
+    const saleItemPrismaEntities = input.map((item) =>
+      PrismaSaleItemMapper.toPrisma(item),
+    );
+    await this.prisma.mNGSaleItem.createMany({
+      data: saleItemPrismaEntities,
+    });
+    return input;
+  }
+
   public async findOneById(id: number): Promise<SaleItem> {
     const saleItem = await this.prisma.mNGSaleItem.findFirst({
       where: {

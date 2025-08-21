@@ -73,4 +73,8 @@ export class CategoryRepository extends ICategoryRepository {
     });
     return PrismaCategoryMapper.toDomain(category);
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.category.delete({ where: { id } });
+  }
 }

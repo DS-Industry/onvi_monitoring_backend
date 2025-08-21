@@ -71,6 +71,22 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
+  public async findAllByRoleIdsAndPosId(
+    roleIds: number[],
+    posId: number,
+  ): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        userRoleId: { in: roleIds },
+        posesPermissions: { some: { id: posId } },
+      },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
   public async findOneById(id: number): Promise<User> {
     const user = await this.prisma.user.findFirst({
       where: {

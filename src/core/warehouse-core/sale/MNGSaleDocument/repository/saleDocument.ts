@@ -28,6 +28,7 @@ export class SaleDocumentRepository extends ISaleDocumentRepository {
   }
 
   public async findAllByFilter(
+    name?: string,
     warehouseId?: number,
     responsibleManagerId?: number,
     dateStartSale?: Date,
@@ -36,6 +37,10 @@ export class SaleDocumentRepository extends ISaleDocumentRepository {
     take?: number,
   ): Promise<SaleDocument[]> {
     const where: any = {};
+
+    if (name !== undefined) {
+      where.name = name;
+    }
 
     if (warehouseId !== undefined) {
       where.warehouseId = warehouseId;

@@ -3,7 +3,7 @@ import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomen
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { PrismaNomenclatureMapper } from '@db/mapper/prisma-nomenclature-mapper';
-import { NomenclatureStatus } from '@prisma/client';
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class NomenclatureRepository extends INomenclatureRepository {
@@ -79,6 +79,26 @@ export class NomenclatureRepository extends INomenclatureRepository {
       },
       orderBy: {
         sku: 'asc',
+      },
+    });
+    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
+  }
+
+  public async findAllByOrganizationIdAndDestiny(
+    organizationId: number,
+    destiny: DestinyNomenclature,
+    skip?: number,
+    take?: number,
+  ): Promise<Nomenclature[]> {
+    const nomenclatures = await this.prisma.nomenclature.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      where: {
+        organizationId,
+        destiny,
+      },
+      orderBy: {
+        name: 'asc',
       },
     });
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));

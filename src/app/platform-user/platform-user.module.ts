@@ -79,6 +79,7 @@ import { NotificationCoreModule } from "@notification/notification-core.module";
 import { ManagerPaperController } from "@platform-user/core-controller/managerPaper";
 import { ManagerPaperValidateRules } from "@platform-user/validate/validate-rules/manager-paper-validate-rules";
 import { ManagerPaperCoreModule } from "@manager-paper/manager-paper-core.module";
+import { SaleController } from "@platform-user/core-controller/sale";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -104,6 +105,7 @@ const controllers = [
   HrController,
   NotificationController,
   ManagerPaperController,
+  SaleController,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,

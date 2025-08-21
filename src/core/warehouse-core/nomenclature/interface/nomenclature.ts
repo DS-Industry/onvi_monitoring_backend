@@ -1,4 +1,5 @@
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { DestinyNomenclature } from "@prisma/client";
 
 export abstract class INomenclatureRepository {
   abstract create(input: Nomenclature): Promise<Nomenclature>;
@@ -14,6 +15,12 @@ export abstract class INomenclatureRepository {
   ): Promise<Nomenclature>;
   abstract findAllByOrganizationId(
     organizationId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<Nomenclature[]>;
+  abstract findAllByOrganizationIdAndDestiny(
+    organizationId: number,
+    destiny: DestinyNomenclature,
     skip?: number,
     take?: number,
   ): Promise<Nomenclature[]>;

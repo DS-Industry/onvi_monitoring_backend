@@ -18,6 +18,16 @@ export class SalePriceRepository extends ISalePriceRepository {
     return PrismaSalePriceMapper.toDomain(salePrice);
   }
 
+  public async createMany(input: SalePrice[]): Promise<SalePrice[]> {
+    const salePricePrismaEntities = input.map((item) =>
+      PrismaSalePriceMapper.toPrisma(item),
+    );
+    await this.prisma.mNGSalePrice.createMany({
+      data: salePricePrismaEntities,
+    });
+    return input;
+  }
+
   public async findOneById(id: number): Promise<SalePrice> {
     const salePrice = await this.prisma.mNGSalePrice.findFirst({
       where: {
@@ -61,6 +71,27 @@ export class SalePriceRepository extends ISalePriceRepository {
         id: input.id,
       },
       data: salePricePrismaEntity,
+    });
+    return PrismaSalePriceMapper.toDomain(salePrice);
+  }
+
+  public async updateMany(input: SalePrice[]): Promise<void> {
+    const updates = input.map((item) => {
+      return this.prisma.mNGSalePrice.update({
+        where: { id: item.id },
+        data: PrismaSalePriceMapper.toPrisma(item),
+      });
+    });
+
+    await this.prisma.$transaction(updates);
+  }
+
+  public async updateValue(id: number, price: number): Promise<SalePrice> {
+    const salePrice = await this.prisma.mNGSalePrice.update({
+      where: {
+        id: id,
+      },
+      data: { price: price },
     });
     return PrismaSalePriceMapper.toDomain(salePrice);
   }

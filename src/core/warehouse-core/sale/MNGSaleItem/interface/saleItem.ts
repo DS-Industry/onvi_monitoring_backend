@@ -2,6 +2,7 @@ import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
 
 export abstract class ISaleItemRepository {
   abstract create(input: SaleItem): Promise<SaleItem>;
+  abstract createMany(input: SaleItem[]): Promise<SaleItem[]>;
   abstract findOneById(id: number): Promise<SaleItem>;
   abstract findAllByFilter(
     nomenclatureId?: number,

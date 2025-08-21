@@ -9,5 +9,6 @@ export abstract class ICategoryRepository {
     ownerCategoryId: number,
   ): Promise<Category[]>;
   abstract findAll(): Promise<Category[]>;
+  abstract delete(id: number): Promise<void>;
   abstract update(input: Category): Promise<Category>;
 }

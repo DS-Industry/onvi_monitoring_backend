@@ -1289,6 +1289,7 @@ model MNGSalePrice {
 
 model MNGSaleDocument {
   id             Int                       @id @default(autoincrement())
+  name           String
   warehouseId    Int
   warehouse      Warehouse    @relation(fields: [warehouseId], references: [id])
   responsibleManagerId  Int
@@ -1504,6 +1505,7 @@ enum ManagerPaperGroup {
   ACCOUNTABLE_FUNDS
   REPRESENTATIVE_EXPENSES
   SALE_EQUIPMENT
+  SALE_NOMENCLATURE
   MANUFACTURE
   OTHER
   SUPPLIES

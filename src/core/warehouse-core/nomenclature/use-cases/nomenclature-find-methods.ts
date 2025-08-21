@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomenclature';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { DestinyNomenclature } from '@prisma/client';
 
 @Injectable()
 export class FindMethodsNomenclatureUseCase {
@@ -39,6 +40,20 @@ export class FindMethodsNomenclatureUseCase {
   ): Promise<Nomenclature[]> {
     return await this.nomenclatureRepository.findAllByOrganizationId(
       organizationId,
+      skip,
+      take,
+    );
+  }
+
+  async getAllByOrganizationIdAndDestiny(
+    organizationId: number,
+    destiny: DestinyNomenclature,
+    skip?: number,
+    take?: number,
+  ): Promise<Nomenclature[]> {
+    return await this.nomenclatureRepository.findAllByOrganizationIdAndDestiny(
+      organizationId,
+      destiny,
       skip,
       take,
     );
