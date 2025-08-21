@@ -65,8 +65,14 @@ import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
 import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
 import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
-import { SaleInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-sale";
-import { InventoryItemSaleResponseDto } from "@warehouse/inventoryItem/use-cases/dto/inventoryItem-sale-response.dto";
+import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
+import { InventoryItemSaleResponseDto } from '@warehouse/inventoryItem/use-cases/dto/inventoryItem-sale-response.dto';
+import { DeleteCategoryUseCase } from '@warehouse/category/use-cases/category-delete';
+import { DeleteSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-delete';
+import { UpdateSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-update';
+import { SupplierUpdateDto } from '@platform-user/core-controller/dto/receive/supplier-update.dto';
+import { Supplier } from '@warehouse/supplier/domain/supplier';
+import { DeleteWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-delete';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -91,6 +97,10 @@ export class WarehouseController {
     private readonly inventoryInventoryItemUseCase: InventoryInventoryItemUseCase,
     private readonly createWarehouseDocumentUseCase: CreateWarehouseDocumentUseCase,
     private readonly saleInventoryItemUseCase: SaleInventoryItemUseCase,
+    private readonly deleteCategoryUseCase: DeleteCategoryUseCase,
+    private readonly deleteSupplierUseCase: DeleteSupplierUseCase,
+    private readonly updateSupplierUseCase: UpdateSupplierUseCase,
+    private readonly deleteWarehouseDocumentUseCase: DeleteWarehouseDocumentUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -461,6 +471,34 @@ export class WarehouseController {
       }
     }
   }
+  @Delete('category/:categoryId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async deleteCategory(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const category =
+        await this.warehouseValidateRules.updateCategoryValidate(categoryId);
+      await this.deleteCategoryUseCase.execute(category.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Get all category
   @Get('category')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -512,7 +550,62 @@ export class WarehouseController {
       }
     }
   }
-  //Get all supplier
+  @Patch('supplier/:supplierId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async updateSupplier(
+    @Param('supplierId', ParseIntPipe) supplierId: number,
+    @Body() data: SupplierUpdateDto,
+  ): Promise<Supplier> {
+    try {
+      const supplier =
+        await this.warehouseValidateRules.updateSupplierValidate(supplierId);
+      return await this.updateSupplierUseCase.execute(data, supplier);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('supplier/:supplierId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async deleteSupplier(
+    @Param('supplierId', ParseIntPipe) supplierId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const category =
+        await this.warehouseValidateRules.updateSupplierValidate(supplierId);
+      await this.deleteSupplierUseCase.execute(category.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('supplier')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
@@ -825,6 +918,41 @@ export class WarehouseController {
       return await this.createWarehouseDocumentUseCase.execute(data.type, user);
     } catch (e) {
       if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('document/:documentId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateWarehouseAbility())
+  @HttpCode(201)
+  async deleteDocument(
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const oldDocument =
+        await this.warehouseValidateRules.deleteDocumentValidate(documentId);
+      await this.deleteWarehouseDocumentUseCase.execute(oldDocument.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof WarehouseDomainException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,
