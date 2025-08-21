@@ -12,6 +12,7 @@ export abstract class IOrganizationRepository {
   abstract findAllByUser(
     userId: number,
     placementId: number | '*',
+    noLoyaltyProgram?: boolean,
   ): Promise<Organization[]>;
   abstract findAllByLoyaltyProgramId(
     loyaltyProgramId: number,

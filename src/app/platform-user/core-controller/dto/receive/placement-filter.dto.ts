@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsOptional, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PlacementFilterDto {
@@ -7,4 +7,9 @@ export class PlacementFilterDto {
     return parseInt(value);
   })
   placementId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  noLoyaltyProgram?: boolean;
 }
