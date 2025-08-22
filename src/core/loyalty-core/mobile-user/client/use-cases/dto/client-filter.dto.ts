@@ -8,4 +8,7 @@ export class ClientFilterDto {
   phone?: string;
   skip?: number;
   take?: number;
+  registrationFrom?: string;
+  registrationTo?: string;
+  search?: string;
 }

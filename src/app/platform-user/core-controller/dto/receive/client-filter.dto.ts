@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ContractType } from "@loyalty/mobile-user/client/domain/contractType";
+import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
 
 export class ClientFilterDto {
   @IsNotEmpty({ message: 'placementId is required' })
@@ -42,4 +42,16 @@ export class ClientFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+
+  @IsOptional()
+  @IsString()
+  registrationFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  registrationTo?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

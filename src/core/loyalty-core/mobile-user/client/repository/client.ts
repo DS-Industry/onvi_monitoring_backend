@@ -3,7 +3,7 @@ import { IClientRepository } from '../interfaces/client';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Client } from '../domain/client';
 import { PrismaMobileUserMapper } from '@db/mapper/prisma-mobile-user-mapper';
-import { ContractType } from '@prisma/client';
+import { ContractType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ClientRepository extends IClientRepository {
@@ -36,8 +36,31 @@ export class ClientRepository extends IClientRepository {
     phone?: string,
     skip?: number,
     take?: number,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
   ): Promise<Client[]> {
-    const where: any = {};
+    const where: Prisma.LTYUserWhereInput = {};
+
+    if (registrationFrom || registrationTo) {
+      where.createdAt = {};
+
+      if (registrationFrom) {
+        where.createdAt.gte = new Date(registrationFrom);
+      }
+
+      if (registrationTo) {
+        where.createdAt.lte = new Date(registrationTo);
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { card: { number: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
 
     if (placementId !== undefined) {
       where.placementId = placementId;

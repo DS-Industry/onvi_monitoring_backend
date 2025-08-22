@@ -32,6 +32,9 @@ export class FindByFilterClientUseCase {
       data?.phone,
       data?.skip,
       data?.take,
+      data?.registrationFrom,
+      data?.registrationTo,
+      data?.search,
     );
 
     return await Promise.all(

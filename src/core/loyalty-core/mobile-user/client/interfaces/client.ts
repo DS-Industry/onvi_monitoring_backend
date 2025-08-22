@@ -15,6 +15,9 @@ export abstract class IClientRepository {
     phone?: string,
     skip?: number,
     take?: number,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
   ): Promise<Client[]>;
   abstract update(input: Client): Promise<Client>;
   abstract updateConnectionTag(

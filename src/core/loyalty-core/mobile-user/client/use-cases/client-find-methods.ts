@@ -23,6 +23,9 @@ export class FindMethodsClientUseCase {
     phone?: string,
     skip?: number,
     take?: number,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
   ): Promise<Client[]> {
     return await this.clientRepository.findAllByFilter(
       placementId,
@@ -32,6 +35,9 @@ export class FindMethodsClientUseCase {
       phone,
       skip,
       take,
+      registrationFrom,
+      registrationTo,
+      search,
     );
   }
 }
