@@ -1,4 +1,4 @@
-import { IsOptional, IsBoolean } from 'class-validator';
+import { IsOptional, IsBoolean, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PlacementFilterDto {
@@ -12,4 +12,9 @@ export class PlacementFilterDto {
   @IsBoolean()
   @Transform(({ value }) => value === 'true' || value === true)
   noLoyaltyProgram?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @IsNumber({}, { message: 'organizationId must be a number' })
+  organizationId?: number;
 }

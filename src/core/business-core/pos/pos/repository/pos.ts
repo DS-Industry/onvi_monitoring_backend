@@ -4,7 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Pos } from '@pos/pos/domain/pos';
 import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
 import { accessibleBy } from '@casl/prisma';
-import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 @Injectable()
 export class PosRepository extends IPosRepository {

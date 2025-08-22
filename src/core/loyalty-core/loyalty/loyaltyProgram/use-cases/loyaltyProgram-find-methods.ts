@@ -32,7 +32,13 @@ export class FindMethodsLoyaltyProgramUseCase {
     );
   }
 
-  async getAllByAbility(ability: any): Promise<LoyaltyProgram[]> {
-    return await this.loyaltyProgramRepository.findAllByPermission(ability);
+  async getAllByAbility(
+    ability: any,
+    organizationId?: number,
+  ): Promise<LoyaltyProgram[]> {
+    return await this.loyaltyProgramRepository.findAllByPermission(
+      ability,
+      organizationId,
+    );
   }
 }
