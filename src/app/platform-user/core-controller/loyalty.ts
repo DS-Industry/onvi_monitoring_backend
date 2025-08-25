@@ -72,6 +72,7 @@ import { LoyaltyProgramUpdateDto } from '@platform-user/core-controller/dto/rece
 import { CardsFilterDto } from './dto/receive/cards.filter.dto';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
+import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -928,14 +929,13 @@ export class LoyaltyController {
     }
   }
 
-  // Get all cards
-  @Get('key-stats')
+  @Get('user-key-stats')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(200)
-  async getKeyStats(@Query() data: ClientKeyStatsDto): Promise<Card[]> {
+  async getUserKeyStats(@Query() data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
     try {
-      return await this.findMethodsCardUseCase.getKeyStatsByClientId(data);
+      return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

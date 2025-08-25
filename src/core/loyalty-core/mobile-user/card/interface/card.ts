@@ -2,6 +2,7 @@ import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards.filter.dto';
 import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
+import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
 
 export abstract class ICardRepository {
   abstract create(input: Card): Promise<Card>;
@@ -16,4 +17,5 @@ export abstract class ICardRepository {
   abstract update(input: Card): Promise<Card>;
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
   abstract getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any>;
+  abstract getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto>;
 }

@@ -3,6 +3,7 @@ import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
+import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
 
 @Injectable()
 export class FindMethodsCardUseCase {
@@ -44,5 +45,9 @@ export class FindMethodsCardUseCase {
 
   async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
     return await this.cardRepository.getKeyStatsByClientId(data);
+  }
+
+  async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
+    return await this.cardRepository.getUserKeyStatsByOrganization(data);
   }
 }

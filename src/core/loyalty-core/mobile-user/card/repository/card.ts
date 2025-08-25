@@ -7,6 +7,7 @@ import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loy
 import { Prisma } from '@prisma/client';
 import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
 import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards.filter.dto';
+import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -155,5 +156,95 @@ export class CardRepository extends ICardRepository {
   public async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
     // return await this.cardRepository.getKeyStatsByClientId(data);
     return { success: true };
+  }
+
+  public async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: data.organizationId },
+    });
+
+    if (!organization) {
+      throw new Error(`Organization with id ${data.organizationId} not found`);
+    }
+
+    const client = await this.prisma.lTYUser.findUnique({
+      where: { id: data.clientId },
+    });
+
+    if (!client) {
+      throw new Error(`Client with id ${data.clientId} not found`);
+    }
+
+    const card = await this.prisma.lTYCard.findFirst({
+      where: {
+        clientId: data.clientId,
+      },
+      include: {
+        client: true,
+        cardTier: {
+          include: {
+            ltyProgram: {
+              include: {
+                organizations: {
+                  where: {
+                    id: data.organizationId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!card) {
+      throw new Error(`Card not found for client ${data.clientId}`);
+    }
+
+    if (!card.cardTier?.ltyProgram?.organizations || card.cardTier.ltyProgram.organizations.length === 0) {
+      throw new Error(`Card does not belong to organization ${data.organizationId}`);
+    }
+
+    const orders = await this.prisma.lTYOrder.findMany({
+      where: {
+        cardId: card.id,
+        carWashDevice: {
+          carWasPos: {
+            pos: {
+              organizationId: data.organizationId,
+            },
+          },
+        },
+        orderStatus: 'COMPLETED',
+      },
+      select: {
+        sumReal: true,
+        orderData: true,
+      },
+      orderBy: {
+        orderData: 'asc',
+      },
+    });
+
+    const totalOrdersCount = orders.length;
+    const totalAmountSpent = orders.reduce((sum, order) => sum + order.sumReal, 0);
+    const averageOrderAmount = totalOrdersCount > 0 ? totalAmountSpent / totalOrdersCount : 0;
+    const firstOrderDate = orders.length > 0 ? orders[0].orderData : undefined;
+    const lastOrderDate = orders.length > 0 ? orders[orders.length - 1].orderData : undefined;
+
+    return {
+      clientId: data.clientId,
+      organizationId: data.organizationId,
+      organizationName: organization.name,
+      clientName: client.name,
+      totalAmountSpent,
+      averageOrderAmount: Math.round(averageOrderAmount),
+      totalOrdersCount,
+      cardBalance: card.balance,
+      lastOrderDate,
+      firstOrderDate,
+      cardNumber: card.number,
+      cardDevNumber: card.unqNumber,
+    };
   }
 }
