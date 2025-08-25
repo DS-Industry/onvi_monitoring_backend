@@ -12,5 +12,6 @@ export interface ClientCreateDto {
   devNumber?: string;
   number?: string;
   monthlyLimit?: number;
-  tagIds: number[];
+  tagIds?: number[];
+  cardId?: number;
 }

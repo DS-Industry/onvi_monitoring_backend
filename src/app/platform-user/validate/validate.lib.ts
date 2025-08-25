@@ -903,6 +903,10 @@ export class ValidateLib {
   }
 
   public async tagIdsExists(tagIds: number[]): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+    
     const allTagIds = await this.findMethodsTagUseCase.getAll();
     const tagIdsCheck = allTagIds.map((item) => item.id);
     const unnecessaryTagIds = tagIds.filter(
@@ -1174,6 +1178,10 @@ export class ValidateLib {
     tagIds: number[],
     userId: number,
   ): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+    
     const allTagIds =
       await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
         authorUserId: userId,

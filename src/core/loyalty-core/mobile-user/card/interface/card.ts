@@ -5,14 +5,14 @@ import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/cl
 
 export abstract class ICardRepository {
   abstract create(input: Card): Promise<Card>;
-  abstract findOneById(id: number): Promise<Card>;
-  abstract findOneByClientId(id: number): Promise<Card>;
-  abstract findOneByUnqNumber(unqNumber: string): Promise<Card>;
-  abstract findOneByNumber(number: string): Promise<Card>;
-  abstract findOneByClientPhone(phone: string): Promise<Card>;
+  abstract findOneById(id: number): Promise<Card | null>;
+  abstract findOneByClientId(id: number): Promise<Card | null>;
+  abstract findOneByUnqNumber(unqNumber: string): Promise<Card | null>;
+  abstract findOneByNumber(number: string): Promise<Card | null>;
+  abstract findOneByClientPhone(phone: string): Promise<Card | null>;
   abstract findFullCardInfoForDevice(
     unqNumber: string,
-  ): Promise<LoyaltyCardInfoFullResponseDto>;
+  ): Promise<LoyaltyCardInfoFullResponseDto | null>;
   abstract update(input: Card): Promise<Card>;
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
   abstract getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any>;

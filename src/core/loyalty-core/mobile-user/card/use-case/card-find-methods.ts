@@ -8,29 +8,29 @@ import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/cl
 export class FindMethodsCardUseCase {
   constructor(private readonly cardRepository: ICardRepository) {}
 
-  async getById(id: number): Promise<Card> {
+  async getById(id: number): Promise<Card | null> {
     return await this.cardRepository.findOneById(id);
   }
 
-  async getByClientId(clientId: number): Promise<Card> {
+  async getByClientId(clientId: number): Promise<Card | null> {
     return await this.cardRepository.findOneByClientId(clientId);
   }
 
-  async getByDevNumber(devNumber: string): Promise<Card> {
+  async getByDevNumber(devNumber: string): Promise<Card | null> {
     return await this.cardRepository.findOneByUnqNumber(devNumber);
   }
 
-  async getByNumber(number: string): Promise<Card> {
+  async getByNumber(number: string): Promise<Card | null> {
     return await this.cardRepository.findOneByNumber(number);
   }
 
-  async getByClientPhone(phone: string): Promise<Card> {
+  async getByClientPhone(phone: string): Promise<Card | null> {
     return await this.cardRepository.findOneByClientPhone(phone);
   }
 
   async getFullCardInfoForDevice(
     devNumber: string,
-  ): Promise<LoyaltyCardInfoFullResponseDto> {
+  ): Promise<LoyaltyCardInfoFullResponseDto | null> {
     return await this.cardRepository.findFullCardInfoForDevice(devNumber);
   }
 

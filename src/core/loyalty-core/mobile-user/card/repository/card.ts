@@ -20,7 +20,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneById(id: number): Promise<Card> {
+  public async findOneById(id: number): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
         id,
@@ -29,7 +29,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByClientId(id: number): Promise<Card> {
+  public async findOneByClientId(id: number): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
         clientId: id,
@@ -38,7 +38,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByUnqNumber(unqNumber: string): Promise<Card> {
+  public async findOneByUnqNumber(unqNumber: string): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
         unqNumber,
@@ -47,7 +47,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByNumber(number: string): Promise<Card> {
+  public async findOneByNumber(number: string): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
         number,
@@ -56,7 +56,7 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
-  public async findOneByClientPhone(phone: string): Promise<Card> {
+  public async findOneByClientPhone(phone: string): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
         client: {
@@ -69,7 +69,7 @@ export class CardRepository extends ICardRepository {
 
   public async findFullCardInfoForDevice(
     unqNumber: string,
-  ): Promise<LoyaltyCardInfoFullResponseDto> {
+  ): Promise<LoyaltyCardInfoFullResponseDto | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: { unqNumber },
       include: {

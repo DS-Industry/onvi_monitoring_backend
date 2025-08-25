@@ -660,7 +660,7 @@ export class LoyaltyController {
     try {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
-        data.tagIds,
+        data.tagIds || [],
         data?.devNumber,
         data?.number,
       );
@@ -692,7 +692,7 @@ export class LoyaltyController {
     try {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
-        data?.tagIds,
+        data?.tagIds || [],
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -774,7 +774,7 @@ export class LoyaltyController {
         createdAt: client.createdAt,
         updatedAt: client.updatedAt,
         tags: tags.map((tag) => tag.getProps()),
-        card: {
+        card: card ? {
           id: card.id,
           balance: card.balance,
           mobileUserId: card.mobileUserId,
@@ -783,7 +783,7 @@ export class LoyaltyController {
           monthlyLimit: card?.monthlyLimit,
           createdAt: card.createdAt,
           updatedAt: card.updatedAt,
-        },
+        } : null,
       };
     } catch (e) {
       if (e instanceof LoyaltyException) {
