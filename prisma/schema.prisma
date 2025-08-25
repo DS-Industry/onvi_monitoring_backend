@@ -32,6 +32,7 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                    @relation("OrganizationToUser")
+  cards                    LTYCard[]
 }
 
 model Address {
@@ -123,6 +124,9 @@ model User {
   incidentsUpdated             Incident[]                  @relation("UpdateByUser")
   incidentWorker               Incident[]                  @relation("Worker")
   bonusOpers                   LTYBonusOper[]
+  mngSaleDocumentCreated       MNGSaleDocument[]           @relation("CreatedByUser")
+  mngSaleDocumentResponsible   MNGSaleDocument[]           @relation("ResponsibleManager")
+  mngSaleDocumentUpdated       MNGSaleDocument[]           @relation("UpdateByUser")
   workDayShiftReportCreated    MNGShiftReport[]            @relation("CreatedByUser")
   workDayShiftReportUpdated    MNGShiftReport[]            @relation("UpdateByUser")
   managerPaperCreated          ManagerPaper[]              @relation("CreatedByUser")
@@ -153,9 +157,6 @@ model User {
   ltyPrograms                  LTYProgram[]                @relation("LTYProgramToUser")
   organizations                Organization[]              @relation("OrganizationToUser")
   posesPermissions             Pos[]                       @relation("PosToUser")
-  mngSaleDocumentCreated       MNGSaleDocument[]         @relation("CreatedByUser")
-  mngSaleDocumentUpdated       MNGSaleDocument[]         @relation("UpdateByUser")
-  mngSaleDocumentResponsible       MNGSaleDocument[]         @relation("ResponsibleManager")
 }
 
 model UserMailConfirm {
@@ -613,22 +614,24 @@ model LTYUserTag {
 }
 
 model LTYCard {
-  id           Int            @id @default(autoincrement())
-  balance      Int            @default(0)
-  clientId     Int?           @unique
-  unqNumber    String
-  number       String
-  type         LTYCardType    @default(VIRTUAL)
-  monthlyLimit Int?
-  createdAt    DateTime?
-  updatedAt    DateTime?
-  cardTierId   Int?
-  bonusBanks   LTYBonusBank[]
-  bonusOpers   LTYBonusOper[]
-  cardTier     LTYCardTier?   @relation(fields: [cardTierId], references: [id])
-  client       LTYUser?       @relation(fields: [clientId], references: [id])
-  equarings    LTYEquaring[]
-  orders       LTYOrder[]
+  id             Int            @id @default(autoincrement())
+  balance        Int            @default(0)
+  clientId       Int?           @unique
+  unqNumber      String
+  number         String
+  type           LTYCardType    @default(VIRTUAL)
+  monthlyLimit   Int?
+  createdAt      DateTime?
+  updatedAt      DateTime?
+  cardTierId     Int?
+  organizationId Int?
+  bonusBanks     LTYBonusBank[]
+  bonusOpers     LTYBonusOper[]
+  cardTier       LTYCardTier?   @relation(fields: [cardTierId], references: [id])
+  client         LTYUser?       @relation(fields: [clientId], references: [id])
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  equarings      LTYEquaring[]
+  orders         LTYOrder[]
 }
 
 model LTYBonusBank {
@@ -909,13 +912,13 @@ model Warehouse {
   createdAt          DateTime
   updatedAt          DateTime
   inventoryItems     InventoryItem[]
+  mngSaleDocument    MNGSaleDocument[]
+  mngSalePrice       MNGSalePrice[]
   createdBy          User                @relation("CreatedByUser", fields: [createdById], references: [id])
   manager            User?               @relation("Manager", fields: [managerId], references: [id])
   pos                Pos?                @relation(fields: [posId], references: [id])
   updateBy           User                @relation("UpdateByUser", fields: [updateById], references: [id])
   warehouseDocuments WarehouseDocument[]
-  mngSalePrice       MNGSalePrice[]
-  mngSaleDocument    MNGSaleDocument[]
 }
 
 model Nomenclature {
@@ -930,19 +933,19 @@ model Nomenclature {
   updateById               Int
   updatedAt                DateTime
   measurement              MeasurementNomenclature?
-  destiny                  DestinyNomenclature       @default(INTERNAL)
   image                    String?
   metaData                 Json?
   status                   NomenclatureStatus?       @default(ACTIVE)
+  destiny                  DestinyNomenclature       @default(INTERNAL)
   inventoryItems           InventoryItem[]
+  mngSaleItem              MNGSaleItem[]
+  mngSalePrice             MNGSalePrice[]
   category                 Category                  @relation(fields: [categoryId], references: [id])
   createdBy                User                      @relation("CreatedByUser", fields: [createdById], references: [id])
   organization             Organization              @relation(fields: [organizationId], references: [id])
   supplier                 Supplier?                 @relation(fields: [supplierId], references: [id])
   updateBy                 User                      @relation("UpdateByUser", fields: [updateById], references: [id])
   warehouseDocumentDetails WarehouseDocumentDetail[]
-  mngSalePrice             MNGSalePrice[]
-  mngSaleItem              MNGSaleItem[]
 }
 
 model InventoryItem {
@@ -1279,38 +1282,38 @@ model ManagerReportPeriod {
 }
 
 model MNGSalePrice {
-  id             Int                       @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   nomenclatureId Int
-  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
   warehouseId    Int
-  warehouse      Warehouse    @relation(fields: [warehouseId], references: [id])
   price          Int
+  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  warehouse      Warehouse    @relation(fields: [warehouseId], references: [id])
 }
 
 model MNGSaleDocument {
-  id             Int                       @id @default(autoincrement())
-  name           String
-  warehouseId    Int
-  warehouse      Warehouse    @relation(fields: [warehouseId], references: [id])
-  responsibleManagerId  Int
-  responsibleManager    User                      @relation("ResponsibleManager", fields: [responsibleManagerId], references: [id])
-  saleDate       DateTime
-  createdAt      DateTime
-  updatedAt      DateTime
-  createdById    Int
-  updatedById    Int
-  createdBy      User                      @relation("CreatedByUser", fields: [createdById], references: [id])
-  updatedBy      User                      @relation("UpdateByUser", fields: [updatedById], references: [id])
-  mngSaleItem    MNGSaleItem[]
+  id                   Int           @id @default(autoincrement())
+  warehouseId          Int
+  responsibleManagerId Int
+  saleDate             DateTime
+  createdAt            DateTime
+  updatedAt            DateTime
+  createdById          Int
+  updatedById          Int
+  name                 String
+  createdBy            User          @relation("CreatedByUser", fields: [createdById], references: [id])
+  responsibleManager   User          @relation("ResponsibleManager", fields: [responsibleManagerId], references: [id])
+  updatedBy            User          @relation("UpdateByUser", fields: [updatedById], references: [id])
+  warehouse            Warehouse     @relation(fields: [warehouseId], references: [id])
+  mngSaleItem          MNGSaleItem[]
 }
 
 model MNGSaleItem {
-  id             Int                       @id @default(autoincrement())
-  nomenclatureId Int
-  nomenclature   Nomenclature @relation(fields: [nomenclatureId], references: [id])
+  id                Int             @id @default(autoincrement())
+  nomenclatureId    Int
   mngSaleDocumentId Int
+  count             Int
   mngSaleDocument   MNGSaleDocument @relation(fields: [mngSaleDocumentId], references: [id])
-  count          Int
+  nomenclature      Nomenclature    @relation(fields: [nomenclatureId], references: [id])
 }
 
 enum LTYProgramStatus {
@@ -1505,7 +1508,6 @@ enum ManagerPaperGroup {
   ACCOUNTABLE_FUNDS
   REPRESENTATIVE_EXPENSES
   SALE_EQUIPMENT
-  SALE_NOMENCLATURE
   MANUFACTURE
   OTHER
   SUPPLIES
@@ -1514,6 +1516,7 @@ enum ManagerPaperGroup {
   CONSTRUCTION
   MAINTENANCE_REPAIR
   TRANSPORTATION_COSTS
+  SALE_NOMENCLATURE
 }
 
 enum ManagerPaperTypeClass {
