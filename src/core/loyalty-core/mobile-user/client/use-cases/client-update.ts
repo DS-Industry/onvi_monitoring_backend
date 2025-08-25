@@ -25,9 +25,11 @@ export class UpdateClientUseCase {
       comment,
       placementId,
       refreshTokenId,
+      gender
     } = input;
 
     oldClient.name = name ? name : oldClient.name;
+
     oldClient.birthday = birthday ? birthday : oldClient.birthday;
     oldClient.avatar = avatar ? avatar : oldClient.avatar;
     oldClient.refreshTokenId = refreshTokenId
@@ -39,7 +41,7 @@ export class UpdateClientUseCase {
       : oldClient.contractType;
     oldClient.comment = comment ? comment : oldClient.comment;
     oldClient.placementId = placementId ? placementId : oldClient.placementId;
-
+    oldClient.gender = gender ? gender : oldClient.gender;
     oldClient.updatedAt = new Date(Date.now());
     const client = await this.clientRepository.update(oldClient);
     const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);

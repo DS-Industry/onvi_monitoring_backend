@@ -4,6 +4,9 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { PrismaCardMobileUserMapper } from '@db/mapper/prisma-card-mobile-user-mapper';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
+import { Prisma } from '@prisma/client';
+import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
+import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards.filter.dto';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -98,5 +101,59 @@ export class CardRepository extends ICardRepository {
       data: cardEntity,
     });
     return PrismaCardMobileUserMapper.toDomain(card);
+  }
+
+  public async getAll({
+    unqNumber,
+    organizationId,
+    unnasigned,
+  }: CardsFilterDto) {
+    const where: Prisma.LTYCardWhereInput = {};
+
+    if (unqNumber) {
+      where.unqNumber = unqNumber;
+    }
+
+    if (organizationId) {
+      where.cardTier = {
+        ltyProgram: {
+          organizations: {
+            some: {
+              id: organizationId,
+            },
+          },
+        },
+      };
+    }
+
+    if (unnasigned) {
+      where.client = null;
+    }
+
+    const cards = await this.prisma.lTYCard.findMany({
+      where,
+      include: {
+        client: true,
+        cardTier: {
+          include: {
+            benefits: true,
+            ltyProgram: {
+              include: {
+                organizations: {
+                  select: { id: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
+  }
+
+  public async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
+    // return await this.cardRepository.getKeyStatsByClientId(data);
+    return { success: true };
   }
 }

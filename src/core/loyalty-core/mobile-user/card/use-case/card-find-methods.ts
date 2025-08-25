@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
+import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
 
 @Injectable()
 export class FindMethodsCardUseCase {
@@ -31,5 +32,17 @@ export class FindMethodsCardUseCase {
     devNumber: string,
   ): Promise<LoyaltyCardInfoFullResponseDto> {
     return await this.cardRepository.findFullCardInfoForDevice(devNumber);
+  }
+
+  async getAll(data: {
+    unqNumber?: string;
+    organizationId?: number;
+    unnasigned?: boolean;
+  }): Promise<Card[]> {
+    return await this.cardRepository.getAll(data);
+  }
+
+  async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
+    return await this.cardRepository.getKeyStatsByClientId(data);
   }
 }

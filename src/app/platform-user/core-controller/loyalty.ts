@@ -69,6 +69,9 @@ import { CardBenefitDataDto } from '@loyalty/mobile-user/card/use-case/dto/card-
 import { ExpirationCardBonusBankUseCase } from '@loyalty/mobile-user/bonus/cardBonusBank/use-case/cardBonusBank-expiration';
 import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
 import { LoyaltyProgramUpdateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-update.dto';
+import { CardsFilterDto } from './dto/receive/cards.filter.dto';
+import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -883,6 +886,56 @@ export class LoyaltyController {
     try {
       const tag = await this.loyaltyValidateRules.deleteTagValidate(id);
       return await this.deleteTagUseCase.execute(tag);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Get all cards
+  @Get('cards')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getAllCard(@Query() data: CardsFilterDto): Promise<Card[]> {
+    try {
+      return await this.findMethodsCardUseCase.getAll(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Get all cards
+  @Get('key-stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getKeyStats(@Query() data: ClientKeyStatsDto): Promise<Card[]> {
+    try {
+      return await this.findMethodsCardUseCase.getKeyStatsByClientId(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
