@@ -132,4 +132,8 @@ export class Client extends BaseEntity<ClientProps> {
   set gender(gender: string) {
     this.props.gender = gender;
   }
+
+  set email(email: string) {
+    this.props.email = email;
+  }
 }

@@ -5,7 +5,7 @@ import { LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE } from '@constant/error.constan
 export interface CardProps {
   id?: number;
   balance: number;
-  mobileUserId: number;
+  mobileUserId?: number;
   devNumber: string;
   number: string;
   monthlyLimit?: number;
@@ -27,7 +27,7 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.balance;
   }
 
-  get mobileUserId(): number {
+  get mobileUserId(): number | undefined {
     return this.props.mobileUserId;
   }
 
@@ -65,6 +65,10 @@ export class Card extends BaseEntity<CardProps> {
 
   set loyaltyCardTierId(loyaltyCardTierId: number) {
     this.props.loyaltyCardTierId = loyaltyCardTierId;
+  }
+
+  set mobileUserId(mobileUserId: number | undefined) {
+    this.props.mobileUserId = mobileUserId;
   }
 
   set createdAt(createdAt: Date) {

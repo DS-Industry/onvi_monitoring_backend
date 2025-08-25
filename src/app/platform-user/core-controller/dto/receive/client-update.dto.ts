@@ -33,4 +33,10 @@ export class ClientUpdateDto {
   @IsArray()
   @IsOptional()
   tagIds?: number[];
+  @IsNumber()
+  @IsOptional()
+  cardId?: number;
+  @IsString()
+  @IsOptional()
+  email?: string;
 }
