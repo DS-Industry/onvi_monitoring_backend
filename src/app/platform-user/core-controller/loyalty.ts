@@ -73,6 +73,8 @@ import { CardsFilterDto } from './dto/receive/cards.filter.dto';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
 import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
+import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
+import { ClientLoyaltyStatsResponseDto } from './dto/response/client-loyalty-stats-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -936,6 +938,30 @@ export class LoyaltyController {
   async getUserKeyStats(@Query() data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
     try {
       return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('client-loyalty-stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getClientLoyaltyStats(@Query() data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
+    try {
+      return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

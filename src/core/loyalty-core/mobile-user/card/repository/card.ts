@@ -8,6 +8,8 @@ import { Prisma } from '@prisma/client';
 import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
 import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards.filter.dto';
 import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
+import { ClientLoyaltyStatsDto } from '@platform-user/core-controller/dto/receive/client-loyalty-stats.dto';
+import { ClientLoyaltyStatsResponseDto } from '@platform-user/core-controller/dto/response/client-loyalty-stats-response.dto';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -245,6 +247,133 @@ export class CardRepository extends ICardRepository {
       firstOrderDate,
       cardNumber: card.number,
       cardDevNumber: card.unqNumber,
+    };
+  }
+
+  public async getClientLoyaltyStats(data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: data.organizationId },
+    });
+
+    if (!organization) {
+      throw new Error(`Organization with id ${data.organizationId} not found`);
+    }
+
+    const client = await this.prisma.lTYUser.findUnique({
+      where: { id: data.clientId },
+    });
+
+    if (!client) {
+      throw new Error(`Client with id ${data.clientId} not found`);
+    }
+
+    const card = await this.prisma.lTYCard.findFirst({
+      where: {
+        clientId: data.clientId,
+      },
+      include: {
+        client: true,
+        cardTier: {
+          include: {
+            ltyProgram: {
+              include: {
+                organizations: {
+                  where: {
+                    id: data.organizationId,
+                  },
+                },
+                cardTiers: {
+                  orderBy: {
+                    id: 'asc',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    console.log(card);
+
+    if (!card) {
+      throw new Error(`Card not found for client ${data.clientId}`);
+    }
+
+    if (!card.cardTier?.ltyProgram?.organizations || card.cardTier.ltyProgram.organizations.length === 0) {
+      throw new Error(`Card does not belong to organization ${data.organizationId}`);
+    }
+
+    const orders = await this.prisma.lTYOrder.findMany({
+      where: {
+        cardId: card.id,
+        carWashDevice: {
+          carWasPos: {
+            pos: {
+              organizationId: data.organizationId,
+            },
+          },
+        },
+        orderStatus: 'COMPLETED',
+      },
+      select: {
+        sumReal: true,
+        sumBonus: true,
+        orderData: true,
+      },
+    });
+
+    const totalPurchaseAmount = orders.reduce((sum, order) => sum + order.sumReal, 0);
+    
+    const totalBonusEarned = orders.reduce((sum, order) => sum + order.sumBonus, 0);
+    
+    const activeBonuses = await this.prisma.lTYBonusBank.aggregate({
+      where: {
+        cardId: card.id,
+        expiryAt: {
+          gt: new Date(),
+        },
+      },
+      _sum: {
+        sum: true,
+      },
+    });
+    
+    const activeBonusesSum = activeBonuses._sum.sum || 0;
+
+    const accumulatedAmount = totalPurchaseAmount + totalBonusEarned;
+
+    const allTiers = card.cardTier?.ltyProgram?.cardTiers || [];
+    const currentTierIndex = allTiers.findIndex(tier => tier.id === card.cardTierId);
+    const nextTier = currentTierIndex >= 0 && currentTierIndex < allTiers.length - 1 ? allTiers[currentTierIndex + 1] : null;
+
+    let amountToNextTier = 0;
+    if (nextTier) {
+      const currentTierThreshold = card.cardTier?.id || 0;
+      const nextTierThreshold = nextTier.id;
+      amountToNextTier = Math.max(0, nextTierThreshold - currentTierThreshold);
+    }
+
+    return {
+      clientId: data.clientId,
+      organizationId: data.organizationId,
+      organizationName: organization.name,
+      clientName: client.name,
+      
+      totalPurchaseAmount,
+      
+      accumulatedAmount,
+      amountToNextTier,
+      
+      activeBonuses: activeBonusesSum,
+      totalBonusEarned,
+      
+      cardNumber: card.number,
+      cardDevNumber: card.unqNumber,
+      currentTierName: card.cardTier?.name,
+      nextTierName: nextTier?.name,
+      currentTierId: card.cardTierId,
+      nextTierId: nextTier?.id,
     };
   }
 }
