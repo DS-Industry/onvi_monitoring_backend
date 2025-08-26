@@ -16,6 +16,7 @@ import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-creat
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-by-filter';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
+import { CardImportUseCase } from '@loyalty/mobile-user/card/use-case/card-import';
 import { LoyaltyProgramRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyaltyProgram';
 import { LoyaltyTierRepositoryProvider } from '@loyalty/loyalty/loyaltyTier/provider/loyaltyTier';
 import { BenefitActionRepositoryProvider } from '@loyalty/loyalty/benefit/benefitAction/provider/benefitAction';
@@ -86,6 +87,7 @@ const cardUseCase: Provider[] = [
   UpdateCardUseCase,
   FindMethodsCardUseCase,
   GetBenefitsCardUseCase,
+  CardImportUseCase,
 ];
 
 const loyaltyProgramUseCase: Provider[] = [

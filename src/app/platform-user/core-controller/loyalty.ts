@@ -9,10 +9,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   Request,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
@@ -76,6 +80,10 @@ import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.
 import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
 import { ClientLoyaltyStatsResponseDto } from './dto/response/client-loyalty-stats-response.dto';
 import { ClientPaginatedResponseDto } from './dto/response/client-paginated-response.dto';
+import { ImportCardsDto } from './dto/receive/import-cards.dto';
+import { ImportCardsResponseDto } from './dto/response/import-cards-response.dto';
+import { CardImportUseCase } from '@loyalty/mobile-user/card/use-case/card-import';
+import { FileParserService } from './services/excel-parser.service';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -104,6 +112,8 @@ export class LoyaltyController {
     private readonly getBenefitsCardUseCase: GetBenefitsCardUseCase,
     private readonly expirationCardBonusBankUseCase: ExpirationCardBonusBankUseCase,
     private readonly updateLoyaltyProgramUseCase: UpdateLoyaltyProgramUseCase,
+    private readonly cardImportUseCase: CardImportUseCase,
+    private readonly fileParserService: FileParserService,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -963,6 +973,124 @@ export class LoyaltyController {
   async getClientLoyaltyStats(@Query() data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
     try {
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('import-cards')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async importCards(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() data: ImportCardsDto,
+  ): Promise<ImportCardsResponseDto> {
+    try {
+      console.log('Import cards endpoint called with:', {
+        hasFile: !!file,
+        fileInfo: file ? {
+          filename: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          fieldname: file.fieldname,
+          encoding: file.encoding,
+          bufferLength: file.buffer?.length,
+          bufferType: typeof file.buffer,
+          bufferIsArray: Array.isArray(file.buffer),
+          bufferIsBuffer: Buffer.isBuffer(file.buffer),
+        } : null,
+        organizationId: data.organizationId,
+        bodyData: data,
+      });
+
+      if (!file) {
+        throw new CustomHttpException({
+          message: 'Excel (.xlsx, .xls) or CSV (.csv) file is required',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      console.log('File object properties:', {
+        hasOriginalname: !!file.originalname,
+        hasMimetype: !!file.mimetype,
+        hasSize: !!file.size,
+        hasFieldname: !!file.fieldname,
+        hasEncoding: !!file.encoding,
+        hasBuffer: !!file.buffer,
+        bufferLength: file.buffer?.length,
+        fileKeys: Object.keys(file),
+      });
+
+      console.log('File upload debug info:', {
+        filename: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        fieldname: file.fieldname,
+        encoding: file.encoding,
+      });
+
+      const allowedMimeTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+        'application/vnd.ms-excel',
+        'application/octet-stream',
+        'application/vnd.ms-office', 
+        'application/zip', 
+        'text/csv', 
+        'text/plain',
+      ];
+
+      const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+      const fileExtension = file.originalname ? 
+        file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
+
+      const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
+      const isValidExtension = allowedExtensions.includes(fileExtension);
+
+      if (!isValidMimeType && !isValidExtension) {
+        console.warn('File validation failed, but attempting to process anyway:', {
+          mimetype: file.mimetype,
+          extension: fileExtension,
+          filename: file.originalname,
+        });
+        
+        if (file.mimetype && 
+            !file.mimetype.includes('excel') && 
+            !file.mimetype.includes('spreadsheet') && 
+            !file.mimetype.includes('office') &&
+            !file.mimetype.includes('csv') &&
+            !file.mimetype.includes('text')) {
+          throw new CustomHttpException({
+            message: `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`,
+            code: HttpStatus.BAD_REQUEST,
+          });
+        }
+      }
+
+      const cardsData = await this.fileParserService.parseCardImportFile(file);
+
+      if (cardsData.length === 0) {
+        throw new CustomHttpException({
+          message: 'No valid card data found in the file',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      return await this.cardImportUseCase.execute(data.organizationId, cardsData);
+
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

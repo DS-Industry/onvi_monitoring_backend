@@ -1,0 +1,93 @@
+import { Injectable } from '@nestjs/common';
+import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
+import { CardImportItemDto } from '@platform-user/core-controller/dto/receive/card-import-item.dto';
+import { ImportCardsResponseDto } from '@platform-user/core-controller/dto/response/import-cards-response.dto';
+import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { PrismaService } from '@db/prisma/prisma.service';
+
+@Injectable()
+export class CardImportUseCase {
+  constructor(
+    private readonly cardRepository: ICardRepository,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  async execute(
+    organizationId: number,
+    cardsData: CardImportItemDto[],
+  ): Promise<ImportCardsResponseDto> {
+    const errors: string[] = [];
+    let successCount = 0;
+    let errorCount = 0;
+
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
+
+    if (!organization) {
+      throw new Error(`Organization with id ${organizationId} not found`);
+    }
+
+    for (const cardData of cardsData) {
+      try {
+        const tier = await this.prisma.lTYCardTier.findFirst({
+          where: {
+            id: cardData.tierId,
+            ltyProgram: {
+              organizations: {
+                some: {
+                  id: organizationId,
+                },
+              },
+            },
+          },
+        });
+
+        if (!tier) {
+          errors.push(`Tier ${cardData.tierId} not found or not accessible for organization ${organizationId}`);
+          errorCount++;
+          continue;
+        }
+
+        const existingCard = await this.prisma.lTYCard.findFirst({
+          where: {
+            OR: [
+              { unqNumber: cardData.devNumber },
+              { number: cardData.uniqueNumber },
+            ],
+          },
+        });
+
+        if (existingCard) {
+          errors.push(`Card with unqNumber ${cardData.devNumber} or number ${cardData.uniqueNumber} already exists`);
+          errorCount++;
+          continue;
+        }
+
+        const newCard = new Card({
+          devNumber: cardData.devNumber,
+          number: cardData.uniqueNumber,
+          balance: 0,
+          loyaltyCardTierId: cardData.tierId,
+          mobileUserId: undefined, 
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        await this.cardRepository.create(newCard);
+        successCount++;
+
+      } catch (error) {
+        errors.push(`Error processing card ${cardData.devNumber}: ${error.message}`);
+        errorCount++;
+      }
+    }
+
+    return {
+      successCount,
+      errorCount,
+      errors,
+      message: `Import completed. ${successCount} cards created successfully, ${errorCount} errors encountered.`,
+    };
+  }
+}
