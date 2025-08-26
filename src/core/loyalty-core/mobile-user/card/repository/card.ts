@@ -362,23 +362,28 @@ export class CardRepository extends ICardRepository {
       const currentTierId = card.cardTierId || 1;
       const nextTierIdValue = nextTier.id;
       
-      const tierMultiplier = 10000; 
-      const tierLevelDifference = nextTierIdValue - currentTierId;
-      
       const currentTierBenefitLimit = card.cardTier?.limitBenefit || 0;
       const nextTierBenefitLimit = nextTier.limitBenefit || 0;
       
-      if (tierLevelDifference > 0) {
-        nextTierThreshold = tierLevelDifference * tierMultiplier;
+      console.log('Tier progression calculation:', {
+        currentTierId,
+        nextTierId: nextTierIdValue,
+        currentTierBenefitLimit,
+        nextTierBenefitLimit,
+        accumulatedAmount,
+      });
+      
+      if (nextTierBenefitLimit > currentTierBenefitLimit) {
+
+        nextTierThreshold = nextTierBenefitLimit - currentTierBenefitLimit;
         
-        if (nextTierBenefitLimit > currentTierBenefitLimit) {
-          const benefitMultiplier = 5000; 
-          const benefitDifference = nextTierBenefitLimit - currentTierBenefitLimit;
-          nextTierThreshold = Math.max(nextTierThreshold, benefitDifference * benefitMultiplier);
-        }
-        
-    
         amountToNextTier = Math.max(0, nextTierThreshold - accumulatedAmount);
+        
+        console.log('Tier threshold calculation:', {
+          nextTierThreshold,
+          amountToNextTier,
+          calculation: `${nextTierBenefitLimit} - ${currentTierBenefitLimit} = ${nextTierThreshold}`,
+        });
       }
       
       nextTierName = nextTier.name;
