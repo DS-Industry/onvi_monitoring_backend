@@ -300,6 +300,10 @@ export class CardRepository extends ICardRepository {
       throw new Error(`Card not found for client ${data.clientId}`);
     }
 
+    if (!card.cardTier) {
+      throw new Error(`Card tier not found for client ${data.clientId}`);
+    }
+
     if (!card.cardTier?.ltyProgram?.organizations || card.cardTier.ltyProgram.organizations.length === 0) {
       throw new Error(`Card does not belong to organization ${data.organizationId}`);
     }
@@ -347,11 +351,38 @@ export class CardRepository extends ICardRepository {
     const currentTierIndex = allTiers.findIndex(tier => tier.id === card.cardTierId);
     const nextTier = currentTierIndex >= 0 && currentTierIndex < allTiers.length - 1 ? allTiers[currentTierIndex + 1] : null;
 
+    console.log("allTiers: ", allTiers);
+
     let amountToNextTier = 0;
+    let nextTierName = null;
+    let nextTierId = null;
+    let nextTierThreshold = 0;
+    
     if (nextTier) {
-      const currentTierThreshold = card.cardTier?.id || 0;
-      const nextTierThreshold = nextTier.id;
-      amountToNextTier = Math.max(0, nextTierThreshold - currentTierThreshold);
+      const currentTierId = card.cardTierId || 1;
+      const nextTierIdValue = nextTier.id;
+      
+      const tierMultiplier = 10000; 
+      const tierLevelDifference = nextTierIdValue - currentTierId;
+      
+      const currentTierBenefitLimit = card.cardTier?.limitBenefit || 0;
+      const nextTierBenefitLimit = nextTier.limitBenefit || 0;
+      
+      if (tierLevelDifference > 0) {
+        nextTierThreshold = tierLevelDifference * tierMultiplier;
+        
+        if (nextTierBenefitLimit > currentTierBenefitLimit) {
+          const benefitMultiplier = 5000; 
+          const benefitDifference = nextTierBenefitLimit - currentTierBenefitLimit;
+          nextTierThreshold = Math.max(nextTierThreshold, benefitDifference * benefitMultiplier);
+        }
+        
+    
+        amountToNextTier = Math.max(0, nextTierThreshold - accumulatedAmount);
+      }
+      
+      nextTierName = nextTier.name;
+      nextTierId = nextTier.id;
     }
 
     return {
@@ -360,8 +391,8 @@ export class CardRepository extends ICardRepository {
       organizationName: organization.name,
       clientName: client.name,
       
-      totalPurchaseAmount,
       
+      totalPurchaseAmount,
       accumulatedAmount,
       amountToNextTier,
       
@@ -370,10 +401,19 @@ export class CardRepository extends ICardRepository {
       
       cardNumber: card.number,
       cardDevNumber: card.unqNumber,
+      
       currentTierName: card.cardTier?.name,
-      nextTierName: nextTier?.name,
       currentTierId: card.cardTierId,
-      nextTierId: nextTier?.id,
+      currentTierDescription: card.cardTier?.description,
+      
+      nextTierName: nextTierName,
+      nextTierId: nextTierId,
+      nextTierDescription: nextTier?.description,
+      
+      isHighestTier: !nextTier,
+      tierProgressPercentage: nextTier ? 
+        Math.min(100, Math.max(0, Math.round((accumulatedAmount / (nextTierThreshold || 1)) * 100))) : 
+        100,
     };
   }
 }
