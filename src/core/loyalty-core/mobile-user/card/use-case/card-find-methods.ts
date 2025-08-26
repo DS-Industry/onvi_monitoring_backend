@@ -45,10 +45,6 @@ export class FindMethodsCardUseCase {
     return await this.cardRepository.getAll(data);
   }
 
-  async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
-    return await this.cardRepository.getKeyStatsByClientId(data);
-  }
-
   async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
     return await this.cardRepository.getUserKeyStatsByOrganization(data);
   }

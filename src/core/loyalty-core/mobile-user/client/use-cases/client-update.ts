@@ -51,23 +51,19 @@ export class UpdateClientUseCase {
     let card;
     
     if (cardId) {
-      // Validate cardId
       if (cardId <= 0) {
         throw new Error(`Invalid cardId: ${cardId}. Card ID must be a positive number.`);
       }
       
-      // Handle card reassignment
       const newCard = await this.findMethodsCardUseCase.getById(cardId);
       if (!newCard) {
         throw new Error(`Card with id ${cardId} not found`);
       }
       
-      // Check if the new card is already assigned to another client
       if (newCard.mobileUserId && newCard.mobileUserId !== client.id) {
         throw new Error(`Card with id ${cardId} is already assigned to another client`);
       }
       
-      // Unassign old card from current client
       const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
       if (oldCard) {
         oldCard.mobileUserId = null;
@@ -79,7 +75,6 @@ export class UpdateClientUseCase {
         );
       }
       
-      // Assign new card to current client
       newCard.mobileUserId = client.id;
       card = await this.updateCardUseCase.execute(
         {
@@ -88,7 +83,6 @@ export class UpdateClientUseCase {
         newCard,
       );
     } else {
-      // Update existing card without reassignment (only if balance, monthlyLimit, or loyaltyCardTierId are provided)
       if (input.balance !== undefined || input.monthlyLimit !== undefined || input.loyaltyCardTierId !== undefined) {
         const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
         if (oldCard) {
@@ -102,7 +96,6 @@ export class UpdateClientUseCase {
           );
         }
       } else {
-        // If no card updates are needed, just get the current card for the response
         card = await this.findMethodsCardUseCase.getByClientId(client.id);
       }
     }

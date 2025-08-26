@@ -155,11 +155,6 @@ export class CardRepository extends ICardRepository {
     return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
   }
 
-  public async getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any> {
-    // return await this.cardRepository.getKeyStatsByClientId(data);
-    return { success: true };
-  }
-
   public async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
     const organization = await this.prisma.organization.findUnique({
       where: { id: data.organizationId },

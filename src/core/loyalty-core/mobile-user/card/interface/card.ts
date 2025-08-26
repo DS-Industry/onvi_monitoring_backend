@@ -18,7 +18,6 @@ export abstract class ICardRepository {
   ): Promise<LoyaltyCardInfoFullResponseDto | null>;
   abstract update(input: Card): Promise<Card>;
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
-  abstract getKeyStatsByClientId(data: ClientKeyStatsDto): Promise<any>;
   abstract getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto>;
   abstract getClientLoyaltyStats(data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto>;
 }
