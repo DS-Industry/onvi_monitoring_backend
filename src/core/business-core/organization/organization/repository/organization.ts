@@ -70,6 +70,7 @@ export class OrganizationRepository extends IOrganizationRepository {
   public async findAllByUser(
     userId: number,
     placementId: number | '*',
+    findAllByUser?: boolean,
   ): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
       where: {
@@ -79,8 +80,10 @@ export class OrganizationRepository extends IOrganizationRepository {
           },
         },
         ...(placementId !== '*' && { placementId }),
+        ...(findAllByUser && { ltyProgramId: null }),
       },
     });
+
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 

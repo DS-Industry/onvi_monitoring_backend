@@ -29,4 +29,5 @@ export abstract class IWarehouseDocumentRepository {
     type: WarehouseDocumentType,
   ): Promise<WarehouseDocument[]>;
   abstract update(input: WarehouseDocument): Promise<WarehouseDocument>;
+  abstract delete(id: number): Promise<void>;
 }

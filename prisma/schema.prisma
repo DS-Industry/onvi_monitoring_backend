@@ -33,6 +33,7 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                    @relation("OrganizationToUser")
+  cards                    LTYCard[]
 }
 
 model Address {
@@ -629,7 +630,7 @@ model LTYCard {
   bonusOpers     LTYBonusOper[]
   cardTier       LTYCardTier?   @relation(fields: [cardTierId], references: [id])
   client         LTYUser?       @relation(fields: [clientId], references: [id])
-  Organization   Organization?  @relation(fields: [organizationId], references: [id])
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
   equarings      LTYEquaring[]
   orders         LTYOrder[]
 }

@@ -2,6 +2,7 @@ import { BaseEntity } from '@utils/entity';
 
 export interface SaleDocumentProps {
   id?: number;
+  name: string;
   warehouseId: number;
   responsibleManagerId: number;
   saleDate: Date;
@@ -18,6 +19,10 @@ export class SaleDocument extends BaseEntity<SaleDocumentProps> {
 
   get id(): number {
     return this.props.id;
+  }
+
+  get name(): string {
+    return this.props.name;
   }
 
   get warehouseId(): number {

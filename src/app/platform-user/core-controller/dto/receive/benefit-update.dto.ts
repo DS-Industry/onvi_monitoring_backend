@@ -6,6 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 import { LTYBenefitType } from "@loyalty/loyalty/benefit/benefit/domain/benefitType";
+import { Transform } from "class-transformer";
 
 export class BenefitUpdateDto {
   @IsNumber()
@@ -14,7 +15,7 @@ export class BenefitUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   bonus?: number;
   @IsEnum(LTYBenefitType)

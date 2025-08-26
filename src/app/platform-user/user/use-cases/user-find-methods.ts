@@ -39,4 +39,11 @@ export class FindMethodsUserUseCase {
   async getAllByRoleIds(roleIds: number[]): Promise<User[]> {
     return await this.userRepository.findAllByRoleIds(roleIds);
   }
+
+  async getAllByRoleIdsAndPosId(
+    roleIds: number[],
+    posId: number,
+  ): Promise<User[]> {
+    return await this.userRepository.findAllByRoleIdsAndPosId(roleIds, posId);
+  }
 }

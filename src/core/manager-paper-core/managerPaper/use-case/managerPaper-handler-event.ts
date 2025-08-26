@@ -6,6 +6,7 @@ import { CreateEventDto } from '@manager-paper/managerPaper/use-case/dto/create-
 import { ManagerPaperGroup } from '@prisma/client';
 import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-find-methods';
 import { DeleteManagerPaperUseCase } from '@manager-paper/managerPaper/use-case/managerPaper-delete';
+import { CreateEventSaleDocumentDto } from '@manager-paper/managerPaper/use-case/dto/create-event-sale-document.dto';
 
 @Injectable()
 export class ManagerPaperHandlerEventUseCase {
@@ -31,6 +32,32 @@ export class ManagerPaperHandlerEventUseCase {
           sum: payload.sum,
           userId: payload.user.id,
           cashCollectionId: payload.cashCollectionId,
+        },
+        payload.user,
+      );
+    } catch (error) {
+      throw new CustomHttpException({
+        message: error.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @OnEvent('manager-paper.created-sale-document')
+  async handlerManagerPaperCreatedSaleDocumentEvent(
+    payload: CreateEventSaleDocumentDto,
+  ) {
+    try {
+      const managerPaperType =
+        await this.findMethodsManagerPaperTypeUseCase.getOneByName('Продажа');
+      await this.createManagerPaperUseCase.execute(
+        {
+          group: ManagerPaperGroup.REVENUE,
+          posId: payload.posId,
+          paperTypeId: managerPaperType.id,
+          eventDate: payload.eventDate,
+          sum: payload.sum,
+          userId: payload.user.id,
         },
         payload.user,
       );

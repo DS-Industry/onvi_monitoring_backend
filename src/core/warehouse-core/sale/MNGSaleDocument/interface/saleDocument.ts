@@ -4,6 +4,7 @@ export abstract class ISaleDocumentRepository {
   abstract create(input: SaleDocument): Promise<SaleDocument>;
   abstract findOneById(id: number): Promise<SaleDocument>;
   abstract findAllByFilter(
+    name?: string,
     warehouseId?: number,
     responsibleManagerId?: number,
     dateStartSale?: Date,

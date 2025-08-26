@@ -1,4 +1,5 @@
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { DestinyNomenclature, NomenclatureStatus } from "@prisma/client";
 
 export abstract class INomenclatureRepository {
   abstract create(input: Nomenclature): Promise<Nomenclature>;
@@ -12,28 +13,20 @@ export abstract class INomenclatureRepository {
     name: string,
     organizationId: number,
   ): Promise<Nomenclature>;
-  abstract findAllByOrganizationId(
-    organizationId: number,
+  abstract findAllByFilter(
+    organizationId?: number,
+    categoryId?: number,
+    destiny?: DestinyNomenclature,
+    status?: NomenclatureStatus,
     skip?: number,
     take?: number,
   ): Promise<Nomenclature[]>;
-  abstract countAllByOrganizationId(
-    organizationId: number,
+  abstract findAllByFilterCount(
+    organizationId?: number,
+    categoryId?: number,
+    destiny?: DestinyNomenclature,
+    status?: NomenclatureStatus,
   ): Promise<number>;
-  abstract findAllByCategoryIdAndOrganizationId(
-    categoryId: number,
-    organizationId: number,
-    skip?: number,
-    take?: number,
-  ): Promise<Nomenclature[]>;
-  abstract countAllByCategoryIdAndOrganizationId(
-    categoryId: number,
-    organizationId: number,
-  ): Promise<number>;
-  abstract findAllBySupplierIdAndOrganizationId(
-    supplierId: number,
-    organizationId: number,
-  ): Promise<Nomenclature[]>;
   abstract findManyByIds(ids: number[]): Promise<Nomenclature[]>;
   abstract update(input: Nomenclature): Promise<Nomenclature>;
 }

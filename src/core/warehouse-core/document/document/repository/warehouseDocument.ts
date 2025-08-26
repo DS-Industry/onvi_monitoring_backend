@@ -162,4 +162,8 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
     });
     return PrismaWarehouseDocumentMapper.toDomain(warehouseDocument);
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.warehouseDocument.delete({ where: { id } });
+  }
 }

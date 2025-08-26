@@ -16,19 +16,24 @@ import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
 import { WarehouseDocumentSaveDto } from '@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto';
 import {
+  SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
   WAREHOUSE_CREATE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
-  WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE,
-  WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE,
+  WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE, WAREHOUSE_DELETE_DOCUMENT_EXCEPTION_CODE,
+  WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE, WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE,
   WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE,
   WAREHOUSE_SAVE_DOCUMENT_EXCEPTION_CODE,
-  WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
-} from '@constant/error.constants';
+  WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE
+} from "@constant/error.constants";
 import { WarehouseException } from '@exception/option.exceptions';
+import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
+import { User } from '@platform-user/user/domain/user';
+import { SaleDocumentCreateDto } from '@platform-user/core-controller/dto/receive/sale-document-create.dto';
+import { WarehouseDocument } from "@warehouse/document/document/domain/warehouseDocument";
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -280,6 +285,14 @@ export class WarehouseValidateRules {
     return categoryCheck.object;
   }
 
+  public async updateSupplierValidate(supplierId: number) {
+    const supplierCheck = await this.validateLib.supplierByIdExists(supplierId);
+    if (supplierCheck.code !== 200) {
+      throw new WarehouseException(WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE, supplierCheck.errorMessage);
+    }
+    return supplierCheck.object;
+  }
+
   public async getAllNomenclatureByOrgIdValidate(orgId: number) {
     const orgCheck = await this.validateLib.organizationByIdExists(orgId);
     if (orgCheck.code !== 200) {
@@ -307,6 +320,14 @@ export class WarehouseValidateRules {
       PermissionAction.read,
       warehouseCheck.object,
     );
+    return warehouseCheck.object;
+  }
+
+  public async getOneByIdCheck(id: number) {
+    const warehouseCheck = await this.validateLib.warehouseByIdExists(id);
+    if (warehouseCheck.code !== 200) {
+      throw new WarehouseException(WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE, warehouseCheck.errorMessage);
+    }
     return warehouseCheck.object;
   }
 
@@ -389,6 +410,38 @@ export class WarehouseValidateRules {
       warehouseCheck.object,
     );
     return warehouseDocumentCheck.object;
+  }
+
+  public async deleteDocumentValidate(documentId: number): Promise<WarehouseDocument> {
+    const response = [];
+    const warehouseDocumentCheck = await this.validateLib.warehouseDocumentByIdExists(documentId);
+    response.push(warehouseDocumentCheck)
+    if (warehouseDocumentCheck.object.status === WarehouseDocumentStatus.SENT) {
+      response.push({ code: 465 })
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      WAREHOUSE_DELETE_DOCUMENT_EXCEPTION_CODE,
+    );
+    return warehouseDocumentCheck.object;
+  }
+  
+  public async createSaleDocumentValidate(input: SaleDocumentCreateDto): Promise<{warehouse: Warehouse, manager: User}> {
+    const response = [];
+
+    const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
+    response.push(warehouseCheck)
+    const managerCheck = await this.validateLib.userByIdExists(input.managerId);
+    response.push(managerCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.WAREHOUSE,
+      SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
+    );
+    return { warehouse: warehouseCheck.object, manager: managerCheck.object}
   }
 
   private isValidInventoryMetaData(metaData: any): boolean {

@@ -10,4 +10,5 @@ export abstract class ISupplierRepository {
   ): Promise<Supplier[]>;
   abstract countAll(name?: string): Promise<number>;
   abstract update(input: Supplier): Promise<Supplier>;
+  abstract delete(id: number): Promise<void>;
 }

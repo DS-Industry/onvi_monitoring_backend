@@ -82,6 +82,7 @@ export class OrganizationController {
       return await this.filterByUserOrganizationUseCase.execute(
         user,
         data.placementId,
+        data.noLoyaltyProgram,
       );
     } catch (e) {
       if (e instanceof OrganizationException) {

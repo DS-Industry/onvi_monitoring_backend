@@ -8,6 +8,7 @@ export class PrismaSaleDocumentMapper {
     }
     return new SaleDocument({
       id: entity.id,
+      name: entity.name,
       warehouseId: entity.warehouseId,
       responsibleManagerId: entity.responsibleManagerId,
       saleDate: entity.saleDate,
@@ -23,6 +24,7 @@ export class PrismaSaleDocumentMapper {
   ): Prisma.MNGSaleDocumentUncheckedCreateInput {
     return {
       id: saleDocument?.id,
+      name: saleDocument.name,
       warehouseId: saleDocument.warehouseId,
       responsibleManagerId: saleDocument.responsibleManagerId,
       saleDate: saleDocument.saleDate,

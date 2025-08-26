@@ -3,7 +3,7 @@ import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomen
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { PrismaNomenclatureMapper } from '@db/mapper/prisma-nomenclature-mapper';
-import { NomenclatureStatus } from '@prisma/client';
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class NomenclatureRepository extends INomenclatureRepository {
@@ -65,18 +65,36 @@ export class NomenclatureRepository extends INomenclatureRepository {
     return PrismaNomenclatureMapper.toDomain(nomenclature);
   }
 
-  public async findAllByOrganizationId(
-    organizationId: number,
+  public async findAllByFilter(
+    organizationId?: number,
+    categoryId?: number,
+    destiny?: DestinyNomenclature,
+    status?: NomenclatureStatus,
     skip?: number,
     take?: number,
   ): Promise<Nomenclature[]> {
+    const where: any = {};
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (categoryId !== undefined) {
+      where.categoryId = categoryId;
+    }
+
+    if (destiny !== undefined) {
+      where.destiny = destiny;
+    }
+
+    if (status !== undefined) {
+      where.status = status;
+    }
+
     const nomenclatures = await this.prisma.nomenclature.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
-      where: {
-        organizationId,
-        status: NomenclatureStatus.ACTIVE,
-      },
+      where: where,
       orderBy: {
         sku: 'asc',
       },
@@ -84,63 +102,33 @@ export class NomenclatureRepository extends INomenclatureRepository {
     return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
   }
 
-  public async countAllByOrganizationId(
-    organizationId: number,
+  public async findAllByFilterCount(
+    organizationId?: number,
+    categoryId?: number,
+    destiny?: DestinyNomenclature,
+    status?: NomenclatureStatus,
   ): Promise<number> {
+    const where: any = {};
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (categoryId !== undefined) {
+      where.categoryId = categoryId;
+    }
+
+    if (destiny !== undefined) {
+      where.destiny = destiny;
+    }
+
+    if (status !== undefined) {
+      where.status = status;
+    }
+
     return this.prisma.nomenclature.count({
-      where: {
-        organizationId,
-        status: NomenclatureStatus.ACTIVE,
-      },
+      where: where,
     });
-  }
-
-  public async findAllByCategoryIdAndOrganizationId(
-    categoryId: number,
-    organizationId: number,
-    skip?: number,
-    take?: number,
-  ): Promise<Nomenclature[]> {
-    const nomenclatures = await this.prisma.nomenclature.findMany({
-      skip: skip ?? undefined,
-      take: take ?? undefined,
-      where: {
-        categoryId,
-        organizationId,
-        status: NomenclatureStatus.ACTIVE,
-      },
-      orderBy: {
-        sku: 'asc',
-      },
-    });
-    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
-  }
-
-  public async countAllByCategoryIdAndOrganizationId(
-    categoryId: number,
-    organizationId: number,
-  ): Promise<number> {
-    return this.prisma.nomenclature.count({
-      where: {
-        categoryId,
-        organizationId,
-        status: NomenclatureStatus.ACTIVE,
-      },
-    });
-  }
-
-  public async findAllBySupplierIdAndOrganizationId(
-    supplierId: number,
-    organizationId: number,
-  ): Promise<Nomenclature[]> {
-    const nomenclatures = await this.prisma.nomenclature.findMany({
-      where: {
-        supplierId,
-        organizationId,
-        status: NomenclatureStatus.ACTIVE,
-      },
-    });
-    return nomenclatures.map((item) => PrismaNomenclatureMapper.toDomain(item));
   }
 
   public async findManyByIds(ids: number[]): Promise<Nomenclature[]> {

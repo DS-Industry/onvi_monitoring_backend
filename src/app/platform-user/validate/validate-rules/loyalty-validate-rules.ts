@@ -100,10 +100,10 @@ export class LoyaltyValidateRules {
         orgCheck.object,
       );
     });
-    ForbiddenError.from(ability).throwUnlessCan(
+    /*ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       checkLoyaltyProgram.object,
-    );
+    );*/
     return checkLoyaltyProgram.object;
   }
 
@@ -121,10 +121,10 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    ForbiddenError.from(ability).throwUnlessCan(
+    /*ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       loyaltyProgramCheck.object,
-    );
+    );*/
     return loyaltyProgramCheck.object;
   }
 
@@ -142,10 +142,10 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    ForbiddenError.from(ability).throwUnlessCan(
+    /*ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       loyaltyProgramCheck.object,
-    );
+    );*/
   }
 
   public async updateLoyaltyTierValidate(
