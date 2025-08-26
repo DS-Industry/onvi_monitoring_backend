@@ -40,4 +40,26 @@ export class FindMethodsClientUseCase {
       search,
     );
   }
+
+  async getCountByFilter(
+    placementId?: number,
+    tagIds?: number[],
+    contractType?: ContractType,
+    workerCorporateId?: number,
+    phone?: string,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
+  ): Promise<number> {
+    return await this.clientRepository.countByFilter(
+      placementId,
+      tagIds,
+      contractType,
+      workerCorporateId,
+      phone,
+      registrationFrom,
+      registrationTo,
+      search,
+    );
+  }
 }

@@ -75,6 +75,7 @@ import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
 import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
 import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
 import { ClientLoyaltyStatsResponseDto } from './dto/response/client-loyalty-stats-response.dto';
+import { ClientPaginatedResponseDto } from './dto/response/client-paginated-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -721,7 +722,7 @@ export class LoyaltyController {
   @HttpCode(201)
   async getClient(
     @Query() data: ClientFilterDto,
-  ): Promise<ClientResponseDto[]> {
+  ): Promise<ClientPaginatedResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;

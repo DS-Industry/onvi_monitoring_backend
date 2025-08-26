@@ -19,6 +19,16 @@ export abstract class IClientRepository {
     registrationTo?: string,
     search?: string,
   ): Promise<Client[]>;
+  abstract countByFilter(
+    placementId?: number,
+    tagIds?: number[],
+    contractType?: ContractType,
+    workerCorporateId?: number,
+    phone?: string,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
+  ): Promise<number>;
   abstract update(input: Client): Promise<Client>;
   abstract updateConnectionTag(
     userId: number,

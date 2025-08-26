@@ -6,6 +6,9 @@ export class ClientFilterDto {
   workerCorporateId: number | '*';
   tagIds: number[];
   phone?: string;
+  name?: string;
+  page?: number;
+  size?: number;
   skip?: number;
   take?: number;
   registrationFrom?: string;

@@ -71,7 +71,17 @@ export class ClientRepository extends IClientRepository {
     }
 
     if (workerCorporateId !== undefined) {
-      where.workerCorporateId = workerCorporateId;
+      where.card = {
+        cardTier: {
+          ltyProgram: {
+            organizations: {
+              some: {
+                id: workerCorporateId,
+              }
+            }
+          }
+        }
+      }
     }
 
     if (phone !== undefined) {
@@ -91,6 +101,71 @@ export class ClientRepository extends IClientRepository {
       },
     });
     return clients.map((item) => PrismaMobileUserMapper.toDomain(item));
+  }
+
+  public async countByFilter(
+    placementId?: number,
+    tagIds?: number[],
+    contractType?: ContractType,
+    workerCorporateId?: number,
+    phone?: string,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
+  ): Promise<number> {
+    const where: Prisma.LTYUserWhereInput = {};
+
+    if (registrationFrom || registrationTo) {
+      where.createdAt = {};
+
+      if (registrationFrom) {
+        where.createdAt.gte = new Date(registrationFrom);
+      }
+
+      if (registrationTo) {
+        where.createdAt.lte = new Date(registrationTo);
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { card: { number: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (contractType !== undefined) {
+      where.contractType = contractType;
+    }
+
+    if (workerCorporateId !== undefined) {
+      where.card = {
+        cardTier: {
+          ltyProgram: {
+            organizations: {
+              some: {
+                id: workerCorporateId,
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (phone !== undefined) {
+      where.phone = phone;
+    }
+
+    if (tagIds !== undefined && tagIds.length > 0) {
+      where.tags = { some: { id: { in: tagIds } } };
+    }
+
+    return await this.prisma.lTYUser.count({ where });
   }
 
   public async findOneById(id: number): Promise<Client> {
