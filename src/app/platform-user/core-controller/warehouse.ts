@@ -73,6 +73,8 @@ import { UpdateSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-up
 import { SupplierUpdateDto } from '@platform-user/core-controller/dto/receive/supplier-update.dto';
 import { Supplier } from '@warehouse/supplier/domain/supplier';
 import { DeleteWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-delete';
+import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
+import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -80,6 +82,7 @@ export class WarehouseController {
     private readonly createWarehouseUseCase: CreateWarehouseUseCase,
     private readonly warehouseValidateRules: WarehouseValidateRules,
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
+    private readonly findMethodsInventoryItemUseCase: FindMethodsInventoryItemUseCase,
     private readonly inventoryItemMonitoringUseCase: InventoryItemMonitoringUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
     private readonly updateCategoryUseCase: UpdateCategoryUseCase,
@@ -285,11 +288,12 @@ export class WarehouseController {
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
       );
-      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
-        orgId,
-        skip,
-        take,
-      );
+      return await this.findMethodsNomenclatureUseCase.getAllByFilter({
+        organizationId: orgId,
+        status: NomenclatureStatus.ACTIVE,
+        skip: skip,
+        take: take,
+      });
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -324,12 +328,12 @@ export class WarehouseController {
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
       );
-      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationIdAndDestiny(
-        orgId,
-        DestinyNomenclature.SALE,
-        skip,
-        take,
-      );
+      return await this.findMethodsNomenclatureUseCase.getAllByFilter({
+        organizationId: orgId,
+        destiny: DestinyNomenclature.SALE,
+        skip: skip,
+        take: take,
+      });
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -357,9 +361,12 @@ export class WarehouseController {
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
       );
-      return await this.findMethodsNomenclatureUseCase.getCountAllByOrganizationId(
-        orgId,
-      );
+      const count =
+        await this.findMethodsNomenclatureUseCase.getCountAllByFilter({
+          organizationId: orgId,
+          status: NomenclatureStatus.ACTIVE,
+        });
+      return { count };
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -727,16 +734,30 @@ export class WarehouseController {
         ability,
         ...params,
       });
-      if (params.categoryId) {
-        return await this.findMethodsNomenclatureUseCase.getCountAllByCategoryIdAndOrganizationId(
-          params.categoryId,
-          orgId,
+
+      let warehouses: Warehouse[] = [];
+
+      if (params.warehouseId) {
+        warehouses.push(
+          await this.findMethodsWarehouseUseCase.getById(params.warehouseId),
         );
       } else {
-        return await this.findMethodsNomenclatureUseCase.getCountAllByOrganizationId(
-          orgId,
+        warehouses = await this.findMethodsWarehouseUseCase.geyAllByPermission(
+          ability,
+          params.placementId,
         );
       }
+
+      const count =
+        await this.findMethodsInventoryItemUseCase.getCountByWarehouseIdsForInventory(
+          {
+            warehouseIds: warehouses.map((w) => w.id),
+            organizationId: orgId,
+            categoryId: params.categoryId,
+            status: NomenclatureStatus.ACTIVE,
+          },
+        );
+      return { count };
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({

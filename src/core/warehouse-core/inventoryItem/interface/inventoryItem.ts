@@ -1,4 +1,5 @@
 import { InventoryItem } from '@warehouse/inventoryItem/domain/inventoryItem';
+import { NomenclatureStatus } from "@prisma/client";
 
 export abstract class IInventoryItemRepository {
   abstract create(input: InventoryItem): Promise<InventoryItem>;
@@ -12,6 +13,20 @@ export abstract class IInventoryItemRepository {
     nomenclatureId: number,
     warehouseId: number,
   ): Promise<InventoryItem>;
+  abstract findAllByWarehouseIdsForInventory(
+    warehouseIds: number[],
+    organizationId?: number,
+    categoryId?: number,
+    status?: NomenclatureStatus,
+    skip?: number,
+    take?: number,
+  ): Promise<InventoryItem[]>;
+  abstract findCountByWarehouseIdsForInventory(
+    warehouseIds: number[],
+    organizationId?: number,
+    categoryId?: number,
+    status?: NomenclatureStatus,
+  ): Promise<number>;
   abstract findAllByNomenclatureIdsAndWarehouseIds(
     nomenclatureIds: number[],
     warehouseIds: number[],

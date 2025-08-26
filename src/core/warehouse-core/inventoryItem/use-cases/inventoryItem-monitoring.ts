@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { IInventoryItemRepository } from '@warehouse/inventoryItem/interface/inventoryItem';
 import { FindMethodsNomenclatureUseCase } from '@warehouse/nomenclature/use-cases/nomenclature-find-methods';
 import { FindMethodsWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-find-methods';
 import {
@@ -7,40 +6,25 @@ import {
   InventoryItemMonitoringResponseDto,
 } from '@warehouse/inventoryItem/use-cases/dto/inventoryItem-monitoring-response.dto';
 import { FindMethodsCategoryUseCase } from '@warehouse/category/use-cases/category-find-methods';
-import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
+import { NomenclatureStatus } from '@prisma/client';
+import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
 
 @Injectable()
 export class InventoryItemMonitoringUseCase {
   constructor(
-    private readonly inventoryItemRepository: IInventoryItemRepository,
     private readonly findMethodsNomenclatureUseCase: FindMethodsNomenclatureUseCase,
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
     private readonly findMethodsCategoryUseCase: FindMethodsCategoryUseCase,
+    private readonly findMethodsInventoryItemUseCase: FindMethodsInventoryItemUseCase,
   ) {}
 
   async execute(
     data: InventoryItemMonitoringDto,
   ): Promise<InventoryItemMonitoringResponseDto[]> {
-    let nomenclatures: Nomenclature[];
     let warehouses: Warehouse[] = [];
-    if (data.categoryId) {
-      nomenclatures =
-        await this.findMethodsNomenclatureUseCase.getAllByCategoryIdAndOrganizationId(
-          data.categoryId,
-          data.orgId,
-          data.skip,
-          data.take,
-        );
-    } else {
-      nomenclatures =
-        await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
-          data.orgId,
-          data.skip,
-          data.take,
-        );
-    }
+
     if (data.warehouseId) {
       warehouses.push(
         await this.findMethodsWarehouseUseCase.getById(data.warehouseId),
@@ -52,8 +36,25 @@ export class InventoryItemMonitoringUseCase {
       );
     }
 
+    const inventoryItemPaginations =
+      await this.findMethodsInventoryItemUseCase.getAllByWarehouseIdsForInventory(
+        {
+          warehouseIds: warehouses.map((w) => w.id),
+          organizationId: data.orgId,
+          categoryId: data.categoryId,
+          status: NomenclatureStatus.ACTIVE,
+          skip: data.skip,
+          take: data.take,
+        },
+      );
+
+    const nomenclatures =
+      await this.findMethodsNomenclatureUseCase.getManyByIds(
+        inventoryItemPaginations.map((i) => i.nomenclatureId),
+      );
+
     const inventoryItems =
-      await this.inventoryItemRepository.findAllByNomenclatureIdsAndWarehouseIds(
+      await this.findMethodsInventoryItemUseCase.getAllByNomenclatureIdsAndWarehouseIds(
         nomenclatures.map((n) => n.id),
         warehouses.map((w) => w.id),
       );

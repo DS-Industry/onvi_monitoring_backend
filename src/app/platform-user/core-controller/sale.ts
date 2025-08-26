@@ -76,10 +76,10 @@ export class SaleController {
   @HttpCode(201)
   async createPrice(
     @Request() req: any,
-    @Body() data: SalePriceCreateDto[],
-  ): Promise<SalePrice[]> {
+    @Body() data: SalePriceCreateDto,
+  ): Promise<SalePrice> {
     try {
-      return await this.createSalePriceUseCase.executeMany(data);
+      return await this.createSalePriceUseCase.execute(data);
     } catch (e) {
       if (e instanceof SaleException) {
         throw new CustomHttpException({

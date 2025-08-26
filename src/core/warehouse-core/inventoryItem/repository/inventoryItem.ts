@@ -3,6 +3,7 @@ import { IInventoryItemRepository } from '@warehouse/inventoryItem/interface/inv
 import { PrismaService } from '@db/prisma/prisma.service';
 import { InventoryItem } from '@warehouse/inventoryItem/domain/inventoryItem';
 import { PrismaInventoryItemMapper } from '@db/mapper/prisma-inventory-item-mapper';
+import { NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class InventoryItemRepository extends IInventoryItemRepository {
@@ -64,6 +65,81 @@ export class InventoryItemRepository extends IInventoryItemRepository {
       },
     });
     return PrismaInventoryItemMapper.toDomain(inventoryItem);
+  }
+
+  public async findAllByWarehouseIdsForInventory(
+    warehouseIds: number[],
+    organizationId?: number,
+    categoryId?: number,
+    status?: NomenclatureStatus,
+    skip?: number,
+    take?: number,
+  ): Promise<InventoryItem[]> {
+    const where: any = {};
+
+    where.warehouseId = { in: warehouseIds };
+
+    where.quantity = { gt: 0 };
+
+    if (organizationId !== undefined) {
+      where.nomenclature = { organizationId };
+    }
+
+    if (categoryId !== undefined) {
+      where.nomenclature = { categoryId };
+    }
+
+    if (status !== undefined) {
+      where.nomenclature = { status };
+    }
+
+    const inventoryItems = await this.prisma.inventoryItem.findMany({
+      where: where,
+      distinct: ['nomenclatureId'],
+      orderBy: {
+        nomenclatureId: 'asc',
+      },
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+    });
+    return inventoryItems.map((item) =>
+      PrismaInventoryItemMapper.toDomain(item),
+    );
+  }
+
+  public async findCountByWarehouseIdsForInventory(
+    warehouseIds: number[],
+    organizationId?: number,
+    categoryId?: number,
+    status?: NomenclatureStatus,
+  ): Promise<number> {
+    const where: any = {};
+
+    where.warehouseId = { in: warehouseIds };
+
+    where.quantity = { gt: 0 };
+
+    if (organizationId !== undefined) {
+      where.nomenclature = { organizationId };
+    }
+
+    if (categoryId !== undefined) {
+      where.nomenclature = { categoryId };
+    }
+
+    if (status !== undefined) {
+      where.nomenclature = { status };
+    }
+
+    const result = await this.prisma.inventoryItem.groupBy({
+      by: ['nomenclatureId'],
+      where: where,
+      _count: {
+        _all: true,
+      },
+    });
+
+    return result.length;
   }
 
   public async findAllByNomenclatureIdsAndWarehouseIds(
