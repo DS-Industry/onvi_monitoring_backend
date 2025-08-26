@@ -30,6 +30,11 @@ export class Auth {
   @Post('/login')
   async login(@Body() body: AuthLoginDto, @Request() req: any): Promise<any> {
     try {
+      /*
+        TODO:
+        - add clinet metadata to schema
+        - add custom http errors exceptions
+      */
       const { user } = req;
       if (user.register) {
         return {
@@ -46,7 +51,15 @@ export class Auth {
 
   @Post('/register')
   @HttpCode(201)
-  async register(@Body() body: AuthRegisterDto, @Request() req: any) {
+  async register(@Body() body: AuthRegisterDto) {
+    /*
+        TODO:
+        - add custom http errors exceptions
+        - add deleted client login logic
+        - add card creation logic
+        - add promocode automatic generation based on condition (if clinet is from moy-ka!ds)
+      */
+
     const { correctClient, accessToken, refreshToken } =
       await this.authRegister.execute(body.phone, body.otp);
     return {
@@ -63,6 +76,13 @@ export class Auth {
   @HttpCode(201)
   @Post('/send/otp')
   async sendOtp(@Body() body: AuthSendOtpDto) {
+    /*
+        TODO:
+        - add custom http errors exceptions
+        - handling dev accounts
+        - redis otp security by ip address
+
+      */
     try {
       const otp = await this.authSendOtp.execute(body.phone);
       return {
@@ -79,6 +99,10 @@ export class Auth {
   @Post('refresh')
   async refresh(@Body() body: any, @Request() req: any) {
     try {
+      /*
+        TODO:
+        - add custom http errors exceptions
+      */
       const { user } = req;
       const accessToken = await this.singAccessToken.execute(
         user.props.phone,
