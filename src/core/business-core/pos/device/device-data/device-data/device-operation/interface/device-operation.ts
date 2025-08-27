@@ -21,6 +21,7 @@ export abstract class IDeviceOperationRepository {
     dateStart?: Date,
     dateEnd?: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperationFullDataResponseDto[]>;
@@ -32,6 +33,7 @@ export abstract class IDeviceOperationRepository {
     dateStart?: Date,
     dateEnd?: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
   ): Promise<number>;
   abstract findDataByMonitoring(
     posIds: number[],

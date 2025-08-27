@@ -17,6 +17,7 @@ export class DataByDeviceOperationUseCase {
     dateStart: Date,
     dateEnd: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperationMonitoringResponseDto> {
@@ -27,6 +28,7 @@ export class DataByDeviceOperationUseCase {
         dateStart: dateStart,
         dateEnd: dateEnd,
         currencyType: currencyType,
+        currencyId: currencyId,
       });
     const deviceOperations =
       await this.findMethodsDeviceOperationUseCase.getAllByFilter({
@@ -34,6 +36,7 @@ export class DataByDeviceOperationUseCase {
         dateStart: dateStart,
         dateEnd: dateEnd,
         currencyType: currencyType,
+        currencyId: currencyId,
         skip: skip,
         take: take,
       });
