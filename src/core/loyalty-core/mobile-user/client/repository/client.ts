@@ -79,6 +79,10 @@ export class ClientRepository extends IClientRepository {
       where: {
         phone,
       },
+      include: {
+        meta: true,
+        card: true,
+      },
     });
     return PrismaMobileUserMapper.toDomain(client);
   }

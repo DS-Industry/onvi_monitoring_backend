@@ -32,7 +32,6 @@ export class Auth {
     try {
       /*
         TODO:
-        - add clinet metadata to schema
         - add custom http errors exceptions
       */
       const { user } = req;
@@ -43,7 +42,7 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authLogin.execute(body.phone, user.props.id);
+      return await this.authLogin.execute(body.phone, user);
     } catch (e) {
       throw new Error(e);
     }
