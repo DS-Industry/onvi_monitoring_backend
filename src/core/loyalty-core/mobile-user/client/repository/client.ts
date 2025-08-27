@@ -33,6 +33,7 @@ export class ClientRepository extends IClientRepository {
     tagIds?: number[],
     contractType?: ContractType,
     workerCorporateId?: number,
+    organizationId?: number | null,
     phone?: string,
     skip?: number,
     take?: number,
@@ -62,26 +63,30 @@ export class ClientRepository extends IClientRepository {
       ];
     }
 
-    if (placementId !== undefined) {
+    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
       where.placementId = placementId;
     }
 
-    if (contractType !== undefined) {
+    if (contractType !== undefined && contractType !== null) {
       where.contractType = contractType;
     }
 
-    if (workerCorporateId !== undefined) {
+    if (organizationId !== undefined && organizationId !== null) {
       where.card = {
         cardTier: {
           ltyProgram: {
             organizations: {
               some: {
-                id: workerCorporateId,
-              }
-            }
-          }
-        }
-      }
+                id: organizationId,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
+      where.workerCorporateId = workerCorporateId;
     }
 
     if (phone !== undefined) {
@@ -89,7 +94,10 @@ export class ClientRepository extends IClientRepository {
     }
 
     if (tagIds !== undefined && tagIds.length > 0) {
-      where.tags = { some: { id: { in: tagIds } } };
+      const validTagIds = tagIds.filter(id => id !== null && id !== undefined && typeof id === 'number');
+      if (validTagIds.length > 0) {
+        where.tags = { some: { id: { in: validTagIds } } };
+      }
     }
 
     const clients = await this.prisma.lTYUser.findMany({
@@ -108,6 +116,7 @@ export class ClientRepository extends IClientRepository {
     tagIds?: number[],
     contractType?: ContractType,
     workerCorporateId?: number,
+    organizationId?: number | null,
     phone?: string,
     registrationFrom?: string,
     registrationTo?: string,
@@ -135,26 +144,30 @@ export class ClientRepository extends IClientRepository {
       ];
     }
 
-    if (placementId !== undefined) {
+    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
       where.placementId = placementId;
     }
 
-    if (contractType !== undefined) {
+    if (contractType !== undefined && contractType !== null) {
       where.contractType = contractType;
     }
 
-    if (workerCorporateId !== undefined) {
+    if (organizationId !== undefined && organizationId !== null) {
       where.card = {
         cardTier: {
           ltyProgram: {
             organizations: {
               some: {
-                id: workerCorporateId,
-              }
-            }
-          }
-        }
-      }
+                id: organizationId,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
+      where.workerCorporateId = workerCorporateId;
     }
 
     if (phone !== undefined) {

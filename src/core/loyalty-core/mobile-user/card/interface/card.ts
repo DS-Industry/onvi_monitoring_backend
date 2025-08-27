@@ -20,4 +20,8 @@ export abstract class ICardRepository {
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
   abstract getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto>;
   abstract getClientLoyaltyStats(data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto>;
+  
+  abstract validateOrganizationExists(organizationId: number): Promise<boolean>;
+  abstract validateTierExistsAndAccessible(tierId: number, organizationId: number): Promise<boolean>;
+  abstract checkCardExists(devNumber: string, uniqueNumber: string): Promise<boolean>;
 }

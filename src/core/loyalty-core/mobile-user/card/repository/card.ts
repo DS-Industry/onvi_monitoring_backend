@@ -416,4 +416,39 @@ export class CardRepository extends ICardRepository {
         100,
     };
   }
+
+  public async validateOrganizationExists(organizationId: number): Promise<boolean> {
+    const organization = await this.prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
+    return !!organization;
+  }
+
+  public async validateTierExistsAndAccessible(tierId: number, organizationId: number): Promise<boolean> {
+    const tier = await this.prisma.lTYCardTier.findFirst({
+      where: {
+        id: tierId,
+        ltyProgram: {
+          organizations: {
+            some: {
+              id: organizationId,
+            },
+          },
+        },
+      },
+    });
+    return !!tier;
+  }
+
+  public async checkCardExists(devNumber: string, uniqueNumber: string): Promise<boolean> {
+    const existingCard = await this.prisma.lTYCard.findFirst({
+      where: {
+        OR: [
+          { unqNumber: devNumber },
+          { number: uniqueNumber },
+        ],
+      },
+    });
+    return !!existingCard;
+  }
 }

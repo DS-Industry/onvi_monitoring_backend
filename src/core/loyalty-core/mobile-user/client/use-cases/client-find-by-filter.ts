@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
-import { ClientResponseDto } from '@platform-user/core-controller/dto/response/client-response.dto';
 import { ClientFilterDto } from '@loyalty/mobile-user/client/use-cases/dto/client-filter.dto';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { ClientPaginatedResponseDto } from '@platform-user/core-controller/dto/response/client-paginated-response.dto';
+import { ContractType } from '@prisma/client';
 
 @Injectable()
 export class FindByFilterClientUseCase {
@@ -13,17 +13,26 @@ export class FindByFilterClientUseCase {
   ) {}
 
   async execute(data: ClientFilterDto): Promise<ClientPaginatedResponseDto> {
-    let placementId = undefined;
-    let contractType = undefined;
-    let workerCorporateId = undefined;
-    if (data.placementId != '*') {
-      placementId = data.placementId;
+    let placementId: number | undefined = undefined;
+    let contractType: ContractType | undefined = undefined;
+    let workerCorporateId: number | undefined = undefined;
+    
+    if (data.placementId !== '*' && data.placementId !== null && data.placementId !== undefined) {
+      placementId = Number(data.placementId);
+      if (isNaN(placementId)) {
+        placementId = undefined;
+      }
     }
-    if (data.contractType != '*') {
+    
+    if (data.contractType !== '*' && data.contractType !== null && data.contractType !== undefined) {
       contractType = data.contractType;
     }
-    if (data.workerCorporateId != '*') {
-      workerCorporateId = data.workerCorporateId;
+    
+    if (data.workerCorporateId !== '*' && data.workerCorporateId !== null && data.workerCorporateId !== undefined) {
+      workerCorporateId = Number(data.workerCorporateId);
+      if (isNaN(workerCorporateId)) {
+        workerCorporateId = undefined;
+      }
     }
 
     const total = await this.findMethodsClientUseCase.getCountByFilter(

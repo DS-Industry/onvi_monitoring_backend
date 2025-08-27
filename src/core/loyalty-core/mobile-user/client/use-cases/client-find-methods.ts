@@ -26,12 +26,14 @@ export class FindMethodsClientUseCase {
     registrationFrom?: string,
     registrationTo?: string,
     search?: string,
+    organizationId?: number,
   ): Promise<Client[]> {
     return await this.clientRepository.findAllByFilter(
       placementId,
       tagIds,
       contractType,
       workerCorporateId,
+      organizationId || null,
       phone,
       skip,
       take,
@@ -50,12 +52,14 @@ export class FindMethodsClientUseCase {
     registrationFrom?: string,
     registrationTo?: string,
     search?: string,
+    organizationId?: number,
   ): Promise<number> {
     return await this.clientRepository.countByFilter(
       placementId,
       tagIds,
       contractType,
       workerCorporateId,
+      organizationId || null,
       phone,
       registrationFrom,
       registrationTo,
