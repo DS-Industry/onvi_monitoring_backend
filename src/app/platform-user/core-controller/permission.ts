@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -21,7 +22,6 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   ManageOrgAbility,
-  ReadOrgAbility,
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
@@ -37,6 +37,8 @@ import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { RedisService } from '@infra/cache/redis.service';
+import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { OrganizationValidateRules } from '@platform-user/validate/validate-rules/organization-validate-rules';
 
 @Controller('permission')
 export class PermissionController {
@@ -51,6 +53,7 @@ export class PermissionController {
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly connectionUserPosUseCase: ConnectionUserPosUseCase,
     private readonly redisService: RedisService,
+    private readonly organizationValidateRules: OrganizationValidateRules,
   ) {}
 
   private async deleteUserKeysSafely(userId: number) {
@@ -125,15 +128,51 @@ export class PermissionController {
       }
     }
   }
-  @Get('worker')
+  @Get('worker/:orgId')
   @UseGuards(JwtGuard)
   @HttpCode(200)
   async getWorker(
-    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: PaginationDto,
   ): Promise<UserPermissionDataResponseDto[]> {
     try {
-      const { user } = req;
-      return await this.organizationManageUserUseCase.execute(user);
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      const organization =
+        await this.organizationValidateRules.getContact(orgId);
+      return await this.organizationManageUserUseCase.execute(
+        organization,
+        skip,
+        take,
+      );
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('worker-count/:orgId')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getCountWorker(
+    @Param('orgId', ParseIntPipe) orgId: number,
+  ): Promise<{ count: number }> {
+    try {
+      return await this.findMethodsUserUseCase.getCountByOrgId(orgId);
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({

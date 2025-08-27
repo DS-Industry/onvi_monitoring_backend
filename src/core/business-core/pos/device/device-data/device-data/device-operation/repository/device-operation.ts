@@ -140,6 +140,73 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     );
   }
 
+  public async findCountByFilter(
+    ability?: any,
+    organizationId?: number,
+    posIds?: number[],
+    carWashDeviceId?: number,
+    dateStart?: Date,
+    dateEnd?: Date,
+    currencyType?: CurrencyType,
+  ): Promise<number> {
+    const where: any = {};
+
+    if (organizationId !== undefined) {
+      where.carWashDevice = {
+        carWasPos: {
+          pos: {
+            organizationId,
+          },
+        },
+      };
+    }
+
+    if (posIds !== undefined && posIds.length > 0) {
+      where.carWashDevice = {
+        carWasPos: {
+          posId: {
+            in: posIds,
+          },
+        },
+      };
+    }
+
+    if (carWashDeviceId !== undefined) {
+      where.carWashDeviceId = carWashDeviceId;
+    }
+
+    if (dateStart !== undefined && dateEnd !== undefined) {
+      where.operDate = {
+        gte: dateStart,
+        lte: dateEnd,
+      };
+    }
+
+    if (currencyType !== undefined) {
+      where.currency = {
+        currencyType,
+      };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [
+            {
+              carWashDevice: {
+                carWasPos: {
+                  pos: accessibleBy(ability).Pos,
+                },
+              },
+            },
+            where,
+          ],
+        }
+      : where;
+    return this.prisma.carWashDeviceOperationsEvent.count({
+      where: finalWhere,
+    });
+  }
+
   public async findDataByMonitoring(
     posIds: number[],
     dateStart: Date,
@@ -338,18 +405,5 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       date: item.date,
       sum: Number(item.sum),
     }));
-  }
-
-  public async countAllByDeviceIdAndDateOper(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return this.prisma.carWashDeviceOperationsEvent.count({
-      where: {
-        carWashDeviceId: deviceId,
-        operDate: { gte: dateStart, lte: dateEnd },
-      },
-    });
   }
 }

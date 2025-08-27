@@ -6,12 +6,13 @@ export class PrismaSalePriceMapper {
     if (!entity) {
       return null;
     }
-    return new SalePrice({
+    const salePriceProps = new SalePrice({
       id: entity.id,
       nomenclatureId: entity.nomenclatureId,
       warehouseId: entity.warehouseId,
       price: entity.price,
     });
+    return <SalePrice>salePriceProps.getProps();
   }
 
   static toPrisma(

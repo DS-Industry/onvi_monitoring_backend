@@ -38,6 +38,7 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
+import { DeviceMonitoringFilterDto } from "@platform-user/core-controller/dto/receive/device-monitoring-filter.dto";
 
 @Controller('device')
 export class DeviceController {
@@ -92,7 +93,7 @@ export class DeviceController {
   async monitoringDevice(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Query() data: DataFilterDto,
+    @Query() data: DeviceMonitoringFilterDto,
   ): Promise<DeviceOperationMonitoringResponseDto> {
     try {
       let skip = undefined;
@@ -107,6 +108,7 @@ export class DeviceController {
         id,
         data.dateStart,
         data.dateEnd,
+        data.currencyType,
         skip,
         take,
       );

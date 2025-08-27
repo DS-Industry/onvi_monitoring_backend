@@ -41,6 +41,26 @@ export class FindMethodsDeviceOperationUseCase {
     );
   }
 
+  async getCountByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posIds?: number[];
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    currencyType?: CurrencyType;
+  }): Promise<number> {
+    return await this.deviceOperationRepository.findCountByFilter(
+      data.ability,
+      data.organizationId,
+      data.posIds,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.currencyType,
+    );
+  }
+
   async getDataByMonitoring(
     posIds: number[],
     dateStart: Date,
@@ -103,18 +123,6 @@ export class FindMethodsDeviceOperationUseCase {
   ): Promise<DeviceOperationLastDataResponseDto[]> {
     return await this.deviceOperationRepository.findDataLastOperByDeviceIds(
       deviceIds,
-    );
-  }
-
-  async getCountAllByDeviceIdAndDateOper(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return await this.deviceOperationRepository.countAllByDeviceIdAndDateOper(
-      deviceId,
-      dateStart,
-      dateEnd,
     );
   }
 }

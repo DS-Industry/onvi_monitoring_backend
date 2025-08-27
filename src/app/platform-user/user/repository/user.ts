@@ -41,14 +41,26 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
-  public async findAllByOrgId(orgId: number): Promise<User[]> {
+  public async findAllByOrgId(
+    orgId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where: { organizations: { some: { id: orgId } } },
       include: {
         userRole: true,
       },
+      skip: skip ?? undefined,
+      take: take ?? undefined,
     });
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findCountByOrgId(orgId: number): Promise<number> {
+    return this.prisma.user.count({
+      where: { organizations: { some: { id: orgId } } },
+    });
   }
 
   public async findAllByPosId(posId: number): Promise<User[]> {
