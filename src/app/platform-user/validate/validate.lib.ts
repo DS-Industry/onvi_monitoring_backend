@@ -54,6 +54,7 @@ import {
   UserException,
   WarehouseException,
 } from '@exception/option.exceptions';
+import { LOYALTY_CREATE_CLIENT_EXCEPTION_CODE } from '@constant/error.constants';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-find-methods';
@@ -1194,6 +1195,71 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'tagId connection error' };
     }
     return { code: 200 };
+  }
+
+  public async validateExcelCsvFile(
+    file: Express.Multer.File,
+  ): Promise<ValidateResponse<Express.Multer.File>> {
+    if (!file) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Excel (.xlsx, .xls) or CSV (.csv) file is required'
+      );
+    }
+
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'File buffer is empty or missing'
+      );
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`
+      );
+    }
+
+    const allowedMimeTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', 
+      'application/octet-stream',
+      'application/vnd.ms-office',
+      'application/zip',
+      'text/csv',
+      'text/plain',
+    ];
+
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.originalname ? 
+      file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
+
+    const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
+    const isValidExtension = allowedExtensions.includes(fileExtension);
+
+    if (!isValidMimeType && !isValidExtension) {
+      const hasValidKeywords = file.mimetype && (
+        file.mimetype.includes('excel') ||
+        file.mimetype.includes('spreadsheet') ||
+        file.mimetype.includes('office') ||
+        file.mimetype.includes('csv') ||
+        file.mimetype.includes('text')
+      );
+
+      if (!hasValidKeywords) {
+        throw new LoyaltyException(
+          LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+          `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`
+        );
+      }
+    }
+
+    return {
+      code: 200,
+      object: file,
+    };
   }
 
   public async managerPaperExists(

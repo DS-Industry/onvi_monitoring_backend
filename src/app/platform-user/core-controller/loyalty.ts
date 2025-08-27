@@ -1017,70 +1017,9 @@ export class LoyaltyController {
         bodyData: data,
       });
 
-      if (!file) {
-        throw new CustomHttpException({
-          message: 'Excel (.xlsx, .xls) or CSV (.csv) file is required',
-          code: HttpStatus.BAD_REQUEST,
-        });
-      }
+      const validatedFile = await this.loyaltyValidateRules.validateExcelCsvFileValidate(file);
 
-      console.log('File object properties:', {
-        hasOriginalname: !!file.originalname,
-        hasMimetype: !!file.mimetype,
-        hasSize: !!file.size,
-        hasFieldname: !!file.fieldname,
-        hasEncoding: !!file.encoding,
-        hasBuffer: !!file.buffer,
-        bufferLength: file.buffer?.length,
-        fileKeys: Object.keys(file),
-      });
-
-      console.log('File upload debug info:', {
-        filename: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        fieldname: file.fieldname,
-        encoding: file.encoding,
-      });
-
-      const allowedMimeTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-        'application/vnd.ms-excel',
-        'application/octet-stream',
-        'application/vnd.ms-office', 
-        'application/zip', 
-        'text/csv', 
-        'text/plain',
-      ];
-
-      const allowedExtensions = ['.xlsx', '.xls', '.csv'];
-      const fileExtension = file.originalname ? 
-        file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
-
-      const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
-      const isValidExtension = allowedExtensions.includes(fileExtension);
-
-      if (!isValidMimeType && !isValidExtension) {
-        console.warn('File validation failed, but attempting to process anyway:', {
-          mimetype: file.mimetype,
-          extension: fileExtension,
-          filename: file.originalname,
-        });
-        
-        if (file.mimetype && 
-            !file.mimetype.includes('excel') && 
-            !file.mimetype.includes('spreadsheet') && 
-            !file.mimetype.includes('office') &&
-            !file.mimetype.includes('csv') &&
-            !file.mimetype.includes('text')) {
-          throw new CustomHttpException({
-            message: `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`,
-            code: HttpStatus.BAD_REQUEST,
-          });
-        }
-      }
-
-      const cardsData = await this.fileParserService.parseCardImportFile(file);
+      const cardsData = await this.fileParserService.parseCardImportFile(validatedFile);
 
       if (cardsData.length === 0) {
         throw new CustomHttpException({
