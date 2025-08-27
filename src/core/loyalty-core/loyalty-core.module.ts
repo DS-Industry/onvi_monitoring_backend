@@ -49,9 +49,11 @@ import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
+import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
+  ClientMetaRepositoryProvider,
   TagRepositoryProvider,
   CardRepositoryProvider,
   LoyaltyProgramRepositoryProvider,
