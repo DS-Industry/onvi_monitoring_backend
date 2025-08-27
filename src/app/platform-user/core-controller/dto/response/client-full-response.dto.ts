@@ -22,10 +22,11 @@ export class ClientFullResponseDto {
 export class CardResponseDto {
   id?: number;
   balance: number;
-  mobileUserId: number;
+  mobileUserId?: number;
   devNumber: string;
   number: string;
   monthlyLimit?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  email?: string;
 }

@@ -38,4 +38,10 @@ export class UpdateClientDto {
   @IsNumber()
   @IsOptional()
   mobileUserRoleId?: number;
+  @IsNumber()
+  @IsOptional()
+  cardId?: number;
+  @IsString()
+  @IsOptional()
+  email?: string;
 }

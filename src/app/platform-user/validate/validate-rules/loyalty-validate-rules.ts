@@ -16,6 +16,7 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LoyaltyException } from '@exception/option.exceptions';
 
 @Injectable()
 export class LoyaltyValidateRules {
@@ -257,13 +258,15 @@ export class LoyaltyValidateRules {
 
   public async createClientValidate(
     phone: string,
-    tagIds: number[],
+    tagIds?: number[],
     devNumber?: string,
     number?: string,
   ) {
     const response = [];
     response.push(await this.validateLib.clientByPhoneNotExists(phone));
-    response.push(await this.validateLib.tagIdsExists(tagIds));
+    if (tagIds && tagIds.length > 0) {
+      response.push(await this.validateLib.tagIdsExists(tagIds));
+    }
     if (devNumber) {
       response.push(await this.validateLib.cardByDevNumberNotExists(devNumber));
     }
@@ -328,5 +331,20 @@ export class LoyaltyValidateRules {
       LOYALTY_DELETE_TAG_EXCEPTION_CODE,
     );
     return checkTag.object;
+  }
+
+  public async validateExcelCsvFileValidate(
+    file: Express.Multer.File,
+  ): Promise<Express.Multer.File> {
+    const response = await this.validateLib.validateExcelCsvFile(file);
+    
+    if (response.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        response.errorMessage || 'File validation failed'
+      );
+    }
+
+    return response.object;
   }
 }

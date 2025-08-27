@@ -17,6 +17,7 @@ export interface ClientProps {
   createdAt?: Date;
   updatedAt?: Date;
   mobileUserRoleId?: number;
+  cardId?: number;
 }
 
 export class Client extends BaseEntity<ClientProps> {
@@ -84,6 +85,10 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.mobileUserRoleId;
   }
 
+  get cardId(): number {
+    return this.props.cardId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -122,5 +127,13 @@ export class Client extends BaseEntity<ClientProps> {
 
   set mobileUserRoleId(mobileUserRoleId: number) {
     this.props.mobileUserRoleId = mobileUserRoleId;
+  }
+
+  set gender(gender: string) {
+    this.props.gender = gender;
+  }
+
+  set email(email: string) {
+    this.props.email = email;
   }
 }

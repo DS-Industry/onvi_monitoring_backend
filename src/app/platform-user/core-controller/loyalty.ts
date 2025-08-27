@@ -9,10 +9,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   Request,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
@@ -69,6 +73,17 @@ import { CardBenefitDataDto } from '@loyalty/mobile-user/card/use-case/dto/card-
 import { ExpirationCardBonusBankUseCase } from '@loyalty/mobile-user/bonus/cardBonusBank/use-case/cardBonusBank-expiration';
 import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
 import { LoyaltyProgramUpdateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-update.dto';
+import { CardsFilterDto } from './dto/receive/cards.filter.dto';
+import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
+import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
+import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
+import { ClientLoyaltyStatsResponseDto } from './dto/response/client-loyalty-stats-response.dto';
+import { ClientPaginatedResponseDto } from './dto/response/client-paginated-response.dto';
+import { ImportCardsDto } from './dto/receive/import-cards.dto';
+import { ImportCardsResponseDto } from './dto/response/import-cards-response.dto';
+import { CardImportUseCase } from '@loyalty/mobile-user/card/use-case/card-import';
+import { FileParserService } from './services/excel-parser.service';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -97,6 +112,8 @@ export class LoyaltyController {
     private readonly getBenefitsCardUseCase: GetBenefitsCardUseCase,
     private readonly expirationCardBonusBankUseCase: ExpirationCardBonusBankUseCase,
     private readonly updateLoyaltyProgramUseCase: UpdateLoyaltyProgramUseCase,
+    private readonly cardImportUseCase: CardImportUseCase,
+    private readonly fileParserService: FileParserService,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -657,7 +674,7 @@ export class LoyaltyController {
     try {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
-        data.tagIds,
+        data.tagIds || [],
         data?.devNumber,
         data?.number,
       );
@@ -689,7 +706,7 @@ export class LoyaltyController {
     try {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
-        data?.tagIds,
+        data?.tagIds || [],
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -715,7 +732,7 @@ export class LoyaltyController {
   @HttpCode(201)
   async getClient(
     @Query() data: ClientFilterDto,
-  ): Promise<ClientResponseDto[]> {
+  ): Promise<ClientPaginatedResponseDto> {
     try {
       let skip = undefined;
       let take = undefined;
@@ -771,7 +788,7 @@ export class LoyaltyController {
         createdAt: client.createdAt,
         updatedAt: client.updatedAt,
         tags: tags.map((tag) => tag.getProps()),
-        card: {
+        card: card ? {
           id: card.id,
           balance: card.balance,
           mobileUserId: card.mobileUserId,
@@ -780,7 +797,7 @@ export class LoyaltyController {
           monthlyLimit: card?.monthlyLimit,
           createdAt: card.createdAt,
           updatedAt: card.updatedAt,
-        },
+        } : null,
       };
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -883,6 +900,136 @@ export class LoyaltyController {
     try {
       const tag = await this.loyaltyValidateRules.deleteTagValidate(id);
       return await this.deleteTagUseCase.execute(tag);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Get all cards
+  @Get('cards')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getAllCard(@Query() data: CardsFilterDto): Promise<Card[]> {
+    try {
+      return await this.findMethodsCardUseCase.getAll(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('user-key-stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getUserKeyStats(@Query() data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
+    try {
+      return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('client-loyalty-stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getClientLoyaltyStats(@Query() data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
+    try {
+      return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('import-cards')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async importCards(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() data: ImportCardsDto,
+  ): Promise<ImportCardsResponseDto> {
+    try {
+      console.log('Import cards endpoint called with:', {
+        hasFile: !!file,
+        fileInfo: file ? {
+          filename: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          fieldname: file.fieldname,
+          encoding: file.encoding,
+          bufferLength: file.buffer?.length,
+          bufferType: typeof file.buffer,
+          bufferIsArray: Array.isArray(file.buffer),
+          bufferIsBuffer: Buffer.isBuffer(file.buffer),
+        } : null,
+        organizationId: data.organizationId,
+        bodyData: data,
+      });
+
+      const validatedFile = await this.loyaltyValidateRules.validateExcelCsvFileValidate(file);
+
+      const cardsData = await this.fileParserService.parseCardImportFile(validatedFile);
+
+      if (cardsData.length === 0) {
+        throw new CustomHttpException({
+          message: 'No valid card data found in the file',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      return await this.cardImportUseCase.execute(data.organizationId, cardsData);
+
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

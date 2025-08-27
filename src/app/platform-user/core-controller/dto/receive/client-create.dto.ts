@@ -51,5 +51,9 @@ export class ClientCreateDto {
   monthlyLimit?: number;
   @IsArray()
   @IsOptional()
-  tagIds: number[];
+  @Transform(({ value }) => value || [])
+  tagIds?: number[];
+  @IsNumber()
+  @IsOptional()
+  cardId?: number;
 }

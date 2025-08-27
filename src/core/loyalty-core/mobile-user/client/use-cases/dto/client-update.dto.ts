@@ -13,4 +13,7 @@ export interface ClientUpdateDto {
   balance?: number;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
+  gender?: string;
+  cardId?: number;
+  email?: string;
 }
