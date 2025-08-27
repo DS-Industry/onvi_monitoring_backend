@@ -4,6 +4,7 @@ export class ClientFilterDto {
   placementId: number | '*';
   contractType: ContractType | '*';
   workerCorporateId: number | '*';
+  organizationId: number | '*';
   tagIds: number[];
   phone?: string;
   name?: string;

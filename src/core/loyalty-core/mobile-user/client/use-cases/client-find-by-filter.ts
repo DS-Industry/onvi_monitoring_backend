@@ -16,6 +16,7 @@ export class FindByFilterClientUseCase {
     let placementId: number | undefined = undefined;
     let contractType: ContractType | undefined = undefined;
     let workerCorporateId: number | undefined = undefined;
+    let organizationId: number | undefined = undefined;
     
     if (data.placementId !== '*' && data.placementId !== null && data.placementId !== undefined) {
       placementId = Number(data.placementId);
@@ -35,6 +36,14 @@ export class FindByFilterClientUseCase {
       }
     }
 
+     
+    if (data.organizationId !== '*' && data.organizationId !== null && data.organizationId !== undefined) {
+      organizationId = Number(data.organizationId);
+      if (isNaN(organizationId)) {
+        organizationId = undefined;
+      }
+    }
+
     const total = await this.findMethodsClientUseCase.getCountByFilter(
       placementId,
       data.tagIds,
@@ -42,8 +51,9 @@ export class FindByFilterClientUseCase {
       workerCorporateId,
       data?.phone,
       data?.registrationFrom,
-      data?.registrationTo,
+      data?.registrationTo, 
       data?.search,
+      organizationId,
     );
 
     const clients = await this.findMethodsClientUseCase.getAllByFilter(
@@ -57,6 +67,7 @@ export class FindByFilterClientUseCase {
       data?.registrationFrom,
       data?.registrationTo,
       data?.search,
+      organizationId,
     );
 
     const clientData = await Promise.all(
