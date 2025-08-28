@@ -14,6 +14,9 @@ export class DeviceMonitoringFilterDto {
   currencyType?: CurrencyType;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
+  currencyId?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
   page?: number;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))

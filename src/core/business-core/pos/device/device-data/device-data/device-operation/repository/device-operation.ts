@@ -47,6 +47,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     dateStart?: Date,
     dateEnd?: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperationFullDataResponseDto[]> {
@@ -86,6 +87,12 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     if (currencyType !== undefined) {
       where.currency = {
         currencyType,
+      };
+    }
+
+    if (currencyId !== undefined) {
+      where.currency = {
+        id: currencyId,
       };
     }
 
@@ -148,6 +155,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     dateStart?: Date,
     dateEnd?: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
   ): Promise<number> {
     const where: any = {};
 
@@ -185,6 +193,12 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     if (currencyType !== undefined) {
       where.currency = {
         currencyType,
+      };
+    }
+
+    if (currencyId !== undefined) {
+      where.currency = {
+        id: currencyId,
       };
     }
 

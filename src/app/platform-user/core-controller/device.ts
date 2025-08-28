@@ -39,6 +39,8 @@ import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
 import { DeviceMonitoringFilterDto } from "@platform-user/core-controller/dto/receive/device-monitoring-filter.dto";
+import { Currency } from "@pos/device/device-data/currency/currency/domain/currency";
+import { FindMethodsCurrencyUseCase } from "@pos/device/device-data/currency/currency/use-case/currency-find-methods";
 
 @Controller('device')
 export class DeviceController {
@@ -52,6 +54,7 @@ export class DeviceController {
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
     private readonly posValidateRules: PosValidateRules,
+    private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
   ) {}
   //Create device
   @Post('')
@@ -109,9 +112,34 @@ export class DeviceController {
         data.dateStart,
         data.dateEnd,
         data.currencyType,
+        data.currencyId,
         skip,
         take,
       );
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('currency')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getCurrency(
+  ): Promise<Currency[]> {
+    try {
+      return await this.findMethodsCurrencyUseCase.getAll();
     } catch (e) {
       if (e instanceof DeviceException) {
         throw new CustomHttpException({

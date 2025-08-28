@@ -1,16 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { CurrencyType } from '@prisma/client';
-import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
-import {
-  DeviceOperationFullSumDyPosResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
-import {
-  DeviceOperationDailyStatisticResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto";
+import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
+import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -25,6 +20,7 @@ export class FindMethodsDeviceOperationUseCase {
     dateStart?: Date;
     dateEnd?: Date;
     currencyType?: CurrencyType;
+    currencyId?: number;
     skip?: number;
     take?: number;
   }): Promise<DeviceOperationFullDataResponseDto[]> {
@@ -36,6 +32,7 @@ export class FindMethodsDeviceOperationUseCase {
       data.dateStart,
       data.dateEnd,
       data.currencyType,
+      data.currencyId,
       data.skip,
       data.take,
     );
@@ -49,6 +46,7 @@ export class FindMethodsDeviceOperationUseCase {
     dateStart?: Date;
     dateEnd?: Date;
     currencyType?: CurrencyType;
+    currencyId?: number;
   }): Promise<number> {
     return await this.deviceOperationRepository.findCountByFilter(
       data.ability,
@@ -58,6 +56,7 @@ export class FindMethodsDeviceOperationUseCase {
       data.dateStart,
       data.dateEnd,
       data.currencyType,
+      data.currencyId,
     );
   }
 
@@ -96,7 +95,6 @@ export class FindMethodsDeviceOperationUseCase {
       dateEnd,
     );
   }
-
 
   async getDataByMonitoringDetail(
     deviceIds: number[],
