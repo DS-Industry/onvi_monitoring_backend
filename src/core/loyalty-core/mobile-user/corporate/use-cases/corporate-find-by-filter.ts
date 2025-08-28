@@ -72,7 +72,7 @@ export class CorporateFindByFilterUseCase {
       name: corporate.name,
       inn: corporate.inn,
       address: corporate.address,
-      ownerPhone: corporate.owner?.phone || '',
+      ownerPhone: corporate.ownerPhone || '',
       dateRegistered: corporate.createdAt?.toISOString() || '',
     };
   }

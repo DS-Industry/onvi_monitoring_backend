@@ -118,11 +118,6 @@ export class CorporateRepository extends ICorporateRepository {
       },
       include: {
         owner: true,
-        workers: {
-          include: {
-            card: true,
-          },
-        },
       },
     });
 
