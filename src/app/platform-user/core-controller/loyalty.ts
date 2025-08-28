@@ -88,8 +88,12 @@ import { FileParserService } from './services/excel-parser.service';
 import { CorporateClientsFilterDto } from './dto/receive/corporate-clients-filter.dto';
 import { CorporateClientsPaginatedResponseDto } from './dto/response/corporate-clients-paginated-response.dto';
 import { CorporateClientResponseDto } from './dto/response/corporate-client-response.dto';
+import { CorporateClientCreateDto } from './dto/receive/corporate-client-create.dto';
+import { CorporateClientUpdateDto } from './dto/receive/corporate-client-update.dto';
 import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
+import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
+import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -122,6 +126,8 @@ export class LoyaltyController {
     private readonly fileParserService: FileParserService,
     private readonly corporateFindByFilterUseCase: CorporateFindByFilterUseCase,
     private readonly corporateGetByIdUseCase: CorporateGetByIdUseCase,
+    private readonly createCorporateClientUseCase: CreateCorporateClientUseCase,
+    private readonly updateCorporateClientUseCase: UpdateCorporateClientUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1104,6 +1110,61 @@ export class LoyaltyController {
   ): Promise<CorporateClientResponseDto> {
     try {
       return await this.corporateGetByIdUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('corporate-clients')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(201)
+  async createCorporateClient(
+    @Request() req: any,
+    @Body() data: CorporateClientCreateDto,
+  ): Promise<CorporateClientResponseDto> {
+    try {
+      const { user } = req;
+      return await this.createCorporateClientUseCase.execute(data, user.id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Put('corporate-clients/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async updateCorporateClient(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: CorporateClientUpdateDto,
+  ): Promise<CorporateClientResponseDto> {
+    try {
+      return await this.updateCorporateClientUseCase.execute(id, data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

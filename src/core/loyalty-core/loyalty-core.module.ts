@@ -52,6 +52,8 @@ import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-f
 import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
 import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
+import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
+import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -139,6 +141,8 @@ const orderUseCase: Provider[] = [
 const corporateUseCase: Provider[] = [
   CorporateFindByFilterUseCase,
   CorporateGetByIdUseCase,
+  CreateCorporateClientUseCase,
+  UpdateCorporateClientUseCase,
 ];
 
 @Module({
