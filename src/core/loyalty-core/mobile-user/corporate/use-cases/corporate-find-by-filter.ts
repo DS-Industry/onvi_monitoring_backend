@@ -11,25 +11,52 @@ export class CorporateFindByFilterUseCase {
   async execute(
     data: CorporateClientsFilterDto,
   ): Promise<CorporateClientsPaginatedResponseDto> {
-    // TODO: Implement corporate clients filtering logic
-    // This is a placeholder implementation
-
-    console.log('Я здесь: ');
+    let placementId: number | undefined = undefined;
+    
+    if (data.placementId !== null && data.placementId !== undefined) {
+      placementId = Number(data.placementId);
+      if (isNaN(placementId)) {
+        placementId = undefined;
+      }
+    }
 
     const page = data.page || 1;
     const size = data.size || 15;
-    const skip = (page - 1) * size;
+    const skip = size * (page - 1);
+    const take = size;
 
-    // Placeholder data - replace with actual repository calls
-    const total = 0;
-    const corporates: any[] = [];
+    const total = await this.corporateRepository.countByFilter(
+      placementId,
+      data.search,
+      data.inn,
+      data.ownerPhone,
+      data.name,
+      data.registrationFrom,
+      data.registrationTo,
+    );
 
-    const totalPages = Math.ceil(total / size);
+    const corporates = await this.corporateRepository.findAllByFilter(
+      placementId,
+      data.search,
+      data.inn,
+      data.ownerPhone,
+      data.name,
+      skip,
+      take,
+      data.registrationFrom,
+      data.registrationTo,
+    );
+
+    
+    const corporateData = corporates.map(corporate => this.mapToResponse(corporate));
+
+    
+    const totalPages = size > 0 ? Math.ceil(total / size) : 1;
     const hasNext = page < totalPages;
     const hasPrevious = page > 1;
 
     return {
-      data: corporates.map((corporate) => this.mapToResponse(corporate)),
+      data: corporateData,
       total,
       page,
       size,
@@ -45,7 +72,7 @@ export class CorporateFindByFilterUseCase {
       name: corporate.name,
       inn: corporate.inn,
       address: corporate.address,
-      ownerPhone: corporate.ownerPhone || '',
+      ownerPhone: corporate.owner?.phone || '',
       dateRegistered: corporate.createdAt?.toISOString() || '',
     };
   }

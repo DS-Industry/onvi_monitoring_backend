@@ -50,6 +50,8 @@ import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
+import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
+import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -133,6 +135,12 @@ const orderUseCase: Provider[] = [
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
 ];
+
+const corporateUseCase: Provider[] = [
+  CorporateFindByFilterUseCase,
+  CorporateGetByIdUseCase,
+];
+
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [
@@ -148,6 +156,7 @@ const orderUseCase: Provider[] = [
     ...cardBonusOper,
     ...cardBonusOperType,
     ...orderUseCase,
+    ...corporateUseCase,
   ],
   exports: [
     ...repositories,
@@ -161,6 +170,7 @@ const orderUseCase: Provider[] = [
     ...cardBonusOper,
     ...orderUseCase,
     ...cardBonusBank,
+    ...corporateUseCase,
   ],
 })
 export class LoyaltyCoreModule {}

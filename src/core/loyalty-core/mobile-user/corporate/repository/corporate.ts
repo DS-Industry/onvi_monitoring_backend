@@ -3,8 +3,6 @@ import { ICorporateRepository } from '@loyalty/mobile-user/corporate/interfaces/
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { PrismaCorporateMapper } from '@db/mapper/prisma-corporate-mapper';
-import { CorporateClientsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-clients-paginated-response.dto';
-import { CorporateClientResponseDto } from '@platform-user/core-controller/dto/response/corporate-client-response.dto';
 
 @Injectable()
 export class CorporateRepository extends ICorporateRepository {
@@ -24,6 +22,14 @@ export class CorporateRepository extends ICorporateRepository {
     const corporate = await this.prisma.lTYCorporate.findFirst({
       where: {
         id,
+      },
+      include: {
+        owner: true,
+        workers: {
+          include: {
+            card: true,
+          },
+        },
       },
     });
     return PrismaCorporateMapper.toDomain(corporate);
@@ -59,22 +65,20 @@ export class CorporateRepository extends ICorporateRepository {
     take?: number,
     registrationFrom?: string,
     registrationTo?: string,
-  ): Promise<CorporateClientResponseDto[]> {
-    const where: any = {
-      contractType: 'CORPORATE',
-    };
+  ): Promise<Corporate[]> {
+    const where: any = {};
 
     // Build where clause based on filter parameters
-    if (placementId !== undefined && placementId !== null) {
-      where.placementId = placementId;
-    }
-
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
+        { inn: { contains: search, mode: 'insensitive' } },
+        { address: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    if (inn) {
+      where.inn = { contains: inn, mode: 'insensitive' };
     }
 
     if (name) {
@@ -89,6 +93,20 @@ export class CorporateRepository extends ICorporateRepository {
       if (registrationTo) {
         where.createdAt.lte = new Date(registrationTo);
       }
+    }
+
+    if (placementId !== undefined && placementId !== null) {
+      where.workers = {
+        some: {
+          placementId: placementId,
+        },
+      };
+    }
+
+    if (ownerPhone) {
+      where.owner = {
+        phone: { contains: ownerPhone, mode: 'insensitive' },
+      };
     }
 
     const corporates = await this.prisma.lTYCorporate.findMany({
@@ -100,21 +118,15 @@ export class CorporateRepository extends ICorporateRepository {
       },
       include: {
         owner: true,
+        workers: {
+          include: {
+            card: true,
+          },
+        },
       },
     });
 
-    return corporates.map((corporate) => {
-      const corporateData = {
-        id: corporate.id,
-        name: corporate.name,
-        inn: corporate.inn || '',
-        ownerPhone: corporate.owner?.phone,
-        address: corporate.address,
-        dateRegistered: String(corporate.createdAt),
-      };
-
-      return corporateData;
-    });
+    return corporates.map((item) => PrismaCorporateMapper.toDomain(item));
   }
 
   public async countByFilter(
@@ -126,21 +138,19 @@ export class CorporateRepository extends ICorporateRepository {
     registrationFrom?: string,
     registrationTo?: string,
   ): Promise<number> {
-    const where: any = {
-      contractType: 'CORPORATE',
-    };
+    const where: any = {};
 
     // Build where clause based on filter parameters (same logic as findAllByFilter)
-    if (placementId !== undefined && placementId !== null) {
-      where.placementId = placementId;
-    }
-
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { phone: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
+        { inn: { contains: search, mode: 'insensitive' } },
+        { address: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    if (inn) {
+      where.inn = { contains: inn, mode: 'insensitive' };
     }
 
     if (name) {
@@ -157,6 +167,20 @@ export class CorporateRepository extends ICorporateRepository {
       }
     }
 
-    return await this.prisma.lTYUser.count({ where });
+    if (placementId !== undefined && placementId !== null) {
+      where.workers = {
+        some: {
+          placementId: placementId,
+        },
+      };
+    }
+
+    if (ownerPhone) {
+      where.owner = {
+        phone: { contains: ownerPhone, mode: 'insensitive' },
+      };
+    }
+
+    return await this.prisma.lTYCorporate.count({ where });
   }
 }

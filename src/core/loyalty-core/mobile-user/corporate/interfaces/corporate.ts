@@ -16,7 +16,7 @@ export abstract class ICorporateRepository {
     take?: number,
     registrationFrom?: string,
     registrationTo?: string,
-  ): Promise<CorporateClientResponseDto[]>;
+  ): Promise<Corporate[]>;
   abstract countByFilter(
     placementId?: number,
     search?: string,
