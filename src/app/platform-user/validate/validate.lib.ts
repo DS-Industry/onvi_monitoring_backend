@@ -49,11 +49,11 @@ import {
   ManagerPaperException,
   OrganizationException,
   PosException,
-  ReportTemplateException,
+  ReportTemplateException, SaleException,
   TechTaskException,
   UserException,
-  WarehouseException,
-} from '@exception/option.exceptions';
+  WarehouseException
+} from "@exception/option.exceptions";
 import { LOYALTY_CREATE_CLIENT_EXCEPTION_CODE } from '@constant/error.constants';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
@@ -96,6 +96,8 @@ import { FindMethodsManagerReportPeriodUseCase } from '@manager-paper/managerRep
 import { ManagerReportPeriod } from '@manager-paper/managerReportPeriod/domain/managerReportPeriod';
 import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-find-methods';
 import { ManagerPaperType } from '@manager-paper/managerPaperType/domain/managerPaperType';
+import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
+import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -115,6 +117,7 @@ export enum ExceptionType {
   HR = 'Hr',
   NOTIFICATION = 'Notification',
   MANAGER_PAPER = 'ManagerPaper',
+  SALE = 'Sale',
 }
 @Injectable()
 export class ValidateLib {
@@ -163,6 +166,7 @@ export class ValidateLib {
     private readonly findMethodsManagerReportPeriodUseCase: FindMethodsManagerReportPeriodUseCase,
     private readonly findMethodsManagerPaperUseCase: FindMethodsManagerPaperUseCase,
     private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
+    private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -907,7 +911,7 @@ export class ValidateLib {
     if (!tagIds || tagIds.length === 0) {
       return { code: 200 };
     }
-    
+
     const allTagIds = await this.findMethodsTagUseCase.getAll();
     const tagIdsCheck = allTagIds.map((item) => item.id);
     const unnecessaryTagIds = tagIds.filter(
@@ -1182,7 +1186,7 @@ export class ValidateLib {
     if (!tagIds || tagIds.length === 0) {
       return { code: 200 };
     }
-    
+
     const allTagIds =
       await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
         authorUserId: userId,
@@ -1203,14 +1207,14 @@ export class ValidateLib {
     if (!file) {
       throw new LoyaltyException(
         LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Excel (.xlsx, .xls) or CSV (.csv) file is required'
+        'Excel (.xlsx, .xls) or CSV (.csv) file is required',
       );
     }
 
     if (!file.buffer || file.buffer.length === 0) {
       throw new LoyaltyException(
         LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'File buffer is empty or missing'
+        'File buffer is empty or missing',
       );
     }
 
@@ -1218,13 +1222,13 @@ export class ValidateLib {
     if (file.size > maxSize) {
       throw new LoyaltyException(
         LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`
+        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`,
       );
     }
 
     const allowedMimeTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-      'application/vnd.ms-excel', 
+      'application/vnd.ms-excel',
       'application/octet-stream',
       'application/vnd.ms-office',
       'application/zip',
@@ -1233,25 +1237,28 @@ export class ValidateLib {
     ];
 
     const allowedExtensions = ['.xlsx', '.xls', '.csv'];
-    const fileExtension = file.originalname ? 
-      file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
+    const fileExtension = file.originalname
+      ? file.originalname
+          .toLowerCase()
+          .substring(file.originalname.lastIndexOf('.'))
+      : '';
 
     const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
     const isValidExtension = allowedExtensions.includes(fileExtension);
 
     if (!isValidMimeType && !isValidExtension) {
-      const hasValidKeywords = file.mimetype && (
-        file.mimetype.includes('excel') ||
-        file.mimetype.includes('spreadsheet') ||
-        file.mimetype.includes('office') ||
-        file.mimetype.includes('csv') ||
-        file.mimetype.includes('text')
-      );
+      const hasValidKeywords =
+        file.mimetype &&
+        (file.mimetype.includes('excel') ||
+          file.mimetype.includes('spreadsheet') ||
+          file.mimetype.includes('office') ||
+          file.mimetype.includes('csv') ||
+          file.mimetype.includes('text'));
 
       if (!hasValidKeywords) {
         throw new LoyaltyException(
           LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-          `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`
+          `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`,
         );
       }
     }
@@ -1308,6 +1315,19 @@ export class ValidateLib {
     return { code: 200, object: managerReportPeriod };
   }
 
+  public async salePriceByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SalePrice>> {
+    const checkSalePrice = await this.findMethodsSalePriceUseCase.getById(id);
+    if (!checkSalePrice) {
+      return {
+        code: 400,
+        errorMessage: 'The salePrice does not exist',
+      };
+    }
+    return { code: 200, object: checkSalePrice };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -1345,6 +1365,8 @@ export class ValidateLib {
         throw new HrException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.MANAGER_PAPER) {
         throw new ManagerPaperException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.SALE) {
+        throw new SaleException(exceptionCode, errorCodes);
       }
     }
   }

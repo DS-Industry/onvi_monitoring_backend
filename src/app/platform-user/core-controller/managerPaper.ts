@@ -57,7 +57,7 @@ import { ManagerPaperTypeCreateDto } from '@platform-user/core-controller/dto/re
 import { CreateManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-create';
 import { ManagerPaperTypeUpdateDto } from '@platform-user/core-controller/dto/receive/managerPaperType-update.dto';
 import { UpdateManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-update';
-import { ManagerPaperDeleteManyDto } from '@platform-user/core-controller/dto/receive/managerPaper-delete-many.dto';
+import { DeleteManyDto } from '@platform-user/core-controller/dto/receive/delete-many.dto';
 import { ManagerReportPeriodStatus } from '@prisma/client';
 
 @Controller('manager-paper')
@@ -259,7 +259,7 @@ export class ManagerPaperController {
   @HttpCode(201)
   async deleteManyManagerPaper(
     @Request() req: any,
-    @Body() data: ManagerPaperDeleteManyDto,
+    @Body() data: DeleteManyDto,
   ): Promise<{ status: string }> {
     try {
       const { ability } = req;

@@ -47,6 +47,7 @@ import { DeleteCategoryUseCase } from "@warehouse/category/use-cases/category-de
 import { DeleteSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-delete";
 import { UpdateSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-update";
 import { DeleteWarehouseDocumentUseCase } from "@warehouse/document/document/use-cases/warehouseDocument-delete";
+import { DeleteSalePriceUseCase } from "@warehouse/sale/MNGSalePrice/use-cases/salePrice-delete";
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -115,6 +116,7 @@ const salePriceUseCase: Provider[] = [
   CreateSalePriceUseCase,
   FindMethodsSalePriceUseCase,
   UpdateSalePriceUseCase,
+  DeleteSalePriceUseCase,
 ];
 
 const saleItemUseCase: Provider[] = [

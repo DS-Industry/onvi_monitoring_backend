@@ -3,6 +3,7 @@ import { ISalePriceRepository } from '@warehouse/sale/MNGSalePrice/interface/sal
 import { PrismaService } from '@db/prisma/prisma.service';
 import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
 import { PrismaSalePriceMapper } from '@db/mapper/prisma-sale-price-mapper';
+import { SalePriceResponseDto } from '@warehouse/sale/MNGSalePrice/use-cases/dto/salePrice-response.dto';
 
 @Injectable()
 export class SalePriceRepository extends ISalePriceRepository {
@@ -10,12 +11,15 @@ export class SalePriceRepository extends ISalePriceRepository {
     super();
   }
 
-  public async create(input: SalePrice): Promise<SalePrice> {
+  public async create(input: SalePrice): Promise<SalePriceResponseDto> {
     const salePricePrismaEntity = PrismaSalePriceMapper.toPrisma(input);
     const salePrice = await this.prisma.mNGSalePrice.create({
       data: salePricePrismaEntity,
+      include: {
+        nomenclature: true,
+      },
     });
-    return PrismaSalePriceMapper.toDomain(salePrice);
+    return PrismaSalePriceMapper.toDomainWhitNomenclatureName(salePrice);
   }
 
   public async createMany(input: SalePrice[]): Promise<SalePrice[]> {
@@ -42,7 +46,7 @@ export class SalePriceRepository extends ISalePriceRepository {
     warehouseId?: number,
     skip?: number,
     take?: number,
-  ): Promise<SalePrice[]> {
+  ): Promise<SalePriceResponseDto[]> {
     const where: any = {};
 
     if (warehouseId !== undefined) {
@@ -57,11 +61,16 @@ export class SalePriceRepository extends ISalePriceRepository {
       skip: skip ?? undefined,
       take: take ?? undefined,
       where: where,
+      include: {
+        nomenclature: true,
+      },
       orderBy: {
         id: 'asc',
       },
     });
-    return salePrices.map((item) => PrismaSalePriceMapper.toDomain(item));
+    return salePrices.map((item) =>
+      PrismaSalePriceMapper.toDomainWhitNomenclatureName(item),
+    );
   }
 
   public async update(input: SalePrice): Promise<SalePrice> {
@@ -94,5 +103,9 @@ export class SalePriceRepository extends ISalePriceRepository {
       data: { price: price },
     });
     return PrismaSalePriceMapper.toDomain(salePrice);
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.mNGSalePrice.delete({ where: { id } });
   }
 }
