@@ -114,6 +114,31 @@ export class DeleteWarehouseAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'Warehouse';
 }
+
+export class ReadCorporateAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'LTYCorporate';
+}
+
+export class CreateCorporateAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'LTYCorporate';
+}
+
+export class UpdateCorporateAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'LTYCorporate';
+}
+
+export class DeleteCorporateAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'LTYCorporate';
+}
+
+export class ManageCorporateAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'LTYCorporate';
+}
 export class ManageCashCollectionAbility implements RequiredRule {
   action = PermissionAction.manage;
   subject = 'Warehouse';

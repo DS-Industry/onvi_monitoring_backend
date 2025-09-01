@@ -1,6 +1,11 @@
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { CorporateClientResponseDto } from '@platform-user/core-controller/dto/response/corporate-client-response.dto';
 
+export interface CorporateStatsResult {
+  totalBalance: number;
+  numberOfCards: number;
+}
+
 export abstract class ICorporateRepository {
   abstract create(input: Corporate): Promise<Corporate>;
   abstract findOneById(id: number): Promise<Corporate>;
@@ -26,4 +31,5 @@ export abstract class ICorporateRepository {
     registrationFrom?: string,
     registrationTo?: string,
   ): Promise<number>;
+  abstract getStatsById(id: number): Promise<CorporateStatsResult>;
 }

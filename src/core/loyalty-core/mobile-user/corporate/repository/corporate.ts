@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ICorporateRepository } from '@loyalty/mobile-user/corporate/interfaces/corporate';
+import { ICorporateRepository, CorporateStatsResult } from '@loyalty/mobile-user/corporate/interfaces/corporate';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { PrismaCorporateMapper } from '@db/mapper/prisma-corporate-mapper';
@@ -177,5 +177,31 @@ export class CorporateRepository extends ICorporateRepository {
     }
 
     return await this.prisma.lTYCorporate.count({ where });
+  }
+
+  public async getStatsById(id: number): Promise<CorporateStatsResult> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: { id },
+      include: {
+        workers: {
+          include: {
+            card: true,
+          },
+        },
+      },
+    });
+
+    if (!corporate) {
+      throw new Error('Corporate client not found');
+    }
+
+    const workersWithCards = corporate.workers.filter(worker => worker.card !== null);
+    const totalBalance = workersWithCards.reduce((sum, worker) => sum + (worker.card?.balance || 0), 0);
+    const numberOfCards = workersWithCards.length;
+
+    return {
+      totalBalance,
+      numberOfCards,
+    };
   }
 }

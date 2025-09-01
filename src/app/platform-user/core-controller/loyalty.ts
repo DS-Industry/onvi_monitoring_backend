@@ -24,6 +24,9 @@ import {
   CreateLoyaltyAbility,
   ReadLoyaltyAbility,
   UpdateLoyaltyAbility,
+  ReadCorporateAbility,
+  CreateCorporateAbility,
+  UpdateCorporateAbility,
 } from '@common/decorators/abilities.decorator';
 import { TagCreateDto } from '@platform-user/core-controller/dto/receive/tag-create.dto';
 import { LoyaltyException } from '@exception/option.exceptions';
@@ -88,10 +91,13 @@ import { FileParserService } from './services/excel-parser.service';
 import { CorporateClientsFilterDto } from './dto/receive/corporate-clients-filter.dto';
 import { CorporateClientsPaginatedResponseDto } from './dto/response/corporate-clients-paginated-response.dto';
 import { CorporateClientResponseDto } from './dto/response/corporate-client-response.dto';
+import { CorporateClientStatsResponseDto } from './dto/response/corporate-client-stats-response.dto';
 import { CorporateClientCreateDto } from './dto/receive/corporate-client-create.dto';
 import { CorporateClientUpdateDto } from './dto/receive/corporate-client-update.dto';
+import { CorporateValidateRules } from '@platform-user/validate/validate-rules/corporate-validate-rules';
 import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
+import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-stats-by-id';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 
@@ -126,8 +132,10 @@ export class LoyaltyController {
     private readonly fileParserService: FileParserService,
     private readonly corporateFindByFilterUseCase: CorporateFindByFilterUseCase,
     private readonly corporateGetByIdUseCase: CorporateGetByIdUseCase,
+    private readonly corporateGetStatsByIdUseCase: CorporateGetStatsByIdUseCase,
     private readonly createCorporateClientUseCase: CreateCorporateClientUseCase,
     private readonly updateCorporateClientUseCase: UpdateCorporateClientUseCase,
+    private readonly corporateValidateRules: CorporateValidateRules,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1077,7 +1085,7 @@ export class LoyaltyController {
 
   @Get('corporate-clients')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadLoyaltyAbility())
+  @CheckAbilities(new ReadCorporateAbility())
   @HttpCode(200)
   async getCorporateClients(
     @Query() data: CorporateClientsFilterDto,
@@ -1103,13 +1111,45 @@ export class LoyaltyController {
 
   @Get('corporate-clients/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadLoyaltyAbility())
+  @CheckAbilities(new ReadCorporateAbility())
   @HttpCode(200)
   async getCorporateClientById(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
   ): Promise<CorporateClientResponseDto> {
     try {
+      const { ability } = req;
+      await this.corporateValidateRules.getByIdValidate(id, ability);
       return await this.corporateGetByIdUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('corporate-clients/:id/stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadCorporateAbility())
+  @HttpCode(200)
+  async getCorporateClientStatsById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<CorporateClientStatsResponseDto> {
+    try {
+      const { ability } = req;
+      await this.corporateValidateRules.getByIdValidate(id, ability);
+      return await this.corporateGetStatsByIdUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1129,7 +1169,7 @@ export class LoyaltyController {
 
   @Post('corporate-clients')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility())
+  @CheckAbilities(new CreateCorporateAbility())
   @HttpCode(201)
   async createCorporateClient(
     @Request() req: any,
@@ -1157,7 +1197,7 @@ export class LoyaltyController {
 
   @Put('corporate-clients/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateLoyaltyAbility())
+  @CheckAbilities(new UpdateCorporateAbility())
   @HttpCode(200)
   async updateCorporateClient(
     @Param('id', ParseIntPipe) id: number,

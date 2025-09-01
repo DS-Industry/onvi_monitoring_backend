@@ -8,7 +8,7 @@ export class CorporateGetByIdUseCase {
 
   async execute(id: number): Promise<CorporateClientResponseDto> {
     const corporate = await this.corporateRepository.findOneById(id);
-
+    
     if (!corporate) {
       throw new Error('Corporate client not exists');
     }

@@ -80,6 +80,7 @@ import { NotificationCoreModule } from "@notification/notification-core.module";
 import { ManagerPaperController } from "@platform-user/core-controller/managerPaper";
 import { ManagerPaperValidateRules } from "@platform-user/validate/validate-rules/manager-paper-validate-rules";
 import { ManagerPaperCoreModule } from "@manager-paper/manager-paper-core.module";
+import { CorporateValidateRules } from "@platform-user/validate/validate-rules/corporate-validate-rules";
 import { SaleController } from "@platform-user/core-controller/sale";
 import { FileParserService } from "@platform-user/core-controller/services/excel-parser.service";
 
@@ -156,6 +157,7 @@ const validate: Provider[] = [
   FinanceValidateRules,
   ReportValidateRules,
   LoyaltyValidateRules,
+  CorporateValidateRules,
   HrValidateRules,
   NotificationValidateRules,
   ManagerPaperValidateRules,

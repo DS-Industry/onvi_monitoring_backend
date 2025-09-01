@@ -101,6 +101,7 @@ import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-ca
 import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
 import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
+import { PrismaService } from '@db/prisma/prisma.service';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -172,6 +173,7 @@ export class ValidateLib {
     private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
     private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
     private readonly bcrypt: IBcryptAdapter,
+    private readonly prisma: PrismaService,
   ) {}
 
   public async workerConfirmMailExists(
@@ -1344,6 +1346,24 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkSaleDocument };
+  }
+
+  public async corporateByIdExists(id: number): Promise<ValidateResponse<any>> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: { id },
+      include: {
+        organization: true,
+      },
+    });
+
+    if (!corporate) {
+      return {
+        code: 404,
+        errorMessage: 'Corporate client not found',
+      };
+    }
+
+    return { code: 200, object: corporate };
   }
 
   public handlerArrayResponse(
