@@ -25,7 +25,11 @@ export class CreateCorporateClientUseCase {
       name: corporate.name,
       inn: corporate.inn,
       address: corporate.address,
-      ownerPhone: corporate.ownerPhone,
+      ownerPhone: corporate.ownerPhone || '',
+      ownerName: corporate.ownerName || '',
+      ownerEmail: corporate.ownerEmail || '',
+      ownerAvatar: corporate.ownerAvatar || '',
+      status: corporate.status || '',
       dateRegistered: corporate.createdAt.toISOString(),
     };
   }

@@ -13,6 +13,10 @@ export class PrismaCorporateMapper {
       address: entity.address,
       ownerId: entity.ownerId,
       ownerPhone: entity.owner?.phone,
+      ownerName: entity.owner?.name,
+      ownerEmail: entity.owner?.email,
+      ownerAvatar: entity.owner?.avatar,
+      status: entity.status,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });

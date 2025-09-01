@@ -36,7 +36,11 @@ export class UpdateCorporateClientUseCase {
       name: updatedCorporate.name,
       inn: updatedCorporate.inn,
       address: updatedCorporate.address,
-      ownerPhone: updatedCorporate.ownerPhone,
+      ownerPhone: updatedCorporate.ownerPhone || '',
+      ownerName: updatedCorporate.ownerName || '',
+      ownerEmail: updatedCorporate.ownerEmail || '',
+      ownerAvatar: updatedCorporate.ownerAvatar || '',
+      status: updatedCorporate.status || '',
       dateRegistered: updatedCorporate.createdAt.toISOString(),
     };
   }
