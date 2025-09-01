@@ -33,6 +33,7 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                    @relation("OrganizationToUser")
+  LTYCorporate             LTYCorporate[]
 }
 
 model Address {
@@ -590,33 +591,35 @@ model LTYUser {
   ownerCorporates      LTYCorporate[]        @relation("Owner")
   placement            Placement?            @relation(fields: [placementId], references: [id])
   workerCorporate      LTYCorporate?         @relation("Worker", fields: [workerCorporateId], references: [id])
+  meta                 LTYUserMeta?          @relation("LTYUserToLTYUserMeta")
   promocodeTransaction PromocodeTransaction?
   tags                 LTYUserTag[]          @relation("LTYUserToLTYUserTag")
-  meta                 LTYUserMeta?         @relation("LTYUserToLTYUserMeta")
-
 }
 
 model LTYUserMeta {
-  id        Int    @id @default(autoincrement())
-  clientId  Int    @unique
-  deviceId  Int
-  model     String
-  name      String
-  platform  String
-
-  client    LTYUser @relation("LTYUserToLTYUserMeta", fields: [clientId], references: [id])
+  id       Int     @id @default(autoincrement())
+  clientId Int     @unique
+  deviceId Int
+  model    String
+  name     String
+  platform String
+  client   LTYUser @relation("LTYUserToLTYUserMeta", fields: [clientId], references: [id])
 }
- 
+
 model LTYCorporate {
-  id        Int       @id @default(autoincrement())
-  name      String
-  inn       String
-  address   String
-  ownerId   Int?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-  owner     LTYUser?  @relation("Owner", fields: [ownerId], references: [id])
-  workers   LTYUser[] @relation("Worker")
+  id             Int                @id @default(autoincrement())
+  name           String
+  inn            String
+  address        String
+  ownerId        Int?
+  organizationId Int?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @default(now())
+  status         LTYCorporateStatus @default(ACTIVE)
+
+  owner        LTYUser?      @relation("Owner", fields: [ownerId], references: [id])
+  workers      LTYUser[]     @relation("Worker")
+  organization Organization? @relation(fields: [organizationId], references: [id])
 }
 
 model LTYUserTag {
@@ -1325,7 +1328,6 @@ model MNGSaleItem {
   nomenclatureId    Int
   mngSaleDocumentId Int
   count             Int
-  fullSum           Int
   mngSaleDocument   MNGSaleDocument @relation(fields: [mngSaleDocumentId], references: [id])
   nomenclature      Nomenclature    @relation(fields: [nomenclatureId], references: [id])
 }
@@ -1333,6 +1335,11 @@ model MNGSaleItem {
 enum LTYProgramStatus {
   ACTIVE
   PAUSE
+}
+
+enum LTYCorporateStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum LTYBenefitType {
