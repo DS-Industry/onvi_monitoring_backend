@@ -32,16 +32,26 @@ export class SaleInventoryItemUseCase {
       inventoryItems.map((item) => [item.nomenclatureId, item]),
     );
 
-    return nomenclatureSaleData.map((item) => {
-      const nomenclature = nomenclatureMap.get(item.nomenclatureId);
-      const inventoryItem = nomenclatureItemMap.get(item.nomenclatureId);
+    return nomenclatureSaleData
+      .map((item) => {
+        const nomenclature = nomenclatureMap.get(item.nomenclatureId);
+        const inventoryItem = nomenclatureItemMap.get(item.nomenclatureId);
 
-      return {
-        nomenclatureId: item.nomenclatureId,
-        nomenclatureName: nomenclature?.name || '',
-        quantity: inventoryItem.quantity,
-        price: item.price,
-      };
-    });
+        if (
+          !inventoryItem ||
+          !inventoryItem.quantity ||
+          inventoryItem.quantity <= 0
+        ) {
+          return null;
+        }
+
+        return {
+          nomenclatureId: item.nomenclatureId,
+          nomenclatureName: nomenclature?.name || '',
+          quantity: inventoryItem.quantity,
+          price: item.price,
+        };
+      })
+      .filter((item): item is InventoryItemSaleResponseDto => item !== null);
   }
 }

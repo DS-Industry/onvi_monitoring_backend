@@ -12,6 +12,7 @@ import { SandWarehouseDocumentUseCase } from '@warehouse/document/document/use-c
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
+import { SaleDocumentResponseDto } from "@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto";
 
 @Injectable()
 export class CreateSaleDocumentUseCase {
@@ -29,7 +30,7 @@ export class CreateSaleDocumentUseCase {
   async execute(
     data: SaleDocumentCreateDto,
     user: User,
-  ): Promise<SaleDocument> {
+  ): Promise<SaleDocumentResponseDto> {
     let name = '';
     do {
       name = this.generateName();
@@ -75,6 +76,7 @@ export class CreateSaleDocumentUseCase {
       nomenclatureId: item.nomenclatureId,
       count: item.quantity,
       mngSaleDocumentId: saleDocument.id,
+      fullSum: item.fullSum,
     }));
     await this.createSaleItemUseCase.executeMany(itemsToCreate);
 

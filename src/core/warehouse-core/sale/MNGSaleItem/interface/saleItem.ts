@@ -1,4 +1,5 @@
 import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
+import { SaleItemResponseDto } from "@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto";
 
 export abstract class ISaleItemRepository {
   abstract create(input: SaleItem): Promise<SaleItem>;
@@ -9,6 +10,6 @@ export abstract class ISaleItemRepository {
     mngSaleDocumentId?: number,
     skip?: number,
     take?: number,
-  ): Promise<SaleItem[]>;
+  ): Promise<SaleItemResponseDto[]>;
   abstract update(input: SaleItem): Promise<SaleItem>;
 }

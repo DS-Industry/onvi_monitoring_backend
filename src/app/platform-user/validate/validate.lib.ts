@@ -49,11 +49,12 @@ import {
   ManagerPaperException,
   OrganizationException,
   PosException,
-  ReportTemplateException, SaleException,
+  ReportTemplateException,
+  SaleException,
   TechTaskException,
   UserException,
-  WarehouseException
-} from "@exception/option.exceptions";
+  WarehouseException,
+} from '@exception/option.exceptions';
 import { LOYALTY_CREATE_CLIENT_EXCEPTION_CODE } from '@constant/error.constants';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
@@ -98,6 +99,8 @@ import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperT
 import { ManagerPaperType } from '@manager-paper/managerPaperType/domain/managerPaperType';
 import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
 import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
+import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -167,6 +170,7 @@ export class ValidateLib {
     private readonly findMethodsManagerPaperUseCase: FindMethodsManagerPaperUseCase,
     private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
     private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
+    private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -1326,6 +1330,20 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkSalePrice };
+  }
+
+  public async saleDocumentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SaleDocumentResponseDto>> {
+    const checkSaleDocument =
+      await this.findMethodsSaleDocumentUseCase.getOneById(id);
+    if (!checkSaleDocument) {
+      return {
+        code: 400,
+        errorMessage: 'The saleDocument does not exist',
+      };
+    }
+    return { code: 200, object: checkSaleDocument };
   }
 
   public handlerArrayResponse(

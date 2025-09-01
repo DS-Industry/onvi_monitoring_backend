@@ -11,4 +11,5 @@ export class SaleDocumentCreateDto {
 export class SaleDocumentItem {
   nomenclatureId: number;
   quantity: number;
+  fullSum: number;
 }

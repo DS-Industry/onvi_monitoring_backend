@@ -1,8 +1,9 @@
 import { SaleDocument } from '@warehouse/sale/MNGSaleDocument/domain/saleDocument';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 
 export abstract class ISaleDocumentRepository {
-  abstract create(input: SaleDocument): Promise<SaleDocument>;
-  abstract findOneById(id: number): Promise<SaleDocument>;
+  abstract create(input: SaleDocument): Promise<SaleDocumentResponseDto>;
+  abstract findOneById(id: number): Promise<SaleDocumentResponseDto>;
   abstract findAllByFilter(
     name?: string,
     warehouseId?: number,
@@ -11,6 +12,6 @@ export abstract class ISaleDocumentRepository {
     dateEndSale?: Date,
     skip?: number,
     take?: number,
-  ): Promise<SaleDocument[]>;
+  ): Promise<SaleDocumentResponseDto[]>;
   abstract update(input: SaleDocument): Promise<SaleDocument>;
 }

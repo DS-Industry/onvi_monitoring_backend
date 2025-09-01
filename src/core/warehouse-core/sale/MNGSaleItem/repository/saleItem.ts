@@ -3,6 +3,7 @@ import { ISaleItemRepository } from '@warehouse/sale/MNGSaleItem/interface/saleI
 import { PrismaService } from '@db/prisma/prisma.service';
 import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
 import { PrismaSaleItemMapper } from '@db/mapper/prisma-sale-item-mapper';
+import { SaleItemResponseDto } from '@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto';
 
 @Injectable()
 export class SaleItemRepository extends ISaleItemRepository {
@@ -42,7 +43,7 @@ export class SaleItemRepository extends ISaleItemRepository {
     mngSaleDocumentId?: number,
     skip?: number,
     take?: number,
-  ): Promise<SaleItem[]> {
+  ): Promise<SaleItemResponseDto[]> {
     const where: any = {};
 
     if (nomenclatureId !== undefined) {
@@ -60,8 +61,13 @@ export class SaleItemRepository extends ISaleItemRepository {
       orderBy: {
         id: 'asc',
       },
+      include: {
+        nomenclature: true,
+      },
     });
-    return saleItems.map((item) => PrismaSaleItemMapper.toDomain(item));
+    return saleItems.map((item) =>
+      PrismaSaleItemMapper.toDomainWhitNomenclatureName(item),
+    );
   }
 
   public async update(input: SaleItem): Promise<SaleItem> {

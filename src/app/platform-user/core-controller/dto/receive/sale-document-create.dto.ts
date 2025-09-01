@@ -24,4 +24,7 @@ export class SaleDocumentItem {
   @IsNumber()
   @IsNotEmpty({ message: 'quantity is required' })
   quantity: number;
+  @IsNumber()
+  @IsNotEmpty({ message: 'fullSum is required' })
+  fullSum: number;
 }
