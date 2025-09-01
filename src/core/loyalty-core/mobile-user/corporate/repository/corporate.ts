@@ -56,6 +56,7 @@ export class CorporateRepository extends ICorporateRepository {
   }
 
   public async findAllByFilter(
+    organizationId: number,
     placementId?: number,
     search?: string,
     inn?: string,
@@ -66,7 +67,9 @@ export class CorporateRepository extends ICorporateRepository {
     registrationFrom?: string,
     registrationTo?: string,
   ): Promise<Corporate[]> {
-    const where: any = {};
+    const where: any = {
+      organizationId: organizationId,
+    };
 
     // Build where clause based on filter parameters
     if (search) {
@@ -125,6 +128,7 @@ export class CorporateRepository extends ICorporateRepository {
   }
 
   public async countByFilter(
+    organizationId: number,
     placementId?: number,
     search?: string,
     inn?: string,
@@ -133,7 +137,9 @@ export class CorporateRepository extends ICorporateRepository {
     registrationFrom?: string,
     registrationTo?: string,
   ): Promise<number> {
-    const where: any = {};
+    const where: any = {
+      organizationId: organizationId,
+    };
 
     // Build where clause based on filter parameters (same logic as findAllByFilter)
     if (search) {

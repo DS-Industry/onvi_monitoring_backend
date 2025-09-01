@@ -26,6 +26,7 @@ export class CorporateFindByFilterUseCase {
     const take = size;
 
     const total = await this.corporateRepository.countByFilter(
+      data.organizationId,
       placementId,
       data.search,
       data.inn,
@@ -36,6 +37,7 @@ export class CorporateFindByFilterUseCase {
     );
 
     const corporates = await this.corporateRepository.findAllByFilter(
+      data.organizationId,
       placementId,
       data.search,
       data.inn,
@@ -78,6 +80,7 @@ export class CorporateFindByFilterUseCase {
       ownerAvatar: corporate.ownerAvatar || '',
       status: corporate.status || '',
       dateRegistered: corporate.createdAt?.toISOString() || '',
+      organizationId: corporate.organizationId,
     };
   }
 }

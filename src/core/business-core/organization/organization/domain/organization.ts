@@ -1,6 +1,11 @@
 import { BaseEntity } from '@utils/entity';
 import { StatusOrganization, TypeOrganization } from '@prisma/client';
 
+export interface LoyaltyProgram {
+  id: number;
+  name: string;
+}
+
 export interface OrganizationProps {
   id?: number;
   name: string;
@@ -12,6 +17,7 @@ export interface OrganizationProps {
   createdAt?: Date;
   updatedAt?: Date;
   ownerId?: number;
+  ltyPrograms?: LoyaltyProgram[];
 }
 
 export class Organization extends BaseEntity<OrganizationProps> {
@@ -59,6 +65,10 @@ export class Organization extends BaseEntity<OrganizationProps> {
     return this.props.ownerId;
   }
 
+  get ltyPrograms(): LoyaltyProgram[] {
+    return this.props.ltyPrograms || [];
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -89,5 +99,9 @@ export class Organization extends BaseEntity<OrganizationProps> {
 
   set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
+  }
+
+  set ltyPrograms(ltyPrograms: LoyaltyProgram[]) {
+    this.props.ltyPrograms = ltyPrograms;
   }
 }

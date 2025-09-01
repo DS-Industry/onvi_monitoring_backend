@@ -9,4 +9,5 @@ export class CorporateClientResponseDto {
   ownerAvatar: string;
   status: string;
   dateRegistered: string;
+  organizationId?: number;
 }

@@ -16,6 +16,7 @@ export class CreateCorporateClientUseCase {
       ownerId: ownerId,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
+      organizationId: data.organizationId,
     });
 
     const corporate = await this.corporateRepository.create(corporateData);

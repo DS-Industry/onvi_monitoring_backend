@@ -38,6 +38,14 @@ export class OrganizationRepository extends IOrganizationRepository {
       where: {
         id,
       },
+      include: {
+        ltyPrograms: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
     return PrismaOrganizationMapper.toDomain(organization);
   }

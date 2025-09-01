@@ -1080,9 +1080,48 @@ export class LoyaltyController {
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(200)
   async getCorporateClients(
+    @Request() req: any,
     @Query() data: CorporateClientsFilterDto,
   ): Promise<CorporateClientsPaginatedResponseDto> {
     try {
+      const { ability } = req;
+      
+      const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+      
+      if (userLoyaltyProgramIds.length === 0) {
+        throw new CustomHttpException({
+          message: 'Access denied: No loyalty program permissions',
+          code: HttpStatus.FORBIDDEN,
+        });
+      }
+      
+      const organization = await this.findMethodsOrganizationUseCase.getById(data.organizationId);
+      
+      if (!organization) {
+        throw new CustomHttpException({
+          message: 'Organization not found',
+          code: HttpStatus.NOT_FOUND,
+        });
+      }
+
+      if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+        throw new CustomHttpException({
+          message: 'Organization has no loyalty programs',
+          code: HttpStatus.NOT_FOUND,
+        });
+      }
+      
+      const hasAccess = organization.ltyPrograms.some(program => 
+        userLoyaltyProgramIds.includes(program.id)
+      );
+      
+      if (!hasAccess) {
+        throw new CustomHttpException({
+          message: 'Access denied: You do not have access to this organization\'s loyalty programs',
+          code: HttpStatus.FORBIDDEN,
+        });
+      }
+      
       return await this.corporateFindByFilterUseCase.execute(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1180,5 +1219,21 @@ export class LoyaltyController {
         });
       }
     }
+  }
+
+  private extractLoyaltyProgramIds(ability: any): number[] {
+    const userLoyaltyProgramIds: number[] = [];
+    
+    if (ability && ability.rules) {
+      for (const rule of ability.rules) {
+        if (rule.subject === 'LTYProgram' && rule.conditions && rule.conditions.id) {
+          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
+            userLoyaltyProgramIds.push(...rule.conditions.id.in);
+          }
+        }
+      }
+    }
+    
+    return userLoyaltyProgramIds;
   }
 }
