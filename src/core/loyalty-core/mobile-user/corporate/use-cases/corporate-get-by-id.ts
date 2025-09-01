@@ -8,7 +8,7 @@ export class CorporateGetByIdUseCase {
 
   async execute(id: number): Promise<CorporateClientResponseDto> {
     const corporate = await this.corporateRepository.findOneById(id);
-    
+
     if (!corporate) {
       throw new Error('Corporate client not exists');
     }
@@ -23,6 +23,10 @@ export class CorporateGetByIdUseCase {
       inn: corporate.inn,
       address: corporate.address,
       ownerPhone: corporate.ownerPhone || '',
+      ownerName: corporate.ownerName || '',
+      ownerEmail: corporate.ownerEmail || '',
+      ownerAvatar: corporate.ownerAvatar || '',
+      status: corporate.status || '',
       dateRegistered: corporate.createdAt?.toISOString() || '',
     };
   }
