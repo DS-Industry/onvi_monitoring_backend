@@ -20,13 +20,12 @@ model Organization {
   updatedAt                DateTime
   ownerId                  Int?
   placementId              Int?
-  ltyProgramId             Int?
   DeviceApiKey             DeviceApiKey[]
   hrPositions              HrPosition[]
   hrWorker                 HrWorker[]
   cards                    LTYCard[]
   nomenclatures            Nomenclature[]
-  ltyProgram               LTYProgram?               @relation(fields: [ltyProgramId], references: [id])
+  ltyPrograms              LTYProgram[]
   organizationDocument     OrganizationDocument?     @relation(fields: [organizationDocumentId], references: [id])
   owner                    User?                     @relation("Owner", fields: [ownerId], references: [id])
   placement                Placement?                @relation(fields: [placementId], references: [id])
@@ -1328,6 +1327,7 @@ model MNGSaleItem {
   nomenclatureId    Int
   mngSaleDocumentId Int
   count             Int
+  fullSum           Int             @default(0)
   mngSaleDocument   MNGSaleDocument @relation(fields: [mngSaleDocumentId], references: [id])
   nomenclature      Nomenclature    @relation(fields: [nomenclatureId], references: [id])
 }

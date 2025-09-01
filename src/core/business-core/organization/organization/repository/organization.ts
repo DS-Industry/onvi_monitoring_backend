@@ -92,7 +92,11 @@ export class OrganizationRepository extends IOrganizationRepository {
   ): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
       where: {
-        ltyProgramId,
+        ltyPrograms: {
+          some: {
+            id: ltyProgramId,
+          },
+        },
       },
     });
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
