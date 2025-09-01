@@ -16,7 +16,7 @@ import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
 import { WarehouseDocumentSaveDto } from '@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto';
 import {
-  SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
+  SALE_DOCUMENT_CREATE_EXCEPTION_CODE, SALE_DOCUMENT_GET_EXCEPTION_CODE, SALE_PRICE_DELETE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
   WAREHOUSE_CREATE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
@@ -34,6 +34,8 @@ import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { User } from '@platform-user/user/domain/user';
 import { SaleDocumentCreateDto } from '@platform-user/core-controller/dto/receive/sale-document-create.dto';
 import { WarehouseDocument } from "@warehouse/document/document/domain/warehouseDocument";
+import { SalePrice } from "@warehouse/sale/MNGSalePrice/domain/salePrice";
+import { SaleDocumentResponseDto } from "@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto";
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -442,6 +444,34 @@ export class WarehouseValidateRules {
       SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
     );
     return { warehouse: warehouseCheck.object, manager: managerCheck.object}
+  }
+
+  public async getSaleDocumentValidate(input: number): Promise<SaleDocumentResponseDto> {
+    const response = [];
+
+    const saleDocumentCheck = await this.validateLib.saleDocumentByIdExists(input);
+    response.push(saleDocumentCheck)
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.SALE,
+      SALE_DOCUMENT_GET_EXCEPTION_CODE,
+    );
+    return saleDocumentCheck.object;
+  }
+
+  public async deleteManyPriceValidate(input: number): Promise<SalePrice> {
+    const response = [];
+
+    const salePriceCheck = await this.validateLib.salePriceByIdExists(input);
+    response.push(salePriceCheck)
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.SALE,
+      SALE_PRICE_DELETE_EXCEPTION_CODE,
+    );
+    return salePriceCheck.object;
   }
 
   private isValidInventoryMetaData(metaData: any): boolean {

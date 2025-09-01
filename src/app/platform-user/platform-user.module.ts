@@ -1,4 +1,5 @@
 import { Module, Provider } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
@@ -80,6 +81,7 @@ import { ManagerPaperController } from "@platform-user/core-controller/managerPa
 import { ManagerPaperValidateRules } from "@platform-user/validate/validate-rules/manager-paper-validate-rules";
 import { ManagerPaperCoreModule } from "@manager-paper/manager-paper-core.module";
 import { SaleController } from "@platform-user/core-controller/sale";
+import { FileParserService } from "@platform-user/core-controller/services/excel-parser.service";
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -165,6 +167,10 @@ const permission: Provider[] = [
   GetAllPermissionsInfoUseCases,
 ];
 
+const services: Provider[] = [
+  FileParserService,
+];
+
 @Module({
   imports: [
     PrismaModule,
@@ -183,6 +189,38 @@ const permission: Provider[] = [
     ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
+    MulterModule.register({
+      storage: require('multer').memoryStorage(), 
+      fileFilter: (req, file, cb) => {
+        const allowedMimeTypes = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+          'application/vnd.ms-excel', 
+          'application/octet-stream',
+          'application/vnd.ms-office', 
+          'application/zip', 
+          'text/csv',
+          'text/plain',
+        ];
+        
+        const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+        const fileExtension = file.originalname ? 
+          file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
+        
+        if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
+          cb(null, true);
+        } else {
+          console.warn('Multer rejected file:', {
+            filename: file.originalname,
+            mimetype: file.mimetype,
+            extension: fileExtension,
+          });
+          cb(null, false);
+        }
+      },
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
+    }),
   ],
   controllers: [...controllers],
   providers: [
@@ -192,6 +230,7 @@ const permission: Provider[] = [
     ...validate,
     ...permission,
     ...userUseCase,
+    ...services,
   ],
   exports: [...userUseCase,]
 })

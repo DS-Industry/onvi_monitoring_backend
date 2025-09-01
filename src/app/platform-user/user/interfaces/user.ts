@@ -7,7 +7,12 @@ export abstract class IUserRepository {
   abstract findOneById(id: number): Promise<User>;
   abstract findOneByEmail(email: string): Promise<User>;
   abstract findAll(): Promise<User[]>;
-  abstract findAllByOrgId(orgId: number): Promise<User[]>;
+  abstract findAllByOrgId(
+    orgId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]>;
+  abstract findCountByOrgId(orgId: number): Promise<number>;
   abstract findAllByPosId(posId: number): Promise<User[]>;
   abstract findAllByRoleIds(roleIds: number[]): Promise<User[]>;
   abstract findAllByRoleIdsAndPosId(

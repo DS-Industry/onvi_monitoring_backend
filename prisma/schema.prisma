@@ -1325,6 +1325,7 @@ model MNGSaleItem {
   nomenclatureId    Int
   mngSaleDocumentId Int
   count             Int
+  fullSum           Int
   mngSaleDocument   MNGSaleDocument @relation(fields: [mngSaleDocumentId], references: [id])
   nomenclature      Nomenclature    @relation(fields: [nomenclatureId], references: [id])
 }

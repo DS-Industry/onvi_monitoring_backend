@@ -16,6 +16,7 @@ import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-creat
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-by-filter';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
+import { CardImportUseCase } from '@loyalty/mobile-user/card/use-case/card-import';
 import { LoyaltyProgramRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyaltyProgram';
 import { LoyaltyTierRepositoryProvider } from '@loyalty/loyalty/loyaltyTier/provider/loyaltyTier';
 import { BenefitActionRepositoryProvider } from '@loyalty/loyalty/benefit/benefitAction/provider/benefitAction';
@@ -49,6 +50,10 @@ import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
+import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
+import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
+import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
+import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 
 const repositories: Provider[] = [
@@ -88,6 +93,7 @@ const cardUseCase: Provider[] = [
   UpdateCardUseCase,
   FindMethodsCardUseCase,
   GetBenefitsCardUseCase,
+  CardImportUseCase,
 ];
 
 const loyaltyProgramUseCase: Provider[] = [
@@ -133,6 +139,14 @@ const orderUseCase: Provider[] = [
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
 ];
+
+const corporateUseCase: Provider[] = [
+  CorporateFindByFilterUseCase,
+  CorporateGetByIdUseCase,
+  CreateCorporateClientUseCase,
+  UpdateCorporateClientUseCase,
+];
+
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [
@@ -148,6 +162,7 @@ const orderUseCase: Provider[] = [
     ...cardBonusOper,
     ...cardBonusOperType,
     ...orderUseCase,
+    ...corporateUseCase,
   ],
   exports: [
     ...repositories,
@@ -161,6 +176,7 @@ const orderUseCase: Provider[] = [
     ...cardBonusOper,
     ...orderUseCase,
     ...cardBonusBank,
+    ...corporateUseCase,
   ],
 })
 export class LoyaltyCoreModule {}

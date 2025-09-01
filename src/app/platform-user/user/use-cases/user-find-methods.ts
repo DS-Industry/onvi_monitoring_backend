@@ -28,8 +28,17 @@ export class FindMethodsUserUseCase {
     return await this.userRepository.getAllLoyaltyProgramPermissions(input);
   }
 
-  async getAllByOrgId(orgId: number): Promise<User[]> {
-    return await this.userRepository.findAllByOrgId(orgId);
+  async getAllByOrgId(
+    orgId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
+    return await this.userRepository.findAllByOrgId(orgId, skip, take);
+  }
+
+  async getCountByOrgId(orgId: number): Promise<{ count: number }> {
+    const count = await this.userRepository.findCountByOrgId(orgId);
+    return { count };
   }
 
   async getAllByPosId(posId: number): Promise<User[]> {

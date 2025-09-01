@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ContractType } from "@loyalty/mobile-user/client/domain/contractType";
+import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
 
 export class ClientFilterDto {
   @IsNotEmpty({ message: 'placementId is required' })
@@ -12,12 +12,18 @@ export class ClientFilterDto {
   @IsNotEmpty({ message: 'type is required' })
   @IsString()
   contractType: ContractType | '*';
-  @IsNotEmpty({ message: 'workerCorporateId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
     if (value === '*') return value;
     return parseInt(value);
   })
   workerCorporateId: number | '*';
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === '*') return value;
+    return parseInt(value);
+  })
+  organizationId: number | '*';
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
@@ -42,4 +48,16 @@ export class ClientFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+
+  @IsOptional()
+  @IsString()
+  registrationFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  registrationTo?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

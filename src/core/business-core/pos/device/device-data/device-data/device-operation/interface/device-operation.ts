@@ -21,9 +21,20 @@ export abstract class IDeviceOperationRepository {
     dateStart?: Date,
     dateEnd?: Date,
     currencyType?: CurrencyType,
+    currencyId?: number,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperationFullDataResponseDto[]>;
+  abstract findCountByFilter(
+    ability?: any,
+    organizationId?: number,
+    posIds?: number[],
+    carWashDeviceId?: number,
+    dateStart?: Date,
+    dateEnd?: Date,
+    currencyType?: CurrencyType,
+    currencyId?: number,
+  ): Promise<number>;
   abstract findDataByMonitoring(
     posIds: number[],
     dateStart: Date,
@@ -50,9 +61,4 @@ export abstract class IDeviceOperationRepository {
   abstract findDataLastOperByDeviceIds(
     deviceIds: number[],
   ): Promise<DeviceOperationLastDataResponseDto[]>;
-  abstract countAllByDeviceIdAndDateOper(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number>;
 }

@@ -14,6 +14,7 @@ export class CreateSaleItemUseCase {
           nomenclatureId: item.nomenclatureId,
           mngSaleDocumentId: item.mngSaleDocumentId,
           count: item.count,
+          fullSum: item.fullSum,
         }),
     );
     return await this.saleItemRepository.createMany(saleItemsData);

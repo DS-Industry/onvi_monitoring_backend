@@ -3,7 +3,7 @@ import { IClientRepository } from '../interfaces/client';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Client } from '../domain/client';
 import { PrismaMobileUserMapper } from '@db/mapper/prisma-mobile-user-mapper';
-import { ContractType } from '@prisma/client';
+import { ContractType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class ClientRepository extends IClientRepository {
@@ -28,21 +28,59 @@ export class ClientRepository extends IClientRepository {
     tagIds?: number[],
     contractType?: ContractType,
     workerCorporateId?: number,
+    organizationId?: number | null,
     phone?: string,
     skip?: number,
     take?: number,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
   ): Promise<Client[]> {
-    const where: any = {};
+    const where: Prisma.LTYUserWhereInput = {};
 
-    if (placementId !== undefined) {
+    if (registrationFrom || registrationTo) {
+      where.createdAt = {};
+
+      if (registrationFrom) {
+        where.createdAt.gte = new Date(registrationFrom);
+      }
+
+      if (registrationTo) {
+        where.createdAt.lte = new Date(registrationTo);
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { card: { number: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
       where.placementId = placementId;
     }
 
-    if (contractType !== undefined) {
+    if (contractType !== undefined && contractType !== null) {
       where.contractType = contractType;
     }
 
-    if (workerCorporateId !== undefined) {
+    if (organizationId !== undefined && organizationId !== null) {
+      where.card = {
+        cardTier: {
+          ltyProgram: {
+            organizations: {
+              some: {
+                id: organizationId,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
       where.workerCorporateId = workerCorporateId;
     }
 
@@ -51,7 +89,10 @@ export class ClientRepository extends IClientRepository {
     }
 
     if (tagIds !== undefined && tagIds.length > 0) {
-      where.tags = { some: { id: { in: tagIds } } };
+      const validTagIds = tagIds.filter(id => id !== null && id !== undefined && typeof id === 'number');
+      if (validTagIds.length > 0) {
+        where.tags = { some: { id: { in: validTagIds } } };
+      }
     }
 
     const clients = await this.prisma.lTYUser.findMany({
@@ -63,6 +104,76 @@ export class ClientRepository extends IClientRepository {
       },
     });
     return clients.map((item) => PrismaMobileUserMapper.toDomain(item));
+  }
+
+  public async countByFilter(
+    placementId?: number,
+    tagIds?: number[],
+    contractType?: ContractType,
+    workerCorporateId?: number,
+    organizationId?: number | null,
+    phone?: string,
+    registrationFrom?: string,
+    registrationTo?: string,
+    search?: string,
+  ): Promise<number> {
+    const where: Prisma.LTYUserWhereInput = {};
+
+    if (registrationFrom || registrationTo) {
+      where.createdAt = {};
+
+      if (registrationFrom) {
+        where.createdAt.gte = new Date(registrationFrom);
+      }
+
+      if (registrationTo) {
+        where.createdAt.lte = new Date(registrationTo);
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { card: { number: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
+      where.placementId = placementId;
+    }
+
+    if (contractType !== undefined && contractType !== null) {
+      where.contractType = contractType;
+    }
+
+    if (organizationId !== undefined && organizationId !== null) {
+      where.card = {
+        cardTier: {
+          ltyProgram: {
+            organizations: {
+              some: {
+                id: organizationId,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
+      where.workerCorporateId = workerCorporateId;
+    }
+
+    if (phone !== undefined) {
+      where.phone = phone;
+    }
+
+    if (tagIds !== undefined && tagIds.length > 0) {
+      where.tags = { some: { id: { in: tagIds } } };
+    }
+
+    return await this.prisma.lTYUser.count({ where });
   }
 
   public async findOneById(id: number): Promise<Client> {

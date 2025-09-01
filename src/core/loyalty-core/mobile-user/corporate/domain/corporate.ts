@@ -8,6 +8,7 @@ export interface CorporateProps {
   ownerId: number;
   createdAt?: Date;
   updatedAt?: Date;
+  ownerPhone?: string
 }
 
 export class Corporate extends BaseEntity<CorporateProps> {
@@ -32,6 +33,9 @@ export class Corporate extends BaseEntity<CorporateProps> {
   }
   get address(): string {
     return this.props.address;
+  }
+  get ownerPhone(): string {
+    return this.props.ownerPhone;
   }
   set address(address: string) {
     this.props.address = address;

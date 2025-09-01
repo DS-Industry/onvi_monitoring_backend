@@ -5,6 +5,7 @@ export interface SaleItemProps {
   nomenclatureId: number;
   mngSaleDocumentId: number;
   count: number;
+  fullSum: number;
 }
 
 export class SaleItem extends BaseEntity<SaleItemProps> {
@@ -38,5 +39,13 @@ export class SaleItem extends BaseEntity<SaleItemProps> {
 
   set count(count: number) {
     this.props.count = count;
+  }
+
+  get fullSum(): number {
+    return this.props.fullSum;
+  }
+
+  set fullSum(fullSum: number) {
+    this.props.fullSum = fullSum;
   }
 }

@@ -50,10 +50,12 @@ import {
   OrganizationException,
   PosException,
   ReportTemplateException,
+  SaleException,
   TechTaskException,
   UserException,
   WarehouseException,
 } from '@exception/option.exceptions';
+import { LOYALTY_CREATE_CLIENT_EXCEPTION_CODE } from '@constant/error.constants';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-find-methods';
@@ -95,6 +97,10 @@ import { FindMethodsManagerReportPeriodUseCase } from '@manager-paper/managerRep
 import { ManagerReportPeriod } from '@manager-paper/managerReportPeriod/domain/managerReportPeriod';
 import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-find-methods';
 import { ManagerPaperType } from '@manager-paper/managerPaperType/domain/managerPaperType';
+import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
+import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
+import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -114,6 +120,7 @@ export enum ExceptionType {
   HR = 'Hr',
   NOTIFICATION = 'Notification',
   MANAGER_PAPER = 'ManagerPaper',
+  SALE = 'Sale',
 }
 @Injectable()
 export class ValidateLib {
@@ -162,6 +169,8 @@ export class ValidateLib {
     private readonly findMethodsManagerReportPeriodUseCase: FindMethodsManagerReportPeriodUseCase,
     private readonly findMethodsManagerPaperUseCase: FindMethodsManagerPaperUseCase,
     private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
+    private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
+    private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -903,6 +912,10 @@ export class ValidateLib {
   }
 
   public async tagIdsExists(tagIds: number[]): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+
     const allTagIds = await this.findMethodsTagUseCase.getAll();
     const tagIdsCheck = allTagIds.map((item) => item.id);
     const unnecessaryTagIds = tagIds.filter(
@@ -1174,6 +1187,10 @@ export class ValidateLib {
     tagIds: number[],
     userId: number,
   ): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+
     const allTagIds =
       await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
         authorUserId: userId,
@@ -1186,6 +1203,74 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'tagId connection error' };
     }
     return { code: 200 };
+  }
+
+  public async validateExcelCsvFile(
+    file: Express.Multer.File,
+  ): Promise<ValidateResponse<Express.Multer.File>> {
+    if (!file) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Excel (.xlsx, .xls) or CSV (.csv) file is required',
+      );
+    }
+
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'File buffer is empty or missing',
+      );
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`,
+      );
+    }
+
+    const allowedMimeTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel',
+      'application/octet-stream',
+      'application/vnd.ms-office',
+      'application/zip',
+      'text/csv',
+      'text/plain',
+    ];
+
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.originalname
+      ? file.originalname
+          .toLowerCase()
+          .substring(file.originalname.lastIndexOf('.'))
+      : '';
+
+    const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
+    const isValidExtension = allowedExtensions.includes(fileExtension);
+
+    if (!isValidMimeType && !isValidExtension) {
+      const hasValidKeywords =
+        file.mimetype &&
+        (file.mimetype.includes('excel') ||
+          file.mimetype.includes('spreadsheet') ||
+          file.mimetype.includes('office') ||
+          file.mimetype.includes('csv') ||
+          file.mimetype.includes('text'));
+
+      if (!hasValidKeywords) {
+        throw new LoyaltyException(
+          LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+          `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`,
+        );
+      }
+    }
+
+    return {
+      code: 200,
+      object: file,
+    };
   }
 
   public async managerPaperExists(
@@ -1234,6 +1319,33 @@ export class ValidateLib {
     return { code: 200, object: managerReportPeriod };
   }
 
+  public async salePriceByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SalePrice>> {
+    const checkSalePrice = await this.findMethodsSalePriceUseCase.getById(id);
+    if (!checkSalePrice) {
+      return {
+        code: 400,
+        errorMessage: 'The salePrice does not exist',
+      };
+    }
+    return { code: 200, object: checkSalePrice };
+  }
+
+  public async saleDocumentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SaleDocumentResponseDto>> {
+    const checkSaleDocument =
+      await this.findMethodsSaleDocumentUseCase.getOneById(id);
+    if (!checkSaleDocument) {
+      return {
+        code: 400,
+        errorMessage: 'The saleDocument does not exist',
+      };
+    }
+    return { code: 200, object: checkSaleDocument };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
@@ -1271,6 +1383,8 @@ export class ValidateLib {
         throw new HrException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.MANAGER_PAPER) {
         throw new ManagerPaperException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.SALE) {
+        throw new SaleException(exceptionCode, errorCodes);
       }
     }
   }

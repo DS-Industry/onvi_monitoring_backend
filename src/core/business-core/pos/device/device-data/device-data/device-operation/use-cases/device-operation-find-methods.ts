@@ -1,16 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { CurrencyType } from '@prisma/client';
-import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
-import {
-  DeviceOperationFullSumDyPosResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
-import {
-  DeviceOperationDailyStatisticResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto";
+import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
+import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -25,6 +20,7 @@ export class FindMethodsDeviceOperationUseCase {
     dateStart?: Date;
     dateEnd?: Date;
     currencyType?: CurrencyType;
+    currencyId?: number;
     skip?: number;
     take?: number;
   }): Promise<DeviceOperationFullDataResponseDto[]> {
@@ -36,8 +32,31 @@ export class FindMethodsDeviceOperationUseCase {
       data.dateStart,
       data.dateEnd,
       data.currencyType,
+      data.currencyId,
       data.skip,
       data.take,
+    );
+  }
+
+  async getCountByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posIds?: number[];
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    currencyType?: CurrencyType;
+    currencyId?: number;
+  }): Promise<number> {
+    return await this.deviceOperationRepository.findCountByFilter(
+      data.ability,
+      data.organizationId,
+      data.posIds,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.currencyType,
+      data.currencyId,
     );
   }
 
@@ -77,7 +96,6 @@ export class FindMethodsDeviceOperationUseCase {
     );
   }
 
-
   async getDataByMonitoringDetail(
     deviceIds: number[],
     dateStart: Date,
@@ -103,18 +121,6 @@ export class FindMethodsDeviceOperationUseCase {
   ): Promise<DeviceOperationLastDataResponseDto[]> {
     return await this.deviceOperationRepository.findDataLastOperByDeviceIds(
       deviceIds,
-    );
-  }
-
-  async getCountAllByDeviceIdAndDateOper(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return await this.deviceOperationRepository.countAllByDeviceIdAndDateOper(
-      deviceId,
-      dateStart,
-      dateEnd,
     );
   }
 }

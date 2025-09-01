@@ -3,6 +3,7 @@ import { ISaleDocumentRepository } from '@warehouse/sale/MNGSaleDocument/interfa
 import { PrismaService } from '@db/prisma/prisma.service';
 import { SaleDocument } from '@warehouse/sale/MNGSaleDocument/domain/saleDocument';
 import { PrismaSaleDocumentMapper } from '@db/mapper/prisma-sale-document-mapper';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 
 @Injectable()
 export class SaleDocumentRepository extends ISaleDocumentRepository {
@@ -10,21 +11,29 @@ export class SaleDocumentRepository extends ISaleDocumentRepository {
     super();
   }
 
-  public async create(input: SaleDocument): Promise<SaleDocument> {
+  public async create(input: SaleDocument): Promise<SaleDocumentResponseDto> {
     const saleDocumentPrismaEntity = PrismaSaleDocumentMapper.toPrisma(input);
     const saleDocument = await this.prisma.mNGSaleDocument.create({
       data: saleDocumentPrismaEntity,
+      include: {
+        warehouse: true,
+        responsibleManager: true,
+      },
     });
-    return PrismaSaleDocumentMapper.toDomain(saleDocument);
+    return PrismaSaleDocumentMapper.toDomainWithData(saleDocument);
   }
 
-  public async findOneById(id: number): Promise<SaleDocument> {
+  public async findOneById(id: number): Promise<SaleDocumentResponseDto> {
     const saleDocument = await this.prisma.mNGSaleDocument.findFirst({
       where: {
         id,
       },
+      include: {
+        warehouse: true,
+        responsibleManager: true,
+      },
     });
-    return PrismaSaleDocumentMapper.toDomain(saleDocument);
+    return PrismaSaleDocumentMapper.toDomainWithData(saleDocument);
   }
 
   public async findAllByFilter(
@@ -35,7 +44,7 @@ export class SaleDocumentRepository extends ISaleDocumentRepository {
     dateEndSale?: Date,
     skip?: number,
     take?: number,
-  ): Promise<SaleDocument[]> {
+  ): Promise<SaleDocumentResponseDto[]> {
     const where: any = {};
 
     if (name !== undefined) {
@@ -64,8 +73,14 @@ export class SaleDocumentRepository extends ISaleDocumentRepository {
       orderBy: {
         saleDate: 'asc',
       },
+      include: {
+        warehouse: true,
+        responsibleManager: true,
+      },
     });
-    return saleDocuments.map((item) => PrismaSaleDocumentMapper.toDomain(item));
+    return saleDocuments.map((item) =>
+      PrismaSaleDocumentMapper.toDomainWithData(item),
+    );
   }
 
   public async update(input: SaleDocument): Promise<SaleDocument> {

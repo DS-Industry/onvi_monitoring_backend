@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ISaleItemRepository } from '@warehouse/sale/MNGSaleItem/interface/saleItem';
 import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
+import { SaleItemResponseDto } from "@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto";
 
 @Injectable()
 export class FindMethodsSaleItemUseCase {
@@ -15,7 +16,7 @@ export class FindMethodsSaleItemUseCase {
     mngSaleDocumentId?: number;
     skip?: number;
     take?: number;
-  }): Promise<SaleItem[]> {
+  }): Promise<SaleItemResponseDto[]> {
     return await this.saleItemRepository.findAllByFilter(
       data.nomenclatureId,
       data.mngSaleDocumentId,

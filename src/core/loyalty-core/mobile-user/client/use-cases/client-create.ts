@@ -6,6 +6,8 @@ import { StatusUser } from '@prisma/client';
 import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-create';
 import { ClientFullResponseDto } from '@platform-user/core-controller/dto/response/client-full-response.dto';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
 
 @Injectable()
 export class CreateClientUseCase {
@@ -13,6 +15,8 @@ export class CreateClientUseCase {
     private readonly clientRepository: IClientRepository,
     private readonly createCardUseCase: CreateCardUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly updateCardUseCase: UpdateCardUseCase,
   ) {}
 
   async execute(data: ClientCreateDto): Promise<ClientFullResponseDto> {
@@ -30,13 +34,42 @@ export class CreateClientUseCase {
       updatedAt: new Date(Date.now()),
     });
     const client = await this.clientRepository.create(clientData);
-    const card = await this.createCardUseCase.execute({
-      mobileUserId: client.id,
-      devNumber: data?.devNumber,
-      number: data?.number,
-      monthlyLimit: data?.monthlyLimit,
-    });
-    await this.clientRepository.updateConnectionTag(client.id, data.tagIds, []);
+    
+    let card;
+    
+    if (data.cardId) {
+      if (data.cardId <= 0) {
+        throw new Error(`Invalid cardId: ${data.cardId}. Card ID must be a positive number.`);
+      }
+      
+      const existingCard = await this.findMethodsCardUseCase.getById(data.cardId);
+      if (!existingCard) {
+        throw new Error(`Card with id ${data.cardId} not found`);
+      }
+      
+      if (existingCard.mobileUserId) {
+        throw new Error(`Card with id ${data.cardId} is already assigned to another client`);
+      }
+      
+      existingCard.mobileUserId = client.id;
+      card = await this.updateCardUseCase.execute(
+        {
+          mobileUserId: client.id,
+        },
+        existingCard,
+      );
+    } else {
+      card = await this.createCardUseCase.execute({
+        mobileUserId: client.id,
+        devNumber: data?.devNumber,
+        number: data?.number,
+        monthlyLimit: data?.monthlyLimit,
+      });
+    }
+    
+  
+    const tagIds = data.tagIds || [];
+    await this.clientRepository.updateConnectionTag(client.id, tagIds, []);
     const clientTags = await this.findMethodsTagUseCase.getAllByClientId(
       client.id,
     );
@@ -56,7 +89,7 @@ export class CreateClientUseCase {
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
       tags: clientTags.map((tag) => tag.getProps()),
-      card: {
+      card: card ? {
         id: card.id,
         balance: card.balance,
         mobileUserId: card.mobileUserId,
@@ -65,7 +98,7 @@ export class CreateClientUseCase {
         monthlyLimit: card?.monthlyLimit,
         createdAt: card.createdAt,
         updatedAt: card.updatedAt,
-      },
+      } : null,
     };
   }
 }

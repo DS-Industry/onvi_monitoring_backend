@@ -4,6 +4,7 @@ import {
   DeviceOperationMonitoringResponseDto,
   MonitoringDto,
 } from '@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto';
+import { CurrencyType } from '@prisma/client';
 
 @Injectable()
 export class DataByDeviceOperationUseCase {
@@ -15,21 +16,27 @@ export class DataByDeviceOperationUseCase {
     deviceId: number,
     dateStart: Date,
     dateEnd: Date,
+    currencyType?: CurrencyType,
+    currencyId?: number,
     skip?: number,
     take?: number,
   ): Promise<DeviceOperationMonitoringResponseDto> {
     const response: MonitoringDto[] = [];
     const totalCount =
-      await this.findMethodsDeviceOperationUseCase.getCountAllByDeviceIdAndDateOper(
-        deviceId,
-        dateStart,
-        dateEnd,
-      );
+      await this.findMethodsDeviceOperationUseCase.getCountByFilter({
+        carWashDeviceId: deviceId,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
+        currencyType: currencyType,
+        currencyId: currencyId,
+      });
     const deviceOperations =
       await this.findMethodsDeviceOperationUseCase.getAllByFilter({
         carWashDeviceId: deviceId,
         dateStart: dateStart,
         dateEnd: dateEnd,
+        currencyType: currencyType,
+        currencyId: currencyId,
         skip: skip,
         take: take,
       });
