@@ -3,7 +3,6 @@ import { ContractType } from '@prisma/client';
 
 export abstract class IClientRepository {
   abstract create(input: Client): Promise<Client>;
-  abstract createMany(input: Client[]): Promise<Client[]>;
   abstract findOneById(id: number): Promise<Client>;
   abstract findOneByPhone(phone: string): Promise<Client>;
   abstract findAll(): Promise<Client[]>;

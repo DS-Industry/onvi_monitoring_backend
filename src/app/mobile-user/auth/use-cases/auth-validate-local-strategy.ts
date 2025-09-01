@@ -5,6 +5,7 @@ import { IOtpRepository } from '@mobile-user/otp/interfaces/otp';
 import { IDateAdapter } from '@libs/date/adapter';
 import { OTP_EXPIRY_TIME } from '@constant/constants';
 import { StatusUser } from '@prisma/client';
+import { InvalidOtpException } from '@mobile-user/shared/exceptions/auth.exceptions';
 
 @Injectable()
 export class ValidateClientForLocalStrategyUseCase {
@@ -21,17 +22,15 @@ export class ValidateClientForLocalStrategyUseCase {
       this.dateService.isExpired(currentOtp.expireDate, OTP_EXPIRY_TIME) ||
       currentOtp.confirmCode != otp
     ) {
-      throw new Error('error');
+      throw new InvalidOtpException(phone);
     }
 
     const client = await this.clientRepository.findOneByPhone(phone);
 
-    if (!client) {
+    if (!client && client.status !== StatusUser.ACTIVE) {
       return null;
     }
-    if (client.status !== StatusUser.ACTIVE) {
-      throw new Error('authorization error');
-    }
+
     return client;
   }
 }

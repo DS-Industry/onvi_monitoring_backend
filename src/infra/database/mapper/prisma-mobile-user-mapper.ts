@@ -1,8 +1,15 @@
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { LTYUser as PrismaMobileUser, Prisma } from '@prisma/client';
+import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
+import {
+  LTYUser as PrismaMobileUser,
+  LTYUserMeta as PrismaMobileUserMeta,
+  Prisma,
+} from '@prisma/client';
 
 export class PrismaMobileUserMapper {
-  static toDomain(entity: PrismaMobileUser): Client {
+  static toDomain(
+    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta },
+  ): Client {
     if (!entity) {
       return null;
     }
@@ -21,6 +28,7 @@ export class PrismaMobileUserMapper {
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      meta: entity.meta ? this.toDomainClientMeta(entity.meta) : undefined,
     });
   }
 
@@ -40,6 +48,33 @@ export class PrismaMobileUserMapper {
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
+    };
+  }
+
+  static toDomainClientMeta(entity: PrismaMobileUserMeta): ClientMeta {
+    if (!entity) {
+      return null;
+    }
+    return new ClientMeta({
+      id: entity.id,
+      clientId: entity.clientId,
+      deviceId: entity.deviceId,
+      model: entity.model,
+      name: entity.name,
+      platform: entity.platform,
+    });
+  }
+
+  static toPrismaClientMeta(
+    clientMeta: ClientMeta,
+  ): Prisma.LTYUserMetaUncheckedCreateInput {
+    return {
+      id: clientMeta?.id,
+      clientId: clientMeta.clientId,
+      deviceId: clientMeta.deviceId,
+      model: clientMeta.model,
+      name: clientMeta.name,
+      platform: clientMeta.platform,
     };
   }
 }

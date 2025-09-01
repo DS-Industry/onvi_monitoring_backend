@@ -54,9 +54,11 @@ import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
+import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
+  ClientMetaRepositoryProvider,
   TagRepositoryProvider,
   CardRepositoryProvider,
   LoyaltyProgramRepositoryProvider,

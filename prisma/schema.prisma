@@ -24,6 +24,7 @@ model Organization {
   DeviceApiKey             DeviceApiKey[]
   hrPositions              HrPosition[]
   hrWorker                 HrWorker[]
+  cards                    LTYCard[]
   nomenclatures            Nomenclature[]
   ltyProgram               LTYProgram?               @relation(fields: [ltyProgramId], references: [id])
   organizationDocument     OrganizationDocument?     @relation(fields: [organizationDocumentId], references: [id])
@@ -32,7 +33,6 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                    @relation("OrganizationToUser")
-  cards                    LTYCard[]
 }
 
 model Address {
@@ -592,8 +592,21 @@ model LTYUser {
   workerCorporate      LTYCorporate?         @relation("Worker", fields: [workerCorporateId], references: [id])
   promocodeTransaction PromocodeTransaction?
   tags                 LTYUserTag[]          @relation("LTYUserToLTYUserTag")
+  meta                 LTYUserMeta?         @relation("LTYUserToLTYUserMeta")
+
 }
 
+model LTYUserMeta {
+  id        Int    @id @default(autoincrement())
+  clientId  Int    @unique
+  deviceId  Int
+  model     String
+  name      String
+  platform  String
+
+  client    LTYUser @relation("LTYUserToLTYUserMeta", fields: [clientId], references: [id])
+}
+ 
 model LTYCorporate {
   id        Int       @id @default(autoincrement())
   name      String

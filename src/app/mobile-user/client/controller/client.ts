@@ -3,10 +3,11 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param, ParseIntPipe,
+  Param,
+  ParseIntPipe,
   Post,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { GetByIdClientUseCase } from '../../../../core/loyalty-core/mobile-user/client/use-cases/client-get-by-id';
 import { FileInterceptor } from '@nestjs/platform-express';

@@ -1,5 +1,6 @@
 import { StatusUser, ContractType } from '@prisma/client';
 import { BaseEntity } from '@utils/entity';
+import { ClientMeta } from './clientMeta';
 
 export interface ClientProps {
   id?: number;
@@ -18,6 +19,7 @@ export interface ClientProps {
   updatedAt?: Date;
   mobileUserRoleId?: number;
   cardId?: number;
+  meta?: ClientMeta;
 }
 
 export class Client extends BaseEntity<ClientProps> {
@@ -89,6 +91,10 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.cardId;
   }
 
+  get meta(): ClientMeta {
+    return this.props.meta;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -135,5 +141,9 @@ export class Client extends BaseEntity<ClientProps> {
 
   set email(email: string) {
     this.props.email = email;
+  }
+
+  set meta(meta: ClientMeta) {
+    this.props.meta = meta;
   }
 }

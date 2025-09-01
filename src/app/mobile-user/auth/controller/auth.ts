@@ -5,6 +5,7 @@ import {
   Post,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { LocalGuard } from '@mobile-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@mobile-user/auth/controller/dto/auth-login.dto';
@@ -15,6 +16,8 @@ import { SendOtpAuthUseCase } from '@mobile-user/auth/use-cases/auth-send-otp';
 import { RefreshGuard } from '@mobile-user/auth/guards/refresh.guard';
 import { AuthRegisterDto } from '@mobile-user/auth/controller/dto/auth-register.dto';
 import { RegisterAuthUseCase } from '@mobile-user/auth/use-cases/auth-register';
+import { InvalidOtpException } from '@mobile-user/shared/exceptions/auth.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
 
 @Controller('auth')
 export class Auth {
@@ -30,6 +33,10 @@ export class Auth {
   @Post('/login')
   async login(@Body() body: AuthLoginDto, @Request() req: any): Promise<any> {
     try {
+      /*
+        TODO:
+        - add custom http errors exceptions
+      */
       const { user } = req;
       if (user.register) {
         return {
@@ -38,15 +45,35 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authLogin.execute(body.phone, user.props.id);
+      return await this.authLogin.execute(body.phone, user);
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof InvalidOtpException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: 401,
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
   @Post('/register')
   @HttpCode(201)
-  async register(@Body() body: AuthRegisterDto, @Request() req: any) {
+  async register(@Body() body: AuthRegisterDto) {
+    /*
+        TODO:
+        - add custom http errors exceptions
+        - add deleted client login logic
+        - add card creation logic
+        - add promocode automatic generation based on condition (if clinet is from moy-ka!ds)
+      */
+
     const { correctClient, accessToken, refreshToken } =
       await this.authRegister.execute(body.phone, body.otp);
     return {
@@ -63,6 +90,13 @@ export class Auth {
   @HttpCode(201)
   @Post('/send/otp')
   async sendOtp(@Body() body: AuthSendOtpDto) {
+    /*
+        TODO:
+        - add custom http errors exceptions
+        - handling dev accounts
+        - redis otp security by ip address
+
+      */
     try {
       const otp = await this.authSendOtp.execute(body.phone);
       return {
@@ -79,6 +113,10 @@ export class Auth {
   @Post('refresh')
   async refresh(@Body() body: any, @Request() req: any) {
     try {
+      /*
+        TODO:
+        - add custom http errors exceptions
+      */
       const { user } = req;
       const accessToken = await this.singAccessToken.execute(
         user.props.phone,

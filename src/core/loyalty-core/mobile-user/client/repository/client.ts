@@ -18,11 +18,6 @@ export class ClientRepository extends IClientRepository {
     });
     return PrismaMobileUserMapper.toDomain(client);
   }
-
-  public async createMany(input: Client[]): Promise<Client[]> {
-    return Promise.resolve([]);
-  }
-
   public async findAll(): Promise<Client[]> {
     const clients = await this.prisma.lTYUser.findMany();
     return clients.map((item) => PrismaMobileUserMapper.toDomain(item));
@@ -194,6 +189,10 @@ export class ClientRepository extends IClientRepository {
     const client = await this.prisma.lTYUser.findFirst({
       where: {
         phone,
+      },
+      include: {
+        meta: true,
+        card: true,
       },
     });
     return PrismaMobileUserMapper.toDomain(client);
