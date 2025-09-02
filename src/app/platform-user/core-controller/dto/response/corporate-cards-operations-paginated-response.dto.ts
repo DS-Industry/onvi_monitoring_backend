@@ -3,6 +3,9 @@ import { CorporateCardOperationResponseDto } from './corporate-card-operation-re
 export class CorporateCardsOperationsPaginatedResponseDto {
   data: CorporateCardOperationResponseDto[];
   total: number;
-  skip: number;
-  take: number;
+  page: number;
+  size: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
