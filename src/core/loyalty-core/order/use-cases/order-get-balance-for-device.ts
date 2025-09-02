@@ -27,13 +27,17 @@ export class OrderGetBalanceForDeviceUseCase {
       return this.createErrorResponse(3);
     }
 
+    const ownerCard =
+      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
+
+    const targetCard = ownerCard || cardData;
     const { maxDiscount, maxCashback } = this.calculateMaxBenefits(
-      cardData.benefits,
+      targetCard.benefits,
     );
 
     return {
       errcode: 200,
-      balance: cardData.balance,
+      balance: targetCard.balance,
       discount: maxDiscount,
       cashback: maxCashback,
     };

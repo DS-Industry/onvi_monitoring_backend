@@ -37,6 +37,12 @@ export class FindMethodsCardUseCase {
     return await this.cardRepository.findFullCardInfoForDevice(devNumber);
   }
 
+  async getOwnerCorporationCard(
+    unqNumber: string,
+  ): Promise<LoyaltyCardInfoFullResponseDto | null> {
+    return await this.cardRepository.findOwnerCorporationCard(unqNumber);
+  }
+
   async getAll(data: {
     unqNumber?: string;
     organizationId?: number;
@@ -45,11 +51,15 @@ export class FindMethodsCardUseCase {
     return await this.cardRepository.getAll(data);
   }
 
-  async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
+  async getUserKeyStatsByOrganization(
+    data: ClientKeyStatsDto,
+  ): Promise<UserKeyStatsResponseDto> {
     return await this.cardRepository.getUserKeyStatsByOrganization(data);
   }
 
-  async getClientLoyaltyStats(data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
+  async getClientLoyaltyStats(
+    data: ClientLoyaltyStatsDto,
+  ): Promise<ClientLoyaltyStatsResponseDto> {
     return await this.cardRepository.getClientLoyaltyStats(data);
   }
 }

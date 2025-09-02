@@ -45,7 +45,10 @@ export class OrderOperForDeviceUseCase {
       discountSum = Math.round(sum * (discount.maxDiscount / 100));
     }*/
 
-    const order = await this.handlerOrderUseCase.execute({
+    const ownerCard =
+      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
+
+    const orderData = {
       transactionId: this.generateTransactionId(),
       sumFull: sum,
       sumReal: 0,
@@ -53,11 +56,15 @@ export class OrderOperForDeviceUseCase {
       sumDiscount: discountSum,
       sumCashback: 0,
       carWashDeviceId: deviceId,
-      platform: PlatformType.ONVI,
-      orderData: new Date(Date.now()),
+      platform: PlatformType.LOCAL_LOYALTY,
+      orderData: new Date(),
       orderStatus: OrderStatus.COMPLETED,
       cardMobileUserId: cardData.cardId,
-    });
+    };
+
+    const order = ownerCard
+      ? await this.handlerOrderUseCase.execute(orderData, ownerCard)
+      : await this.handlerOrderUseCase.execute(orderData);
 
     return {
       errcode: 200,

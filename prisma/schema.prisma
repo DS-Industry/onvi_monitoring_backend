@@ -1379,6 +1379,7 @@ enum PlatformType {
   ONVI
   YANDEX
   LUKOIL
+  LOCAL_LOYALTY
 }
 
 enum OrderHandlerStatus {

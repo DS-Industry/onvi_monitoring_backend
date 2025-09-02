@@ -1,6 +1,6 @@
 import { MNGSaleItem as PrismaSaleItem, Prisma } from '@prisma/client';
 import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
-import { SaleItemResponseDto } from "@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto";
+import { SaleItemResponseDto } from '@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto';
 export type PrismaSaleItemWithNomenclature = Prisma.MNGSaleItemGetPayload<{
   include: { nomenclature: true };
 }>;
@@ -14,12 +14,12 @@ export class PrismaSaleItemMapper {
       nomenclatureId: entity.nomenclatureId,
       mngSaleDocumentId: entity.mngSaleDocumentId,
       count: entity.count,
-      fullSum: 0,
+      fullSum: entity.fullSum,
     });
   }
 
   static toDomainWhitNomenclatureName(
-    entity: PrismaSaleItemWithNomenclature
+    entity: PrismaSaleItemWithNomenclature,
   ): SaleItemResponseDto {
     if (!entity) {
       return null;
@@ -30,7 +30,7 @@ export class PrismaSaleItemMapper {
       nomenclatureName: entity.nomenclature.name,
       mngSaleDocumentId: entity.mngSaleDocumentId,
       count: entity.count,
-      fullSum: 0,
+      fullSum: entity.fullSum,
     };
   }
   static toPrisma(saleItem: SaleItem): Prisma.MNGSaleItemUncheckedCreateInput {
@@ -39,6 +39,7 @@ export class PrismaSaleItemMapper {
       nomenclatureId: saleItem.nomenclatureId,
       mngSaleDocumentId: saleItem.mngSaleDocumentId,
       count: saleItem.count,
+      fullSum: saleItem.fullSum,
     };
   }
 }

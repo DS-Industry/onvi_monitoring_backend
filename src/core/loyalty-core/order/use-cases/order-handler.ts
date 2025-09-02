@@ -10,6 +10,7 @@ import {
   USING_BONUSES_OPER_TYPE_ID,
 } from '@constant/constants';
 import { UpdateOrderUseCase } from '@loyalty/order/use-cases/order-update';
+import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 
 @Injectable()
 export class HandlerOrderUseCase {
@@ -20,7 +21,10 @@ export class HandlerOrderUseCase {
     private readonly updateOrderUseCase: UpdateOrderUseCase,
   ) {}
 
-  async execute(data: HandlerDto): Promise<Order> {
+  async execute(
+    data: HandlerDto,
+    ownerCard?: LoyaltyCardInfoFullResponseDto,
+  ): Promise<Order> {
     if (data.platform != PlatformType.ONVI && data.clientPhone) {
       const card = await this.findMethodsCardUseCase.getByClientPhone(
         data.clientPhone,
@@ -62,6 +66,20 @@ export class HandlerOrderUseCase {
             card,
           );
         }
+      } else if (data.platform == PlatformType.LOCAL_LOYALTY && ownerCard) {
+        const card = await this.findMethodsCardUseCase.getById(
+          ownerCard.cardId,
+        );
+        await this.createCardBonusOperUseCase.execute(
+          {
+            carWashDeviceId: data.carWashDeviceId,
+            typeOperId: USING_BONUSES_OPER_TYPE_ID,
+            operDate: data.orderData,
+            sum: data.sumBonus,
+            orderMobileUserId: order.id,
+          },
+          card,
+        );
       }
     } catch (error) {
       orderHandlerStatus = OrderHandlerStatus.ERROR;

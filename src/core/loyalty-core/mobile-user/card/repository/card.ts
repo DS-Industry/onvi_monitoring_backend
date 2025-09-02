@@ -97,6 +97,46 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toLoyaltyCardInfoFullDto(card);
   }
 
+  public async findOwnerCorporationCard(
+    unqNumber: string,
+  ): Promise<LoyaltyCardInfoFullResponseDto | null> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: {
+        client: {
+          ownerCorporates: {
+            some: {
+              workers: {
+                some: {
+                  card: {
+                    unqNumber,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      include: {
+        client: true,
+        cardTier: {
+          include: {
+            benefits: true,
+            ltyProgram: {
+              include: {
+                organizations: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    return PrismaCardMobileUserMapper.toLoyaltyCardInfoFullDto(card);
+  }
+
   public async update(input: Card): Promise<Card> {
     const cardEntity = PrismaCardMobileUserMapper.toPrisma(input);
     const card = await this.prisma.lTYCard.update({
@@ -155,7 +195,9 @@ export class CardRepository extends ICardRepository {
     return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
   }
 
-  public async getUserKeyStatsByOrganization(data: ClientKeyStatsDto): Promise<UserKeyStatsResponseDto> {
+  public async getUserKeyStatsByOrganization(
+    data: ClientKeyStatsDto,
+  ): Promise<UserKeyStatsResponseDto> {
     const organization = await this.prisma.organization.findUnique({
       where: { id: data.organizationId },
     });
@@ -198,8 +240,13 @@ export class CardRepository extends ICardRepository {
       throw new Error(`Card not found for client ${data.clientId}`);
     }
 
-    if (!card.cardTier?.ltyProgram?.organizations || card.cardTier.ltyProgram.organizations.length === 0) {
-      throw new Error(`Card does not belong to organization ${data.organizationId}`);
+    if (
+      !card.cardTier?.ltyProgram?.organizations ||
+      card.cardTier.ltyProgram.organizations.length === 0
+    ) {
+      throw new Error(
+        `Card does not belong to organization ${data.organizationId}`,
+      );
     }
 
     const orders = await this.prisma.lTYOrder.findMany({
@@ -224,10 +271,15 @@ export class CardRepository extends ICardRepository {
     });
 
     const totalOrdersCount = orders.length;
-    const totalAmountSpent = orders.reduce((sum, order) => sum + order.sumReal, 0);
-    const averageOrderAmount = totalOrdersCount > 0 ? totalAmountSpent / totalOrdersCount : 0;
+    const totalAmountSpent = orders.reduce(
+      (sum, order) => sum + order.sumReal,
+      0,
+    );
+    const averageOrderAmount =
+      totalOrdersCount > 0 ? totalAmountSpent / totalOrdersCount : 0;
     const firstOrderDate = orders.length > 0 ? orders[0].orderData : undefined;
-    const lastOrderDate = orders.length > 0 ? orders[orders.length - 1].orderData : undefined;
+    const lastOrderDate =
+      orders.length > 0 ? orders[orders.length - 1].orderData : undefined;
 
     return {
       clientId: data.clientId,
@@ -245,7 +297,9 @@ export class CardRepository extends ICardRepository {
     };
   }
 
-  public async getClientLoyaltyStats(data: ClientLoyaltyStatsDto): Promise<ClientLoyaltyStatsResponseDto> {
+  public async getClientLoyaltyStats(
+    data: ClientLoyaltyStatsDto,
+  ): Promise<ClientLoyaltyStatsResponseDto> {
     const organization = await this.prisma.organization.findUnique({
       where: { id: data.organizationId },
     });
@@ -299,8 +353,13 @@ export class CardRepository extends ICardRepository {
       throw new Error(`Card tier not found for client ${data.clientId}`);
     }
 
-    if (!card.cardTier?.ltyProgram?.organizations || card.cardTier.ltyProgram.organizations.length === 0) {
-      throw new Error(`Card does not belong to organization ${data.organizationId}`);
+    if (
+      !card.cardTier?.ltyProgram?.organizations ||
+      card.cardTier.ltyProgram.organizations.length === 0
+    ) {
+      throw new Error(
+        `Card does not belong to organization ${data.organizationId}`,
+      );
     }
 
     const orders = await this.prisma.lTYOrder.findMany({
@@ -322,10 +381,16 @@ export class CardRepository extends ICardRepository {
       },
     });
 
-    const totalPurchaseAmount = orders.reduce((sum, order) => sum + order.sumReal, 0);
-    
-    const totalBonusEarned = orders.reduce((sum, order) => sum + order.sumBonus, 0);
-    
+    const totalPurchaseAmount = orders.reduce(
+      (sum, order) => sum + order.sumReal,
+      0,
+    );
+
+    const totalBonusEarned = orders.reduce(
+      (sum, order) => sum + order.sumBonus,
+      0,
+    );
+
     const activeBonuses = await this.prisma.lTYBonusBank.aggregate({
       where: {
         cardId: card.id,
@@ -337,29 +402,34 @@ export class CardRepository extends ICardRepository {
         sum: true,
       },
     });
-    
+
     const activeBonusesSum = activeBonuses._sum.sum || 0;
 
     const accumulatedAmount = totalPurchaseAmount + totalBonusEarned;
 
     const allTiers = card.cardTier?.ltyProgram?.cardTiers || [];
-    const currentTierIndex = allTiers.findIndex(tier => tier.id === card.cardTierId);
-    const nextTier = currentTierIndex >= 0 && currentTierIndex < allTiers.length - 1 ? allTiers[currentTierIndex + 1] : null;
+    const currentTierIndex = allTiers.findIndex(
+      (tier) => tier.id === card.cardTierId,
+    );
+    const nextTier =
+      currentTierIndex >= 0 && currentTierIndex < allTiers.length - 1
+        ? allTiers[currentTierIndex + 1]
+        : null;
 
-    console.log("allTiers: ", allTiers);
+    console.log('allTiers: ', allTiers);
 
     let amountToNextTier = 0;
     let nextTierName = null;
     let nextTierId = null;
     let nextTierThreshold = 0;
-    
+
     if (nextTier) {
       const currentTierId = card.cardTierId || 1;
       const nextTierIdValue = nextTier.id;
-      
+
       const currentTierBenefitLimit = card.cardTier?.limitBenefit || 0;
       const nextTierBenefitLimit = nextTier.limitBenefit || 0;
-      
+
       console.log('Tier progression calculation:', {
         currentTierId,
         nextTierId: nextTierIdValue,
@@ -367,20 +437,19 @@ export class CardRepository extends ICardRepository {
         nextTierBenefitLimit,
         accumulatedAmount,
       });
-      
-      if (nextTierBenefitLimit > currentTierBenefitLimit) {
 
+      if (nextTierBenefitLimit > currentTierBenefitLimit) {
         nextTierThreshold = nextTierBenefitLimit - currentTierBenefitLimit;
-        
+
         amountToNextTier = Math.max(0, nextTierThreshold - accumulatedAmount);
-        
+
         console.log('Tier threshold calculation:', {
           nextTierThreshold,
           amountToNextTier,
           calculation: `${nextTierBenefitLimit} - ${currentTierBenefitLimit} = ${nextTierThreshold}`,
         });
       }
-      
+
       nextTierName = nextTier.name;
       nextTierId = nextTier.id;
     }
@@ -390,41 +459,51 @@ export class CardRepository extends ICardRepository {
       organizationId: data.organizationId,
       organizationName: organization.name,
       clientName: client.name,
-      
-      
+
       totalPurchaseAmount,
       accumulatedAmount,
       amountToNextTier,
-      
+
       activeBonuses: activeBonusesSum,
       totalBonusEarned,
-      
+
       cardNumber: card.number,
       cardDevNumber: card.unqNumber,
-      
+
       currentTierName: card.cardTier?.name,
       currentTierId: card.cardTierId,
       currentTierDescription: card.cardTier?.description,
-      
+
       nextTierName: nextTierName,
       nextTierId: nextTierId,
       nextTierDescription: nextTier?.description,
-      
+
       isHighestTier: !nextTier,
-      tierProgressPercentage: nextTier ? 
-        Math.min(100, Math.max(0, Math.round((accumulatedAmount / (nextTierThreshold || 1)) * 100))) : 
-        100,
+      tierProgressPercentage: nextTier
+        ? Math.min(
+            100,
+            Math.max(
+              0,
+              Math.round((accumulatedAmount / (nextTierThreshold || 1)) * 100),
+            ),
+          )
+        : 100,
     };
   }
 
-  public async validateOrganizationExists(organizationId: number): Promise<boolean> {
+  public async validateOrganizationExists(
+    organizationId: number,
+  ): Promise<boolean> {
     const organization = await this.prisma.organization.findUnique({
       where: { id: organizationId },
     });
     return !!organization;
   }
 
-  public async validateTierExistsAndAccessible(tierId: number, organizationId: number): Promise<boolean> {
+  public async validateTierExistsAndAccessible(
+    tierId: number,
+    organizationId: number,
+  ): Promise<boolean> {
     const tier = await this.prisma.lTYCardTier.findFirst({
       where: {
         id: tierId,
@@ -440,13 +519,13 @@ export class CardRepository extends ICardRepository {
     return !!tier;
   }
 
-  public async checkCardExists(devNumber: string, uniqueNumber: string): Promise<boolean> {
+  public async checkCardExists(
+    devNumber: string,
+    uniqueNumber: string,
+  ): Promise<boolean> {
     const existingCard = await this.prisma.lTYCard.findFirst({
       where: {
-        OR: [
-          { unqNumber: devNumber },
-          { number: uniqueNumber },
-        ],
+        OR: [{ unqNumber: devNumber }, { number: uniqueNumber }],
       },
     });
     return !!existingCard;
