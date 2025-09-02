@@ -13,6 +13,7 @@ export interface CorporateProps {
   ownerEmail?: string;
   ownerAvatar?: string;
   status?: string;
+  organizationId?: number;
 }
 
 export class Corporate extends BaseEntity<CorporateProps> {
@@ -70,5 +71,11 @@ export class Corporate extends BaseEntity<CorporateProps> {
   }
   set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
+  }
+  get organizationId(): number {
+    return this.props.organizationId;
+  }
+  set organizationId(organizationId: number) {
+    this.props.organizationId = organizationId;
   }
 }

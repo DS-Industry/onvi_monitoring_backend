@@ -1080,9 +1080,14 @@ export class LoyaltyController {
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(200)
   async getCorporateClients(
+    @Request() req: any,
     @Query() data: CorporateClientsFilterDto,
   ): Promise<CorporateClientsPaginatedResponseDto> {
     try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.getCorporateClientsValidate(data.organizationId, ability);
+      
       return await this.corporateFindByFilterUseCase.execute(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1106,9 +1111,14 @@ export class LoyaltyController {
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(200)
   async getCorporateClientById(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CorporateClientResponseDto> {
     try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
+      
       return await this.corporateGetByIdUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1136,7 +1146,10 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { user } = req;
+      const { user, ability } = req;
+      
+      await this.loyaltyValidateRules.createCorporateClientValidate(data.organizationId, ability);
+      
       return await this.createCorporateClientUseCase.execute(data, user.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1160,10 +1173,15 @@ export class LoyaltyController {
   @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(200)
   async updateCorporateClient(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: CorporateClientUpdateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.updateCorporateClientValidate(id, ability);
+      
       return await this.updateCorporateClientUseCase.execute(id, data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1181,4 +1199,6 @@ export class LoyaltyController {
       }
     }
   }
+
+
 }

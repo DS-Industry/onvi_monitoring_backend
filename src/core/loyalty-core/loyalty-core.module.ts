@@ -54,6 +54,7 @@ import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
+import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 
 const repositories: Provider[] = [
@@ -145,6 +146,7 @@ const corporateUseCase: Provider[] = [
   CorporateGetByIdUseCase,
   CreateCorporateClientUseCase,
   UpdateCorporateClientUseCase,
+  FindMethodsCorporateUseCase,
 ];
 
 @Module({

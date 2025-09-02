@@ -2,6 +2,10 @@ import { IsOptional, IsString, IsNumber, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CorporateClientsFilterDto {
+  @Type(() => Number)
+  @IsNumber()
+  organizationId: number;
+
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

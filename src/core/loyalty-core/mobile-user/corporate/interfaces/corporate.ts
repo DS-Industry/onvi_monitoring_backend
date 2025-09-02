@@ -7,6 +7,7 @@ export abstract class ICorporateRepository {
   abstract findAllByOwnerId(ownerId: number): Promise<Corporate[]>;
   abstract update(input: Corporate): Promise<Corporate>;
   abstract findAllByFilter(
+    organizationId: number,
     placementId?: number,
     search?: string,
     inn?: string,
@@ -18,6 +19,7 @@ export abstract class ICorporateRepository {
     registrationTo?: string,
   ): Promise<Corporate[]>;
   abstract countByFilter(
+    organizationId: number,
     placementId?: number,
     search?: string,
     inn?: string,

@@ -80,6 +80,8 @@ import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-
 import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
 import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
 import { FindMethodsBenefitActionUseCase } from '@loyalty/loyalty/benefit/benefitAction/use-case/benefitAction-find-methods';
+import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
+import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-methods';
 import { Position } from '@hr/position/domain/position';
@@ -159,6 +161,7 @@ export class ValidateLib {
     private readonly findMethodsLoyaltyTierUseCase: FindMethodsLoyaltyTierUseCase,
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
+    private readonly findMethodsCorporateUseCase: FindMethodsCorporateUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
@@ -987,6 +990,17 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkClient };
+  }
+
+  public async corporateClientByIdExists(id: number): Promise<ValidateResponse<Corporate>> {
+    const checkCorporateClient = await this.findMethodsCorporateUseCase.getById(id);
+    if (!checkCorporateClient) {
+      return {
+        code: 400,
+        errorMessage: 'The corporate client does not exist',
+      };
+    }
+    return { code: 200, object: checkCorporateClient };
   }
 
   public async loyaltyProgramByIdExists(

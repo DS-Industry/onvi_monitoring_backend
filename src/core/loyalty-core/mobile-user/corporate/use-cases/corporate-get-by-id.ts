@@ -28,6 +28,7 @@ export class CorporateGetByIdUseCase {
       ownerAvatar: corporate.ownerAvatar || '',
       status: corporate.status || '',
       dateRegistered: corporate.createdAt?.toISOString() || '',
+      organizationId: corporate.organizationId,
     };
   }
 }
