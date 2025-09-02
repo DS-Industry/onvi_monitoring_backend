@@ -347,4 +347,230 @@ export class LoyaltyValidateRules {
 
     return response.object;
   }
+
+  private extractLoyaltyProgramIds(ability: any): number[] {
+    const userLoyaltyProgramIds: number[] = [];
+    
+    if (ability && ability.rules) {
+      for (const rule of ability.rules) {
+        if (rule.subject === 'LTYProgram' && rule.conditions && rule.conditions.id) {
+          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
+            userLoyaltyProgramIds.push(...rule.conditions.id.in);
+          }
+        }
+      }
+    }
+    
+    return userLoyaltyProgramIds;
+  }
+
+  public async getCorporateClientsValidate(
+    organizationId: number,
+    ability: any,
+  ) {
+    const response = [];
+    
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: No loyalty program permissions',
+      });
+    }
+    
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+    
+    if (organizationCheck.code === 200 && organizationCheck.object) {
+      const organization = organizationCheck.object;
+      
+      if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+        response.push({
+          code: 404,
+          errorMessage: 'Organization has no loyalty programs',
+        });
+      } else {
+        const hasAccess = organization.ltyPrograms.some(program => 
+          userLoyaltyProgramIds.includes(program.id)
+        );
+        
+        if (!hasAccess) {
+          response.push({
+            code: 403,
+            errorMessage: 'Access denied: You do not have access to this organization\'s loyalty programs',
+          });
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    return organizationCheck.object;
+  }
+
+  public async getCorporateClientByIdValidate(
+    id: number,
+    ability: any,
+  ) {
+    const response = [];
+    
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: No loyalty program permissions',
+      });
+    }
+    
+    const corporateClient = await this.validateLib.corporateClientByIdExists(id);
+    response.push(corporateClient);
+    
+    if (corporateClient.code === 200 && corporateClient.object) {
+      const organizationId = corporateClient.object.organizationId;
+      
+      const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+      response.push(organizationCheck);
+      
+      if (organizationCheck.code === 200 && organizationCheck.object) {
+        const organization = organizationCheck.object;
+        
+        if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+          response.push({
+            code: 404,
+            errorMessage: 'Organization has no loyalty programs',
+          });
+        } else {
+          const hasAccess = organization.ltyPrograms.some(program => 
+            userLoyaltyProgramIds.includes(program.id)
+          );
+          
+          if (!hasAccess) {
+            response.push({
+              code: 403,
+              errorMessage: 'Access denied: You do not have access to this organization\'s loyalty programs',
+            });
+          }
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    return corporateClient.object;
+  }
+
+  public async createCorporateClientValidate(
+    organizationId: number,
+    ability: any,
+  ) {
+    const response = [];
+    
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: No loyalty program permissions',
+      });
+    }
+    
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+    
+    if (organizationCheck.code === 200 && organizationCheck.object) {
+      const organization = organizationCheck.object;
+      
+      if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+        response.push({
+          code: 404,
+          errorMessage: 'Organization has no loyalty programs',
+        });
+      } else {
+        const hasAccess = organization.ltyPrograms.some(program => 
+          userLoyaltyProgramIds.includes(program.id)
+        );
+        
+        if (!hasAccess) {
+          response.push({
+            code: 403,
+            errorMessage: 'Access denied: You do not have access to this organization\'s loyalty programs',
+          });
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    return organizationCheck.object;
+  }
+
+  public async updateCorporateClientValidate(
+    id: number,
+    ability: any,
+  ) {
+    const response = [];
+    
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: No loyalty program permissions',
+      });
+    }
+    
+    const corporateClient = await this.validateLib.corporateClientByIdExists(id);
+    response.push(corporateClient);
+    
+    if (corporateClient.code === 200 && corporateClient.object) {
+      const organizationId = corporateClient.object.organizationId;
+      
+      const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+      response.push(organizationCheck);
+      
+      if (organizationCheck.code === 200 && organizationCheck.object) {
+        const organization = organizationCheck.object;
+        
+        if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+          response.push({
+            code: 404,
+            errorMessage: 'Organization has no loyalty programs',
+          });
+        } else {
+          const hasAccess = organization.ltyPrograms.some(program => 
+            userLoyaltyProgramIds.includes(program.id)
+          );
+          
+          if (!hasAccess) {
+            response.push({
+              code: 403,
+              errorMessage: 'Access denied: You do not have access to this organization\'s loyalty programs',
+            });
+          }
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    return corporateClient.object;
+  }
 }
