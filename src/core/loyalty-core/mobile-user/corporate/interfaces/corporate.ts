@@ -1,9 +1,10 @@
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
-import { CorporateClientResponseDto } from '@platform-user/core-controller/dto/response/corporate-client-response.dto';
+import { CorporateCardsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-paginated-response.dto';
 
 export abstract class ICorporateRepository {
   abstract create(input: Corporate): Promise<Corporate>;
   abstract findOneById(id: number): Promise<Corporate>;
+  abstract findOneByIdWithStats(id: number): Promise<any>;
   abstract findAllByOwnerId(ownerId: number): Promise<Corporate[]>;
   abstract update(input: Corporate): Promise<Corporate>;
   abstract findAllByFilter(
@@ -28,4 +29,10 @@ export abstract class ICorporateRepository {
     registrationFrom?: string,
     registrationTo?: string,
   ): Promise<number>;
+  abstract findCardsByCorporateId(
+    corporateId: number,
+    skip?: number,
+    take?: number,
+    search?: string,
+  ): Promise<CorporateCardsPaginatedResponseDto>;
 }

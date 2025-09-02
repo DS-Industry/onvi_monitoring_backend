@@ -3,6 +3,7 @@ import { ICorporateRepository } from '@loyalty/mobile-user/corporate/interfaces/
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { PrismaCorporateMapper } from '@db/mapper/prisma-corporate-mapper';
+import { CorporateCardsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-paginated-response.dto';
 
 @Injectable()
 export class CorporateRepository extends ICorporateRepository {
@@ -25,6 +26,18 @@ export class CorporateRepository extends ICorporateRepository {
       },
       include: {
         owner: true,
+      },
+    });
+    return PrismaCorporateMapper.toDomain(corporate);
+  }
+
+  public async findOneByIdWithStats(id: number): Promise<any> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        owner: true,
         workers: {
           include: {
             card: true,
@@ -32,7 +45,7 @@ export class CorporateRepository extends ICorporateRepository {
         },
       },
     });
-    return PrismaCorporateMapper.toDomain(corporate);
+    return corporate;
   }
 
   public async findAllByOwnerId(ownerId: number): Promise<Corporate[]> {
@@ -183,5 +196,73 @@ export class CorporateRepository extends ICorporateRepository {
     }
 
     return await this.prisma.lTYCorporate.count({ where });
+  }
+
+  public async findCardsByCorporateId(
+    corporateId: number,
+    skip?: number,
+    take?: number,
+    search?: string,
+  ): Promise<CorporateCardsPaginatedResponseDto> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: {
+        id: corporateId,
+      },
+      include: {
+        workers: {
+          include: {
+            card: {
+              include: {
+                cardTier: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!corporate) {
+      return {
+        data: [],
+        total: 0,
+        skip: skip || 0,
+        take: take || 10,
+      };
+    }
+
+    let workersWithCards = corporate.workers.filter(worker => worker.card);
+
+    if (search) {
+      workersWithCards = workersWithCards.filter(worker => 
+        worker.name.toLowerCase().includes(search.toLowerCase()) ||
+        worker.card.unqNumber.toLowerCase().includes(search.toLowerCase()) ||
+        worker.card.number.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    const total = workersWithCards.length;
+
+    const paginatedWorkers = workersWithCards
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(skip || 0, (skip || 0) + (take || 10));
+
+    const data = paginatedWorkers.map(worker => ({
+      id: worker.card.id,
+      ownerName: worker.name,
+      cardUnqNumber: worker.card.unqNumber,
+      cardNumber: worker.card.number,
+      cardBalance: worker.card.balance,
+      cardTier: worker.card.cardTier ? {
+        name: worker.card.cardTier.name,
+        limitBenefit: worker.card.cardTier.limitBenefit,
+      } : null,
+    }));
+
+    return {
+      data,
+      total,
+      skip: skip || 0,
+      take: take || 10,
+    };
   }
 }
