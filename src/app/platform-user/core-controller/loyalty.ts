@@ -88,10 +88,12 @@ import { FileParserService } from './services/excel-parser.service';
 import { CorporateClientsFilterDto } from './dto/receive/corporate-clients-filter.dto';
 import { CorporateClientsPaginatedResponseDto } from './dto/response/corporate-clients-paginated-response.dto';
 import { CorporateClientResponseDto } from './dto/response/corporate-client-response.dto';
+import { CorporateClientStatsResponseDto } from './dto/response/corporate-client-stats-response.dto';
 import { CorporateClientCreateDto } from './dto/receive/corporate-client-create.dto';
 import { CorporateClientUpdateDto } from './dto/receive/corporate-client-update.dto';
 import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
+import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-stats-by-id';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 
@@ -126,6 +128,7 @@ export class LoyaltyController {
     private readonly fileParserService: FileParserService,
     private readonly corporateFindByFilterUseCase: CorporateFindByFilterUseCase,
     private readonly corporateGetByIdUseCase: CorporateGetByIdUseCase,
+    private readonly corporateGetStatsByIdUseCase: CorporateGetStatsByIdUseCase,
     private readonly createCorporateClientUseCase: CreateCorporateClientUseCase,
     private readonly updateCorporateClientUseCase: UpdateCorporateClientUseCase,
   ) {}
@@ -1200,5 +1203,32 @@ export class LoyaltyController {
     }
   }
 
-
+  @Get('corporate-clients/:id/stats')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getCorporateClientStatsById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<CorporateClientStatsResponseDto> {
+    try {
+      const { ability } = req;
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
+      return await this.corporateGetStatsByIdUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
 }

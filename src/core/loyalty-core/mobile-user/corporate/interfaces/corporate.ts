@@ -4,6 +4,7 @@ import { CorporateClientResponseDto } from '@platform-user/core-controller/dto/r
 export abstract class ICorporateRepository {
   abstract create(input: Corporate): Promise<Corporate>;
   abstract findOneById(id: number): Promise<Corporate>;
+  abstract findOneByIdWithStats(id: number): Promise<any>;
   abstract findAllByOwnerId(ownerId: number): Promise<Corporate[]>;
   abstract update(input: Corporate): Promise<Corporate>;
   abstract findAllByFilter(

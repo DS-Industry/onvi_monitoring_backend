@@ -25,6 +25,18 @@ export class CorporateRepository extends ICorporateRepository {
       },
       include: {
         owner: true,
+      },
+    });
+    return PrismaCorporateMapper.toDomain(corporate);
+  }
+
+  public async findOneByIdWithStats(id: number): Promise<any> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        owner: true,
         workers: {
           include: {
             card: true,
@@ -32,7 +44,7 @@ export class CorporateRepository extends ICorporateRepository {
         },
       },
     });
-    return PrismaCorporateMapper.toDomain(corporate);
+    return corporate;
   }
 
   public async findAllByOwnerId(ownerId: number): Promise<Corporate[]> {
