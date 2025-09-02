@@ -54,6 +54,7 @@ import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
 import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-stats-by-id';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
+import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
@@ -148,6 +149,7 @@ const corporateUseCase: Provider[] = [
   CorporateGetByIdUseCase,
   CorporateGetStatsByIdUseCase,
   CorporateGetCardsUseCase,
+  CorporateGetCardsOperationsUseCase,
   CreateCorporateClientUseCase,
   UpdateCorporateClientUseCase,
   FindMethodsCorporateUseCase,
