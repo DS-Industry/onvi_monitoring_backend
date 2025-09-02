@@ -4,6 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { PrismaCorporateMapper } from '@db/mapper/prisma-corporate-mapper';
 import { CorporateCardsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-paginated-response.dto';
+import { CorporateCardsOperationsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-operations-paginated-response.dto';
 
 @Injectable()
 export class CorporateRepository extends ICorporateRepository {
@@ -256,6 +257,191 @@ export class CorporateRepository extends ICorporateRepository {
         name: worker.card.cardTier.name,
         limitBenefit: worker.card.cardTier.limitBenefit,
       } : null,
+    }));
+
+    return {
+      data,
+      total,
+      skip: skip || 0,
+      take: take || 10,
+    };
+  }
+
+  public async findCardsOperationsByCorporateId(
+    corporateId: number,
+    skip?: number,
+    take?: number,
+    search?: string,
+    platform?: string,
+    orderStatus?: string,
+    contractType?: string,
+    carWashDeviceId?: number,
+    dateFrom?: string,
+    dateTo?: string,
+    minSumFull?: number,
+    maxSumFull?: number,
+    minSumBonus?: number,
+    maxSumBonus?: number,
+  ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
+    const corporate = await this.prisma.lTYCorporate.findFirst({
+      where: {
+        id: corporateId,
+      },
+      include: {
+        workers: {
+          include: {
+            card: true,
+          },
+        },
+      },
+    });
+
+    if (!corporate) {
+      return {
+        data: [],
+        total: 0,
+        skip: skip || 0,
+        take: take || 10,
+      };
+    }
+
+    const cardIds = corporate.workers
+      .filter(worker => worker.card)
+      .map(worker => worker.card.id);
+
+    if (cardIds.length === 0) {
+      return {
+        data: [],
+        total: 0,
+        skip: skip || 0,
+        take: take || 10,
+      };
+    }
+
+    const where: any = {
+      cardId: {
+        in: cardIds,
+      },
+    };
+
+    if (platform) {
+      where.platform = platform;
+    }
+
+    if (orderStatus) {
+      where.orderStatus = orderStatus;
+    }
+
+    if (contractType) {
+      where.contractType = contractType;
+    }
+
+    if (carWashDeviceId) {
+      where.carWashDeviceId = carWashDeviceId;
+    }
+
+    if (dateFrom || dateTo) {
+      where.orderData = {};
+      if (dateFrom) {
+        where.orderData.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        where.orderData.lte = new Date(dateTo);
+      }
+    }
+
+    if (minSumFull !== undefined) {
+      where.sumFull = { ...where.sumFull, gte: minSumFull };
+    }
+
+    if (maxSumFull !== undefined) {
+      where.sumFull = { ...where.sumFull, lte: maxSumFull };
+    }
+
+    if (minSumBonus !== undefined) {
+      where.sumBonus = { ...where.sumBonus, gte: minSumBonus };
+    }
+
+    if (maxSumBonus !== undefined) {
+      where.sumBonus = { ...where.sumBonus, lte: maxSumBonus };
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          card: {
+            client: {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
+          card: {
+            unqNumber: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        },
+        {
+          card: {
+            number: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        },
+        {
+          transactionId: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    const total = await this.prisma.lTYOrder.count({ where });
+
+    const orders = await this.prisma.lTYOrder.findMany({
+      where,
+      include: {
+        card: {
+          include: {
+            client: true,
+          },
+        },
+        carWashDevice: true,
+      },
+      orderBy: {
+        orderData: 'desc',
+      },
+      skip: skip || 0,
+      take: take || 10,
+    });
+
+    const data = orders.map(order => ({
+      id: order.id,
+      transactionId: order.transactionId,
+      cardId: order.cardId,
+      cardUnqNumber: order.card?.unqNumber || '',
+      cardNumber: order.card?.number || '',
+      ownerName: order.card?.client?.name || '',
+      sumFull: order.sumFull,
+      sumReal: order.sumReal,
+      sumBonus: order.sumBonus,
+      sumDiscount: order.sumDiscount,
+      sumCashback: order.sumCashback,
+      platform: order.platform,
+      contractType: order.contractType,
+      orderData: order.orderData,
+      createData: order.createData,
+      orderStatus: order.orderStatus,
+      orderHandlerStatus: order.orderHandlerStatus,
+      carWashDeviceId: order.carWashDeviceId,
+      carWashDeviceName: order.carWashDevice?.name || '',
     }));
 
     return {

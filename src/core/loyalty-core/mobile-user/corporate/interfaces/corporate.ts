@@ -1,5 +1,6 @@
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { CorporateCardsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-paginated-response.dto';
+import { CorporateCardsOperationsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/corporate-cards-operations-paginated-response.dto';
 
 export abstract class ICorporateRepository {
   abstract create(input: Corporate): Promise<Corporate>;
@@ -35,4 +36,20 @@ export abstract class ICorporateRepository {
     take?: number,
     search?: string,
   ): Promise<CorporateCardsPaginatedResponseDto>;
+  abstract findCardsOperationsByCorporateId(
+    corporateId: number,
+    skip?: number,
+    take?: number,
+    search?: string,
+    platform?: string,
+    orderStatus?: string,
+    contractType?: string,
+    carWashDeviceId?: number,
+    dateFrom?: string,
+    dateTo?: string,
+    minSumFull?: number,
+    maxSumFull?: number,
+    minSumBonus?: number,
+    maxSumBonus?: number,
+  ): Promise<CorporateCardsOperationsPaginatedResponseDto>;
 }

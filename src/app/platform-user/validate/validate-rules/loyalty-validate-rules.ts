@@ -574,7 +574,7 @@ export class LoyaltyValidateRules {
     return corporateClient.object;
   }
 
-  public async getCorporateCardsValidate(
+  private async validateCorporateClientAccess(
     corporateId: number,
     ability: any,
   ) {
@@ -628,5 +628,19 @@ export class LoyaltyValidateRules {
     );
     
     return corporateClient.object;
+  }
+
+  public async getCorporateCardsValidate(
+    corporateId: number,
+    ability: any,
+  ) {
+    return await this.validateCorporateClientAccess(corporateId, ability);
+  }
+
+  public async getCorporateCardsOperationsValidate(
+    corporateId: number,
+    ability: any,
+  ) {
+    return await this.validateCorporateClientAccess(corporateId, ability);
   }
 }

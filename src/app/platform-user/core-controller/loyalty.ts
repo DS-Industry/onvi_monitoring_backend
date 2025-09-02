@@ -93,10 +93,13 @@ import { CorporateClientCreateDto } from './dto/receive/corporate-client-create.
 import { CorporateClientUpdateDto } from './dto/receive/corporate-client-update.dto';
 import { CorporateCardsFilterDto } from './dto/receive/corporate-cards-filter.dto';
 import { CorporateCardsPaginatedResponseDto } from './dto/response/corporate-cards-paginated-response.dto';
+import { CorporateCardsOperationsFilterDto } from './dto/receive/corporate-cards-operations-filter.dto';
+import { CorporateCardsOperationsPaginatedResponseDto } from './dto/response/corporate-cards-operations-paginated-response.dto';
 import { CorporateFindByFilterUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-by-filter';
 import { CorporateGetByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-by-id';
 import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-stats-by-id';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
+import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 
@@ -133,6 +136,7 @@ export class LoyaltyController {
     private readonly corporateGetByIdUseCase: CorporateGetByIdUseCase,
     private readonly corporateGetStatsByIdUseCase: CorporateGetStatsByIdUseCase,
     private readonly corporateGetCardsUseCase: CorporateGetCardsUseCase,
+    private readonly corporateGetCardsOperationsUseCase: CorporateGetCardsOperationsUseCase,
     private readonly createCorporateClientUseCase: CreateCorporateClientUseCase,
     private readonly updateCorporateClientUseCase: UpdateCorporateClientUseCase,
   ) {}
@@ -1251,6 +1255,38 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getCorporateCardsValidate(id, ability);
 
       return await this.corporateGetCardsUseCase.execute(id, data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('corporate-clients/:id/cards/operations')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getCorporateCardsOperations(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() data: CorporateCardsOperationsFilterDto,
+  ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
+    try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.getCorporateCardsOperationsValidate(id, ability);
+
+      return await this.corporateGetCardsOperationsUseCase.execute(id, data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
