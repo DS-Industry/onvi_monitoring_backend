@@ -6,12 +6,12 @@ export class CorporateCardsOperationsFilterDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  skip?: number = 0;
+  page?: number = 1;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  take?: number = 10;
+  size?: number = 10;
 
   @IsOptional()
   @IsString()

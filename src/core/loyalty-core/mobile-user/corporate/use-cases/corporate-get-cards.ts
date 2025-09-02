@@ -13,10 +13,15 @@ export class CorporateGetCardsUseCase {
       throw new Error('Corporate client not exists');
     }
 
+    const page = data.page || 1;
+    const size = data.size || 10;
+    const skip = size * (page - 1);
+    const take = size;
+
     return await this.corporateRepository.findCardsByCorporateId(
       corporateId,
-      data.skip,
-      data.take,
+      skip,
+      take,
       data.search,
     );
   }

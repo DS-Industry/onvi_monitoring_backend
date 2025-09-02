@@ -223,11 +223,17 @@ export class CorporateRepository extends ICorporateRepository {
     });
 
     if (!corporate) {
+      const page = skip && take ? Math.floor(skip / take) + 1 : 1;
+      const size = take || 10;
+      const totalPages = 0;
       return {
         data: [],
         total: 0,
-        skip: skip || 0,
-        take: take || 10,
+        page,
+        size,
+        totalPages,
+        hasNext: false,
+        hasPrevious: false,
       };
     }
 
@@ -242,6 +248,11 @@ export class CorporateRepository extends ICorporateRepository {
     }
 
     const total = workersWithCards.length;
+    const size = take || 10;
+    const page = skip && take ? Math.floor(skip / take) + 1 : 1;
+    const totalPages = size > 0 ? Math.ceil(total / size) : 1;
+    const hasNext = page < totalPages;
+    const hasPrevious = page > 1;
 
     const paginatedWorkers = workersWithCards
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -262,8 +273,11 @@ export class CorporateRepository extends ICorporateRepository {
     return {
       data,
       total,
-      skip: skip || 0,
-      take: take || 10,
+      page,
+      size,
+      totalPages,
+      hasNext,
+      hasPrevious,
     };
   }
 
@@ -297,11 +311,17 @@ export class CorporateRepository extends ICorporateRepository {
     });
 
     if (!corporate) {
+      const page = skip && take ? Math.floor(skip / take) + 1 : 1;
+      const size = take || 10;
+      const totalPages = 0;
       return {
         data: [],
         total: 0,
-        skip: skip || 0,
-        take: take || 10,
+        page,
+        size,
+        totalPages,
+        hasNext: false,
+        hasPrevious: false,
       };
     }
 
@@ -310,11 +330,17 @@ export class CorporateRepository extends ICorporateRepository {
       .map(worker => worker.card.id);
 
     if (cardIds.length === 0) {
+      const page = skip && take ? Math.floor(skip / take) + 1 : 1;
+      const size = take || 10;
+      const totalPages = 0;
       return {
         data: [],
         total: 0,
-        skip: skip || 0,
-        take: take || 10,
+        page,
+        size,
+        totalPages,
+        hasNext: false,
+        hasPrevious: false,
       };
     }
 
@@ -444,11 +470,20 @@ export class CorporateRepository extends ICorporateRepository {
       carWashDeviceName: order.carWashDevice?.name || '',
     }));
 
+    const size = take || 10;
+    const page = skip && take ? Math.floor(skip / take) + 1 : 1;
+    const totalPages = size > 0 ? Math.ceil(total / size) : 1;
+    const hasNext = page < totalPages;
+    const hasPrevious = page > 1;
+
     return {
       data,
       total,
-      skip: skip || 0,
-      take: take || 10,
+      page,
+      size,
+      totalPages,
+      hasNext,
+      hasPrevious,
     };
   }
 }
