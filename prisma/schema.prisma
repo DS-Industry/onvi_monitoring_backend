@@ -232,7 +232,7 @@ model Pos {
   shiftReport          MNGShiftReport[]
   managerPaper         ManagerPaper[]
   monthlyPlans         MonthlyPlanPos[]
-  marketingCampaignPoses MarketingCampaignPos[]
+  marketingCampaigns MarketingCampaign[] @relation("MarketingCampaignToPos")
   marketingCampaignUsage MarketingCampaignUsage[]
   address              Address?              @relation(fields: [addressId], references: [id])
   createdBy            User                  @relation("CreatedByUser", fields: [createdById], references: [id])
@@ -1635,7 +1635,7 @@ model MarketingCampaign {
   ltyProgram            LTYProgram?                   @relation(fields: [ltyProgramId], references: [id])
   createdBy             User                          @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
   updatedBy             User                          @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
-  poses                 MarketingCampaignPos[]
+  poses                 Pos[]                         @relation("MarketingCampaignToPos")
   promocodes            MarketingPromocode[]
   campaignUsage         MarketingCampaignUsage[]
   
@@ -1643,20 +1643,6 @@ model MarketingCampaign {
   @@index([type])
   @@index([launchDate])
   @@index([ltyProgramId])
-}
-
-model MarketingCampaignPos {
-  id                    Int                @id @default(autoincrement())
-  campaignId            Int
-  posId                 Int
-  createdAt             DateTime           @default(now())
-  
-  campaign              MarketingCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  pos                   Pos                @relation(fields: [posId], references: [id], onDelete: Cascade)
-  
-  @@unique([campaignId, posId])
-  @@index([campaignId])
-  @@index([posId])
 }
 
 model MarketingPromocode {
