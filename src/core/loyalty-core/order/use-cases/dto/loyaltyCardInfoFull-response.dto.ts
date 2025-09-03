@@ -4,6 +4,7 @@ export class LoyaltyCardInfoFullResponseDto {
   cardId: number;
   balance: number;
   devNumber: string;
+  monthlyLimit?: number;
   status: StatusUser;
   benefits: {
     bonus: number;

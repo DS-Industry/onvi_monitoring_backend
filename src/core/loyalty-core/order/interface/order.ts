@@ -7,10 +7,10 @@ export abstract class IOrderRepository {
   abstract findAllByFilter(
     dateStart: Date,
     dateEnd: Date,
-    platformType: PlatformType | '*',
-    typeMobileUser: ContractType | '*',
-    orderStatus: OrderStatus | '*',
-    carWashDeviceId: number | '*',
+    platformType?: PlatformType,
+    typeMobileUser?: ContractType,
+    orderStatus?: OrderStatus,
+    carWashDeviceId?: number,
     cardId?: number,
   ): Promise<Order[]>;
   abstract update(input: Order): Promise<Order>;

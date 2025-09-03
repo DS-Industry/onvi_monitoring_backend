@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { Pos } from '@pos/pos/domain/pos';
 import { LoyaltyCardBalanceResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardBalance-response.dto';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { LTYBenefitType, StatusUser } from '@prisma/client';
+import { LTYBenefitType, OrderStatus, StatusUser } from '@prisma/client';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
+import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 
 @Injectable()
 export class OrderGetBalanceForDeviceUseCase {
   constructor(
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly findMethodsOrderUseCase: FindMethodsOrderUseCase,
   ) {}
 
   async execute(
@@ -30,14 +32,30 @@ export class OrderGetBalanceForDeviceUseCase {
     const ownerCard =
       await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
 
-    const targetCard = ownerCard || cardData;
-    const { maxDiscount, maxCashback } = this.calculateMaxBenefits(
-      targetCard.benefits,
-    );
+    let finalBalance: number;
+    let targetBenefits: { bonus: number; benefitType: LTYBenefitType }[];
+
+    if (ownerCard) {
+      const monthlySpent = await this.getMonthlySpentAmount(cardData.cardId);
+      const monthlyLimit = cardData.monthlyLimit ?? 0;
+
+      const availableBalance = Math.min(
+        ownerCard.balance,
+        monthlyLimit - monthlySpent,
+      );
+      finalBalance = Math.max(availableBalance, 0);
+      targetBenefits = ownerCard.benefits;
+    } else {
+      finalBalance = cardData.balance;
+      targetBenefits = cardData.benefits;
+    }
+
+    const { maxDiscount, maxCashback } =
+      this.calculateMaxBenefits(targetBenefits);
 
     return {
       errcode: 200,
-      balance: targetCard.balance,
+      balance: finalBalance,
       discount: maxDiscount,
       cashback: maxCashback,
     };
@@ -84,6 +102,21 @@ export class OrderGetBalanceForDeviceUseCase {
     });
 
     return { maxDiscount, maxCashback };
+  }
+
+  private async getMonthlySpentAmount(cardId: number): Promise<number> {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const orders = await this.findMethodsOrderUseCase.getAllByFilter({
+      dateStart: firstDayOfMonth,
+      dateEnd: lastDayOfMonth,
+      cardId: cardId,
+      orderStatus: OrderStatus.COMPLETED,
+    });
+
+    return orders.reduce((total, order) => total + order.sumFull, 0);
   }
 
   private createErrorResponse(errcode: number): LoyaltyCardBalanceResponseDto {

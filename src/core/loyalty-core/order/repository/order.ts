@@ -31,10 +31,10 @@ export class OrderRepository extends IOrderRepository {
   public async findAllByFilter(
     dateStart: Date,
     dateEnd: Date,
-    platformType: PlatformType | '*',
-    typeMobileUser: ContractType | '*',
-    orderStatus: OrderStatus | '*',
-    carWashDeviceId: number | '*',
+    platformType?: PlatformType,
+    typeMobileUser?: ContractType,
+    orderStatus?: OrderStatus,
+    carWashDeviceId?: number,
     cardId?: number,
   ): Promise<Order[]> {
     const where: any = {};
@@ -44,24 +44,24 @@ export class OrderRepository extends IOrderRepository {
       lte: dateEnd,
     };
 
-    if (platformType !== '*') {
+    if (platformType !== undefined) {
       where.platformType = platformType;
     }
 
-    if (typeMobileUser !== '*') {
+    if (typeMobileUser !== undefined) {
       where.typeMobileUser = typeMobileUser;
     }
 
-    if (orderStatus !== '*') {
+    if (orderStatus !== undefined) {
       where.orderStatus = orderStatus;
     }
 
-    if (carWashDeviceId !== '*') {
+    if (carWashDeviceId !== undefined) {
       where.carWashDeviceId = carWashDeviceId;
     }
 
     if (cardId !== undefined) {
-      where.carWashDeviceId = cardId;
+      where.cardId = cardId;
     }
 
     const orders = await this.prisma.lTYOrder.findMany({

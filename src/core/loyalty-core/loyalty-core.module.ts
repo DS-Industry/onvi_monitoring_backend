@@ -59,6 +59,7 @@ import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
+import { FindMethodsOrderUseCase } from "@loyalty/order/use-cases/order-find-methods";
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -142,6 +143,7 @@ const orderUseCase: Provider[] = [
   HandlerOrderUseCase,
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
+  FindMethodsOrderUseCase,
 ];
 
 const corporateUseCase: Provider[] = [

@@ -10,12 +10,14 @@ import {
 } from '@prisma/client';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
+import { FindMethodsOrderUseCase } from "@loyalty/order/use-cases/order-find-methods";
 
 @Injectable()
 export class OrderOperForDeviceUseCase {
   constructor(
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly handlerOrderUseCase: HandlerOrderUseCase,
+    private readonly findMethodsOrderUseCase: FindMethodsOrderUseCase,
   ) {}
 
   async execute(
@@ -35,7 +37,24 @@ export class OrderOperForDeviceUseCase {
     if (!this.checkOrganizationAccess(pos, cardData)) {
       return this.createErrorResponse(3, 'Нет доступа по карте');
     }
-    if (cardData.balance < sum) {
+    const ownerCard =
+      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
+
+    let finalBalance: number;
+    if (ownerCard) {
+      const monthlySpent = await this.getMonthlySpentAmount(cardData.cardId);
+      const monthlyLimit = cardData.monthlyLimit ?? 0;
+
+      const availableBalance = Math.min(
+        ownerCard.balance,
+        monthlyLimit - monthlySpent,
+      );
+      finalBalance = Math.max(availableBalance, 0);
+    } else {
+      finalBalance = cardData.balance;
+    }
+
+    if (finalBalance < sum) {
       return this.createErrorResponse(4, 'Недостаточно средств');
     }
 
@@ -44,9 +63,6 @@ export class OrderOperForDeviceUseCase {
     if (discount.maxDiscount > 0) {
       discountSum = Math.round(sum * (discount.maxDiscount / 100));
     }*/
-
-    const ownerCard =
-      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
 
     const orderData = {
       transactionId: this.generateTransactionId(),
@@ -69,7 +85,7 @@ export class OrderOperForDeviceUseCase {
     return {
       errcode: 200,
       errmes: '',
-      balance: cardData.balance - (sum - discountSum),
+      balance: finalBalance - (sum - discountSum),
       oper_id: order.id,
     };
   }
@@ -109,6 +125,21 @@ export class OrderOperForDeviceUseCase {
     });
 
     return { maxDiscount };
+  }
+
+  private async getMonthlySpentAmount(cardId: number): Promise<number> {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const orders = await this.findMethodsOrderUseCase.getAllByFilter({
+      dateStart: firstDayOfMonth,
+      dateEnd: lastDayOfMonth,
+      cardId: cardId,
+      orderStatus: OrderStatus.COMPLETED,
+    });
+
+    return orders.reduce((total, order) => total + order.sumFull, 0);
   }
 
   private createErrorResponse(

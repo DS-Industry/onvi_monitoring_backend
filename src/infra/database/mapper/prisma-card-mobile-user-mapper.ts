@@ -61,6 +61,7 @@ export class PrismaCardMobileUserMapper {
       balance: entity.balance,
       devNumber: entity.unqNumber,
       status: entity.client?.status,
+      monthlyLimit: entity?.monthlyLimit,
       benefits:
         entity.cardTier?.benefits.map((b) => ({
           bonus: b.bonus,
