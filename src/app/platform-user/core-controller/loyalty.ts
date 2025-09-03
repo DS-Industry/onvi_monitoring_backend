@@ -103,6 +103,7 @@ import { MarketingCampaignUpdateDto } from './dto/receive/marketing-campaign-upd
 import { MarketingCampaignResponseDto } from './dto/response/marketing-campaign-response.dto';
 import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
+import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
 import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
@@ -146,6 +147,7 @@ export class LoyaltyController {
     private readonly updateCorporateClientUseCase: UpdateCorporateClientUseCase,
     private readonly createMarketingCampaignUseCase: CreateMarketingCampaignUseCase,
     private readonly updateMarketingCampaignUseCase: UpdateMarketingCampaignUseCase,
+    private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1294,6 +1296,67 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getCorporateCardsOperationsValidate(id, ability);
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('marketing-campaigns')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getMarketingCampaigns(
+    @Request() req: any,
+  ): Promise<MarketingCampaignResponseDto[]> {
+    try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability);
+
+      return await this.findMethodsMarketingCampaignUseCase.getAll();
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('marketing-campaigns/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getMarketingCampaignById(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<MarketingCampaignResponseDto> {
+    try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(id, ability);
+
+      return await this.findMethodsMarketingCampaignUseCase.getOneById(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

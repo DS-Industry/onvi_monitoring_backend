@@ -721,6 +721,46 @@ export class LoyaltyValidateRules {
     );
   }
 
+  public async getMarketingCampaignsValidate(ability: any) {
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Access denied: No loyalty program permissions',
+      );
+    }
+  }
+
+  public async getMarketingCampaignByIdValidate(campaignId: number, ability: any) {
+    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    
+    if (userLoyaltyProgramIds.length === 0) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Access denied: No loyalty program permissions',
+      );
+    }
+
+    const campaignCheck = await this.validateLib.marketingCampaignByIdExists(campaignId);
+    
+    if (campaignCheck.code !== 200 || !campaignCheck.object) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        'Marketing campaign not found',
+      );
+    }
+
+    const campaign = campaignCheck.object;
+    
+    if (campaign.ltyProgramId && !userLoyaltyProgramIds.includes(campaign.ltyProgramId)) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Access denied: You do not have access to this marketing campaign',
+      );
+    }
+  }
+
   public async updateMarketingCampaignValidate(
     campaignId: number,
     data: {
