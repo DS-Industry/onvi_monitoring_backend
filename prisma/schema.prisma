@@ -24,15 +24,15 @@ model Organization {
   hrPositions              HrPosition[]
   hrWorker                 HrWorker[]
   cards                    LTYCard[]
+  LTYCorporate             LTYCorporate[]
   nomenclatures            Nomenclature[]
-  ltyPrograms              LTYProgram[]
   organizationDocument     OrganizationDocument?     @relation(fields: [organizationDocumentId], references: [id])
   owner                    User?                     @relation("Owner", fields: [ownerId], references: [id])
   placement                Placement?                @relation(fields: [placementId], references: [id])
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
+  ltyPrograms              LTYProgram[]              @relation("LTYProgramToOrganization")
   users                    User[]                    @relation("OrganizationToUser")
-  LTYCorporate             LTYCorporate[]
 }
 
 model Address {
@@ -157,6 +157,8 @@ model User {
   ltyPrograms                  LTYProgram[]                @relation("LTYProgramToUser")
   organizations                Organization[]              @relation("OrganizationToUser")
   posesPermissions             Pos[]                       @relation("PosToUser")
+  marketingCampaignsCreated    MarketingCampaign[]         @relation("MarketingCampaignCreatedBy")
+  marketingCampaignsUpdated    MarketingCampaign[]         @relation("MarketingCampaignUpdatedBy")
 }
 
 model UserMailConfirm {
@@ -230,6 +232,8 @@ model Pos {
   shiftReport          MNGShiftReport[]
   managerPaper         ManagerPaper[]
   monthlyPlans         MonthlyPlanPos[]
+  marketingCampaignPoses MarketingCampaignPos[]
+  marketingCampaignUsage MarketingCampaignUsage[]
   address              Address?              @relation(fields: [addressId], references: [id])
   createdBy            User                  @relation("CreatedByUser", fields: [createdById], references: [id])
   organization         Organization          @relation(fields: [organizationId], references: [id])
@@ -513,8 +517,9 @@ model LTYProgram {
   startDate         DateTime
   lifetimeBonusDays Int?
   cardTiers         LTYCardTier[]
-  organizations     Organization[]
+  organizations     Organization[]   @relation("LTYProgramToOrganization")
   managers          User[]           @relation("LTYProgramToUser")
+  marketingCampaigns MarketingCampaign[]
 }
 
 model LoyaltyPosPromocode {
@@ -593,6 +598,7 @@ model LTYUser {
   meta                 LTYUserMeta?          @relation("LTYUserToLTYUserMeta")
   promocodeTransaction PromocodeTransaction?
   tags                 LTYUserTag[]          @relation("LTYUserToLTYUserTag")
+  marketingCampaignUsage MarketingCampaignUsage[]
 }
 
 model LTYUserMeta {
@@ -611,14 +617,13 @@ model LTYCorporate {
   inn            String
   address        String
   ownerId        Int?
-  organizationId Int?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @default(now())
+  organizationId Int?
   status         LTYCorporateStatus @default(ACTIVE)
-
-  owner        LTYUser?      @relation("Owner", fields: [ownerId], references: [id])
-  workers      LTYUser[]     @relation("Worker")
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization?      @relation(fields: [organizationId], references: [id])
+  owner          LTYUser?           @relation("Owner", fields: [ownerId], references: [id])
+  workers        LTYUser[]          @relation("Worker")
 }
 
 model LTYUserTag {
@@ -1611,6 +1616,106 @@ enum PermissionAction {
   update
   delete
   read
+}
+
+model MarketingCampaign {
+  id                    Int                           @id @default(autoincrement())
+  name                  String
+  status                MarketingCampaignStatus       @default(DRAFT)
+  type                  MarketingCampaignType
+  launchDate            DateTime
+  endDate               DateTime?
+  description           String?
+  ltyProgramId          Int?
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  createdById           Int
+  updatedById           Int
+  
+  ltyProgram            LTYProgram?                   @relation(fields: [ltyProgramId], references: [id])
+  createdBy             User                          @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  updatedBy             User                          @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  poses                 MarketingCampaignPos[]
+  promocodes            MarketingPromocode[]
+  campaignUsage         MarketingCampaignUsage[]
+  
+  @@index([status])
+  @@index([type])
+  @@index([launchDate])
+  @@index([ltyProgramId])
+}
+
+model MarketingCampaignPos {
+  id                    Int                @id @default(autoincrement())
+  campaignId            Int
+  posId                 Int
+  createdAt             DateTime           @default(now())
+  
+  campaign              MarketingCampaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  pos                   Pos                @relation(fields: [posId], references: [id], onDelete: Cascade)
+  
+  @@unique([campaignId, posId])
+  @@index([campaignId])
+  @@index([posId])
+}
+
+model MarketingPromocode {
+  id                    Int                           @id @default(autoincrement())
+  campaignId            Int
+  promocode             String                        @unique
+  discountType          MarketingDiscountType
+  discountValue         Float
+  maxUsage              Int?
+  currentUsage          Int                           @default(0)
+  isActive              Boolean                       @default(true)
+  createdAt             DateTime                      @default(now())
+  updatedAt             DateTime                      @updatedAt
+  
+  campaign              MarketingCampaign             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  usage                 MarketingCampaignUsage[]
+  
+  @@index([campaignId])
+  @@index([promocode])
+  @@index([isActive])
+}
+
+model MarketingCampaignUsage {
+  id                    Int                @id @default(autoincrement())
+  campaignId            Int
+  promocodeId           Int?
+  ltyUserId             Int
+  usedAt                DateTime                      @default(now())
+  discountAmount        Float
+  orderAmount           Float
+  posId                 Int?
+  
+  campaign              MarketingCampaign             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  promocode             MarketingPromocode?          @relation(fields: [promocodeId], references: [id])
+  ltyUser               LTYUser                       @relation(fields: [ltyUserId], references: [id], onDelete: Cascade)
+  pos                   Pos?                          @relation(fields: [posId], references: [id])
+  
+  @@index([campaignId])
+  @@index([ltyUserId])
+  @@index([usedAt])
+  @@index([promocodeId])
+}
+
+enum MarketingCampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum MarketingCampaignType {
+  PROMOCODE
+  DISCOUNT
+}
+
+enum MarketingDiscountType {
+  FIXED
+  PERCENTAGE
 }
 
 enum StatusDeviceDataRaw {
