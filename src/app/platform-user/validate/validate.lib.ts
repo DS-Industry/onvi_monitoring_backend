@@ -103,6 +103,7 @@ import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-ca
 import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
 import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
+import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -174,6 +175,7 @@ export class ValidateLib {
     private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
     private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
     private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
+    private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
     private readonly bcrypt: IBcryptAdapter,
   ) {}
 
@@ -1358,6 +1360,19 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkSaleDocument };
+  }
+
+  public async marketingCampaignByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkMarketingCampaign = await this.findMethodsMarketingCampaignUseCase.getOneById(id);
+    if (!checkMarketingCampaign) {
+      return {
+        code: 400,
+        errorMessage: 'The marketing campaign does not exist',
+      };
+    }
+    return { code: 200, object: checkMarketingCampaign };
   }
 
   public handlerArrayResponse(
