@@ -32,6 +32,7 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   ltyPrograms              LTYProgram[]              @relation("LTYProgramToOrganization")
+  ownedLtyPrograms         LTYProgram[]              @relation("LTYProgramOwner")
   users                    User[]                    @relation("OrganizationToUser")
 }
 
@@ -511,15 +512,17 @@ model ErrNum {
 }
 
 model LTYProgram {
-  id                 Int                 @id @default(autoincrement())
-  name               String
-  status             LTYProgramStatus
-  startDate          DateTime
-  lifetimeBonusDays  Int?
-  cardTiers          LTYCardTier[]
-  organizations      Organization[]      @relation("LTYProgramToOrganization")
-  managers           User[]              @relation("LTYProgramToUser")
-  marketingCampaigns MarketingCampaign[]
+  id                   Int                 @id @default(autoincrement())
+  name                 String
+  status               LTYProgramStatus
+  startDate            DateTime
+  lifetimeBonusDays    Int?
+  ownerOrganizationId  Int?
+  cardTiers            LTYCardTier[]
+  organizations        Organization[]      @relation("LTYProgramToOrganization")
+  ownerOrganization    Organization?       @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
+  managers             User[]              @relation("LTYProgramToUser")
+  marketingCampaigns   MarketingCampaign[]
 }
 
 model LoyaltyPosPromocode {
