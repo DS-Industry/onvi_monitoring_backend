@@ -343,8 +343,6 @@ export class CardRepository extends ICardRepository {
       },
     });
 
-    console.log(card);
-
     if (!card) {
       throw new Error(`Card not found for client ${data.clientId}`);
     }

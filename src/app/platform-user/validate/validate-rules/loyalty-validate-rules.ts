@@ -159,17 +159,6 @@ export class LoyaltyValidateRules {
     response.push(loyaltyTierCheck);
 
     if (benefitIds) {
-      if (
-        loyaltyTierCheck.object &&
-        loyaltyTierCheck.object.limitBenefit !== undefined
-      ) {
-        if (benefitIds.length > loyaltyTierCheck.object.limitBenefit) {
-          response.push({
-            code: 400,
-            errorMessage: 'The benefit limit has been exceeded',
-          });
-        }
-      }
 
       await Promise.all(
         benefitIds.map(async (item) => {

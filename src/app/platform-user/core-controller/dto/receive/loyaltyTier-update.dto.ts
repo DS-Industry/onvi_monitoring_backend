@@ -10,4 +10,7 @@ export class LoyaltyTierUpdateDto {
   @IsArray()
   @IsOptional()
   benefitIds: number[];
+  @IsNumber()
+  @IsOptional()
+  limitBenefit?: number;
 }
