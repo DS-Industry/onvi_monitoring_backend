@@ -58,6 +58,9 @@ import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corpora
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
 import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
+import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
+import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
+import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 import { FindMethodsOrderUseCase } from "@loyalty/order/use-cases/order-find-methods";
 
@@ -157,6 +160,12 @@ const corporateUseCase: Provider[] = [
   FindMethodsCorporateUseCase,
 ];
 
+const marketingCampaignUseCase: Provider[] = [
+  CreateMarketingCampaignUseCase,
+  UpdateMarketingCampaignUseCase,
+  FindMethodsMarketingCampaignUseCase,
+];
+
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [
@@ -173,6 +182,7 @@ const corporateUseCase: Provider[] = [
     ...cardBonusOperType,
     ...orderUseCase,
     ...corporateUseCase,
+    ...marketingCampaignUseCase,
   ],
   exports: [
     ...repositories,
@@ -187,6 +197,7 @@ const corporateUseCase: Provider[] = [
     ...orderUseCase,
     ...cardBonusBank,
     ...corporateUseCase,
+    ...marketingCampaignUseCase,
   ],
 })
 export class LoyaltyCoreModule {}
