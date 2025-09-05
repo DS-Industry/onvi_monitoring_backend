@@ -100,11 +100,11 @@ export class UpdateMarketingCampaignUseCase {
           where: { id: existingPromocode.id },
           data: promocodeUpdateData,
         });
-      } else if (data.promocode) {
+      } else if (data.promocode || data.type === 'DISCOUNT') {
         promocode = await this.prisma.marketingPromocode.create({
           data: {
             campaignId: campaign.id,
-            promocode: data.promocode,
+            promocode: data.promocode || '', 
             discountType: data.discountType || 'FIXED',
             discountValue: data.discountValue || 0,
             maxUsage: data.maxUsage,
@@ -113,7 +113,7 @@ export class UpdateMarketingCampaignUseCase {
       }
     }
 
-    const posCount = await this.prisma.pos.count({
+    const poses = await this.prisma.pos.findMany({
       where: {
         marketingCampaigns: {
           some: {
@@ -121,7 +121,13 @@ export class UpdateMarketingCampaignUseCase {
           },
         },
       },
+      select: {
+        id: true,
+      },
     });
+
+    const posCount = poses.length;
+    const posIds = poses.map(pos => pos.id);
 
     return {
       id: campaign.id,
@@ -133,12 +139,13 @@ export class UpdateMarketingCampaignUseCase {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || data.discountType || campaign.promocodes[0]?.discountType,
+      discountType: promocode?.discountType || data.discountType || campaign.promocodes[0]?.discountType || '',
       discountValue: promocode?.discountValue || data.discountValue || campaign.promocodes[0]?.discountValue || 0,
       promocode: promocode?.promocode || campaign.promocodes[0]?.promocode,
       maxUsage: promocode?.maxUsage || campaign.promocodes[0]?.maxUsage,
       currentUsage: promocode?.currentUsage || campaign.promocodes[0]?.currentUsage || 0,
       posCount: posCount,
+      posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
       updatedAt: campaign.updatedAt.toISOString(),
       createdBy: {

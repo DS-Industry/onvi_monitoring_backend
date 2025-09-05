@@ -55,11 +55,11 @@ export class CreateMarketingCampaignUseCase {
     });
 
     let promocode = null;
-    if (data.promocode) {
+    if (data.promocode || data.type === 'DISCOUNT') {
       promocode = await this.prisma.marketingPromocode.create({
         data: {
           campaignId: campaign.id,
-          promocode: data.promocode,
+          promocode: data.promocode || '',
           discountType: data.discountType,
           discountValue: data.discountValue,
           maxUsage: data.maxUsage,
@@ -67,7 +67,7 @@ export class CreateMarketingCampaignUseCase {
       });
     }
 
-    const posCount = await this.prisma.pos.count({
+    const poses = await this.prisma.pos.findMany({
       where: {
         marketingCampaigns: {
           some: {
@@ -75,7 +75,13 @@ export class CreateMarketingCampaignUseCase {
           },
         },
       },
+      select: {
+        id: true,
+      },
     });
+
+    const posCount = poses.length;
+    const posIds = poses.map(pos => pos.id);
 
     return {
       id: campaign.id,
@@ -87,12 +93,13 @@ export class CreateMarketingCampaignUseCase {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || data.discountType,
-      discountValue: promocode?.discountValue || data.discountValue,
+      discountType: promocode?.discountType || '',
+      discountValue: promocode?.discountValue || 0,
       promocode: promocode?.promocode,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
+      posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
       updatedAt: campaign.updatedAt.toISOString(),
       createdBy: {

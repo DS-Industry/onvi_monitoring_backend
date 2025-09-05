@@ -14,6 +14,7 @@ export class MarketingCampaignResponseDto {
   maxUsage?: number;
   currentUsage: number;
   posCount: number;
+  posIds: number[];
   createdAt: string;
   updatedAt: string;
   createdBy: {

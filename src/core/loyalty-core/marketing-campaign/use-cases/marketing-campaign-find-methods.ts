@@ -33,6 +33,7 @@ export class FindMethodsMarketingCampaignUseCase {
 
     const posCount = campaign.poses.length;
     const promocode = campaign.promocodes[0]; 
+    const posIds = campaign.poses.map(pos => pos.id);
 
     return {
       id: campaign.id,
@@ -50,6 +51,7 @@ export class FindMethodsMarketingCampaignUseCase {
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
+      posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
       updatedAt: campaign.updatedAt.toISOString(),
       createdBy: {
@@ -87,6 +89,7 @@ export class FindMethodsMarketingCampaignUseCase {
     return campaigns.map(campaign => {
       const posCount = campaign.poses.length;
       const promocode = campaign.promocodes[0];
+      const posIds = campaign.poses.map(pos => pos.id);
 
       return {
         id: campaign.id,
@@ -104,6 +107,7 @@ export class FindMethodsMarketingCampaignUseCase {
         maxUsage: promocode?.maxUsage,
         currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
+        posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
         updatedAt: campaign.updatedAt.toISOString(),
         createdBy: {
