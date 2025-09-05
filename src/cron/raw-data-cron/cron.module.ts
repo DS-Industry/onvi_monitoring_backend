@@ -4,18 +4,20 @@ import process from 'process';
 import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { PosModule } from '@pos/pos.module';
-import { HandlerDeviceDataRawCron } from '../../infra/handler/device-data-raw/cron/handler-device-data-raw';
+import { HandlerDeviceDataRawCron } from '@infra/handler/device-data-raw/cron/handler-device-data-raw';
 import { ScheduleModule } from '@nestjs/schedule';
-import { HandlerTechTaskCron } from '../../infra/handler/techTask/cron/handler-techTask';
+import { HandlerTechTaskCron } from '@infra/handler/techTask/cron/handler-techTask';
 import { TechTaskModule } from '@tech-task/tech-task.module';
-import { TestDataCron } from '../../infra/handler/testData/cron/testData';
-import { TestDataTechTaskCron } from '../../infra/handler/testData/cron/testDataTechTask';
-import { HandlerManagerPaperCron } from '../../infra/handler/managerPaper/cron/handler-managerPaper';
+import { TestDataCron } from '@infra/handler/testData/cron/testData';
+import { TestDataTechTaskCron } from '@infra/handler/testData/cron/testDataTechTask';
+import { HandlerManagerPaperCron } from '@infra/handler/managerPaper/cron/handler-managerPaper';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from '@infra/cache/redis.module';
+import { HandlerUpdateTierCron } from '@infra/handler/loyalty/cron/handler-update-tier';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 
 const cronUseCases: Provider[] = [
   HandlerDeviceDataRawCron,
@@ -23,6 +25,7 @@ const cronUseCases: Provider[] = [
   TestDataCron,
   TestDataTechTaskCron,
   HandlerManagerPaperCron,
+  HandlerUpdateTierCron,
 ];
 
 @Module({
@@ -65,6 +68,7 @@ const cronUseCases: Provider[] = [
     PosModule,
     TechTaskModule,
     ManagerPaperCoreModule,
+    LoyaltyCoreModule,
     PlatformUserModule,
     RedisModule,
   ],

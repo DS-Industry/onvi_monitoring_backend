@@ -23,7 +23,7 @@ export class PrismaLoyaltyTierMapper {
       name: loyaltyTier.name,
       description: loyaltyTier?.description,
       ltyProgramId: loyaltyTier.loyaltyProgramId,
-      limitBenefit: loyaltyTier.limitBenefit,
+      limitBenefit: loyaltyTier?.limitBenefit,
     };
   }
 }

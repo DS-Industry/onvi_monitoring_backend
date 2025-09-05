@@ -63,7 +63,11 @@ import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
-import { FindMethodsOrderUseCase } from "@loyalty/order/use-cases/order-find-methods";
+import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
+import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
+import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
+import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
+import { UpdateHandlerLoyaltyTierUseCase } from "@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update-handler";
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -80,6 +84,7 @@ const repositories: Provider[] = [
   OrderProvider,
   CorporateRepositoryProvider,
   MarketingCampaignRepositoryProvider,
+  LoyaltyTierHistRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [
@@ -116,6 +121,12 @@ const loyaltyTierUseCase: Provider[] = [
   CreateLoyaltyTierUseCase,
   FindMethodsLoyaltyTierUseCase,
   UpdateLoyaltyTierUseCase,
+  UpdateHandlerLoyaltyTierUseCase,
+];
+
+const loyaltyTierHistUseCase: Provider[] = [
+  CreateLoyaltyTierHistUseCase,
+  FindMethodsLoyaltyTierHistUseCase,
 ];
 
 const benefitUseCase: Provider[] = [
@@ -185,6 +196,7 @@ const marketingCampaignUseCase: Provider[] = [
     ...orderUseCase,
     ...corporateUseCase,
     ...marketingCampaignUseCase,
+    ...loyaltyTierHistUseCase,
   ],
   exports: [
     ...repositories,

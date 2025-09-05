@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyTierRepository } from '@loyalty/loyalty/loyaltyTier/interface/loyaltyTier';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
+import { LoyaltyTierUpdateInfoResponseDto } from '@loyalty/loyalty/loyaltyTier/use-cases/dto/loyaltyTier-update-info-response.dto';
 
 @Injectable()
 export class FindMethodsLoyaltyTierUseCase {
@@ -23,6 +24,16 @@ export class FindMethodsLoyaltyTierUseCase {
   ): Promise<LoyaltyTier[]> {
     return await this.loyaltyTierRepository.findAllByLoyaltyProgramIds(
       loyaltyProgramIds,
+    );
+  }
+
+  async getCardsForTierUpdate(
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<LoyaltyTierUpdateInfoResponseDto[]> {
+    return await this.loyaltyTierRepository.findCardsForTierUpdate(
+      dateStart,
+      dateEnd,
     );
   }
 }

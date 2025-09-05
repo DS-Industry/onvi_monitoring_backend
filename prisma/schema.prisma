@@ -573,9 +573,27 @@ model LTYCardTier {
   description  String?
   ltyProgramId Int
   limitBenefit Int
+  upCardTierId Int?         @unique
+
   cards        LTYCard[]
   ltyProgram   LTYProgram   @relation(fields: [ltyProgramId], references: [id])
+  upCardTier   LTYCardTier? @relation("CardTierHierarchy", fields: [upCardTierId], references: [id])
+  downCardTiers LTYCardTier[] @relation("CardTierHierarchy")
+  oldCardTierHist LTYCardTierHist[] @relation("oldCardTier")
+  newCardTierHist LTYCardTierHist[] @relation("newCardTier")
   benefits     LTYBenefit[] @relation("LTYBenefitToLTYCardTier")
+}
+
+model LTYCardTierHist {
+  id                            Int          @id @default(autoincrement())
+  cardId                        Int
+  transitionDate                DateTime
+  oldCardTierId                 Int
+  newCardTierId                 Int
+
+  oldCardTier                   LTYCardTier   @relation("oldCardTier", fields: [oldCardTierId], references: [id])
+  newCardTier                   LTYCardTier   @relation("newCardTier", fields: [newCardTierId], references: [id])
+  card                          LTYCard       @relation(fields: [cardId], references: [id])
 }
 
 model LTYUser {
@@ -655,6 +673,7 @@ model LTYCard {
   organization   Organization?  @relation(fields: [organizationId], references: [id])
   equarings      LTYEquaring[]
   orders         LTYOrder[]
+  cardTierHist   LTYCardTierHist[]
 }
 
 model LTYBonusBank {

@@ -17,6 +17,7 @@ export abstract class ICardRepository {
     unqNumber: string,
   ): Promise<LoyaltyCardInfoFullResponseDto | null>;
   abstract update(input: Card): Promise<Card>;
+  abstract updateTier(id: number, tierId: number): Promise<Card>;
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
   abstract getUserKeyStatsByOrganization(
     data: ClientKeyStatsDto,
