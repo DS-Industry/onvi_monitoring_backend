@@ -146,6 +146,16 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
+  public async updateTier(id: number, tierId: number): Promise<Card> {
+    const card = await this.prisma.lTYCard.update({
+      where: {
+        id: id,
+      },
+      data: { cardTierId: tierId },
+    });
+    return PrismaCardMobileUserMapper.toDomain(card);
+  }
+
   public async getAll({
     unqNumber,
     organizationId,
