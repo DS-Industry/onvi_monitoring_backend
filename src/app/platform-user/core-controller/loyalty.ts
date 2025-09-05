@@ -223,13 +223,14 @@ export class LoyaltyController {
     try {
       const { ability, user } = req;
       await this.loyaltyValidateRules.createLoyaltyProgramValidate(
-        data.organizationIds,
+        [...data.organizationIds, data.ownerOrganizationId],
         ability,
       );
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
           organizationIds: data.organizationIds,
+          ownerOrganizationId: data.ownerOrganizationId,
           lifetimeDays: data?.lifetimeDays,
         },
         user,

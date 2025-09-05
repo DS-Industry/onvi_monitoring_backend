@@ -4,6 +4,7 @@ export abstract class ILoyaltyProgramRepository {
   abstract create(
     input: LoyaltyProgram,
     organizationIds: number[],
+    ownerOrganizationId: number,
     userId: number,
   ): Promise<LoyaltyProgram>;
   abstract findOneById(id: number): Promise<LoyaltyProgram>;

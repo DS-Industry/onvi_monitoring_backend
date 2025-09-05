@@ -14,6 +14,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async create(
     input: LoyaltyProgram,
     organizationIds: number[],
+    ownerOrganizationId: number,
     userId: number,
   ): Promise<LoyaltyProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
@@ -21,6 +22,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
       data: {
         ...LoyaltyProgramEntity,
         organizations: { connect: organizationIds.map((id) => ({ id })) },
+        ownerOrganization: { connect: { id: ownerOrganizationId } },
         managers: { connect: { id: userId } },
       },
     });
@@ -77,7 +79,6 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   ): Promise<LoyaltyProgram[]> {
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
-        ...accessibleBy(ability).LTYProgram,
         organizations: {
           some: {
             id: organizationId,
