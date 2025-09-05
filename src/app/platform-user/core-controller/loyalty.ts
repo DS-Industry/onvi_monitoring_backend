@@ -390,6 +390,7 @@ export class LoyaltyController {
         data.loyaltyProgramId,
         data.limitBenefit,
         data?.description,
+        data?.upCardTierId,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -464,6 +465,7 @@ export class LoyaltyController {
         tiers =
           await this.findMethodsLoyaltyTierUseCase.getAllByLoyaltyProgramId(
             data.programId,
+            data?.onlyWithoutChildren,
           );
       }
       return await Promise.all(
@@ -478,6 +480,7 @@ export class LoyaltyController {
             description: tier.description,
             loyaltyProgramId: tier.loyaltyProgramId,
             limitBenefit: tier.limitBenefit,
+            upCardTierId: tier.upCardTierId,
             benefitIds: benefitIds,
           };
         }),
@@ -1106,9 +1109,12 @@ export class LoyaltyController {
   ): Promise<CorporateClientsPaginatedResponseDto> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.getCorporateClientsValidate(data.organizationId, ability);
-      
+
+      await this.loyaltyValidateRules.getCorporateClientsValidate(
+        data.organizationId,
+        ability,
+      );
+
       return await this.corporateFindByFilterUseCase.execute(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1137,9 +1143,12 @@ export class LoyaltyController {
   ): Promise<CorporateClientResponseDto> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
-      
+
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(
+        id,
+        ability,
+      );
+
       return await this.corporateGetByIdUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1168,9 +1177,12 @@ export class LoyaltyController {
   ): Promise<CorporateClientResponseDto> {
     try {
       const { user, ability } = req;
-      
-      await this.loyaltyValidateRules.createCorporateClientValidate(data.organizationId, ability);
-      
+
+      await this.loyaltyValidateRules.createCorporateClientValidate(
+        data.organizationId,
+        ability,
+      );
+
       return await this.createCorporateClientUseCase.execute(data, user.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1200,9 +1212,12 @@ export class LoyaltyController {
   ): Promise<CorporateClientResponseDto> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.updateCorporateClientValidate(id, ability);
-      
+
+      await this.loyaltyValidateRules.updateCorporateClientValidate(
+        id,
+        ability,
+      );
+
       return await this.updateCorporateClientUseCase.execute(id, data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1231,7 +1246,10 @@ export class LoyaltyController {
   ): Promise<CorporateClientStatsResponseDto> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(
+        id,
+        ability,
+      );
       return await this.corporateGetStatsByIdUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1261,7 +1279,7 @@ export class LoyaltyController {
   ): Promise<CorporateCardsPaginatedResponseDto> {
     try {
       const { ability } = req;
-      
+
       await this.loyaltyValidateRules.getCorporateCardsValidate(id, ability);
 
       return await this.corporateGetCardsUseCase.execute(id, data);
@@ -1293,8 +1311,11 @@ export class LoyaltyController {
   ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.getCorporateCardsOperationsValidate(id, ability);
+
+      await this.loyaltyValidateRules.getCorporateCardsOperationsValidate(
+        id,
+        ability,
+      );
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);
     } catch (e) {
@@ -1323,7 +1344,7 @@ export class LoyaltyController {
   ): Promise<MarketingCampaignResponseDto[]> {
     try {
       const { ability } = req;
-      
+
       await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability);
 
       return await this.findMethodsMarketingCampaignUseCase.getAll();
@@ -1354,8 +1375,11 @@ export class LoyaltyController {
   ): Promise<MarketingCampaignResponseDto> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(id, ability);
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        id,
+        ability,
+      );
 
       return await this.findMethodsMarketingCampaignUseCase.getOneById(id);
     } catch (e) {
@@ -1385,15 +1409,15 @@ export class LoyaltyController {
   ): Promise<MarketingCampaignResponseDto> {
     try {
       const { user, ability } = req;
-      
+
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
           ltyProgramId: data.ltyProgramId,
           posIds: data.posIds,
         },
-        ability
+        ability,
       );
-      
+
       return await this.createMarketingCampaignUseCase.execute(data, user.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1423,17 +1447,21 @@ export class LoyaltyController {
   ): Promise<MarketingCampaignResponseDto> {
     try {
       const { user, ability } = req;
-      
+
       await this.loyaltyValidateRules.updateMarketingCampaignValidate(
         id,
         {
           ltyProgramId: data.ltyProgramId,
           posIds: data.posIds,
         },
-        ability
+        ability,
       );
-      
-      return await this.updateMarketingCampaignUseCase.execute(id, data, user.id);
+
+      return await this.updateMarketingCampaignUseCase.execute(
+        id,
+        data,
+        user.id,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

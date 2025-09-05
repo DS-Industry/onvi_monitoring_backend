@@ -12,6 +12,7 @@ export class PrismaLoyaltyTierMapper {
       description: entity.description,
       loyaltyProgramId: entity.ltyProgramId,
       limitBenefit: entity.limitBenefit,
+      upCardTierId: entity.upCardTierId,
     });
   }
 
@@ -24,6 +25,7 @@ export class PrismaLoyaltyTierMapper {
       description: loyaltyTier?.description,
       ltyProgramId: loyaltyTier.loyaltyProgramId,
       limitBenefit: loyaltyTier?.limitBenefit,
+      upCardTierId: loyaltyTier?.upCardTierId,
     };
   }
 }

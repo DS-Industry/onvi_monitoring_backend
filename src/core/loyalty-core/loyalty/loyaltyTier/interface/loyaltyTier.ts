@@ -6,6 +6,7 @@ export abstract class ILoyaltyTierRepository {
   abstract findOneById(id: number): Promise<LoyaltyTier>;
   abstract findAllByLoyaltyProgramId(
     ltyProgramId: number,
+    onlyWithoutChildren?: boolean,
   ): Promise<LoyaltyTier[]>;
   abstract findAllByLoyaltyProgramIds(
     ltyProgramIds: number[],

@@ -11,6 +11,9 @@ export class LoyaltyTierCreateDto {
   @IsNotEmpty({ message: 'loyaltyProgramId is required' })
   loyaltyProgramId: number;
   @IsNumber()
+  @IsNotEmpty({ message: 'limitBenefit is required' })
+  limitBenefit: number;
+  @IsNumber()
   @IsOptional()
-  limitBenefit?: number;
+  upCardTierId?: number;
 }

@@ -4,5 +4,6 @@ export class LoyaltyTierGetOneResponseDto{
   description?: string;
   loyaltyProgramId: number;
   limitBenefit: number;
+  upCardTierId?: number;
   benefitIds: number[]
 }

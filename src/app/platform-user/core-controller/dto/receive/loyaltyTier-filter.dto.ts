@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional } from "class-validator";
 import { Transform } from 'class-transformer';
 
 export class LoyaltyTierFilterDto {
@@ -8,4 +8,11 @@ export class LoyaltyTierFilterDto {
     return parseInt(value);
   })
   programId: number | '*';
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') {
+      return true;
+    }
+  })
+  onlyWithoutChildren?: boolean;
 }

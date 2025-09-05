@@ -30,12 +30,27 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
 
   public async findAllByLoyaltyProgramId(
     ltyProgramId: number,
+    onlyWithoutChildren: boolean = false,
   ): Promise<LoyaltyTier[]> {
+    let whereClause: any = {
+      ltyProgramId,
+    };
+
+    if (onlyWithoutChildren) {
+      whereClause = {
+        ...whereClause,
+        NOT: {
+          downCardTiers: {
+            some: {},
+          },
+        },
+      };
+    }
+
     const loyaltyTiers = await this.prisma.lTYCardTier.findMany({
-      where: {
-        ltyProgramId,
-      },
+      where: whereClause,
     });
+
     return loyaltyTiers.map((item) => PrismaLoyaltyTierMapper.toDomain(item));
   }
 

@@ -13,9 +13,11 @@ export class FindMethodsLoyaltyTierUseCase {
 
   async getAllByLoyaltyProgramId(
     loyaltyProgramId: number,
+    onlyWithoutChildren?: boolean,
   ): Promise<LoyaltyTier[]> {
     return await this.loyaltyTierRepository.findAllByLoyaltyProgramId(
       loyaltyProgramId,
+      onlyWithoutChildren,
     );
   }
 

@@ -6,7 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from "class-transformer";
 import { AddressCreateDto } from '@platform-user/core-controller/dto/receive/address-create.dto';
 import { CarWashPosType } from "@pos/carWashPos/domain/carWashPosType";
 
@@ -23,16 +23,16 @@ export class PosCreateDto {
   @Type(() => AddressCreateDto)
   @ValidateNested()
   address: AddressCreateDto;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'OrganizationId is required' })
   organizationId: number;
   @IsEnum(CarWashPosType)
   @IsNotEmpty({ message: 'Type pos is required' })
   carWashPosType: CarWashPosType;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'minSumOrder is required' })
   minSumOrder: number;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'maxSumOrder is required' })
   maxSumOrder: number;
   @IsNumber()
