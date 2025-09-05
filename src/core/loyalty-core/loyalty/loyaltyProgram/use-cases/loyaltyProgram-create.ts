@@ -14,6 +14,7 @@ export class CreateLoyaltyProgramUseCase {
   async execute(data: CreateDto, user: User): Promise<LoyaltyProgram> {
     const loyaltyProgram = new LoyaltyProgram({
       name: data.name,
+      ownerOrganizationId: data.ownerOrganizationId,
       status: LTYProgramStatus.ACTIVE,
       startDate: new Date(Date.now()),
       lifetimeDays: data?.lifetimeDays,
@@ -21,6 +22,7 @@ export class CreateLoyaltyProgramUseCase {
     return await this.loyaltyProgramRepository.create(
       loyaltyProgram,
       data.organizationIds,
+      data.ownerOrganizationId,
       user.id,
     );
   }

@@ -12,18 +12,19 @@ export class PrismaLoyaltyProgramMapper {
       status: entity.status,
       startDate: entity.startDate,
       lifetimeDays: entity.lifetimeBonusDays,
+      ownerOrganizationId: entity.ownerOrganizationId,
     });
   }
 
   static toPrisma(
     loyaltyProgram: LoyaltyProgram,
-  ): Prisma.LTYProgramUncheckedCreateInput {
+  ): Prisma.LTYProgramCreateInput {
     return {
-      id: loyaltyProgram?.id,
       name: loyaltyProgram.name,
       status: loyaltyProgram.status,
       startDate: loyaltyProgram.startDate,
       lifetimeBonusDays: loyaltyProgram?.lifetimeDays,
+      ownerOrganization: loyaltyProgram.ownerOrganizationId ? { connect: { id: loyaltyProgram.ownerOrganizationId } } : undefined,
     };
   }
 }

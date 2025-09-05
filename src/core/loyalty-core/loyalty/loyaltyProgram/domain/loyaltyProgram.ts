@@ -5,6 +5,7 @@ export interface LoyaltyProgramProps {
   id?: number;
   name: string;
   status: LTYProgramStatus;
+  ownerOrganizationId: number;
   startDate: Date;
   lifetimeDays?: number;
 }
@@ -38,6 +39,10 @@ export class LoyaltyProgram extends BaseEntity<LoyaltyProgramProps> {
     this.props.name = name;
   }
 
+  get ownerOrganizationId(): number {
+    return this.props.ownerOrganizationId;
+  }
+
   set status(status: LTYProgramStatus) {
     this.props.status = status;
   }
@@ -48,5 +53,9 @@ export class LoyaltyProgram extends BaseEntity<LoyaltyProgramProps> {
 
   set lifetimeDays(lifetimeDays: number) {
     this.props.lifetimeDays = lifetimeDays;
+  }
+
+  set ownerOrganizationId(ownerOrganizationId: number) {
+    this.props.ownerOrganizationId = ownerOrganizationId;
   }
 }

@@ -16,4 +16,7 @@ export class LoyaltyProgramCreateDto {
   @IsNumber()
   @IsOptional()
   lifetimeDays?: number;
+  @IsNumber()
+  @IsNotEmpty({ message: 'Owner organizationId is required' })
+  ownerOrganizationId: number;
 }
