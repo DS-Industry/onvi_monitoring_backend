@@ -20,8 +20,7 @@ export class PosCreateDto {
   @IsString()
   @IsOptional()
   posMetaData?: string;
-  @Type(() => AddressCreateDto)
-  @ValidateNested()
+  @IsNotEmpty({ message: 'address is required' })
   address: AddressCreateDto;
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'OrganizationId is required' })
