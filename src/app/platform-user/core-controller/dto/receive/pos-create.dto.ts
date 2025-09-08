@@ -35,7 +35,7 @@ export class PosCreateDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'maxSumOrder is required' })
   maxSumOrder: number;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'stepSumOrder is required' })
   stepSumOrder: number;
 }
