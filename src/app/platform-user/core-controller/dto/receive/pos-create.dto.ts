@@ -6,9 +6,9 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Transform, Type } from "class-transformer";
+import { Transform, Type } from 'class-transformer';
 import { AddressCreateDto } from '@platform-user/core-controller/dto/receive/address-create.dto';
-import { CarWashPosType } from "@pos/carWashPos/domain/carWashPosType";
+import { CarWashPosType } from '@pos/carWashPos/domain/carWashPosType';
 
 export class PosCreateDto {
   @IsString()
@@ -20,7 +20,17 @@ export class PosCreateDto {
   @IsString()
   @IsOptional()
   posMetaData?: string;
-  @IsNotEmpty({ message: 'address is required' })
+  @Transform(({ value }) => {
+    if (typeof value === 'object' && value !== null) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return JSON.parse(value);
+    }
+    return value;
+  })
+  @ValidateNested()
+  @Type(() => AddressCreateDto)
   address: AddressCreateDto;
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'OrganizationId is required' })
