@@ -5,6 +5,9 @@ export class WorkerUpdateDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'workerId is required' })
   workerId: number;
+  @IsOptional()
+  @IsString()
+  name?: string;
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   hrPositionId?: number;

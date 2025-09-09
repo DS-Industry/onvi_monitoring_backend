@@ -1199,6 +1199,7 @@ model HrWorker {
   monthlySalary       Int
   dailySalary         Int
   percentageSalary    Int
+  status              StatusHrWorker   @default(WORKS)
   gender              String?
   citizenship         String?
   passportSeries      String?
@@ -1588,6 +1589,11 @@ enum StatusUser {
   BLOCKED
   DELETED
   VERIFICATE
+}
+
+enum StatusHrWorker {
+  WORKS
+  DISMISSED
 }
 
 enum PositionUser {
