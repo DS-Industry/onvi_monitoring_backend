@@ -181,6 +181,37 @@ export class HrController {
       }
     }
   }
+  @Get('workers-count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadHrAbility())
+  @HttpCode(201)
+  async getWorkersCount(
+    @Query() data: WorkerFilterDto,
+  ): Promise<{ count: number }> {
+    try {
+      const count = await this.findMethodsWorkerUseCase.getAllByFilterCount(
+        data.placementId,
+        data.hrPositionId,
+        data.organizationId,
+        data?.name,
+      );
+      return { count };
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('worker/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())

@@ -14,6 +14,12 @@ export abstract class IWorkerRepository {
     skip?: number,
     take?: number,
   ): Promise<Worker[]>;
+  abstract findAllByFilterCount(
+    placementId?: number,
+    hrPositionId?: number,
+    organizationId?: number,
+    name?: string,
+  ): Promise<number>;
   abstract findAllForCalculatePayment(
     organizationId: number,
     billingMonth: Date,

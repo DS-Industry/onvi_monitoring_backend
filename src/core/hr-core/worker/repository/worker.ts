@@ -79,6 +79,33 @@ export class WorkerRepository extends IWorkerRepository {
     return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
   }
 
+  public async findAllByFilterCount(
+    placementId?: number,
+    hrPositionId?: number,
+    organizationId?: number,
+    name?: string,
+  ): Promise<number> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (name !== undefined) {
+      where.name = name;
+    }
+
+    if (hrPositionId !== undefined) {
+      where.hrPositionId = hrPositionId;
+    }
+
+    return this.prisma.hrWorker.count({ where: where });
+  }
+
   public async findAllForCalculatePayment(
     organizationId: number,
     billingMonth: Date,

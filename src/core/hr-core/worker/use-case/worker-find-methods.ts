@@ -29,6 +29,20 @@ export class FindMethodsWorkerUseCase {
     );
   }
 
+  async getAllByFilterCount(
+    placementId?: number,
+    hrPositionId?: number,
+    organizationId?: number,
+    name?: string,
+  ): Promise<number> {
+    return await this.workerRepository.findAllByFilterCount(
+      placementId,
+      hrPositionId,
+      organizationId,
+      name,
+    );
+  }
+
   async getAllForCalculatePayment(data: {
     organizationId: number;
     billingMonth: Date;
