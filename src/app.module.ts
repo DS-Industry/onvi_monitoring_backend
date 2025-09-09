@@ -28,6 +28,8 @@ import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@infra/cache/redis.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheSWRInterceptor } from '@common/interceptors/cache-swr.interceptor';
+import { MulterModule } from "@nestjs/platform-express";
+import { multerConfig } from "@libs/multer/multerConfig";
 
 @Module({
   imports: [
@@ -102,6 +104,7 @@ import { CacheSWRInterceptor } from '@common/interceptors/cache-swr.interceptor'
     EventEmitterModule.forRoot({
       wildcard: true,
     }),
+    MulterModule.register(multerConfig),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,

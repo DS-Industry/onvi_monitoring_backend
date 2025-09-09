@@ -1,4 +1,5 @@
 import { BaseEntity } from '@utils/entity';
+import { StatusHrWorker } from "@prisma/client";
 
 export interface WorkerProps {
   id?: number;
@@ -14,6 +15,7 @@ export interface WorkerProps {
   monthlySalary: number;
   dailySalary: number;
   percentageSalary: number;
+  status: StatusHrWorker;
   gender?: string;
   citizenship?: string;
   passportSeries?: string;
@@ -127,6 +129,14 @@ export class Worker extends BaseEntity<WorkerProps> {
 
   set percentageSalary(percentageSalary: number) {
     this.props.percentageSalary = percentageSalary;
+  }
+
+  get status(): StatusHrWorker {
+    return this.props.status;
+  }
+
+  set status(status: StatusHrWorker) {
+    this.props.status = status;
   }
 
   get gender(): string {

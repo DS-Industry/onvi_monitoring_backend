@@ -1,4 +1,7 @@
+import { StatusHrWorker } from '@prisma/client';
+
 export interface UpdateDto {
+  name?: string;
   hrPositionId?: number;
   placementId?: number;
   startWorkDate?: Date;
@@ -8,6 +11,7 @@ export interface UpdateDto {
   monthlySalary?: number;
   dailySalary?: number;
   percentageSalary?: number;
+  status?: StatusHrWorker;
   gender?: string;
   citizenship?: string;
   passportSeries?: string;

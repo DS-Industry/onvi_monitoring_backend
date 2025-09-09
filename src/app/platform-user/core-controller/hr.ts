@@ -34,7 +34,6 @@ import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-
 import { CreateWorkerUseCase } from '@hr/worker/use-case/worker-create';
 import { Worker } from '@hr/worker/domain/worker';
 import { WorkerCreateDto } from '@platform-user/core-controller/dto/receive/worker-create.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { WorkerFilterDto } from '@platform-user/core-controller/dto/receive/worker-filter.dto';
 import { UpdateWorkerUseCase } from '@hr/worker/use-case/worker-update';
@@ -53,6 +52,7 @@ import { PrepaymentsGetResponseDto } from '@platform-user/core-controller/dto/re
 import { PaymentCalculateWorkersDto } from '@platform-user/core-controller/dto/receive/payment-calculate-workers.dto';
 import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
 import { ShiftReportCalculationPaymentResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/shiftReport-calculation-payment-response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('hr')
 export class HrController {

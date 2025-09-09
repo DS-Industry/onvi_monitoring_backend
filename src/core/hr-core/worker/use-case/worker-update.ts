@@ -18,6 +18,7 @@ export class UpdateWorkerUseCase {
     file?: Express.Multer.File,
   ): Promise<Worker> {
     const {
+      name,
       hrPositionId,
       placementId,
       startWorkDate,
@@ -27,6 +28,7 @@ export class UpdateWorkerUseCase {
       monthlySalary,
       dailySalary,
       percentageSalary,
+      status,
       gender,
       citizenship,
       passportSeries,
@@ -37,6 +39,7 @@ export class UpdateWorkerUseCase {
       snils,
     } = input;
 
+    oldWorker.name = name ? name : oldWorker.name;
     oldWorker.hrPositionId = hrPositionId
       ? hrPositionId
       : oldWorker.hrPositionId;
@@ -54,6 +57,7 @@ export class UpdateWorkerUseCase {
     oldWorker.percentageSalary = percentageSalary
       ? percentageSalary
       : oldWorker.percentageSalary;
+    oldWorker.status = status ? status : oldWorker.status;
     oldWorker.gender = gender ? gender : oldWorker.gender;
     oldWorker.citizenship = citizenship ? citizenship : oldWorker.citizenship;
     oldWorker.passportSeries = passportSeries

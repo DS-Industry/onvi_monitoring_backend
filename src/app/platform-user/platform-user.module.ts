@@ -1,5 +1,4 @@
 import { Module, Provider } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { SignRefreshTokenUseCase } from '@platform-user/auth/use-cases/auth-sign-refresh-token';
@@ -68,20 +67,20 @@ import { ReportValidateRules } from '@platform-user/validate/validate-rules/repo
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 import { PlacementController } from '@platform-user/core-controller/placement';
-import { LoyaltyValidateRules } from "@platform-user/validate/validate-rules/loyalty-validate-rules";
-import { LoyaltyCoreModule } from "@loyalty/loyalty-core.module";
-import { LoyaltyController } from "@platform-user/core-controller/loyalty";
-import { HrController } from "@platform-user/core-controller/hr";
-import { HrCoreModule } from "@hr/hr-core.module";
-import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-validate-rules";
-import { NotificationController } from "@platform-user/core-controller/notification";
-import { NotificationValidateRules } from "@platform-user/validate/validate-rules/notification-validate-rules";
-import { NotificationCoreModule } from "@notification/notification-core.module";
-import { ManagerPaperController } from "@platform-user/core-controller/managerPaper";
-import { ManagerPaperValidateRules } from "@platform-user/validate/validate-rules/manager-paper-validate-rules";
-import { ManagerPaperCoreModule } from "@manager-paper/manager-paper-core.module";
-import { SaleController } from "@platform-user/core-controller/sale";
-import { FileParserService } from "@platform-user/core-controller/services/excel-parser.service";
+import { LoyaltyValidateRules } from '@platform-user/validate/validate-rules/loyalty-validate-rules';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
+import { LoyaltyController } from '@platform-user/core-controller/loyalty';
+import { HrController } from '@platform-user/core-controller/hr';
+import { HrCoreModule } from '@hr/hr-core.module';
+import { HrValidateRules } from '@platform-user/validate/validate-rules/hr-validate-rules';
+import { NotificationController } from '@platform-user/core-controller/notification';
+import { NotificationValidateRules } from '@platform-user/validate/validate-rules/notification-validate-rules';
+import { NotificationCoreModule } from '@notification/notification-core.module';
+import { ManagerPaperController } from '@platform-user/core-controller/managerPaper';
+import { ManagerPaperValidateRules } from '@platform-user/validate/validate-rules/manager-paper-validate-rules';
+import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
+import { SaleController } from '@platform-user/core-controller/sale';
+import { FileParserService } from '@platform-user/core-controller/services/excel-parser.service';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -167,9 +166,7 @@ const permission: Provider[] = [
   GetAllPermissionsInfoUseCases,
 ];
 
-const services: Provider[] = [
-  FileParserService,
-];
+const services: Provider[] = [FileParserService];
 
 @Module({
   imports: [
@@ -189,38 +186,6 @@ const services: Provider[] = [
     ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
-    MulterModule.register({
-      storage: require('multer').memoryStorage(), 
-      fileFilter: (req, file, cb) => {
-        const allowedMimeTypes = [
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-          'application/vnd.ms-excel', 
-          'application/octet-stream',
-          'application/vnd.ms-office', 
-          'application/zip', 
-          'text/csv',
-          'text/plain',
-        ];
-        
-        const allowedExtensions = ['.xlsx', '.xls', '.csv'];
-        const fileExtension = file.originalname ? 
-          file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.')) : '';
-        
-        if (allowedMimeTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
-          cb(null, true);
-        } else {
-          console.warn('Multer rejected file:', {
-            filename: file.originalname,
-            mimetype: file.mimetype,
-            extension: fileExtension,
-          });
-          cb(null, false);
-        }
-      },
-      limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
-      },
-    }),
   ],
   controllers: [...controllers],
   providers: [
@@ -232,6 +197,6 @@ const services: Provider[] = [
     ...userUseCase,
     ...services,
   ],
-  exports: [...userUseCase,]
+  exports: [...userUseCase],
 })
 export class PlatformUserModule {}
