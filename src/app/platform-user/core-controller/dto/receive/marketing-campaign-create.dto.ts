@@ -22,6 +22,14 @@ enum MarketingDiscountType {
   PERCENTAGE = 'PERCENTAGE',
 }
 
+enum MarketingCampaignStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
 export class MarketingCampaignCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'Campaign name is required' })
@@ -71,4 +79,8 @@ export class MarketingCampaignCreateDto {
   @IsOptional()
   @Min(1, { message: 'Max usage must be at least 1' })
   maxUsage?: number;
+
+  @IsEnum(MarketingCampaignStatus)
+  @IsOptional()
+  status?: MarketingCampaignStatus;
 }

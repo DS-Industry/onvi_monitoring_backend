@@ -26,7 +26,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaign = await this.prisma.marketingCampaign.create({
       data: {
         name: data.name,
-        status: MarketingCampaignStatus.DRAFT,
+        status: data.status || MarketingCampaignStatus.DRAFT,
         type: data.type,
         launchDate: data.launchDate,
         endDate: data.endDate,
@@ -160,6 +160,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     if (data.endDate !== undefined) updateData.endDate = data.endDate;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.ltyProgramId !== undefined) updateData.ltyProgramId = data.ltyProgramId;
+    if (data.status !== undefined) updateData.status = data.status;
 
     const campaign = await this.prisma.marketingCampaign.update({
       where: { id },
