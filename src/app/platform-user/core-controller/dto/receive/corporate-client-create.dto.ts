@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CorporateClientCreateDto {
   @IsString()
@@ -13,8 +14,9 @@ export class CorporateClientCreateDto {
   @IsNotEmpty({ message: 'Address is required' })
   address: string;
 
+  @Type(() => Number)
   @IsNumber()
-  @IsNotEmpty({ message: 'Address is required' })
+  @IsNotEmpty({ message: 'Organization ID is required' })
   organizationId: number;
 
 }
