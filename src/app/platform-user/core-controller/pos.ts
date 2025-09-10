@@ -27,7 +27,10 @@ import {
 import { PosProgramFullUseCase } from '@pos/pos/use-cases/pos-program-full';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { CreatePosUseCase } from '@pos/pos/use-cases/pos-create';
+import { UpdatePosUseCase } from '@pos/pos/use-cases/pos-update';
+import { DeletePosUseCase } from '@pos/pos/use-cases/pos-delete';
 import { PosCreateDto } from '@platform-user/core-controller/dto/receive/pos-create.dto';
+import { PosUpdateDto } from '@platform-user/core-controller/dto/receive/pos-update.dto';
 import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { PosFilterResponseDto } from '@platform-user/core-controller/dto/response/pos-filter-by-response.dto';
 import {
@@ -53,6 +56,8 @@ import { FileInterceptor } from "@nestjs/platform-express";
 export class PosController {
   constructor(
     private readonly createPosUseCase: CreatePosUseCase,
+    private readonly updatePosUseCase: UpdatePosUseCase,
+    private readonly deletePosUseCase: DeletePosUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly monitoringPosUseCase: MonitoringPosUseCase,
     private readonly monitoringFullByIdPosUseCase: MonitoringFullByIdPosUseCase,
@@ -100,6 +105,74 @@ export class PosController {
       }
     }
   }
+
+  @Patch(':id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdatePosAbility())
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(200)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: PosUpdateDto,
+    @Request() req: any,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<PosResponseDto> {
+    try {
+      const { user, ability } = req;
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+
+      
+      if (file) {
+        return await this.updatePosUseCase.execute(id, data, user, pos, file);
+      }
+      return await this.updatePosUseCase.execute(id, data, user, pos);
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch(':id/delete')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdatePosAbility())
+  @HttpCode(200)
+  async softDelete(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(id, ability);
+      await this.deletePosUseCase.execute(id);
+      return { status: 'success' };
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Get all pos for permission user
   @Get('filter')
   @UseGuards(JwtGuard, AbilitiesGuard)

@@ -23,4 +23,5 @@ export abstract class IPosRepository {
     addWorkerIds: number[],
     deleteWorkerIds: number[],
   ): Promise<any>;
+  abstract softDelete(id: number): Promise<Pos>;
 }

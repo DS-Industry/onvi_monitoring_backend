@@ -24,13 +24,10 @@ export class ClientCreateDto {
   })
   phone: string;
   @IsEmail()
-  @IsOptional()
   email?: string;
   @IsString()
-  @IsOptional()
   gender?: string;
   @IsEnum(ContractType)
-  @IsNotEmpty({ message: 'Type client is required' })
   contractType: ContractType;
   @IsString()
   @IsOptional()
@@ -54,6 +51,5 @@ export class ClientCreateDto {
   @Transform(({ value }) => value || [])
   tagIds?: number[];
   @IsNumber()
-  @IsOptional()
   cardId?: number;
 }
