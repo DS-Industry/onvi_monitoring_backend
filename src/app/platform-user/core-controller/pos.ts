@@ -119,12 +119,13 @@ export class PosController {
   ): Promise<PosResponseDto> {
     try {
       const { user, ability } = req;
-      await this.posValidateRules.getOneByIdValidate(id, ability);
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+
       
       if (file) {
-        return await this.updatePosUseCase.execute(id, data, user, file);
+        return await this.updatePosUseCase.execute(id, data, user, pos, file);
       }
-      return await this.updatePosUseCase.execute(id, data, user);
+      return await this.updatePosUseCase.execute(id, data, user, pos);
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({

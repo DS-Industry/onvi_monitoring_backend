@@ -9,6 +9,7 @@ import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-
 import { IFileAdapter } from '@libs/file/adapter';
 import { v4 as uuid } from 'uuid';
 import slugify from 'slugify';
+import { Pos } from '@pos/pos/domain/pos';
 
 @Injectable()
 export class UpdatePosUseCase {
@@ -23,14 +24,16 @@ export class UpdatePosUseCase {
     id: number,
     input: PosUpdateDto,
     user: User,
+    pos: Pos,
     file?: Express.Multer.File,
   ): Promise<PosResponseDto> {
-    const existingPos = await this.posRepository.findOneById(id);
     
-    if (!existingPos) {
+    if (!pos) {
       throw new Error('POS not found');
     }
 
+    const posProps = pos.getProps();
+    let addressId = posProps.addressId;
     if (input.address) {
       const addressData = new Address({
         city: input.address.city,
@@ -39,28 +42,29 @@ export class UpdatePosUseCase {
         lon: input?.address.lon,
       });
       const address = await this.addressRepository.create(addressData);
-      existingPos.addressId = address.id;
+      addressId = address.id;
     }
 
-    existingPos.name = input.name ? input.name : existingPos.name;
-    existingPos.slug = input.name ? slugify(input.name, '_') : existingPos.slug;
-    existingPos.timeWork = input.timeWork ? input.timeWork : existingPos.timeWork;
-    existingPos.organizationId = input.organizationId ? input.organizationId : existingPos.organizationId;
-    existingPos.posMetaData = input.posMetaData !== undefined ? input.posMetaData : existingPos.posMetaData;
-    existingPos.updatedAt = new Date(Date.now());
-    existingPos.updatedById = user.id;
+    posProps.name = input.name ? input.name : posProps.name;
+    posProps.slug = input.name ? slugify(input.name, '_') : posProps.slug;
+    posProps.timeWork = input.timeWork ? input.timeWork : posProps.timeWork;
+    posProps.organizationId = input.organizationId ? input.organizationId : posProps.organizationId;
+    posProps.posMetaData = input.posMetaData !== undefined ? input.posMetaData : posProps.posMetaData;
+    posProps.addressId = addressId;
+    posProps.updatedAt = new Date(Date.now());
+    posProps.updatedById = user.id;
 
     if (file) {
-      if (existingPos.image) {
-        await this.fileService.delete(`pos/${existingPos.name}/${existingPos.image}`);
+      if (posProps.image) {
+        await this.fileService.delete(`pos/${posProps.name}/${posProps.image}`);
       }
       const key = uuid();
-      existingPos.image = key;
-      const keyWay = 'pos/' + existingPos.name + '/' + key;
+      posProps.image = key;
+      const keyWay = 'pos/' + posProps.name + '/' + key;
       await this.fileService.upload(file, keyWay);
     }
 
-    const updatedPos = await this.posRepository.update(existingPos);
+    const updatedPos = await this.posRepository.update(pos);
 
     let carWashPos = await this.carWashPosRepository.findOneByPosId(id);
     if (input.carWashPosType || input.minSumOrder || input.maxSumOrder || input.stepSumOrder) {
@@ -74,23 +78,24 @@ export class UpdatePosUseCase {
       }
     }
 
-    const address = await this.addressRepository.findOneById(updatedPos.addressId);
+    const updatedPosProps = updatedPos.getProps();
+    const address = await this.addressRepository.findOneById(updatedPosProps.addressId);
 
     return {
-      id: updatedPos.id,
-      name: updatedPos.name,
-      slug: updatedPos.slug,
-      timeWork: updatedPos.timeWork,
-      organizationId: updatedPos.organizationId,
-      posMetaData: updatedPos.posMetaData,
-      timezone: updatedPos.timezone,
-      image: updatedPos.image,
-      rating: updatedPos.rating,
-      status: updatedPos.status,
-      createdAt: updatedPos.createdAt,
-      updatedAt: updatedPos.updatedAt,
-      createdById: updatedPos.createdById,
-      updatedById: updatedPos.updatedById,
+      id: updatedPosProps.id,
+      name: updatedPosProps.name,
+      slug: updatedPosProps.slug,
+      timeWork: updatedPosProps.timeWork,
+      organizationId: updatedPosProps.organizationId,
+      posMetaData: updatedPosProps.posMetaData,
+      timezone: updatedPosProps.timezone,
+      image: updatedPosProps.image,
+      rating: updatedPosProps.rating,
+      status: updatedPosProps.status,
+      createdAt: updatedPosProps.createdAt,
+      updatedAt: updatedPosProps.updatedAt,
+      createdById: updatedPosProps.createdById,
+      updatedById: updatedPosProps.updatedById,
       address: {
         id: address.id,
         city: address.city,
