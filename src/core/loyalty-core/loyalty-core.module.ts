@@ -61,6 +61,7 @@ import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-
 import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
+import { MarketingCampaignStatusHandlerUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-status-handler';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
@@ -177,6 +178,7 @@ const marketingCampaignUseCase: Provider[] = [
   CreateMarketingCampaignUseCase,
   UpdateMarketingCampaignUseCase,
   FindMethodsMarketingCampaignUseCase,
+  MarketingCampaignStatusHandlerUseCase,
 ];
 
 @Module({

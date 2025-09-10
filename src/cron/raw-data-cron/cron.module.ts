@@ -17,6 +17,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from '@infra/cache/redis.module';
 import { HandlerUpdateTierCron } from '@infra/handler/loyalty/cron/handler-update-tier';
+import { HandlerMarketingCampaignCron } from '@infra/handler/marketing-campaign/cron/handler-marketing-campaign';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 
 const cronUseCases: Provider[] = [
@@ -26,6 +27,7 @@ const cronUseCases: Provider[] = [
   TestDataTechTaskCron,
   HandlerManagerPaperCron,
   HandlerUpdateTierCron,
+  HandlerMarketingCampaignCron,
 ];
 
 @Module({

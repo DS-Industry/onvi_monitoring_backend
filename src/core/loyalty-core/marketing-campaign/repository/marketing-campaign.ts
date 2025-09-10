@@ -4,14 +4,7 @@ import { MarketingCampaignCreateDto } from '@platform-user/core-controller/dto/r
 import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-
-enum MarketingCampaignStatus {
-  DRAFT = 'DRAFT',
-  ACTIVE = 'ACTIVE',
-  PAUSED = 'PAUSED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
+import { MarketingCampaignStatus } from '@prisma/client';
 
 @Injectable()
 export class MarketingCampaignRepository extends IMarketingCampaignRepository {
@@ -26,7 +19,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaign = await this.prisma.marketingCampaign.create({
       data: {
         name: data.name,
-        status: MarketingCampaignStatus.DRAFT,
+        status: data.status || MarketingCampaignStatus.DRAFT,
         type: data.type,
         launchDate: data.launchDate,
         endDate: data.endDate,
@@ -160,6 +153,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     if (data.endDate !== undefined) updateData.endDate = data.endDate;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.ltyProgramId !== undefined) updateData.ltyProgramId = data.ltyProgramId;
+    if (data.status !== undefined) updateData.status = data.status;
 
     const campaign = await this.prisma.marketingCampaign.update({
       where: { id },
@@ -390,6 +384,52 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           name: campaign.updatedBy.name,
         },
       };
+    });
+  }
+
+  async findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]> {
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where: {
+        status: MarketingCampaignStatus.DRAFT,
+        launchDate: {
+          lte: now,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        launchDate: true,
+      },
+    });
+
+    return campaigns;
+  }
+
+  async findActiveCampaignsToComplete(now: Date): Promise<{ id: number; name: string; endDate: Date | null }[]> {
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where: {
+        status: MarketingCampaignStatus.ACTIVE,
+        endDate: {
+          lte: now,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        endDate: true,
+      },
+    });
+
+    return campaigns;
+  }
+
+  async updateStatus(id: number, status: MarketingCampaignStatus): Promise<void> {
+    await this.prisma.marketingCampaign.update({
+      where: { id },
+      data: {
+        status,
+        updatedAt: new Date(),
+      },
     });
   }
 }
