@@ -12,6 +12,7 @@ import { PosCreateDto } from '@pos/pos/use-cases/dto/pos-create.dto';
 import { StatusPos } from '@prisma/client';
 import { IFileAdapter } from '@libs/file/adapter';
 import { v4 as uuid } from 'uuid';
+import { RedisService } from '@infra/cache/redis.service';
 
 @Injectable()
 export class CreatePosUseCase {
@@ -20,6 +21,7 @@ export class CreatePosUseCase {
     private readonly addressRepository: IAddressRepository,
     private readonly carWashPosRepository: ICarWashPosRepository,
     private readonly fileService: IFileAdapter,
+    private readonly redisService: RedisService,
   ) {}
 
   async execute(
@@ -72,6 +74,13 @@ export class CreatePosUseCase {
     });
 
     const carWashPos = await this.carWashPosRepository.create(carWashPosData);
+
+    try {
+      await this.redisService.del(`ability:${owner.id}:`);
+      console.log(`Invalidated ability cache for user ${owner.id} after POS creation`);
+    } catch (error) {
+      console.error('Failed to invalidate ability cache:', error);
+    }
 
     return {
       id: pos.id,

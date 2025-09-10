@@ -1280,7 +1280,7 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.getCorporateCardsValidate(id, ability);
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
 
       return await this.corporateGetCardsUseCase.execute(id, data);
     } catch (e) {
@@ -1312,7 +1312,7 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.getCorporateCardsOperationsValidate(
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
         ability,
       );
