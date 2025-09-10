@@ -36,7 +36,6 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   CreateOrgAbility,
-  ReadOrgAbility,
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';

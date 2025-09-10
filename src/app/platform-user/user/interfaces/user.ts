@@ -12,6 +12,14 @@ export abstract class IUserRepository {
     skip?: number,
     take?: number,
   ): Promise<User[]>;
+  abstract findAllByOrgIdWithFilters(
+    orgId: number,
+    roleId?: number,
+    status?: string,
+    name?: string,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]>;
   abstract findCountByOrgId(orgId: number): Promise<number>;
   abstract findAllByPosId(posId: number): Promise<User[]>;
   abstract findAllByRoleIds(roleIds: number[]): Promise<User[]>;
