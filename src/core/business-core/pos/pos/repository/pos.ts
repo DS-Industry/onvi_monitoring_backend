@@ -131,4 +131,17 @@ export class PosRepository extends IPosRepository {
       },
     });
   }
+
+  public async softDelete(id: number): Promise<Pos> {
+    const pos = await this.prisma.pos.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'DELETED',
+        updatedAt: new Date(Date.now()),
+      },
+    });
+    return PrismaPosMapper.toDomain(pos);
+  }
 }

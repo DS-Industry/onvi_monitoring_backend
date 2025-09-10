@@ -2,6 +2,8 @@ import { Module, Provider } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { PosRepositoryProvider } from '@pos/pos/provider/pos';
 import { CreatePosUseCase } from '@pos/pos/use-cases/pos-create';
+import { UpdatePosUseCase } from '@pos/pos/use-cases/pos-update';
+import { DeletePosUseCase } from '@pos/pos/use-cases/pos-delete';
 import { AddressModule } from '@address/address.module';
 import { MonitoringPosUseCase } from '@pos/pos/use-cases/pos-monitoring';
 import { MonitoringFullByIdPosUseCase } from '@pos/pos/use-cases/pos-monitoring-full-by-id';
@@ -92,6 +94,8 @@ const repositories: Provider[] = [
 
 const posUseCase: Provider[] = [
   CreatePosUseCase,
+  UpdatePosUseCase,
+  DeletePosUseCase,
   MonitoringPosUseCase,
   MonitoringFullByIdPosUseCase,
   ProgramPosUseCase,
