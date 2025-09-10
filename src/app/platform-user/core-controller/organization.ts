@@ -36,8 +36,6 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   CreateOrgAbility,
-  ManageOrgAbility,
-  ReadOrgAbility,
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
@@ -494,33 +492,6 @@ export class OrganizationController {
           data.organizationId,
         );
       return await this.organizationAddDocuments.execute(organization, file);
-    } catch (e) {
-      if (e instanceof OrganizationException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //Block user by ID
-  @Patch('worker/:id/block')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageOrgAbility())
-  @HttpCode(200)
-  async blockUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    try {
-      return await this.updateUserUseCase.execute({
-        id: id,
-        status: StatusUser.BLOCKED,
-      });
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({

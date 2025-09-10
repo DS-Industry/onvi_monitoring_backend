@@ -36,6 +36,24 @@ export class FindMethodsUserUseCase {
     return await this.userRepository.findAllByOrgId(orgId, skip, take);
   }
 
+  async getAllByOrgIdWithFilters(
+    orgId: number,
+    roleId?: number,
+    status?: string,
+    name?: string,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
+    return await this.userRepository.findAllByOrgIdWithFilters(
+      orgId,
+      roleId,
+      status,
+      name,
+      skip,
+      take,
+    );
+  }
+
   async getCountByOrgId(orgId: number): Promise<{ count: number }> {
     const count = await this.userRepository.findCountByOrgId(orgId);
     return { count };

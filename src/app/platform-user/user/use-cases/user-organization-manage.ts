@@ -15,11 +15,17 @@ export class OrganizationManageUserUseCase {
     organization: Organization,
     skip?: number,
     take?: number,
+    roleId?: number,
+    status?: string,
+    name?: string,
   ): Promise<UserPermissionDataResponseDto[]> {
     const response: UserPermissionDataResponseDto[] = [];
 
-    const workers = await this.findMethodsUserUseCase.getAllByOrgId(
+    const workers = await this.findMethodsUserUseCase.getAllByOrgIdWithFilters(
       organization.id,
+      roleId,
+      status,
+      name,
       skip,
       take,
     );

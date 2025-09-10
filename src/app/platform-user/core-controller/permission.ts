@@ -37,8 +37,9 @@ import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { RedisService } from '@infra/cache/redis.service';
-import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { WorkerPermissionFilterDto } from '@platform-user/core-controller/dto/receive/worker-permission-filter.dto';
 import { OrganizationValidateRules } from '@platform-user/validate/validate-rules/organization-validate-rules';
+import { StatusUser } from '@prisma/client';
 
 @Controller('permission')
 export class PermissionController {
@@ -133,7 +134,7 @@ export class PermissionController {
   @HttpCode(200)
   async getWorker(
     @Param('orgId', ParseIntPipe) orgId: number,
-    @Query() params: PaginationDto,
+    @Query() params: WorkerPermissionFilterDto,
   ): Promise<UserPermissionDataResponseDto[]> {
     try {
       let skip = undefined;
@@ -148,6 +149,9 @@ export class PermissionController {
         organization,
         skip,
         take,
+        params.roleId,
+        params.status,
+        params.name,
       );
     } catch (e) {
       if (e instanceof UserException) {
@@ -324,6 +328,33 @@ export class PermissionController {
       return await this.userUpdate.execute({
         id: body.userId,
         roleId: body.roleId,
+      });
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //Block user by ID
+  @Patch('worker/:id/block')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
+  @HttpCode(200)
+  async blockUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    try {
+      return await this.userUpdate.execute({
+        id: id,
+        status: StatusUser.BLOCKED,
       });
     } catch (e) {
       if (e instanceof UserException) {

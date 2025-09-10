@@ -57,6 +57,45 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
+  public async findAllByOrgIdWithFilters(
+    orgId: number,
+    roleId?: number,
+    status?: string,
+    name?: string,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
+    const whereClause: any = {
+      organizations: { some: { id: orgId } },
+    };
+
+    if (roleId) {
+      whereClause.userRoleId = roleId;
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    if (name) {
+      whereClause.OR = [
+        { name: { contains: name, mode: 'insensitive' } },
+        { surname: { contains: name, mode: 'insensitive' } },
+        { middlename: { contains: name, mode: 'insensitive' } },
+      ];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: whereClause,
+      include: {
+        userRole: true,
+      },
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
   public async findCountByOrgId(orgId: number): Promise<number> {
     return this.prisma.user.count({
       where: { organizations: { some: { id: orgId } } },
