@@ -1036,6 +1036,22 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async loyaltyProgramByOwnerOrganizationIdExists(
+    ownerOrganizationId: number,
+  ): Promise<ValidateResponse<LoyaltyProgram>> {
+    const checkLoyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByOwnerOrganizationId(
+        ownerOrganizationId,
+      );
+    if (!checkLoyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage: 'The loyalty program does not exist for this organization',
+      };
+    }
+    return { code: 200, object: checkLoyaltyProgram };
+  }
+
   public async loyaltyProgramByOrganizationIdAndProgramIdNotExists(
     organizationId: number,
     loyaltyProgramId: number,

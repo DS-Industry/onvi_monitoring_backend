@@ -1,6 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { FileModule } from '@libs/file/module';
+import { RedisService } from '@infra/cache/redis.service';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
@@ -181,6 +182,10 @@ const marketingCampaignUseCase: Provider[] = [
   MarketingCampaignStatusHandlerUseCase,
 ];
 
+const redisProviders: Provider[] = [
+  RedisService,
+];
+
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [
@@ -199,6 +204,7 @@ const marketingCampaignUseCase: Provider[] = [
     ...corporateUseCase,
     ...marketingCampaignUseCase,
     ...loyaltyTierHistUseCase,
+    ...redisProviders,
   ],
   exports: [
     ...repositories,

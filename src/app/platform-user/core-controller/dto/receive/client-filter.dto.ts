@@ -18,12 +18,9 @@ export class ClientFilterDto {
     return parseInt(value);
   })
   workerCorporateId: number | '*';
-  @IsOptional()
-  @Transform(({ value }) => {
-    if (value === '*') return value;
-    return parseInt(value);
-  })
-  organizationId: number | '*';
+  @IsNotEmpty({ message: 'organizationId is required' })
+  @Transform(({ value }) => parseInt(value))
+  organizationId: number;
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') {

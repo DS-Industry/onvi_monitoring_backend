@@ -24,6 +24,14 @@ export class FindMethodsLoyaltyProgramUseCase {
     );
   }
 
+  async getOneByOwnerOrganizationId(
+    ownerOrganizationId: number,
+  ): Promise<LoyaltyProgram> {
+    return await this.loyaltyProgramRepository.findOneByOwnerOrganizationId(
+      ownerOrganizationId,
+    );
+  }
+
   async getOneByLoyaltyCardTierId(
     loyaltyCardTierId: number,
   ): Promise<LoyaltyProgram> {

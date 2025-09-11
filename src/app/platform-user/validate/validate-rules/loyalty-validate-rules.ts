@@ -638,6 +638,43 @@ export class LoyaltyValidateRules {
     }
   }
 
+  public async getClientsValidate(
+    organizationId: number,
+    ability: any,
+  ) {
+    const response = [];
+    
+    // First check if organization exists
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    // Then check if loyalty program exists for this organization as owner
+    const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
+    response.push(loyaltyProgramCheck);
+
+    console.log("response: ", response.map(item => item.object))
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    // Check organization ability first
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      organizationCheck.object,
+    );
+    
+    // Then check loyalty program ability
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      loyaltyProgramCheck.object,
+    );
+    
+    return loyaltyProgramCheck.object;
+  }
+
   public async updateMarketingCampaignValidate(
     campaignId: number,
     data: {

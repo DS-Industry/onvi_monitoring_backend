@@ -70,5 +70,18 @@ export class RoleRepository extends IRoleRepository {
         PrismaPlatformUserPermissionMapper.toDomain(item),
         );
       }
+
+      async findAllByUserId(userId: number): Promise<UserRole[]> {
+        const user = await this.prisma.user.findFirst({
+          where: {
+            id: userId,
+          },
+          include: {
+            userRole: true,
+          },
+        });
+    
+        return [PrismaUserRoleMapper.toDomain(user.userRole)];
+      }
 }
 

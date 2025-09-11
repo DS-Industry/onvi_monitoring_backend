@@ -11,6 +11,9 @@ export abstract class ILoyaltyProgramRepository {
   abstract findOneByOrganizationId(
     organizationId: number,
   ): Promise<LoyaltyProgram>;
+  abstract findOneByOwnerOrganizationId(
+    ownerOrganizationId: number,
+  ): Promise<LoyaltyProgram>;
   abstract findOneByCardTierId(cardTierId: number): Promise<LoyaltyProgram>;
   abstract findAll(): Promise<LoyaltyProgram[]>;
   abstract findAllByPermission(

@@ -4,11 +4,13 @@ import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyPr
 import { LTYProgramStatus } from '@prisma/client';
 import { CreateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/create.dto';
 import { User } from "@platform-user/user/domain/user";
+import { RedisService } from '@infra/cache/redis.service';
 
 @Injectable()
 export class CreateLoyaltyProgramUseCase {
   constructor(
     private readonly loyaltyProgramRepository: ILoyaltyProgramRepository,
+    private readonly redisService: RedisService,
   ) {}
 
   async execute(data: CreateDto, user: User): Promise<LoyaltyProgram> {
@@ -19,11 +21,20 @@ export class CreateLoyaltyProgramUseCase {
       startDate: new Date(Date.now()),
       lifetimeDays: data?.lifetimeDays,
     });
-    return await this.loyaltyProgramRepository.create(
+    
+    const createdLoyaltyProgram = await this.loyaltyProgramRepository.create(
       loyaltyProgram,
       data.organizationIds,
       data.ownerOrganizationId,
       user.id,
     );
+    try {
+      await this.redisService.del(`ability:${user.id}:`);
+      console.log(`Invalidated ability cache for user ${user.id} after loyalty program creation`);
+    } catch (error) {
+      console.error('Failed to invalidate cache:', error);
+    }
+
+    return createdLoyaltyProgram;
   }
 }

@@ -769,9 +769,17 @@ export class LoyaltyController {
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(201)
   async getClient(
+    @Request() req: any,
     @Query() data: ClientFilterDto,
   ): Promise<ClientPaginatedResponseDto> {
     try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.getClientsValidate(
+        data.organizationId,
+        ability,
+      );
+
       let skip = undefined;
       let take = undefined;
       if (data.page && data.size) {
