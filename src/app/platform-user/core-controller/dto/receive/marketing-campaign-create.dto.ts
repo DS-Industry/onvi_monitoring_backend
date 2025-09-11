@@ -63,8 +63,8 @@ export class MarketingCampaignCreateDto {
   posIds: number[];
 
   @IsEnum(MarketingDiscountType)
-  @IsNotEmpty({ message: 'Discount type is required' })
-  discountType: MarketingDiscountType;
+  @IsOptional()
+  discountType?: MarketingDiscountType;
 
   @IsNumber()
   @Min(0, { message: 'Discount value must be greater than or equal to 0' })
