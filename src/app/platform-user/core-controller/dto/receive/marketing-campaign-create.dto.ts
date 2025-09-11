@@ -64,7 +64,7 @@ export class MarketingCampaignCreateDto {
 
   @IsEnum(MarketingDiscountType)
   @IsOptional()
-  discountType: MarketingDiscountType;
+  discountType?: MarketingDiscountType;
 
   @IsNumber()
   @Min(0, { message: 'Discount value must be greater than or equal to 0' })
