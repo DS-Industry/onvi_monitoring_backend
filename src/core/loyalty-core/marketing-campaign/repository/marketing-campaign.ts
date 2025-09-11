@@ -27,6 +27,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
+        discountType: data.type === "DISCOUNT" ? data.discountType || "PERCENTAGE" : null,
+        discountValue: data.type === "DISCOUNT" ? data.discountValue : null,
       },
       include: {
         ltyProgram: true,
@@ -55,12 +57,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     });
 
     let promocode = null;
-    if (data.promocode || data.type === 'DISCOUNT') {
+    if (data.promocode) {
       promocode = await this.prisma.marketingPromocode.create({
         data: {
           campaignId: campaign.id,
           promocode: data.promocode || '',
-          discountType: data.discountType,
+          discountType: data.discountType || "PERCENTAGE",
           discountValue: data.discountValue,
           maxUsage: data.maxUsage,
         },
@@ -216,7 +218,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           data: {
             campaignId: campaign.id,
             promocode: data.promocode || '', 
-            discountType: data.discountType || 'FIXED',
+            discountType: data.discountType || 'PERCENTAGE',
             discountValue: data.discountValue || 0,
             maxUsage: data.maxUsage,
           },
