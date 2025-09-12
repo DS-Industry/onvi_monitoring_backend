@@ -19,6 +19,8 @@ export abstract class IMarketingCampaignRepository {
 
   abstract findAll(): Promise<MarketingCampaignResponseDto[]>;
 
+  abstract findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]>;
+
   abstract findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]>;
 
   abstract findActiveCampaignsToComplete(now: Date): Promise<{ id: number; name: string; endDate: Date | null }[]>;

@@ -392,6 +392,22 @@ export class LoyaltyValidateRules {
     return userLoyaltyProgramIds;
   }
 
+  private extractOrganizationIds(ability: any): number[] {
+    const userOrganizationIds: number[] = [];
+    
+    if (ability && ability.rules) {
+      for (const rule of ability.rules) {
+        if (rule.subject === 'Organization' && rule.conditions && rule.conditions.id) {
+          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
+            userOrganizationIds.push(...rule.conditions.id.in);
+          }
+        }
+      }
+    }
+    
+    return userOrganizationIds;
+  }
+
   public async getCorporateClientsValidate(
     organizationId: number,
     ability: any,
@@ -649,13 +665,21 @@ export class LoyaltyValidateRules {
     );
   }
 
-  public async getMarketingCampaignsValidate(ability: any) {
+  public async getMarketingCampaignsValidate(ability: any, organizationId: number) {
     const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
     
     if (userLoyaltyProgramIds.length === 0) {
       throw new LoyaltyException(
         LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
         'Access denied: No loyalty program permissions',
+      );
+    }
+
+    const userOrganizations = this.extractOrganizationIds(ability);
+    if (!userOrganizations.includes(organizationId)) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        `Access denied: You do not have access to organization ${organizationId}`,
       );
     }
   }

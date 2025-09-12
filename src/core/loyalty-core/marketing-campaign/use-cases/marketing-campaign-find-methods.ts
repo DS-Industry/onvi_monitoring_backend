@@ -13,5 +13,9 @@ export class FindMethodsMarketingCampaignUseCase {
   async getAll(): Promise<MarketingCampaignResponseDto[]> {
     return this.marketingCampaignRepository.findAll();
   }
+
+  async getAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
+    return this.marketingCampaignRepository.findAllByOrganizationId(organizationId);
+  }
 }
 
