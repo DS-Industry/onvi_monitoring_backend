@@ -22,4 +22,8 @@ export class FindMethodsRoleUseCase {
   async getPermissionsById(input: number): Promise<UserPermission[]> {
     return await this.roleRepository.findAllPermissionsById(input);
   }
+
+  async getAllByUserId(userId: number): Promise<UserRole[]> {
+    return await this.roleRepository.findAllByUserId(userId);
+  }
 }

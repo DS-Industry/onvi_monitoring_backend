@@ -27,4 +27,8 @@ export const Objects = [
     id: 7,
     name: 'ShiftReport',
   },
+  {
+    id: 8,
+    name: 'LTYProgram',
+  },
 ];

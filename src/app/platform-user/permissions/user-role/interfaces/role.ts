@@ -10,5 +10,6 @@ export abstract class IRoleRepository {
     abstract findOneById(id: number): Promise<UserRole>;
     abstract findOneByName(name: string): Promise<UserRole>;
     abstract findAllPermissionsById(id: number): Promise<UserPermission[]>;
+    abstract findAllByUserId(userId: number): Promise<UserRole[]>;
   }
   

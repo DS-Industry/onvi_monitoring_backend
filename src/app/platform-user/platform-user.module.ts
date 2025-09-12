@@ -197,6 +197,6 @@ const services: Provider[] = [FileParserService];
     ...userUseCase,
     ...services,
   ],
-  exports: [...userUseCase],
+  exports: [...userUseCase, ...permission],
 })
 export class PlatformUserModule {}

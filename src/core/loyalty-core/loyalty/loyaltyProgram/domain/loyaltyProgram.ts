@@ -1,7 +1,7 @@
 import { BaseEntity } from '@utils/entity';
 import { LTYProgramStatus } from "@prisma/client";
 
-export interface LoyaltyProgramProps {
+export interface LTYProgramProps {
   id?: number;
   name: string;
   status: LTYProgramStatus;
@@ -10,8 +10,8 @@ export interface LoyaltyProgramProps {
   lifetimeDays?: number;
 }
 
-export class LoyaltyProgram extends BaseEntity<LoyaltyProgramProps> {
-  constructor(props: LoyaltyProgramProps) {
+export class LTYProgram extends BaseEntity<LTYProgramProps> {
+  constructor(props: LTYProgramProps) {
     super(props);
   }
 

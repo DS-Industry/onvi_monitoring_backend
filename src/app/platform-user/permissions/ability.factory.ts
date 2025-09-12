@@ -31,7 +31,6 @@ export class AbilityFactory {
     const permissions = await this.findMethodsRoleUseCase.getPermissionsById(
       user.userRoleId,
     );
-
     const organizationCondition =
       await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
     const posCondition = await this.findMethodsUserUseCase.getPosPermissionById(
