@@ -105,10 +105,10 @@ export class LoyaltyValidateRules {
         orgCheck.object,
       );
     });
-    /*ForbiddenError.from(ability).throwUnlessCan(
+    ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       checkLoyaltyProgram.object,
-    );*/
+    );
     return checkLoyaltyProgram.object;
   }
 
@@ -126,10 +126,11 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    /*ForbiddenError.from(ability).throwUnlessCan(
+    ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       loyaltyProgramCheck.object,
-    );*/
+    );
+
     return loyaltyProgramCheck.object;
   }
 
@@ -397,8 +398,13 @@ export class LoyaltyValidateRules {
   ) {
     const response = [];
     
+    // First check if organization exists
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
+
+    // Then check if loyalty program exists for this organization as owner
+    const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
+    response.push(loyaltyProgramCheck);
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -406,12 +412,19 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
     
+    // Check organization ability first
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       organizationCheck.object,
     );
     
-    return organizationCheck.object;
+    // Then check loyalty program ability
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      loyaltyProgramCheck.object,
+    );
+    
+    return loyaltyProgramCheck.object;
   }
 
   public async getCorporateClientByIdValidate(
@@ -690,7 +703,6 @@ export class LoyaltyValidateRules {
     const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
     response.push(loyaltyProgramCheck);
 
-    console.log("response: ", response.map(item => item.object))
 
     this.validateLib.handlerArrayResponse(
       response,

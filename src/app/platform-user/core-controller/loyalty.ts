@@ -1011,8 +1011,11 @@ export class LoyaltyController {
   @HttpCode(200)
   async getUserKeyStats(
     @Query() data: ClientKeyStatsDto,
+    @Request() req: any,
   ): Promise<UserKeyStatsResponseDto> {
     try {
+      const { ability } = req;
+      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
       return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(
         data,
       );
@@ -1039,8 +1042,11 @@ export class LoyaltyController {
   @HttpCode(200)
   async getClientLoyaltyStats(
     @Query() data: ClientLoyaltyStatsDto,
+    @Request() req: any,
   ): Promise<ClientLoyaltyStatsResponseDto> {
     try {
+      const { ability } = req;
+      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
