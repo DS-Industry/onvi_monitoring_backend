@@ -711,9 +711,11 @@ export class LoyaltyController {
     @Body() data: ClientCreateDto,
   ): Promise<ClientFullResponseDto> {
     try {
+      const { ability } = req;
+
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
-        req.user.ability,
+        ability,
         data.tagIds || [],
         data?.devNumber,
         data?.number,
@@ -746,9 +748,11 @@ export class LoyaltyController {
     @Body() data: ClientUpdateDto,
   ): Promise<ClientFullResponseDto> {
     try {
+      const { ability } = req;
+
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
-        req.user.ability,
+        ability,
         data?.tagIds || [],
         data?.cardId,
       );
