@@ -41,7 +41,7 @@ import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases
 import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/client-update.dto';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
@@ -219,7 +219,7 @@ export class LoyaltyController {
   async createPrograms(
     @Request() req: any,
     @Body() data: LoyaltyProgramCreateDto,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     try {
       const { ability, user } = req;
       await this.loyaltyValidateRules.createLoyaltyProgramValidate(
@@ -259,7 +259,7 @@ export class LoyaltyController {
   async updatePrograms(
     @Request() req: any,
     @Body() data: LoyaltyProgramUpdateDto,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     try {
       const { ability } = req;
       const loyaltyProgram =
@@ -301,7 +301,7 @@ export class LoyaltyController {
   async getPrograms(
     @Request() req: any,
     @Query('organizationId') organizationId?: string,
-  ): Promise<LoyaltyProgram[]> {
+  ): Promise<LTYProgram[]> {
     try {
       const { ability } = req;
 

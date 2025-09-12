@@ -15,7 +15,7 @@ import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyException } from '@exception/option.exceptions';
 
 @Injectable()
@@ -62,7 +62,7 @@ export class LoyaltyValidateRules {
     loyaltyProgramId: number,
     ability: any,
     organizationIds?: number[],
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const response = [];
     let organizationsCheckResults = [];
 

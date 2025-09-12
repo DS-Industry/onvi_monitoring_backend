@@ -1,28 +1,28 @@
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 export abstract class ILoyaltyProgramRepository {
   abstract create(
-    input: LoyaltyProgram,
+    input: LTYProgram,
     organizationIds: number[],
     ownerOrganizationId: number,
     userId: number,
-  ): Promise<LoyaltyProgram>;
-  abstract findOneById(id: number): Promise<LoyaltyProgram>;
+  ): Promise<LTYProgram>;
+  abstract findOneById(id: number): Promise<LTYProgram>;
   abstract findOneByOrganizationId(
     organizationId: number,
-  ): Promise<LoyaltyProgram>;
+  ): Promise<LTYProgram>;
   abstract findOneByOwnerOrganizationId(
     ownerOrganizationId: number,
-  ): Promise<LoyaltyProgram>;
-  abstract findOneByCardTierId(cardTierId: number): Promise<LoyaltyProgram>;
-  abstract findAll(): Promise<LoyaltyProgram[]>;
+  ): Promise<LTYProgram>;
+  abstract findOneByCardTierId(cardTierId: number): Promise<LTYProgram>;
+  abstract findAll(): Promise<LTYProgram[]>;
   abstract findAllByPermission(
     ability: any,
     organizationId?: number,
-  ): Promise<LoyaltyProgram[]>;
+  ): Promise<LTYProgram[]>;
   abstract update(
-    input: LoyaltyProgram,
+    input: LTYProgram,
     addOrganizationIds: number[],
     deleteOrganizationIds: number[],
-  ): Promise<LoyaltyProgram>;
+  ): Promise<LTYProgram>;
 }

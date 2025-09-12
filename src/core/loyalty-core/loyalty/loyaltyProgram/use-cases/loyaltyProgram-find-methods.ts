@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 @Injectable()
 export class FindMethodsLoyaltyProgramUseCase {
@@ -8,17 +8,17 @@ export class FindMethodsLoyaltyProgramUseCase {
     private readonly loyaltyProgramRepository: ILoyaltyProgramRepository,
   ) {}
 
-  async getAll(): Promise<LoyaltyProgram[]> {
+  async getAll(): Promise<LTYProgram[]> {
     return await this.loyaltyProgramRepository.findAll();
   }
 
-  async getOneById(id: number): Promise<LoyaltyProgram> {
+  async getOneById(id: number): Promise<LTYProgram> {
     return await this.loyaltyProgramRepository.findOneById(id);
   }
 
   async getOneByOrganizationId(
     organizationId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     return await this.loyaltyProgramRepository.findOneByOrganizationId(
       organizationId,
     );
@@ -26,7 +26,7 @@ export class FindMethodsLoyaltyProgramUseCase {
 
   async getOneByOwnerOrganizationId(
     ownerOrganizationId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     return await this.loyaltyProgramRepository.findOneByOwnerOrganizationId(
       ownerOrganizationId,
     );
@@ -34,7 +34,7 @@ export class FindMethodsLoyaltyProgramUseCase {
 
   async getOneByLoyaltyCardTierId(
     loyaltyCardTierId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     return await this.loyaltyProgramRepository.findOneByCardTierId(
       loyaltyCardTierId,
     );
@@ -43,7 +43,7 @@ export class FindMethodsLoyaltyProgramUseCase {
   async getAllByAbility(
     ability: any,
     organizationId?: number,
-  ): Promise<LoyaltyProgram[]> {
+  ): Promise<LTYProgram[]> {
     return await this.loyaltyProgramRepository.findAllByPermission(
       ability,
       organizationId,

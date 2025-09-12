@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { UpdateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/update.dto';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { Organization } from '@organization/organization/domain/organization';
 
 @Injectable()
@@ -12,9 +12,9 @@ export class UpdateLoyaltyProgramUseCase {
 
   async execute(
     input: UpdateDto,
-    oldLoyaltyProgram: LoyaltyProgram,
+    oldLoyaltyProgram: LTYProgram,
     organizations: Organization[],
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const { name, organizationIds } = input;
 
     oldLoyaltyProgram.name = name ? name : oldLoyaltyProgram.name;

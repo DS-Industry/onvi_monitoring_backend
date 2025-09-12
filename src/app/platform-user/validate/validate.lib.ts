@@ -72,7 +72,7 @@ import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
@@ -1007,7 +1007,7 @@ export class ValidateLib {
 
   public async loyaltyProgramByIdExists(
     id: number,
-  ): Promise<ValidateResponse<LoyaltyProgram>> {
+  ): Promise<ValidateResponse<LTYProgram>> {
     const checkLoyaltyProgram =
       await this.findMethodsLoyaltyProgramUseCase.getOneById(id);
     if (!checkLoyaltyProgram) {
@@ -1038,7 +1038,7 @@ export class ValidateLib {
 
   public async loyaltyProgramByOwnerOrganizationIdExists(
     ownerOrganizationId: number,
-  ): Promise<ValidateResponse<LoyaltyProgram>> {
+  ): Promise<ValidateResponse<LTYProgram>> {
     const checkLoyaltyProgram =
       await this.findMethodsLoyaltyProgramUseCase.getOneByOwnerOrganizationId(
         ownerOrganizationId,

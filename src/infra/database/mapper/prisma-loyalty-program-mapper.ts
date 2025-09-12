@@ -1,12 +1,12 @@
 import { LTYProgram as PrismaLoyaltyProgram, Prisma } from '@prisma/client';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 export class PrismaLoyaltyProgramMapper {
-  static toDomain(entity: PrismaLoyaltyProgram): LoyaltyProgram {
+  static toDomain(entity: PrismaLoyaltyProgram): LTYProgram {
     if (!entity) {
       return null;
     }
-    return new LoyaltyProgram({
+    return new LTYProgram({
       id: entity.id,
       name: entity.name,
       status: entity.status,
@@ -17,7 +17,7 @@ export class PrismaLoyaltyProgramMapper {
   }
 
   static toPrisma(
-    loyaltyProgram: LoyaltyProgram,
+    loyaltyProgram: LTYProgram,
   ): Prisma.LTYProgramCreateInput {
     return {
       name: loyaltyProgram.name,

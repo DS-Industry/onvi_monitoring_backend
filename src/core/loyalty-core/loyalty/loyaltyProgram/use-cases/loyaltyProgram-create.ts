@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LTYProgramStatus } from '@prisma/client';
 import { CreateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/create.dto';
 import { User } from "@platform-user/user/domain/user";
@@ -13,8 +13,15 @@ export class CreateLoyaltyProgramUseCase {
     private readonly redisService: RedisService,
   ) {}
 
-  async execute(data: CreateDto, user: User): Promise<LoyaltyProgram> {
-    const loyaltyProgram = new LoyaltyProgram({
+  async execute(data: CreateDto, user: User): Promise<LTYProgram> {
+    try {
+      await this.redisService.del(`ability:${user.id}:`);
+      console.log(`Invalidated ability cache for user ${user.id} before loyalty program creation`);
+    } catch (error) {
+      console.error('Failed to invalidate cache:', error);
+    }
+
+    const loyaltyProgram = new LTYProgram({
       name: data.name,
       ownerOrganizationId: data.ownerOrganizationId,
       status: LTYProgramStatus.ACTIVE,
@@ -28,12 +35,6 @@ export class CreateLoyaltyProgramUseCase {
       data.ownerOrganizationId,
       user.id,
     );
-    try {
-      await this.redisService.del(`ability:${user.id}:`);
-      console.log(`Invalidated ability cache for user ${user.id} after loyalty program creation`);
-    } catch (error) {
-      console.error('Failed to invalidate cache:', error);
-    }
 
     return createdLoyaltyProgram;
   }

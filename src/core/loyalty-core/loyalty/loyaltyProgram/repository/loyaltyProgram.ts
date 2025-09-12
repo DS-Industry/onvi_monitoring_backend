@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { PrismaLoyaltyProgramMapper } from '@db/mapper/prisma-loyalty-program-mapper';
 import { accessibleBy } from '@casl/prisma';
 
@@ -12,11 +12,11 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   }
 
   public async create(
-    input: LoyaltyProgram,
+    input: LTYProgram,
     organizationIds: number[],
     ownerOrganizationId: number,
     userId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
     const loyaltyProgram = await this.prisma.lTYProgram.create({
       data: {
@@ -29,7 +29,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
 
-  public async findOneById(id: number): Promise<LoyaltyProgram> {
+  public async findOneById(id: number): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
     });
@@ -38,7 +38,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
   public async findOneByOrganizationId(
     organizationId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
         organizations: {
@@ -53,7 +53,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
   public async findOneByOwnerOrganizationId(
     ownerOrganizationId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
         ownerOrganizationId: ownerOrganizationId,
@@ -64,7 +64,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
   public async findOneByCardTierId(
     cardTierId: number,
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
         cardTiers: {
@@ -77,7 +77,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
 
-  public async findAll(): Promise<LoyaltyProgram[]> {
+  public async findAll(): Promise<LTYProgram[]> {
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany();
     return loyaltyPrograms.map((item) =>
       PrismaLoyaltyProgramMapper.toDomain(item),
@@ -87,15 +87,25 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async findAllByPermission(
     ability: any,
     organizationId?: number,
-  ): Promise<LoyaltyProgram[]> {
-    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
-      where: {
-        organizations: {
-          some: {
-            id: organizationId,
-          },
+  ): Promise<LTYProgram[]> {
+    const where: any = {};
+
+    if (organizationId !== undefined) {
+      where.organizations = {
+        some: {
+          id: organizationId,
         },
-      },
+      };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [accessibleBy(ability).LTYProgram, where],
+        }
+      : where;
+
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
+      where: finalWhere,
     });
     return loyaltyPrograms.map((item) =>
       PrismaLoyaltyProgramMapper.toDomain(item),
@@ -103,10 +113,10 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   }
 
   public async update(
-    input: LoyaltyProgram,
+    input: LTYProgram,
     addOrganizationIds: number[],
     deleteOrganizationIds: number[],
-  ): Promise<LoyaltyProgram> {
+  ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
     const loyaltyProgram = await this.prisma.lTYProgram.update({
       where: {
