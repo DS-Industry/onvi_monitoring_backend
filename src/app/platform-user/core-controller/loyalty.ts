@@ -1370,13 +1370,14 @@ export class LoyaltyController {
   @HttpCode(200)
   async getMarketingCampaigns(
     @Request() req: any,
+    @Query('organizationId', ParseIntPipe) organizationId: number,
   ): Promise<MarketingCampaignResponseDto[]> {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability);
+      await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability, organizationId);
 
-      return await this.findMethodsMarketingCampaignUseCase.getAll();
+      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationId(organizationId);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

@@ -389,6 +389,72 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     });
   }
 
+  async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where: {
+        ltyProgram: {
+          organizations: {
+            some: {
+              id: organizationId,
+            },
+          },
+        },
+      },
+      include: {
+        ltyProgram: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        updatedBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        promocodes: true,
+        poses: true,
+      },
+    });
+
+    return campaigns.map(campaign => {
+      const posCount = campaign.poses.length;
+      const promocode = campaign.promocodes[0];
+      const posIds = campaign.poses.map(pos => pos.id);
+
+      return {
+        id: campaign.id,
+        name: campaign.name,
+        status: campaign.status,
+        type: campaign.type,
+        launchDate: campaign.launchDate.toISOString(),
+        endDate: campaign.endDate?.toISOString(),
+        description: campaign.description,
+        ltyProgramId: campaign.ltyProgramId,
+        ltyProgramName: campaign.ltyProgram?.name,
+        discountType: promocode?.discountType || '',
+        discountValue: promocode?.discountValue || 0,
+        promocode: promocode?.promocode,
+        maxUsage: promocode?.maxUsage,
+        currentUsage: promocode?.currentUsage || 0,
+        posCount: posCount,
+        posIds: posIds,
+        createdAt: campaign.createdAt.toISOString(),
+        updatedAt: campaign.updatedAt.toISOString(),
+        createdBy: {
+          id: campaign.createdBy.id,
+          name: campaign.createdBy.name,
+        },
+        updatedBy: {
+          id: campaign.updatedBy.id,
+          name: campaign.updatedBy.name,
+        },
+      };
+    });
+  }
+
   async findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]> {
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
