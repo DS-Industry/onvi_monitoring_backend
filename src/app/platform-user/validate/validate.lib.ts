@@ -1391,6 +1391,57 @@ export class ValidateLib {
     return { code: 200, object: checkMarketingCampaign };
   }
 
+  public async cardBelongsToAccessibleLoyaltyProgram(
+    cardId: number,
+    ability: any,
+  ): Promise<ValidateResponse<Card>> {
+    const card = await this.findMethodsCardUseCase.getById(cardId);
+
+    if (!card) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not exist',
+      };
+    }
+
+    const userLoyaltyProgramIds: number[] = [];
+    if (ability && ability.rules) {
+      for (const rule of ability.rules) {
+        if (rule.subject === 'LTYProgram' && rule.conditions && rule.conditions.id) {
+          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
+            userLoyaltyProgramIds.push(...rule.conditions.id.in);
+          }
+        }
+      }
+    }
+
+    if (!card.loyaltyCardTierId) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not have a loyalty tier assigned',
+      };
+    }
+
+    const loyaltyProgram = await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(card.loyaltyCardTierId);
+    if (!loyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not have a valid loyalty program',
+      };
+    }
+
+    const loyaltyProgramId = loyaltyProgram.id;
+    
+    if (userLoyaltyProgramIds.length > 0 && !userLoyaltyProgramIds.includes(loyaltyProgramId)) {
+      return {
+        code: 403,
+        errorMessage: 'Access denied: You do not have access to this card\'s loyalty program',
+      };
+    }
+
+    return { code: 200, object: card };
+  }
+
   public handlerArrayResponse(
     response: ValidateResponse[],
     exceptionType: ExceptionType,
