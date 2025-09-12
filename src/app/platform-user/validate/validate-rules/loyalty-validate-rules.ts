@@ -17,10 +17,14 @@ import { PermissionAction } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyException } from '@exception/option.exceptions';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
 @Injectable()
 export class LoyaltyValidateRules {
-  constructor(private readonly validateLib: ValidateLib) {}
+  constructor(
+    private readonly validateLib: ValidateLib,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+  ) {}
 
   public async createLoyaltyProgramValidate(
     organizationIds: number[],
@@ -247,9 +251,11 @@ export class LoyaltyValidateRules {
 
   public async createClientValidate(
     phone: string,
+    ability: any,
     tagIds?: number[],
     devNumber?: string,
     number?: string,
+    cardId?: number,
   ) {
     const response = [];
     response.push(await this.validateLib.clientByPhoneNotExists(phone));
@@ -263,6 +269,14 @@ export class LoyaltyValidateRules {
       response.push(await this.validateLib.cardByNumberNotExists(number));
     }
 
+    if (cardId) {
+      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+      response.push(cardAccessCheck);
+    }
+
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
@@ -270,21 +284,36 @@ export class LoyaltyValidateRules {
     );
   }
 
-  public async getClientByIdValidate(id: number): Promise<Client> {
+  public async getClientByIdValidate(id: number, ability: any): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
     response.push(checkClient);
+    
+    if (checkClient.object) {
+      const card = await this.findMethodsCardUseCase.getByClientId(checkClient.object.id);
+      if (card) {
+        const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+          card.id,
+          ability,
+        );
+        response.push(cardAccessCheck);
+      }
+    }
+    
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_GET_ONE_EXCEPTION_CODE,
     );
+    
     return checkClient.object;
   }
 
   public async updateClientValidate(
     id: number,
+    ability: any,
     tagIds?: number[],
+    cardId?: number,
   ): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
@@ -292,6 +321,15 @@ export class LoyaltyValidateRules {
     if (tagIds) {
       response.push(await this.validateLib.tagIdsExists(tagIds));
     }
+    
+    if (cardId) {
+      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+      response.push(cardAccessCheck);
+    }
+    
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,

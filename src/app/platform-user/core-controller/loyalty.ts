@@ -707,14 +707,17 @@ export class LoyaltyController {
   @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
   async createClient(
+    @Request() req: any,
     @Body() data: ClientCreateDto,
   ): Promise<ClientFullResponseDto> {
     try {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
+        req.user.ability,
         data.tagIds || [],
         data?.devNumber,
         data?.number,
+        data?.cardId,
       );
       return await this.createClientUseCase.execute(data);
     } catch (e) {
@@ -739,12 +742,15 @@ export class LoyaltyController {
   @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
   async updateClient(
+    @Request() req: any,
     @Body() data: ClientUpdateDto,
   ): Promise<ClientFullResponseDto> {
     try {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
+        req.user.ability,
         data?.tagIds || [],
+        data?.cardId,
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -813,10 +819,15 @@ export class LoyaltyController {
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(201)
   async getClientById(
+    @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ClientFullResponseDto> {
     try {
-      const client = await this.loyaltyValidateRules.getClientByIdValidate(id);
+      const { ability } = req;
+
+      const client = await this.loyaltyValidateRules.getClientByIdValidate(id, ability);
+
+
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
       return {
