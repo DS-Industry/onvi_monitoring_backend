@@ -30,7 +30,7 @@ export class ClientRepository implements IClientRepository {
   }
 
   async findById(id: number): Promise<Client | null> {
-    const ltyUser = await this.prisma.lTYUser.findUnique({
+    const ltyUser = await this.prisma.lTYUser.findFirst({
       where: { id },
       include: {
         meta: true,
@@ -44,7 +44,7 @@ export class ClientRepository implements IClientRepository {
   }
 
   async findByPhone(phone: string): Promise<Client | null> {
-    const ltyUser = await this.prisma.lTYUser.findUnique({
+    const ltyUser = await this.prisma.lTYUser.findFirst({
       where: { phone },
       include: {
         meta: true,
@@ -58,7 +58,7 @@ export class ClientRepository implements IClientRepository {
   }
 
   async findByEmail(email: string): Promise<Client | null> {
-    const ltyUser = await this.prisma.lTYUser.findUnique({
+    const ltyUser = await this.prisma.lTYUser.findFirst({
       where: { email },
       include: {
         meta: true,

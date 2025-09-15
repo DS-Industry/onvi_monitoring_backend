@@ -29,7 +29,7 @@ export class ClientMetaRepository implements IClientMetaRepository {
   }
 
   async findByClientId(clientId: number): Promise<ClientMeta | null> {
-    const meta = await this.prisma.lTYUserMeta.findUnique({
+    const meta = await this.prisma.lTYUserMeta.findFirst({
       where: { clientId },
     });
     return meta ? ClientMeta.fromPrisma(meta) : null;
