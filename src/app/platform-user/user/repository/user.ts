@@ -230,4 +230,22 @@ export class UserRepository extends IUserRepository {
       },
     });
   }
+
+  public async updateConnectionLoyaltyProgram(
+    userId: number,
+    addLoyaltyProgramIds: number[],
+    deleteLoyaltyProgramIds: number[],
+  ): Promise<any> {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ltyPrograms: {
+          disconnect: deleteLoyaltyProgramIds.map((id) => ({ id })),
+          connect: addLoyaltyProgramIds.map((id) => ({ id })),
+        },
+      },
+    });
+  }
 }
