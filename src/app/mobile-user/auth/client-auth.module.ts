@@ -18,12 +18,14 @@ import { ValidateClientForJwtStrategyUseCase } from '@mobile-user/auth/use-cases
 import { OtpModule } from '@mobile-user/otp/otp.module';
 import { DateModule } from '@libs/date/module';
 import { SmsModule } from '@libs/sms/module';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 
 @Module({
   imports: [
     BcryptModule,
     JwtModule,
     ClientModule,
+    LoyaltyCoreModule,
     OtpModule,
     DateModule,
     SmsModule,
