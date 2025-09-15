@@ -363,8 +363,6 @@ export class PermissionController {
   ): Promise<LoyaltyProgramPermissionsResponseDto[]> {
     try {
       const { ability } = req;
-
-      console.log('organizationId: ', organizationId);
       
       if (organizationId) {
         const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByAbility(
