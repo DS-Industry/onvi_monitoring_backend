@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@db/prisma/prisma.service';
 import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
@@ -65,6 +66,7 @@ import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport
 import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
 import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
 import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
@@ -164,6 +166,7 @@ export class ValidateLib {
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
     private readonly findMethodsCorporateUseCase: FindMethodsCorporateUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
+    private readonly loyaltyProgramManageUserUseCase: LoyaltyProgramManageUserUseCase,
     private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
@@ -177,6 +180,7 @@ export class ValidateLib {
     private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
     private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
     private readonly bcrypt: IBcryptAdapter,
+    private readonly prisma: PrismaService,
   ) {}
 
   public async workerConfirmMailExists(
@@ -245,6 +249,25 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'The user was not found' };
     }
     return { code: 200, object: checkUserId };
+  }
+
+  public async userByIdWithOrganizationExists(id: number): Promise<ValidateResponse<any>> {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+      include: {
+        organizations: {
+          include: {
+            ltyPrograms: true,
+          },
+        },
+      },
+    });
+    
+    if (!user) {
+      return { code: 400, errorMessage: 'The user was not found' };
+    }
+    
+    return { code: 200, object: user };
   }
   public async organizationByOwnerExists(
     organizationId: number,
@@ -890,6 +913,19 @@ export class ValidateLib {
     const unnecessaryPos = posIds.filter((item) => !posIdsCheck.includes(item));
     if (unnecessaryPos.length > 0) {
       return { code: 400, errorMessage: 'posId connection error' };
+    }
+    return { code: 200 };
+  }
+
+  public async loyaltyProgramIdAndPermissionsLoyaltyProgramIdComparison(
+    loyaltyProgramIds: number[],
+    ability: any,
+  ): Promise<ValidateResponse> {
+    const permissionLoyaltyPrograms = await this.loyaltyProgramManageUserUseCase.execute(ability);
+    const loyaltyProgramIdsCheck = permissionLoyaltyPrograms.map((item) => item.id);
+    const unnecessaryLoyaltyPrograms = loyaltyProgramIds.filter((item) => !loyaltyProgramIdsCheck.includes(item));
+    if (unnecessaryLoyaltyPrograms.length > 0) {
+      return { code: 400, errorMessage: 'loyaltyProgramId connection error' };
     }
     return { code: 200 };
   }

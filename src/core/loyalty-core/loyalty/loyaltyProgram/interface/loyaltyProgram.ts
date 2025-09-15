@@ -20,6 +20,7 @@ export abstract class ILoyaltyProgramRepository {
     ability: any,
     organizationId?: number,
   ): Promise<LTYProgram[]>;
+  abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
   abstract update(
     input: LTYProgram,
     addOrganizationIds: number[],

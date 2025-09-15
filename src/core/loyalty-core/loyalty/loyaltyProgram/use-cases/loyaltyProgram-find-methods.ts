@@ -49,4 +49,8 @@ export class FindMethodsLoyaltyProgramUseCase {
       organizationId,
     );
   }
+
+  async getAllByUserId(userId: number): Promise<LTYProgram[]> {
+    return await this.loyaltyProgramRepository.findAllByUserId(userId);
+  }
 }

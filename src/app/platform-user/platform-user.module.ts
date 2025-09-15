@@ -66,6 +66,8 @@ import { ReportController } from '@platform-user/core-controller/report';
 import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
+import { ConnectionUserLoyaltyProgramUseCase } from '@platform-user/user/use-cases/user-loyalty-program-connection';
 import { PlacementController } from '@platform-user/core-controller/placement';
 import { LoyaltyValidateRules } from '@platform-user/validate/validate-rules/loyalty-validate-rules';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
@@ -134,6 +136,8 @@ const userUseCase: Provider[] = [
   OrganizationManageUserUseCase,
   PosManageUserUseCase,
   ConnectionUserPosUseCase,
+  LoyaltyProgramManageUserUseCase,
+  ConnectionUserLoyaltyProgramUseCase,
 ];
 
 const confirmMailUseCase: Provider[] = [
