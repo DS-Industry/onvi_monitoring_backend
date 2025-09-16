@@ -61,9 +61,7 @@ export class ClientController {
   @HttpCode(200)
   @UseGuards(JwtGuard)
   async getCurrentAccount(@Request() req: any): Promise<any> {
-    console.log("hey")
     const { user } = req;
-    console.log("hiiiii")
     return await this.getCurrentAccountUseCase.execute(user.clientId);
   }
 

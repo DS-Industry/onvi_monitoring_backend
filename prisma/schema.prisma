@@ -46,14 +46,16 @@ model Address {
 }
 
 model Placement {
-  id           Int            @id @default(autoincrement())
-  country      String
-  region       String
-  utc          String
-  hrWorkers    HrWorker[]
-  clients      LTYUser[]
-  organization Organization[]
-  pos          Pos[]
+  id                  Int                  @id @default(autoincrement())
+  country             String
+  region              String
+  utc                 String
+  hrWorkers           HrWorker[]
+  clients             LTYUser[]
+  organization        Organization[]
+  pos                 Pos[]
+  regionCode          String?
+  marketingPromocodes MarketingPromocode[]
 
   @@index([country, region])
   @@index([utc])
@@ -618,6 +620,7 @@ model LTYUser {
   marketingCampaignUsage MarketingCampaignUsage[]
   promocodeTransaction   PromocodeTransaction?
   tags                   LTYUserTag[]             @relation("LTYUserToLTYUserTag")
+  marketingCampaigns     MarketingCampaign[]      @relation("MarketingCampaignToLTYUser")
 }
 
 model LTYUserMeta {
@@ -1367,18 +1370,19 @@ model MarketingCampaign {
   endDate       DateTime?
   description   String?
   ltyProgramId  Int?
-  discountType  MarketingDiscountType?
-  discountValue Float?
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
   createdById   Int
   updatedById   Int
+  discountType  MarketingDiscountType?
+  discountValue Float?
   createdBy     User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
   ltyProgram    LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
   updatedBy     User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage MarketingCampaignUsage[]
   promocodes    MarketingPromocode[]
   poses         Pos[]                    @relation("MarketingCampaignToPos")
+  ltyUsers      LTYUser[]                @relation("MarketingCampaignToLTYUser")
 
   @@index([status])
   @@index([type])
@@ -1395,10 +1399,12 @@ model MarketingPromocode {
   maxUsage      Int?
   currentUsage  Int                      @default(0)
   isActive      Boolean                  @default(true)
+  placementId   Int?
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
   usage         MarketingCampaignUsage[]
   campaign      MarketingCampaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  placement     Placement?               @relation(fields: [placementId], references: [id])
 
   @@index([campaignId])
   @@index([promocode])

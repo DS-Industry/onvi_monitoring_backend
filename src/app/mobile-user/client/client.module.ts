@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { ClientController } from '@mobile-user/client/controller/client';
 import { FileModule } from '@libs/file/module';
+import { HttpModule } from '@nestjs/axios';
 import { ClientRepository } from './infrastructure/client.repository';
 import { ClientMetaRepository } from './infrastructure/client-meta.repository';
 import { ClientFavoritesRepository } from './infrastructure/client-favorites.repository';
@@ -18,7 +19,7 @@ import { RemoveClientFavoriteUseCase } from './use-cases/remove-client-favorite.
 import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.use-case';
 
 @Module({
-  imports: [PrismaModule, FileModule],
+  imports: [PrismaModule, FileModule, HttpModule],
   controllers: [ClientController],
   providers: [
     ClientRepository,
