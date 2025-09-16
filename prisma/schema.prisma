@@ -50,12 +50,12 @@ model Placement {
   country             String
   region              String
   utc                 String
+  regionCode          String?
   hrWorkers           HrWorker[]
   clients             LTYUser[]
+  marketingPromocodes MarketingPromocode[]
   organization        Organization[]
   pos                 Pos[]
-  regionCode          String?
-  marketingPromocodes MarketingPromocode[]
 
   @@index([country, region])
   @@index([utc])
@@ -612,6 +612,7 @@ model LTYUser {
   createdAt              DateTime?
   updatedAt              DateTime?
   workerCorporateId      Int?
+  is_notifications_enabled Boolean?                 @default(true)
   card                   LTYCard?
   ownerCorporates        LTYCorporate[]           @relation("Owner")
   placement              Placement?               @relation(fields: [placementId], references: [id])
@@ -1381,8 +1382,8 @@ model MarketingCampaign {
   updatedBy     User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage MarketingCampaignUsage[]
   promocodes    MarketingPromocode[]
-  poses         Pos[]                    @relation("MarketingCampaignToPos")
   ltyUsers      LTYUser[]                @relation("MarketingCampaignToLTYUser")
+  poses         Pos[]                    @relation("MarketingCampaignToPos")
 
   @@index([status])
   @@index([type])
@@ -1399,9 +1400,9 @@ model MarketingPromocode {
   maxUsage      Int?
   currentUsage  Int                      @default(0)
   isActive      Boolean                  @default(true)
-  placementId   Int?
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
+  placementId   Int?
   usage         MarketingCampaignUsage[]
   campaign      MarketingCampaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   placement     Placement?               @relation(fields: [placementId], references: [id])

@@ -16,6 +16,8 @@ export class Client {
   placementId?: number;
   workerCorporateId?: number;
   refreshTokenId?: string;
+  isNotifications?: number;
+  is_notifications_enabled?: boolean;
 
   constructor(data: Partial<Client>) {
     Object.assign(this, data);
@@ -38,6 +40,7 @@ export class Client {
       placementId: ltyUser.placementId,
       workerCorporateId: ltyUser.workerCorporateId,
       refreshTokenId: ltyUser.refreshTokenId,
+      is_notifications_enabled: ltyUser.is_notifications_enabled,
     });
   }
 
@@ -58,6 +61,7 @@ export class Client {
       placementId: this.placementId,
       workerCorporateId: this.workerCorporateId,
       refreshTokenId: this.refreshTokenId,
+      is_notifications_enabled: this.is_notifications_enabled,
     };
   }
 
@@ -72,5 +76,9 @@ export class Client {
 
   public getDisplayName(): string {
     return this.name || `Client ${this.phone}`;
+  }
+
+  public get correctPhone(): string {
+    return this.phone;
   }
 }
