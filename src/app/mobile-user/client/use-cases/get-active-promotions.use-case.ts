@@ -53,6 +53,9 @@ export class GetActivePromotionsUseCase {
         promocodes: {
           where: {
             isActive: true,
+            placement: {
+              regionCode: regionCode,
+            }
           },
         },
         poses: true,
