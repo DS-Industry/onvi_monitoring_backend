@@ -16,6 +16,7 @@ import {
 import { GetClientByIdUseCase } from '../use-cases/get-client-by-id.use-case';
 import { CreateClientUseCase } from '../use-cases/create-client.use-case';
 import { UpdateClientUseCase } from '../use-cases/update-client.use-case';
+import { UpdateAccountUseCase } from '../use-cases/update-account.use-case';
 import { DeleteClientUseCase } from '../use-cases/delete-client.use-case';
 import { GetCurrentAccountUseCase } from '../use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from '../use-cases/create-client-meta.use-case';
@@ -26,11 +27,10 @@ import { RemoveClientFavoriteUseCase } from '../use-cases/remove-client-favorite
 import { GetActivePromotionsUseCase } from '../use-cases/get-active-promotions.use-case';
 import { CreateClientDto } from './dto/client-create.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { ClientUpdateDto } from './dto/client-update.dto';
+import { AccountClientUpdateDto } from './dto/account-client-update.dto';
 import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientFavoritesDto } from './dto/client-favorites.dto';
-import { ClientNotificationsDto } from './dto/client-notifications.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
 
@@ -41,6 +41,7 @@ export class ClientController {
     private readonly getClientByIdUseCase: GetClientByIdUseCase,
     private readonly createClientUseCase: CreateClientUseCase,
     private readonly updateClientUseCase: UpdateClientUseCase,
+    private readonly updateAccountUseCase: UpdateAccountUseCase,
     private readonly deleteClientUseCase: DeleteClientUseCase,
     private readonly getCurrentAccountUseCase: GetCurrentAccountUseCase,
     private readonly createClientMetaUseCase: CreateClientMetaUseCase,
@@ -85,12 +86,15 @@ export class ClientController {
   @Patch('/account/update')
   @UseGuards(JwtGuard)
   async updateAccountInfo(
-    @Body() body: ClientUpdateDto,
+    @Body() body: AccountClientUpdateDto,
     @Request() req: any,
   ) {
     const { user } = req;
-
-    return await this.updateClientUseCase.execute(user.props.id, body);
+    
+    const accountData = await this.getCurrentAccountUseCase.execute(user.clientId);
+    const currentClient = accountData.client;
+    
+    return await this.updateAccountUseCase.execute(body, currentClient);
   }
 
   @Post('/meta/create')
@@ -106,18 +110,6 @@ export class ClientController {
   async updateMeta(@Body() body: ClientMetaUpdateDto): Promise<any> {
     await this.updateClientMetaUseCase.execute(body);
     return { status: 'SUCCESS' };
-  }
-
-  @Patch('notifications')
-  @HttpCode(201)
-  @UseGuards(JwtGuard)
-  async updateNotifications(
-    @Body() body: ClientNotificationsDto,
-    @Request() request: any,
-  ): Promise<any> {
-    const { user } = request;
-    
-    return { status: 'SUCCESS', notification: body.notification };
   }
 
   @Delete()

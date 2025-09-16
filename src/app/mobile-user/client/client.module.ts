@@ -9,6 +9,7 @@ import { ClientFavoritesRepository } from './infrastructure/client-favorites.rep
 import { GetClientByIdUseCase } from './use-cases/get-client-by-id.use-case';
 import { CreateClientUseCase } from './use-cases/create-client.use-case';
 import { UpdateClientUseCase } from './use-cases/update-client.use-case';
+import { UpdateAccountUseCase } from './use-cases/update-account.use-case';
 import { DeleteClientUseCase } from './use-cases/delete-client.use-case';
 import { GetCurrentAccountUseCase } from './use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from './use-cases/create-client-meta.use-case';
@@ -28,6 +29,7 @@ import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.us
     GetClientByIdUseCase,
     CreateClientUseCase,
     UpdateClientUseCase,
+    UpdateAccountUseCase,
     DeleteClientUseCase,
     GetCurrentAccountUseCase,
     CreateClientMetaUseCase,
@@ -44,6 +46,7 @@ import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.us
     GetClientByIdUseCase,
     CreateClientUseCase,
     UpdateClientUseCase,
+    UpdateAccountUseCase,
     DeleteClientUseCase,
     GetCurrentAccountUseCase,
     CreateClientMetaUseCase,

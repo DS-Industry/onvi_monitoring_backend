@@ -87,6 +87,7 @@ export class ClientRepository implements IClientRepository {
         placementId: client.placementId,
         workerCorporateId: client.workerCorporateId,
         refreshTokenId: client.refreshTokenId,
+        is_notifications_enabled: client.is_notifications_enabled,
         updatedAt: new Date(),
       },
       include: {
