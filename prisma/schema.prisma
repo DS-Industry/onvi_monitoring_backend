@@ -597,31 +597,31 @@ model LTYCardTierHist {
 }
 
 model LTYUser {
-  id                     Int                      @id @default(autoincrement())
-  name                   String
-  birthday               DateTime?
-  phone                  String                   @unique
-  email                  String?                  @unique
-  gender                 String?
-  status                 StatusUser?              @default(ACTIVE)
-  avatar                 String?
-  contractType           ContractType             @default(INDIVIDUAL)
-  comment                String?
-  placementId            Int?
-  refreshTokenId         String?
-  createdAt              DateTime?
-  updatedAt              DateTime?
-  workerCorporateId      Int?
+  id                       Int                      @id @default(autoincrement())
+  name                     String
+  birthday                 DateTime?
+  phone                    String                   @unique
+  email                    String?                  @unique
+  gender                   String?
+  status                   StatusUser?              @default(ACTIVE)
+  avatar                   String?
+  contractType             ContractType             @default(INDIVIDUAL)
+  comment                  String?
+  placementId              Int?
+  refreshTokenId           String?
+  createdAt                DateTime?
+  updatedAt                DateTime?
+  workerCorporateId        Int?
   is_notifications_enabled Boolean?                 @default(true)
-  card                   LTYCard?
-  ownerCorporates        LTYCorporate[]           @relation("Owner")
-  placement              Placement?               @relation(fields: [placementId], references: [id])
-  workerCorporate        LTYCorporate?            @relation("Worker", fields: [workerCorporateId], references: [id])
-  meta                   LTYUserMeta?             @relation("LTYUserToLTYUserMeta")
-  marketingCampaignUsage MarketingCampaignUsage[]
-  promocodeTransaction   PromocodeTransaction?
-  tags                   LTYUserTag[]             @relation("LTYUserToLTYUserTag")
-  marketingCampaigns     MarketingCampaign[]      @relation("MarketingCampaignToLTYUser")
+  card                     LTYCard?
+  ownerCorporates          LTYCorporate[]           @relation("Owner")
+  placement                Placement?               @relation(fields: [placementId], references: [id])
+  workerCorporate          LTYCorporate?            @relation("Worker", fields: [workerCorporateId], references: [id])
+  meta                     LTYUserMeta?             @relation("LTYUserToLTYUserMeta")
+  marketingCampaignUsage   MarketingCampaignUsage[]
+  promocodeTransaction     PromocodeTransaction?
+  tags                     LTYUserTag[]             @relation("LTYUserToLTYUserTag")
+  marketingCampaigns       MarketingCampaign[]      @relation("MarketingCampaignToLTYUser")
 }
 
 model LTYUserMeta {

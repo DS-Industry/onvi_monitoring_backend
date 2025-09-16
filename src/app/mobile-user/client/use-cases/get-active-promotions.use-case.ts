@@ -48,14 +48,18 @@ export class GetActivePromotionsUseCase {
           { endDate: null },
           { endDate: { gte: new Date() } },
         ],
+        promocodes: {
+          some: {
+            placement: {
+              regionCode: regionCode,
+            }
+          }
+        }
       },
       include: {
         promocodes: {
           where: {
             isActive: true,
-            placement: {
-              regionCode: regionCode,
-            }
           },
         },
         poses: true,

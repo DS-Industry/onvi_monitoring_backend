@@ -1,0 +1,26 @@
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '@db/prisma/prisma.module';
+import { CardController } from './controller/card.controller';
+import { CardService } from './services/card.service';
+import { GetCardOrdersUseCase } from './use-cases/get-card-orders.use-case';
+import { GetCardFreeVacuumUseCase } from './use-cases/get-card-free-vacuum.use-case';
+import { GetCardTariffUseCase } from './use-cases/get-card-tariff.use-case';
+import { GetCardTransferDataUseCase } from './use-cases/get-card-transfer-data.use-case';
+import { PostCardTransferUseCase } from './use-cases/post-card-transfer.use-case';
+import { CardRepository } from './infrastructure/card.repository';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [CardController],
+  providers: [
+    CardService,
+    GetCardOrdersUseCase,
+    GetCardFreeVacuumUseCase,
+    GetCardTariffUseCase,
+    GetCardTransferDataUseCase,
+    PostCardTransferUseCase,
+    CardRepository,
+  ],
+  exports: [CardService],
+})
+export class CardModule {}
