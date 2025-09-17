@@ -37,7 +37,6 @@ export class GetActivePromotionsUseCase {
       }
     }
 
-    // TODO: add filtering by regionCode
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
         status: 'ACTIVE',
@@ -48,11 +47,19 @@ export class GetActivePromotionsUseCase {
           { endDate: null },
           { endDate: { gte: new Date() } },
         ],
+        ltyUsers: {
+          some: {
+            id: clientId,
+          },
+        },
         promocodes: {
           some: {
-            placement: {
-              regionCode: regionCode,
-            }
+            isActive: true,
+            ...(regionCode && {
+              placement: {
+                regionCode: regionCode,
+              }
+            })
           }
         }
       },
@@ -60,25 +67,25 @@ export class GetActivePromotionsUseCase {
         promocodes: {
           where: {
             isActive: true,
+            ...(regionCode && {
+              placement: {
+                regionCode: regionCode,
+              }
+            })
           },
         },
         poses: true,
+        campaignUsage: {
+          where: {
+            ltyUserId: clientId,
+          },
+        },
       },
     });
 
-    const availableCampaigns = [];
-    for (const campaign of campaigns) {
-      const usage = await this.prisma.marketingCampaignUsage.findFirst({
-        where: {
-          campaignId: campaign.id,
-          ltyUserId: clientId,
-        },
-      });
-
-      if (!usage) {
-        availableCampaigns.push(campaign);
-      }
-    }
+    const availableCampaigns = campaigns.filter(campaign => {
+      return campaign.campaignUsage.length === 0;
+    });
 
     return availableCampaigns;
   }

@@ -22,6 +22,7 @@ export class GetCardOrdersUseCase {
       include: {
         card: true,
         carWashDevice: true,
+        bonusOpers: true
       },
       orderBy: { orderData: 'desc' },
       skip,

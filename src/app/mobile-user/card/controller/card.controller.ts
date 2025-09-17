@@ -15,6 +15,7 @@ import { GetCardFreeVacuumUseCase } from '../use-cases/get-card-free-vacuum.use-
 import { GetCardTariffUseCase } from '../use-cases/get-card-tariff.use-case';
 import { GetCardTransferDataUseCase } from '../use-cases/get-card-transfer-data.use-case';
 import { PostCardTransferUseCase } from '../use-cases/post-card-transfer.use-case';
+import { GetCardVacuumHistoryUseCase } from '../use-cases/get-card-vacuum-history.use-case';
 import { HistOptionsDto } from './dto/hist-options.dto';
 import { CardTransferDataDto } from './dto/card-transfer-data.dto';
 import { CardTransferDto } from './dto/card-transfer.dto';
@@ -28,6 +29,7 @@ export class CardController {
     private readonly getCardTariffUseCase: GetCardTariffUseCase,
     private readonly getCardTransferDataUseCase: GetCardTransferDataUseCase,
     private readonly postCardTransferUseCase: PostCardTransferUseCase,
+    private readonly getCardVacuumHistoryUseCase: GetCardVacuumHistoryUseCase,
   ) {}
 
   @Get('/orders')
@@ -46,6 +48,20 @@ export class CardController {
   async getFreeVacuum(@Request() request: any): Promise<{ limit: number; remains: number }> {
     const { user } = request;
     return await this.getCardFreeVacuumUseCase.execute(user);
+  }
+
+  @Get('/vacuum-history')
+  @HttpCode(HttpStatus.OK)
+  async getVacuumHistory(
+    @Request() request: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('deviceType') deviceType?: string,
+  ): Promise<any> {
+    const { user } = request;
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+    return await this.getCardVacuumHistoryUseCase.execute(user, start, end, deviceType);
   }
 
   @Get('/tariff')

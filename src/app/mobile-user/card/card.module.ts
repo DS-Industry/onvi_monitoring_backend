@@ -7,7 +7,9 @@ import { GetCardFreeVacuumUseCase } from './use-cases/get-card-free-vacuum.use-c
 import { GetCardTariffUseCase } from './use-cases/get-card-tariff.use-case';
 import { GetCardTransferDataUseCase } from './use-cases/get-card-transfer-data.use-case';
 import { PostCardTransferUseCase } from './use-cases/post-card-transfer.use-case';
+import { GetCardVacuumHistoryUseCase } from './use-cases/get-card-vacuum-history.use-case';
 import { CardRepository } from './infrastructure/card.repository';
+import { CardHistoryRepository } from './repository/card-history.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -19,7 +21,9 @@ import { CardRepository } from './infrastructure/card.repository';
     GetCardTariffUseCase,
     GetCardTransferDataUseCase,
     PostCardTransferUseCase,
+    GetCardVacuumHistoryUseCase,
     CardRepository,
+    CardHistoryRepository,
   ],
   exports: [CardService],
 })
