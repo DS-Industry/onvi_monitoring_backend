@@ -621,7 +621,7 @@ model LTYUser {
   marketingCampaignUsage   MarketingCampaignUsage[]
   promocodeTransaction     PromocodeTransaction?
   tags                     LTYUserTag[]             @relation("LTYUserToLTYUserTag")
-  marketingCampaigns       MarketingCampaign[]      @relation("MarketingCampaignToLTYUser")
+  personalPromocodes       MarketingPromocode[]     @relation("PersonalPromocode")
 }
 
 model LTYUserMeta {
@@ -668,6 +668,7 @@ model LTYCard {
   updatedAt      DateTime?
   cardTierId     Int?
   organizationId Int?
+  dayFreeLimit   Int?
   bonusBanks     LTYBonusBank[]
   bonusOpers     LTYBonusOper[]
   cardTier       LTYCardTier?      @relation(fields: [cardTierId], references: [id])
@@ -1375,14 +1376,11 @@ model MarketingCampaign {
   updatedAt     DateTime                 @updatedAt
   createdById   Int
   updatedById   Int
-  discountType  MarketingDiscountType?
-  discountValue Float?
   createdBy     User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
   ltyProgram    LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
   updatedBy     User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage MarketingCampaignUsage[]
   promocodes    MarketingPromocode[]
-  ltyUsers      LTYUser[]                @relation("MarketingCampaignToLTYUser")
   poses         Pos[]                    @relation("MarketingCampaignToPos")
 
   @@index([status])
@@ -1403,11 +1401,17 @@ model MarketingPromocode {
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
   placementId   Int?
+  personalUserId Int?
+  isPersonal     Boolean                 @default(false)
+  type           MarketingPromocodeType  @default(REGULAR)
+
   usage         MarketingCampaignUsage[]
   campaign      MarketingCampaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   placement     Placement?               @relation(fields: [placementId], references: [id])
+  personalUser   LTYUser?                @relation("PersonalPromocode", fields: [personalUserId], references: [id])
 
   @@index([campaignId])
+  @@index([personalUserId])
   @@index([promocode])
   @@index([isActive])
 }
@@ -1416,6 +1420,7 @@ model MarketingCampaignUsage {
   id             Int                 @id @default(autoincrement())
   campaignId     Int
   promocodeId    Int?
+  discountId     Int?
   ltyUserId      Int
   usedAt         DateTime            @default(now())
   discountAmount Float
@@ -1729,11 +1734,17 @@ enum MarketingCampaignStatus {
 enum MarketingCampaignType {
   PROMOCODE
   DISCOUNT
+  CUSTOMER_SERVICE
 }
 
 enum MarketingDiscountType {
   FIXED
   PERCENTAGE
+}
+
+enum MarketingPromocodeType {
+  AUTO_APPLIED
+  REGULAR
 }
 
 enum StatusDeviceDataRaw {
