@@ -9,12 +9,14 @@ import { LTYCorporateStatus } from '@prisma/client';
 export class CreateCorporateClientUseCase {
   constructor(private readonly corporateRepository: ICorporateRepository) {}
 
-  async execute(data: CorporateClientCreateDto, ownerId: number): Promise<CorporateClientResponseDto> {
+  async execute(
+    data: CorporateClientCreateDto,
+  ): Promise<CorporateClientResponseDto> {
     const corporateData = new Corporate({
       name: data.name,
       inn: data.inn,
       address: data.address,
-      ownerId: ownerId,
+      ownerId: undefined,
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
       organizationId: data.organizationId,
