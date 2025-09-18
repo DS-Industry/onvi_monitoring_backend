@@ -829,8 +829,10 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      const client = await this.loyaltyValidateRules.getClientByIdValidate(id, ability);
-
+      const client = await this.loyaltyValidateRules.getClientByIdValidate(
+        id,
+        ability,
+      );
 
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
@@ -1015,7 +1017,10 @@ export class LoyaltyController {
   ): Promise<UserKeyStatsResponseDto> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
+      await this.loyaltyValidateRules.getClientByIdValidate(
+        data.clientId,
+        ability,
+      );
       return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(
         data,
       );
@@ -1046,7 +1051,10 @@ export class LoyaltyController {
   ): Promise<ClientLoyaltyStatsResponseDto> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
+      await this.loyaltyValidateRules.getClientByIdValidate(
+        data.clientId,
+        ability,
+      );
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1205,14 +1213,14 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { user, ability } = req;
+      const { ability } = req;
 
       await this.loyaltyValidateRules.createCorporateClientValidate(
         data.organizationId,
         ability,
       );
 
-      return await this.createCorporateClientUseCase.execute(data, user.id);
+      return await this.createCorporateClientUseCase.execute(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1309,7 +1317,10 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(
+        id,
+        ability,
+      );
 
       return await this.corporateGetCardsUseCase.execute(id, data);
     } catch (e) {
@@ -1375,9 +1386,14 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability, organizationId);
+      await this.loyaltyValidateRules.getMarketingCampaignsValidate(
+        ability,
+        organizationId,
+      );
 
-      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationId(organizationId);
+      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationId(
+        organizationId,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
