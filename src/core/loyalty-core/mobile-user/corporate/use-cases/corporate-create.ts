@@ -3,6 +3,7 @@ import { ICorporateRepository } from '@loyalty/mobile-user/corporate/interfaces/
 import { CorporateClientCreateDto } from '@platform-user/core-controller/dto/receive/corporate-client-create.dto';
 import { CorporateClientResponseDto } from '@platform-user/core-controller/dto/response/corporate-client-response.dto';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
+import { LTYCorporateStatus } from '@prisma/client';
 
 @Injectable()
 export class CreateCorporateClientUseCase {
@@ -17,6 +18,7 @@ export class CreateCorporateClientUseCase {
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
       organizationId: data.organizationId,
+      status: LTYCorporateStatus.INACTIVE,
     });
 
     const corporate = await this.corporateRepository.create(corporateData);
