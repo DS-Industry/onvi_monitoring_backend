@@ -30,6 +30,7 @@ export class PosRepository extends IPosRepository {
       },
       include: {
         address: true,
+        carWashPos: true
       },
     });
     return PrismaPosMapper.toDomain(pos);
