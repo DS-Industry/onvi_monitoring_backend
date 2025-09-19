@@ -6,7 +6,7 @@ export type PrismaPosWithCarWashPosAndAddress = Prisma.PosGetPayload<{
   include: { carWashPos: true; address: true };
 }>;
 export type PrismaPosWithAddress = Prisma.PosGetPayload<{
-  include: { address: true };
+  include: { address: true, carWashPos: true };
 }>;
 export class PrismaPosMapper {
   static toDomain(entity: PrismaPos | PrismaPosWithAddress): Pos {
@@ -23,6 +23,12 @@ export class PrismaPosMapper {
             lon: entity.address.lon,
           })
         : undefined;
+
+    // Extract carWashPos properties if available
+    const carWashPosType = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.carWashPosType : undefined;
+    const minSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.minSumOrder : undefined;
+    const maxSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.maxSumOrder : undefined;
+    const stepSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.stepSumOrder : undefined;
 
     return new Pos({
       id: entity.id,
@@ -42,6 +48,10 @@ export class PrismaPosMapper {
       updatedAt: entity.updatedAt,
       createdById: entity.createdById,
       updatedById: entity.updateById,
+      carWashPosType: carWashPosType,
+      minSumOrder: minSumOrder,
+      maxSumOrder: maxSumOrder,
+      stepSumOrder: stepSumOrder,      
     });
   }
 

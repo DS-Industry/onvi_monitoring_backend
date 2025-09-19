@@ -1,6 +1,6 @@
 import { Address } from '@address/domain/address';
 import { BaseEntity } from '@utils/entity';
-import { StatusPos } from '@prisma/client';
+import { CarWashPosType, StatusPos } from '@prisma/client';
 
 
 export interface PosProps {
@@ -21,6 +21,10 @@ export interface PosProps {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  carWashPosType?: CarWashPosType;
+  minSumOrder?: number;
+  maxSumOrder?: number;
+  stepSumOrder?: number;
 }
 
 export class Pos extends BaseEntity<PosProps> {
@@ -96,6 +100,22 @@ export class Pos extends BaseEntity<PosProps> {
     return this.props.updatedById;
   }
 
+  get carWashPosType(): CarWashPosType {
+    return this.props.carWashPosType;
+  }
+
+  get minSumOrder(): number {
+    return this.props.minSumOrder;
+  }
+
+  get maxSumOrder(): number {
+    return this.props.maxSumOrder;
+  }
+
+  get stepSumOrder(): number {
+    return this.props.stepSumOrder;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -146,5 +166,21 @@ export class Pos extends BaseEntity<PosProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set carWashPosType(carWashPosType: CarWashPosType) {
+    this.props.carWashPosType = carWashPosType;
+  }
+
+  set minSumOrder(minSumOrder: number) {
+    this.props.minSumOrder = minSumOrder;
+  }
+  
+  set maxSumOrder(maxSumOrder: number) {
+    this.props.maxSumOrder = maxSumOrder;
+  }
+
+  set stepSumOrder(stepSumOrder: number) {
+    this.props.stepSumOrder = stepSumOrder;
   }
 }
