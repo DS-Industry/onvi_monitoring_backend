@@ -1836,8 +1836,6 @@ enum StatusDeviceDataRaw {
   DONE
 }
 
-// Hub-and-Spoke model enums
-
 enum LTYProgramRequestStatus {
   PENDING
   APPROVED
