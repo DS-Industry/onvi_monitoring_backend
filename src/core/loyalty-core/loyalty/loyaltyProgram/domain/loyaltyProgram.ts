@@ -8,6 +8,7 @@ export interface LTYProgramProps {
   ownerOrganizationId: number;
   startDate: Date;
   lifetimeDays?: number;
+  isHub?: boolean;
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -57,5 +58,13 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   set ownerOrganizationId(ownerOrganizationId: number) {
     this.props.ownerOrganizationId = ownerOrganizationId;
+  }
+
+  get isHub(): boolean {
+    return this.props.isHub || false;
+  }
+
+  set isHub(isHub: boolean) {
+    this.props.isHub = isHub;
   }
 }

@@ -1072,6 +1072,21 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async hubRequestByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkHubRequest = await this.prisma.lTYProgramParticipantRequest.findUnique({
+      where: { id },
+    });
+    if (!checkHubRequest) {
+      return {
+        code: 400,
+        errorMessage: 'The hub request does not exist',
+      };
+    }
+    return { code: 200, object: checkHubRequest };
+  }
+
   public async loyaltyProgramByOwnerOrganizationIdExists(
     ownerOrganizationId: number,
   ): Promise<ValidateResponse<LTYProgram>> {

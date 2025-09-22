@@ -856,4 +856,89 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
   }
+
+  public async requestHubValidate(
+    loyaltyProgramId: number,
+    organizationId: number,
+    ability: any,
+  ): Promise<LTYProgram> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
+    // Check if user has access to this loyalty program
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      'LTYProgram',
+      { id: loyaltyProgramId }
+    );
+
+    // Check if the organization is the owner of the loyalty program
+    if (loyaltyProgram.object.ownerOrganizationId !== organizationId) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        'Only the owner organization can request hub status',
+      );
+    }
+
+    // Check if already a hub
+    if (loyaltyProgram.object.isHub) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        'Loyalty program is already a hub',
+      );
+    }
+
+    return loyaltyProgram.object;
+  }
+
+  public async approveHubValidate(
+    loyaltyProgramId: number,
+    ability: any,
+  ): Promise<LTYProgram> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
+    // Check if user has super admin permissions (manage permission)
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return loyaltyProgram.object;
+  }
+
+  public async rejectHubValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    // Check if user has super admin permissions (manage permission)
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    // Validate that the request exists
+    const request = await this.validateLib.hubRequestByIdExists(requestId);
+    
+    if (request.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        request.errorMessage,
+      );
+    }
+
+    return request.object;
+  }
 }

@@ -70,6 +70,9 @@ import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierH
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
 import { UpdateHandlerLoyaltyTierUseCase } from "@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update-handler";
+import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
+import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
+import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -117,6 +120,9 @@ const loyaltyProgramUseCase: Provider[] = [
   CreateLoyaltyProgramUseCase,
   FindMethodsLoyaltyProgramUseCase,
   UpdateLoyaltyProgramUseCase,
+  LoyaltyProgramHubRequestUseCase,
+  LoyaltyProgramHubApproveUseCase,
+  LoyaltyProgramHubRejectUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [
