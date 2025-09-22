@@ -39,7 +39,7 @@ export class OrganizationRepository extends IOrganizationRepository {
         id,
       },
       include: {
-        ltyPrograms: {
+        ownedLtyPrograms: {
           select: {
             id: true,
             name: true,
@@ -100,7 +100,7 @@ export class OrganizationRepository extends IOrganizationRepository {
   ): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
       where: {
-        ltyPrograms: {
+        ownedLtyPrograms: {
           some: {
             id: ltyProgramId,
           },

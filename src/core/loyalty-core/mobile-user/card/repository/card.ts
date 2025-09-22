@@ -82,9 +82,10 @@ export class CardRepository extends ICardRepository {
             benefits: true,
             ltyProgram: {
               include: {
-                organizations: {
+                programParticipants: {
                   select: {
-                    id: true,
+                    organizationId: true,
+                    status: true,
                   },
                 },
               },
@@ -123,9 +124,10 @@ export class CardRepository extends ICardRepository {
             benefits: true,
             ltyProgram: {
               include: {
-                organizations: {
+                programParticipants: {
                   select: {
-                    id: true,
+                    organizationId: true,
+                    status: true,
                   },
                 },
               },
@@ -170,9 +172,10 @@ export class CardRepository extends ICardRepository {
     if (organizationId) {
       where.cardTier = {
         ltyProgram: {
-          organizations: {
+          programParticipants: {
             some: {
-              id: organizationId,
+              organizationId: organizationId,
+              status: 'ACTIVE',
             },
           },
         },
@@ -192,7 +195,7 @@ export class CardRepository extends ICardRepository {
             benefits: true,
             ltyProgram: {
               include: {
-                organizations: {
+                programParticipants: {
                   select: { id: true },
                 },
               },
@@ -234,9 +237,10 @@ export class CardRepository extends ICardRepository {
           include: {
             ltyProgram: {
               include: {
-                organizations: {
+                programParticipants: {
                   where: {
-                    id: data.organizationId,
+                    organizationId: data.organizationId,
+                    status: 'ACTIVE',
                   },
                 },
               },
@@ -251,8 +255,8 @@ export class CardRepository extends ICardRepository {
     }
 
     if (
-      !card.cardTier?.ltyProgram?.organizations ||
-      card.cardTier.ltyProgram.organizations.length === 0
+      !card.cardTier?.ltyProgram?.programParticipants ||
+      card.cardTier.ltyProgram.programParticipants.filter(p => p.status === 'ACTIVE').length === 0
     ) {
       throw new Error(
         `Card does not belong to organization ${data.organizationId}`,
@@ -336,9 +340,10 @@ export class CardRepository extends ICardRepository {
           include: {
             ltyProgram: {
               include: {
-                organizations: {
+                programParticipants: {
                   where: {
-                    id: data.organizationId,
+                    organizationId: data.organizationId,
+                    status: 'ACTIVE',
                   },
                 },
                 cardTiers: {
@@ -362,8 +367,8 @@ export class CardRepository extends ICardRepository {
     }
 
     if (
-      !card.cardTier?.ltyProgram?.organizations ||
-      card.cardTier.ltyProgram.organizations.length === 0
+      !card.cardTier?.ltyProgram?.programParticipants ||
+      card.cardTier.ltyProgram.programParticipants.filter(p => p.status === 'ACTIVE').length === 0
     ) {
       throw new Error(
         `Card does not belong to organization ${data.organizationId}`,
@@ -516,9 +521,10 @@ export class CardRepository extends ICardRepository {
       where: {
         id: tierId,
         ltyProgram: {
-          organizations: {
+          programParticipants: {
             some: {
-              id: organizationId,
+              organizationId: organizationId,
+              status: 'ACTIVE',
             },
           },
         },

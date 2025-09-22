@@ -184,15 +184,26 @@ export class UserRepository extends IUserRepository {
   }
 
   public async getAllLoyaltyProgramPermissions(id: number): Promise<number[]> {
-    const user = await this.prisma.user.findFirst({
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
-        id,
+        programParticipants: {
+          some: {
+            organization: {
+              users: {
+                some: {
+                  id: id,
+                },
+              },
+            },
+            status: 'ACTIVE',
+          },
+        },
       },
-      include: {
-        ltyPrograms: true,
+      select: {
+        id: true,
       },
     });
-    return user?.ltyPrograms?.map((item) => item.id) || [];
+    return loyaltyPrograms.map((item) => item.id);
   }
 
   public async getAllOrganizationPermissions(
@@ -236,16 +247,6 @@ export class UserRepository extends IUserRepository {
     addLoyaltyProgramIds: number[],
     deleteLoyaltyProgramIds: number[],
   ): Promise<any> {
-    await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        ltyPrograms: {
-          disconnect: deleteLoyaltyProgramIds.map((id) => ({ id })),
-          connect: addLoyaltyProgramIds.map((id) => ({ id })),
-        },
-      },
-    });
+    // TODO: Remove this method ?
   }
 }

@@ -257,7 +257,7 @@ export class ValidateLib {
       include: {
         organizations: {
           include: {
-            ltyPrograms: true,
+            ownedLtyPrograms: true,
           },
         },
       },

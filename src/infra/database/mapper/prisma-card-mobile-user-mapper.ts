@@ -9,7 +9,7 @@ type PrismaCardMobileUserWithRelations = Prisma.LTYCardGetPayload<{
         benefits: true;
         ltyProgram: {
           include: {
-            organizations: true;
+            programParticipants: true;
           };
         };
       };
@@ -70,8 +70,8 @@ export class PrismaCardMobileUserMapper {
       loyaltyProgram: entity.cardTier?.ltyProgram
         ? {
             organizations:
-              entity.cardTier.ltyProgram.organizations?.map((o) => ({
-                id: o.id,
+              entity.cardTier.ltyProgram.programParticipants?.filter(p => p.status === 'ACTIVE').map((p) => ({
+                id: p.organizationId,
               })) || [],
           }
         : undefined,

@@ -18,14 +18,31 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     userId: number,
   ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
-    const loyaltyProgram = await this.prisma.lTYProgram.create({
-      data: {
-        ...LoyaltyProgramEntity,
-        organizations: { connect: organizationIds.map((id) => ({ id })) },
-        ownerOrganization: { connect: { id: ownerOrganizationId } },
-        managers: { connect: { id: userId } },
-      },
+    
+    const loyaltyProgram = await this.prisma.$transaction(async (tx) => {
+      const createdProgram = await tx.lTYProgram.create({
+        data: {
+          ...LoyaltyProgramEntity,
+          ownerOrganization: { connect: { id: ownerOrganizationId } },
+        },
+      });
+
+      if (organizationIds.length > 0) {
+        const participantsToCreate = organizationIds.map((organizationId) => ({
+          ltyProgramId: createdProgram.id,
+          organizationId,
+          status: 'ACTIVE' as const,
+          registeredAt: new Date(),
+        }));
+
+        await tx.lTYProgramParticipant.createMany({
+          data: participantsToCreate,
+        });
+      }
+
+      return createdProgram;
     });
+
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
 
@@ -41,9 +58,10 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   ): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
-        organizations: {
+        programParticipants: {
           some: {
-            id: organizationId,
+            organizationId: organizationId,
+            status: 'ACTIVE',
           },
         },
       },
@@ -91,9 +109,10 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     const where: any = {};
 
     if (organizationId !== undefined) {
-      where.organizations = {
+      where.programParticipants = {
         some: {
-          id: organizationId,
+          organizationId: organizationId,
+          status: 'ACTIVE',
         },
       };
     }
@@ -115,9 +134,16 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async findAllByUserId(userId: number): Promise<LTYProgram[]> {
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
-        managers: {
+        programParticipants: {
           some: {
-            id: userId,
+            organization: {
+              users: {
+                some: {
+                  id: userId,
+                },
+              },
+            },
+            status: 'ACTIVE',
           },
         },
       },
@@ -133,18 +159,45 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     deleteOrganizationIds: number[],
   ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
-    const loyaltyProgram = await this.prisma.lTYProgram.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        ...LoyaltyProgramEntity,
-        organizations: {
-          disconnect: deleteOrganizationIds.map((id) => ({ id })),
-          connect: addOrganizationIds.map((id) => ({ id })),
+    
+    const loyaltyProgram = await this.prisma.$transaction(async (tx) => {
+      const updatedProgram = await tx.lTYProgram.update({
+        where: {
+          id: input.id,
         },
-      },
+        data: LoyaltyProgramEntity,
+      });
+
+      if (deleteOrganizationIds.length > 0) {
+        await tx.lTYProgramParticipant.updateMany({
+          where: {
+            ltyProgramId: input.id,
+            organizationId: { in: deleteOrganizationIds },
+          },
+          data: {
+            status: 'DEACTIVATED',
+            deactivatedAt: new Date(),
+          },
+        });
+      }
+
+      if (addOrganizationIds.length > 0) {
+        const participantsToCreate = addOrganizationIds.map((organizationId) => ({
+          ltyProgramId: input.id,
+          organizationId,
+          status: 'ACTIVE' as const,
+          registeredAt: new Date(),
+        }));
+
+        await tx.lTYProgramParticipant.createMany({
+          data: participantsToCreate,
+          skipDuplicates: true,
+        });
+      }
+
+      return updatedProgram;
     });
+
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
 }

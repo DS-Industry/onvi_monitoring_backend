@@ -58,11 +58,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     let promocode = null;
     if (data.promocode) {
-      promocode = await this.prisma.marketingPromocode.create({
+      promocode = await this.prisma.lTYPromocode.create({
         data: {
           campaignId: campaign.id,
-          promocode: data.promocode || '',
-          discountType: data.discountType || "PERCENTAGE",
+          code: data.promocode || '',
+          promocodeType: 'CAMPAIGN',
+          discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
           discountValue: data.discountValue,
           maxUsage: data.maxUsage,
         },
@@ -96,8 +97,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
       discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue || 0,
-      promocode: promocode?.promocode,
+      discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+      promocode: promocode?.code,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
@@ -204,21 +205,22 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
       if (existingPromocode) {
         const promocodeUpdateData: any = {};
-        if (data.promocode !== undefined) promocodeUpdateData.promocode = data.promocode;
+        if (data.promocode !== undefined) promocodeUpdateData.code = data.promocode;
         if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType;
         if (data.discountValue !== undefined) promocodeUpdateData.discountValue = data.discountValue;
         if (data.maxUsage !== undefined) promocodeUpdateData.maxUsage = data.maxUsage;
 
-        promocode = await this.prisma.marketingPromocode.update({
+        promocode = await this.prisma.lTYPromocode.update({
           where: { id: existingPromocode.id },
           data: promocodeUpdateData,
         });
       } else if (data.promocode || data.type === 'DISCOUNT') {
-        promocode = await this.prisma.marketingPromocode.create({
+        promocode = await this.prisma.lTYPromocode.create({
           data: {
             campaignId: campaign.id,
-            promocode: data.promocode || '', 
-            discountType: data.discountType || 'PERCENTAGE',
+            code: data.promocode || '', 
+            promocodeType: 'CAMPAIGN',
+            discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
             discountValue: data.discountValue || 0,
             maxUsage: data.maxUsage,
           },
@@ -253,8 +255,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
       discountType: promocode?.discountType || data.discountType || campaign.promocodes[0]?.discountType || '',
-      discountValue: promocode?.discountValue || data.discountValue || campaign.promocodes[0]?.discountValue || 0,
-      promocode: promocode?.promocode || campaign.promocodes[0]?.promocode,
+      discountValue: promocode?.discountValue || data.discountValue || campaign.promocodes[0]?.discountValue ? Number(campaign.promocodes[0].discountValue) : 0,
+      promocode: promocode?.code || campaign.promocodes[0]?.code,
       maxUsage: promocode?.maxUsage || campaign.promocodes[0]?.maxUsage,
       currentUsage: promocode?.currentUsage || campaign.promocodes[0]?.currentUsage || 0,
       posCount: posCount,
@@ -313,8 +315,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
       discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue || 0,
-      promocode: promocode?.promocode,
+      discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+      promocode: promocode?.code,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
@@ -369,8 +371,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
         discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue || 0,
-        promocode: promocode?.promocode,
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
         maxUsage: promocode?.maxUsage,
         currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
@@ -393,9 +395,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
         ltyProgram: {
-          organizations: {
+          programParticipants: {
             some: {
-              id: organizationId,
+              organizationId: organizationId,
+              status: 'ACTIVE',
             },
           },
         },
@@ -435,8 +438,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
         discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue || 0,
-        promocode: promocode?.promocode,
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
         maxUsage: promocode?.maxUsage,
         currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
