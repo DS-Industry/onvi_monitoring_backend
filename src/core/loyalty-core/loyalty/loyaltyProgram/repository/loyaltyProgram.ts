@@ -13,9 +13,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
   public async create(
     input: LTYProgram,
-    organizationIds: number[],
     ownerOrganizationId: number,
-    userId: number,
   ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
     
@@ -27,18 +25,13 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
         },
       });
 
-      if (organizationIds.length > 0) {
-        const participantsToCreate = organizationIds.map((organizationId) => ({
+      await tx.lTYProgramParticipant.create({
+        data: {
           ltyProgramId: createdProgram.id,
-          organizationId,
-          status: 'ACTIVE' as const,
-          registeredAt: new Date(),
-        }));
-
-        await tx.lTYProgramParticipant.createMany({
-          data: participantsToCreate,
-        });
-      }
+          organizationId: ownerOrganizationId,
+          status: 'ACTIVE',
+        },
+      });
 
       return createdProgram;
     });
@@ -155,49 +148,16 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
   public async update(
     input: LTYProgram,
-    addOrganizationIds: number[],
-    deleteOrganizationIds: number[],
   ): Promise<LTYProgram> {
     const LoyaltyProgramEntity = PrismaLoyaltyProgramMapper.toPrisma(input);
     
-    const loyaltyProgram = await this.prisma.$transaction(async (tx) => {
-      const updatedProgram = await tx.lTYProgram.update({
-        where: {
-          id: input.id,
-        },
-        data: LoyaltyProgramEntity,
-      });
-
-      if (deleteOrganizationIds.length > 0) {
-        await tx.lTYProgramParticipant.updateMany({
-          where: {
-            ltyProgramId: input.id,
-            organizationId: { in: deleteOrganizationIds },
-          },
-          data: {
-            status: 'DEACTIVATED',
-            deactivatedAt: new Date(),
-          },
-        });
-      }
-
-      if (addOrganizationIds.length > 0) {
-        const participantsToCreate = addOrganizationIds.map((organizationId) => ({
-          ltyProgramId: input.id,
-          organizationId,
-          status: 'ACTIVE' as const,
-          registeredAt: new Date(),
-        }));
-
-        await tx.lTYProgramParticipant.createMany({
-          data: participantsToCreate,
-          skipDuplicates: true,
-        });
-      }
-
-      return updatedProgram;
+    const updatedProgram = await this.prisma.lTYProgram.update({
+      where: {
+        id: input.id,
+      },
+      data: LoyaltyProgramEntity,
     });
 
-    return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
+    return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);
   }
 }

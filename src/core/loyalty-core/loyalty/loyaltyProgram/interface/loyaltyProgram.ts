@@ -3,9 +3,7 @@ import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgra
 export abstract class ILoyaltyProgramRepository {
   abstract create(
     input: LTYProgram,
-    organizationIds: number[],
     ownerOrganizationId: number,
-    userId: number,
   ): Promise<LTYProgram>;
   abstract findOneById(id: number): Promise<LTYProgram>;
   abstract findOneByOrganizationId(
@@ -23,7 +21,5 @@ export abstract class ILoyaltyProgramRepository {
   abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
   abstract update(
     input: LTYProgram,
-    addOrganizationIds: number[],
-    deleteOrganizationIds: number[],
   ): Promise<LTYProgram>;
 }

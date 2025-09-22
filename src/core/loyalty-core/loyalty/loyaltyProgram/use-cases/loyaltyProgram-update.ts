@@ -36,8 +36,6 @@ export class UpdateLoyaltyProgramUseCase {
 
     return await this.loyaltyProgramRepository.update(
       oldLoyaltyProgram,
-      addOrganizationIds,
-      deleteOrganizationIds,
     );
   }
 }

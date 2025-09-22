@@ -31,9 +31,7 @@ export class CreateLoyaltyProgramUseCase {
     
     const createdLoyaltyProgram = await this.loyaltyProgramRepository.create(
       loyaltyProgram,
-      data.organizationIds,
       data.ownerOrganizationId,
-      user.id,
     );
 
     return createdLoyaltyProgram;
