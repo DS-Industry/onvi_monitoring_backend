@@ -859,7 +859,6 @@ export class LoyaltyValidateRules {
 
   public async requestHubValidate(
     loyaltyProgramId: number,
-    organizationId: number,
     ability: any,
   ): Promise<LTYProgram> {
     const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
@@ -874,17 +873,8 @@ export class LoyaltyValidateRules {
     // Check if user has access to this loyalty program
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
-      'LTYProgram',
-      { id: loyaltyProgramId }
+      loyaltyProgram.object,
     );
-
-    // Check if the organization is the owner of the loyalty program
-    if (loyaltyProgram.object.ownerOrganizationId !== organizationId) {
-      throw new LoyaltyException(
-        LOYALTY_GET_ONE_EXCEPTION_CODE,
-        'Only the owner organization can request hub status',
-      );
-    }
 
     // Check if already a hub
     if (loyaltyProgram.object.isHub) {

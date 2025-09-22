@@ -359,6 +359,8 @@ export class LoyaltyController {
         name: loyaltyProgram.name,
         status: loyaltyProgram.status,
         startDate: loyaltyProgram.startDate,
+        isHub: loyaltyProgram.isHub,
+        isHubRequested: loyaltyProgram.isHubRequested,
         organizations: organizations.map((item) => {
           return { id: item.id, name: item.name };
         }),
@@ -1547,23 +1549,13 @@ export class LoyaltyController {
     try {
       const { ability, user } = req;
 
-      const userOrganizationId = user.organizationId || user.organization?.id;
-      if (!userOrganizationId) {
-        throw new CustomHttpException({
-          message: 'User organization not found',
-          code: HttpStatus.BAD_REQUEST,
-        });
-      }
-
       await this.loyaltyValidateRules.requestHubValidate(
         id,
-        userOrganizationId,
         ability,
       );
 
       return await this.loyaltyProgramHubRequestUseCase.execute(
         id,
-        userOrganizationId,
         user,
         data.comment,
       );

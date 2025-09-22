@@ -42,6 +42,9 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async findOneById(id: number): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
+      include: {
+        participantRequests: true
+      }
     });
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
