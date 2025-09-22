@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { LoyaltyHubRequestsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-hub-requests-filter.dto';
-import { LoyaltyHubRequestsListResponseDto, LoyaltyHubRequestsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-hub-requests-response.dto';
+import {
+  LoyaltyHubRequestsListResponseDto,
+  LoyaltyHubRequestsResponseDto,
+} from '@platform-user/core-controller/dto/response/loyalty-hub-requests-response.dto';
 
 @Injectable()
 export class FindLoyaltyHubRequestsUseCase {
   constructor(private readonly prisma: PrismaService) {}
 
-  async execute(filter: LoyaltyHubRequestsFilterDto): Promise<LoyaltyHubRequestsListResponseDto> {
+  async execute(
+    filter: LoyaltyHubRequestsFilterDto,
+  ): Promise<LoyaltyHubRequestsListResponseDto> {
     const {
       page = 1,
       size = 10,

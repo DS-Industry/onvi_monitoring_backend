@@ -43,7 +43,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
       include: {
-        participantRequests: true
+        hubRequest: true
       }
     });
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
