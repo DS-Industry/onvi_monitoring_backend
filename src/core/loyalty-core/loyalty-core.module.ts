@@ -73,6 +73,7 @@ import { UpdateHandlerLoyaltyTierUseCase } from "@loyalty/loyalty/loyaltyTier/us
 import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
 import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
+import { FindLoyaltyRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-requests';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -123,6 +124,7 @@ const loyaltyProgramUseCase: Provider[] = [
   LoyaltyProgramHubRequestUseCase,
   LoyaltyProgramHubApproveUseCase,
   LoyaltyProgramHubRejectUseCase,
+  FindLoyaltyRequestsUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [

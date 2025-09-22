@@ -112,9 +112,12 @@ import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use
 import { LoyaltyProgramHubRequestDto } from './dto/receive/loyalty-program-hub-request.dto';
 import { LoyaltyProgramHubApproveDto } from './dto/receive/loyalty-program-hub-approve.dto';
 import { LoyaltyProgramHubRejectDto } from './dto/receive/loyalty-program-hub-reject.dto';
+import { LoyaltyRequestsFilterDto } from './dto/receive/loyalty-requests-filter.dto';
+import { LoyaltyRequestsListResponseDto } from './dto/response/loyalty-requests-response.dto';
 import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
 import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
+import { FindLoyaltyRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-requests';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -158,6 +161,7 @@ export class LoyaltyController {
     private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
+    private readonly findLoyaltyRequestsUseCase: FindLoyaltyRequestsUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1633,6 +1637,31 @@ export class LoyaltyController {
         user,
         data.comment,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('requests')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  async getLoyaltyRequests(
+    @Query() filter: LoyaltyRequestsFilterDto,
+  ): Promise<LoyaltyRequestsListResponseDto> {
+    try {
+      return await this.findLoyaltyRequestsUseCase.execute(filter);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
