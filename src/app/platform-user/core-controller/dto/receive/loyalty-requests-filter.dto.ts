@@ -19,10 +19,6 @@ export class LoyaltyRequestsFilterDto {
 
   @IsOptional()
   @IsString()
-  requestType?: string;
-
-  @IsOptional()
-  @IsString()
   search?: string;
 
   @IsOptional()
