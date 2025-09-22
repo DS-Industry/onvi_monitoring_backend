@@ -163,4 +163,16 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
     return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);
   }
+
+  public async updateIsHubStatus(
+    id: number,
+    isHub: boolean,
+  ): Promise<LTYProgram> {
+    const updatedProgram = await this.prisma.lTYProgram.update({
+      where: { id },
+      data: { isHub },
+    });
+
+    return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);
+  }
 }
