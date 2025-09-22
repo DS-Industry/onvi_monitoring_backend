@@ -112,12 +112,12 @@ import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use
 import { LoyaltyProgramHubRequestDto } from './dto/receive/loyalty-program-hub-request.dto';
 import { LoyaltyProgramHubApproveDto } from './dto/receive/loyalty-program-hub-approve.dto';
 import { LoyaltyProgramHubRejectDto } from './dto/receive/loyalty-program-hub-reject.dto';
-import { LoyaltyRequestsFilterDto } from './dto/receive/loyalty-requests-filter.dto';
-import { LoyaltyRequestsListResponseDto } from './dto/response/loyalty-requests-response.dto';
+import { LoyaltyHubRequestsFilterDto } from './dto/receive/loyalty-hub-requests-filter.dto';
+import { LoyaltyHubRequestsListResponseDto } from './dto/response/loyalty-hub-requests-response.dto';
 import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
 import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
-import { FindLoyaltyRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-requests';
+import { FindLoyaltyHubRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-hub-requests';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -161,7 +161,7 @@ export class LoyaltyController {
     private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
-    private readonly findLoyaltyRequestsUseCase: FindLoyaltyRequestsUseCase,
+    private readonly findLoyaltyHubRequestsUseCase: FindLoyaltyHubRequestsUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1551,7 +1551,7 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramHubRequestDto,
   ): Promise<any> {
     try {
-      const { ability, user } = req;
+      const { ability } = req;
 
       await this.loyaltyValidateRules.requestHubValidate(
         id,
@@ -1560,7 +1560,6 @@ export class LoyaltyController {
 
       return await this.loyaltyProgramHubRequestUseCase.execute(
         id,
-        user,
         data.comment,
       );
     } catch (e) {
@@ -1618,7 +1617,7 @@ export class LoyaltyController {
   }
 
   // Super Admin only
-  @Put('participants/:id/reject')
+  @Put('programs/:id/reject-hub')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new SuperAdminAbility())
   @HttpCode(200)
@@ -1654,14 +1653,14 @@ export class LoyaltyController {
     }
   }
 
-  @Get('requests')
+  @Get('hub-requests')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
-  async getLoyaltyRequests(
-    @Query() filter: LoyaltyRequestsFilterDto,
-  ): Promise<LoyaltyRequestsListResponseDto> {
+  async getLoyaltyHubRequests(
+    @Query() filter: LoyaltyHubRequestsFilterDto,
+  ): Promise<LoyaltyHubRequestsListResponseDto> {
     try {
-      return await this.findLoyaltyRequestsUseCase.execute(filter);
+      return await this.findLoyaltyHubRequestsUseCase.execute(filter);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

@@ -870,13 +870,11 @@ export class LoyaltyValidateRules {
       );
     }
 
-    // Check if user has access to this loyalty program
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       loyaltyProgram.object,
     );
 
-    // Check if already a hub
     if (loyaltyProgram.object.isHub) {
       throw new LoyaltyException(
         LOYALTY_GET_ONE_EXCEPTION_CODE,
@@ -900,7 +898,6 @@ export class LoyaltyValidateRules {
       );
     }
 
-    // Check if user has super admin permissions (manage permission)
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.manage,
       'LTYProgram'
@@ -913,13 +910,11 @@ export class LoyaltyValidateRules {
     requestId: number,
     ability: any,
   ): Promise<any> {
-    // Check if user has super admin permissions (manage permission)
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.manage,
       'LTYProgram'
     );
 
-    // Validate that the request exists
     const request = await this.validateLib.hubRequestByIdExists(requestId);
     
     if (request.code !== 200) {

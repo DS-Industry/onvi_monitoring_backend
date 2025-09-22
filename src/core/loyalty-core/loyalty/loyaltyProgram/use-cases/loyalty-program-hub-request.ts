@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { LTYProgramRequestStatus } from '@prisma/client';
-import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class LoyaltyProgramHubRequestUseCase {
@@ -9,7 +8,6 @@ export class LoyaltyProgramHubRequestUseCase {
 
   async execute(
     loyaltyProgramId: number,
-    user: User,
     comment?: string,
   ): Promise<any> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
@@ -26,7 +24,7 @@ export class LoyaltyProgramHubRequestUseCase {
       throw new Error('Loyalty program is already a hub');
     }
 
-    const existingRequest = await this.prisma.lTYProgramParticipantRequest.findFirst({
+    const existingRequest = await this.prisma.lTYProgramHubRequest.findFirst({
       where: {
         ltyProgramId: loyaltyProgramId,
         status: LTYProgramRequestStatus.PENDING,
@@ -37,10 +35,9 @@ export class LoyaltyProgramHubRequestUseCase {
       throw new Error('Hub request already exists and is pending');
     }
 
-    const hubRequest = await this.prisma.lTYProgramParticipantRequest.create({
+    const hubRequest = await this.prisma.lTYProgramHubRequest.create({
       data: {
         ltyProgramId: loyaltyProgramId,
-        organizationId: loyaltyProgram.ownerOrganizationId,
         status: LTYProgramRequestStatus.PENDING,
         requestComment: comment,
         requestedAt: new Date(),

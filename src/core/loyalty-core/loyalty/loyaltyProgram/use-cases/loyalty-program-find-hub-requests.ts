@@ -25,7 +25,9 @@ export class FindLoyaltyHubRequestsUseCase {
     }
 
     if (organizationId) {
-      where.organizationId = organizationId;
+      where.ltyProgram = {
+        ownerOrganizationId: organizationId,
+      };
     }
 
     if (dateFrom || dateTo) {
@@ -39,34 +41,23 @@ export class FindLoyaltyHubRequestsUseCase {
     }
 
     if (search) {
-      where.OR = [
-        {
-          ltyProgram: {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
+      where.ltyProgram = {
+        ...where.ltyProgram,
+        name: {
+          contains: search,
+          mode: 'insensitive',
         },
-        {
-          organization: {
-            name: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        },
-      ];
+      };
     }
 
-    const totalCount = await this.prisma.lTYProgramParticipantRequest.count({
+    const totalCount = await this.prisma.lTYProgramHubRequest.count({
       where,
     });
 
     const skip = (page - 1) * size;
     const totalPages = Math.ceil(totalCount / size);
 
-    const requests = await this.prisma.lTYProgramParticipantRequest.findMany({
+    const requests = await this.prisma.lTYProgramHubRequest.findMany({
       where,
       skip,
       take: size,
@@ -78,12 +69,12 @@ export class FindLoyaltyHubRequestsUseCase {
           select: {
             id: true,
             name: true,
-          },
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
+            ownerOrganization: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         reviewer: {
@@ -99,8 +90,8 @@ export class FindLoyaltyHubRequestsUseCase {
       id: request.id,
       ltyProgramId: request.ltyProgramId,
       ltyProgramName: request.ltyProgram.name,
-      organizationId: request.organizationId,
-      organizationName: request.organization.name,
+      organizationId: request.ltyProgram.ownerOrganization?.id,
+      organizationName: request.ltyProgram.ownerOrganization?.name,
       status: request.status,
       requestedAt: request.requestedAt,
       reviewedAt: request.reviewedAt,

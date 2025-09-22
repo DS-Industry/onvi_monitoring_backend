@@ -12,8 +12,7 @@ export class LoyaltyProgramHubRejectUseCase {
     user: User,
     comment?: string,
   ): Promise<any> {
-    // Find the hub request
-    const hubRequest = await this.prisma.lTYProgramParticipantRequest.findFirst({
+    const hubRequest = await this.prisma.lTYProgramHubRequest.findFirst({
       where: {
         id: requestId,
         status: LTYProgramRequestStatus.PENDING,
@@ -24,8 +23,7 @@ export class LoyaltyProgramHubRejectUseCase {
       throw new Error('No pending hub request found with this ID');
     }
 
-    // Update the request status to rejected
-    const updatedRequest = await this.prisma.lTYProgramParticipantRequest.update({
+    const updatedRequest = await this.prisma.lTYProgramHubRequest.update({
       where: {
         id: requestId,
       },
