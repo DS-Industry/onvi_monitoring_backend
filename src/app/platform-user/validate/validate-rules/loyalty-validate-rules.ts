@@ -926,4 +926,24 @@ export class LoyaltyValidateRules {
 
     return loyaltyProgram.object;
   }
+
+  public async getParticipantProgramsValidate(organizationId: number, ability: any) {
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId); 
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      organizationCheck.object,
+    );
+
+    return organizationCheck.object;
+  }
+
+  public async getHubRequestsValidate(
+    ability: any,
+  ): Promise<void> {
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+  }
 }
