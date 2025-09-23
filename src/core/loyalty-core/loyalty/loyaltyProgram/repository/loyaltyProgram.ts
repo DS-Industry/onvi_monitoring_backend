@@ -42,6 +42,9 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async findOneById(id: number): Promise<LTYProgram> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
+      include: {
+        hubRequest: true
+      }
     });
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
   }
@@ -156,6 +159,18 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
         id: input.id,
       },
       data: LoyaltyProgramEntity,
+    });
+
+    return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);
+  }
+
+  public async updateIsHubStatus(
+    id: number,
+    isHub: boolean,
+  ): Promise<LTYProgram> {
+    const updatedProgram = await this.prisma.lTYProgram.update({
+      where: { id },
+      data: { isHub },
     });
 
     return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);

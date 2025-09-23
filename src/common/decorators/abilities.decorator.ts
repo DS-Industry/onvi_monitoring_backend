@@ -214,3 +214,7 @@ export class DeleteManagerPaperAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'ManagerPaper';
 }
+export class SuperAdminAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'LTYProgram';
+}

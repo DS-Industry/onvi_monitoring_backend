@@ -165,6 +165,7 @@ model User {
   organizations                Organization[]                 @relation("OrganizationToUser")
   posesPermissions             Pos[]                          @relation("PosToUser")
   reviewedLtyProgramRequests   LTYProgramParticipantRequest[] @relation("LTYProgramParticipantRequestReviewer")
+  reviewedLtyProgramHubRequests LTYProgramHubRequest[]        @relation("LTYProgramHubRequestReviewer")
   createdPromocodes            LTYPromocode[]                 @relation("PromocodeCreatedBy")
 }
 
@@ -533,6 +534,7 @@ model LTYProgram {
   marketingCampaigns  MarketingCampaign[]
   programParticipants LTYProgramParticipant[]
   participantRequests LTYProgramParticipantRequest[]
+  hubRequest          LTYProgramHubRequest?
 }
 
 model LTYProgramParticipant {
@@ -587,6 +589,32 @@ model LTYProgramParticipantRequest {
   @@index([status])
   @@index([ltyProgramId])
   @@index([organizationId])
+  @@index([requestedAt])
+  @@index([approvedAt])
+}
+
+model LTYProgramHubRequest {
+  id             Int                     @id @default(autoincrement())
+  ltyProgramId   Int
+  status         LTYProgramRequestStatus @default(PENDING)
+  requestedAt    DateTime                @default(now())
+  reviewedAt     DateTime?
+  approvedAt     DateTime?
+
+  reviewedBy      Int?
+  requestComment  String?
+  responseComment String?
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ltyProgram LTYProgram @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
+  reviewer   User?      @relation("LTYProgramHubRequestReviewer", fields: [reviewedBy], references: [id])
+
+  @@unique([ltyProgramId])
+  @@index([status])
+  @@index([ltyProgramId])
   @@index([requestedAt])
   @@index([approvedAt])
 }
