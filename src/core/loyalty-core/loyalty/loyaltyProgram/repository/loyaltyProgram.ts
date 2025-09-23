@@ -149,6 +149,22 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     );
   }
 
+  public async findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<LTYProgram[]> {
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
+      where: {
+        programParticipants: {
+          some: {
+            organizationId: organizationId,
+            status: 'ACTIVE',
+          },
+        },
+      },
+    });
+    return loyaltyPrograms.map((item) =>
+      PrismaLoyaltyProgramMapper.toDomain(item),
+    );
+  }
+
   public async update(
     input: LTYProgram,
   ): Promise<LTYProgram> {

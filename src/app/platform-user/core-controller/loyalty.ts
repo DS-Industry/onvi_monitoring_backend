@@ -340,6 +340,42 @@ export class LoyaltyController {
     }
   }
 
+  @Get('participant-programs')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(201)
+  async getParticipantPrograms(
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string,
+  ): Promise<LTYProgram[]> {
+    try {
+      if (!organizationId) {
+        throw new CustomHttpException({
+          message: 'Organization ID is required',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
+        Number(organizationId),
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Get program by id
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -365,6 +401,7 @@ export class LoyaltyController {
         startDate: loyaltyProgram.startDate,
         isHub: loyaltyProgram.isHub,
         isHubRequested: loyaltyProgram.isHubRequested,
+        isHubRejected: loyaltyProgram.isHubRejected,
         organizations: organizations.map((item) => {
           return { id: item.id, name: item.name };
         }),

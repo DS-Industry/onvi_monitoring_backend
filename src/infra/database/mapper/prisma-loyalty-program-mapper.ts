@@ -2,6 +2,7 @@ import {
   LTYProgram as PrismaLoyaltyProgram,
   Prisma,
   LTYProgramHubRequest,
+  LTYProgramRequestStatus,
 } from '@prisma/client';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
@@ -21,6 +22,7 @@ export class PrismaLoyaltyProgramMapper {
       ownerOrganizationId: entity.ownerOrganizationId,
       isHub: entity.isHub,
       isHubRequested: entity.hubRequest ? true : false,
+      isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
     });
   }
 

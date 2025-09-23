@@ -907,23 +907,23 @@ export class LoyaltyValidateRules {
   }
 
   public async rejectHubValidate(
-    requestId: number,
+    loyaltyProgramId: number,
     ability: any,
   ): Promise<any> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.manage,
       'LTYProgram'
     );
 
-    const request = await this.validateLib.hubRequestByIdExists(requestId);
-    
-    if (request.code !== 200) {
-      throw new LoyaltyException(
-        LOYALTY_GET_ONE_EXCEPTION_CODE,
-        request.errorMessage,
-      );
-    }
-
-    return request.object;
+    return loyaltyProgram.object;
   }
 }
