@@ -75,6 +75,8 @@ import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
 import { FindLoyaltyHubRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-hub-requests';
 import { LoyaltyProgramHubRequestRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyalty-program-hub-request';
+import { LoyaltyProgramParticipantRequestRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyalty-program-participant-request';
+import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -93,6 +95,7 @@ const repositories: Provider[] = [
   MarketingCampaignRepositoryProvider,
   LoyaltyTierHistRepositoryProvider,
   LoyaltyProgramHubRequestRepositoryProvider,
+  LoyaltyProgramParticipantRequestRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [
@@ -127,6 +130,7 @@ const loyaltyProgramUseCase: Provider[] = [
   LoyaltyProgramHubApproveUseCase,
   LoyaltyProgramHubRejectUseCase,
   FindLoyaltyHubRequestsUseCase,
+  CreateLoyaltyProgramParticipantRequestUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [

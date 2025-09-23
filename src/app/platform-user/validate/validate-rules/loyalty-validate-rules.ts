@@ -134,6 +134,38 @@ export class LoyaltyValidateRules {
     return loyaltyProgramCheck.object;
   }
 
+  public async createLoyaltyProgramParticipantRequestValidate(
+    loyaltyProgramId: number,
+    organizationId: number,
+    ability: any,
+  ): Promise<{ loyaltyProgram: any; organization: any }> {
+    const response = [];
+    
+    const loyaltyProgramCheck =
+      await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    response.push(loyaltyProgramCheck);
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      organizationCheck.object,
+    );
+
+    return {
+      loyaltyProgram: loyaltyProgramCheck.object,
+      organization: organizationCheck.object,
+    };
+  }
+
   public async createLoyaltyTierValidate(
     loyaltyProgramId: number,
     ability: any,

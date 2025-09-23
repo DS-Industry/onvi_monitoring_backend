@@ -45,6 +45,8 @@ import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgra
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
+import { LoyaltyProgramParticipantRequestDto } from '@platform-user/core-controller/dto/receive/loyalty-program-participant-request.dto';
+import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-create';
@@ -159,6 +161,7 @@ export class LoyaltyController {
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
     private readonly findLoyaltyHubRequestsUseCase: FindLoyaltyHubRequestsUseCase,
+    private readonly createLoyaltyProgramParticipantRequestUseCase: CreateLoyaltyProgramParticipantRequestUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1701,6 +1704,45 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getHubRequestsValidate(req.ability);
 
       return await this.findLoyaltyHubRequestsUseCase.execute(filter);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('participant-request')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(201)
+  async createParticipantRequest(
+    @Request() req: any,
+    @Body() data: LoyaltyProgramParticipantRequestDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.createLoyaltyProgramParticipantRequestValidate(
+        data.ltyProgramId,
+        data.organizationId,
+        ability,
+      );
+
+      return await this.createLoyaltyProgramParticipantRequestUseCase.execute(
+        data.ltyProgramId,
+        data.organizationId,
+        data.requestComment,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
