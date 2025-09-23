@@ -12,7 +12,8 @@ export class LoyaltyProgramHubRejectUseCase {
     user: User,
     comment?: string,
   ): Promise<any> {
-    const hubRequest = await this.hubRequestRepository.findFirstById(
+
+    const hubRequest = await this.hubRequestRepository.findFirst(
       requestId,
       LTYProgramRequestStatus.PENDING,
     );
@@ -21,7 +22,7 @@ export class LoyaltyProgramHubRejectUseCase {
       throw new Error('No pending hub request found with this ID');
     }
 
-    const updatedRequest = await this.hubRequestRepository.update(requestId, {
+    const updatedRequest = await this.hubRequestRepository.update(hubRequest.id, {
       status: LTYProgramRequestStatus.REJECTED,
       reviewedAt: new Date(),
       reviewedBy: user.id,

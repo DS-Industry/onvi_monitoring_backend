@@ -10,6 +10,7 @@ export interface LTYProgramProps {
   lifetimeDays?: number;
   isHub?: boolean;
   isHubRequested?: boolean
+  isHubRejected?: boolean
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -67,6 +68,10 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   get isHubRequested(): boolean {
     return this.props.isHubRequested || false;
+  }
+
+  get isHubRejected(): boolean {
+    return this.props.isHubRejected || false;
   }
 
   set isHub(isHub: boolean) {

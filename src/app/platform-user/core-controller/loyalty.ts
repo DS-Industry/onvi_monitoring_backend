@@ -37,7 +37,6 @@ import { ClientCreateDto } from '@platform-user/core-controller/dto/receive/clie
 import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
 import { ClientFullResponseDto } from '@platform-user/core-controller/dto/response/client-full-response.dto';
 import { ClientFilterDto } from '@platform-user/core-controller/dto/receive/client-filter.dto';
-import { ClientResponseDto } from '@platform-user/core-controller/dto/response/client-response.dto';
 import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-by-filter';
 import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/client-update.dto';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
@@ -62,7 +61,6 @@ import { BenefitCreateDto } from '@platform-user/core-controller/dto/receive/ben
 import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
 import { LoyaltyTierFilterDto } from '@platform-user/core-controller/dto/receive/loyaltyTier-filter.dto';
 import { LoyaltyTierGetOneResponseDto } from '@platform-user/core-controller/dto/response/loyaltyTier-get-one-response.dto';
-import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
@@ -139,7 +137,6 @@ export class LoyaltyController {
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly loyaltyValidateRules: LoyaltyValidateRules,
-    private readonly createCardBonusOperUseCase: CreateCardBonusOperUseCase,
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly handlerOrderUseCase: HandlerOrderUseCase,
     private readonly updateBenefitUseCase: UpdateBenefitUseCase,
@@ -340,6 +337,44 @@ export class LoyaltyController {
     }
   }
 
+  @Get('participant-programs')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(201)
+  async getParticipantPrograms(
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string,
+  ): Promise<LTYProgram[]> {
+    try {
+      if (!organizationId) {
+        throw new CustomHttpException({
+          message: 'Organization ID is required',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      await this.loyaltyValidateRules.getParticipantProgramsValidate(Number(organizationId), req.ability);
+
+      return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
+        Number(organizationId),
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Get program by id
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -365,6 +400,7 @@ export class LoyaltyController {
         startDate: loyaltyProgram.startDate,
         isHub: loyaltyProgram.isHub,
         isHubRequested: loyaltyProgram.isHubRequested,
+        isHubRejected: loyaltyProgram.isHubRejected,
         organizations: organizations.map((item) => {
           return { id: item.id, name: item.name };
         }),
@@ -1655,11 +1691,15 @@ export class LoyaltyController {
 
   @Get('hub-requests')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadLoyaltyAbility())
+  @CheckAbilities(new SuperAdminAbility())
   async getLoyaltyHubRequests(
+    @Request() req: any,
     @Query() filter: LoyaltyHubRequestsFilterDto,
   ): Promise<LoyaltyHubRequestsListResponseDto> {
     try {
+
+      await this.loyaltyValidateRules.getHubRequestsValidate(req.ability);
+
       return await this.findLoyaltyHubRequestsUseCase.execute(filter);
     } catch (e) {
       if (e instanceof LoyaltyException) {
