@@ -47,6 +47,8 @@ import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/rece
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
 import { LoyaltyProgramParticipantRequestDto } from '@platform-user/core-controller/dto/receive/loyalty-program-participant-request.dto';
 import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
+import { PublicLoyaltyProgramsFilterDto } from '@platform-user/core-controller/dto/receive/public-loyalty-programs-filter.dto';
+import { PublicLoyaltyProgramResponseDto, PublicLoyaltyProgramsListResponseDto } from '@platform-user/core-controller/dto/response/public-loyalty-programs-response.dto';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-create';
@@ -323,6 +325,51 @@ export class LoyaltyController {
         ability,
         organizationId ? Number(organizationId) : undefined,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('public-programs')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getPublicPrograms(
+    @Request() req: any,
+    @Query() filters: PublicLoyaltyProgramsFilterDto,
+  ): Promise<PublicLoyaltyProgramsListResponseDto> {
+    try {
+      const programs = await this.findMethodsLoyaltyProgramUseCase.getAllPublicPrograms(filters);
+      
+      const programResponses: PublicLoyaltyProgramResponseDto[] = programs.map((program) => ({
+        id: program.id,
+        name: program.name,
+        status: program.status,
+        startDate: program.startDate,
+        lifetimeDays: program.lifetimeDays,
+        ownerOrganizationId: program.ownerOrganizationId,
+        isHub: program.isHub,
+        isPublic: program.isPublic,
+      }));
+
+      return {
+        programs: programResponses,
+        total: programResponses.length,
+        page: filters.page || 1,
+        size: filters.size || 10,
+      };
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
