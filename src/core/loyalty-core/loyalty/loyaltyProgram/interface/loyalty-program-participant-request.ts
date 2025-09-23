@@ -1,4 +1,6 @@
 import { LTYProgramRequestStatus } from '@prisma/client';
+import { LoyaltyParticipantRequestsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-participant-requests-filter.dto';
+import { LoyaltyParticipantRequestsListResponseDto } from '@platform-user/core-controller/dto/response/loyalty-participant-requests-response.dto';
 
 export abstract class ILoyaltyProgramParticipantRequestRepository {
   abstract create(
@@ -19,6 +21,8 @@ export abstract class ILoyaltyProgramParticipantRequestRepository {
     status: LTYProgramRequestStatus,
   ): Promise<any>;
 
+  abstract findById(id: number): Promise<any>;
+
   abstract update(
     id: number,
     data: {
@@ -32,4 +36,6 @@ export abstract class ILoyaltyProgramParticipantRequestRepository {
   ): Promise<any>;
 
   abstract count(where: any): Promise<number>;
+
+  abstract findManyWithPagination(filter: LoyaltyParticipantRequestsFilterDto): Promise<LoyaltyParticipantRequestsListResponseDto>;
 }

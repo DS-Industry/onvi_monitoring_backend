@@ -978,4 +978,55 @@ export class LoyaltyValidateRules {
       'LTYProgram'
     );
   }
+
+  public async approveParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async rejectParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async getParticipantRequestsValidate(
+    ability: any,
+  ): Promise<void> {
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+  }
 }

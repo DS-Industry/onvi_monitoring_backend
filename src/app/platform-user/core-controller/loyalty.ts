@@ -120,6 +120,13 @@ import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram
 import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
 import { FindLoyaltyHubRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-hub-requests';
+import { LoyaltyProgramParticipantApproveDto } from './dto/receive/loyalty-program-participant-approve.dto';
+import { LoyaltyProgramParticipantRejectDto } from './dto/receive/loyalty-program-participant-reject.dto';
+import { LoyaltyParticipantRequestsFilterDto } from './dto/receive/loyalty-participant-requests-filter.dto';
+import { LoyaltyParticipantRequestsListResponseDto } from './dto/response/loyalty-participant-requests-response.dto';
+import { LoyaltyProgramParticipantApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-approve';
+import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-reject';
+import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -164,6 +171,9 @@ export class LoyaltyController {
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
     private readonly findLoyaltyHubRequestsUseCase: FindLoyaltyHubRequestsUseCase,
     private readonly createLoyaltyProgramParticipantRequestUseCase: CreateLoyaltyProgramParticipantRequestUseCase,
+    private readonly loyaltyProgramParticipantApproveUseCase: LoyaltyProgramParticipantApproveUseCase,
+    private readonly loyaltyProgramParticipantRejectUseCase: LoyaltyProgramParticipantRejectUseCase,
+    private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1790,6 +1800,110 @@ export class LoyaltyController {
         data.organizationId,
         data.requestComment,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/approve-participant')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async approveParticipant(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramParticipantApproveDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.approveParticipantRequestValidate(id, ability);
+
+      return await this.loyaltyProgramParticipantApproveUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/reject-participant')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async rejectParticipant(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramParticipantRejectDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.rejectParticipantRequestValidate(id, ability);
+
+      return await this.loyaltyProgramParticipantRejectUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Get('participant-requests')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  async getLoyaltyParticipantRequests(
+    @Request() req: any,
+    @Query() filter: LoyaltyParticipantRequestsFilterDto,
+  ): Promise<LoyaltyParticipantRequestsListResponseDto> {
+    try {
+
+      await this.loyaltyValidateRules.getParticipantRequestsValidate(req.ability);
+
+      return await this.findLoyaltyParticipantRequestsUseCase.execute(filter);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
