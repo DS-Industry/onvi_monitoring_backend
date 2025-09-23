@@ -76,6 +76,7 @@ import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/
 import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
+import { FindParticipantRequestByIdUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-request-by-id';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
@@ -161,6 +162,7 @@ export class ValidateLib {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
     private readonly findMethodsLoyaltyProgramUseCase: FindMethodsLoyaltyProgramUseCase,
+    private readonly findParticipantRequestByIdUseCase: FindParticipantRequestByIdUseCase,
     private readonly findMethodsLoyaltyTierUseCase: FindMethodsLoyaltyTierUseCase,
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
@@ -1085,6 +1087,19 @@ export class ValidateLib {
       };
     }
     return { code: 200, object: checkHubRequest };
+  }
+
+  public async participantRequestByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkParticipantRequest = await this.findParticipantRequestByIdUseCase.execute(id);
+    if (!checkParticipantRequest) {
+      return {
+        code: 400,
+        errorMessage: 'The participant request does not exist',
+      };
+    }
+    return { code: 200, object: checkParticipantRequest };
   }
 
   public async loyaltyProgramByOwnerOrganizationIdExists(

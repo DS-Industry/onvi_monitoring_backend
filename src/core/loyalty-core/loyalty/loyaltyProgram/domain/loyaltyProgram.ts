@@ -11,6 +11,7 @@ export interface LTYProgramProps {
   isHub?: boolean;
   isHubRequested?: boolean
   isHubRejected?: boolean
+  isPublic?: boolean;
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -76,5 +77,13 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   set isHub(isHub: boolean) {
     this.props.isHub = isHub;
+  }
+
+  get isPublic(): boolean {
+    return this.props.isPublic || false;
+  }
+
+  set isPublic(isPublic: boolean) {
+    this.props.isPublic = isPublic;
   }
 }

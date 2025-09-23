@@ -57,4 +57,13 @@ export class FindMethodsLoyaltyProgramUseCase {
   async getAllParticipantProgramsByOrganizationId(organizationId: number): Promise<LTYProgram[]> {
     return await this.loyaltyProgramRepository.findAllParticipantProgramsByOrganizationId(organizationId);
   }
+
+  async getAllPublicPrograms(filters?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<LTYProgram[]> {
+    return await this.loyaltyProgramRepository.findAllPublicPrograms(filters);
+  }
 }

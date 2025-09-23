@@ -75,6 +75,12 @@ import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
 import { FindLoyaltyHubRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-hub-requests';
 import { LoyaltyProgramHubRequestRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyalty-program-hub-request';
+import { LoyaltyProgramParticipantRequestRepositoryProvider } from '@loyalty/loyalty/loyaltyProgram/provider/loyalty-program-participant-request';
+import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
+import { LoyaltyProgramParticipantApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-approve';
+import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-reject';
+import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
+import { FindParticipantRequestByIdUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-request-by-id';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -93,6 +99,7 @@ const repositories: Provider[] = [
   MarketingCampaignRepositoryProvider,
   LoyaltyTierHistRepositoryProvider,
   LoyaltyProgramHubRequestRepositoryProvider,
+  LoyaltyProgramParticipantRequestRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [
@@ -127,6 +134,11 @@ const loyaltyProgramUseCase: Provider[] = [
   LoyaltyProgramHubApproveUseCase,
   LoyaltyProgramHubRejectUseCase,
   FindLoyaltyHubRequestsUseCase,
+  CreateLoyaltyProgramParticipantRequestUseCase,
+  LoyaltyProgramParticipantApproveUseCase,
+  LoyaltyProgramParticipantRejectUseCase,
+  FindLoyaltyParticipantRequestsUseCase,
+  FindParticipantRequestByIdUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [

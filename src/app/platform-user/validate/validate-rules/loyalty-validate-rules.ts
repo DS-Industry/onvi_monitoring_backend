@@ -134,6 +134,38 @@ export class LoyaltyValidateRules {
     return loyaltyProgramCheck.object;
   }
 
+  public async createLoyaltyProgramParticipantRequestValidate(
+    loyaltyProgramId: number,
+    organizationId: number,
+    ability: any,
+  ): Promise<{ loyaltyProgram: any; organization: any }> {
+    const response = [];
+    
+    const loyaltyProgramCheck =
+      await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    response.push(loyaltyProgramCheck);
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+    
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      organizationCheck.object,
+    );
+
+    return {
+      loyaltyProgram: loyaltyProgramCheck.object,
+      organization: organizationCheck.object,
+    };
+  }
+
   public async createLoyaltyTierValidate(
     loyaltyProgramId: number,
     ability: any,
@@ -939,6 +971,57 @@ export class LoyaltyValidateRules {
   }
 
   public async getHubRequestsValidate(
+    ability: any,
+  ): Promise<void> {
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+  }
+
+  public async approveParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async rejectParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async getParticipantRequestsValidate(
     ability: any,
   ): Promise<void> {
     ForbiddenError.from(ability).throwUnlessCan(

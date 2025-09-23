@@ -165,6 +165,53 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     );
   }
 
+  public async findAllPublicPrograms(filters?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<LTYProgram[]> {
+    const where: any = {
+      isPublic: true,
+      isHub: true
+    };
+
+    if (filters?.search) {
+      where.name = {
+        contains: filters.search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    const skip = filters?.page && filters?.size ? (filters.page - 1) * filters.size : undefined;
+    const take = filters?.size;
+
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
+      where,
+      skip,
+      take,
+      include: {
+        ownerOrganization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    return loyaltyPrograms.map((item) =>
+      PrismaLoyaltyProgramMapper.toDomain(item),
+    );
+  }
+
   public async update(
     input: LTYProgram,
   ): Promise<LTYProgram> {

@@ -23,6 +23,7 @@ export class PrismaLoyaltyProgramMapper {
       isHub: entity.isHub,
       isHubRequested: entity.hubRequest ? true : false,
       isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
+      isPublic: (entity as any).isPublic,
     });
   }
 
@@ -32,9 +33,10 @@ export class PrismaLoyaltyProgramMapper {
       status: loyaltyProgram.status,
       startDate: loyaltyProgram.startDate,
       lifetimeBonusDays: loyaltyProgram?.lifetimeDays,
+      isPublic: loyaltyProgram.isPublic,
       ownerOrganization: loyaltyProgram.ownerOrganizationId
         ? { connect: { id: loyaltyProgram.ownerOrganizationId } }
         : undefined,
-    };
+    } 
   }
 }
