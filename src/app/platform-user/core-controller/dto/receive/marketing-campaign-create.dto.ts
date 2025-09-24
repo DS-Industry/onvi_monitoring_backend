@@ -57,6 +57,10 @@ export class MarketingCampaignCreateDto {
   @IsOptional()
   ltyProgramId?: number;
 
+  @IsNumber()
+  @IsOptional()
+  ltyProgramParticipantId?: number;
+
   @IsArray()
   @ArrayMinSize(1, { message: 'At least one POS must be selected' })
   @IsNumber({}, { each: true })

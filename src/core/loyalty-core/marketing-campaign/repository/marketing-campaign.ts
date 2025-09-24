@@ -391,10 +391,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     });
   }
 
-  async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
+  async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {    
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
-        ownerOrganizationId: organizationId,
+        ltyProgramParticipant: {
+          organizationId: organizationId,
+        },
       },
       include: {
         ltyProgram: true,
@@ -415,11 +417,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
     });
 
+
     return campaigns.map(campaign => {
       const posCount = campaign.poses.length;
       const promocode = campaign.promocodes[0];
       const posIds = campaign.poses.map(pos => pos.id);
-
       return {
         id: campaign.id,
         name: campaign.name,
@@ -449,6 +451,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
       };
     });
+    
   }
 
   async findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]> {

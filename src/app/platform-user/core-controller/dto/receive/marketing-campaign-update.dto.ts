@@ -55,6 +55,10 @@ export class MarketingCampaignUpdateDto {
   @IsOptional()
   ltyProgramId?: number;
 
+  @IsNumber()
+  @IsOptional()
+  ltyProgramParticipantId?: number;
+
   @IsArray()
   @IsOptional()
   @ArrayMinSize(1, { message: 'At least one POS must be selected' })
