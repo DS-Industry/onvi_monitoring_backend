@@ -36,6 +36,7 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                         @relation("OrganizationToUser")
+  marketingCampaigns       MarketingCampaign[]
 }
 
 model Address {
@@ -527,8 +528,8 @@ model LTYProgram {
   lifetimeBonusDays   Int?
   ownerOrganizationId Int?
   isHub               Boolean                        @default(false)
-  isPublic            Boolean                        @default(false)
   participantLimit    Int?
+  isPublic            Boolean                        @default(false)
   cardTiers           LTYCardTier[]
   ownerOrganization   Organization?                  @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
   hubRequest          LTYProgramHubRequest?
@@ -1446,32 +1447,35 @@ model MNGSaleItem {
 }
 
 model MarketingCampaign {
-  id            Int                      @id @default(autoincrement())
-  name          String
-  status        MarketingCampaignStatus  @default(DRAFT)
-  type          MarketingCampaignType
-  launchDate    DateTime
-  endDate       DateTime?
-  description   String?
-  ltyProgramId  Int?
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-  createdById   Int
-  updatedById   Int
-  discountType  MarketingDiscountType?
-  discountValue Float?
-  promocodes    LTYPromocode[]
-  createdBy     User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
-  ltyProgram    LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
-  updatedBy     User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
-  campaignUsage MarketingCampaignUsage[]
-  ltyUsers      LTYUser[]                @relation("MarketingCampaignToLTYUser")
-  poses         Pos[]                    @relation("MarketingCampaignToPos")
+  id                  Int                      @id @default(autoincrement())
+  name                String
+  status              MarketingCampaignStatus  @default(DRAFT)
+  type                MarketingCampaignType
+  launchDate          DateTime
+  endDate             DateTime?
+  description         String?
+  ltyProgramId        Int?
+  ownerOrganizationId Int?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  createdById         Int
+  updatedById         Int
+  discountType        MarketingDiscountType?
+  discountValue       Float?
+  promocodes          LTYPromocode[]
+  createdBy           User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  ltyProgram          LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
+  ownerOrganization   Organization?            @relation(fields: [ownerOrganizationId], references: [id])
+  updatedBy           User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  campaignUsage       MarketingCampaignUsage[]
+  ltyUsers            LTYUser[]                @relation("MarketingCampaignToLTYUser")
+  poses               Pos[]                    @relation("MarketingCampaignToPos")
 
   @@index([status])
   @@index([type])
   @@index([launchDate])
   @@index([ltyProgramId])
+  @@index([ownerOrganizationId])
 }
 
 model LTYPromocode {
