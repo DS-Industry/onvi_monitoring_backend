@@ -4,7 +4,7 @@ import { MarketingCampaignCreateDto } from '@platform-user/core-controller/dto/r
 import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { MarketingCampaignStatus } from '@prisma/client';
+import { MarketingCampaignStatus, MarketingCampaignType } from '@prisma/client';
 
 @Injectable()
 export class MarketingCampaignRepository extends IMarketingCampaignRepository {
@@ -27,8 +27,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
-        discountType: data.type === "DISCOUNT" ? data.discountType || "PERCENTAGE" : null,
-        discountValue: data.type === "DISCOUNT" ? data.discountValue : null,
+        discountType: data.type === MarketingCampaignType.DISCOUNT ? data.discountType || "PERCENTAGE" : null,
+        discountValue: data.type === MarketingCampaignType.DISCOUNT ? data.discountValue : null,
         ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
@@ -201,13 +201,39 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     }
 
     let promocode = null;
-    if (data.promocode || data.discountType || data.discountValue !== undefined || data.maxUsage !== undefined) {
-      const existingPromocode = campaign.promocodes[0];
 
+    if (data.type === MarketingCampaignType.DISCOUNT) {
+      if (existingCampaign.promocodes.length > 0) {
+        await this.prisma.lTYPromocode.deleteMany({
+          where: { campaignId: id },
+        });
+      }
+      
+      if (data.discountType !== undefined || data.discountValue !== undefined) {
+        await this.prisma.marketingCampaign.update({
+          where: { id },
+          data: {
+            discountType: data.discountType,
+            discountValue: data.discountValue,
+          },
+        });
+      }
+    } else if (data.type === MarketingCampaignType.PROMOCODE) {
+      if (existingCampaign.type === MarketingCampaignType.DISCOUNT) {
+        await this.prisma.marketingCampaign.update({
+          where: { id },
+          data: {
+            discountType: null,
+            discountValue: null,
+          },
+        });
+      }
+      
+      const existingPromocode = campaign.promocodes[0];
       if (existingPromocode) {
         const promocodeUpdateData: any = {};
         if (data.promocode !== undefined) promocodeUpdateData.code = data.promocode;
-        if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType;
+        if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE';
         if (data.discountValue !== undefined) promocodeUpdateData.discountValue = data.discountValue;
         if (data.maxUsage !== undefined) promocodeUpdateData.maxUsage = data.maxUsage;
 
@@ -215,11 +241,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           where: { id: existingPromocode.id },
           data: promocodeUpdateData,
         });
-      } else if (data.promocode || data.type === 'DISCOUNT') {
+      } else {
         promocode = await this.prisma.lTYPromocode.create({
           data: {
             campaignId: campaign.id,
-            code: data.promocode || '', 
+            code: data.promocode || '',
             promocodeType: 'CAMPAIGN',
             discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
             discountValue: data.discountValue || 0,
@@ -255,8 +281,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || data.discountType || campaign.promocodes[0]?.discountType || '',
-      discountValue: promocode?.discountValue || data.discountValue || campaign.promocodes[0]?.discountValue ? Number(campaign.promocodes[0].discountValue) : 0,
+      discountType: campaign.type === MarketingCampaignType.DISCOUNT 
+        ? campaign.discountType || ''
+        : (promocode?.discountType || campaign.promocodes[0]?.discountType || ''),
+      discountValue: campaign.type === MarketingCampaignType.DISCOUNT
+        ? campaign.discountValue || 0
+        : (promocode?.discountValue || campaign.promocodes[0]?.discountValue || 0),
       promocode: promocode?.code || campaign.promocodes[0]?.code,
       maxUsage: promocode?.maxUsage || campaign.promocodes[0]?.maxUsage,
       currentUsage: promocode?.currentUsage || campaign.promocodes[0]?.currentUsage || 0,
@@ -315,8 +345,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+      discountType: promocode?.discountType || campaign.discountType || '',
+      discountValue: Number(promocode?.discountValue) || Number(campaign.discountValue) || 0,
       promocode: promocode?.code,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
