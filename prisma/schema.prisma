@@ -36,7 +36,6 @@ model Organization {
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
   users                    User[]                         @relation("OrganizationToUser")
-  marketingCampaigns       MarketingCampaign[]
 }
 
 model Address {
@@ -553,6 +552,7 @@ model LTYProgramParticipant {
   ltyProgram      LTYProgram                    @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
   organization    Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   originalRequest LTYProgramParticipantRequest? @relation("OriginalRequest", fields: [requestId], references: [id])
+  marketingCampaigns MarketingCampaign[]
 
   @@unique([ltyProgramId, organizationId])
   @@index([status])
@@ -1455,7 +1455,7 @@ model MarketingCampaign {
   endDate             DateTime?
   description         String?
   ltyProgramId        Int?
-  ownerOrganizationId Int?
+  ltyProgramParticipantId Int?
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
   createdById         Int
@@ -1465,7 +1465,7 @@ model MarketingCampaign {
   promocodes          LTYPromocode[]
   createdBy           User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
   ltyProgram          LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
-  ownerOrganization   Organization?            @relation(fields: [ownerOrganizationId], references: [id])
+  ltyProgramParticipant LTYProgramParticipant? @relation(fields: [ltyProgramParticipantId], references: [id])
   updatedBy           User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage       MarketingCampaignUsage[]
   ltyUsers            LTYUser[]                @relation("MarketingCampaignToLTYUser")
@@ -1475,7 +1475,7 @@ model MarketingCampaign {
   @@index([type])
   @@index([launchDate])
   @@index([ltyProgramId])
-  @@index([ownerOrganizationId])
+  @@index([ltyProgramParticipantId])
 }
 
 model LTYPromocode {
