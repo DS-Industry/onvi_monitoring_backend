@@ -29,6 +29,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         updatedById: userId,
         discountType: data.type === "DISCOUNT" ? data.discountType || "PERCENTAGE" : null,
         discountValue: data.type === "DISCOUNT" ? data.discountValue : null,
+        ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
         ltyProgram: true,

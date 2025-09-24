@@ -1571,8 +1571,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramId: data.ltyProgramId,
-          ltyProgramParticipantId: data.participantId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,
@@ -1611,7 +1610,7 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.updateMarketingCampaignValidate(
         id,
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,

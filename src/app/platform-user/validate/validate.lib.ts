@@ -1457,6 +1457,29 @@ export class ValidateLib {
     return { code: 200, object: checkMarketingCampaign };
   }
 
+  public async ltyProgramParticipantByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkParticipant = await this.prisma.lTYProgramParticipant.findUnique({
+      where: { id },
+      include: {
+        ltyProgram: true,
+        organization: {
+          include: {
+            ownedLtyPrograms: true,
+          },
+        },
+      },
+    });
+    if (!checkParticipant) {
+      return {
+        code: 400,
+        errorMessage: 'The loyalty program participant does not exist',
+      };
+    }
+    return { code: 200, object: checkParticipant };
+  }
+
   public async cardBelongsToAccessibleLoyaltyProgram(
     cardId: number,
     ability: any,
