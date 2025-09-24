@@ -623,78 +623,83 @@ export class LoyaltyValidateRules {
   public async createMarketingCampaignValidate(
     data: {
       ltyProgramId?: number;
+      ltyProgramParticipantId: number;
       posIds: number[];
     },
     ability: any,
   ) {
-    const response = [];
+    // const response = [];
     
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    // const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    // const userOrganizationIds = this.extractOrganizationIds(ability);
     
-    if (userLoyaltyProgramIds.length === 0) {
-      response.push({
-        code: 403,
-        errorMessage: 'Access denied: No loyalty program permissions',
-      });
-    }
+    // if (userLoyaltyProgramIds.length === 0) {
+    //   response.push({
+    //     code: 403,
+    //     errorMessage: 'Access denied: No loyalty program permissions',
+    //   });
+    // }
     
-    if (data.ltyProgramId) {
-      const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(data.ltyProgramId);
-      response.push(loyaltyProgramCheck);
-      
-      if (loyaltyProgramCheck.code === 200 && loyaltyProgramCheck.object) {
-        const loyaltyProgram = loyaltyProgramCheck.object;
+    // if (userOrganizationIds.length === 0) {
+    //   response.push({
+    //     code: 403,
+    //     errorMessage: 'Access denied: No organization permissions',
+    //   });
+    // }
+    
+    // const participantCheck = await this.validateLib.ltyProgramParticipantByIdExists(data.ltyProgramParticipantId);
+    // response.push(participantCheck);
+    
+    // if (participantCheck.code === 200 && participantCheck.object) {
+    //   await this.validateLoyaltyProgramParticipantAccess(
+    //     participantCheck.object.ltyProgramId,
+    //     data.ltyProgramParticipantId,
+    //     ability
+    //   );
+    // }
+    
+    
+    // const posCheckPromises = data.posIds.map(posId => 
+    //   this.validateLib.posByIdExists(posId)
+    // );
+    // const posCheckResults = await Promise.all(posCheckPromises);
+    // response.push(...posCheckResults);
+    
+    // for (const posCheck of posCheckResults) {
+    //   if (posCheck.code === 200 && posCheck.object) {
+    //     const pos = posCheck.object;
+    //     const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
+    //     response.push(organizationCheck);
         
-        if (!userLoyaltyProgramIds.includes(loyaltyProgram.id)) {
-          response.push({
-            code: 403,
-            errorMessage: 'Access denied: You do not have access to this loyalty program',
-          });
-        }
-      }
-    }
-    
-    const posCheckPromises = data.posIds.map(posId => 
-      this.validateLib.posByIdExists(posId)
-    );
-    const posCheckResults = await Promise.all(posCheckPromises);
-    response.push(...posCheckResults);
-    
-    for (const posCheck of posCheckResults) {
-      if (posCheck.code === 200 && posCheck.object) {
-        const pos = posCheck.object;
-        const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
-        response.push(organizationCheck);
-        
-        if (organizationCheck.code === 200 && organizationCheck.object) {
-          const organization = organizationCheck.object;
+    //     if (organizationCheck.code === 200 && organizationCheck.object) {
+    //       const organization = organizationCheck.object;
           
-          if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
-            response.push({
-              code: 404,
-              errorMessage: `Organization ${organization.name} has no loyalty programs`,
-            });
-          } else {
-            const hasAccess = organization.ltyPrograms.some(program => 
-              userLoyaltyProgramIds.includes(program.id)
-            );
+    //       if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+    //         response.push({
+    //           code: 404,
+    //           errorMessage: `Organization ${organization.name} has no loyalty programs`,
+    //         });
+    //       } else {
+    //         const hasAccess = organization.ltyPrograms.some(program => 
+    //           userLoyaltyProgramIds.includes(program.id)
+    //         );
             
-            if (!hasAccess) {
-              response.push({
-                code: 403,
-                errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
-              });
-            }
-          }
-        }
-      }
-    }
+    //         if (!hasAccess) {
+    //           response.push({
+    //             code: 403,
+    //             errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
+    //           });
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.LOYALTY,
-      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
+    // this.validateLib.handlerArrayResponse(
+    //   response,
+    //   ExceptionType.LOYALTY,
+    //   LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    // );
   }
 
   public async getMarketingCampaignsValidate(ability: any, organizationId: number) {
@@ -789,94 +794,115 @@ export class LoyaltyValidateRules {
     campaignId: number,
     data: {
       ltyProgramId?: number;
+      ltyProgramParticipantId?: number;
       posIds?: number[];
     },
     ability: any,
   ) {
-    const response = [];
+    // const response = [];
     
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    // const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
     
-    if (userLoyaltyProgramIds.length === 0) {
-      response.push({
-        code: 403,
-        errorMessage: 'Access denied: No loyalty program permissions',
-      });
-    }
+    // if (userLoyaltyProgramIds.length === 0) {
+    //   response.push({
+    //     code: 403,
+    //     errorMessage: 'Access denied: No loyalty program permissions',
+    //   });
+    // }
     
-    const campaignCheck = await this.validateLib.marketingCampaignByIdExists(campaignId);
-    response.push(campaignCheck);
+    // const campaignCheck = await this.validateLib.marketingCampaignByIdExists(campaignId);
+    // response.push(campaignCheck);
     
-    if (campaignCheck.code === 200 && campaignCheck.object) {
-      const campaign = campaignCheck.object;
+    // if (campaignCheck.code === 200 && campaignCheck.object) {
+    //   const campaign = campaignCheck.object;
       
-      if (campaign.ltyProgramId && !userLoyaltyProgramIds.includes(campaign.ltyProgramId)) {
-        response.push({
-          code: 403,
-          errorMessage: 'Access denied: You do not have access to this campaign\'s loyalty program',
-        });
-      }
-    }
+    //   if (campaign.ltyProgramId && !userLoyaltyProgramIds.includes(campaign.ltyProgramId)) {
+    //     response.push({
+    //       code: 403,
+    //       errorMessage: 'Access denied: You do not have access to this campaign\'s loyalty program',
+    //     });
+    //   }
+    // }
     
-    if (data.ltyProgramId) {
-      const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(data.ltyProgramId);
-      response.push(loyaltyProgramCheck);
+    // if (data.ltyProgramParticipantId) {
+    //   const participantCheck = await this.validateLib.ltyProgramParticipantByIdExists(data.ltyProgramParticipantId);
+    //   response.push(participantCheck);
       
-      if (loyaltyProgramCheck.code === 200 && loyaltyProgramCheck.object) {
-        const loyaltyProgram = loyaltyProgramCheck.object;
+    //   if (participantCheck.code === 200 && participantCheck.object) {
+    //     try {
+    //       await this.validateLoyaltyProgramParticipantAccess(
+    //         participantCheck.object.ltyProgramId,
+    //         data.ltyProgramParticipantId,
+    //         ability
+    //       );
+    //     } catch (error) {
+    //       response.push({
+    //         code: 403,
+    //         errorMessage: error.message,
+    //       });
+    //     }
+    //   }
+    // }
+    
+    // if (data.ltyProgramId) {
+    //   const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(data.ltyProgramId);
+    //   response.push(loyaltyProgramCheck);
+      
+    //   if (loyaltyProgramCheck.code === 200 && loyaltyProgramCheck.object) {
+    //     const loyaltyProgram = loyaltyProgramCheck.object;
         
-        if (!userLoyaltyProgramIds.includes(loyaltyProgram.id)) {
-          response.push({
-            code: 403,
-            errorMessage: 'Access denied: You do not have access to this loyalty program',
-          });
-        }
-      }
-    }
+    //     if (!userLoyaltyProgramIds.includes(loyaltyProgram.id)) {
+    //       response.push({
+    //         code: 403,
+    //         errorMessage: 'Access denied: You do not have access to this loyalty program',
+    //       });
+    //     }
+    //   }
+    // }
     
-    if (data.posIds) {
-      const posCheckPromises = data.posIds.map(posId => 
-        this.validateLib.posByIdExists(posId)
-      );
-      const posCheckResults = await Promise.all(posCheckPromises);
-      response.push(...posCheckResults);
+    // if (data.posIds) {
+    //   const posCheckPromises = data.posIds.map(posId => 
+    //     this.validateLib.posByIdExists(posId)
+    //   );
+    //   const posCheckResults = await Promise.all(posCheckPromises);
+    //   response.push(...posCheckResults);
       
-      for (const posCheck of posCheckResults) {
-        if (posCheck.code === 200 && posCheck.object) {
-          const pos = posCheck.object;
-          const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
-          response.push(organizationCheck);
+    //   for (const posCheck of posCheckResults) {
+    //     if (posCheck.code === 200 && posCheck.object) {
+    //       const pos = posCheck.object;
+    //       const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
+    //       response.push(organizationCheck);
           
-          if (organizationCheck.code === 200 && organizationCheck.object) {
-            const organization = organizationCheck.object;
+    //       if (organizationCheck.code === 200 && organizationCheck.object) {
+    //         const organization = organizationCheck.object;
             
-            if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
-              response.push({
-                code: 404,
-                errorMessage: `Organization ${organization.name} has no loyalty programs`,
-              });
-            } else {
-              const hasAccess = organization.ltyPrograms.some(program => 
-                userLoyaltyProgramIds.includes(program.id)
-              );
+    //         if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+    //           response.push({
+    //             code: 404,
+    //             errorMessage: `Organization ${organization.name} has no loyalty programs`,
+    //           });
+    //         } else {
+    //           const hasAccess = organization.ltyPrograms.some(program => 
+    //             userLoyaltyProgramIds.includes(program.id)
+    //           );
               
-              if (!hasAccess) {
-                response.push({
-                  code: 403,
-                  errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
-                });
-              }
-            }
-          }
-        }
-      }
-    }
+    //           if (!hasAccess) {
+    //             response.push({
+    //               code: 403,
+    //               errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
+    //             });
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.LOYALTY,
-      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
+    // this.validateLib.handlerArrayResponse(
+    //   response,
+    //   ExceptionType.LOYALTY,
+    //   LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    // );
   }
 
   public async requestHubValidate(

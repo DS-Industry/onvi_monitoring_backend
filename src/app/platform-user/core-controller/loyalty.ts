@@ -42,6 +42,7 @@ import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/clie
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
@@ -404,7 +405,7 @@ export class LoyaltyController {
   async getParticipantPrograms(
     @Request() req: any,
     @Query('organizationId') organizationId?: string,
-  ): Promise<LTYProgram[]> {
+  ): Promise<LoyaltyProgramParticipantResponseDto[]> {
     try {
       if (!organizationId) {
         throw new CustomHttpException({
@@ -1571,6 +1572,7 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
           ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.participantId,
           posIds: data.posIds,
         },
         ability,
