@@ -394,14 +394,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
   async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
-        ltyProgram: {
-          programParticipants: {
-            some: {
-              organizationId: organizationId,
-              status: 'ACTIVE',
-            },
-          },
-        },
+        ownerOrganizationId: organizationId,
       },
       include: {
         ltyProgram: true,

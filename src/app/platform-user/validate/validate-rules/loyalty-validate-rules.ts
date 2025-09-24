@@ -704,11 +704,6 @@ export class LoyaltyValidateRules {
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
-    const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
-    response.push(loyaltyProgramCheck);
-
-
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
@@ -720,14 +715,9 @@ export class LoyaltyValidateRules {
       PermissionAction.read,
       organizationCheck.object,
     );
+  
     
-    // Then check loyalty program ability
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      loyaltyProgramCheck.object,
-    );
-    
-    return loyaltyProgramCheck.object;
+    return organizationCheck.object;
   }
 
   public async getMarketingCampaignByIdValidate(campaignId: number, ability: any) {
