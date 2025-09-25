@@ -416,9 +416,9 @@ export class LoyaltyValidateRules {
     
     if (ability && ability.rules) {
       for (const rule of ability.rules) {
-        if (rule.subject === 'Organization' && rule.conditions && rule.conditions.id) {
-          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
-            userOrganizationIds.push(...rule.conditions.id.in);
+        if (rule.subject === 'Pos' && rule.conditions && rule.conditions.organizationId) {
+          if (rule.conditions.organizationId.in && Array.isArray(rule.conditions.organizationId.in)) {
+            userOrganizationIds.push(...rule.conditions.organizationId.in);
           }
         }
       }
