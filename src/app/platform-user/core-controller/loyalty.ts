@@ -407,6 +407,8 @@ export class LoyaltyController {
     @Query('organizationId') organizationId?: string,
   ): Promise<LoyaltyProgramParticipantResponseDto[]> {
     try {
+      const { user } = req;
+
       if (!organizationId) {
         throw new CustomHttpException({
           message: 'Organization ID is required',
@@ -414,7 +416,10 @@ export class LoyaltyController {
         });
       }
 
-      await this.loyaltyValidateRules.getParticipantProgramsValidate(Number(organizationId), req.ability);
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(organizationId),
+      );
 
       return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
         Number(organizationId),
@@ -446,9 +451,9 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<LoyaltyProgramGetByIdResponseDto> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       const loyaltyProgram =
-        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability);
+        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
           loyaltyProgram.id,
@@ -560,7 +565,7 @@ export class LoyaltyController {
     @Query() data: LoyaltyTierFilterDto,
   ): Promise<LoyaltyTierGetOneResponseDto[]> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       let tiers: LoyaltyTier[];
       if (data.programId == '*') {
         const programs =
@@ -574,6 +579,7 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.getLoyaltyProgramValidate(
           data.programId,
           ability,
+          user.id,
         );
         tiers =
           await this.findMethodsLoyaltyTierUseCase.getAllByLoyaltyProgramId(
@@ -1488,6 +1494,7 @@ export class LoyaltyController {
     }
   }
 
+  // Marketologist or Manager Only
   @Get('marketing-campaigns')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
@@ -1497,7 +1504,13 @@ export class LoyaltyController {
     @Query('organizationId', ParseIntPipe) organizationId: number,
   ): Promise<MarketingCampaignResponseDto[]> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        organizationId,
+      );
+
 
       await this.loyaltyValidateRules.getMarketingCampaignsValidate(
         ability,
@@ -1638,6 +1651,7 @@ export class LoyaltyController {
     }
   }
 
+  // Super Admin only
   @Post('programs/:id/request-hub')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
@@ -1779,6 +1793,7 @@ export class LoyaltyController {
     }
   }
 
+  // Marketologist or Manager Only
   @Post('participant-request')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())

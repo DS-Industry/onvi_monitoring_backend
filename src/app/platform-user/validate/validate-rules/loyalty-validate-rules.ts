@@ -18,12 +18,14 @@ import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyException } from '@exception/option.exceptions';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 
 @Injectable()
 export class LoyaltyValidateRules {
   constructor(
     private readonly validateLib: ValidateLib,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
   ) {}
 
   public async createLoyaltyProgramValidate(
@@ -115,21 +117,27 @@ export class LoyaltyValidateRules {
   public async getLoyaltyProgramValidate(
     loyaltyProgramId: number,
     ability: any,
+    userId: number,
   ) {
     const response = [];
     const loyaltyProgramCheck =
       await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
     response.push(loyaltyProgramCheck);
+    
+
+    // TODO: NICK
+    console.log("loyaltyProgramCheck => ", loyaltyProgramCheck)
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      loyaltyProgramCheck.object,
-    );
+
+    // ForbiddenError.from(ability).throwUnlessCan(
+    //   PermissionAction.read,
+    //   loyaltyProgramCheck.object,
+    // );
 
     return loyaltyProgramCheck.object;
   }
@@ -155,10 +163,14 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
     
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
-      organizationCheck.object,
-    );
+    const organizations = await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
+
+    if (!organizations.some(org => org.id === organizationId)) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Access denied: You do not belong to this organization',
+      );
+    }
 
     return {
       loyaltyProgram: loyaltyProgramCheck.object,
@@ -696,14 +708,8 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-  
-    
+
+
     return organizationCheck.object;
   }
 
@@ -985,5 +991,26 @@ export class LoyaltyValidateRules {
       PermissionAction.manage,
       'LTYProgram'
     );
+  }
+
+  public async validateUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ) {
+    const response = await this.validateLib.userBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    console.log("response => ", response)
+
+    if (response.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
   }
 }

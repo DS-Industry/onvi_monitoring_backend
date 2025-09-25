@@ -44,4 +44,8 @@ export abstract class IUserRepository {
     addLoyaltyProgramIds: number[],
     deleteLoyaltyProgramIds: number[],
   ): Promise<any>;
+  abstract findUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<User | null>;
 }

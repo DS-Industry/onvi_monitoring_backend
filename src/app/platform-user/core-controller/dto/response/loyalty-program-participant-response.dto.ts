@@ -11,6 +11,7 @@ export class LoyaltyProgramParticipantResponseDto {
         isHubRejected: boolean;
         lifetimeDays?: number;
         participantId: number; 
+        ownerOrganizationId: number;
     }
 }
 
@@ -29,6 +30,7 @@ export function mapLoyaltyProgramToParticipantResponse(
         isHubRejected: program.isHubRejected,
         lifetimeDays: program.lifetimeDays,
         participantId: participantId,
+        ownerOrganizationId: program.ownerOrganizationId,
     }
   };
 }

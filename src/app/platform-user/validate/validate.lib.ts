@@ -1573,4 +1573,26 @@ export class ValidateLib {
       }
     }
   }
+
+  public async userBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<ValidateResponse<any>> {
+    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    if (!user) {
+      return { 
+        code: 400, 
+        errorMessage: `User with ID ${userId} does not belong to organization with ID ${organizationId}` 
+      };
+    }
+
+    return { 
+      code: 200, 
+      object: user 
+    };
+  }
 }
