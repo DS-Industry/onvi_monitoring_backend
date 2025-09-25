@@ -1457,6 +1457,29 @@ export class ValidateLib {
     return { code: 200, object: checkMarketingCampaign };
   }
 
+  public async ltyProgramParticipantByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkParticipant = await this.prisma.lTYProgramParticipant.findUnique({
+      where: { id },
+      include: {
+        ltyProgram: true,
+        organization: {
+          include: {
+            ownedLtyPrograms: true,
+          },
+        },
+      },
+    });
+    if (!checkParticipant) {
+      return {
+        code: 400,
+        errorMessage: 'The loyalty program participant does not exist',
+      };
+    }
+    return { code: 200, object: checkParticipant };
+  }
+
   public async cardBelongsToAccessibleLoyaltyProgram(
     cardId: number,
     ability: any,
@@ -1549,5 +1572,49 @@ export class ValidateLib {
         throw new SaleException(exceptionCode, errorCodes);
       }
     }
+  }
+
+  public async userBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<ValidateResponse<any>> {
+    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    if (!user) {
+      return { 
+        code: 400, 
+        errorMessage: `User with ID ${userId} does not belong to organization with ID ${organizationId}` 
+      };
+    }
+
+    return { 
+      code: 200, 
+      object: user 
+    };
+  }
+
+  public async userBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<ValidateResponse<any>> {
+    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganizations(
+      userId,
+      organizationIds,
+    );
+
+    if (!user) {
+      return { 
+        code: 400, 
+        errorMessage: `User with ID ${userId} does not belong to any of the organizations with IDs: ${organizationIds.join(', ')}` 
+      };
+    }
+
+    return { 
+      code: 200, 
+      object: user 
+    };
   }
 }

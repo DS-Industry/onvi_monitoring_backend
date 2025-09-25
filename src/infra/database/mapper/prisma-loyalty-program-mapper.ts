@@ -3,12 +3,13 @@ import {
   Prisma,
   LTYProgramHubRequest,
   LTYProgramRequestStatus,
+  LTYProgramParticipant,
 } from '@prisma/client';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 export class PrismaLoyaltyProgramMapper {
   static toDomain(
-    entity: PrismaLoyaltyProgram & { hubRequest?: LTYProgramHubRequest },
+    entity: PrismaLoyaltyProgram & { hubRequest?: LTYProgramHubRequest, programParticipants?: LTYProgramParticipant[] },
   ): LTYProgram {
     if (!entity) {
       return null;
@@ -24,6 +25,7 @@ export class PrismaLoyaltyProgramMapper {
       isHubRequested: entity.hubRequest ? true : false,
       isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
       isPublic: (entity as any).isPublic,
+      programParticipantOrganizationIds: (entity.programParticipants ?? []).map((participant) => participant.organizationId),
     });
   }
 

@@ -26,9 +26,10 @@ export class CorporateRepository extends ICorporateRepository {
         id,
       },
       include: {
-        owner: true,
+        owner: true
       },
     });
+
     return PrismaCorporateMapper.toDomain(corporate);
   }
 

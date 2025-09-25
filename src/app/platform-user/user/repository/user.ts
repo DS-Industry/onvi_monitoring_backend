@@ -249,4 +249,58 @@ export class UserRepository extends IUserRepository {
   ): Promise<any> {
     // TODO: Remove this method ?
   }
+
+  public async findUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: organizationId,
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: organizationId,
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
+  }
+
+  public async findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
+  }
 }

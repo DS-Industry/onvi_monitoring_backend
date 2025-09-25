@@ -42,6 +42,7 @@ import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/clie
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
@@ -247,11 +248,13 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramCreateDto,
   ): Promise<LTYProgram> {
     try {
-      const { ability, user } = req;
-      await this.loyaltyValidateRules.createLoyaltyProgramValidate(
-        [...data.organizationIds, data.ownerOrganizationId],
-        ability,
+      const { user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(data.ownerOrganizationId),
       );
+      
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
@@ -292,7 +295,6 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
           data.loyaltyProgramId,
           ability,
-          data?.organizationIds,
         );
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
@@ -404,8 +406,10 @@ export class LoyaltyController {
   async getParticipantPrograms(
     @Request() req: any,
     @Query('organizationId') organizationId?: string,
-  ): Promise<LTYProgram[]> {
+  ): Promise<LoyaltyProgramParticipantResponseDto[]> {
     try {
+      const { user } = req;
+
       if (!organizationId) {
         throw new CustomHttpException({
           message: 'Organization ID is required',
@@ -413,7 +417,10 @@ export class LoyaltyController {
         });
       }
 
-      await this.loyaltyValidateRules.getParticipantProgramsValidate(Number(organizationId), req.ability);
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(organizationId),
+      );
 
       return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
         Number(organizationId),
@@ -445,9 +452,9 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<LoyaltyProgramGetByIdResponseDto> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       const loyaltyProgram =
-        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability);
+        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
           loyaltyProgram.id,
@@ -559,7 +566,7 @@ export class LoyaltyController {
     @Query() data: LoyaltyTierFilterDto,
   ): Promise<LoyaltyTierGetOneResponseDto[]> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       let tiers: LoyaltyTier[];
       if (data.programId == '*') {
         const programs =
@@ -573,6 +580,7 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.getLoyaltyProgramValidate(
           data.programId,
           ability,
+          user.id,
         );
         tiers =
           await this.findMethodsLoyaltyTierUseCase.getAllByLoyaltyProgramId(
@@ -816,7 +824,7 @@ export class LoyaltyController {
   //Create client
   @Post('client')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility())
+  @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(201)
   async createClient(
     @Request() req: any,
@@ -828,10 +836,10 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
         ability,
+        data?.cardId,
         data.tagIds || [],
         data?.devNumber,
         data?.number,
-        data?.cardId,
       );
       return await this.createClientUseCase.execute(data);
     } catch (e) {
@@ -865,8 +873,8 @@ export class LoyaltyController {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
         ability,
-        data?.tagIds || [],
         data?.cardId,
+        data?.tagIds || [],
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -895,11 +903,11 @@ export class LoyaltyController {
     @Query() data: ClientFilterDto,
   ): Promise<ClientPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getClientsValidate(
         data.organizationId,
-        ability,
+        user.id
       );
 
       let skip = undefined;
@@ -1291,11 +1299,11 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetByIdUseCase.execute(id);
@@ -1325,11 +1333,11 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.createCorporateClientValidate(
         data.organizationId,
-        ability,
+        user.id,
       );
 
       return await this.createCorporateClientUseCase.execute(data);
@@ -1360,11 +1368,11 @@ export class LoyaltyController {
     @Body() data: CorporateClientUpdateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.updateCorporateClientValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.updateCorporateClientUseCase.execute(id, data);
@@ -1394,10 +1402,10 @@ export class LoyaltyController {
     @Request() req: any,
   ): Promise<CorporateClientStatsResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
       return await this.corporateGetStatsByIdUseCase.execute(id);
     } catch (e) {
@@ -1427,11 +1435,11 @@ export class LoyaltyController {
     @Query() data: CorporateCardsFilterDto,
   ): Promise<CorporateCardsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetCardsUseCase.execute(id, data);
@@ -1462,11 +1470,11 @@ export class LoyaltyController {
     @Query() data: CorporateCardsOperationsFilterDto,
   ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);
@@ -1487,6 +1495,7 @@ export class LoyaltyController {
     }
   }
 
+  // Marketologist or Manager Only
   @Get('marketing-campaigns')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
@@ -1496,7 +1505,13 @@ export class LoyaltyController {
     @Query('organizationId', ParseIntPipe) organizationId: number,
   ): Promise<MarketingCampaignResponseDto[]> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        organizationId,
+      );
+
 
       await this.loyaltyValidateRules.getMarketingCampaignsValidate(
         ability,
@@ -1570,7 +1585,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,
@@ -1609,7 +1624,7 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.updateMarketingCampaignValidate(
         id,
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,
@@ -1637,6 +1652,7 @@ export class LoyaltyController {
     }
   }
 
+  // Super Admin only
   @Post('programs/:id/request-hub')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
@@ -1778,6 +1794,7 @@ export class LoyaltyController {
     }
   }
 
+  // Marketologist or Manager Only
   @Post('participant-request')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
@@ -1787,12 +1804,12 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramParticipantRequestDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
+      const { user } = req;
       
       await this.loyaltyValidateRules.createLoyaltyProgramParticipantRequestValidate(
         data.ltyProgramId,
         data.organizationId,
-        ability,
+        user.id
       );
 
       return await this.createLoyaltyProgramParticipantRequestUseCase.execute(

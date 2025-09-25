@@ -4,11 +4,12 @@ import {
   LTYUser as PrismaMobileUser,
   LTYUserMeta as PrismaMobileUserMeta,
   Prisma,
+  LTYCard,
 } from '@prisma/client';
 
 export class PrismaMobileUserMapper {
   static toDomain(
-    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta },
+    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta, card?: LTYCard },
   ): Client {
     if (!entity) {
       return null;
@@ -29,6 +30,7 @@ export class PrismaMobileUserMapper {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       meta: entity.meta ? this.toDomainClientMeta(entity.meta) : undefined,
+      cardId: entity.card?.id,
     });
   }
 

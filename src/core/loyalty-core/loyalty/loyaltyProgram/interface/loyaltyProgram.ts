@@ -19,7 +19,7 @@ export abstract class ILoyaltyProgramRepository {
     organizationId?: number,
   ): Promise<LTYProgram[]>;
   abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
-  abstract findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<LTYProgram[]>;
+  abstract findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<{ program: LTYProgram; participantId: number }[]>;
   abstract findAllPublicPrograms(filters?: {
     search?: string;
     status?: string;

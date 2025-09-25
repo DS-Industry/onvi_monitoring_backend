@@ -51,5 +51,5 @@ export class ClientCreateDto {
   @Transform(({ value }) => value || [])
   tagIds?: number[];
   @IsNumber()
-  cardId?: number;
+  cardId: number;
 }

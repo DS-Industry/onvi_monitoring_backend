@@ -43,7 +43,12 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: { id },
       include: {
-        hubRequest: true
+        hubRequest: true,
+        programParticipants: {
+          where: {
+            status: 'ACTIVE',
+          },
+        }
       }
     });
     return PrismaLoyaltyProgramMapper.toDomain(loyaltyProgram);
@@ -149,7 +154,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     );
   }
 
-  public async findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<LTYProgram[]> {
+  public async findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<{ program: LTYProgram; participantId: number }[]> {
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
         programParticipants: {
@@ -159,10 +164,20 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
           },
         },
       },
+      include: {
+        programParticipants: {
+          where: {
+            organizationId: organizationId,
+            status: 'ACTIVE',
+          }
+        },
+      },
     });
-    return loyaltyPrograms.map((item) =>
-      PrismaLoyaltyProgramMapper.toDomain(item),
-    );
+    
+    return loyaltyPrograms.map((item) => ({
+      program: PrismaLoyaltyProgramMapper.toDomain(item),
+      participantId: item.programParticipants[0].id, 
+    }));
   }
 
   public async findAllPublicPrograms(filters?: {
