@@ -478,30 +478,24 @@ export class LoyaltyValidateRules {
 
   public async createCorporateClientValidate(
     organizationId: number,
-    ability: any,
+    userId: number,
   ) {
     const response = [];
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(accesTooOrganization);
     
-    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
-    response.push(organizationCheck);
-
     this.validateLib.handlerArrayResponse(
-      response,
+      response, 
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    return organizationCheck.object;
+
+    return accesTooOrganization
   }
 
   public async updateCorporateClientValidate(
     id: number,
-    ability: any,
+    userId: number,
   ) {
     const response = [];
     
@@ -510,18 +504,15 @@ export class LoyaltyValidateRules {
 
     const organizationId = corporateClient.object.organizationId;
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+
+    response.push(accesTooOrganization);
     response.push(organizationCheck);
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
-  
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
     );
     
     return corporateClient.object;

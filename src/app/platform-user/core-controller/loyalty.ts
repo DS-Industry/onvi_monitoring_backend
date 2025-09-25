@@ -1333,11 +1333,11 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.createCorporateClientValidate(
         data.organizationId,
-        ability,
+        user.id,
       );
 
       return await this.createCorporateClientUseCase.execute(data);
@@ -1368,11 +1368,11 @@ export class LoyaltyController {
     @Body() data: CorporateClientUpdateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.updateCorporateClientValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.updateCorporateClientUseCase.execute(id, data);
