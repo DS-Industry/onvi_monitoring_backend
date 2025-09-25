@@ -13,7 +13,6 @@ export class ConnectionUserLoyaltyProgramUseCase {
     const existingLoyaltyPrograms =
       await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
     const existingLoyaltyProgramIds = existingLoyaltyPrograms.map((loyaltyProgram) => loyaltyProgram.id);
-
     const deleteLoyaltyProgramIds = existingLoyaltyProgramIds.filter((id) => !loyaltyProgramIds.includes(id));
     const addLoyaltyProgramIds = loyaltyProgramIds.filter((id) => !existingLoyaltyProgramIds.includes(id));
 

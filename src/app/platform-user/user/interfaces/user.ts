@@ -48,4 +48,8 @@ export abstract class IUserRepository {
     userId: number,
     organizationId: number,
   ): Promise<User | null>;
+  abstract findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null>;
 }

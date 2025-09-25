@@ -274,4 +274,33 @@ export class UserRepository extends IUserRepository {
 
     return user ? PrismaPlatformUserMapper.toDomain(user) : null;
   }
+
+  public async findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
+  }
 }

@@ -47,7 +47,7 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
         programParticipants: {
           where: {
             status: 'ACTIVE',
-          }
+          },
         }
       }
     });

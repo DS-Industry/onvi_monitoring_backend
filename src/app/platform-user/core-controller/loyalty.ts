@@ -248,11 +248,13 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramCreateDto,
   ): Promise<LTYProgram> {
     try {
-      const { ability, user } = req;
-      await this.loyaltyValidateRules.createLoyaltyProgramValidate(
-        [...data.organizationIds, data.ownerOrganizationId],
-        ability,
+      const { user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(data.ownerOrganizationId),
       );
+      
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
@@ -293,7 +295,6 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
           data.loyaltyProgramId,
           ability,
-          data?.organizationIds,
         );
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
@@ -1803,12 +1804,12 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramParticipantRequestDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
+      const { user } = req;
       
       await this.loyaltyValidateRules.createLoyaltyProgramParticipantRequestValidate(
         data.ltyProgramId,
         data.organizationId,
-        ability,
+        user.id
       );
 
       return await this.createLoyaltyProgramParticipantRequestUseCase.execute(

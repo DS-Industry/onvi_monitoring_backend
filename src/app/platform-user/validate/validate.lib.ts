@@ -1595,4 +1595,26 @@ export class ValidateLib {
       object: user 
     };
   }
+
+  public async userBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<ValidateResponse<any>> {
+    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganizations(
+      userId,
+      organizationIds,
+    );
+
+    if (!user) {
+      return { 
+        code: 400, 
+        errorMessage: `User with ID ${userId} does not belong to any of the organizations with IDs: ${organizationIds.join(', ')}` 
+      };
+    }
+
+    return { 
+      code: 200, 
+      object: user 
+    };
+  }
 }

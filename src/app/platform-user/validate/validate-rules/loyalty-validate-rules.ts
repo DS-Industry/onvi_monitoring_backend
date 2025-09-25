@@ -67,46 +67,18 @@ export class LoyaltyValidateRules {
   public async updateLoyaltyProgramValidate(
     loyaltyProgramId: number,
     ability: any,
-    organizationIds?: number[],
   ): Promise<LTYProgram> {
     const response = [];
-    let organizationsCheckResults = [];
 
     const checkLoyaltyProgram =
       await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
     response.push(checkLoyaltyProgram);
 
-    if (organizationIds) {
-      const organizationsCheckPromises = organizationIds.map((orgId) =>
-        this.validateLib.organizationByIdExists(orgId),
-      );
-      organizationsCheckResults = await Promise.all(organizationsCheckPromises);
-
-      response.push(...organizationsCheckResults);
-
-      const loyaltyProgramCheckPromises = organizationIds.map((orgId) =>
-        this.validateLib.loyaltyProgramByOrganizationIdAndProgramIdNotExists(
-          orgId,
-          loyaltyProgramId,
-        ),
-      );
-      const loyaltyProgramCheckResults = await Promise.all(
-        loyaltyProgramCheckPromises,
-      );
-
-      response.push(...loyaltyProgramCheckResults);
-    }
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    organizationsCheckResults.forEach((orgCheck) => {
-      ForbiddenError.from(ability).throwUnlessCan(
-        PermissionAction.read,
-        orgCheck.object,
-      );
-    });
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       checkLoyaltyProgram.object,
@@ -124,9 +96,11 @@ export class LoyaltyValidateRules {
       await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
     response.push(loyaltyProgramCheck);
     
-
-    // TODO: NICK
-    console.log("loyaltyProgramCheck => ", loyaltyProgramCheck)
+    const userBelongsToOrganizations = await this.validateLib.userBelongsToOrganizations(userId, loyaltyProgramCheck.object.programParticipantOrganizationIds);
+    
+    if (userBelongsToOrganizations.code !== 200) {
+      response.push(userBelongsToOrganizations);
+    }
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -134,10 +108,10 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
 
-    // ForbiddenError.from(ability).throwUnlessCan(
-    //   PermissionAction.read,
-    //   loyaltyProgramCheck.object,
-    // );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      loyaltyProgramCheck.object,
+    );
 
     return loyaltyProgramCheck.object;
   }
@@ -145,7 +119,7 @@ export class LoyaltyValidateRules {
   public async createLoyaltyProgramParticipantRequestValidate(
     loyaltyProgramId: number,
     organizationId: number,
-    ability: any,
+    userId: number
   ): Promise<{ loyaltyProgram: any; organization: any }> {
     const response = [];
     
@@ -162,13 +136,14 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    const organizations = await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
 
-    if (!organizations.some(org => org.id === organizationId)) {
+    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    if (userBelongsToOrganization.code !== 200) {
       throw new LoyaltyException(
         LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Access denied: You do not belong to this organization',
+        userBelongsToOrganization.errorMessage,
       );
     }
 

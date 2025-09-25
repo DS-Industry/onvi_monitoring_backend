@@ -83,4 +83,14 @@ export class FindMethodsUserUseCase {
       organizationId,
     );
   }
+
+  async findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ) {
+    return await this.userRepository.findUserBelongsToOrganizations(
+      userId,
+      organizationIds,
+    );
+  }
 }

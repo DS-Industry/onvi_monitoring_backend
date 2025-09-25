@@ -12,7 +12,7 @@ export interface LTYProgramProps {
   isHubRequested?: boolean
   isHubRejected?: boolean
   isPublic?: boolean;
-  programParticipantIds?: number[];
+  programParticipantOrganizationIds?: number[];
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -75,8 +75,8 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
   get isHubRejected(): boolean {
     return this.props.isHubRejected || false;
   }
-  get programParticipantIds(): number[] {
-    return this.props.programParticipantIds || [];
+  get programParticipantOrganizationIds(): number[] {
+    return this.props.programParticipantOrganizationIds || [];
   }
 
   set isHub(isHub: boolean) {
@@ -91,7 +91,7 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
     this.props.isPublic = isPublic;
   }
 
-  set programParticipantIds(programParticipantIds: number[]) {
-    this.props.programParticipantIds = programParticipantIds;
+  set programParticipantOrganizationIds(programParticipantIds: number[]) {
+    this.props.programParticipantOrganizationIds = programParticipantIds;
   }
 }

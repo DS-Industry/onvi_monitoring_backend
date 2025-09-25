@@ -25,7 +25,7 @@ export class PrismaLoyaltyProgramMapper {
       isHubRequested: entity.hubRequest ? true : false,
       isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
       isPublic: (entity as any).isPublic,
-      programParticipantIds: (entity.programParticipants ?? []).map((participant) => participant.id),
+      programParticipantOrganizationIds: (entity.programParticipants ?? []).map((participant) => participant.organizationId),
     });
   }
 
