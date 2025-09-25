@@ -824,7 +824,7 @@ export class LoyaltyController {
   //Create client
   @Post('client')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility())
+  @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(201)
   async createClient(
     @Request() req: any,
@@ -836,10 +836,10 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
         ability,
+        data?.cardId,
         data.tagIds || [],
         data?.devNumber,
         data?.number,
-        data?.cardId,
       );
       return await this.createClientUseCase.execute(data);
     } catch (e) {
@@ -873,8 +873,8 @@ export class LoyaltyController {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
         ability,
-        data?.tagIds || [],
         data?.cardId,
+        data?.tagIds || [],
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -903,11 +903,11 @@ export class LoyaltyController {
     @Query() data: ClientFilterDto,
   ): Promise<ClientPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getClientsValidate(
         data.organizationId,
-        ability,
+        user.id
       );
 
       let skip = undefined;

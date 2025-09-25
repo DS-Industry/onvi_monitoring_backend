@@ -272,10 +272,10 @@ export class LoyaltyValidateRules {
   public async createClientValidate(
     phone: string,
     ability: any,
+    cardId: number,
     tagIds?: number[],
     devNumber?: string,
     number?: string,
-    cardId?: number,
   ) {
     const response = [];
     response.push(await this.validateLib.clientByPhoneNotExists(phone));
@@ -289,13 +289,12 @@ export class LoyaltyValidateRules {
       response.push(await this.validateLib.cardByNumberNotExists(number));
     }
 
-    if (cardId) {
-      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId,
-        ability,
-      );
-      response.push(cardAccessCheck);
-    }
+    const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+      cardId,
+      ability,
+    );
+    response.push(cardAccessCheck);
+
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -311,13 +310,13 @@ export class LoyaltyValidateRules {
     
     if (checkClient.object) {
       const card = await this.findMethodsCardUseCase.getByClientId(checkClient.object.id);
-      if (card) {
-        const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-          card.id,
-          ability,
-        );
-        response.push(cardAccessCheck);
-      }
+      
+      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        card.id,
+        ability,
+      );
+      response.push(cardAccessCheck);
+      
     }
     
     this.validateLib.handlerArrayResponse(
@@ -332,23 +331,23 @@ export class LoyaltyValidateRules {
   public async updateClientValidate(
     id: number,
     ability: any,
+    cardId: number,
     tagIds?: number[],
-    cardId?: number,
   ): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
+
     response.push(checkClient);
     if (tagIds) {
       response.push(await this.validateLib.tagIdsExists(tagIds));
     }
     
-    if (cardId) {
-      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId,
-        ability,
-      );
-      response.push(cardAccessCheck);
-    }
+    const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+      cardId || checkClient.object.cardId,
+      ability,
+    );
+    response.push(cardAccessCheck);
+    
     
     this.validateLib.handlerArrayResponse(
       response,
@@ -719,35 +718,30 @@ export class LoyaltyValidateRules {
 
   public async getClientsValidate(
     organizationId: number,
-    ability: any,
+    userId: any,
   ) {
     const response = [];
     
-    // First check if organization exists
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
     const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
     response.push(loyaltyProgramCheck);
 
+    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    if (userBelongsToOrganization.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        userBelongsToOrganization.errorMessage,
+      );
+    }
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
-    
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    // Then check loyalty program ability
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      loyaltyProgramCheck.object,
     );
     
     return loyaltyProgramCheck.object;
