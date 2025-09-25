@@ -1299,11 +1299,11 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetByIdUseCase.execute(id);
@@ -1402,10 +1402,10 @@ export class LoyaltyController {
     @Request() req: any,
   ): Promise<CorporateClientStatsResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
       return await this.corporateGetStatsByIdUseCase.execute(id);
     } catch (e) {
@@ -1435,11 +1435,11 @@ export class LoyaltyController {
     @Query() data: CorporateCardsFilterDto,
   ): Promise<CorporateCardsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetCardsUseCase.execute(id, data);
@@ -1470,11 +1470,11 @@ export class LoyaltyController {
     @Query() data: CorporateCardsOperationsFilterDto,
   ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);

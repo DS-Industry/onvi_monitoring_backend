@@ -18,14 +18,12 @@ import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyException } from '@exception/option.exceptions';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 
 @Injectable()
 export class LoyaltyValidateRules {
   constructor(
     private readonly validateLib: ValidateLib,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
-    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
   ) {}
 
   public async createLoyaltyProgramValidate(
@@ -131,14 +129,14 @@ export class LoyaltyValidateRules {
       await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
+    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-
-    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
-    response.push(userBelongsToOrganization);
 
     if (userBelongsToOrganization.code !== 200) {
       throw new LoyaltyException(
@@ -432,11 +430,9 @@ export class LoyaltyValidateRules {
   ) {
     const response = [];
     
-    // First check if organization exists
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
     const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
     response.push(loyaltyProgramCheck);
 
@@ -446,13 +442,6 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
     
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    // Then check loyalty program ability
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       loyaltyProgramCheck.object,
@@ -463,27 +452,27 @@ export class LoyaltyValidateRules {
 
   public async getCorporateClientByIdValidate(
     id: number,
-    ability: any,
+    userId: number
   ) {
     const response = [];
     
     const corporateClient = await this.validateLib.corporateClientByIdExists(id);
     response.push(corporateClient);
 
+    const organizationId = corporateClient.object.organizationId;
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+
+    response.push(organizationCheck);
+
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(accesTooOrganization);
+    
     this.validateLib.handlerArrayResponse(
-      response,
+      response, 
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    const organizationId = corporateClient.object.organizationId;
-    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
+  
     return corporateClient.object;
   }
 
@@ -519,14 +508,16 @@ export class LoyaltyValidateRules {
     const corporateClient = await this.validateLib.corporateClientByIdExists(id);
     response.push(corporateClient);
 
+    const organizationId = corporateClient.object.organizationId;
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    const organizationId = corporateClient.object.organizationId;
-    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+  
     
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
@@ -970,8 +961,6 @@ export class LoyaltyValidateRules {
       userId,
       organizationId,
     );
-
-    console.log("response => ", response)
 
     if (response.code !== 200) {
       throw new LoyaltyException(
