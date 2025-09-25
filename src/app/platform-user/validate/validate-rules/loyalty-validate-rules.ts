@@ -700,7 +700,7 @@ export class LoyaltyValidateRules {
 
   public async getClientsValidate(
     organizationId: number,
-    userId: any,
+    userId: number,
   ) {
     const response = [];
     
