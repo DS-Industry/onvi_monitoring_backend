@@ -3,6 +3,8 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 import { MarketingCampaignCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-create.dto';
 import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { MarketingCampaignStatus, MarketingCampaignType } from '@prisma/client';
 
@@ -483,6 +485,105 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       };
     });
     
+  }
+
+  async findAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
+    const { page = 1, size = 10, organizationId, status, search } = filter;
+    const skip = size * (page - 1);
+    const take = size;
+
+    const where: any = {
+      ltyProgramParticipant: {
+        organizationId: organizationId,
+      },
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const total = await this.prisma.marketingCampaign.count({ where });
+
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where,
+      skip,
+      take,
+      include: {
+        ltyProgram: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        updatedBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        promocodes: true,
+        poses: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const data = campaigns.map(campaign => {
+      const posCount = campaign.poses.length;
+      const promocode = campaign.promocodes[0];
+      const posIds = campaign.poses.map(pos => pos.id);
+      return {
+        id: campaign.id,
+        name: campaign.name,
+        status: campaign.status,
+        type: campaign.type,
+        launchDate: campaign.launchDate.toISOString(),
+        endDate: campaign.endDate?.toISOString(),
+        description: campaign.description,
+        ltyProgramId: campaign.ltyProgramId,
+        ltyProgramName: campaign.ltyProgram?.name,
+        discountType: promocode?.discountType || '',
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
+        maxUsage: promocode?.maxUsage,
+        currentUsage: promocode?.currentUsage || 0,
+        posCount: posCount,
+        posIds: posIds,
+        createdAt: campaign.createdAt.toISOString(),
+        updatedAt: campaign.updatedAt.toISOString(),
+        createdBy: {
+          id: campaign.createdBy.id,
+          name: campaign.createdBy.name,
+        },
+        updatedBy: {
+          id: campaign.updatedBy.id,
+          name: campaign.updatedBy.name,
+        },
+      };
+    });
+
+    const totalPages = Math.ceil(total / size);
+    const hasNext = page < totalPages;
+    const hasPrevious = page > 1;
+
+    return {
+      data,
+      total,
+      page,
+      size,
+      totalPages,
+      hasNext,
+      hasPrevious,
+    };
   }
 
   async findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]> {

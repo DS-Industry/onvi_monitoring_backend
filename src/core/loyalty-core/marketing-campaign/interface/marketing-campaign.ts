@@ -1,6 +1,8 @@
 import { MarketingCampaignCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-create.dto';
 import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { MarketingCampaignStatus } from '@prisma/client';
 
 export abstract class IMarketingCampaignRepository {
@@ -20,6 +22,8 @@ export abstract class IMarketingCampaignRepository {
   abstract findAll(): Promise<MarketingCampaignResponseDto[]>;
 
   abstract findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]>;
+
+  abstract findAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto>;
 
   abstract findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]>;
 
