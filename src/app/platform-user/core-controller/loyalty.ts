@@ -105,6 +105,8 @@ import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use
 import { MarketingCampaignCreateDto } from './dto/receive/marketing-campaign-create.dto';
 import { MarketingCampaignUpdateDto } from './dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from './dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from './dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from './dto/receive/marketing-campaigns-filter.dto';
 import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
@@ -1502,24 +1504,23 @@ export class LoyaltyController {
   @HttpCode(200)
   async getMarketingCampaigns(
     @Request() req: any,
-    @Query('organizationId', ParseIntPipe) organizationId: number,
-  ): Promise<MarketingCampaignResponseDto[]> {
+    @Query() filter: MarketingCampaignsFilterDto,
+  ): Promise<MarketingCampaignsPaginatedResponseDto> {
     try {
       const { ability, user } = req;
 
       await this.loyaltyValidateRules.validateUserBelongsToOrganization(
         user.id,
-        organizationId,
+        filter.organizationId,
       );
-
 
       await this.loyaltyValidateRules.getMarketingCampaignsValidate(
         ability,
-        organizationId,
+        filter.organizationId,
       );
 
-      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationId(
-        organizationId,
+      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationIdPaginated(
+        filter,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {

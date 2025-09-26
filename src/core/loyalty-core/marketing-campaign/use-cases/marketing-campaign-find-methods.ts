@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
 
 @Injectable()
@@ -16,6 +18,10 @@ export class FindMethodsMarketingCampaignUseCase {
 
   async getAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
     return this.marketingCampaignRepository.findAllByOrganizationId(organizationId);
+  }
+
+  async getAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
+    return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(filter);
   }
 }
 
