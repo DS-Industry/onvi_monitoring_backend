@@ -5,6 +5,7 @@ import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { DeviceDataRawConsumer } from '../../infra/handler/device-data-raw/consumer/device-data-raw.consumer';
 import { PosModule } from '@pos/pos.module';
+import { RedisModule } from "@infra/cache/redis.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PosModule } from '@pos/pos.module';
       },
     }),
     PosModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [DeviceDataRawConsumer],
