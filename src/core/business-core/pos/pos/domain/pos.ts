@@ -7,7 +7,8 @@ export interface PosProps {
   id?: number;
   name: string;
   slug: string;
-  timeWork: string;
+  startTime?: string;
+  endTime?: string;
   organizationId: number;
   posMetaData?: string;
   timezone: number;
@@ -44,8 +45,12 @@ export class Pos extends BaseEntity<PosProps> {
     return this.props.slug;
   }
 
-  get timeWork(): string {
-    return this.props.timeWork;
+  get startTime(): string {
+    return this.props.startTime;
+  }
+
+  get endTime(): string {
+    return this.props.endTime;
   }
 
   get organizationId(): number {
@@ -124,8 +129,12 @@ export class Pos extends BaseEntity<PosProps> {
     this.props.slug = slug;
   }
 
-  set timeWork(timeWork: string) {
-    this.props.timeWork = timeWork;
+  set startTime(startTime: string) {
+    this.props.startTime = startTime;
+  }
+
+  set endTime(endTime: string) {
+    this.props.endTime = endTime;
   }
 
   set organizationId(organizationId: number) {

@@ -220,7 +220,8 @@ model Pos {
   id                     Int                      @id @default(autoincrement())
   name                   String
   slug                   String
-  timeWork               String                   @default("24")
+  startTime              String?
+  endTime                String?
   organizationId         Int
   posMetaData            String?
   timezone               Int

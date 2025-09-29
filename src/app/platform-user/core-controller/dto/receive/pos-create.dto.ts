@@ -14,8 +14,11 @@ export class PosCreateDto {
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
   @IsString()
-  @IsNotEmpty({ message: 'timeWork is required' })
-  timeWork: string;
+  @IsNotEmpty({ message: 'startTime is required' })
+  startTime: string;
+  @IsString()
+  @IsNotEmpty({ message: 'endTime is required' })
+  endTime: string;
   @IsString()
   @IsOptional()
   posMetaData?: string;

@@ -34,7 +34,8 @@ export class PrismaPosMapper {
       id: entity.id,
       name: entity.name,
       slug: entity.slug,
-      timeWork: entity.timeWork,
+      startTime: (entity as any).startTime,
+      endTime: (entity as any).endTime,
       organizationId: entity.organizationId,
       placementId: entity.placementId,
       posMetaData: entity.posMetaData,
@@ -65,7 +66,8 @@ export class PrismaPosMapper {
       id: entity.id,
       name: entity.name,
       slug: entity.slug,
-      timeWork: entity.timeWork,
+      startTime: (entity as any).startTime,
+      endTime: (entity as any).endTime,
       organizationId: entity.organizationId,
       posMetaData: entity.posMetaData,
       timezone: entity.timezone,
@@ -94,12 +96,13 @@ export class PrismaPosMapper {
       },
     };
   }
-  static toPrisma(pos: Pos): Prisma.PosUncheckedCreateInput {
+  static toPrisma(pos: Pos): any {
     return {
       id: pos?.id,
       name: pos.name,
       slug: pos.slug,
-      timeWork: pos.timeWork,
+      startTime: pos.startTime,
+      endTime: pos.endTime,
       organizationId: pos.organizationId,
       placementId: pos.placementId,
       posMetaData: pos.posMetaData,
