@@ -47,7 +47,8 @@ export class UpdatePosUseCase {
 
     posProps.name = input.name ? input.name : posProps.name;
     posProps.slug = input.name ? slugify(input.name, '_') : posProps.slug;
-    posProps.timeWork = input.timeWork ? input.timeWork : posProps.timeWork;
+    posProps.startTime = input.startTime ? input.startTime : posProps.startTime;
+    posProps.endTime = input.endTime ? input.endTime : posProps.endTime;
     posProps.organizationId = input.organizationId ? input.organizationId : posProps.organizationId;
     posProps.posMetaData = input.posMetaData !== undefined ? input.posMetaData : posProps.posMetaData;
     posProps.addressId = addressId;
@@ -85,7 +86,8 @@ export class UpdatePosUseCase {
       id: updatedPosProps.id,
       name: updatedPosProps.name,
       slug: updatedPosProps.slug,
-      timeWork: updatedPosProps.timeWork,
+      startTime: updatedPosProps.startTime,
+      endTime: updatedPosProps.endTime,
       organizationId: updatedPosProps.organizationId,
       posMetaData: updatedPosProps.posMetaData,
       timezone: updatedPosProps.timezone,
