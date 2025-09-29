@@ -2,6 +2,11 @@ import { WarehouseDocument } from '@warehouse/document/document/domain/warehouse
 import { WarehouseDocumentType } from '@prisma/client';
 import { PureAbility } from '@casl/ability';
 
+export type PaginatedWarehouseDocuments = {
+  data: WarehouseDocument[];
+  total: number;
+};
+
 export abstract class IWarehouseDocumentRepository {
   abstract create(input: WarehouseDocument): Promise<WarehouseDocument>;
   abstract findOneById(id: number): Promise<WarehouseDocument>;
@@ -20,7 +25,18 @@ export abstract class IWarehouseDocumentRepository {
     ability: PureAbility,
     warehouseId?: number,
     placementId?: number,
+    page?: number,
+    size?: number,
   );
+  abstract getAllByWarehouseIdsAndDatePaginated(
+    dateStart: Date,
+    dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
+    page?: number,
+    size?: number,
+  ): Promise<PaginatedWarehouseDocuments>;
   abstract findAllByWarehouseIdAndType(
     warehouseId: number,
     type: WarehouseDocumentType,

@@ -1140,6 +1140,8 @@ export class WarehouseController {
         ability,
         params.placementId,
         warehouse,
+        params.page,
+        params.size,
       );
     } catch (e) {
       if (e instanceof WarehouseException) {

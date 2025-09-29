@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IWarehouseDocumentRepository } from '@warehouse/document/document/interface/warehouseDocument';
+import { IWarehouseDocumentRepository, PaginatedWarehouseDocuments } from '@warehouse/document/document/interface/warehouseDocument';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { WarehouseDocumentType } from '@prisma/client';
 import { PureAbility } from '@casl/ability';
@@ -42,6 +42,8 @@ export class FindMethodsWarehouseDocumentUseCase {
     ability: PureAbility,
     warehouseId?: number,
     placementId?: number,
+    page?: number,
+    size?: number,
   ): Promise<WarehouseDocument[]> {
     return await this.warehouseDocumentRepository.getAllByWarehouseIdsAndDate(
       dateStart,
@@ -49,6 +51,28 @@ export class FindMethodsWarehouseDocumentUseCase {
       ability,
       warehouseId,
       placementId,
+      page,
+      size,
+    );
+  }
+
+  async getAllByWarehouseIdsAndDatePaginated(
+    dateStart: Date,
+    dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
+    page?: number,
+    size?: number,
+  ): Promise<PaginatedWarehouseDocuments> {
+    return await this.warehouseDocumentRepository.getAllByWarehouseIdsAndDatePaginated(
+      dateStart,
+      dateEnd,
+      ability,
+      warehouseId,
+      placementId,
+      page,
+      size,
     );
   }
 
