@@ -20,12 +20,14 @@ export abstract class INomenclatureRepository {
     status?: NomenclatureStatus,
     skip?: number,
     take?: number,
+    search?: string,
   ): Promise<Nomenclature[]>;
   abstract findAllByFilterCount(
     organizationId?: number,
     categoryId?: number,
     destiny?: DestinyNomenclature,
     status?: NomenclatureStatus,
+    search?: string,
   ): Promise<number>;
   abstract findManyByIds(ids: number[]): Promise<Nomenclature[]>;
   abstract update(input: Nomenclature): Promise<Nomenclature>;

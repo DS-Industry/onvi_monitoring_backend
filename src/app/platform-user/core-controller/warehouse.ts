@@ -63,6 +63,7 @@ import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
 import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { NomenclatureFilterDto } from '@platform-user/core-controller/dto/receive/nomenclature-filter.dto';
 import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
 import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
 import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
@@ -276,7 +277,7 @@ export class WarehouseController {
   @HttpCode(200)
   async getAllNomenclatureByOrgId(
     @Param('orgId', ParseIntPipe) orgId: number,
-    @Query() params: PaginationDto,
+    @Query() params: NomenclatureFilterDto,
   ): Promise<any> {
     try {
       let skip = undefined;
@@ -293,6 +294,7 @@ export class WarehouseController {
         status: NomenclatureStatus.ACTIVE,
         skip: skip,
         take: take,
+        search: params.search,
       });
     } catch (e) {
       if (e instanceof WarehouseException) {

@@ -40,6 +40,7 @@ export class FindMethodsNomenclatureUseCase {
     status?: NomenclatureStatus;
     skip?: number;
     take?: number;
+    search?: string;
   }): Promise<Nomenclature[]> {
     return await this.nomenclatureRepository.findAllByFilter(
       data.organizationId,
@@ -48,6 +49,7 @@ export class FindMethodsNomenclatureUseCase {
       data.status,
       data.skip,
       data.take,
+      data.search,
     );
   }
 
@@ -56,12 +58,14 @@ export class FindMethodsNomenclatureUseCase {
     categoryId?: number;
     destiny?: DestinyNomenclature;
     status?: NomenclatureStatus;
+    search?: string;
   }): Promise<number> {
     return await this.nomenclatureRepository.findAllByFilterCount(
       data.organizationId,
       data.categoryId,
       data.destiny,
       data.status,
+      data.search,
     );
   }
 
