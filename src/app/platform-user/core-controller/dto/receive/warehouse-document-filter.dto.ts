@@ -18,4 +18,14 @@ export class WarehouseDocumentFilterDto {
     return parseInt(value);
   })
   placementId?: number;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  size?: number;
 }
