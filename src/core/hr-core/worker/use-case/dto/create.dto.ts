@@ -18,4 +18,5 @@ export interface CreateDto {
   passportDateIssue?: Date;
   inn?: string;
   snils?: string;
+  registrationAddress?: string;
 }

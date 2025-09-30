@@ -63,4 +63,7 @@ export class WorkerUpdateDto {
   @IsOptional()
   @IsString()
   snils?: string;
+  @IsOptional()
+  @IsString()
+  registrationAddress?: string;
 }

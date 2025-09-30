@@ -37,6 +37,7 @@ export class UpdateWorkerUseCase {
       passportDateIssue,
       inn,
       snils,
+      registrationAddress,
     } = input;
 
     oldWorker.name = name ? name : oldWorker.name;
@@ -74,6 +75,9 @@ export class UpdateWorkerUseCase {
       : oldWorker.passportDateIssue;
     oldWorker.inn = inn ? inn : oldWorker.inn;
     oldWorker.snils = snils ? snils : oldWorker.snils;
+    oldWorker.registrationAddress = registrationAddress
+      ? registrationAddress
+      : oldWorker.registrationAddress;
 
     if (file) {
       if (oldWorker.avatar) {
