@@ -220,8 +220,6 @@ model Pos {
   id                     Int                      @id @default(autoincrement())
   name                   String
   slug                   String
-  startTime              String?
-  endTime                String?
   organizationId         Int
   posMetaData            String?
   timezone               Int
@@ -234,6 +232,8 @@ model Pos {
   createdById            Int
   updateById             Int
   placementId            Int?
+  endTime                String?
+  startTime              String?
   carWashPos             CarWashPos?
   cashCollection         CashCollection[]
   incident               Incident[]
@@ -539,20 +539,20 @@ model LTYProgram {
 }
 
 model LTYProgramParticipant {
-  id              Int                           @id @default(autoincrement())
-  ltyProgramId    Int
-  organizationId  Int
-  status          LTYProgramParticipantStatus   @default(ACTIVE)
-  registeredAt    DateTime                      @default(now())
-  deactivatedAt   DateTime?
-  requestId       Int?
-  comment         String?
-  createdAt       DateTime                      @default(now())
-  updatedAt       DateTime                      @updatedAt
-  commissionRate  Decimal?
-  ltyProgram      LTYProgram                    @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
-  organization    Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  originalRequest LTYProgramParticipantRequest? @relation("OriginalRequest", fields: [requestId], references: [id])
+  id                 Int                           @id @default(autoincrement())
+  ltyProgramId       Int
+  organizationId     Int
+  status             LTYProgramParticipantStatus   @default(ACTIVE)
+  registeredAt       DateTime                      @default(now())
+  deactivatedAt      DateTime?
+  requestId          Int?
+  comment            String?
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  commissionRate     Decimal?
+  ltyProgram         LTYProgram                    @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
+  organization       Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  originalRequest    LTYProgramParticipantRequest? @relation("OriginalRequest", fields: [requestId], references: [id])
   marketingCampaigns MarketingCampaign[]
 
   @@unique([ltyProgramId, organizationId])
@@ -1292,6 +1292,7 @@ model HrWorker {
   passportNumber      String?
   passportExtradition String?
   passportDateIssue   DateTime?
+  registrationAddress String?
   inn                 String?
   snils               String?
   placementId         Int
@@ -1448,29 +1449,29 @@ model MNGSaleItem {
 }
 
 model MarketingCampaign {
-  id                  Int                      @id @default(autoincrement())
-  name                String
-  status              MarketingCampaignStatus  @default(DRAFT)
-  type                MarketingCampaignType
-  launchDate          DateTime
-  endDate             DateTime?
-  description         String?
-  ltyProgramId        Int?
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  status                  MarketingCampaignStatus  @default(DRAFT)
+  type                    MarketingCampaignType
+  launchDate              DateTime
+  endDate                 DateTime?
+  description             String?
+  ltyProgramId            Int?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  createdById             Int
+  updatedById             Int
+  discountType            MarketingDiscountType?
+  discountValue           Float?
   ltyProgramParticipantId Int?
-  createdAt           DateTime                 @default(now())
-  updatedAt           DateTime                 @updatedAt
-  createdById         Int
-  updatedById         Int
-  discountType        MarketingDiscountType?
-  discountValue       Float?
-  promocodes          LTYPromocode[]
-  createdBy           User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
-  ltyProgram          LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
-  ltyProgramParticipant LTYProgramParticipant? @relation(fields: [ltyProgramParticipantId], references: [id])
-  updatedBy           User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
-  campaignUsage       MarketingCampaignUsage[]
-  ltyUsers            LTYUser[]                @relation("MarketingCampaignToLTYUser")
-  poses               Pos[]                    @relation("MarketingCampaignToPos")
+  promocodes              LTYPromocode[]
+  createdBy               User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  ltyProgram              LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramParticipant   LTYProgramParticipant?   @relation(fields: [ltyProgramParticipantId], references: [id])
+  updatedBy               User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  campaignUsage           MarketingCampaignUsage[]
+  ltyUsers                LTYUser[]                @relation("MarketingCampaignToLTYUser")
+  poses                   Pos[]                    @relation("MarketingCampaignToPos")
 
   @@index([status])
   @@index([type])

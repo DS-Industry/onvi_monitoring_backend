@@ -29,6 +29,7 @@ export class PrismaHrWorkerMapper {
       passportDateIssue: entity.passportDateIssue,
       inn: entity.inn,
       snils: entity.snils,
+      registrationAddress: entity.registrationAddress,
     });
   }
 
@@ -56,6 +57,7 @@ export class PrismaHrWorkerMapper {
       passportDateIssue: worker?.passportDateIssue,
       inn: worker?.inn,
       snils: worker?.snils,
+      registrationAddress: worker?.registrationAddress,
     };
   }
 }

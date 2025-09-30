@@ -24,6 +24,7 @@ export interface WorkerProps {
   passportDateIssue?: Date;
   inn?: string;
   snils?: string;
+  registrationAddress?: string;
 }
 
 export class Worker extends BaseEntity<WorkerProps> {
@@ -201,5 +202,13 @@ export class Worker extends BaseEntity<WorkerProps> {
 
   set snils(snils: string) {
     this.props.snils = snils;
+  }
+
+  get registrationAddress(): string {
+    return this.props.registrationAddress;
+  }
+
+  set registrationAddress(registrationAddress: string) {
+    this.props.registrationAddress = registrationAddress;
   }
 }

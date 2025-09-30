@@ -20,4 +20,5 @@ export interface UpdateDto {
   passportDateIssue?: Date;
   inn?: string;
   snils?: string;
+  registrationAddress?: string;
 }

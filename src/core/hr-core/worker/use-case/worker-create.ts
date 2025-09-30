@@ -35,6 +35,7 @@ export class CreateWorkerUseCase {
       passportDateIssue: data?.passportDateIssue,
       inn: data?.inn,
       snils: data?.snils,
+      registrationAddress: data?.registrationAddress,
     });
 
     if (file) {
