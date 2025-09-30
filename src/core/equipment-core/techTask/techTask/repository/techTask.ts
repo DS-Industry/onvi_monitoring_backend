@@ -103,9 +103,10 @@ export class TechTaskRepository extends ITechTaskRepository {
       take: take ?? undefined,
       where: where,
       orderBy: {
-        startDate: 'asc',
+        endSpecifiedDate: 'desc',
       },
     });
+
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 
