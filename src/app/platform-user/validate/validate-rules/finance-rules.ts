@@ -196,6 +196,27 @@ export class FinanceValidateRules {
     return shiftReport.object;
   }
 
+  public async deleteShiftReportValidate(
+    shiftReportId: number,
+    ability: any,
+  ): Promise<ShiftReport> {
+    const response = [];
+    const shiftReportCheck =
+      await this.validateLib.shiftReportByIdExists(shiftReportId);
+    response.push(shiftReportCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.FINANCE,
+      FINANCE_RETURN_EXCEPTION_CODE,
+    );
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.delete,
+      shiftReportCheck.object,
+    );
+    return shiftReportCheck.object;
+  }
+
   public async updateShiftReportById(
     shiftReportId: number,
     ability: any,

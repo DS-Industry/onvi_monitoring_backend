@@ -127,4 +127,12 @@ export class ShiftReportRepository extends IShiftReportRepository {
     });
     return PrismaShiftReportMapper.toDomain(shiftReport);
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.mNGShiftReport.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
