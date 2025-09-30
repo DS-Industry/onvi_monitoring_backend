@@ -11,6 +11,7 @@ import {
   LOYALTY_CREATE_TAG_EXCEPTION_CODE,
   TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
   TECH_TASK_CREATE_EXCEPTION_CODE, TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
+  TECH_TASK_DELETE_EXCEPTION_CODE,
   TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
   TECH_TASK_UPDATE_EXCEPTION_CODE
 } from "@constant/error.constants";
@@ -126,5 +127,25 @@ export class TechTaskValidateRules {
       ExceptionType.LOYALTY,
       TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
     );
+  }
+
+  public async deleteValidate(
+    techTaskId: number,
+    ability: any,
+  ): Promise<TechTask> {
+    const response = await this.validateLib.techTaskByIdExists(techTaskId);
+
+    if (response.code !== 200) {
+      throw new TechTaskException(
+        TECH_TASK_DELETE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.delete,
+      response.object,
+    );
+    return response.object;
   }
 }
