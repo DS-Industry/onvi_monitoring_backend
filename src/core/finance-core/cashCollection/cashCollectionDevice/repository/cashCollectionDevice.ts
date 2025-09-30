@@ -58,6 +58,9 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         where: {
           cashCollectionId: cashCollectionId,
         },
+        orderBy: {
+          carWashDeviceId: 'asc',
+        },
       });
     return cashCollectionDevices.map((cashCollectionDevice) =>
       PrismaCashCollectionDeviceMapper.toDomain(cashCollectionDevice),
