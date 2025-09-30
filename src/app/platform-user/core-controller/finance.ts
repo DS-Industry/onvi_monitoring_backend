@@ -29,6 +29,7 @@ import {
   CheckAbilities,
   CreateCashCollectionAbility,
   CreateShiftReportAbility,
+  DeleteShiftReportAbility,
   ReadCashCollectionAbility,
   ReadShiftReportAbility,
   UpdateCashCollectionAbility,
@@ -76,6 +77,7 @@ import { SendShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cas
 import { CreateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-create';
 import { GetOperDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-oper-data';
 import { FindMethodsShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-find-methods';
+import { DeleteShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-delete';
 import { Worker } from '@hr/worker/domain/worker';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { ConnectionPosWorkerUseCase } from '@pos/pos/use-cases/pos-worker-connection';
@@ -109,6 +111,7 @@ export class FinanceController {
     private readonly createShiftReportCashOperUseCase: CreateShiftReportCashOperUseCase,
     private readonly getOperDataShiftReportUseCase: GetOperDataShiftReportUseCase,
     private readonly findMethodsShiftReportCashOperUseCase: FindMethodsShiftReportCashOperUseCase,
+    private readonly deleteShiftReportUseCase: DeleteShiftReportUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly connectionPosWorkerUseCase: ConnectionPosWorkerUseCase,
     private readonly carStatisticPosUseCase: CarStatisticPosUseCase,
@@ -999,6 +1002,38 @@ export class FinanceController {
         shiftReport.startWorkingTime,
         shiftReport.endWorkingTime,
       );
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('shift-report/:shiftReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteShiftReportAbility())
+  @HttpCode(204)
+  async deleteShiftReport(
+    @Request() req: any,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+  ): Promise<void> {
+    try {
+      const { ability } = req;
+      const shiftReport = await this.financeValidateRules.deleteShiftReportValidate(
+        shiftReportId,
+        ability,
+      );
+      await this.deleteShiftReportUseCase.execute(shiftReport);
     } catch (e) {
       if (e instanceof FinanceException) {
         throw new CustomHttpException({

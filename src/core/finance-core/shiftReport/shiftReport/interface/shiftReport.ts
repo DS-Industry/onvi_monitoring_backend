@@ -26,4 +26,5 @@ export abstract class IShiftReportRepository {
     workerIds: number[],
   ): Promise<DataForCalculationResponseDto[]>;
   abstract update(input: ShiftReport): Promise<ShiftReport>;
+  abstract delete(id: number): Promise<void>;
 }

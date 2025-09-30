@@ -29,6 +29,7 @@ import { FindMethodsShiftReportCashOperUseCase } from '@finance/shiftReport/shif
 import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
 import { GetOperDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-oper-data';
 import { SendShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-send';
+import { DeleteShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-delete';
 import { GradingEstimationRepositoryProvider } from '@finance/shiftReport/gradingEstimation/provider/gradingEstimation';
 import { GradingParameterRepositoryProvider } from '@finance/shiftReport/gradingParameter/provider/gradingParameter';
 import { ShiftGradingRepositoryProvider } from '@finance/shiftReport/shiftGrading/provider/shiftGrading';
@@ -83,6 +84,7 @@ const shiftReportUseCase: Provider[] = [
   SendShiftReportUseCase,
   FullDataShiftReportUseCase,
   CalculationPaymentShiftReportUseCase,
+  DeleteShiftReportUseCase,
 ];
 
 const shiftReportCashOperUseCase: Provider[] = [
