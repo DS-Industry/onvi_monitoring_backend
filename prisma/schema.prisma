@@ -1817,6 +1817,7 @@ enum CurrencyType {
 enum CurrencyView {
   COIN
   PAPER
+  POS
 }
 
 enum PermissionAction {
