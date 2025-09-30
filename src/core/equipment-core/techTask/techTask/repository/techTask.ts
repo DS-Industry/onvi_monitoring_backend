@@ -212,4 +212,20 @@ export class TechTaskRepository extends ITechTaskRepository {
       },
     });
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.techTaskItemValueToTechTask.deleteMany({
+        where: {
+          techTaskId: id,
+        },
+      });
+
+      await prisma.techTask.delete({
+        where: {
+          id: id,
+        },
+      });
+    });
+  }
 }

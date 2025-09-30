@@ -38,4 +38,5 @@ export abstract class ITechTaskRepository {
     addTagIds: number[],
     deleteTagIds: number[],
   ): Promise<any>;
+  abstract delete(id: number): Promise<void>;
 }

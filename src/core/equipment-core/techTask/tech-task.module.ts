@@ -4,6 +4,7 @@ import { TechTaskRepositoryProvider } from '@tech-task/techTask/provider/techTas
 import { TechTaskItemTemplateProvider } from '@tech-task/itemTemplate/provider/itemTemplate';
 import { TechTaskItemValueToTechTaskProvider } from '@tech-task/itemTemplateToTechTask/provider/itemValueToTechTask';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
+import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { HandlerTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-handler';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
@@ -35,6 +36,7 @@ const repositories: Provider[] = [
 
 const techTaskUseCases: Provider[] = [
   CreateTechTaskUseCase,
+  DeleteTechTaskUseCase,
   FindMethodsTechTaskUseCase,
   UpdateTechTaskUseCase,
   HandlerTechTaskUseCase,

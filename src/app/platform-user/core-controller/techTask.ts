@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -15,11 +16,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
+import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
   CreateTechTaskAbility,
+  DeleteTechTaskAbility,
   ReadIncidentAbility,
   ReadTechTaskAbility,
   UpdateTechTaskAbility,
@@ -61,6 +64,7 @@ import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/
 export class TechTaskController {
   constructor(
     private readonly createTechTaskUseCase: CreateTechTaskUseCase,
+    private readonly deleteTechTaskUseCase: DeleteTechTaskUseCase,
     private readonly techTaskValidateRules: TechTaskValidateRules,
     private readonly updateTechTaskUseCase: UpdateTechTaskUseCase,
     private readonly manageAllByPosAndStatusesTechTaskUseCase: ManageAllByPosAndStatusesTechTaskUseCase,
@@ -139,6 +143,40 @@ export class TechTaskController {
       }
     }
   }
+
+  @Delete(':id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteTechTaskAbility())
+  @HttpCode(200)
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const techTask = await this.techTaskValidateRules.deleteValidate(
+        id,
+        ability,
+      );
+      await this.deleteTechTaskUseCase.execute(techTask);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   @Get('manage')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
