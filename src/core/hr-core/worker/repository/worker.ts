@@ -141,4 +141,38 @@ export class WorkerRepository extends IWorkerRepository {
     });
     return PrismaHrWorkerMapper.toDomain(worker);
   }
+
+  public async findPosesByWorkerId(workerId: number): Promise<any[]> {
+    const worker = await this.prisma.hrWorker.findFirst({
+      where: {
+        id: workerId,
+      },
+      include: {
+        posWorks: {
+          include: {
+            address: true,
+          },
+        },
+      },
+    });
+    return worker?.posWorks || [];
+  }
+
+  public async updateConnectionPos(
+    workerId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any> {
+    await this.prisma.hrWorker.update({
+      where: {
+        id: workerId,
+      },
+      data: {
+        posWorks: {
+          disconnect: deletePosIds.map((id) => ({ id })),
+          connect: addPosIds.map((id) => ({ id })),
+        },
+      },
+    });
+  }
 }
