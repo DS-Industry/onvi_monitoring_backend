@@ -53,6 +53,9 @@ import { PaymentCalculateWorkersDto } from '@platform-user/core-controller/dto/r
 import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
 import { ShiftReportCalculationPaymentResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/shiftReport-calculation-payment-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ConnectionWorkerPosUseCase } from '@hr/worker/use-case/worker-pos-connection';
+import { WorkerPosConnectionDto } from '@platform-user/core-controller/dto/receive/worker-pos-connection.dto';
+import { WorkerPosesListResponseDto } from '@platform-user/core-controller/dto/response/worker-poses-response.dto';
 
 @Controller('hr')
 export class HrController {
@@ -68,6 +71,7 @@ export class HrController {
     private readonly calculatePaymentUseCase: CalculatePaymentUseCase,
     private readonly getReportPaymentUseCase: GetReportPaymentUseCase,
     private readonly calculationPaymentShiftReportUseCase: CalculationPaymentShiftReportUseCase,
+    private readonly connectionWorkerPosUseCase: ConnectionWorkerPosUseCase,
   ) {}
   @Post('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -663,6 +667,86 @@ export class HrController {
         skip,
         take,
       });
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('worker/pos-connection')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateHrAbility())
+  @HttpCode(200)
+  async updateWorkerPosConnection(
+    @Request() req: any,
+    @Body() data: WorkerPosConnectionDto,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      await this.hrValidateRules.updateWorkerValidate(
+        data.workerId,
+        ability,
+      );
+      return await this.connectionWorkerPosUseCase.execute(
+        data.posIds,
+        data.workerId,
+      );
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('worker/:id/poses')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadHrAbility())
+  @HttpCode(200)
+  async getWorkerPoses(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) workerId: number,
+  ): Promise<WorkerPosesListResponseDto> {
+    try {
+      await this.hrValidateRules.findOneByIdWorkerValidate(workerId);
+      
+      const poses = await this.findMethodsWorkerUseCase.getPosesByWorkerId(workerId);
+      
+      return {
+        poses: poses.map(pos => ({
+          id: pos.id,
+          name: pos.name,
+          slug: pos.slug,
+          organizationId: pos.organizationId,
+          status: pos.status,
+          address: pos.address ? {
+            id: pos.address.id,
+            city: pos.address.city,
+            location: pos.address.location,
+          } : undefined,
+        })),
+        totalCount: poses.length,
+      };
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({

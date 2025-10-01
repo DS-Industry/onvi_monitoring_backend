@@ -27,4 +27,10 @@ export abstract class IWorkerRepository {
     paymentType?: PaymentType,
   ): Promise<Worker[]>;
   abstract update(input: Worker): Promise<Worker>;
+  abstract findPosesByWorkerId(workerId: number): Promise<any[]>;
+  abstract updateConnectionPos(
+    workerId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any>;
 }

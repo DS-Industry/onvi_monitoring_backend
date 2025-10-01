@@ -6,6 +6,7 @@ import { PositionRepositoryProvider } from '@hr/position/provider/position';
 import { CreateWorkerUseCase } from '@hr/worker/use-case/worker-create';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { UpdateWorkerUseCase } from '@hr/worker/use-case/worker-update';
+import { ConnectionWorkerPosUseCase } from '@hr/worker/use-case/worker-pos-connection';
 import { CreatePositionUseCase } from '@hr/position/use-case/position-create';
 import { UpdatePositionUseCase } from '@hr/position/use-case/position-update';
 import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-methods';
@@ -25,6 +26,7 @@ const workerUseCases: Provider[] = [
   CreateWorkerUseCase,
   FindMethodsWorkerUseCase,
   UpdateWorkerUseCase,
+  ConnectionWorkerPosUseCase,
 ];
 
 const positionUseCases: Provider[] = [
