@@ -105,8 +105,8 @@ export class PrismaCarWashDeviceProgramMapper {
       counter: Number(item.counter),
       totalTime: Number(item.totalTime),
       averageTime: Number(item.averageTime),
-      totalProfit: Number(item?.totalProfit),
-      averageProfit: Number(item?.averageProfit),
+      totalProfit: typeof item?.totalProfit === 'bigint' ? Number(item.totalProfit) : Number(item?.totalProfit || 0),
+      averageProfit: typeof item?.averageProfit === 'bigint' ? Number(item.averageProfit) : Number(item?.averageProfit || 0),
     };
   }
 

@@ -371,7 +371,9 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     const dateStartStr = toPostgresTimestamp(dateStart);
     const dateEndStr = toPostgresTimestamp(dateEnd);
 
-    return this.prisma.$queryRaw<DeviceProgramCleanDataResponseDto[]>(
+    const rawResults = await this.prisma.$queryRaw<
+      { deviceId: number; programName: string; counter: bigint | number; totalTime: bigint | number }[]
+    >(
       Prisma.sql`
       SELECT 
         cwd.id AS "deviceId",
@@ -389,6 +391,13 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
       ORDER BY cwd.id, COUNT(*) DESC
     `,
     );
+
+    return rawResults.map(item => ({
+      deviceId: item.deviceId,
+      programName: item.programName,
+      counter: typeof item.counter === 'bigint' ? Number(item.counter) : Number(item.counter),
+      totalTime: typeof item.totalTime === 'bigint' ? Number(item.totalTime) : Number(item.totalTime || 0),
+    }));
   }
 
   public async findProgramForCheckCar(
