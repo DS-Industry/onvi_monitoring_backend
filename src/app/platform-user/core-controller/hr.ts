@@ -168,6 +168,7 @@ export class HrController {
         data?.name,
         skip,
         take,
+        data.posId,
       );
     } catch (e) {
       if (e instanceof HrException) {
