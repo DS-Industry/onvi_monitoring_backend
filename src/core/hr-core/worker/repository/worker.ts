@@ -49,6 +49,7 @@ export class WorkerRepository extends IWorkerRepository {
     name?: string,
     skip?: number,
     take?: number,
+    posId?: number,
   ): Promise<Worker[]> {
     const where: any = {};
 
@@ -68,6 +69,12 @@ export class WorkerRepository extends IWorkerRepository {
       where.hrPositionId = hrPositionId;
     }
 
+    if (posId !== undefined) {
+      where.posWorks = { some: { id: posId } };
+    }
+
+    console.log('where', where);
+
     const workers = await this.prisma.hrWorker.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
@@ -84,6 +91,7 @@ export class WorkerRepository extends IWorkerRepository {
     hrPositionId?: number,
     organizationId?: number,
     name?: string,
+    posId?: number,
   ): Promise<number> {
     const where: any = {};
 
@@ -101,6 +109,10 @@ export class WorkerRepository extends IWorkerRepository {
 
     if (hrPositionId !== undefined) {
       where.hrPositionId = hrPositionId;
+    }
+
+    if (posId !== undefined) {
+      where.posWorks = { some: { id: posId } };
     }
 
     return this.prisma.hrWorker.count({ where: where });

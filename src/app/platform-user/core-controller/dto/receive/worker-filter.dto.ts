@@ -26,4 +26,9 @@ export class WorkerFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  posId?: number;
 }

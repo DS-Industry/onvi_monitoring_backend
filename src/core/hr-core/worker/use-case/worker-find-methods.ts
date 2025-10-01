@@ -18,6 +18,7 @@ export class FindMethodsWorkerUseCase {
     name?: string,
     skip?: number,
     take?: number,
+    posId?: number,
   ): Promise<Worker[]> {
     return await this.workerRepository.findAllByFilter(
       placementId,
@@ -26,6 +27,7 @@ export class FindMethodsWorkerUseCase {
       name,
       skip,
       take,
+      posId,
     );
   }
 
@@ -34,12 +36,14 @@ export class FindMethodsWorkerUseCase {
     hrPositionId?: number,
     organizationId?: number,
     name?: string,
+    posId?: number,
   ): Promise<number> {
     return await this.workerRepository.findAllByFilterCount(
       placementId,
       hrPositionId,
       organizationId,
       name,
+      posId,
     );
   }
 
