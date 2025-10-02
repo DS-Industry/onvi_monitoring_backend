@@ -21,5 +21,17 @@ export abstract class IWarehouseRepository {
     ability: any,
     placementId?: number,
   ): Promise<number>;
+  abstract findAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+    skip?: number,
+    take?: number,
+  ): Promise<Warehouse[]>;
+  abstract findCountAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+  ): Promise<number>;
   abstract update(input: Warehouse): Promise<Warehouse>;
 }
