@@ -97,6 +97,59 @@ export class WarehouseRepository extends IWarehouseRepository {
     });
   }
 
+  public async findAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+    skip?: number,
+    take?: number,
+  ): Promise<Warehouse[]> {
+    const whereConditions = [
+      accessibleBy(ability).Warehouse,
+      { pos: { organizationId } },
+    ];
+
+    if (posId !== undefined) {
+      whereConditions.push({ posId });
+    }
+
+    const warehouses = await this.prisma.warehouse.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      include: {
+        manager: true,
+      },
+      where: {
+        AND: whereConditions,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+    return warehouses.map((item) => PrismaWarehouseMapper.toDomain(item));
+  }
+
+  public async findCountAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+  ): Promise<number> {
+    const whereConditions = [
+      accessibleBy(ability).Warehouse,
+      { pos: { organizationId } },
+    ];
+
+    if (posId !== undefined) {
+      whereConditions.push({ posId });
+    }
+
+    return this.prisma.warehouse.count({
+      where: {
+        AND: whereConditions,
+      },
+    });
+  }
+
   public async update(input: Warehouse): Promise<Warehouse> {
     const warehouseEntity = PrismaWarehouseMapper.toPrisma(input);
     const warehouse = await this.prisma.warehouse.update({
