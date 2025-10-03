@@ -618,7 +618,7 @@ export class ManagerPaperController {
   ): Promise<{ status: string }> {
     try {
       const managerReportPeriod =
-        await this.managerPaperValidateRules.getDetailManagerPaperPeriodValidate(
+        await this.managerPaperValidateRules.deleteManagerPaperPeriodValidate(
           id,
         );
       await this.deleteManagerReportPeriodUseCase.execute(managerReportPeriod);

@@ -5,12 +5,14 @@ import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
 import { CreateDto } from '@manager-paper/managerPaper/use-case/dto/create.dto';
 import { User } from '@platform-user/user/domain/user';
 import { v4 as uuid } from 'uuid';
+import { ManagerPaperValidationService } from '@manager-paper/managerPaper/validation/managerPaper-validation.service';
 
 @Injectable()
 export class CreateManagerPaperUseCase {
   constructor(
     private readonly fileService: IFileAdapter,
     private readonly managerPaperRepository: IManagerPaperRepository,
+    private readonly managerPaperValidationService: ManagerPaperValidationService,
   ) {}
 
   async execute(
@@ -18,6 +20,11 @@ export class CreateManagerPaperUseCase {
     user: User,
     file?: Express.Multer.File,
   ): Promise<ManagerPaper> {
+    await this.managerPaperValidationService.validatePeriodNotSent(
+      data.eventDate,
+      data.userId,
+    );
+
     const managerPaper = new ManagerPaper({
       group: data.group,
       posId: data.posId,

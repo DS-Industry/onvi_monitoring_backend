@@ -6,10 +6,11 @@ import {
 import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
 import {
   MANAGER_PAPER_DELETE_EXCEPTION_CODE, MANAGER_PAPER_TYPE_UPDATE_EXCEPTION_CODE,
-  MANAGER_PAPER_UPDATE_EXCEPTION_CODE, MANAGER_REPORT_PERIOD_GET_DETAIL_EXCEPTION_CODE
+  MANAGER_PAPER_UPDATE_EXCEPTION_CODE, MANAGER_REPORT_PERIOD_GET_DETAIL_EXCEPTION_CODE,
+  MANAGER_REPORT_PERIOD_DELETE_EXCEPTION_CODE
 } from "@constant/error.constants";
 import { ForbiddenError } from '@casl/ability';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction, ManagerReportPeriodStatus } from '@prisma/client';
 import { ManagerReportPeriod } from "@manager-paper/managerReportPeriod/domain/managerReportPeriod";
 import { ManagerPaperType } from "@manager-paper/managerPaperType/domain/managerPaperType";
 
@@ -90,6 +91,30 @@ export class ManagerPaperValidateRules {
       response,
       ExceptionType.MANAGER_PAPER,
       MANAGER_REPORT_PERIOD_GET_DETAIL_EXCEPTION_CODE,
+    );
+
+    return managerReportPeriod.object;
+  }
+
+  public async deleteManagerPaperPeriodValidate(
+    managerReportPeriodId: number,
+  ): Promise<ManagerReportPeriod> {
+    const response = [];
+    const managerReportPeriod =
+      await this.validateLib.managerReportPeriodExists(managerReportPeriodId);
+    response.push(managerReportPeriod);
+
+    if (managerReportPeriod.object && managerReportPeriod.object.status === ManagerReportPeriodStatus.SENT) {
+      response.push({
+        success: false,
+        message: 'Cannot delete a period that has already been sent',
+      });
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.MANAGER_PAPER,
+      MANAGER_REPORT_PERIOD_DELETE_EXCEPTION_CODE,
     );
 
     return managerReportPeriod.object;

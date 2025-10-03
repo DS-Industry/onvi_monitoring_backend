@@ -5,12 +5,14 @@ import { UpdateDto } from '@manager-paper/managerPaper/use-case/dto/update.dto';
 import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
 import { User } from '@platform-user/user/domain/user';
 import { v4 as uuid } from 'uuid';
+import { ManagerPaperValidationService } from '@manager-paper/managerPaper/validation/managerPaper-validation.service';
 
 @Injectable()
 export class UpdateManagerPaperUseCase {
   constructor(
     private readonly fileService: IFileAdapter,
     private readonly managerPaperRepository: IManagerPaperRepository,
+    private readonly managerPaperValidationService: ManagerPaperValidationService,
   ) {}
 
   async execute(
@@ -22,6 +24,14 @@ export class UpdateManagerPaperUseCase {
     const { group, posId, paperTypeId, eventDate, sum, userId, comment } =
       input;
     const oldUserId = oldManagerPaper.userId;
+
+    const newEventDate = eventDate ? eventDate : oldManagerPaper.eventDate;
+    const newUserId = userId ? userId : oldManagerPaper.userId;
+
+    await this.managerPaperValidationService.validatePeriodNotSent(
+      newEventDate,
+      newUserId,
+    );
 
     oldManagerPaper.group = group ? group : oldManagerPaper.group;
     oldManagerPaper.posId = posId ? posId : oldManagerPaper.posId;

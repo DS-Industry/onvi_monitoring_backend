@@ -20,6 +20,7 @@ import { DeleteManagerReportPeriodUseCase } from '@manager-paper/managerReportPe
 import { HandlerManagerReportPeriodUseCase } from '@manager-paper/managerReportPeriod/use-case/managerReportPeriod-handler';
 import { StatisticManagerPaperUseCase } from '@manager-paper/managerPaper/use-case/managerPaper-statistic';
 import { ManagerPaperHandlerEventUseCase } from '@manager-paper/managerPaper/use-case/managerPaper-handler-event';
+import { ManagerPaperValidationService } from '@manager-paper/managerPaper/validation/managerPaper-validation.service';
 
 const repositories: Provider[] = [
   ManagerPaperRepositoryProvider,
@@ -51,6 +52,10 @@ const managerReportPeriodUseCases: Provider[] = [
   DeleteManagerReportPeriodUseCase,
   HandlerManagerReportPeriodUseCase,
 ];
+
+const validationServices: Provider[] = [
+  ManagerPaperValidationService,
+];
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [
@@ -58,11 +63,13 @@ const managerReportPeriodUseCases: Provider[] = [
     ...managerPaperUseCases,
     ...managerPaperTypeUseCases,
     ...managerReportPeriodUseCases,
+    ...validationServices,
   ],
   exports: [
     ...managerPaperUseCases,
     ...managerPaperTypeUseCases,
     ...managerReportPeriodUseCases,
+    ...validationServices,
   ],
 })
 export class ManagerPaperCoreModule {}
