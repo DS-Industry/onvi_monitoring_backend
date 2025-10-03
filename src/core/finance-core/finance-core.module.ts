@@ -1,6 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { BusinessCoreModule } from '@business-core/business-core.module';
+import { HrCoreModule } from '@hr/hr-core.module';
 import { CashCollectionRepositoryProvider } from '@finance/cashCollection/cashCollection/provider/cashCollection';
 import { CashCollectionDeviceRepositoryProvider } from '@finance/cashCollection/cashCollectionDevice/provider/cashCollectionDevice';
 import { CashCollectionDeviceTypeRepositoryProvider } from '@finance/cashCollection/cashCollectionDeviceType/provider/cashCollectionDeviceType';
@@ -40,6 +41,7 @@ import { FullDataShiftReportUseCase } from "@finance/shiftReport/shiftReport/use
 import {
   CalculationPaymentShiftReportUseCase
 } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment";
+import { CalculateDailyPayoutShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -84,6 +86,7 @@ const shiftReportUseCase: Provider[] = [
   SendShiftReportUseCase,
   FullDataShiftReportUseCase,
   CalculationPaymentShiftReportUseCase,
+  CalculateDailyPayoutShiftReportUseCase,
   DeleteShiftReportUseCase,
 ];
 
@@ -99,7 +102,7 @@ const shiftGradingUseCase: Provider[] = [
   FindMethodsGradingEstimationUseCase,
 ];
 @Module({
-  imports: [PrismaModule, BusinessCoreModule],
+  imports: [PrismaModule, BusinessCoreModule, HrCoreModule],
   providers: [
     ...repositories,
     ...cashCollectionUseCase,

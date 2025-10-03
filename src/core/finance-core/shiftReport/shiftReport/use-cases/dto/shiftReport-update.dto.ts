@@ -13,6 +13,7 @@ export class ShiftReportUpdateDto {
   status?: StatusWorkDayShiftReport;
   cashAtStart?: number;
   cashAtEnd?: number;
+  dailyShiftPayout?: number;
   comment?: string;
   gradingData?: gradingDataDto[];
 }

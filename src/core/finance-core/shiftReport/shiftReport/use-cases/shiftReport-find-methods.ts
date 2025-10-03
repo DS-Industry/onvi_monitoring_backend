@@ -53,4 +53,16 @@ export class FindMethodsShiftReportUseCase {
       workerIds,
     );
   }
+  
+  async getShiftReportsWithPayout(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<ShiftReport[]> {
+    return await this.shiftReportRepository.findAllWithPayoutForCalculation(
+      dateStart,
+      dateEnd,
+      workerIds,
+    );
+  }
 }
