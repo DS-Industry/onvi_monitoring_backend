@@ -18,6 +18,7 @@ export interface ShiftReportProps {
   status?: StatusWorkDayShiftReport;
   cashAtStart?: number;
   cashAtEnd?: number;
+  dailyShiftPayout?: number;
   comment?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -72,6 +73,9 @@ export class ShiftReport extends BaseEntity<ShiftReportProps> {
   get cashAtEnd(): number {
     return this.props.cashAtEnd;
   }
+  get dailyShiftPayout(): number {
+    return this.props.dailyShiftPayout;
+  }
   get comment(): string {
     return this.props.comment;
   }
@@ -110,6 +114,9 @@ export class ShiftReport extends BaseEntity<ShiftReportProps> {
   }
   set cashAtEnd(cashAtEnd: number) {
     this.props.cashAtEnd = cashAtEnd;
+  }
+  set dailyShiftPayout(dailyShiftPayout: number) {
+    this.props.dailyShiftPayout = dailyShiftPayout;
   }
   set comment(comment: string) {
     this.props.comment = comment;

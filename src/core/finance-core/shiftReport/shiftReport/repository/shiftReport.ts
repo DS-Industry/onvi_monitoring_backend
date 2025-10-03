@@ -117,6 +117,35 @@ export class ShiftReportRepository extends IShiftReportRepository {
       })),
     }));
   }
+  
+  public async findAllWithPayoutForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<ShiftReport[]> {
+    const shiftReports = await this.prisma.mNGShiftReport.findMany({
+      where: {
+        workDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        workerId: {
+          in: workerIds,
+        },
+        typeWorkDay: TypeWorkDay.WORKING,
+        status: StatusWorkDayShiftReport.SENT,
+        dailyShiftPayout: {
+          not: null, 
+        },
+      },
+      orderBy: {
+        workDate: 'asc',
+      },
+    });
+
+    return shiftReports.map((report) => PrismaShiftReportMapper.toDomain(report));
+  }
+  
   public async update(input: ShiftReport): Promise<ShiftReport> {
     const shiftReportEntity = PrismaShiftReportMapper.toPrisma(input);
     const shiftReport = await this.prisma.mNGShiftReport.update({

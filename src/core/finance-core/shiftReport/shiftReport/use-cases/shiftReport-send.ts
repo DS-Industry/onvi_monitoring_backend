@@ -3,6 +3,7 @@ import { User } from '@platform-user/user/domain/user';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { CalculateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-calculate';
 import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
+import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
 import { StatusWorkDayShiftReport } from '@prisma/client';
 import { Injectable } from "@nestjs/common";
 @Injectable()
@@ -11,6 +12,7 @@ export class SendShiftReportUseCase {
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly calculateShiftReportCashOperUseCase: CalculateShiftReportCashOperUseCase,
     private readonly updateShiftReportUseCase: UpdateShiftReportUseCase,
+    private readonly calculateDailyPayoutShiftReportUseCase: CalculateDailyPayoutShiftReportUseCase,
   ) {}
 
   async execute(shiftReport: ShiftReport, user: User): Promise<ShiftReport> {
@@ -22,6 +24,12 @@ export class SendShiftReportUseCase {
     const cashOperData = await this.calculateShiftReportCashOperUseCase.execute(
       shiftReport.id,
     );
+    
+    const dailyShiftPayout = await this.calculateDailyPayoutShiftReportUseCase.execute(
+      shiftReport.id,
+      shiftReport.workerId,
+    );
+    
     return await this.updateShiftReportUseCase.execute(
       {
         status: StatusWorkDayShiftReport.SENT,
@@ -30,6 +38,7 @@ export class SendShiftReportUseCase {
           lastShiftReport?.cashAtEnd +
             cashOperData.replenishmentSum -
             cashOperData.expenditureSum || 0,
+        dailyShiftPayout: dailyShiftPayout,
       },
       shiftReport,
       user,
