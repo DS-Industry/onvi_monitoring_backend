@@ -1285,7 +1285,7 @@ model HrWorker {
   avatar              String?
   monthlySalary       Int
   dailySalary         Int
-  bonusPayout         Int
+  bonusPayout         Int?
   gender              String?
   citizenship         String?
   passportSeries      String?
