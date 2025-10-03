@@ -6,7 +6,7 @@ export interface PrepaymentsGetResponseDto {
   paymentDate: Date;
   monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  bonusPayout: number;
   countShifts: number;
   sum: number;
   createdAt: Date;

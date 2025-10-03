@@ -10,7 +10,7 @@ export interface UpdateDto {
   description?: string;
   monthlySalary?: number;
   dailySalary?: number;
-  percentageSalary?: number;
+  bonusPayout?: number;
   status?: StatusHrWorker;
   gender?: string;
   citizenship?: string;
