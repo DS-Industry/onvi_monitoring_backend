@@ -5,5 +5,5 @@ export interface PrepaymentCalculateResponseDro {
   billingMonth: Date;
   monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  bonusPayout: number;
 }

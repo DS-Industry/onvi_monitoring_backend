@@ -70,7 +70,7 @@ export class CalculationPaymentShiftReportUseCase {
 
         const shiftSum =
           worker.dailySalary +
-          (worker.percentageSalary * totalPercentage) / 100;
+          (worker.bonusPayout * totalPercentage) / 100;
         totalSum += shiftSum;
       });
 
@@ -80,7 +80,7 @@ export class CalculationPaymentShiftReportUseCase {
         hrPositionId: worker.hrPositionId,
         billingMonth: billingMonth,
         dailySalary: worker.dailySalary,
-        maxBonusSalary: worker.percentageSalary,
+        maxBonusSalary: worker.bonusPayout,
         countShifts: shiftReports.length,
         sum: totalSum,
       });

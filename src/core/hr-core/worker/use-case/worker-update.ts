@@ -27,7 +27,7 @@ export class UpdateWorkerUseCase {
       description,
       monthlySalary,
       dailySalary,
-      percentageSalary,
+      bonusPayout,
       status,
       gender,
       citizenship,
@@ -55,9 +55,9 @@ export class UpdateWorkerUseCase {
       ? monthlySalary
       : oldWorker.monthlySalary;
     oldWorker.dailySalary = dailySalary ? dailySalary : oldWorker.dailySalary;
-    oldWorker.percentageSalary = percentageSalary
-      ? percentageSalary
-      : oldWorker.percentageSalary;
+    oldWorker.bonusPayout = bonusPayout
+      ? bonusPayout
+      : oldWorker.bonusPayout;
     oldWorker.status = status ? status : oldWorker.status;
     oldWorker.gender = gender ? gender : oldWorker.gender;
     oldWorker.citizenship = citizenship ? citizenship : oldWorker.citizenship;

@@ -14,7 +14,7 @@ export interface WorkerProps {
   avatar?: string;
   monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  bonusPayout: number;
   status: StatusHrWorker;
   gender?: string;
   citizenship?: string;
@@ -124,12 +124,12 @@ export class Worker extends BaseEntity<WorkerProps> {
     this.props.dailySalary = dailySalary;
   }
 
-  get percentageSalary(): number {
-    return this.props.percentageSalary;
+  get bonusPayout(): number {
+    return this.props.bonusPayout;
   }
 
-  set percentageSalary(percentageSalary: number) {
-    this.props.percentageSalary = percentageSalary;
+  set bonusPayout(bonusPayout: number) {
+    this.props.bonusPayout = bonusPayout;
   }
 
   get status(): StatusHrWorker {

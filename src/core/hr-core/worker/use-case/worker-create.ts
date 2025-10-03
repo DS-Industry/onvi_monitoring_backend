@@ -25,7 +25,7 @@ export class CreateWorkerUseCase {
       description: data?.description,
       monthlySalary: data.monthlySalary,
       dailySalary: data.dailySalary,
-      percentageSalary: data.percentageSalary,
+      bonusPayout: data.bonusPayout,
       status: StatusHrWorker.WORKS,
       gender: data?.gender,
       citizenship: data?.citizenship,
