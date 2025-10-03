@@ -20,4 +20,5 @@ export abstract class IManagerReportPeriodRepository {
   ): Promise<number>;
   abstract update(input: ManagerReportPeriod): Promise<ManagerReportPeriod>;
   abstract delete(id: number): Promise<void>;
+  abstract findByDateAndUser(eventDate: Date, userId: number): Promise<ManagerReportPeriod | null>;
 }

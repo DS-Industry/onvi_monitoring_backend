@@ -112,4 +112,24 @@ export class ManagerReportPeriodRepository extends IManagerReportPeriodRepositor
   public async delete(id: number): Promise<void> {
     await this.prisma.managerReportPeriod.delete({ where: { id } });
   }
+
+  public async findByDateAndUser(eventDate: Date, userId: number): Promise<ManagerReportPeriod | null> {
+    const managerReportPeriod = await this.prisma.managerReportPeriod.findFirst({
+      where: {
+        userId,
+        startPeriod: {
+          lte: eventDate,
+        },
+        endPeriod: {
+          gte: eventDate,
+        },
+      },
+    });
+
+    if (!managerReportPeriod) {
+      return null;
+    }
+
+    return PrismaManagerReportPeriodMapper.toDomain(managerReportPeriod);
+  }
 }
