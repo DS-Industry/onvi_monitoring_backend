@@ -19,5 +19,12 @@ export abstract class IPaymentRepository {
     paymentType: PaymentType,
     billingMonth: Date,
   ): Promise<Payment[]>;
+  abstract findCountByFilter(
+    startPaymentDate?: Date,
+    endPaymentDate?: Date,
+    hrWorkerId?: number,
+    paymentType?: PaymentType,
+    billingMonth?: Date,
+  ): Promise<number>;
   abstract update(input: Payment): Promise<Payment>;
 }

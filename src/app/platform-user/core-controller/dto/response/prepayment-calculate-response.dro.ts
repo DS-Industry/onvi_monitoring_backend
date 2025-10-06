@@ -1,9 +1,12 @@
 export interface PrepaymentCalculateResponseDro {
   hrWorkerId: number;
+  employeeName: string;
   name: string;
   hrPositionId: number;
   billingMonth: Date;
-  monthlySalary: number;
   dailySalary: number;
   bonusPayout: number;
+  numberOfShiftsWorked: number;
+  sum: number;
+  payoutTimestamp?: Date;
 }

@@ -54,6 +54,18 @@ export class GetReportPaymentUseCase {
     });
   }
 
+  async prepaymentCount(
+    data: ReportFilterDto,
+  ): Promise<number> {
+    return await this.findMethodsPaymentUseCase.getCountByFilter(
+      data.startPaymentDate,
+      data.endPaymentDate,
+      data.hrWorkerId,
+      PaymentType.PREPAYMENT,
+      data.billingMonth,
+    );
+  }
+
   async payment(data: ReportFilterDto): Promise<PaymentsGetResponseDto[]> {
     const paymentPayments = await this.findMethodsPaymentUseCase.getAllByFilter(
       data.startPaymentDate,
