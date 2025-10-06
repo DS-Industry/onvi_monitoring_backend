@@ -15,6 +15,7 @@ import { CreatePaymentUseCase } from '@hr/payment/use-case/payment-create';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
 import { CalculatePaymentUseCase } from "@hr/payment/use-case/payment-calculate";
 import { GetReportPaymentUseCase } from "@hr/payment/use-case/payment-get-report";
+import { FinanceCoreModule } from '@finance/finance-core.module';
 
 const repositories: Provider[] = [
   WorkerRepositoryProvider,
@@ -42,7 +43,7 @@ const paymentUseCases: Provider[] = [
   GetReportPaymentUseCase,
 ];
 @Module({
-  imports: [PrismaModule, FileModule],
+  imports: [PrismaModule, FileModule, FinanceCoreModule],
   providers: [
     ...repositories,
     ...workerUseCases,
