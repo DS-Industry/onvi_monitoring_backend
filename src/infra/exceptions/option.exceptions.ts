@@ -159,3 +159,13 @@ export class LoyaltyDomainException extends BaseException {
     return HttpStatus.CONFLICT;
   }
 }
+
+export class PermissionException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_permission', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.FORBIDDEN;
+  }
+}
