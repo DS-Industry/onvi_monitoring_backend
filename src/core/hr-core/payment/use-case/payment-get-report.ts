@@ -36,21 +36,34 @@ export class GetReportPaymentUseCase {
 
     return prepayments.map((payment) => {
       const worker = workersMap.get(payment.hrWorkerId);
+      
       return {
         hrWorkerId: worker.id,
-        name: worker.name,
+        employeeName: worker.name, 
+        name: worker.name, 
         hrPositionId: worker.hrPositionId,
-        billingMonth: payment.billingMonth,
-        paymentDate: payment.paymentDate,
-        monthlySalary: worker.monthlySalary,
+        billingMonth: payment.billingMonth, 
         dailySalary: worker.dailySalary,
         bonusPayout: worker.bonusPayout,
-        countShifts: payment.countShifts,
-        sum: payment.sum,
+        numberOfShiftsWorked: payment.countShifts, 
+        sum: payment.sum, 
+        payoutTimestamp: payment.createdAt,
         createdAt: payment.createdAt,
         createdById: payment.createdById,
       };
     });
+  }
+
+  async prepaymentCount(
+    data: ReportFilterDto,
+  ): Promise<number> {
+    return await this.findMethodsPaymentUseCase.getCountByFilter(
+      data.startPaymentDate,
+      data.endPaymentDate,
+      data.hrWorkerId,
+      PaymentType.PREPAYMENT,
+      data.billingMonth,
+    );
   }
 
   async payment(data: ReportFilterDto): Promise<PaymentsGetResponseDto[]> {

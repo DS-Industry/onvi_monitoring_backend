@@ -586,6 +586,8 @@ export class FinanceController {
         shiftReport.endWorkingTime,
       );
       shiftReport.workerName = worker.name;
+      shiftReport.dailySalary = worker.dailySalary;
+      shiftReport.bonusPayout = worker.bonusPayout;
 
       return shiftReport;
     } catch (e) {
@@ -630,6 +632,8 @@ export class FinanceController {
         shiftReport.endWorkingTime,
       );
       shiftReportFull.workerName = worker.name;
+      shiftReportFull.dailySalary = worker.dailySalary;
+      shiftReportFull.bonusPayout = worker.bonusPayout;
 
       return shiftReportFull;
     } catch (e) {
