@@ -5,14 +5,12 @@ import { ReportFilterDto } from '@hr/payment/use-case/dto/report-filter.dto';
 import { PaymentType } from '@prisma/client';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { PrepaymentsGetResponseDto } from '@platform-user/core-controller/dto/response/prepayments-get-response.dto';
-import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 
 @Injectable()
 export class GetReportPaymentUseCase {
   constructor(
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
-    private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
   ) {}
   async prepayment(
     data: ReportFilterDto,
@@ -36,68 +34,19 @@ export class GetReportPaymentUseCase {
     const workers = await this.findMethodsWorkerUseCase.getAllByIds(workerIds);
     const workersMap = new Map(workers.map((w) => [w.id, w]));
 
-    const billingMonth = data.billingMonth || prepayments[0].billingMonth;
-    const dateStart = new Date(
-      billingMonth.getUTCFullYear(),
-      billingMonth.getUTCMonth(),
-      1,
-      0,
-      0,
-      0,
-    );
-    const dateEnd = new Date(
-      Date.UTC(
-        billingMonth.getUTCFullYear(),
-        billingMonth.getUTCMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-      ),
-    );
-
-    const shiftReports = await this.findMethodsShiftReportUseCase.getShiftReportsWithPayout(
-      dateStart,
-      dateEnd,
-      workerIds,
-    );
-
-    const shiftReportsByWorker = shiftReports.reduce((acc, shiftReport) => {
-      if (!acc.has(shiftReport.workerId)) {
-        acc.set(shiftReport.workerId, []);
-      }
-      acc.get(shiftReport.workerId)!.push(shiftReport);
-      return acc;
-    }, new Map<number, typeof shiftReports>());
-
-    const maxAdvanceSalaryMap = new Map<number, number>();
-    shiftReportsByWorker.forEach((workerShiftReports, workerId) => {
-      const totalDailyPayouts = workerShiftReports.reduce((sum, shiftReport) => {
-        return sum + (shiftReport.dailyShiftPayout || 0);
-      }, 0);
-      maxAdvanceSalaryMap.set(workerId, totalDailyPayouts);
-    });
-
     return prepayments.map((payment) => {
       const worker = workersMap.get(payment.hrWorkerId);
-      const maxAdvanceSalary = maxAdvanceSalaryMap.get(payment.hrWorkerId) || 0;
       
       return {
         hrWorkerId: worker.id,
         employeeName: worker.name, 
         name: worker.name, 
         hrPositionId: worker.hrPositionId,
-        salaryPeriod: payment.billingMonth, 
         billingMonth: payment.billingMonth, 
-        paymentDate: payment.paymentDate,
-        monthlySalary: worker.monthlySalary,
         dailySalary: worker.dailySalary,
         bonusPayout: worker.bonusPayout,
         numberOfShiftsWorked: payment.countShifts, 
-        countShifts: payment.countShifts, 
-        advanceSalary: payment.sum, 
         sum: payment.sum, 
-        maxAdvanceSalary: maxAdvanceSalary,
         payoutTimestamp: payment.createdAt,
         createdAt: payment.createdAt,
         createdById: payment.createdById,
