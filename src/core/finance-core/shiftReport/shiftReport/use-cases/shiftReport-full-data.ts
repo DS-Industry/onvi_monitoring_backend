@@ -36,6 +36,7 @@ export class FullDataShiftReportUseCase {
         return {
           id: param.id,
           name: param.name,
+          weightPercent: param.weightPercent,
           estimationId: shiftGrading?.gradingEstimationId,
         };
       },
@@ -60,6 +61,7 @@ export class FullDataShiftReportUseCase {
         allEstimations: allGradingEstimations.map((est) => ({
           id: est.id,
           name: est.name,
+          weightPercent: est.weightPercent,
         })),
       },
     };

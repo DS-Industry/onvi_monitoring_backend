@@ -81,10 +81,12 @@ export class ReceiverShiftReportUseCase {
     const parametersInfo = gradingParameters.map((param) => ({
       id: param.id,
       name: param.name,
+      weightPercent: param.weightPercent,
     }));
     const estimationsInfo = gradingEstimations.map((est) => ({
       id: est.id,
       name: est.name,
+      weightPercent: est.weightPercent,
     }));
 
     return {
