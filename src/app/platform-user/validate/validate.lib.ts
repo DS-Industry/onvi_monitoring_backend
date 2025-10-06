@@ -91,6 +91,7 @@ import { Position } from '@hr/position/domain/position';
 import { Worker } from '@hr/worker/domain/worker';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
+import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { FindMethodsUserNotificationTagUseCase } from '@notification/userNotificationTag/use-case/userNotificationTag-find-methods';
 import { UserNotificationTag } from '@notification/userNotificationTag/domain/userNotificationTag';
@@ -172,6 +173,7 @@ export class ValidateLib {
     private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
+    private readonly calculationPaymentShiftReportUseCase: CalculationPaymentShiftReportUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly findMethodsUserNotificationTagUseCase: FindMethodsUserNotificationTagUseCase,
     private readonly findMethodsUserNotificationUseCase: FindMethodsUserNotificationUseCase,
@@ -1616,5 +1618,76 @@ export class ValidateLib {
       code: 200, 
       object: user 
     };
+  }
+
+  public async paymentSumValidation(
+    hrWorkerId: number,
+    billingMonth: Date,
+    paymentSum: number,
+  ): Promise<ValidateResponse<any>> {
+    try {
+      const worker = await this.findMethodsWorkerUseCase.getById(hrWorkerId);
+      if (!worker) {
+        return {
+          code: 400,
+          errorMessage: `Worker with ID ${hrWorkerId} not found`,
+        };
+      }
+
+      const shiftReportData = await this.calculationPaymentShiftReportUseCase.execute(
+        billingMonth,
+        [worker],
+      );
+
+      if (shiftReportData.length === 0) {
+        return {
+          code: 200,
+          object: {
+            maxAvailable: paymentSum, 
+            totalEarned: 0,
+            totalPrepayments: 0,
+            note: 'No shift reports found - validation bypassed',
+          },
+        };
+      }
+
+      const workerShiftData = shiftReportData.find(data => data.hrWorkerId === hrWorkerId);
+      if (!workerShiftData) {
+        return {
+          code: 400,
+          errorMessage: `No shift data found for worker ${hrWorkerId}`,
+        };
+      }
+
+      const existingPrepayments = await this.findMethodsPaymentUseCase.getAllForCalculate(
+        [hrWorkerId],
+        PaymentType.PREPAYMENT,
+        billingMonth,
+      );
+
+      const totalPrepaymentSum = existingPrepayments.reduce((sum, payment) => sum + payment.sum, 0);
+      const maxAvailableForPayment = workerShiftData.sum - totalPrepaymentSum;
+
+      if (paymentSum > maxAvailableForPayment) {
+        return {
+          code: 400,
+          errorMessage: `Payment sum ${paymentSum} exceeds maximum available amount ${maxAvailableForPayment}. Worker earned ${workerShiftData.sum} from shifts, already received ${totalPrepaymentSum} in prepayments.`,
+        };
+      }
+
+      return {
+        code: 200,
+        object: {
+          maxAvailable: maxAvailableForPayment,
+          totalEarned: workerShiftData.sum,
+          totalPrepayments: totalPrepaymentSum,
+        },
+      };
+    } catch (error) {
+      return {
+        code: 500,
+        errorMessage: `Error validating payment sum: ${error.message}`,
+      };
+    }
   }
 }

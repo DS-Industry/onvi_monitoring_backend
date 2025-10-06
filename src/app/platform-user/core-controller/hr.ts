@@ -589,10 +589,15 @@ export class HrController {
   ): Promise<any> {
     try {
       const { user } = req;
-      /*await this.hrValidateRules.createPrepayment(
-        data.hrWorkerId,
-        data.billingMonth,
-      );*/
+      
+      for (const payment of data.payments) {
+        await this.hrValidateRules.createPayment(
+          payment.hrWorkerId,
+          payment.billingMonth,
+          payment.sum,
+        );
+      }
+      
       await this.createPaymentUseCase.createMany(
         data.payments.map((payment) => ({
           ...payment,
