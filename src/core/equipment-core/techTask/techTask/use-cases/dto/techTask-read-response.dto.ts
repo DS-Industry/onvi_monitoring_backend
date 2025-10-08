@@ -21,4 +21,8 @@ export class TechTaskReadAllResponse {
     firstName: string;
     lastName: string;
   } | null;
+  executor?: {
+    firstName: string;
+    lastName: string;
+  } | null;
 }

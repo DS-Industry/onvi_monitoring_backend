@@ -73,6 +73,7 @@ export class TechTaskRepository extends ITechTaskRepository {
     name?: string,
     tags?: string[],
     authorId?: number,
+    executorId?: number,
   ): Promise<TechTask[]> {
     const where: any = {};
 
@@ -159,6 +160,10 @@ export class TechTaskRepository extends ITechTaskRepository {
       where.createdById = authorId;
     }
 
+    if (executorId !== undefined) {
+      where.executorId = executorId;
+    }
+
     const techTasks = await this.prisma.techTask.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
@@ -170,6 +175,12 @@ export class TechTaskRepository extends ITechTaskRepository {
         tags: true,
         pos: true,
         createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
+        executor: {
           select: {
             name: true,
             surname: true,
@@ -197,6 +208,7 @@ export class TechTaskRepository extends ITechTaskRepository {
     name?: string,
     tags?: string[],
     authorId?: number,
+    executorId?: number,
   ): Promise<number> {
     const where: any = {};
 
@@ -282,6 +294,10 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (authorId !== undefined) {
       where.createdById = authorId;
+    }
+
+    if (executorId !== undefined) {
+      where.executorId = executorId;
     }
 
     return this.prisma.techTask.count({

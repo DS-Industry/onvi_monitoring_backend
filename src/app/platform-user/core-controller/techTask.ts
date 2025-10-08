@@ -320,8 +320,16 @@ export class TechTaskController {
 
       return await this.reportTechTaskUseCase.execute(
         user,
-        params.posId,
-        params.type,
+        {
+          posId: params.posId,
+          organizationId: params.organizationId,
+          type: params.type,
+          name: params.name,
+          executorId: params.executorId,
+          tags: params.tags,
+          startDate: params.startDate ? new Date(params.startDate) : undefined,
+          endDate: params.endDate ? new Date(params.endDate) : undefined,
+        },
         skip,
         take,
       );
