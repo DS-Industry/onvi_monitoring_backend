@@ -4,7 +4,6 @@ export interface PaymentsGetResponseDto {
   hrPositionId: number;
   billingMonth: Date;
   paymentDate: Date;
-  monthlySalary: number;
   dailySalary: number;
   bonusPayout: number;
   countShifts: number;
@@ -12,7 +11,10 @@ export interface PaymentsGetResponseDto {
   paymentSum: number;
   prize: number;
   fine: number;
+  virtualSum?: number;
+  comment?: string;
   totalPayment: number;
+  totalPaymentFinal: number;
   createdAt: Date;
   createdById: number;
 }

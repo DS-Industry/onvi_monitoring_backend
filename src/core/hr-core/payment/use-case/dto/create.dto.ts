@@ -9,4 +9,6 @@ export interface CreateDto {
   sum: number;
   prize: number;
   fine: number;
+  virtualSum?: number;
+  comment?: string;
 }

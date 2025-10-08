@@ -36,17 +36,17 @@ export class GetReportPaymentUseCase {
 
     return prepayments.map((payment) => {
       const worker = workersMap.get(payment.hrWorkerId);
-      
+
       return {
         hrWorkerId: worker.id,
-        employeeName: worker.name, 
-        name: worker.name, 
+        employeeName: worker.name,
+        name: worker.name,
         hrPositionId: worker.hrPositionId,
-        billingMonth: payment.billingMonth, 
+        billingMonth: payment.billingMonth,
         dailySalary: worker.dailySalary,
         bonusPayout: worker.bonusPayout,
-        numberOfShiftsWorked: payment.countShifts, 
-        sum: payment.sum, 
+        numberOfShiftsWorked: payment.countShifts,
+        sum: payment.sum,
         payoutTimestamp: payment.createdAt,
         createdAt: payment.createdAt,
         createdById: payment.createdById,
@@ -54,9 +54,7 @@ export class GetReportPaymentUseCase {
     });
   }
 
-  async prepaymentCount(
-    data: ReportFilterDto,
-  ): Promise<number> {
+  async prepaymentCount(data: ReportFilterDto): Promise<number> {
     return await this.findMethodsPaymentUseCase.getCountByFilter(
       data.startPaymentDate,
       data.endPaymentDate,
@@ -105,7 +103,6 @@ export class GetReportPaymentUseCase {
         hrPositionId: worker.hrPositionId,
         billingMonth: payment.billingMonth,
         paymentDate: payment.paymentDate,
-        monthlySalary: worker.monthlySalary,
         dailySalary: worker.dailySalary,
         bonusPayout: worker.bonusPayout,
         countShifts: payment.countShifts,
@@ -113,11 +110,19 @@ export class GetReportPaymentUseCase {
         paymentSum: payment.sum,
         prize: payment.prize,
         fine: payment.fine,
+        virtualSum: payment?.virtualSum,
+        comment: payment?.comment,
         totalPayment:
+          payment.sum -
           (prepaymentMap.get(payment.hrWorkerId) || 0) +
-          payment.sum +
           payment.prize -
           payment.fine,
+        totalPaymentFinal:
+          payment.sum -
+          (prepaymentMap.get(payment.hrWorkerId) || 0) +
+          payment.prize -
+          payment.fine -
+          (payment?.virtualSum || 0),
         createdAt: payment.createdAt,
         createdById: payment.createdById,
       };

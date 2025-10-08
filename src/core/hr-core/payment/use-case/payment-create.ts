@@ -39,6 +39,8 @@ export class CreatePaymentUseCase {
           sum: data.sum,
           prize: data.prize,
           fine: data.fine,
+          virtualSum: data?.virtualSum,
+          comment: data?.comment,
           createdAt: new Date(Date.now()),
           createdById: user.id,
           updatedAt: new Date(Date.now()),
