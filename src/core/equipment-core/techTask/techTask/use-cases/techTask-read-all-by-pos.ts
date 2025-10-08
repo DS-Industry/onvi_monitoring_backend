@@ -17,7 +17,7 @@ export class ReadAllByPosTechTaskUseCase {
 
   async execute(
     user: User,
-    filterData: { posId?: number; status?: StatusTechTask },
+    filterData: { posId?: number; status?: StatusTechTask; organizationId?: number },
     skip?: number,
     take?: number,
   ): Promise<TechTaskReadAllResponseDto> {
@@ -37,19 +37,18 @@ export class ReadAllByPosTechTaskUseCase {
         userId: user.id,
         statuses,
         posId: filterData.posId,
+        organizationId: filterData.organizationId,
       }),
       this.findMethodsTechTaskUseCase.getAllByFilter({
         userId: user.id,
         statuses,
         posId: filterData.posId,
+        organizationId: filterData.organizationId,
         skip,
         take,
       }),
     ]);
     for (const techTask of techTasks) {
-      const techTags = await this.findMethodsTechTagUseCase.getAllByTechTaskId(
-        techTask.id,
-      );
       response.push({
         id: techTask.id,
         name: techTask.name,
@@ -60,7 +59,7 @@ export class ReadAllByPosTechTaskUseCase {
         startWorkDate: techTask.startWorkDate,
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
-        tags: techTags.map((tag) => tag.getProps()),
+        tags: techTask.tags,
       });
     }
 

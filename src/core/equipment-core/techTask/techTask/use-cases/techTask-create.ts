@@ -45,6 +45,7 @@ export class CreateTechTaskUseCase {
       updatedAt: new Date(Date.now()),
       createdById: userId,
       updatedById: userId,
+      tags: [],
     });
     const techTask = await this.techTaskRepository.create(techTaskData);
     await this.techTaskRepository.updateConnectionTag(

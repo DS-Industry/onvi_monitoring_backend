@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
 import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
+import { DeleteManyTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete-many';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
@@ -59,12 +60,14 @@ import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplat
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-me-filter.dto';
+import { TechTaskDeleteManyDto } from '@platform-user/core-controller/dto/receive/tech-task-delete-many.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
   constructor(
     private readonly createTechTaskUseCase: CreateTechTaskUseCase,
     private readonly deleteTechTaskUseCase: DeleteTechTaskUseCase,
+    private readonly deleteManyTechTaskUseCase: DeleteManyTechTaskUseCase,
     private readonly techTaskValidateRules: TechTaskValidateRules,
     private readonly updateTechTaskUseCase: UpdateTechTaskUseCase,
     private readonly manageAllByPosAndStatusesTechTaskUseCase: ManageAllByPosAndStatusesTechTaskUseCase,
@@ -177,6 +180,41 @@ export class TechTaskController {
     }
   }
 
+  @Delete('bulk/delete')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteTechTaskAbility())
+  @HttpCode(200)
+  async deleteMany(
+    @Body() data: TechTaskDeleteManyDto,
+    @Request() req: any,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const techTasks = await this.techTaskValidateRules.deleteManyValidate(
+        data.ids,
+        ability,
+        data.posId,
+        data.organizationId,
+      );
+      await this.deleteManyTechTaskUseCase.execute(techTasks);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   @Get('manage')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
@@ -234,7 +272,7 @@ export class TechTaskController {
       }
       return await this.readAllByPosTechTaskUseCase.execute(
         user,
-        { posId: params.posId, status: params.status },
+        { posId: params.posId, status: params.status, organizationId: params.organizationId },
         skip,
         take,
       );

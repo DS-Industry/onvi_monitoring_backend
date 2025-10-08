@@ -44,6 +44,8 @@ import { PaymentType } from '@prisma/client';
 import { PaymentReportFilterDto } from '@platform-user/core-controller/dto/receive/payment-report-filter.dto';
 import { PaymentCalculateDto } from '@platform-user/core-controller/dto/receive/payment-calculate.dto';
 import { PaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/payment-calculate-response.dro';
+import { PrepaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/prepayment-calculate-response.dro';
+import { PrepaymentCalculateResponseMapper } from '@platform-user/core-controller/mapper/prepayment-calculate-response.mapper';
 import { CalculatePaymentUseCase } from '@hr/payment/use-case/payment-calculate';
 import { PaymentCreateDto } from '@platform-user/core-controller/dto/receive/payment-create.dto';
 import { PaymentsGetResponseDto } from '@platform-user/core-controller/dto/response/payments-get-response.dto';
@@ -392,7 +394,7 @@ export class HrController {
   @HttpCode(201)
   async calculatePrepayment(
     @Body() data: PaymentCalculateDto,
-  ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
+  ): Promise<PrepaymentCalculateResponseDro[]> {
     try {
       const workers =
         await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
@@ -400,10 +402,12 @@ export class HrController {
           billingMonth: data.billingMonth,
           hrPositionId: data.hrPositionId,
         });
-      return await this.calculationPaymentShiftReportUseCase.execute(
+      const shiftReportData = await this.calculationPaymentShiftReportUseCase.execute(
         data.billingMonth,
         workers,
       );
+      
+      return PrepaymentCalculateResponseMapper.toResponse(shiftReportData);
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -585,10 +589,15 @@ export class HrController {
   ): Promise<any> {
     try {
       const { user } = req;
-      /*await this.hrValidateRules.createPrepayment(
-        data.hrWorkerId,
-        data.billingMonth,
-      );*/
+      
+      for (const payment of data.payments) {
+        await this.hrValidateRules.createPayment(
+          payment.hrWorkerId,
+          payment.billingMonth,
+          payment.sum,
+        );
+      }
+      
       await this.createPaymentUseCase.createMany(
         data.payments.map((payment) => ({
           ...payment,
@@ -632,6 +641,34 @@ export class HrController {
         skip,
         take,
       });
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('prepayments/count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadHrAbility())
+  @HttpCode(200)
+  async getPrepaymentsCount(
+    @Query() data: PaymentReportFilterDto,
+  ): Promise<{ count: number }> {
+    try {
+      const count = await this.getReportPaymentUseCase.prepaymentCount({
+        ...data,
+      });
+      return { count };
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({

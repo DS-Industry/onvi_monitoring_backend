@@ -9,6 +9,11 @@ export class TechTaskMeFilterDto {
   })
   posId?: number;
   @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  organizationId?: number;
+  @IsOptional()
   @IsEnum(StatusTechTask)
   status?: StatusTechTask;
   @IsOptional()

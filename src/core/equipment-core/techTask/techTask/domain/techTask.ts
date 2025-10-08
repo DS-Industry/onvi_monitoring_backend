@@ -1,4 +1,5 @@
 import { StatusTechTask, TypeTechTask } from '@prisma/client';
+import { TechTag } from '@tech-task/tag/domain/techTag';
 import { BaseEntity } from '@utils/entity';
 
 export interface TechTaskProps {
@@ -19,6 +20,7 @@ export interface TechTaskProps {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  tags: TechTag[];
 }
 
 export class TechTask extends BaseEntity<TechTaskProps> {
@@ -94,6 +96,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.updatedById;
   }
 
+  get tags(): TechTag[] {
+    return this.props.tags;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -148,5 +154,9 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set tags(tags: TechTag[]) {
+    this.props.tags = tags;
   }
 }

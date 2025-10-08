@@ -7,6 +7,7 @@ import { Position } from '@hr/position/domain/position';
 import {
   HR_CREATE_POSITION_EXCEPTION_CODE,
   HR_CREATE_PREPAYMENT_EXCEPTION_CODE,
+  HR_CREATE_PAYMENT_EXCEPTION_CODE,
   HR_CREATE_WORKER_EXCEPTION_CODE,
   HR_GET_ONE_POSITION_EXCEPTION_CODE,
   HR_GET_ONE_WORKER_EXCEPTION_CODE,
@@ -129,6 +130,27 @@ export class HrValidateRules {
       response,
       ExceptionType.HR,
       HR_CREATE_PREPAYMENT_EXCEPTION_CODE,
+    );
+  }
+
+  public async createPayment(
+    hrWorkerId: number,
+    billingMonth: Date,
+    paymentSum: number,
+  ): Promise<any> {
+    const response = [];
+    response.push(await this.validateLib.workerByIdExists(hrWorkerId));
+    response.push(
+      await this.validateLib.paymentSumValidation(
+        hrWorkerId,
+        billingMonth,
+        paymentSum,
+      ),
+    );
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.HR,
+      HR_CREATE_PAYMENT_EXCEPTION_CODE,
     );
   }
 }

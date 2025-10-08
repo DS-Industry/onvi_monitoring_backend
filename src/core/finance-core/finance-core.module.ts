@@ -1,6 +1,5 @@
-import { Module, Provider } from '@nestjs/common';
+import { Module, Provider, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
-import { BusinessCoreModule } from '@business-core/business-core.module';
 import { HrCoreModule } from '@hr/hr-core.module';
 import { CashCollectionRepositoryProvider } from '@finance/cashCollection/cashCollection/provider/cashCollection';
 import { CashCollectionDeviceRepositoryProvider } from '@finance/cashCollection/cashCollectionDevice/provider/cashCollectionDevice';
@@ -102,7 +101,7 @@ const shiftGradingUseCase: Provider[] = [
   FindMethodsGradingEstimationUseCase,
 ];
 @Module({
-  imports: [PrismaModule, BusinessCoreModule, HrCoreModule],
+  imports: [PrismaModule, forwardRef(() => HrCoreModule)],
   providers: [
     ...repositories,
     ...cashCollectionUseCase,

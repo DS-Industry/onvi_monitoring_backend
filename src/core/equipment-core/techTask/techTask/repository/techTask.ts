@@ -15,6 +15,9 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTaskEntity = PrismaTechTaskMapper.toPrisma(input);
     const techTask = await this.prisma.techTask.create({
       data: techTaskEntity,
+      include: {
+        tags: true,
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -23,6 +26,9 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTask = await this.prisma.techTask.findFirst({
       where: {
         id,
+      },
+      include: {
+        tags: true,
       },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
@@ -41,11 +47,16 @@ export class TechTaskRepository extends ITechTaskRepository {
     codeTag?: string,
     skip?: number,
     take?: number,
+    organizationId?: number,
   ): Promise<TechTask[]> {
     const where: any = {};
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
     } else {
       where.pos = {
         usersPermissions: {
@@ -105,6 +116,9 @@ export class TechTaskRepository extends ITechTaskRepository {
       orderBy: {
         endSpecifiedDate: 'desc',
       },
+      include:{
+        tags: true,
+      }
     });
 
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
@@ -122,11 +136,16 @@ export class TechTaskRepository extends ITechTaskRepository {
     type?: TypeTechTask,
     statuses?: StatusTechTask[],
     codeTag?: string,
+    organizationId?: number,
   ): Promise<number> {
     const where: any = {};
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
     } else {
       where.pos = {
         usersPermissions: {
@@ -191,6 +210,9 @@ export class TechTaskRepository extends ITechTaskRepository {
         id: input.id,
       },
       data: techTaskEntity,
+      include: {
+        tags: true,
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -227,5 +249,50 @@ export class TechTaskRepository extends ITechTaskRepository {
         },
       });
     });
+  }
+
+  public async deleteMany(ids: number[]): Promise<void> {
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.techTaskItemValueToTechTask.deleteMany({
+        where: {
+          techTaskId: {
+            in: ids,
+          },
+        },
+      });
+
+      await prisma.techTask.deleteMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      });
+    });
+  }
+
+  public async findManyByIds(ids: number[], posId?: number, organizationId?: number): Promise<TechTask[]> {
+    const where: any = {
+      id: {
+        in: ids,
+      },
+    };
+
+    if (posId !== undefined) {
+      where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
+    }
+
+    const techTasks = await this.prisma.techTask.findMany({
+      where: where,
+      include: {
+        tags: true,
+      },
+    });
+
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 }

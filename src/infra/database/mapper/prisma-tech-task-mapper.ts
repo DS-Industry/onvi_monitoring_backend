@@ -1,8 +1,9 @@
-import { TechTask as PrismaTechTask, Prisma } from '@prisma/client';
+import { TechTask as PrismaTechTask, TechTaskTag, Prisma } from '@prisma/client';
+import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 
 export class PrismaTechTaskMapper {
-  static toDomain(entity: PrismaTechTask): TechTask {
+  static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[] }): TechTask {
     if (!entity) {
       return null;
     }
@@ -24,6 +25,11 @@ export class PrismaTechTaskMapper {
       updatedAt: entity.updatedAt,
       createdById: entity.createdById,
       updatedById: entity.updateById,
+      tags: entity.tags ? entity.tags.map(tag => new TechTag({
+        id: tag.id,
+        name: tag.name,
+        code: tag.code,
+      })) : [],
     });
   }
 
