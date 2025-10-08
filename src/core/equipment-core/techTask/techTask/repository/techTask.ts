@@ -26,6 +26,7 @@ export class TechTaskRepository extends ITechTaskRepository {
           select: {
             name: true,
             surname: true,
+            id: true
           },
         },
       },
@@ -49,6 +50,7 @@ export class TechTaskRepository extends ITechTaskRepository {
           select: {
             name: true,
             surname: true,
+            id: true
           },
         },
       },
@@ -178,12 +180,14 @@ export class TechTaskRepository extends ITechTaskRepository {
           select: {
             name: true,
             surname: true,
+            id: true
           },
         },
         executor: {
           select: {
             name: true,
             surname: true,
+            id: true
           },
         },
       }
