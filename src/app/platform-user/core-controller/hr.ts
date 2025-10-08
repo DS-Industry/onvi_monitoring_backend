@@ -402,11 +402,12 @@ export class HrController {
           billingMonth: data.billingMonth,
           hrPositionId: data.hrPositionId,
         });
-      const shiftReportData = await this.calculationPaymentShiftReportUseCase.execute(
-        data.billingMonth,
-        workers,
-      );
-      
+      const shiftReportData =
+        await this.calculationPaymentShiftReportUseCase.execute(
+          data.billingMonth,
+          workers,
+        );
+
       return PrepaymentCalculateResponseMapper.toResponse(shiftReportData);
     } catch (e) {
       if (e instanceof HrException) {
@@ -589,7 +590,7 @@ export class HrController {
   ): Promise<any> {
     try {
       const { user } = req;
-      
+
       for (const payment of data.payments) {
         await this.hrValidateRules.createPayment(
           payment.hrWorkerId,
@@ -597,7 +598,7 @@ export class HrController {
           payment.sum,
         );
       }
-      
+
       await this.createPaymentUseCase.createMany(
         data.payments.map((payment) => ({
           ...payment,
@@ -732,10 +733,7 @@ export class HrController {
   ): Promise<{ status: string }> {
     try {
       const { ability } = req;
-      await this.hrValidateRules.updateWorkerValidate(
-        data.workerId,
-        ability,
-      );
+      await this.hrValidateRules.updateWorkerValidate(data.workerId, ability);
       return await this.connectionWorkerPosUseCase.execute(
         data.posIds,
         data.workerId,
@@ -767,21 +765,24 @@ export class HrController {
   ): Promise<WorkerPosesListResponseDto> {
     try {
       await this.hrValidateRules.findOneByIdWorkerValidate(workerId);
-      
-      const poses = await this.findMethodsWorkerUseCase.getPosesByWorkerId(workerId);
-      
+
+      const poses =
+        await this.findMethodsWorkerUseCase.getPosesByWorkerId(workerId);
+
       return {
-        poses: poses.map(pos => ({
+        poses: poses.map((pos) => ({
           id: pos.id,
           name: pos.name,
           slug: pos.slug,
           organizationId: pos.organizationId,
           status: pos.status,
-          address: pos.address ? {
-            id: pos.address.id,
-            city: pos.address.city,
-            location: pos.address.location,
-          } : undefined,
+          address: pos.address
+            ? {
+                id: pos.address.id,
+                city: pos.address.city,
+                location: pos.address.location,
+              }
+            : undefined,
         })),
         totalCount: poses.length,
       };

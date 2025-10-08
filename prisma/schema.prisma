@@ -1328,6 +1328,8 @@ model HrPayment {
   createdById  Int
   paymentType  PaymentType
   countShifts  Int
+  virtualSum   Int?        @default(0)
+  comment      String?
   updatedAt    DateTime?
   updatedById  Int?
   createdBy    User        @relation("CreatedByUser", fields: [createdById], references: [id])
