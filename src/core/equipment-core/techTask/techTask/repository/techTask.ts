@@ -15,6 +15,20 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTaskEntity = PrismaTechTaskMapper.toPrisma(input);
     const techTask = await this.prisma.techTask.create({
       data: techTaskEntity,
+      include: {
+        tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -23,6 +37,20 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTask = await this.prisma.techTask.findFirst({
       where: {
         id,
+      },
+      include: {
+        tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
       },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
@@ -41,11 +69,19 @@ export class TechTaskRepository extends ITechTaskRepository {
     codeTag?: string,
     skip?: number,
     take?: number,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<TechTask[]> {
     const where: any = {};
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
     } else {
       where.pos = {
         usersPermissions: {
@@ -56,21 +92,24 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (gteStartDate !== undefined && lteStartDate !== undefined) {
-      where.startDate = {
-        gte: gteStartDate,
-        lte: lteStartDate,
-      };
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
     }
 
-    if (
-      gteEndSpecifiedDate !== undefined &&
-      lteEndSpecifiedDate !== undefined
-    ) {
-      where.endSpecifiedDate = {
-        gte: gteEndSpecifiedDate,
-        lte: lteEndSpecifiedDate,
-      };
+    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
     }
 
     if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
@@ -90,12 +129,34 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (codeTag !== undefined) {
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map(tag => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } }
+            ]
+          }))
+        },
+      };
+    } else if (codeTag !== undefined) {
       where.tags = {
         some: {
           code: codeTag,
         },
       };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
     }
 
     const techTasks = await this.prisma.techTask.findMany({
@@ -105,6 +166,16 @@ export class TechTaskRepository extends ITechTaskRepository {
       orderBy: {
         endSpecifiedDate: 'desc',
       },
+      include:{
+        tags: true,
+        pos: true,
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
+      }
     });
 
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
@@ -122,11 +193,19 @@ export class TechTaskRepository extends ITechTaskRepository {
     type?: TypeTechTask,
     statuses?: StatusTechTask[],
     codeTag?: string,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<number> {
     const where: any = {};
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
     } else {
       where.pos = {
         usersPermissions: {
@@ -137,21 +216,24 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (gteStartDate !== undefined && lteStartDate !== undefined) {
-      where.startDate = {
-        gte: gteStartDate,
-        lte: lteStartDate,
-      };
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
     }
 
-    if (
-      gteEndSpecifiedDate !== undefined &&
-      lteEndSpecifiedDate !== undefined
-    ) {
-      where.endSpecifiedDate = {
-        gte: gteEndSpecifiedDate,
-        lte: lteEndSpecifiedDate,
-      };
+    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
     }
 
     if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
@@ -171,12 +253,35 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (codeTag !== undefined) {
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    // Handle tag filtering - prioritize new tags array over legacy codeTag
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map(tag => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } }
+            ]
+          }))
+        },
+      };
+    } else if (codeTag !== undefined) {
       where.tags = {
         some: {
           code: codeTag,
         },
       };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
     }
 
     return this.prisma.techTask.count({
@@ -191,6 +296,9 @@ export class TechTaskRepository extends ITechTaskRepository {
         id: input.id,
       },
       data: techTaskEntity,
+      include: {
+        tags: true,
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -227,5 +335,50 @@ export class TechTaskRepository extends ITechTaskRepository {
         },
       });
     });
+  }
+
+  public async deleteMany(ids: number[]): Promise<void> {
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.techTaskItemValueToTechTask.deleteMany({
+        where: {
+          techTaskId: {
+            in: ids,
+          },
+        },
+      });
+
+      await prisma.techTask.deleteMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      });
+    });
+  }
+
+  public async findManyByIds(ids: number[], posId?: number, organizationId?: number): Promise<TechTask[]> {
+    const where: any = {
+      id: {
+        in: ids,
+      },
+    };
+
+    if (posId !== undefined) {
+      where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
+    }
+
+    const techTasks = await this.prisma.techTask.findMany({
+      where: where,
+      include: {
+        tags: true,
+      },
+    });
+
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 }
