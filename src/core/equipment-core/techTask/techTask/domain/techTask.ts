@@ -26,6 +26,10 @@ export interface TechTaskProps {
     firstName: string;
     lastName: string;
   };
+  executor?: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export class TechTask extends BaseEntity<TechTaskProps> {
@@ -113,6 +117,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.createdBy;
   }
 
+  get executor(): { firstName: string; lastName: string } {
+    return this.props.executor;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -171,5 +179,13 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   set tags(tags: TechTag[]) {
     this.props.tags = tags;
+  }
+
+  set createdBy(createdBy: { firstName: string; lastName: string }) {
+    this.props.createdBy = createdBy;
+  }
+
+  set executor(executor: { firstName: string; lastName: string }) {
+    this.props.executor = executor;
   }
 }
