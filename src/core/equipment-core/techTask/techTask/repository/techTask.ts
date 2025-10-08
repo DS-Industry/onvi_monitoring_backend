@@ -70,21 +70,24 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (gteStartDate !== undefined && lteStartDate !== undefined) {
-      where.startDate = {
-        gte: gteStartDate,
-        lte: lteStartDate,
-      };
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
     }
 
-    if (
-      gteEndSpecifiedDate !== undefined &&
-      lteEndSpecifiedDate !== undefined
-    ) {
-      where.endSpecifiedDate = {
-        gte: gteEndSpecifiedDate,
-        lte: lteEndSpecifiedDate,
-      };
+    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
     }
 
     if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
@@ -184,21 +187,24 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (gteStartDate !== undefined && lteStartDate !== undefined) {
-      where.startDate = {
-        gte: gteStartDate,
-        lte: lteStartDate,
-      };
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
     }
 
-    if (
-      gteEndSpecifiedDate !== undefined &&
-      lteEndSpecifiedDate !== undefined
-    ) {
-      where.endSpecifiedDate = {
-        gte: gteEndSpecifiedDate,
-        lte: lteEndSpecifiedDate,
-      };
+    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
     }
 
     if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
