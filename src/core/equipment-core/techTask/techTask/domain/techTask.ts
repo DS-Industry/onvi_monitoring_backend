@@ -21,6 +21,10 @@ export interface TechTaskProps {
   createdById: number;
   updatedById: number;
   tags: TechTag[];
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export class TechTask extends BaseEntity<TechTaskProps> {
@@ -98,6 +102,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   get tags(): TechTag[] {
     return this.props.tags;
+  }
+
+  get createdBy(): { firstName: string; lastName: string } {
+    return this.props.createdBy;
   }
 
   set name(name: string) {

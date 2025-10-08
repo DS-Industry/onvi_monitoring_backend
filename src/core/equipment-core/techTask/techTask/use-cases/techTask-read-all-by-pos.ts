@@ -79,6 +79,10 @@ export class ReadAllByPosTechTaskUseCase {
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
         tags: techTask.tags.map((tag) => tag.getProps()),
+        createdBy: techTask.createdBy || {
+          firstName: '',
+          lastName: '',
+        },
       });
     }
 

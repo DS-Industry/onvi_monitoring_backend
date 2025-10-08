@@ -16,4 +16,8 @@ export class TechTaskReadAllResponse {
   sendWorkDate?: Date;
   executorId?: number;
   tags: TechTagProps[];
+  createdBy: {
+    firstName: string;
+    lastName: string;
+  };
 }

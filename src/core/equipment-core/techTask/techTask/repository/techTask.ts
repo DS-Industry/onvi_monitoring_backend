@@ -17,6 +17,12 @@ export class TechTaskRepository extends ITechTaskRepository {
       data: techTaskEntity,
       include: {
         tags: true,
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
       },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
@@ -29,6 +35,12 @@ export class TechTaskRepository extends ITechTaskRepository {
       },
       include: {
         tags: true,
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
       },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
@@ -146,6 +158,12 @@ export class TechTaskRepository extends ITechTaskRepository {
       },
       include:{
         tags: true,
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+          },
+        },
       }
     });
 

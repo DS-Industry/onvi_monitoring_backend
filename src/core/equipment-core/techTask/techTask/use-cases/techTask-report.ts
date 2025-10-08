@@ -54,6 +54,7 @@ export class ReportTechTaskUseCase {
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
         tags: techTags.map((tag) => tag.getProps()),
+        createdBy: techTask.createdBy || null
       });
     }
 
