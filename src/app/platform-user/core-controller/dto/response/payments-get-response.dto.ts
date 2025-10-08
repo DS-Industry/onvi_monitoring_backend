@@ -6,7 +6,7 @@ export interface PaymentsGetResponseDto {
   paymentDate: Date;
   dailySalary: number;
   bonusPayout: number;
-  countShifts: number;
+  numberOfShiftsWorked: number;
   prepaymentSum: number;
   paymentSum: number;
   prize: number;

@@ -105,7 +105,7 @@ export class GetReportPaymentUseCase {
         paymentDate: payment.paymentDate,
         dailySalary: worker.dailySalary,
         bonusPayout: worker.bonusPayout,
-        countShifts: payment.countShifts,
+        numberOfShiftsWorked: payment.countShifts,
         prepaymentSum: prepaymentMap.get(payment.hrWorkerId) || 0,
         paymentSum: payment.sum,
         prize: payment.prize,
