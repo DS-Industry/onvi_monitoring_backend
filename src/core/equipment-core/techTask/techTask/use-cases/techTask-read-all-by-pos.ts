@@ -35,11 +35,7 @@ export class ReadAllByPosTechTaskUseCase {
     const statuses =
       filterData.status !== undefined
         ? [filterData.status]
-        : [
-            StatusTechTask.ACTIVE,
-            StatusTechTask.OVERDUE,
-            StatusTechTask.RETURNED,
-          ];
+        : undefined;
 
     const [totalCount, techTasks] = await Promise.all([
       this.findMethodsTechTaskUseCase.getCountByFilter({
