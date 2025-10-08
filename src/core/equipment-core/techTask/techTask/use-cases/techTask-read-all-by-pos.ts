@@ -72,6 +72,7 @@ export class ReadAllByPosTechTaskUseCase {
         id: techTask.id,
         name: techTask.name,
         posId: techTask.posId,
+        posName: techTask.posName,
         type: techTask.type,
         status: techTask.status,
         endSpecifiedDate: techTask?.endSpecifiedDate,
@@ -79,10 +80,7 @@ export class ReadAllByPosTechTaskUseCase {
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
         tags: techTask.tags.map((tag) => tag.getProps()),
-        createdBy: techTask.createdBy || {
-          firstName: '',
-          lastName: '',
-        },
+        createdBy: techTask.createdBy || null,
       });
     }
 

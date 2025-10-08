@@ -6,6 +6,7 @@ export interface TechTaskProps {
   id?: number;
   name: string;
   posId: number;
+  posName?: string;
   type: TypeTechTask;
   status: StatusTechTask;
   period?: number;
@@ -42,6 +43,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   get posId(): number {
     return this.props.posId;
+  }
+
+  get posName(): string {
+    return this.props.posName;
   }
 
   get type(): TypeTechTask {

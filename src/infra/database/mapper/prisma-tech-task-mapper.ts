@@ -1,9 +1,9 @@
-import { TechTask as PrismaTechTask, TechTaskTag, Prisma, User } from '@prisma/client';
+import { TechTask as PrismaTechTask, TechTaskTag, Prisma, User, Pos } from '@prisma/client';
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 
 export class PrismaTechTaskMapper {
-  static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[]; createdBy?: Pick<User, 'name' | 'surname'> }): TechTask {
+  static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[]; createdBy?: Pick<User, 'name' | 'surname'>; pos?: Pick<Pos, 'name'> }): TechTask {
     if (!entity) {
       return null;
     }
@@ -11,6 +11,7 @@ export class PrismaTechTaskMapper {
       id: entity.id,
       name: entity.name,
       posId: entity.posId,
+      posName: entity.pos?.name,
       type: entity.type,
       status: entity.status,
       period: entity.period,

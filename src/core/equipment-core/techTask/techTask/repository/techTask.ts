@@ -17,6 +17,11 @@ export class TechTaskRepository extends ITechTaskRepository {
       data: techTaskEntity,
       include: {
         tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
         createdBy: {
           select: {
             name: true,
@@ -35,6 +40,11 @@ export class TechTaskRepository extends ITechTaskRepository {
       },
       include: {
         tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
         createdBy: {
           select: {
             name: true,
@@ -158,6 +168,7 @@ export class TechTaskRepository extends ITechTaskRepository {
       },
       include:{
         tags: true,
+        pos: true,
         createdBy: {
           select: {
             name: true,

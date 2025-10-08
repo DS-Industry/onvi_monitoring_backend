@@ -47,6 +47,7 @@ export class ReportTechTaskUseCase {
         id: techTask.id,
         name: techTask.name,
         posId: techTask.posId,
+        posName: techTask.posName,
         type: techTask.type,
         status: techTask.status,
         endSpecifiedDate: techTask?.endSpecifiedDate,
