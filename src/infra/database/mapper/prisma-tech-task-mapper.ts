@@ -3,7 +3,7 @@ import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 
 export class PrismaTechTaskMapper {
-  static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[]; executor?: Pick<User, 'name' | 'surname'>; createdBy?: Pick<User, 'name' | 'surname'>; pos?: Pick<Pos, 'name'> }): TechTask {
+  static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[]; executor?: Pick<User, 'name' | 'surname' | 'id'>; createdBy?: Pick<User, 'name' | 'surname' | 'id'>; pos?: Pick<Pos, 'name'> }): TechTask {
     if (!entity) {
       return null;
     }
@@ -34,10 +34,12 @@ export class PrismaTechTaskMapper {
       createdBy: entity.createdBy ? {
         firstName: entity.createdBy.name,
         lastName: entity.createdBy.surname,
+        id: entity.createdBy.id,
       } : undefined,
       executor: entity.executor ? {
         firstName: entity.executor.name,
         lastName: entity.executor.surname,
+        id: entity.executor.id,
       } : undefined,
     });
   }
