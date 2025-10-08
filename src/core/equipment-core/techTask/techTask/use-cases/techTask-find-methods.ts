@@ -26,6 +26,9 @@ export class FindMethodsTechTaskUseCase {
     skip?: number;
     take?: number;
     organizationId?: number;
+    name?: string;
+    tags?: string[];
+    authorId?: number;
   }): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllByFilter(
       data.posId,
@@ -42,6 +45,9 @@ export class FindMethodsTechTaskUseCase {
       data.skip,
       data.take,
       data.organizationId,
+      data.name,
+      data.tags,
+      data.authorId,
     );
   }
 
@@ -58,6 +64,9 @@ export class FindMethodsTechTaskUseCase {
     statuses?: StatusTechTask[];
     codeTag?: string;
     organizationId?: number;
+    name?: string;
+    tags?: string[];
+    authorId?: number;
   }): Promise<number> {
     return await this.techTaskRepository.countAllByFilter(
       data.posId,
@@ -72,6 +81,9 @@ export class FindMethodsTechTaskUseCase {
       data.statuses,
       data.codeTag,
       data.organizationId,
+      data.name,
+      data.tags,
+      data.authorId,
     );
   }
 }

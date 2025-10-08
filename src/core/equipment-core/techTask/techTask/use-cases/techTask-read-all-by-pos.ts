@@ -17,7 +17,16 @@ export class ReadAllByPosTechTaskUseCase {
 
   async execute(
     user: User,
-    filterData: { posId?: number; status?: StatusTechTask; organizationId?: number },
+    filterData: { 
+      posId?: number; 
+      status?: StatusTechTask; 
+      organizationId?: number;
+      name?: string;
+      tags?: string[];
+      startDate?: Date;
+      endDate?: Date;
+      authorId?: number;
+    },
     skip?: number,
     take?: number,
   ): Promise<TechTaskReadAllResponseDto> {
@@ -38,12 +47,22 @@ export class ReadAllByPosTechTaskUseCase {
         statuses,
         posId: filterData.posId,
         organizationId: filterData.organizationId,
+        name: filterData.name,
+        tags: filterData.tags,
+        gteStartDate: filterData.startDate,
+        lteEndSpecifiedDate: filterData.endDate,
+        authorId: filterData.authorId,
       }),
       this.findMethodsTechTaskUseCase.getAllByFilter({
         userId: user.id,
         statuses,
         posId: filterData.posId,
         organizationId: filterData.organizationId,
+        name: filterData.name,
+        tags: filterData.tags,
+        gteStartDate: filterData.startDate,
+        lteEndSpecifiedDate: filterData.endDate,
+        authorId: filterData.authorId,
         skip,
         take,
       }),
@@ -59,7 +78,7 @@ export class ReadAllByPosTechTaskUseCase {
         startWorkDate: techTask.startWorkDate,
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
-        tags: techTask.tags,
+        tags: techTask.tags.map((tag) => tag.getProps()),
       });
     }
 

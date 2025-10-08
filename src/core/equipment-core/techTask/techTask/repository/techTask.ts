@@ -48,6 +48,9 @@ export class TechTaskRepository extends ITechTaskRepository {
     skip?: number,
     take?: number,
     organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<TechTask[]> {
     const where: any = {};
 
@@ -101,12 +104,34 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (codeTag !== undefined) {
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map(tag => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } }
+            ]
+          }))
+        },
+      };
+    } else if (codeTag !== undefined) {
       where.tags = {
         some: {
           code: codeTag,
         },
       };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
     }
 
     const techTasks = await this.prisma.techTask.findMany({
@@ -137,6 +162,9 @@ export class TechTaskRepository extends ITechTaskRepository {
     statuses?: StatusTechTask[],
     codeTag?: string,
     organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<number> {
     const where: any = {};
 
@@ -190,12 +218,35 @@ export class TechTaskRepository extends ITechTaskRepository {
       };
     }
 
-    if (codeTag !== undefined) {
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    // Handle tag filtering - prioritize new tags array over legacy codeTag
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map(tag => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } }
+            ]
+          }))
+        },
+      };
+    } else if (codeTag !== undefined) {
       where.tags = {
         some: {
           code: codeTag,
         },
       };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
     }
 
     return this.prisma.techTask.count({

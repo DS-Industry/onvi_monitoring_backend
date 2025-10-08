@@ -272,7 +272,16 @@ export class TechTaskController {
       }
       return await this.readAllByPosTechTaskUseCase.execute(
         user,
-        { posId: params.posId, status: params.status, organizationId: params.organizationId },
+        { 
+          posId: params.posId, 
+          status: params.status, 
+          organizationId: params.organizationId,
+          name: params.name,
+          tags: params.tags,
+          startDate: params.startDate ? new Date(params.startDate) : undefined,
+          endDate: params.endDate ? new Date(params.endDate) : undefined,
+          authorId: params.authorId,
+        },
         skip,
         take,
       );

@@ -4,6 +4,7 @@ export interface TechTagProps {
   id?: number;
   name: string;
   code?: string;
+  color?: string;
 }
 
 export class TechTag extends BaseEntity<TechTagProps> {

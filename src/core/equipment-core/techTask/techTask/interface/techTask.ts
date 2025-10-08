@@ -19,6 +19,9 @@ export abstract class ITechTaskRepository {
     skip?: number,
     take?: number,
     organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<TechTask[]>;
   abstract countAllByFilter(
     posId?: number,
@@ -33,6 +36,9 @@ export abstract class ITechTaskRepository {
     statuses?: StatusTechTask[],
     codeTag?: string,
     organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
   ): Promise<number>;
   abstract update(input: TechTask): Promise<TechTask>;
   abstract updateConnectionTag(
