@@ -30,7 +30,7 @@ export class CreateTechTaskUseCase {
       }
       PeriodCalculator.validatePeriodConfig(input.periodType, input.customPeriodDays);
       nextCreateDate = PeriodCalculator.calculateNextDate(input.startDate, input.periodType, input.customPeriodDays);
-      endSpecifiedDate = nextCreateDate;
+      endSpecifiedDate = input.endSpecifiedDate || nextCreateDate;
     } else if (input.type === TypeTechTask.ONETIME) {
       endSpecifiedDate = input.endSpecifiedDate;
     }
