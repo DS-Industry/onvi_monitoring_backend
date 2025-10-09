@@ -115,11 +115,14 @@ export class TechTaskRepository extends ITechTaskRepository {
       }
     }
 
-    if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
-      where.nextCreateDate = {
-        gte: gteNextCreateDate,
-        lte: lteNextCreateDate,
-      };
+    if (gteNextCreateDate !== undefined || lteNextCreateDate !== undefined) {
+      where.nextCreateDate = {};
+      if (gteNextCreateDate !== undefined) {
+        where.nextCreateDate.gte = gteNextCreateDate;
+      }
+      if (lteNextCreateDate !== undefined) {
+        where.nextCreateDate.lte = lteNextCreateDate;
+      }
     }
 
     if (type !== undefined) {
@@ -252,11 +255,14 @@ export class TechTaskRepository extends ITechTaskRepository {
       }
     }
 
-    if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
-      where.nextCreateDate = {
-        gte: gteNextCreateDate,
-        lte: lteNextCreateDate,
-      };
+    if (gteNextCreateDate !== undefined || lteNextCreateDate !== undefined) {
+      where.nextCreateDate = {};
+      if (gteNextCreateDate !== undefined) {
+        where.nextCreateDate.gte = gteNextCreateDate;
+      }
+      if (lteNextCreateDate !== undefined) {
+        where.nextCreateDate.lte = lteNextCreateDate;
+      }
     }
 
     if (type !== undefined) {
