@@ -255,7 +255,9 @@ export class ValidateLib {
     return { code: 200, object: checkUserId };
   }
 
-  public async userByIdWithOrganizationExists(id: number): Promise<ValidateResponse<any>> {
+  public async userByIdWithOrganizationExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
     const user = await this.prisma.user.findFirst({
       where: { id },
       include: {
@@ -266,11 +268,11 @@ export class ValidateLib {
         },
       },
     });
-    
+
     if (!user) {
       return { code: 400, errorMessage: 'The user was not found' };
     }
-    
+
     return { code: 200, object: user };
   }
   public async organizationByOwnerExists(
@@ -925,9 +927,14 @@ export class ValidateLib {
     loyaltyProgramIds: number[],
     ability: any,
   ): Promise<ValidateResponse> {
-    const permissionLoyaltyPrograms = await this.loyaltyProgramManageUserUseCase.execute(ability);
-    const loyaltyProgramIdsCheck = permissionLoyaltyPrograms.map((item) => item.id);
-    const unnecessaryLoyaltyPrograms = loyaltyProgramIds.filter((item) => !loyaltyProgramIdsCheck.includes(item));
+    const permissionLoyaltyPrograms =
+      await this.loyaltyProgramManageUserUseCase.execute(ability);
+    const loyaltyProgramIdsCheck = permissionLoyaltyPrograms.map(
+      (item) => item.id,
+    );
+    const unnecessaryLoyaltyPrograms = loyaltyProgramIds.filter(
+      (item) => !loyaltyProgramIdsCheck.includes(item),
+    );
     if (unnecessaryLoyaltyPrograms.length > 0) {
       return { code: 400, errorMessage: 'loyaltyProgramId connection error' };
     }
@@ -1034,8 +1041,11 @@ export class ValidateLib {
     return { code: 200, object: checkClient };
   }
 
-  public async corporateClientByIdExists(id: number): Promise<ValidateResponse<Corporate>> {
-    const checkCorporateClient = await this.findMethodsCorporateUseCase.getById(id);
+  public async corporateClientByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Corporate>> {
+    const checkCorporateClient =
+      await this.findMethodsCorporateUseCase.getById(id);
     if (!checkCorporateClient) {
       return {
         code: 400,
@@ -1079,9 +1089,10 @@ export class ValidateLib {
   public async hubRequestByIdExists(
     id: number,
   ): Promise<ValidateResponse<any>> {
-    const checkHubRequest = await this.prisma.lTYProgramParticipantRequest.findUnique({
-      where: { id },
-    });
+    const checkHubRequest =
+      await this.prisma.lTYProgramParticipantRequest.findUnique({
+        where: { id },
+      });
     if (!checkHubRequest) {
       return {
         code: 400,
@@ -1094,7 +1105,8 @@ export class ValidateLib {
   public async participantRequestByIdExists(
     id: number,
   ): Promise<ValidateResponse<any>> {
-    const checkParticipantRequest = await this.findParticipantRequestByIdUseCase.execute(id);
+    const checkParticipantRequest =
+      await this.findParticipantRequestByIdUseCase.execute(id);
     if (!checkParticipantRequest) {
       return {
         code: 400,
@@ -1114,7 +1126,8 @@ export class ValidateLib {
     if (!checkLoyaltyProgram) {
       return {
         code: 400,
-        errorMessage: 'The loyalty program does not exist for this organization',
+        errorMessage:
+          'The loyalty program does not exist for this organization',
       };
     }
     return { code: 200, object: checkLoyaltyProgram };
@@ -1449,7 +1462,8 @@ export class ValidateLib {
   public async marketingCampaignByIdExists(
     id: number,
   ): Promise<ValidateResponse<any>> {
-    const checkMarketingCampaign = await this.findMethodsMarketingCampaignUseCase.getOneById(id);
+    const checkMarketingCampaign =
+      await this.findMethodsMarketingCampaignUseCase.getOneById(id);
     if (!checkMarketingCampaign) {
       return {
         code: 400,
@@ -1462,17 +1476,19 @@ export class ValidateLib {
   public async ltyProgramParticipantByIdExists(
     id: number,
   ): Promise<ValidateResponse<any>> {
-    const checkParticipant = await this.prisma.lTYProgramParticipant.findUnique({
-      where: { id },
-      include: {
-        ltyProgram: true,
-        organization: {
-          include: {
-            ownedLtyPrograms: true,
+    const checkParticipant = await this.prisma.lTYProgramParticipant.findUnique(
+      {
+        where: { id },
+        include: {
+          ltyProgram: true,
+          organization: {
+            include: {
+              ownedLtyPrograms: true,
+            },
           },
         },
       },
-    });
+    );
     if (!checkParticipant) {
       return {
         code: 400,
@@ -1498,7 +1514,11 @@ export class ValidateLib {
     const userLoyaltyProgramIds: number[] = [];
     if (ability && ability.rules) {
       for (const rule of ability.rules) {
-        if (rule.subject === 'LTYProgram' && rule.conditions && rule.conditions.id) {
+        if (
+          rule.subject === 'LTYProgram' &&
+          rule.conditions &&
+          rule.conditions.id
+        ) {
           if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
             userLoyaltyProgramIds.push(...rule.conditions.id.in);
           }
@@ -1513,7 +1533,10 @@ export class ValidateLib {
       };
     }
 
-    const loyaltyProgram = await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(card.loyaltyCardTierId);
+    const loyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(
+        card.loyaltyCardTierId,
+      );
     if (!loyaltyProgram) {
       return {
         code: 400,
@@ -1522,11 +1545,15 @@ export class ValidateLib {
     }
 
     const loyaltyProgramId = loyaltyProgram.id;
-    
-    if (userLoyaltyProgramIds.length > 0 && !userLoyaltyProgramIds.includes(loyaltyProgramId)) {
+
+    if (
+      userLoyaltyProgramIds.length > 0 &&
+      !userLoyaltyProgramIds.includes(loyaltyProgramId)
+    ) {
       return {
         code: 403,
-        errorMessage: 'Access denied: You do not have access to this card\'s loyalty program',
+        errorMessage:
+          "Access denied: You do not have access to this card's loyalty program",
       };
     }
 
@@ -1580,21 +1607,22 @@ export class ValidateLib {
     userId: number,
     organizationId: number,
   ): Promise<ValidateResponse<any>> {
-    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganization(
-      userId,
-      organizationId,
-    );
+    const user =
+      await this.findMethodsUserUseCase.findUserBelongsToOrganization(
+        userId,
+        organizationId,
+      );
 
     if (!user) {
-      return { 
-        code: 400, 
-        errorMessage: `User with ID ${userId} does not belong to organization with ID ${organizationId}` 
+      return {
+        code: 400,
+        errorMessage: `User with ID ${userId} does not belong to organization with ID ${organizationId}`,
       };
     }
 
-    return { 
-      code: 200, 
-      object: user 
+    return {
+      code: 200,
+      object: user,
     };
   }
 
@@ -1602,21 +1630,22 @@ export class ValidateLib {
     userId: number,
     organizationIds: number[],
   ): Promise<ValidateResponse<any>> {
-    const user = await this.findMethodsUserUseCase.findUserBelongsToOrganizations(
-      userId,
-      organizationIds,
-    );
+    const user =
+      await this.findMethodsUserUseCase.findUserBelongsToOrganizations(
+        userId,
+        organizationIds,
+      );
 
     if (!user) {
-      return { 
-        code: 400, 
-        errorMessage: `User with ID ${userId} does not belong to any of the organizations with IDs: ${organizationIds.join(', ')}` 
+      return {
+        code: 400,
+        errorMessage: `User with ID ${userId} does not belong to any of the organizations with IDs: ${organizationIds.join(', ')}`,
       };
     }
 
-    return { 
-      code: 200, 
-      object: user 
+    return {
+      code: 200,
+      object: user,
     };
   }
 
@@ -1634,16 +1663,16 @@ export class ValidateLib {
         };
       }
 
-      const shiftReportData = await this.calculationPaymentShiftReportUseCase.execute(
-        billingMonth,
-        [worker],
-      );
+      const shiftReportData =
+        await this.calculationPaymentShiftReportUseCase.execute(billingMonth, [
+          worker,
+        ]);
 
       if (shiftReportData.length === 0) {
         return {
           code: 200,
           object: {
-            maxAvailable: paymentSum, 
+            maxAvailable: paymentSum,
             totalEarned: 0,
             totalPrepayments: 0,
             note: 'No shift reports found - validation bypassed',
@@ -1651,7 +1680,9 @@ export class ValidateLib {
         };
       }
 
-      const workerShiftData = shiftReportData.find(data => data.hrWorkerId === hrWorkerId);
+      const workerShiftData = shiftReportData.find(
+        (data) => data.hrWorkerId === hrWorkerId,
+      );
       if (!workerShiftData) {
         return {
           code: 400,
@@ -1659,27 +1690,31 @@ export class ValidateLib {
         };
       }
 
-      const existingPrepayments = await this.findMethodsPaymentUseCase.getAllForCalculate(
-        [hrWorkerId],
-        PaymentType.PREPAYMENT,
-        billingMonth,
-      );
+      const existingPrepayments =
+        await this.findMethodsPaymentUseCase.getAllForCalculate(
+          [hrWorkerId],
+          PaymentType.PREPAYMENT,
+          billingMonth,
+        );
 
-      const totalPrepaymentSum = existingPrepayments.reduce((sum, payment) => sum + payment.sum, 0);
-      const maxAvailableForPayment = workerShiftData.sum - totalPrepaymentSum;
+      const totalPrepaymentSum = existingPrepayments.reduce(
+        (sum, payment) => sum + payment.sum,
+        0,
+      );
+      /*const maxAvailableForPayment = workerShiftData.sum - totalPrepaymentSum;
 
       if (paymentSum > maxAvailableForPayment) {
         return {
           code: 400,
           errorMessage: `Payment sum ${paymentSum} exceeds maximum available amount ${maxAvailableForPayment}. Worker earned ${workerShiftData.sum} from shifts, already received ${totalPrepaymentSum} in prepayments.`,
         };
-      }
+      }*/
 
       return {
         code: 200,
         object: {
-          maxAvailable: maxAvailableForPayment,
-          totalEarned: workerShiftData.sum,
+          maxAvailable: paymentSum,
+          totalEarned: paymentSum,
           totalPrepayments: totalPrepaymentSum,
         },
       };
