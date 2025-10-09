@@ -918,7 +918,8 @@ model TechTask {
   nextCreateDate               DateTime?
   endSpecifiedDate             DateTime?
   markdownDescription          String?
-  period                       Int?
+  periodType                   PeriodType?
+  customPeriodDays             Int?
   createdBy                    User                          @relation("CreatedByUser", fields: [createdById], references: [id])
   executor                     User?                         @relation("Executor", fields: [executorId], references: [id])
   pos                          Pos?                          @relation(fields: [posId], references: [id])
@@ -1625,6 +1626,14 @@ enum StatusTechTask {
   PAUSE
   OVERDUE
   RETURNED
+}
+
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
 }
 
 enum TypeTechTaskItemTemplate {

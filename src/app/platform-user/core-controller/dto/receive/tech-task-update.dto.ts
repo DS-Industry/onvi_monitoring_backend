@@ -5,9 +5,11 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { Transform } from "class-transformer";
 import { StatusTechTask } from "@tech-task/techTask/domain/statusTechTask";
+import { PeriodType } from '@tech-task/techTask/domain/periodType';
 
 export class TechTaskUpdateDto {
   @IsNumber()
@@ -19,9 +21,13 @@ export class TechTaskUpdateDto {
   @IsOptional()
   @IsEnum(StatusTechTask)
   status?: StatusTechTask;
-  @IsNumber()
+  @IsEnum(PeriodType)
   @IsOptional()
-  period?: number;
+  periodType?: PeriodType;
+  @ValidateIf(o => o.periodType === PeriodType.CUSTOM)
+  @IsNumber({}, { message: 'customPeriodDays must be a number when periodType is CUSTOM' })
+  @IsOptional()
+  customPeriodDays?: number;
   @IsString()
   @IsOptional()
   markdownDescription?: string;

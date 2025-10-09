@@ -1,6 +1,7 @@
 import { StatusTechTask, TypeTechTask } from '@prisma/client';
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { BaseEntity } from '@utils/entity';
+import { PeriodType } from './periodType';
 
 export interface TechTaskProps {
   id?: number;
@@ -9,7 +10,8 @@ export interface TechTaskProps {
   posName?: string;
   type: TypeTechTask;
   status: StatusTechTask;
-  period?: number;
+  periodType?: PeriodType;
+  customPeriodDays?: number;
   markdownDescription?: string;
   nextCreateDate?: Date;
   endSpecifiedDate?: Date;
@@ -63,8 +65,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.status;
   }
 
-  get period(): number {
-    return this.props.period;
+  get periodType(): PeriodType {
+    return this.props.periodType;
+  }
+
+  get customPeriodDays(): number {
+    return this.props.customPeriodDays;
   }
 
   get markdownDescription(): string {
@@ -139,8 +145,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     this.props.status = status;
   }
 
-  set period(period: number) {
-    this.props.period = period;
+  set periodType(periodType: PeriodType) {
+    this.props.periodType = periodType;
+  }
+
+  set customPeriodDays(customPeriodDays: number) {
+    this.props.customPeriodDays = customPeriodDays;
   }
 
   set markdownDescription(markdownDescription: string) {
