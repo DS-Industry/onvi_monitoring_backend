@@ -23,7 +23,8 @@ export class ProgramPosUseCase {
     dateStart: Date;
     dateEnd: Date;
     ability: any;
-    placementId: number;
+    placementId?: number;
+    organizationId?: number;
     pos?: Pos;
     skip?: number;
     take?: number;
@@ -73,7 +74,8 @@ export class ProgramPosUseCase {
   private async getPosData(data: {
     pos?: Pos;
     ability: any;
-    placementId: number;
+    placementId?: number;
+    organizationId?: number;
     skip?: number;
     take?: number;
   }): Promise<{
@@ -97,14 +99,16 @@ export class ProgramPosUseCase {
     }
 
     const totalCount =
-      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement(
-        data.ability,
-        data.placementId,
-      );
+      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement({
+        ability: data.ability,
+        placementId: data.placementId,
+        organizationId: data.organizationId,
+      });
 
     const poses = await this.findMethodsPosUseCase.getAllByFilter({
       ability: data.ability,
       placementId: data.placementId,
+      organizationId: data.organizationId,
       skip: data.skip,
       take: data.take,
     });

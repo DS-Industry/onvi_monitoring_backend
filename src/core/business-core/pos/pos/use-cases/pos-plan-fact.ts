@@ -100,10 +100,10 @@ export class PlanFactPosUseCase {
     }
 
     const totalCount =
-      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement(
-        data.ability,
-        data.placementId,
-      );
+      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement({
+        ability: data.ability,
+        placementId: data.placementId,
+      });
 
     const posIds = data.ability.rules
       .filter(

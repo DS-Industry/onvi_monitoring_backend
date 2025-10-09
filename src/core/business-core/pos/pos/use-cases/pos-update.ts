@@ -89,6 +89,7 @@ export class UpdatePosUseCase {
       startTime: updatedPosProps.startTime,
       endTime: updatedPosProps.endTime,
       organizationId: updatedPosProps.organizationId,
+      placementId: updatedPosProps.placementId,
       posMetaData: updatedPosProps.posMetaData,
       timezone: updatedPosProps.timezone,
       image: updatedPosProps.image,

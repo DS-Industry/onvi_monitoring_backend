@@ -90,6 +90,7 @@ export class CreatePosUseCase {
       startTime: pos.startTime,
       endTime: pos.endTime,
       organizationId: pos.organizationId,
+      placementId: pos.placementId,
       posMetaData: pos.posMetaData,
       timezone: pos.timezone,
       image: pos.image,

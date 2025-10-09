@@ -7,6 +7,7 @@ export interface PosResponseDto {
   startTime?: string;
   endTime?: string;
   organizationId: number;
+  placementId: number;
   posMetaData: string;
   timezone: number;
   image: string;

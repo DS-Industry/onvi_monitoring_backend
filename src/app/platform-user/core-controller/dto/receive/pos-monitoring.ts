@@ -19,6 +19,11 @@ export class PosMonitoringDto {
   })
   placementId?: number;
   @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  organizationId?: number;
+  @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;
   @IsOptional()

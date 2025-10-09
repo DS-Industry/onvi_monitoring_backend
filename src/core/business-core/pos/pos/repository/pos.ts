@@ -30,7 +30,7 @@ export class PosRepository extends IPosRepository {
       },
       include: {
         address: true,
-        carWashPos: true
+        carWashPos: true,
       },
     });
     return PrismaPosMapper.toDomain(pos);
@@ -102,15 +102,34 @@ export class PosRepository extends IPosRepository {
   }
 
   public async countAllByAbilityAndPlacement(
-    ability: any,
-    placementId?: number | '*',
+    ability?: any,
+    placementId?: number,
+    organizationId?: number,
+    userId?: number,
   ): Promise<number> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (userId !== undefined) {
+      where.usersPermissions = { some: { id: userId } };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [accessibleBy(ability).Pos, where],
+        }
+      : where;
+
     return this.prisma.pos.count({
       where: {
-        AND: [
-          accessibleBy(ability).Pos,
-          placementId !== '*' ? { placementId } : {},
-        ],
+        AND: finalWhere,
       },
     });
   }

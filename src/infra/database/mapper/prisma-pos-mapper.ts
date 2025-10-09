@@ -69,6 +69,7 @@ export class PrismaPosMapper {
       startTime: (entity as any).startTime,
       endTime: (entity as any).endTime,
       organizationId: entity.organizationId,
+      placementId: entity.placementId,
       posMetaData: entity.posMetaData,
       timezone: entity.timezone,
       image: entity.image,
