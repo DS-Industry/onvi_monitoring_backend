@@ -123,15 +123,27 @@ export class HandlerTechTaskUseCase {
     const result = { processed: 0, created: 0, errors: [] };
 
     try {
-      const recurringTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
-        gteNextCreateDate: todayUTC,
+      const allRecurringTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
         lteNextCreateDate: tomorrowUTC,
         type: TypeTechTask.REGULAR,
         statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE], 
         take: this.config.maxTasksPerBatch, 
       });
 
+      const recurringTasks = allRecurringTasks.filter(task => {
+        if (!task.periodType) {
+          this.logger.warn(`Skipping task ${task.id} (${task.name}) - missing periodType (legacy task)`);
+          return false;
+        }
+        return true;
+      });
+
       this.logger.log(`Found ${recurringTasks.length} recurring tasks to process`);
+      if (this.config.enableDetailedLogging) {
+        recurringTasks.forEach(task => {
+          this.logger.debug(`Task ${task.id} (${task.name}): nextCreateDate=${task.nextCreateDate}, status=${task.status}`);
+        });
+      }
       result.processed = recurringTasks.length;
 
       if (recurringTasks.length === 0) {
@@ -188,14 +200,13 @@ export class HandlerTechTaskUseCase {
       if (this.config.enableDetailedLogging) {
         this.logger.warn(`Skipping task creation for ${task.name} (ID: ${task.id}) - duplicate already exists (ID: ${duplicateTask.id})`);
       }
-      throw new Error(`Duplicate task already exists`);
+      return duplicateTask.id;
     }
 
     const [items, tags] = await Promise.all([
       this.findMethodsItemTemplateToTechTaskUseCase.findAllByTaskId(task.id),
       this.findMethodsTechTagUseCase.getAllByTechTaskId(task.id),
     ]);
-
     const newTask = await this.createTechTaskUseCase.execute(
       {
         name: task.name,
