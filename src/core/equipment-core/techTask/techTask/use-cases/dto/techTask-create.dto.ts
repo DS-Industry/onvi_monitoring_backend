@@ -1,10 +1,12 @@
 import { TypeTechTask } from '@prisma/client';
+import { PeriodType } from '../../domain/periodType';
 
 export class TechTaskCreateDto {
   name: string;
   posId: number;
   type: TypeTechTask;
-  period?: number;
+  periodType?: PeriodType;
+  customPeriodDays?: number;
   markdownDescription?: string;
   endSpecifiedDate?: Date;
   startDate: Date;

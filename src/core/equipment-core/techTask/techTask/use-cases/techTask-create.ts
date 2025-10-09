@@ -7,6 +7,7 @@ import { ITechTaskItemValueToTechTaskRepository } from '@tech-task/itemTemplateT
 import { TechTaskItemValueToTechTask } from '@tech-task/itemTemplateToTechTask/domain/itemValueToTechTask';
 import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { PeriodCalculator } from '../utils/period-calculator';
 
 @Injectable()
 export class CreateTechTaskUseCase {
@@ -24,8 +25,11 @@ export class CreateTechTaskUseCase {
     let endSpecifiedDate: Date | undefined;
 
     if (input.type === TypeTechTask.REGULAR) {
-      nextCreateDate = new Date(input.startDate);
-      nextCreateDate.setDate(nextCreateDate.getDate() + input.period);
+      if (!input.periodType) {
+        throw new Error('periodType is required for REGULAR tasks');
+      }
+      PeriodCalculator.validatePeriodConfig(input.periodType, input.customPeriodDays);
+      nextCreateDate = PeriodCalculator.calculateNextDate(input.startDate, input.periodType, input.customPeriodDays);
       endSpecifiedDate = nextCreateDate;
     } else if (input.type === TypeTechTask.ONETIME) {
       endSpecifiedDate = input.endSpecifiedDate;
@@ -36,7 +40,8 @@ export class CreateTechTaskUseCase {
       posId: input.posId,
       type: input.type,
       status: StatusTechTask.ACTIVE,
-      period: input?.period,
+      periodType: input?.periodType,
+      customPeriodDays: input?.customPeriodDays,
       markdownDescription: input?.markdownDescription,
       nextCreateDate: nextCreateDate,
       endSpecifiedDate: endSpecifiedDate,
@@ -74,7 +79,8 @@ export class CreateTechTaskUseCase {
       posId: techTask.posId,
       type: techTask.type,
       status: techTask.status,
-      period: techTask?.period,
+      periodType: techTask?.periodType,
+      customPeriodDays: techTask?.customPeriodDays,
       markdownDescription: techTask?.markdownDescription,
       nextCreateDate: techTask?.nextCreateDate,
       endSpecifiedDate: techTask?.endSpecifiedDate,
