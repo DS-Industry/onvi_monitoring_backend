@@ -1,6 +1,7 @@
 import { TechTask as PrismaTechTask, TechTaskTag, Prisma, User, Pos } from '@prisma/client';
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
+import { PeriodType } from '@tech-task/techTask/domain/periodType';
 
 export class PrismaTechTaskMapper {
   static toDomain(entity: PrismaTechTask & { tags?: TechTaskTag[]; executor?: Pick<User, 'name' | 'surname' | 'id'>; createdBy?: Pick<User, 'name' | 'surname' | 'id'>; pos?: Pick<Pos, 'name'> }): TechTask {
@@ -14,7 +15,8 @@ export class PrismaTechTaskMapper {
       posName: entity.pos?.name,
       type: entity.type,
       status: entity.status,
-      period: entity.period,
+      periodType: entity.periodType as PeriodType,
+      customPeriodDays: entity.customPeriodDays,
       markdownDescription: entity.markdownDescription,
       nextCreateDate: entity.nextCreateDate,
       endSpecifiedDate: entity.endSpecifiedDate,
@@ -51,7 +53,8 @@ export class PrismaTechTaskMapper {
       posId: techTask?.posId,
       type: techTask.type,
       status: techTask.status,
-      period: techTask?.period,
+      periodType: techTask?.periodType,
+      customPeriodDays: techTask?.customPeriodDays,
       markdownDescription: techTask?.markdownDescription,
       nextCreateDate: techTask?.nextCreateDate,
       endSpecifiedDate: techTask?.endSpecifiedDate,
