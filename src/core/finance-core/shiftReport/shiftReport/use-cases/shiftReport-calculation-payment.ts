@@ -33,11 +33,12 @@ export class CalculationPaymentShiftReportUseCase {
     );
     const workerIds = workers.map((worker) => worker.id);
 
-    const shiftReports = await this.findMethodsShiftReportUseCase.getShiftReportsWithPayout(
-      dateStart,
-      dateEnd,
-      workerIds,
-    );
+    const shiftReports =
+      await this.findMethodsShiftReportUseCase.getShiftReportsWithPayout(
+        dateStart,
+        dateEnd,
+        workerIds,
+      );
 
     const workersMap = new Map<number, Worker>();
     workers.forEach((worker) => {

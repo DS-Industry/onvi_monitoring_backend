@@ -15,8 +15,10 @@ export abstract class IPosRepository {
   ): Promise<PosResponseDto[]>;
   abstract update(input: Pos): Promise<Pos>;
   abstract countAllByAbilityAndPlacement(
-    ability: any,
-    placementId?: number | '*',
+    ability?: any,
+    placementId?: number,
+    organizationId?: number,
+    userId?: number,
   ): Promise<number>;
   abstract updateConnectionWorker(
     posId: number,

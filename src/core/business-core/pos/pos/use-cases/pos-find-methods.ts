@@ -33,13 +33,17 @@ export class FindMethodsPosUseCase {
     );
   }
 
-  async countAllByAbilityAndPlacement(
-    ability: any,
-    placementId?: number | '*',
-  ): Promise<number> {
+  async countAllByAbilityAndPlacement(data: {
+    ability?: any;
+    placementId?: number;
+    organizationId?: number;
+    userId?: number;
+  }): Promise<number> {
     return await this.posRepository.countAllByAbilityAndPlacement(
-      ability,
-      placementId,
+      data.ability,
+      data.placementId,
+      data.organizationId,
+      data.userId,
     );
   }
 }

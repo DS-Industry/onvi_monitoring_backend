@@ -11,6 +11,8 @@ export interface PaymentProps {
   sum: number;
   prize: number;
   fine: number;
+  virtualSum?: number;
+  comment?: string;
   createdAt: Date;
   updatedAt: Date;
   createdById: number;
@@ -80,6 +82,22 @@ export class Payment extends BaseEntity<PaymentProps> {
 
   set fine(fine: number) {
     this.props.fine = fine;
+  }
+
+  get virtualSum(): number {
+    return this.props.virtualSum;
+  }
+
+  set virtualSum(virtualSum: number) {
+    this.props.virtualSum = virtualSum;
+  }
+
+  get comment(): string {
+    return this.props.comment;
+  }
+
+  set comment(comment: string) {
+    this.props.comment = comment;
   }
 
   get createdAt(): Date {
