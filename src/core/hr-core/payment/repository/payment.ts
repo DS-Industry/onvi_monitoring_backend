@@ -121,7 +121,7 @@ export class PaymentRepository extends IPaymentRepository {
       where.billingMonth = billingMonth;
     }
 
-    return await this.prisma.hrPayment.count({
+    return this.prisma.hrPayment.count({
       where,
     });
   }
@@ -135,5 +135,9 @@ export class PaymentRepository extends IPaymentRepository {
       data: paymentPrismaEntity,
     });
     return PrismaHrPaymentMapper.toDomain(payment);
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.hrPayment.delete({ where: { id } });
   }
 }

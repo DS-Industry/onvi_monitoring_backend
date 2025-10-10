@@ -27,4 +27,5 @@ export abstract class IPaymentRepository {
     billingMonth?: Date,
   ): Promise<number>;
   abstract update(input: Payment): Promise<Payment>;
+  abstract delete(id: number): Promise<void>;
 }

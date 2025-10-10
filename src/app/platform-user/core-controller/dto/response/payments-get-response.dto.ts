@@ -1,4 +1,5 @@
 export interface PaymentsGetResponseDto {
+  id: number;
   hrWorkerId: number;
   name: string;
   hrPositionId: number;

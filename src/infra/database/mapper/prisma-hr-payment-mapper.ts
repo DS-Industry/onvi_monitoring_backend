@@ -6,7 +6,7 @@ export class PrismaHrPaymentMapper {
     if (!entity) {
       return null;
     }
-    return new Payment({
+    const paymentProps = new Payment({
       id: entity.id,
       hrWorkerId: entity.hrWorkerId,
       paymentType: entity.paymentType,
@@ -23,6 +23,8 @@ export class PrismaHrPaymentMapper {
       updatedAt: entity.updatedAt,
       updatedById: entity.updatedById,
     });
+
+    return <Payment>paymentProps.getProps();
   }
 
   static toPrisma(payment: Payment): Prisma.HrPaymentUncheckedCreateInput {

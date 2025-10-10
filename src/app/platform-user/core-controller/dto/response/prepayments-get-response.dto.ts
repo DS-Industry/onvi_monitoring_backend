@@ -1,4 +1,5 @@
 export interface PrepaymentsGetResponseDto {
+  id: number;
   hrWorkerId: number;
   employeeName: string; 
   name: string; 

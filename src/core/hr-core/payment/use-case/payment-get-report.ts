@@ -38,6 +38,7 @@ export class GetReportPaymentUseCase {
       const worker = workersMap.get(payment.hrWorkerId);
 
       return {
+        id: payment.id,
         hrWorkerId: worker.id,
         employeeName: worker.name,
         name: worker.name,
@@ -98,6 +99,7 @@ export class GetReportPaymentUseCase {
       const worker = workersMap.get(payment.hrWorkerId);
 
       return {
+        id: payment.id,
         hrWorkerId: worker.id,
         name: worker.name,
         hrPositionId: worker.hrPositionId,

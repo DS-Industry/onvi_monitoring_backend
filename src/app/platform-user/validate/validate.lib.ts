@@ -108,6 +108,7 @@ import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
 import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
+import { Payment } from '@hr/payment/domain/payment';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -1235,6 +1236,19 @@ export class ValidateLib {
       };
     }
     return { code: 200 };
+  }
+
+  public async paymentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Payment>> {
+    const paymentTag = await this.findMethodsPaymentUseCase.getById(id);
+    if (!paymentTag) {
+      return {
+        code: 400,
+        errorMessage: 'The payment does not exist',
+      };
+    }
+    return { code: 200, object: paymentTag };
   }
 
   public async techTegByNameNotExists(name: string): Promise<ValidateResponse> {

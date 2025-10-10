@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -20,6 +21,7 @@ import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guar
 import {
   CheckAbilities,
   CreateHrAbility,
+  DeleteHrAbility,
   ReadHrAbility,
   UpdateHrAbility,
 } from '@common/decorators/abilities.decorator';
@@ -58,6 +60,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ConnectionWorkerPosUseCase } from '@hr/worker/use-case/worker-pos-connection';
 import { WorkerPosConnectionDto } from '@platform-user/core-controller/dto/receive/worker-pos-connection.dto';
 import { WorkerPosesListResponseDto } from '@platform-user/core-controller/dto/response/worker-poses-response.dto';
+import { PrepaymentUpdateDto } from '@platform-user/core-controller/dto/receive/prepayment-update.dto';
+import { UpdatePaymentUseCase } from '@hr/payment/use-case/payment-update';
+import { PaymentUpdateDto } from '@platform-user/core-controller/dto/receive/payment-update.dto';
+import { DeleteManyDto } from '@platform-user/core-controller/dto/receive/delete-many.dto';
+import { Payment } from '@hr/payment/domain/payment';
+import { DeletePaymentUseCase } from '@hr/payment/use-case/payment-delete';
+import { PositionsFilterDto } from '@platform-user/core-controller/dto/receive/positions-filter.dto';
 
 @Controller('hr')
 export class HrController {
@@ -74,6 +83,8 @@ export class HrController {
     private readonly getReportPaymentUseCase: GetReportPaymentUseCase,
     private readonly calculationPaymentShiftReportUseCase: CalculationPaymentShiftReportUseCase,
     private readonly connectionWorkerPosUseCase: ConnectionWorkerPosUseCase,
+    private readonly updatePaymentUseCase: UpdatePaymentUseCase,
+    private readonly deletePaymentUseCase: DeletePaymentUseCase,
   ) {}
   @Post('worker')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -342,9 +353,17 @@ export class HrController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
-  async getPositions(@Request() req: any): Promise<Position[]> {
+  async getPositions(
+    @Request() req: any,
+    @Query() data: PositionsFilterDto,
+  ): Promise<Position[]> {
     try {
       const { user } = req;
+      if (data.organizationId) {
+        return await this.findMethodsPositionUseCase.getAllByOrgId(
+          data.organizationId,
+        );
+      }
       return await this.findMethodsPositionUseCase.getAllByPermissionUser(user);
     } catch (e) {
       if (e instanceof HrException) {
@@ -440,7 +459,7 @@ export class HrController {
           billingMonth: data.billingMonth,
         });
       const filteredWorkers = workers.filter(
-        (worker) => !data.workerIds.includes(worker.id),
+        (worker) => data.workerIds.includes(worker.id),
       );
       return await this.calculationPaymentShiftReportUseCase.execute(
         data.billingMonth,
@@ -516,7 +535,7 @@ export class HrController {
           paymentType: PaymentType.PAYMENT,
         });
       const filteredWorkers = workers.filter(
-        (worker) => !data.workerIds.includes(worker.id),
+        (worker) => data.workerIds.includes(worker.id),
       );
       const calculateDate =
         await this.calculationPaymentShiftReportUseCase.execute(
@@ -524,6 +543,37 @@ export class HrController {
           filteredWorkers,
         );
       return await this.calculatePaymentUseCase.payment(calculateDate);
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('prepayment/many')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteHrAbility())
+  @HttpCode(201)
+  async deleteManyPrepayment(
+    @Request() req: any,
+    @Body() data: DeleteManyDto,
+  ): Promise<{ status: string }> {
+    try {
+      for (const id of data.ids) {
+        const prepayment =
+          await this.hrValidateRules.findOneByIdPaymentValidate(id);
+        await this.deletePaymentUseCase.execute(prepayment);
+      }
+      return { status: 'SUCCESS' };
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -580,6 +630,67 @@ export class HrController {
       }
     }
   }
+  @Patch('prepayment')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteHrAbility())
+  @HttpCode(201)
+  async updatePrepayment(
+    @Request() req: any,
+    @Body() data: PrepaymentUpdateDto,
+  ): Promise<Payment> {
+    try {
+      const { user } = req;
+      const prepayment = await this.hrValidateRules.findOneByIdPaymentValidate(
+        data.prepaymentId,
+      );
+      return await this.updatePaymentUseCase.execute(data, prepayment, user);
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('payment/many')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteHrAbility())
+  @HttpCode(201)
+  async deleteManyPayment(
+    @Request() req: any,
+    @Body() data: DeleteManyDto,
+  ): Promise<{ status: string }> {
+    try {
+      for (const id of data.ids) {
+        const payment =
+          await this.hrValidateRules.findOneByIdPaymentValidate(id);
+        await this.deletePaymentUseCase.execute(payment);
+      }
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Post('payment')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateHrAbility())
@@ -607,6 +718,36 @@ export class HrController {
         user,
       );
       return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Patch('payment')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteHrAbility())
+  @HttpCode(201)
+  async updatePayment(
+    @Request() req: any,
+    @Body() data: PaymentUpdateDto,
+  ): Promise<Payment> {
+    try {
+      const { user } = req;
+      const prepayment = await this.hrValidateRules.findOneByIdPaymentValidate(
+        data.paymentId,
+      );
+      return await this.updatePaymentUseCase.execute(data, prepayment, user);
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
