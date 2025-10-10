@@ -209,6 +209,7 @@ export class HandlerTechTaskUseCase {
     ]);
     const newTask = await this.createTechTaskUseCase.execute(
       {
+        markdownDescription: task.markdownDescription,
         name: task.name,
         posId: task.posId,
         type: task.type,

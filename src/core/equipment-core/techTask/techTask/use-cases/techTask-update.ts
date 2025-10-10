@@ -10,6 +10,7 @@ import { ITechTaskItemValueToTechTaskRepository } from '@tech-task/itemTemplateT
 import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { PeriodCalculator } from '../utils/period-calculator';
+import { PeriodType } from '../domain/periodType';
 
 @Injectable()
 export class UpdateTechTaskUseCase {
@@ -40,6 +41,11 @@ export class UpdateTechTaskUseCase {
     oldTechTask.status = status ? status : oldTechTask.status;
     oldTechTask.periodType = periodType !== undefined ? periodType : oldTechTask.periodType;
     oldTechTask.customPeriodDays = customPeriodDays !== undefined ? customPeriodDays : oldTechTask.customPeriodDays;
+
+    if (periodType !== undefined && periodType !== PeriodType.CUSTOM) {
+      oldTechTask.customPeriodDays = undefined;
+    }
+    
     oldTechTask.markdownDescription = markdownDescription
       ? markdownDescription
       : oldTechTask.markdownDescription;
