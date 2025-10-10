@@ -11,9 +11,7 @@ import {
   Post,
   Query,
   Request,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
 import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
@@ -35,13 +33,12 @@ import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-up
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
-import { TechTaskCompletionShapeDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
+import { TechTaskCompletionShapeDto, itemValueDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
 import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
@@ -489,32 +486,23 @@ export class TechTaskController {
   @Post(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
-  @UseInterceptors(AnyFilesInterceptor())
   @HttpCode(200)
   async completionShapeById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: TechTaskCompletionShapeDto,
-    @UploadedFiles() files?: Array<Express.Multer.File>,
+    @Body() data: TechTaskCompletionShapeDto | itemValueDto[],
   ): Promise<TechTask> {
     try {
       const { ability, user } = req;
 
-      const valueWithFiles = data.valueData.map((item) => {
-        if (files) {
-          const matchingFile = files.find(
-            (file) => file.fieldname === item.itemValueId.toString(),
-          );
-          return {
-            ...item,
-            file: matchingFile || undefined,
-          };
-        } else {
-          return { ...item };
-        }
-      });
 
-      const itemIds = valueWithFiles.map((item) => item.itemValueId);
+      const valueData = Array.isArray(data) ? data : data.valueData;
+      
+      if (!valueData || !Array.isArray(valueData)) {
+        throw new Error('valueData must be an array');
+      }
+
+      const itemIds = valueData.map((item) => item.itemValueId);
       const techTask =
         await this.techTaskValidateRules.completionShapeByIdValidate(
           id,
@@ -523,7 +511,7 @@ export class TechTaskController {
         );
       return await this.completionShapeTechTaskUseCase.execute(
         techTask,
-        valueWithFiles,
+        valueData,
         user,
       );
     } catch (e) {
