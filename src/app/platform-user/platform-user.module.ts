@@ -83,6 +83,8 @@ import { ManagerPaperValidateRules } from '@platform-user/validate/validate-rule
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 import { SaleController } from '@platform-user/core-controller/sale';
 import { FileParserService } from '@platform-user/core-controller/services/excel-parser.service';
+import { S3Controller } from '@platform-user/core-controller/s3';
+import { S3Module } from '@libs/s3/module';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -109,6 +111,7 @@ const controllers = [
   NotificationController,
   ManagerPaperController,
   SaleController,
+  S3Controller,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -190,6 +193,7 @@ const services: Provider[] = [FileParserService];
     ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
+    S3Module,
   ],
   controllers: [...controllers],
   providers: [
