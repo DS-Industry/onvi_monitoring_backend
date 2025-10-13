@@ -458,8 +458,8 @@ export class HrController {
           organizationId: data.organizationId,
           billingMonth: data.billingMonth,
         });
-      const filteredWorkers = workers.filter(
-        (worker) => data.workerIds.includes(worker.id),
+      const filteredWorkers = workers.filter((worker) =>
+        data.workerIds.includes(worker.id),
       );
       return await this.calculationPaymentShiftReportUseCase.execute(
         data.billingMonth,
@@ -534,8 +534,8 @@ export class HrController {
           billingMonth: data.billingMonth,
           paymentType: PaymentType.PAYMENT,
         });
-      const filteredWorkers = workers.filter(
-        (worker) => data.workerIds.includes(worker.id),
+      const filteredWorkers = workers.filter((worker) =>
+        data.workerIds.includes(worker.id),
       );
       const calculateDate =
         await this.calculationPaymentShiftReportUseCase.execute(

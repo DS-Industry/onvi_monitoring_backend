@@ -19,5 +19,5 @@ export class PaymentUpdateDto {
   comment?: string;
   @IsOptional()
   @Transform(({ value }) => new Date(value))
-  paymentDate?: Date;
+  payoutTimestamp?: Date;
 }

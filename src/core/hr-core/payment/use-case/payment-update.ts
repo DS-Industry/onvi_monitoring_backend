@@ -13,9 +13,9 @@ export class UpdatePaymentUseCase {
     oldPayment: Payment,
     user: User,
   ): Promise<Payment> {
-    const { paymentDate, sum, prize, fine, virtualSum, comment } = input;
+    const { payoutTimestamp, sum, prize, fine, virtualSum, comment } = input;
 
-    oldPayment.paymentDate = paymentDate ?? oldPayment.paymentDate;
+    oldPayment.paymentDate = payoutTimestamp ?? oldPayment.paymentDate;
     oldPayment.sum = sum ?? oldPayment.sum;
     oldPayment.prize = prize ?? oldPayment.prize;
     oldPayment.fine = fine ?? oldPayment.fine;

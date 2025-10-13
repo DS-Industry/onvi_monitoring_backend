@@ -1,5 +1,5 @@
 export class UpdateDto {
-  paymentDate?: Date;
+  payoutTimestamp?: Date;
   sum?: number;
   prize?: number;
   fine?: number;

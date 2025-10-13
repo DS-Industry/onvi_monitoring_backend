@@ -10,5 +10,5 @@ export class PrepaymentUpdateDto {
   sum?: number;
   @IsOptional()
   @Transform(({ value }) => new Date(value))
-  paymentDate?: Date;
+  payoutTimestamp?: Date;
 }
