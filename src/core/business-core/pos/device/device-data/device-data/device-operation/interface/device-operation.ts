@@ -61,4 +61,5 @@ export abstract class IDeviceOperationRepository {
   abstract findDataLastOperByDeviceIds(
     deviceIds: number[],
   ): Promise<DeviceOperationLastDataResponseDto[]>;
+  abstract delete(id: number): Promise<void>;
 }

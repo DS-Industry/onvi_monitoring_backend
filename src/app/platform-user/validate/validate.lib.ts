@@ -109,6 +109,8 @@ import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { Payment } from '@hr/payment/domain/payment';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
+import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -184,6 +186,7 @@ export class ValidateLib {
     private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
     private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
     private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly bcrypt: IBcryptAdapter,
     private readonly prisma: PrismaService,
   ) {}
@@ -466,6 +469,17 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'The device does not exist' };
     }
     return { code: 200, object: device };
+  }
+
+  public async deviceOperationByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<DeviceOperation>> {
+    const deviceOperation =
+      await this.findMethodsDeviceOperationUseCase.getOneById(id);
+    if (!deviceOperation) {
+      return { code: 400, errorMessage: 'The device operation does not exist' };
+    }
+    return { code: 200, object: deviceOperation };
   }
 
   public async nomenclatureExel(

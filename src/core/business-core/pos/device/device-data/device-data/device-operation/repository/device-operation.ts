@@ -457,4 +457,8 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       sum: Number(item.sum),
     }));
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.carWashDeviceOperationsEvent.delete({ where: { id } });
+  }
 }
