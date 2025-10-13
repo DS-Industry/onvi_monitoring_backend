@@ -48,7 +48,7 @@ export class GetReportPaymentUseCase {
         bonusPayout: worker.bonusPayout,
         numberOfShiftsWorked: payment.countShifts,
         sum: payment.sum,
-        payoutTimestamp: payment.createdAt,
+        payoutTimestamp: payment.paymentDate,
         createdAt: payment.createdAt,
         createdById: payment.createdById,
       };
