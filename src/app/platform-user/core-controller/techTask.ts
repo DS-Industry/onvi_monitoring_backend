@@ -267,6 +267,7 @@ export class TechTaskController {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
+
       return await this.readAllByPosTechTaskUseCase.execute(
         user,
         { 
@@ -278,6 +279,7 @@ export class TechTaskController {
           startDate: params.startDate ? new Date(params.startDate) : undefined,
           endDate: params.endDate ? new Date(params.endDate) : undefined,
           authorId: params.authorId,
+          executorId: params.executorId,
         },
         skip,
         take,
