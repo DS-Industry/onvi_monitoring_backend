@@ -26,6 +26,9 @@ import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReportTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-report";
+import { TechTaskCommentProvider } from '@tech-task/comment/provider/techTaskComment';
+import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
+import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
@@ -33,6 +36,7 @@ const repositories: Provider[] = [
   TechTaskItemValueToTechTaskProvider,
   ProgramTechRateProvider,
   TechTagRepositoryProvider,
+  TechTaskCommentProvider,
 ];
 
 const techTaskUseCases: Provider[] = [
@@ -67,6 +71,11 @@ const tagUseCases: Provider[] = [
   FindMethodsTechTagUseCase,
 ];
 
+const commentUseCases: Provider[] = [
+  CreateTechTaskCommentUseCase,
+  ReadTechTaskCommentsUseCase,
+];
+
 @Module({
   imports: [PrismaModule, FileModule, ScheduleModule.forRoot()],
   providers: [
@@ -76,6 +85,7 @@ const tagUseCases: Provider[] = [
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
     ...tagUseCases,
+    ...commentUseCases,
   ],
   exports: [
     ...repositories,
@@ -84,6 +94,7 @@ const tagUseCases: Provider[] = [
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
     ...tagUseCases,
+    ...commentUseCases,
   ],
 })
 export class TechTaskModule {}
