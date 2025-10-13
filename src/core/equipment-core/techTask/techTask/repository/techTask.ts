@@ -53,6 +53,13 @@ export class TechTaskRepository extends ITechTaskRepository {
             id: true
           },
         },
+        executor: {
+          select: {
+            name: true,
+            surname: true,
+            id: true
+          },
+        },
       },
     });
     return PrismaTechTaskMapper.toDomain(techTask);

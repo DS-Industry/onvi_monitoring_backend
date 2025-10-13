@@ -121,11 +121,11 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.tags;
   }
 
-  get createdBy(): { firstName: string; lastName: string } {
+  get createdBy(): { firstName: string; lastName: string; id: number } {
     return this.props.createdBy;
   }
 
-  get executor(): { firstName: string; lastName: string } {
+  get executor(): { firstName: string; lastName: string; id: number } {
     return this.props.executor;
   }
 

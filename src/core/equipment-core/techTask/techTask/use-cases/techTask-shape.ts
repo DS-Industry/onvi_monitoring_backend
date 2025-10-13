@@ -60,6 +60,8 @@ export class ShapeTechTaskUseCase {
       executorId: techTask?.executorId,
       items: items,
       tags: techTags.map((tag) => tag.getProps()),
+      createdBy: techTask?.createdBy || undefined,
+      executor: techTask?.executor || undefined,
     };
   }
 }
