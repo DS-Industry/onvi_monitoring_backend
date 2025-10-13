@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class TechTaskCommentCreateDto {
   @IsNotEmpty()
@@ -8,8 +8,4 @@ export class TechTaskCommentCreateDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  techTaskId: number;
 }
