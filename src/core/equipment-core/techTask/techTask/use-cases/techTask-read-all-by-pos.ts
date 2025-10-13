@@ -26,6 +26,7 @@ export class ReadAllByPosTechTaskUseCase {
       startDate?: Date;
       endDate?: Date;
       authorId?: number;
+      executorId?: number;
     },
     skip?: number,
     take?: number,
@@ -48,6 +49,7 @@ export class ReadAllByPosTechTaskUseCase {
         gteStartDate: filterData.startDate,
         lteEndSpecifiedDate: filterData.endDate,
         authorId: filterData.authorId,
+        executorId: filterData.executorId,
       }),
       this.findMethodsTechTaskUseCase.getAllByFilter({
         userId: user.id,
@@ -59,6 +61,7 @@ export class ReadAllByPosTechTaskUseCase {
         gteStartDate: filterData.startDate,
         lteEndSpecifiedDate: filterData.endDate,
         authorId: filterData.authorId,
+        executorId: filterData.executorId,
         skip,
         take,
       }),
@@ -77,6 +80,7 @@ export class ReadAllByPosTechTaskUseCase {
         executorId: techTask.executorId,
         tags: techTask.tags.map((tag) => tag.getProps()),
         createdBy: techTask.createdBy || null,
+        executor: techTask.executor || null,
       });
     }
 

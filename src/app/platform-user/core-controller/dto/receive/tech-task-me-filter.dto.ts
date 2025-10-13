@@ -43,4 +43,7 @@ export class TechTaskMeFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   authorId?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  executorId?: number;
 }

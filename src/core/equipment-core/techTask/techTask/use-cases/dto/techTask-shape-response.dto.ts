@@ -17,6 +17,16 @@ export class TechTaskShapeResponseDto {
   executorId?: number;
   items: TechTaskItemDto[];
   tags: TechTagProps[];
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  };
+  executor?: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  };
 }
 
 export class TechTaskItemDto {
