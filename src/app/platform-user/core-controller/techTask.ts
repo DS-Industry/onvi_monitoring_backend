@@ -58,6 +58,10 @@ import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-me-filter.dto';
 import { TechTaskDeleteManyDto } from '@platform-user/core-controller/dto/receive/tech-task-delete-many.dto';
+import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
+import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';
+import { TechTaskCommentCreateDto } from '@platform-user/core-controller/dto/receive/tech-task-comment-create.dto';
+import { TechTaskCommentResponseDto } from '@platform-user/core-controller/dto/response/tech-task-comment-response.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -78,6 +82,8 @@ export class TechTaskController {
     private readonly createTechTagUseCase: CreateTechTagUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly posValidateRules: PosValidateRules,
+    private readonly createTechTaskCommentUseCase: CreateTechTaskCommentUseCase,
+    private readonly readTechTaskCommentsUseCase: ReadTechTaskCommentsUseCase,
   ) {}
   @Post()
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -516,6 +522,69 @@ export class TechTaskController {
         valueData,
         user,
       );
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get(':id/comments')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(200)
+  async getComments(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) techTaskId: number,
+  ): Promise<TechTaskCommentResponseDto[]> {
+    try {
+      const { ability } = req;
+      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
+      
+      return await this.readTechTaskCommentsUseCase.execute(techTaskId);
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post(':id/comments')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(201)
+  async createComment(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) techTaskId: number,
+    @Body() data: TechTaskCommentCreateDto,
+  ): Promise<TechTaskCommentResponseDto> {
+    try {
+      const { ability, user } = req;
+      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
+      
+      const commentData = { ...data, techTaskId };
+      
+      return await this.createTechTaskCommentUseCase.execute(commentData, user.id);
     } catch (e) {
       if (e instanceof TechTaskException) {
         throw new CustomHttpException({
