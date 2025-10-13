@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ITechTaskCommentRepository } from '../interface/techTaskComment';
 import { TechTaskComment } from '../domain/techTaskComment';
-import { TechTaskCommentCreateDto } from './dto/techTaskComment-create.dto';
+import { TechTaskCommentCreateDto } from '../../../../../app/platform-user/core-controller/dto/receive/tech-task-comment-create.dto';
 import { TechTaskCommentResponseDto } from './dto/techTaskComment-response.dto';
 
 @Injectable()
@@ -12,12 +12,13 @@ export class CreateTechTaskCommentUseCase {
 
   async execute(
     data: TechTaskCommentCreateDto,
+    techTaskId: number,
     authorId: number,
   ): Promise<TechTaskCommentResponseDto> {
     const comment = new TechTaskComment({
       content: data.content,
       imageUrl: data.imageUrl,
-      techTaskId: data.techTaskId,
+      techTaskId: techTaskId,
       authorId: authorId,
       createdAt: new Date(),
       updatedAt: new Date(),

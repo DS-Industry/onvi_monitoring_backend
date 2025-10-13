@@ -582,9 +582,7 @@ export class TechTaskController {
       const { ability, user } = req;
       await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
       
-      const commentData = { ...data, techTaskId };
-      
-      return await this.createTechTaskCommentUseCase.execute(commentData, user.id);
+      return await this.createTechTaskCommentUseCase.execute(data, techTaskId, user.id);
     } catch (e) {
       if (e instanceof TechTaskException) {
         throw new CustomHttpException({
