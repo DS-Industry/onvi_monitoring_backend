@@ -53,6 +53,7 @@ import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-
 import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 
 @Controller('pos')
 export class PosController {
@@ -67,6 +68,7 @@ export class PosController {
     private readonly programPosUseCase: ProgramPosUseCase,
     private readonly connectionPosDeviceProgramTypeUseCase: ConnectionPosDeviceProgramTypeUseCase,
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly posValidateRules: PosValidateRules,
   ) {}
   //Create pos
@@ -454,30 +456,18 @@ export class PosController {
     @Request() req: any,
     @Param('posId', ParseIntPipe) posId: number,
     @Query() data: DataFilterDto,
-  ): Promise<FalseOperationResponseDto> {
+  ): Promise<FalseOperationResponseDto[]> {
     try {
       const { ability } = req;
       const pos = await this.posValidateRules.getOneByIdValidate(
         posId,
         ability,
       );
-      return {
-        falseData: [
-          {
-            deviceId: 428,
-            deviceName: 'Пост 1',
-            operDay: new Date(),
-            falseOperCount: 10,
-          },
-          {
-            deviceId: 429,
-            deviceName: 'Пост 2',
-            operDay: new Date(),
-            falseOperCount: 15,
-          },
-        ],
-        totalCount: 2,
-      };
+      return await this.findMethodsDeviceOperationUseCase.getFalseOperationsByPosId(
+        pos.id,
+        data.dateStart,
+        data.dateEnd,
+      );
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({

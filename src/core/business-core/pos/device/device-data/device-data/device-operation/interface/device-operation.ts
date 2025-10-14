@@ -3,12 +3,9 @@ import { CurrencyType } from '@prisma/client';
 import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
-import {
-  DeviceOperationFullSumDyPosResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto";
-import {
-  DeviceOperationDailyStatisticResponseDto
-} from "@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto";
+import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
+import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
+import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;
@@ -61,5 +58,10 @@ export abstract class IDeviceOperationRepository {
   abstract findDataLastOperByDeviceIds(
     deviceIds: number[],
   ): Promise<DeviceOperationLastDataResponseDto[]>;
+  abstract findFalseOperationsByPosId(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<FalseOperationResponseDto[]>;
   abstract delete(id: number): Promise<void>;
 }

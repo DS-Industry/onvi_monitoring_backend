@@ -13,6 +13,7 @@ import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/de
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
+import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
 
 @Injectable()
 export class DeviceOperationRepository extends IDeviceOperationRepository {
@@ -456,6 +457,94 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       date: item.date,
       sum: Number(item.sum),
     }));
+  }
+
+  public async findFalseOperationsByPosId(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<FalseOperationResponseDto[]> {
+    const toPostgresTimestamp = (date: Date): string =>
+      date.toISOString().slice(0, 19).replace('T', ' ');
+
+    const dateStartStr = toPostgresTimestamp(dateStart);
+    const dateEndStr = toPostgresTimestamp(dateEnd);
+
+    return this.prisma.$queryRaw<
+      {
+        deviceId: number;
+        deviceName: string;
+        operDay: string;
+        falseOperCount: number;
+      }[]
+    >(Prisma.sql`
+    WITH ops AS (
+        SELECT
+            e.id,
+            e."carWashDeviceId" AS device_id,
+            d.name AS device_name,
+            c."currencyView",
+            e."operDate",
+            DATE_TRUNC('day', e."operDate") AS oper_day
+        FROM "CarWashDeviceOperationsEvent" e
+        JOIN "CarWashDevice" d ON e."carWashDeviceId" = d.id
+        JOIN "CarWashPos" p ON d."carWashPosId" = p.id
+        JOIN "Currency" c ON e."currencyId" = c.id
+        WHERE p."posId" = ${posId}
+          AND e."operDate" BETWEEN ${dateStartStr}::timestamp AND ${dateEndStr}::timestamp
+          AND c."currencyView" IN ('COIN', 'PAPER', 'POS')
+    ),
+    grouped_sec AS (
+        SELECT
+            device_id,
+            "currencyView",
+            TO_CHAR("operDate", 'YYYY-MM-DD HH24:MI:SS') AS oper_second,
+            COUNT(*) AS ops_count
+        FROM ops
+        WHERE "currencyView" IN ('COIN', 'PAPER')
+        GROUP BY device_id, "currencyView", TO_CHAR("operDate", 'YYYY-MM-DD HH24:MI:SS')
+    ),
+    violating_seconds AS (
+        SELECT device_id, "currencyView", oper_second
+        FROM grouped_sec
+        WHERE ("currencyView" = 'COIN' AND ops_count > 2)
+           OR ("currencyView" = 'PAPER' AND ops_count > 1)
+    ),
+    false_sec_ops AS (
+        SELECT o.id, o.device_id, o.device_name, o.oper_day
+        FROM ops o
+        JOIN violating_seconds v
+          ON v.device_id = o.device_id
+         AND v."currencyView" = o."currencyView"
+         AND v.oper_second = TO_CHAR(o."operDate", 'YYYY-MM-DD HH24:MI:SS')
+    ),
+    false_pos_ops AS (
+        SELECT a.id, a.device_id, a.device_name, a.oper_day
+        FROM ops a
+        WHERE a."currencyView" = 'POS'
+          AND EXISTS (
+            SELECT 1
+            FROM ops b
+            WHERE b."currencyView" = 'POS'
+              AND b.device_id = a.device_id
+              AND b.id <> a.id
+              AND ABS(EXTRACT(EPOCH FROM (b."operDate" - a."operDate"))) <= 5
+          )
+    ),
+    all_false_ops AS (
+        SELECT * FROM false_sec_ops
+        UNION ALL
+        SELECT * FROM false_pos_ops
+    )
+    SELECT
+        device_id AS "deviceId",
+        device_name AS "deviceName",
+        TO_CHAR(oper_day, 'YYYY-MM-DD') AS "operDay",
+        CAST(COUNT(*) AS INTEGER) AS "falseOperCount"
+    FROM all_false_ops
+    GROUP BY device_id, device_name, oper_day
+    ORDER BY device_id, oper_day;
+  `);
   }
 
   public async delete(id: number): Promise<void> {

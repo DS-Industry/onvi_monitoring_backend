@@ -7,6 +7,9 @@ import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/devi
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import {
+  FalseOperationResponseDto
+} from "@platform-user/core-controller/dto/response/false-operation-response.dto";
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -127,5 +130,17 @@ export class FindMethodsDeviceOperationUseCase {
 
   async getOneById(id: number): Promise<DeviceOperation> {
     return await this.deviceOperationRepository.findOneById(id);
+  }
+
+  async getFalseOperationsByPosId(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<FalseOperationResponseDto[]> {
+    return await this.deviceOperationRepository.findFalseOperationsByPosId(
+      posId,
+      dateStart,
+      dateEnd,
+    );
   }
 }
