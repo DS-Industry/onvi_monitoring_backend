@@ -4,6 +4,7 @@ import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/ca
 import { ICurrencyCarWashPosRepository } from '@pos/device/device-data/currency/currency-car-wash-pos/interface/currency-car-wash-pos';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import { MAX_SUM_OPER } from '@constant/constants';
 
 @Injectable()
 export class DeviceOperationHandlerUseCase {
@@ -43,6 +44,11 @@ export class DeviceOperationHandlerUseCase {
       const sum = input.data * coef;
       const counter = input.counter * coef;
       const loadDate = new Date(Date.now());
+
+      if (sum > MAX_SUM_OPER) {
+        throw new Error('Ложное зачисление: ' + sum);
+      }
+
       const deviceOperationData = new DeviceOperation({
         carWashDeviceId: deviceId,
         operDate: input.begDate,

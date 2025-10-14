@@ -11,8 +11,9 @@ import {
   Query,
   Request,
   UploadedFile,
-  UseGuards, UseInterceptors
-} from "@nestjs/common";
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { PosMonitoringResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
 import { MonitoringPosUseCase } from '@pos/pos/use-cases/pos-monitoring';
@@ -50,7 +51,8 @@ import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { CacheSWR } from '@common/decorators/cache-swr.decorator';
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
 
 @Controller('pos')
 export class PosController {
@@ -121,7 +123,6 @@ export class PosController {
       const { user, ability } = req;
       const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
 
-      
       if (file) {
         return await this.updatePosUseCase.execute(id, data, user, pos, file);
       }
@@ -428,6 +429,62 @@ export class PosController {
         skip: skip,
         take: take,
       });
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('false-operations/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  @CacheSWR(120)
+  async falseOperationsPos(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() data: DataFilterDto,
+  ): Promise<FalseOperationResponseDto> {
+    try {
+      const { ability } = req;
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+      return {
+        oper: [
+          {
+            id: 0,
+            posName: pos.name,
+            deviceName: 'Пост 1',
+            sumOper: 10,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '1',
+            localId: 0,
+            currencyType: 'Монета',
+          },
+          {
+            id: 0,
+            posName: pos.name,
+            deviceName: 'Пост 2',
+            sumOper: 100,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '2',
+            localId: 0,
+            currencyType: 'Монета',
+          },
+        ],
+        totalCount: 2,
+      };
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({
