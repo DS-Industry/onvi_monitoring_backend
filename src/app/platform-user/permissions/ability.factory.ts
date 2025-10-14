@@ -18,7 +18,7 @@ export class AbilityFactory {
     private readonly redisService: RedisService,
   ) {}
 
-  async createForPlatformManager(user: User): Promise<any> {
+  async createForPlatformManager(user: User, isSuperAdmin?: boolean): Promise<any> {
     const cacheKey = `ability:${user.id}:`;
     const cachedRulesJson = await this.redisService.get(cacheKey);
 
@@ -57,9 +57,13 @@ export class AbilityFactory {
           organizationId: { in: organizationCondition.map((org) => org.id) },
         };
       } else if (objectMap[permission.objectId].name == 'LTYProgram') {
-        condition = {
-          id: { in: loyaltyProgramCondition },
-        };
+        if (isSuperAdmin) {
+          condition = {};
+        } else {
+          condition = {
+            id: { in: loyaltyProgramCondition },
+          };
+        }
       } else if (objectMap[permission.objectId].name == 'Organization') {
         condition = {
           id: { in: organizationCondition.map((org) => org.id) },

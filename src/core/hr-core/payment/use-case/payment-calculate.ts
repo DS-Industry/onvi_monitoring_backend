@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
-import { CalculateDto } from '@hr/payment/use-case/dto/calculate.dto';
 import { PaymentType } from '@prisma/client';
 import { PaymentCalculateResponseDro } from '@platform-user/core-controller/dto/response/payment-calculate-response.dro';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
@@ -9,7 +7,6 @@ import { ShiftReportCalculationPaymentResponseDto } from '@finance/shiftReport/s
 @Injectable()
 export class CalculatePaymentUseCase {
   constructor(
-    private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
   ) {}
 
@@ -44,19 +41,14 @@ export class CalculatePaymentUseCase {
     return data.map((calculateDate) => ({
       hrWorkerId: calculateDate.hrWorkerId,
       name: calculateDate.name,
+      employeeName: calculateDate.name,
       hrPositionId: calculateDate.hrPositionId,
       billingMonth: calculateDate.billingMonth,
       dailySalary: calculateDate.dailySalary,
-      maxBonusSalary: calculateDate.maxBonusSalary,
+      bonusPayout: calculateDate.maxBonusSalary,
+      numberOfShiftsWorked: calculateDate.countShifts,
       prepaymentSum: prepaymentSumMap.get(calculateDate.hrWorkerId) || 0,
-      prepaymentCountShifts:
-        prepaymentCountShiftsMap.get(calculateDate.hrWorkerId) || 0,
-      sum:
-        calculateDate.sum -
-        (prepaymentSumMap.get(calculateDate.hrWorkerId) || 0),
-      countShifts:
-        calculateDate.countShifts -
-        (prepaymentCountShiftsMap.get(calculateDate.hrWorkerId) || 0),
+      sum: calculateDate.sum,
     }));
   }
 }

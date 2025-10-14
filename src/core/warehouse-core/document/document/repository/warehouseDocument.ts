@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IWarehouseDocumentRepository } from '@warehouse/document/document/interface/warehouseDocument';
+import { IWarehouseDocumentRepository, PaginatedWarehouseDocuments } from '@warehouse/document/document/interface/warehouseDocument';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { PrismaWarehouseDocumentMapper } from '@db/mapper/prisma-warehouse-document-mapper';
@@ -84,6 +84,8 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
     ability: PureAbility,
     warehouseId?: number,
     placementId?: number,
+    page?: number,
+    size?: number,
   ) {
     const whereClause: Prisma.WarehouseDocumentWhereInput = {
       ...(warehouseId
@@ -108,6 +110,9 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
       },
     };
 
+    const skip = page && size ? (page - 1) * size : undefined;
+    const take = size || undefined;
+
     const warehouseDocuments = await this.prisma.warehouseDocument.findMany({
       where: whereClause,
       include: {
@@ -117,10 +122,73 @@ export class WarehouseDocumentRepository extends IWarehouseDocumentRepository {
       orderBy: {
         carryingAt: 'asc',
       },
+      skip,
+      take,
     });
     return warehouseDocuments.map((item) =>
       PrismaWarehouseDocumentMapper.toDomain(item),
     );
+  }
+
+  public async getAllByWarehouseIdsAndDatePaginated(
+    dateStart: Date,
+    dateEnd: Date,
+    ability: PureAbility,
+    warehouseId?: number,
+    placementId?: number,
+    page?: number,
+    size?: number,
+  ): Promise<PaginatedWarehouseDocuments> {
+    const whereClause: Prisma.WarehouseDocumentWhereInput = {
+      ...(warehouseId
+        ? { warehouseId }
+        : {
+            AND: [
+              {
+                warehouse: accessibleBy(ability).Warehouse,
+              },
+              {
+                warehouse: {
+                  pos: {
+                    placementId: placementId || undefined,
+                  },
+                },
+              },
+            ],
+          }),
+      carryingAt: {
+        gte: dateStart,
+        lte: dateEnd,
+      },
+    };
+
+    const skip = page && size ? (page - 1) * size : undefined;
+    const take = size || undefined;
+
+    const [warehouseDocuments, total] = await Promise.all([
+      this.prisma.warehouseDocument.findMany({
+        where: whereClause,
+        include: {
+          responsible: true,
+          warehouse: true,
+        },
+        orderBy: {
+          carryingAt: 'asc',
+        },
+        skip,
+        take,
+      }),
+      this.prisma.warehouseDocument.count({
+        where: whereClause,
+      }),
+    ]);
+
+    return {
+      data: warehouseDocuments.map((item) =>
+        PrismaWarehouseDocumentMapper.toDomain(item),
+      ),
+      total,
+    };
   }
 
   public async findAllByWarehouseIdAndType(

@@ -33,8 +33,8 @@ export class CalculationPaymentShiftReportUseCase {
     );
     const workerIds = workers.map((worker) => worker.id);
 
-    const calculationData =
-      await this.findMethodsShiftReportUseCase.getDataForCalculation(
+    const shiftReports =
+      await this.findMethodsShiftReportUseCase.getShiftReportsWithPayout(
         dateStart,
         dateEnd,
         workerIds,
@@ -45,34 +45,22 @@ export class CalculationPaymentShiftReportUseCase {
       workersMap.set(worker.id, worker);
     });
 
-    const groupedData = calculationData.reduce((acc, data) => {
-      if (!acc.has(data.workerId)) {
-        acc.set(data.workerId, []);
+    const groupedData = shiftReports.reduce((acc, shiftReport) => {
+      if (!acc.has(shiftReport.workerId)) {
+        acc.set(shiftReport.workerId, []);
       }
-      acc.get(data.workerId)!.push(data);
+      acc.get(shiftReport.workerId)!.push(shiftReport);
       return acc;
-    }, new Map<number, typeof calculationData>());
+    }, new Map<number, typeof shiftReports>());
 
     const result: ShiftReportCalculationPaymentResponseDto[] = [];
-    groupedData.forEach((shiftReports, workerId) => {
+    groupedData.forEach((workerShiftReports, workerId) => {
       const worker = workersMap.get(workerId);
       if (!worker) return;
 
-      let totalSum = 0;
-
-      shiftReports.forEach((shiftReport) => {
-        const totalPercentage = shiftReport.gradingData.reduce((sum, grade) => {
-          const parameterPercent =
-            (grade.parameterWeightPercent * grade.estimationWeightPercent) /
-            100;
-          return sum + parameterPercent;
-        }, 0);
-
-        const shiftSum =
-          worker.dailySalary +
-          (worker.percentageSalary * totalPercentage) / 100;
-        totalSum += shiftSum;
-      });
+      const totalSum = workerShiftReports.reduce((sum, shiftReport) => {
+        return sum + (shiftReport.dailyShiftPayout || 0);
+      }, 0);
 
       result.push({
         hrWorkerId: workerId,
@@ -80,8 +68,8 @@ export class CalculationPaymentShiftReportUseCase {
         hrPositionId: worker.hrPositionId,
         billingMonth: billingMonth,
         dailySalary: worker.dailySalary,
-        maxBonusSalary: worker.percentageSalary,
-        countShifts: shiftReports.length,
+        maxBonusSalary: worker.bonusPayout,
+        countShifts: workerShiftReports.length,
         sum: totalSum,
       });
     });

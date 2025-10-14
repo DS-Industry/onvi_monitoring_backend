@@ -1,5 +1,6 @@
 import { StatusTechTask, TypeTechTask } from "@prisma/client";
 import { TechTagProps } from "@tech-task/tag/domain/techTag";
+import { PeriodType } from '@tech-task/techTask/domain/periodType';
 
 export class TechTaskResponseDto {
   id: number;
@@ -7,7 +8,8 @@ export class TechTaskResponseDto {
   posId: number;
   type: TypeTechTask;
   status: StatusTechTask;
-  period?: number;
+  periodType?: PeriodType;
+  customPeriodDays?: number;
   markdownDescription?: string;
   nextCreateDate?: Date;
   endSpecifiedDate?: Date;

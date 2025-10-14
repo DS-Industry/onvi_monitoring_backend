@@ -184,15 +184,26 @@ export class UserRepository extends IUserRepository {
   }
 
   public async getAllLoyaltyProgramPermissions(id: number): Promise<number[]> {
-    const user = await this.prisma.user.findFirst({
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
-        id,
+        programParticipants: {
+          some: {
+            organization: {
+              users: {
+                some: {
+                  id: id,
+                },
+              },
+            },
+            status: 'ACTIVE',
+          },
+        },
       },
-      include: {
-        ltyPrograms: true,
+      select: {
+        id: true,
       },
     });
-    return user?.ltyPrograms?.map((item) => item.id) || [];
+    return loyaltyPrograms.map((item) => item.id);
   }
 
   public async getAllOrganizationPermissions(
@@ -229,5 +240,67 @@ export class UserRepository extends IUserRepository {
         },
       },
     });
+  }
+
+  public async updateConnectionLoyaltyProgram(
+    userId: number,
+    addLoyaltyProgramIds: number[],
+    deleteLoyaltyProgramIds: number[],
+  ): Promise<any> {
+    // TODO: Remove this method ?
+  }
+
+  public async findUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: organizationId,
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: organizationId,
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
+  }
+
+  public async findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
   }
 }

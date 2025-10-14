@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -10,16 +11,17 @@ import {
   Post,
   Query,
   Request,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
+import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
+import { DeleteManyTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete-many';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
   CreateTechTaskAbility,
+  DeleteTechTaskAbility,
   ReadIncidentAbility,
   ReadTechTaskAbility,
   UpdateTechTaskAbility,
@@ -31,13 +33,12 @@ import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-up
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
-import { TechTaskCompletionShapeDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
+import { TechTaskCompletionShapeDto, itemValueDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
 import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { PosException, TechTaskException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
@@ -56,11 +57,18 @@ import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplat
 import { TechTag } from '@tech-task/tag/domain/techTag';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-me-filter.dto';
+import { TechTaskDeleteManyDto } from '@platform-user/core-controller/dto/receive/tech-task-delete-many.dto';
+import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
+import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';
+import { TechTaskCommentCreateDto } from '@platform-user/core-controller/dto/receive/tech-task-comment-create.dto';
+import { TechTaskCommentResponseDto } from '@platform-user/core-controller/dto/response/tech-task-comment-response.dto';
 
 @Controller('tech-task')
 export class TechTaskController {
   constructor(
     private readonly createTechTaskUseCase: CreateTechTaskUseCase,
+    private readonly deleteTechTaskUseCase: DeleteTechTaskUseCase,
+    private readonly deleteManyTechTaskUseCase: DeleteManyTechTaskUseCase,
     private readonly techTaskValidateRules: TechTaskValidateRules,
     private readonly updateTechTaskUseCase: UpdateTechTaskUseCase,
     private readonly manageAllByPosAndStatusesTechTaskUseCase: ManageAllByPosAndStatusesTechTaskUseCase,
@@ -74,6 +82,8 @@ export class TechTaskController {
     private readonly createTechTagUseCase: CreateTechTagUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
     private readonly posValidateRules: PosValidateRules,
+    private readonly createTechTaskCommentUseCase: CreateTechTaskCommentUseCase,
+    private readonly readTechTaskCommentsUseCase: ReadTechTaskCommentsUseCase,
   ) {}
   @Post()
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -139,6 +149,75 @@ export class TechTaskController {
       }
     }
   }
+
+  @Delete(':id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteTechTaskAbility())
+  @HttpCode(200)
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const techTask = await this.techTaskValidateRules.deleteValidate(
+        id,
+        ability,
+      );
+      await this.deleteTechTaskUseCase.execute(techTask);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('bulk/delete')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteTechTaskAbility())
+  @HttpCode(200)
+  async deleteMany(
+    @Body() data: TechTaskDeleteManyDto,
+    @Request() req: any,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const techTasks = await this.techTaskValidateRules.deleteManyValidate(
+        data.ids,
+        ability,
+        data.posId,
+        data.organizationId,
+      );
+      await this.deleteManyTechTaskUseCase.execute(techTasks);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   @Get('manage')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateTechTaskAbility())
@@ -194,9 +273,20 @@ export class TechTaskController {
         skip = params.size * (params.page - 1);
         take = params.size;
       }
+
       return await this.readAllByPosTechTaskUseCase.execute(
         user,
-        { posId: params.posId, status: params.status },
+        { 
+          posId: params.posId, 
+          status: params.status, 
+          organizationId: params.organizationId,
+          name: params.name,
+          tags: params.tags,
+          startDate: params.startDate ? new Date(params.startDate) : undefined,
+          endDate: params.endDate ? new Date(params.endDate) : undefined,
+          authorId: params.authorId,
+          executorId: params.executorId,
+        },
         skip,
         take,
       );
@@ -235,8 +325,16 @@ export class TechTaskController {
 
       return await this.reportTechTaskUseCase.execute(
         user,
-        params.posId,
-        params.type,
+        {
+          posId: params.posId,
+          organizationId: params.organizationId,
+          type: params.type,
+          name: params.name,
+          executorId: params.executorId,
+          tags: params.tags,
+          startDate: params.startDate ? new Date(params.startDate) : undefined,
+          endDate: params.endDate ? new Date(params.endDate) : undefined,
+        },
         skip,
         take,
       );
@@ -396,32 +494,23 @@ export class TechTaskController {
   @Post(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadTechTaskAbility())
-  @UseInterceptors(AnyFilesInterceptor())
   @HttpCode(200)
   async completionShapeById(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: TechTaskCompletionShapeDto,
-    @UploadedFiles() files?: Array<Express.Multer.File>,
+    @Body() data: TechTaskCompletionShapeDto | itemValueDto[],
   ): Promise<TechTask> {
     try {
       const { ability, user } = req;
 
-      const valueWithFiles = data.valueData.map((item) => {
-        if (files) {
-          const matchingFile = files.find(
-            (file) => file.fieldname === item.itemValueId.toString(),
-          );
-          return {
-            ...item,
-            file: matchingFile || undefined,
-          };
-        } else {
-          return { ...item };
-        }
-      });
 
-      const itemIds = valueWithFiles.map((item) => item.itemValueId);
+      const valueData = Array.isArray(data) ? data : data.valueData;
+      
+      if (!valueData || !Array.isArray(valueData)) {
+        throw new Error('valueData must be an array');
+      }
+
+      const itemIds = valueData.map((item) => item.itemValueId);
       const techTask =
         await this.techTaskValidateRules.completionShapeByIdValidate(
           id,
@@ -430,9 +519,70 @@ export class TechTaskController {
         );
       return await this.completionShapeTechTaskUseCase.execute(
         techTask,
-        valueWithFiles,
+        valueData,
         user,
       );
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get(':id/comments')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(200)
+  async getComments(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) techTaskId: number,
+  ): Promise<TechTaskCommentResponseDto[]> {
+    try {
+      const { ability } = req;
+      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
+      
+      return await this.readTechTaskCommentsUseCase.execute(techTaskId);
+    } catch (e) {
+      if (e instanceof TechTaskException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post(':id/comments')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadTechTaskAbility())
+  @HttpCode(201)
+  async createComment(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) techTaskId: number,
+    @Body() data: TechTaskCommentCreateDto,
+  ): Promise<TechTaskCommentResponseDto> {
+    try {
+      const { ability, user } = req;
+      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
+      
+      return await this.createTechTaskCommentUseCase.execute(data, techTaskId, user.id);
     } catch (e) {
       if (e instanceof TechTaskException) {
         throw new CustomHttpException({

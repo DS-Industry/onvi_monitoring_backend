@@ -23,9 +23,9 @@ export class CreateWorkerUseCase {
       phone: data?.phone,
       email: data?.email,
       description: data?.description,
-      monthlySalary: data.monthlySalary,
-      dailySalary: data.dailySalary,
-      percentageSalary: data.percentageSalary,
+      monthlySalary: data.monthlySalary || 0,
+      dailySalary: data.dailySalary || 0,
+      bonusPayout: data.bonusPayout || 0,
       status: StatusHrWorker.WORKS,
       gender: data?.gender,
       citizenship: data?.citizenship,
@@ -35,6 +35,7 @@ export class CreateWorkerUseCase {
       passportDateIssue: data?.passportDateIssue,
       inn: data?.inn,
       snils: data?.snils,
+      registrationAddress: data?.registrationAddress,
     });
 
     if (file) {

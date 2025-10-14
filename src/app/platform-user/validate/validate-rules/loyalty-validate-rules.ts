@@ -65,46 +65,18 @@ export class LoyaltyValidateRules {
   public async updateLoyaltyProgramValidate(
     loyaltyProgramId: number,
     ability: any,
-    organizationIds?: number[],
   ): Promise<LTYProgram> {
     const response = [];
-    let organizationsCheckResults = [];
 
     const checkLoyaltyProgram =
       await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
     response.push(checkLoyaltyProgram);
 
-    if (organizationIds) {
-      const organizationsCheckPromises = organizationIds.map((orgId) =>
-        this.validateLib.organizationByIdExists(orgId),
-      );
-      organizationsCheckResults = await Promise.all(organizationsCheckPromises);
-
-      response.push(...organizationsCheckResults);
-
-      const loyaltyProgramCheckPromises = organizationIds.map((orgId) =>
-        this.validateLib.loyaltyProgramByOrganizationIdAndProgramIdNotExists(
-          orgId,
-          loyaltyProgramId,
-        ),
-      );
-      const loyaltyProgramCheckResults = await Promise.all(
-        loyaltyProgramCheckPromises,
-      );
-
-      response.push(...loyaltyProgramCheckResults);
-    }
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    organizationsCheckResults.forEach((orgCheck) => {
-      ForbiddenError.from(ability).throwUnlessCan(
-        PermissionAction.read,
-        orgCheck.object,
-      );
-    });
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.update,
       checkLoyaltyProgram.object,
@@ -115,23 +87,68 @@ export class LoyaltyValidateRules {
   public async getLoyaltyProgramValidate(
     loyaltyProgramId: number,
     ability: any,
+    userId: number,
   ) {
     const response = [];
     const loyaltyProgramCheck =
       await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
     response.push(loyaltyProgramCheck);
+    
+    const userBelongsToOrganizations = await this.validateLib.userBelongsToOrganizations(userId, loyaltyProgramCheck.object.programParticipantOrganizationIds);
+    
+    if (userBelongsToOrganizations.code !== 200) {
+      response.push(userBelongsToOrganizations);
+    }
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
+
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       loyaltyProgramCheck.object,
     );
 
     return loyaltyProgramCheck.object;
+  }
+
+  public async createLoyaltyProgramParticipantRequestValidate(
+    loyaltyProgramId: number,
+    organizationId: number,
+    userId: number
+  ): Promise<{ loyaltyProgram: any; organization: any }> {
+    const response = [];
+    
+    const loyaltyProgramCheck =
+      await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    response.push(loyaltyProgramCheck);
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
+    if (userBelongsToOrganization.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        userBelongsToOrganization.errorMessage,
+      );
+    }
+
+    return {
+      loyaltyProgram: loyaltyProgramCheck.object,
+      organization: organizationCheck.object,
+    };
   }
 
   public async createLoyaltyTierValidate(
@@ -253,10 +270,10 @@ export class LoyaltyValidateRules {
   public async createClientValidate(
     phone: string,
     ability: any,
+    cardId: number,
     tagIds?: number[],
     devNumber?: string,
     number?: string,
-    cardId?: number,
   ) {
     const response = [];
     response.push(await this.validateLib.clientByPhoneNotExists(phone));
@@ -270,13 +287,12 @@ export class LoyaltyValidateRules {
       response.push(await this.validateLib.cardByNumberNotExists(number));
     }
 
-    if (cardId) {
-      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId,
-        ability,
-      );
-      response.push(cardAccessCheck);
-    }
+    const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+      cardId,
+      ability,
+    );
+    response.push(cardAccessCheck);
+
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -292,13 +308,13 @@ export class LoyaltyValidateRules {
     
     if (checkClient.object) {
       const card = await this.findMethodsCardUseCase.getByClientId(checkClient.object.id);
-      if (card) {
-        const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-          card.id,
-          ability,
-        );
-        response.push(cardAccessCheck);
-      }
+      
+      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        card.id,
+        ability,
+      );
+      response.push(cardAccessCheck);
+      
     }
     
     this.validateLib.handlerArrayResponse(
@@ -313,23 +329,23 @@ export class LoyaltyValidateRules {
   public async updateClientValidate(
     id: number,
     ability: any,
+    cardId: number,
     tagIds?: number[],
-    cardId?: number,
   ): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
+
     response.push(checkClient);
     if (tagIds) {
       response.push(await this.validateLib.tagIdsExists(tagIds));
     }
     
-    if (cardId) {
-      const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId,
-        ability,
-      );
-      response.push(cardAccessCheck);
-    }
+    const cardAccessCheck = await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+      cardId || checkClient.object.cardId,
+      ability,
+    );
+    response.push(cardAccessCheck);
+    
     
     this.validateLib.handlerArrayResponse(
       response,
@@ -397,9 +413,9 @@ export class LoyaltyValidateRules {
     
     if (ability && ability.rules) {
       for (const rule of ability.rules) {
-        if (rule.subject === 'Organization' && rule.conditions && rule.conditions.id) {
-          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
-            userOrganizationIds.push(...rule.conditions.id.in);
+        if (rule.subject === 'Pos' && rule.conditions && rule.conditions.organizationId) {
+          if (rule.conditions.organizationId.in && Array.isArray(rule.conditions.organizationId.in)) {
+            userOrganizationIds.push(...rule.conditions.organizationId.in);
           }
         }
       }
@@ -414,11 +430,9 @@ export class LoyaltyValidateRules {
   ) {
     const response = [];
     
-    // First check if organization exists
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
     const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
     response.push(loyaltyProgramCheck);
 
@@ -428,13 +442,6 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
     
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    // Then check loyalty program ability
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
       loyaltyProgramCheck.object,
@@ -445,74 +452,67 @@ export class LoyaltyValidateRules {
 
   public async getCorporateClientByIdValidate(
     id: number,
-    ability: any,
+    userId: number
   ) {
     const response = [];
     
     const corporateClient = await this.validateLib.corporateClientByIdExists(id);
     response.push(corporateClient);
 
+    const organizationId = corporateClient.object.organizationId;
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+
+    response.push(organizationCheck);
+
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(accesTooOrganization);
+    
     this.validateLib.handlerArrayResponse(
-      response,
+      response, 
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    const organizationId = corporateClient.object.organizationId;
-    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
+  
     return corporateClient.object;
   }
 
   public async createCorporateClientValidate(
     organizationId: number,
-    ability: any,
+    userId: number,
+  ) {
+    const response = [];
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(accesTooOrganization);
+    
+    this.validateLib.handlerArrayResponse(
+      response, 
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
+    return accesTooOrganization
+  }
+
+  public async updateCorporateClientValidate(
+    id: number,
+    userId: number,
   ) {
     const response = [];
     
+    const corporateClient = await this.validateLib.corporateClientByIdExists(id);
+    response.push(corporateClient);
+
+    const organizationId = corporateClient.object.organizationId;
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
+    const accesTooOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+
+    response.push(accesTooOrganization);
     response.push(organizationCheck);
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    return organizationCheck.object;
-  }
-
-  public async updateCorporateClientValidate(
-    id: number,
-    ability: any,
-  ) {
-    const response = [];
-    
-    const corporateClient = await this.validateLib.corporateClientByIdExists(id);
-    response.push(corporateClient);
-
-    this.validateLib.handlerArrayResponse(
-      response,
-      ExceptionType.LOYALTY,
-      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
-    
-    const organizationId = corporateClient.object.organizationId;
-    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
-    
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
     );
     
     return corporateClient.object;
@@ -590,71 +590,58 @@ export class LoyaltyValidateRules {
 
   public async createMarketingCampaignValidate(
     data: {
-      ltyProgramId?: number;
+      ltyProgramParticipantId: number;
       posIds: number[];
     },
     ability: any,
   ) {
     const response = [];
     
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    const userOrganizationIds = this.extractOrganizationIds(ability);
     
-    if (userLoyaltyProgramIds.length === 0) {
+
+    if (userOrganizationIds.length === 0) {
       response.push({
         code: 403,
-        errorMessage: 'Access denied: No loyalty program permissions',
+        errorMessage: 'Access denied: No organization permissions',
       });
     }
     
-    if (data.ltyProgramId) {
-      const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(data.ltyProgramId);
-      response.push(loyaltyProgramCheck);
-      
-      if (loyaltyProgramCheck.code === 200 && loyaltyProgramCheck.object) {
-        const loyaltyProgram = loyaltyProgramCheck.object;
-        
-        if (!userLoyaltyProgramIds.includes(loyaltyProgram.id)) {
-          response.push({
-            code: 403,
-            errorMessage: 'Access denied: You do not have access to this loyalty program',
-          });
-        }
-      }
+    const participantCheck = await this.validateLib.ltyProgramParticipantByIdExists(data.ltyProgramParticipantId);
+    response.push(participantCheck);
+
+    if (participantCheck.code !== 200 || !participantCheck.object) {
+      response.push({
+        code: 400,
+        errorMessage: 'The loyalty program participant does not exist',
+      });
+    }
+
+    if (!userOrganizationIds.includes(participantCheck.object.organizationId)) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: You do not have access to this organization',
+      });
     }
     
-    const posCheckPromises = data.posIds.map(posId => 
-      this.validateLib.posByIdExists(posId)
-    );
-    const posCheckResults = await Promise.all(posCheckPromises);
-    response.push(...posCheckResults);
-    
-    for (const posCheck of posCheckResults) {
-      if (posCheck.code === 200 && posCheck.object) {
-        const pos = posCheck.object;
-        const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
-        response.push(organizationCheck);
-        
-        if (organizationCheck.code === 200 && organizationCheck.object) {
-          const organization = organizationCheck.object;
+      
+      const posCheckPromises = data.posIds.map(posId => 
+        this.validateLib.posByIdExists(posId)
+      );
+      const posCheckResults = await Promise.all(posCheckPromises);
+      response.push(...posCheckResults);
+      
+      for (const posCheck of posCheckResults) {
+        if (posCheck.code === 200 && posCheck.object) {
+          const pos = posCheck.object;
           
-          if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
+          if (!userOrganizationIds.includes(pos.organizationId)) {
             response.push({
-              code: 404,
-              errorMessage: `Organization ${organization.name} has no loyalty programs`,
+              code: 403,
+              errorMessage: `Access denied: You do not have access to POS organization ${pos.organizationId}`,
             });
-          } else {
-            const hasAccess = organization.ltyPrograms.some(program => 
-              userLoyaltyProgramIds.includes(program.id)
-            );
-            
-            if (!hasAccess) {
-              response.push({
-                code: 403,
-                errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
-              });
-            }
           }
-        }
+        
       }
     }
 
@@ -672,30 +659,14 @@ export class LoyaltyValidateRules {
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
-    const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
-    response.push(loyaltyProgramCheck);
-
-
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-    
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    // Then check loyalty program ability
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      loyaltyProgramCheck.object,
-    );
-    
-    return loyaltyProgramCheck.object;
+
+
+    return organizationCheck.object;
   }
 
   public async getMarketingCampaignByIdValidate(campaignId: number, ability: any) {
@@ -729,35 +700,30 @@ export class LoyaltyValidateRules {
 
   public async getClientsValidate(
     organizationId: number,
-    ability: any,
+    userId: number,
   ) {
     const response = [];
     
-    // First check if organization exists
     const organizationCheck = await this.validateLib.organizationByIdExists(organizationId);
     response.push(organizationCheck);
 
-    // Then check if loyalty program exists for this organization as owner
     const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(organizationId);
     response.push(loyaltyProgramCheck);
 
+    const userBelongsToOrganization = await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    if (userBelongsToOrganization.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        userBelongsToOrganization.errorMessage,
+      );
+    }
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-    );
-    
-    // Check organization ability first
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      organizationCheck.object,
-    );
-    
-    // Then check loyalty program ability
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      loyaltyProgramCheck.object,
     );
     
     return loyaltyProgramCheck.object;
@@ -766,53 +732,50 @@ export class LoyaltyValidateRules {
   public async updateMarketingCampaignValidate(
     campaignId: number,
     data: {
-      ltyProgramId?: number;
+      ltyProgramParticipantId: number;
       posIds?: number[];
     },
     ability: any,
   ) {
     const response = [];
     
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    const userOrganizationIds = this.extractOrganizationIds(ability);
     
-    if (userLoyaltyProgramIds.length === 0) {
+    if (userOrganizationIds.length === 0) {
       response.push({
         code: 403,
-        errorMessage: 'Access denied: No loyalty program permissions',
+        errorMessage: 'Access denied: No organization permissions',
       });
     }
     
     const campaignCheck = await this.validateLib.marketingCampaignByIdExists(campaignId);
     response.push(campaignCheck);
     
-    if (campaignCheck.code === 200 && campaignCheck.object) {
-      const campaign = campaignCheck.object;
-      
-      if (campaign.ltyProgramId && !userLoyaltyProgramIds.includes(campaign.ltyProgramId)) {
-        response.push({
-          code: 403,
-          errorMessage: 'Access denied: You do not have access to this campaign\'s loyalty program',
-        });
-      }
+    if (campaignCheck.code !== 200 || !campaignCheck.object) {
+      response.push({
+        code: 400,
+        errorMessage: 'The marketing campaign does not exist',
+      });
     }
     
-    if (data.ltyProgramId) {
-      const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(data.ltyProgramId);
-      response.push(loyaltyProgramCheck);
-      
-      if (loyaltyProgramCheck.code === 200 && loyaltyProgramCheck.object) {
-        const loyaltyProgram = loyaltyProgramCheck.object;
-        
-        if (!userLoyaltyProgramIds.includes(loyaltyProgram.id)) {
+      const participantCheck = await this.validateLib.ltyProgramParticipantByIdExists(data.ltyProgramParticipantId);
+      response.push(participantCheck);
+
+      if (participantCheck.code !== 200 || !participantCheck.object) {
+        response.push({
+          code: 400,
+          errorMessage: 'The loyalty program participant does not exist',
+        });
+      } else {
+        if (!userOrganizationIds.includes(participantCheck.object.organizationId)) {
           response.push({
             code: 403,
-            errorMessage: 'Access denied: You do not have access to this loyalty program',
+            errorMessage: 'Access denied: You do not have access to this organization',
           });
         }
       }
-    }
     
-    if (data.posIds) {
+    if (data.posIds && data.posIds.length > 0) {
       const posCheckPromises = data.posIds.map(posId => 
         this.validateLib.posByIdExists(posId)
       );
@@ -822,29 +785,12 @@ export class LoyaltyValidateRules {
       for (const posCheck of posCheckResults) {
         if (posCheck.code === 200 && posCheck.object) {
           const pos = posCheck.object;
-          const organizationCheck = await this.validateLib.organizationByIdExists(pos.organizationId);
-          response.push(organizationCheck);
           
-          if (organizationCheck.code === 200 && organizationCheck.object) {
-            const organization = organizationCheck.object;
-            
-            if (!organization.ltyPrograms || organization.ltyPrograms.length === 0) {
-              response.push({
-                code: 404,
-                errorMessage: `Organization ${organization.name} has no loyalty programs`,
-              });
-            } else {
-              const hasAccess = organization.ltyPrograms.some(program => 
-                userLoyaltyProgramIds.includes(program.id)
-              );
-              
-              if (!hasAccess) {
-                response.push({
-                  code: 403,
-                  errorMessage: `Access denied: You do not have access to organization ${organization.name}'s loyalty programs`,
-                });
-              }
-            }
+          if (!userOrganizationIds.includes(pos.organizationId)) {
+            response.push({
+              code: 403,
+              errorMessage: `Access denied: You do not have access to POS organization ${pos.organizationId}`,
+            });
           }
         }
       }
@@ -855,5 +801,165 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
+  }
+
+  public async requestHubValidate(
+    loyaltyProgramId: number,
+    ability: any,
+  ): Promise<LTYProgram> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.update,
+      loyaltyProgram.object,
+    );
+
+    if (loyaltyProgram.object.isHub) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        'Loyalty program is already a hub',
+      );
+    }
+
+    return loyaltyProgram.object;
+  }
+
+  public async approveHubValidate(
+    loyaltyProgramId: number,
+    ability: any,
+  ): Promise<LTYProgram> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return loyaltyProgram.object;
+  }
+
+  public async rejectHubValidate(
+    loyaltyProgramId: number,
+    ability: any,
+  ): Promise<any> {
+    const loyaltyProgram = await this.validateLib.loyaltyProgramByIdExists(loyaltyProgramId);
+    
+    if (loyaltyProgram.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        loyaltyProgram.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return loyaltyProgram.object;
+  }
+
+  public async getParticipantProgramsValidate(organizationId: number, ability: any) {
+    const organizationCheck = await this.validateLib.organizationByIdExists(organizationId); 
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.read,
+      organizationCheck.object,
+    );
+
+    return organizationCheck.object;
+  }
+
+  public async getHubRequestsValidate(
+    ability: any,
+  ): Promise<void> {
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+  }
+
+  public async approveParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async rejectParticipantRequestValidate(
+    requestId: number,
+    ability: any,
+  ): Promise<any> {
+    const participantRequest = await this.validateLib.participantRequestByIdExists(requestId);
+    
+    if (participantRequest.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        participantRequest.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+
+    return participantRequest.object;
+  }
+
+  public async getParticipantRequestsValidate(
+    ability: any,
+  ): Promise<void> {
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.manage,
+      'LTYProgram'
+    );
+  }
+
+  public async validateUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ) {
+    const response = await this.validateLib.userBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    if (response.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
   }
 }

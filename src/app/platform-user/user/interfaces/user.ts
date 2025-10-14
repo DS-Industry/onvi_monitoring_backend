@@ -39,4 +39,17 @@ export abstract class IUserRepository {
     addPosIds: number[],
     deletePosIds: number[],
   ): Promise<any>;
+  abstract updateConnectionLoyaltyProgram(
+    userId: number,
+    addLoyaltyProgramIds: number[],
+    deleteLoyaltyProgramIds: number[],
+  ): Promise<any>;
+  abstract findUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<User | null>;
+  abstract findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null>;
 }

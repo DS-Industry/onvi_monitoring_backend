@@ -5,6 +5,8 @@ import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { DeviceDataRawConsumer } from '../../infra/handler/device-data-raw/consumer/device-data-raw.consumer';
 import { PosModule } from '@pos/pos.module';
+import { RedisModule } from "@infra/cache/redis.module";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
 @Module({
   imports: [
@@ -35,7 +37,11 @@ import { PosModule } from '@pos/pos.module';
         retryStrategy: (times) => Math.min(times * 100, 3000),
       },
     }),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
     PosModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [DeviceDataRawConsumer],

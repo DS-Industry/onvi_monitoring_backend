@@ -1,13 +1,17 @@
 import { StatusTechTask, TypeTechTask } from '@prisma/client';
+import { TechTag } from '@tech-task/tag/domain/techTag';
 import { BaseEntity } from '@utils/entity';
+import { PeriodType } from './periodType';
 
 export interface TechTaskProps {
   id?: number;
   name: string;
   posId: number;
+  posName?: string;
   type: TypeTechTask;
   status: StatusTechTask;
-  period?: number;
+  periodType?: PeriodType;
+  customPeriodDays?: number;
   markdownDescription?: string;
   nextCreateDate?: Date;
   endSpecifiedDate?: Date;
@@ -19,6 +23,17 @@ export interface TechTaskProps {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  tags: TechTag[];
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+    id: number
+  };
+  executor?: {
+    firstName: string;
+    lastName: string;
+    id: number
+  };
 }
 
 export class TechTask extends BaseEntity<TechTaskProps> {
@@ -38,6 +53,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.posId;
   }
 
+  get posName(): string {
+    return this.props.posName;
+  }
+
   get type(): TypeTechTask {
     return this.props.type;
   }
@@ -46,8 +65,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.status;
   }
 
-  get period(): number {
-    return this.props.period;
+  get periodType(): PeriodType {
+    return this.props.periodType;
+  }
+
+  get customPeriodDays(): number {
+    return this.props.customPeriodDays;
   }
 
   get markdownDescription(): string {
@@ -94,6 +117,18 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.updatedById;
   }
 
+  get tags(): TechTag[] {
+    return this.props.tags;
+  }
+
+  get createdBy(): { firstName: string; lastName: string; id: number } {
+    return this.props.createdBy;
+  }
+
+  get executor(): { firstName: string; lastName: string; id: number } {
+    return this.props.executor;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -110,8 +145,12 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     this.props.status = status;
   }
 
-  set period(period: number) {
-    this.props.period = period;
+  set periodType(periodType: PeriodType) {
+    this.props.periodType = periodType;
+  }
+
+  set customPeriodDays(customPeriodDays: number) {
+    this.props.customPeriodDays = customPeriodDays;
   }
 
   set markdownDescription(markdownDescription: string) {
@@ -148,5 +187,17 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set tags(tags: TechTag[]) {
+    this.props.tags = tags;
+  }
+
+  set createdBy(createdBy: { firstName: string; lastName: string, id: number }) {
+    this.props.createdBy = createdBy;
+  }
+
+  set executor(executor: { firstName: string; lastName: string, id: number }) {
+    this.props.executor = executor;
   }
 }

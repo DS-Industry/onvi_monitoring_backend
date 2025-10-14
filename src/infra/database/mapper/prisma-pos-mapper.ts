@@ -6,7 +6,7 @@ export type PrismaPosWithCarWashPosAndAddress = Prisma.PosGetPayload<{
   include: { carWashPos: true; address: true };
 }>;
 export type PrismaPosWithAddress = Prisma.PosGetPayload<{
-  include: { address: true };
+  include: { address: true, carWashPos: true };
 }>;
 export class PrismaPosMapper {
   static toDomain(entity: PrismaPos | PrismaPosWithAddress): Pos {
@@ -24,11 +24,18 @@ export class PrismaPosMapper {
           })
         : undefined;
 
+    // Extract carWashPos properties if available
+    const carWashPosType = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.carWashPosType : undefined;
+    const minSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.minSumOrder : undefined;
+    const maxSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.maxSumOrder : undefined;
+    const stepSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.stepSumOrder : undefined;
+
     return new Pos({
       id: entity.id,
       name: entity.name,
       slug: entity.slug,
-      timeWork: entity.timeWork,
+      startTime: (entity as any).startTime,
+      endTime: (entity as any).endTime,
       organizationId: entity.organizationId,
       placementId: entity.placementId,
       posMetaData: entity.posMetaData,
@@ -42,6 +49,10 @@ export class PrismaPosMapper {
       updatedAt: entity.updatedAt,
       createdById: entity.createdById,
       updatedById: entity.updateById,
+      carWashPosType: carWashPosType,
+      minSumOrder: minSumOrder,
+      maxSumOrder: maxSumOrder,
+      stepSumOrder: stepSumOrder,      
     });
   }
 
@@ -55,8 +66,10 @@ export class PrismaPosMapper {
       id: entity.id,
       name: entity.name,
       slug: entity.slug,
-      timeWork: entity.timeWork,
+      startTime: (entity as any).startTime,
+      endTime: (entity as any).endTime,
       organizationId: entity.organizationId,
+      placementId: entity.placementId,
       posMetaData: entity.posMetaData,
       timezone: entity.timezone,
       image: entity.image,
@@ -84,12 +97,13 @@ export class PrismaPosMapper {
       },
     };
   }
-  static toPrisma(pos: Pos): Prisma.PosUncheckedCreateInput {
+  static toPrisma(pos: Pos): any {
     return {
       id: pos?.id,
       name: pos.name,
       slug: pos.slug,
-      timeWork: pos.timeWork,
+      startTime: pos.startTime,
+      endTime: pos.endTime,
       organizationId: pos.organizationId,
       placementId: pos.placementId,
       posMetaData: pos.posMetaData,

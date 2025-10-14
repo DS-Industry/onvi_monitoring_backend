@@ -1,4 +1,4 @@
-import { LTYCorporate as PrismaCorporate, Prisma, LTYUser } from '@prisma/client';
+import { LTYCorporate as PrismaCorporate, Prisma, LTYUser, LTYCorporateStatus } from '@prisma/client';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 
 export class PrismaCorporateMapper {
@@ -35,6 +35,7 @@ export class PrismaCorporateMapper {
       createdAt: corporate?.createdAt,
       updatedAt: corporate?.updatedAt,
       organizationId: corporate?.organizationId,
+      status: corporate?.status as LTYCorporateStatus,
     };
   }
 }

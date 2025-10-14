@@ -35,7 +35,7 @@ export class WorkerUpdateDto {
   dailySalary?: number;
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
-  percentageSalary?: number;
+  bonusPayout?: number;
   @IsOptional()
   @IsEnum(StatusHrWorker)
   status?: StatusHrWorker;
@@ -63,4 +63,7 @@ export class WorkerUpdateDto {
   @IsOptional()
   @IsString()
   snils?: string;
+  @IsOptional()
+  @IsString()
+  registrationAddress?: string;
 }

@@ -1,5 +1,6 @@
 import { GroupTechTaskItemTemplate, StatusTechTask, TypeTechTask, TypeTechTaskItemTemplate } from "@prisma/client";
 import { TechTagProps } from "@tech-task/tag/domain/techTag";
+import { PeriodType } from '../../domain/periodType';
 
 export class TechTaskShapeResponseDto {
   id: number;
@@ -7,7 +8,8 @@ export class TechTaskShapeResponseDto {
   posId: number;
   type: TypeTechTask;
   status: StatusTechTask;
-  period?: number;
+  periodType?: PeriodType;
+  customPeriodDays?: number;
   markdownDescription?: string;
   endSpecifiedDate?: Date;
   startWorkDate?: Date;
@@ -15,6 +17,16 @@ export class TechTaskShapeResponseDto {
   executorId?: number;
   items: TechTaskItemDto[];
   tags: TechTagProps[];
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  };
+  executor?: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  };
 }
 
 export class TechTaskItemDto {

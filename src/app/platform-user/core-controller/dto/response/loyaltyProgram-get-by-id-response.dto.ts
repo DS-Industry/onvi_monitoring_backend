@@ -5,6 +5,9 @@ export class LoyaltyProgramGetByIdResponseDto {
   name: string;
   status: LTYProgramStatus;
   startDate: Date;
+  isHub: boolean;
+  isHubRequested: boolean;
+  isHubRejected: boolean;
   organizations: {
     id: number;
     name: string;

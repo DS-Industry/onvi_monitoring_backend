@@ -6,7 +6,7 @@ export class PrismaHrPaymentMapper {
     if (!entity) {
       return null;
     }
-    return new Payment({
+    const paymentProps = new Payment({
       id: entity.id,
       hrWorkerId: entity.hrWorkerId,
       paymentType: entity.paymentType,
@@ -16,11 +16,15 @@ export class PrismaHrPaymentMapper {
       sum: entity.sum,
       prize: entity.prize,
       fine: entity.fine,
+      virtualSum: entity.virtualSum,
+      comment: entity.comment,
       createdAt: entity.createdAt,
       createdById: entity.createdById,
       updatedAt: entity.updatedAt,
       updatedById: entity.updatedById,
     });
+
+    return <Payment>paymentProps.getProps();
   }
 
   static toPrisma(payment: Payment): Prisma.HrPaymentUncheckedCreateInput {
@@ -34,6 +38,8 @@ export class PrismaHrPaymentMapper {
       sum: payment.sum,
       prize: payment.prize,
       fine: payment.fine,
+      virtualSum: payment?.virtualSum,
+      comment: payment?.comment,
       createdAt: payment.createdAt,
       createdById: payment.createdById,
       updatedAt: payment.updatedAt,

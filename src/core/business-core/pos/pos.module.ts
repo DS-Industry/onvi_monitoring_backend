@@ -60,17 +60,13 @@ import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/de
 import { MonthlyPlanPosProvider } from '@pos/monthlyPlanPos/provider/monthlyPlanPos';
 import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
 import { PlanFactPosUseCase } from '@pos/pos/use-cases/pos-plan-fact';
-import {
-  DeviceProgramChangeRepositoryProvider
-} from "@pos/device/device-data/device-data/device-program/device-program-change/provider/device-program-change";
-import {
-  FindMethodsDeviceProgramChangeUseCase
-} from "@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods";
-import { TestDataCron } from "../../../infra/handler/testData/cron/testData";
-import { ScheduleModule } from "@nestjs/schedule";
-import { ConnectionPosWorkerUseCase } from "@pos/pos/use-cases/pos-worker-connection";
-import { HrCoreModule } from "@hr/hr-core.module";
-import { CarStatisticPosUseCase } from "@pos/pos/use-cases/pos-car-statistic";
+import { DeviceProgramChangeRepositoryProvider } from '@pos/device/device-data/device-data/device-program/device-program-change/provider/device-program-change';
+import { FindMethodsDeviceProgramChangeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-change/use-case/device-program-change-find-methods';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ConnectionPosWorkerUseCase } from '@pos/pos/use-cases/pos-worker-connection';
+import { HrCoreModule } from '@hr/hr-core.module';
+import { CarStatisticPosUseCase } from '@pos/pos/use-cases/pos-car-statistic';
+import { DeleteDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-delete';
 
 const repositories: Provider[] = [
   PosRepositoryProvider,
@@ -153,6 +149,7 @@ const deviceDataUseCase: Provider[] = [
   FindMethodsDeviceOperationCardUseCase,
   CleanDataDeviceProgramUseCase,
   SuspiciouslyDataDeviceProgramUseCase,
+  DeleteDeviceOperationUseCase,
 ];
 
 const deviceDataRawHandlerUseCase: Provider[] = [

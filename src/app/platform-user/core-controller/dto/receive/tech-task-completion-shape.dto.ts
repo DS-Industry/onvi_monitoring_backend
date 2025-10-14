@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class TechTaskCompletionShapeDto {
@@ -17,4 +17,7 @@ export class itemValueDto {
   @IsString()
   @IsNotEmpty({ message: 'value is required' })
   value: string;
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

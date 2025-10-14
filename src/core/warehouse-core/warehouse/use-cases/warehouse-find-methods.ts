@@ -47,4 +47,33 @@ export class FindMethodsWarehouseUseCase {
     );
     return { count };
   }
+
+  async getAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+    skip?: number,
+    take?: number,
+  ): Promise<Warehouse[]> {
+    return await this.warehouseRepository.findAllByOrganizationId(
+      organizationId,
+      ability,
+      posId,
+      skip,
+      take,
+    );
+  }
+
+  async getCountAllByOrganizationId(
+    organizationId: number,
+    ability: any,
+    posId?: number,
+  ): Promise<{ count: number }> {
+    const count = await this.warehouseRepository.findCountAllByOrganizationId(
+      organizationId,
+      ability,
+      posId,
+    );
+    return { count };
+  }
 }

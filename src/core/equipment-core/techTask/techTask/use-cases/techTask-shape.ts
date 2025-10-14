@@ -52,13 +52,16 @@ export class ShapeTechTaskUseCase {
       type: techTask.type,
       status: techTask.status,
       endSpecifiedDate: techTask?.endSpecifiedDate,
-      period: techTask?.period,
+      periodType: techTask?.periodType,
+      customPeriodDays: techTask?.customPeriodDays,
       markdownDescription: techTask?.markdownDescription,
       startWorkDate: techTask?.startWorkDate,
       sendWorkDate: techTask?.sendWorkDate,
       executorId: techTask?.executorId,
       items: items,
       tags: techTags.map((tag) => tag.getProps()),
+      createdBy: techTask?.createdBy || undefined,
+      executor: techTask?.executor || undefined,
     };
   }
 }

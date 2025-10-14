@@ -25,5 +25,11 @@ export abstract class IShiftReportRepository {
     dateEnd: Date,
     workerIds: number[],
   ): Promise<DataForCalculationResponseDto[]>;
+  abstract findAllWithPayoutForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<ShiftReport[]>;
   abstract update(input: ShiftReport): Promise<ShiftReport>;
+  abstract delete(id: number): Promise<void>;
 }

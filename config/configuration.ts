@@ -27,6 +27,8 @@ export const configuration = () => ({
   bucketName: process.env.BUCKET_NAME,
   endpointFile: process.env.ENDPOINT_FILE,
   storageUrl: process.env.STORAGE_URL,
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   tz: process.env.TZ,
   apiExpirationTime: process.env.API_EXPIRATION_TIME,
   redisHost: process.env.REDIS_HOST,

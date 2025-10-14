@@ -104,4 +104,42 @@ export class OrganizationValidateRules {
       );
     }
   }
+
+  public async validateUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ) {
+    const response = await this.validateLib.userBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    if (response.code !== 200) {
+      throw new OrganizationException(
+        ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
+  }
+
+  public async validateUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ) {
+    const response = await this.validateLib.userBelongsToOrganizations(
+      userId,
+      organizationIds,
+    );
+
+    if (response.code !== 200) {
+      throw new OrganizationException(
+        ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
+  }
 }

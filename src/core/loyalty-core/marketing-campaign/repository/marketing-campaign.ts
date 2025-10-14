@@ -3,8 +3,10 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 import { MarketingCampaignCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-create.dto';
 import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { MarketingCampaignStatus } from '@prisma/client';
+import { MarketingCampaignStatus, MarketingCampaignType } from '@prisma/client';
 
 @Injectable()
 export class MarketingCampaignRepository extends IMarketingCampaignRepository {
@@ -27,8 +29,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
-        discountType: data.type === "DISCOUNT" ? data.discountType || "PERCENTAGE" : null,
-        discountValue: data.type === "DISCOUNT" ? data.discountValue : null,
+        discountType: data.type === MarketingCampaignType.DISCOUNT ? data.discountType || "PERCENTAGE" : null,
+        discountValue: data.type === MarketingCampaignType.DISCOUNT ? data.discountValue : null,
+        ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
         ltyProgram: true,
@@ -58,11 +61,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     let promocode = null;
     if (data.promocode) {
-      promocode = await this.prisma.marketingPromocode.create({
+      promocode = await this.prisma.lTYPromocode.create({
         data: {
           campaignId: campaign.id,
-          promocode: data.promocode || '',
-          discountType: data.discountType || "PERCENTAGE",
+          code: data.promocode || '',
+          promocodeType: 'CAMPAIGN',
+          discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
           discountValue: data.discountValue,
           maxUsage: data.maxUsage,
         },
@@ -96,8 +100,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
       discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue || 0,
-      promocode: promocode?.promocode,
+      discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+      promocode: promocode?.code,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
@@ -199,26 +203,53 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     }
 
     let promocode = null;
-    if (data.promocode || data.discountType || data.discountValue !== undefined || data.maxUsage !== undefined) {
-      const existingPromocode = campaign.promocodes[0];
 
+    if (data.type === MarketingCampaignType.DISCOUNT) {
+      if (existingCampaign.promocodes.length > 0) {
+        await this.prisma.lTYPromocode.deleteMany({
+          where: { campaignId: id },
+        });
+      }
+      
+      if (data.discountType !== undefined || data.discountValue !== undefined) {
+        await this.prisma.marketingCampaign.update({
+          where: { id },
+          data: {
+            discountType: data.discountType,
+            discountValue: data.discountValue,
+          },
+        });
+      }
+    } else if (data.type === MarketingCampaignType.PROMOCODE) {
+      if (existingCampaign.type === MarketingCampaignType.DISCOUNT) {
+        await this.prisma.marketingCampaign.update({
+          where: { id },
+          data: {
+            discountType: null,
+            discountValue: null,
+          },
+        });
+      }
+      
+      const existingPromocode = campaign.promocodes[0];
       if (existingPromocode) {
         const promocodeUpdateData: any = {};
-        if (data.promocode !== undefined) promocodeUpdateData.promocode = data.promocode;
-        if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType;
+        if (data.promocode !== undefined) promocodeUpdateData.code = data.promocode;
+        if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE';
         if (data.discountValue !== undefined) promocodeUpdateData.discountValue = data.discountValue;
         if (data.maxUsage !== undefined) promocodeUpdateData.maxUsage = data.maxUsage;
 
-        promocode = await this.prisma.marketingPromocode.update({
+        promocode = await this.prisma.lTYPromocode.update({
           where: { id: existingPromocode.id },
           data: promocodeUpdateData,
         });
-      } else if (data.promocode || data.type === 'DISCOUNT') {
-        promocode = await this.prisma.marketingPromocode.create({
+      } else {
+        promocode = await this.prisma.lTYPromocode.create({
           data: {
             campaignId: campaign.id,
-            promocode: data.promocode || '', 
-            discountType: data.discountType || 'PERCENTAGE',
+            code: data.promocode || '',
+            promocodeType: 'CAMPAIGN',
+            discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
             discountValue: data.discountValue || 0,
             maxUsage: data.maxUsage,
           },
@@ -252,9 +283,13 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || data.discountType || campaign.promocodes[0]?.discountType || '',
-      discountValue: promocode?.discountValue || data.discountValue || campaign.promocodes[0]?.discountValue || 0,
-      promocode: promocode?.promocode || campaign.promocodes[0]?.promocode,
+      discountType: campaign.type === MarketingCampaignType.DISCOUNT 
+        ? campaign.discountType || ''
+        : (promocode?.discountType || campaign.promocodes[0]?.discountType || ''),
+      discountValue: campaign.type === MarketingCampaignType.DISCOUNT
+        ? campaign.discountValue || 0
+        : (promocode?.discountValue || campaign.promocodes[0]?.discountValue || 0),
+      promocode: promocode?.code || campaign.promocodes[0]?.code,
       maxUsage: promocode?.maxUsage || campaign.promocodes[0]?.maxUsage,
       currentUsage: promocode?.currentUsage || campaign.promocodes[0]?.currentUsage || 0,
       posCount: posCount,
@@ -312,9 +347,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue || 0,
-      promocode: promocode?.promocode,
+      discountType: promocode?.discountType || campaign.discountType || '',
+      discountValue: Number(promocode?.discountValue) || Number(campaign.discountValue) || 0,
+      promocode: promocode?.code,
       maxUsage: promocode?.maxUsage,
       currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
@@ -369,8 +404,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
         discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue || 0,
-        promocode: promocode?.promocode,
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
         maxUsage: promocode?.maxUsage,
         currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
@@ -389,15 +424,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     });
   }
 
-  async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
+  async findAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {    
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: {
-        ltyProgram: {
-          organizations: {
-            some: {
-              id: organizationId,
-            },
-          },
+        ltyProgramParticipant: {
+          organizationId: organizationId,
         },
       },
       include: {
@@ -419,11 +450,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
     });
 
+
     return campaigns.map(campaign => {
       const posCount = campaign.poses.length;
       const promocode = campaign.promocodes[0];
       const posIds = campaign.poses.map(pos => pos.id);
-
       return {
         id: campaign.id,
         name: campaign.name,
@@ -435,8 +466,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
         discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue || 0,
-        promocode: promocode?.promocode,
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
         maxUsage: promocode?.maxUsage,
         currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
@@ -453,6 +484,106 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
       };
     });
+    
+  }
+
+  async findAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
+    const { page = 1, size = 10, organizationId, status, search } = filter;
+    const skip = size * (page - 1);
+    const take = size;
+
+    const where: any = {
+      ltyProgramParticipant: {
+        organizationId: organizationId,
+      },
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const total = await this.prisma.marketingCampaign.count({ where });
+
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where,
+      skip,
+      take,
+      include: {
+        ltyProgram: true,
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        updatedBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        promocodes: true,
+        poses: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const data = campaigns.map(campaign => {
+      const posCount = campaign.poses.length;
+      const promocode = campaign.promocodes[0];
+      const posIds = campaign.poses.map(pos => pos.id);
+      return {
+        id: campaign.id,
+        name: campaign.name,
+        status: campaign.status,
+        type: campaign.type,
+        launchDate: campaign.launchDate.toISOString(),
+        endDate: campaign.endDate?.toISOString(),
+        description: campaign.description,
+        ltyProgramId: campaign.ltyProgramId,
+        ltyProgramName: campaign.ltyProgram?.name,
+        discountType: promocode?.discountType || '',
+        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
+        promocode: promocode?.code,
+        maxUsage: promocode?.maxUsage,
+        currentUsage: promocode?.currentUsage || 0,
+        posCount: posCount,
+        posIds: posIds,
+        createdAt: campaign.createdAt.toISOString(),
+        updatedAt: campaign.updatedAt.toISOString(),
+        createdBy: {
+          id: campaign.createdBy.id,
+          name: campaign.createdBy.name,
+        },
+        updatedBy: {
+          id: campaign.updatedBy.id,
+          name: campaign.updatedBy.name,
+        },
+      };
+    });
+
+    const totalPages = Math.ceil(total / size);
+    const hasNext = page < totalPages;
+    const hasPrevious = page > 1;
+
+    return {
+      data,
+      total,
+      page,
+      size,
+      totalPages,
+      hasNext,
+      hasPrevious,
+    };
   }
 
   async findDraftCampaignsToActivate(now: Date): Promise<{ id: number; name: string; launchDate: Date }[]> {

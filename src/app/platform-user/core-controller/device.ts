@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -31,6 +32,7 @@ import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/res
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
+  DeletePosAbility,
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
@@ -38,9 +40,11 @@ import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/dev
 import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
-import { DeviceMonitoringFilterDto } from "@platform-user/core-controller/dto/receive/device-monitoring-filter.dto";
-import { Currency } from "@pos/device/device-data/currency/currency/domain/currency";
-import { FindMethodsCurrencyUseCase } from "@pos/device/device-data/currency/currency/use-case/currency-find-methods";
+import { DeviceMonitoringFilterDto } from '@platform-user/core-controller/dto/receive/device-monitoring-filter.dto';
+import { Currency } from '@pos/device/device-data/currency/currency/domain/currency';
+import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
+import { DeleteDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-delete';
+import { DeleteManyDto } from '@platform-user/core-controller/dto/receive/delete-many.dto';
 
 @Controller('device')
 export class DeviceController {
@@ -55,6 +59,7 @@ export class DeviceController {
     private readonly deviceValidateRules: DeviceValidateRules,
     private readonly posValidateRules: PosValidateRules,
     private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
+    private readonly deleteDeviceOperationUseCase: DeleteDeviceOperationUseCase,
   ) {}
   //Create device
   @Post('')
@@ -136,8 +141,7 @@ export class DeviceController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
-  async getCurrency(
-  ): Promise<Currency[]> {
+  async getCurrency(): Promise<Currency[]> {
     try {
       return await this.findMethodsCurrencyUseCase.getAll();
     } catch (e) {
@@ -334,6 +338,36 @@ export class DeviceController {
           code: e.getHttpStatus(),
         });
       } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('operations')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeletePosAbility())
+  @HttpCode(201)
+  async deleteOperations(
+    @Body() data: DeleteManyDto,
+  ): Promise<{ status: string }> {
+    try {
+      for (const id of data.ids) {
+        const deviceOperation =
+          await this.deviceValidateRules.getDeviceOperationByIdValidate(id);
+        await this.deleteDeviceOperationUseCase.execute(deviceOperation);
+      }
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof DeviceException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

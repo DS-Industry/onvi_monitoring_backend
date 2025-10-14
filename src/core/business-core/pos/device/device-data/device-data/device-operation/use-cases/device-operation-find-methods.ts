@@ -6,6 +6,7 @@ import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/de
 import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
+import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
@@ -122,5 +123,9 @@ export class FindMethodsDeviceOperationUseCase {
     return await this.deviceOperationRepository.findDataLastOperByDeviceIds(
       deviceIds,
     );
+  }
+
+  async getOneById(id: number): Promise<DeviceOperation> {
+    return await this.deviceOperationRepository.findOneById(id);
   }
 }

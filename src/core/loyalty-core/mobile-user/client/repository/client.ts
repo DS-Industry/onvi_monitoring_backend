@@ -70,9 +70,10 @@ export class ClientRepository extends IClientRepository {
       where.card = {
         cardTier: {
           ltyProgram: {
-            organizations: {
+            programParticipants: {
               some: {
-                id: organizationId,
+                organizationId: organizationId,
+                status: 'ACTIVE',
               },
             },
           },
@@ -151,9 +152,10 @@ export class ClientRepository extends IClientRepository {
       where.card = {
         cardTier: {
           ltyProgram: {
-            organizations: {
+            programParticipants: {
               some: {
-                id: organizationId,
+                organizationId: organizationId,
+                status: 'ACTIVE',
               },
             },
           },
@@ -181,6 +183,9 @@ export class ClientRepository extends IClientRepository {
       where: {
         id,
       },
+      include: {
+        card: true
+      }
     });
     return PrismaMobileUserMapper.toDomain(client);
   }

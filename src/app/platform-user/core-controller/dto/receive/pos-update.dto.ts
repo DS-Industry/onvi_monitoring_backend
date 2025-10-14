@@ -15,7 +15,11 @@ export class PosUpdateDto {
 
   @IsString()
   @IsOptional()
-  timeWork?: string;
+  startTime?: string;
+
+  @IsString()
+  @IsOptional()
+  endTime?: string;
 
   @IsString()
   @IsOptional()

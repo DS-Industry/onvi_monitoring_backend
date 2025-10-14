@@ -9,6 +9,7 @@ export class TechTaskReadAllResponse {
   id: number;
   name: string;
   posId: number;
+  posName?: string;
   type: TypeTechTask;
   status: StatusTechTask;
   endSpecifiedDate?: Date;
@@ -16,4 +17,12 @@ export class TechTaskReadAllResponse {
   sendWorkDate?: Date;
   executorId?: number;
   tags: TechTagProps[];
+  createdBy?: {
+    firstName: string;
+    lastName: string;
+  } | null;
+  executor?: {
+    firstName: string;
+    lastName: string;
+  } | null;
 }

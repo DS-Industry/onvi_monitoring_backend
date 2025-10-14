@@ -66,6 +66,8 @@ import { ReportController } from '@platform-user/core-controller/report';
 import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
+import { ConnectionUserLoyaltyProgramUseCase } from '@platform-user/user/use-cases/user-loyalty-program-connection';
 import { PlacementController } from '@platform-user/core-controller/placement';
 import { LoyaltyValidateRules } from '@platform-user/validate/validate-rules/loyalty-validate-rules';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
@@ -81,6 +83,8 @@ import { ManagerPaperValidateRules } from '@platform-user/validate/validate-rule
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
 import { SaleController } from '@platform-user/core-controller/sale';
 import { FileParserService } from '@platform-user/core-controller/services/excel-parser.service';
+import { S3Controller } from '@platform-user/core-controller/s3';
+import { S3Module } from '@libs/s3/module';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -107,6 +111,7 @@ const controllers = [
   NotificationController,
   ManagerPaperController,
   SaleController,
+  S3Controller,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -134,6 +139,8 @@ const userUseCase: Provider[] = [
   OrganizationManageUserUseCase,
   PosManageUserUseCase,
   ConnectionUserPosUseCase,
+  LoyaltyProgramManageUserUseCase,
+  ConnectionUserLoyaltyProgramUseCase,
 ];
 
 const confirmMailUseCase: Provider[] = [
@@ -186,6 +193,7 @@ const services: Provider[] = [FileParserService];
     ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
+    S3Module,
   ],
   controllers: [...controllers],
   providers: [

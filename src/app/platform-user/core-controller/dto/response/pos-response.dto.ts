@@ -4,8 +4,10 @@ export interface PosResponseDto {
   id: number;
   name: string;
   slug: string;
-  timeWork: string;
+  startTime?: string;
+  endTime?: string;
   organizationId: number;
+  placementId: number;
   posMetaData: string;
   timezone: number;
   image: string;

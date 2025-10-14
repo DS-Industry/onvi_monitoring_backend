@@ -35,6 +35,11 @@ import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-man
 import { ConnectedPodUserDto } from '@platform-user/core-controller/dto/receive/connected-pod-user.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { LoyaltyProgramPermissionsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-permissions-response.dto';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
+import { ConnectedLoyaltyProgramUserDto } from '@platform-user/core-controller/dto/receive/connected-loyalty-program-user.dto';
+import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
+import { ConnectionUserLoyaltyProgramUseCase } from '@platform-user/user/use-cases/user-loyalty-program-connection';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { RedisService } from '@infra/cache/redis.service';
 import { WorkerPermissionFilterDto } from '@platform-user/core-controller/dto/receive/worker-permission-filter.dto';
@@ -53,6 +58,9 @@ export class PermissionController {
     private readonly posManageUserUseCase: PosManageUserUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly connectionUserPosUseCase: ConnectionUserPosUseCase,
+    private readonly loyaltyProgramManageUserUseCase: LoyaltyProgramManageUserUseCase,
+    private readonly findMethodsLoyaltyProgramUseCase: FindMethodsLoyaltyProgramUseCase,
+    private readonly connectionUserLoyaltyProgramUseCase: ConnectionUserLoyaltyProgramUseCase,
     private readonly redisService: RedisService,
     private readonly organizationValidateRules: OrganizationValidateRules,
   ) {}
@@ -293,6 +301,117 @@ export class PermissionController {
       await this.deleteUserKeysSafely(userId);
 
       return await this.connectionUserPosUseCase.execute(body.posIds, userId);
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  
+  @Get('loyalty-program/:userId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
+  @HttpCode(200)
+  async getLoyaltyProgramByUserId(
+    @Request() req: any,
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<LoyaltyProgramPermissionsResponseDto[]> {
+    try {
+      const { ability } = req;
+      
+      await this.userPermissionValidateRules.getUserLoyaltyProgramAccessValidate(userId, ability);
+      
+      const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
+      return loyaltyPrograms.map((loyaltyProgram) => ({
+        id: loyaltyProgram.id,
+        name: loyaltyProgram.name,
+      }));
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('loyalty-program')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
+  @HttpCode(200)
+  async getLoyaltyProgram(
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string,
+  ): Promise<LoyaltyProgramPermissionsResponseDto[]> {
+    try {
+      const { ability } = req;
+      
+      if (organizationId) {
+        const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByAbility(
+          ability,
+          Number(organizationId),
+        );
+        return loyaltyPrograms.map((loyaltyProgram) => ({
+          id: loyaltyProgram.id,
+          name: loyaltyProgram.name,
+        }));
+      }
+      
+      return await this.loyaltyProgramManageUserUseCase.execute(ability);
+    } catch (e) {
+      if (e instanceof UserException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('loyalty-program-user/:userId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
+  @HttpCode(201)
+  async updateConnectedUserLoyaltyProgram(
+    @Request() req: any,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: ConnectedLoyaltyProgramUserDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.userPermissionValidateRules.updateConnectedUserLoyaltyProgramValidate(
+        body.loyaltyProgramIds,
+        ability,
+      );
+
+      await this.deleteUserKeysSafely(userId);
+
+      return await this.connectionUserLoyaltyProgramUseCase.execute(body.loyaltyProgramIds, userId);
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({

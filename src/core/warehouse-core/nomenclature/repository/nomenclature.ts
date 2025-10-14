@@ -72,6 +72,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
     status?: NomenclatureStatus,
     skip?: number,
     take?: number,
+    search?: string,
   ): Promise<Nomenclature[]> {
     const where: any = {};
 
@@ -91,6 +92,23 @@ export class NomenclatureRepository extends INomenclatureRepository {
       where.status = status;
     }
 
+    if (search !== undefined && search.trim() !== '') {
+      where.OR = [
+        {
+          name: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          sku: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
     const nomenclatures = await this.prisma.nomenclature.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
@@ -107,6 +125,7 @@ export class NomenclatureRepository extends INomenclatureRepository {
     categoryId?: number,
     destiny?: DestinyNomenclature,
     status?: NomenclatureStatus,
+    search?: string,
   ): Promise<number> {
     const where: any = {};
 
@@ -124,6 +143,23 @@ export class NomenclatureRepository extends INomenclatureRepository {
 
     if (status !== undefined) {
       where.status = status;
+    }
+
+    if (search !== undefined && search.trim() !== '') {
+      where.OR = [
+        {
+          name: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        {
+          sku: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ];
     }
 
     return this.prisma.nomenclature.count({

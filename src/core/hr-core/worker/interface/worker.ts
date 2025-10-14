@@ -13,12 +13,14 @@ export abstract class IWorkerRepository {
     name?: string,
     skip?: number,
     take?: number,
+    posId?: number,
   ): Promise<Worker[]>;
   abstract findAllByFilterCount(
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
     name?: string,
+    posId?: number,
   ): Promise<number>;
   abstract findAllForCalculatePayment(
     organizationId: number,
@@ -27,4 +29,10 @@ export abstract class IWorkerRepository {
     paymentType?: PaymentType,
   ): Promise<Worker[]>;
   abstract update(input: Worker): Promise<Worker>;
+  abstract findPosesByWorkerId(workerId: number): Promise<any[]>;
+  abstract updateConnectionPos(
+    workerId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any>;
 }

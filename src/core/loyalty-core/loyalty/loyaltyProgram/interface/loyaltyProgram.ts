@@ -3,9 +3,7 @@ import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgra
 export abstract class ILoyaltyProgramRepository {
   abstract create(
     input: LTYProgram,
-    organizationIds: number[],
     ownerOrganizationId: number,
-    userId: number,
   ): Promise<LTYProgram>;
   abstract findOneById(id: number): Promise<LTYProgram>;
   abstract findOneByOrganizationId(
@@ -20,9 +18,19 @@ export abstract class ILoyaltyProgramRepository {
     ability: any,
     organizationId?: number,
   ): Promise<LTYProgram[]>;
+  abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
+  abstract findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<{ program: LTYProgram; participantId: number }[]>;
+  abstract findAllPublicPrograms(filters?: {
+    search?: string;
+    status?: string;
+    page?: number;
+    size?: number;
+  }): Promise<LTYProgram[]>;
   abstract update(
     input: LTYProgram,
-    addOrganizationIds: number[],
-    deleteOrganizationIds: number[],
+  ): Promise<LTYProgram>;
+  abstract updateIsHubStatus(
+    id: number,
+    isHub: boolean,
   ): Promise<LTYProgram>;
 }

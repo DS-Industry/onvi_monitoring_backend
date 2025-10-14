@@ -24,6 +24,7 @@ import {
   CreateLoyaltyAbility,
   ReadLoyaltyAbility,
   UpdateLoyaltyAbility,
+  SuperAdminAbility,
 } from '@common/decorators/abilities.decorator';
 import { TagCreateDto } from '@platform-user/core-controller/dto/receive/tag-create.dto';
 import { LoyaltyException } from '@exception/option.exceptions';
@@ -36,15 +37,19 @@ import { ClientCreateDto } from '@platform-user/core-controller/dto/receive/clie
 import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
 import { ClientFullResponseDto } from '@platform-user/core-controller/dto/response/client-full-response.dto';
 import { ClientFilterDto } from '@platform-user/core-controller/dto/receive/client-filter.dto';
-import { ClientResponseDto } from '@platform-user/core-controller/dto/response/client-response.dto';
 import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-by-filter';
 import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/client-update.dto';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
+import { LoyaltyProgramParticipantRequestDto } from '@platform-user/core-controller/dto/receive/loyalty-program-participant-request.dto';
+import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
+import { PublicLoyaltyProgramsFilterDto } from '@platform-user/core-controller/dto/receive/public-loyalty-programs-filter.dto';
+import { PublicLoyaltyProgramResponseDto, PublicLoyaltyProgramsListResponseDto } from '@platform-user/core-controller/dto/response/public-loyalty-programs-response.dto';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-create';
@@ -61,7 +66,6 @@ import { BenefitCreateDto } from '@platform-user/core-controller/dto/receive/ben
 import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
 import { LoyaltyTierFilterDto } from '@platform-user/core-controller/dto/receive/loyaltyTier-filter.dto';
 import { LoyaltyTierGetOneResponseDto } from '@platform-user/core-controller/dto/response/loyaltyTier-get-one-response.dto';
-import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
@@ -101,6 +105,8 @@ import { CorporateGetStatsByIdUseCase } from '@loyalty/mobile-user/corporate/use
 import { MarketingCampaignCreateDto } from './dto/receive/marketing-campaign-create.dto';
 import { MarketingCampaignUpdateDto } from './dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from './dto/response/marketing-campaign-response.dto';
+import { MarketingCampaignsPaginatedResponseDto } from './dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignsFilterDto } from './dto/receive/marketing-campaigns-filter.dto';
 import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
@@ -108,6 +114,22 @@ import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cas
 import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
+import { LoyaltyProgramHubRequestDto } from './dto/receive/loyalty-program-hub-request.dto';
+import { LoyaltyProgramHubApproveDto } from './dto/receive/loyalty-program-hub-approve.dto';
+import { LoyaltyProgramHubRejectDto } from './dto/receive/loyalty-program-hub-reject.dto';
+import { LoyaltyHubRequestsFilterDto } from './dto/receive/loyalty-hub-requests-filter.dto';
+import { LoyaltyHubRequestsListResponseDto } from './dto/response/loyalty-hub-requests-response.dto';
+import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
+import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
+import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
+import { FindLoyaltyHubRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-hub-requests';
+import { LoyaltyProgramParticipantApproveDto } from './dto/receive/loyalty-program-participant-approve.dto';
+import { LoyaltyProgramParticipantRejectDto } from './dto/receive/loyalty-program-participant-reject.dto';
+import { LoyaltyParticipantRequestsFilterDto } from './dto/receive/loyalty-participant-requests-filter.dto';
+import { LoyaltyParticipantRequestsListResponseDto } from './dto/response/loyalty-participant-requests-response.dto';
+import { LoyaltyProgramParticipantApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-approve';
+import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-reject';
+import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -129,7 +151,6 @@ export class LoyaltyController {
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly loyaltyValidateRules: LoyaltyValidateRules,
-    private readonly createCardBonusOperUseCase: CreateCardBonusOperUseCase,
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly handlerOrderUseCase: HandlerOrderUseCase,
     private readonly updateBenefitUseCase: UpdateBenefitUseCase,
@@ -148,6 +169,14 @@ export class LoyaltyController {
     private readonly createMarketingCampaignUseCase: CreateMarketingCampaignUseCase,
     private readonly updateMarketingCampaignUseCase: UpdateMarketingCampaignUseCase,
     private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
+    private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
+    private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
+    private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
+    private readonly findLoyaltyHubRequestsUseCase: FindLoyaltyHubRequestsUseCase,
+    private readonly createLoyaltyProgramParticipantRequestUseCase: CreateLoyaltyProgramParticipantRequestUseCase,
+    private readonly loyaltyProgramParticipantApproveUseCase: LoyaltyProgramParticipantApproveUseCase,
+    private readonly loyaltyProgramParticipantRejectUseCase: LoyaltyProgramParticipantRejectUseCase,
+    private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -221,11 +250,13 @@ export class LoyaltyController {
     @Body() data: LoyaltyProgramCreateDto,
   ): Promise<LTYProgram> {
     try {
-      const { ability, user } = req;
-      await this.loyaltyValidateRules.createLoyaltyProgramValidate(
-        [...data.organizationIds, data.ownerOrganizationId],
-        ability,
+      const { user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(data.ownerOrganizationId),
       );
+      
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
@@ -266,7 +297,6 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
           data.loyaltyProgramId,
           ability,
-          data?.organizationIds,
         );
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
@@ -326,6 +356,94 @@ export class LoyaltyController {
     }
   }
 
+  @Get('public-programs')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getPublicPrograms(
+    @Request() req: any,
+    @Query() filters: PublicLoyaltyProgramsFilterDto,
+  ): Promise<PublicLoyaltyProgramsListResponseDto> {
+    try {
+      const programs = await this.findMethodsLoyaltyProgramUseCase.getAllPublicPrograms(filters);
+      
+      const programResponses: PublicLoyaltyProgramResponseDto[] = programs.map((program) => ({
+        id: program.id,
+        name: program.name,
+        status: program.status,
+        startDate: program.startDate,
+        lifetimeDays: program.lifetimeDays,
+        ownerOrganizationId: program.ownerOrganizationId,
+        isHub: program.isHub,
+        isPublic: program.isPublic,
+      }));
+
+      return {
+        programs: programResponses,
+        total: programResponses.length,
+        page: filters.page || 1,
+        size: filters.size || 10,
+      };
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('participant-programs')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(201)
+  async getParticipantPrograms(
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string,
+  ): Promise<LoyaltyProgramParticipantResponseDto[]> {
+    try {
+      const { user } = req;
+
+      if (!organizationId) {
+        throw new CustomHttpException({
+          message: 'Organization ID is required',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        Number(organizationId),
+      );
+
+      return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
+        Number(organizationId),
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Get program by id
   @Get('program/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -336,9 +454,9 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<LoyaltyProgramGetByIdResponseDto> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       const loyaltyProgram =
-        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability);
+        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
           loyaltyProgram.id,
@@ -349,6 +467,9 @@ export class LoyaltyController {
         name: loyaltyProgram.name,
         status: loyaltyProgram.status,
         startDate: loyaltyProgram.startDate,
+        isHub: loyaltyProgram.isHub,
+        isHubRequested: loyaltyProgram.isHubRequested,
+        isHubRejected: loyaltyProgram.isHubRejected,
         organizations: organizations.map((item) => {
           return { id: item.id, name: item.name };
         }),
@@ -447,7 +568,7 @@ export class LoyaltyController {
     @Query() data: LoyaltyTierFilterDto,
   ): Promise<LoyaltyTierGetOneResponseDto[]> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       let tiers: LoyaltyTier[];
       if (data.programId == '*') {
         const programs =
@@ -461,6 +582,7 @@ export class LoyaltyController {
         await this.loyaltyValidateRules.getLoyaltyProgramValidate(
           data.programId,
           ability,
+          user.id,
         );
         tiers =
           await this.findMethodsLoyaltyTierUseCase.getAllByLoyaltyProgramId(
@@ -704,7 +826,7 @@ export class LoyaltyController {
   //Create client
   @Post('client')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility())
+  @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(201)
   async createClient(
     @Request() req: any,
@@ -716,10 +838,10 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.createClientValidate(
         data.phone,
         ability,
+        data?.cardId,
         data.tagIds || [],
         data?.devNumber,
         data?.number,
-        data?.cardId,
       );
       return await this.createClientUseCase.execute(data);
     } catch (e) {
@@ -753,8 +875,8 @@ export class LoyaltyController {
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
         ability,
-        data?.tagIds || [],
         data?.cardId,
+        data?.tagIds || [],
       );
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
@@ -783,11 +905,11 @@ export class LoyaltyController {
     @Query() data: ClientFilterDto,
   ): Promise<ClientPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getClientsValidate(
         data.organizationId,
-        ability,
+        user.id
       );
 
       let skip = undefined;
@@ -829,8 +951,10 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      const client = await this.loyaltyValidateRules.getClientByIdValidate(id, ability);
-
+      const client = await this.loyaltyValidateRules.getClientByIdValidate(
+        id,
+        ability,
+      );
 
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
@@ -1015,7 +1139,10 @@ export class LoyaltyController {
   ): Promise<UserKeyStatsResponseDto> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
+      await this.loyaltyValidateRules.getClientByIdValidate(
+        data.clientId,
+        ability,
+      );
       return await this.findMethodsCardUseCase.getUserKeyStatsByOrganization(
         data,
       );
@@ -1046,7 +1173,10 @@ export class LoyaltyController {
   ): Promise<ClientLoyaltyStatsResponseDto> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.getClientByIdValidate(data.clientId, ability);
+      await this.loyaltyValidateRules.getClientByIdValidate(
+        data.clientId,
+        ability,
+      );
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1171,11 +1301,11 @@ export class LoyaltyController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetByIdUseCase.execute(id);
@@ -1205,14 +1335,14 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { user, ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.createCorporateClientValidate(
         data.organizationId,
-        ability,
+        user.id,
       );
 
-      return await this.createCorporateClientUseCase.execute(data, user.id);
+      return await this.createCorporateClientUseCase.execute(data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1240,11 +1370,11 @@ export class LoyaltyController {
     @Body() data: CorporateClientUpdateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.updateCorporateClientValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.updateCorporateClientUseCase.execute(id, data);
@@ -1274,10 +1404,10 @@ export class LoyaltyController {
     @Request() req: any,
   ): Promise<CorporateClientStatsResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
       return await this.corporateGetStatsByIdUseCase.execute(id);
     } catch (e) {
@@ -1307,9 +1437,12 @@ export class LoyaltyController {
     @Query() data: CorporateCardsFilterDto,
   ): Promise<CorporateCardsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
-      await this.loyaltyValidateRules.getCorporateClientByIdValidate(id, ability);
+      await this.loyaltyValidateRules.getCorporateClientByIdValidate(
+        id,
+        user.id,
+      );
 
       return await this.corporateGetCardsUseCase.execute(id, data);
     } catch (e) {
@@ -1339,11 +1472,11 @@ export class LoyaltyController {
     @Query() data: CorporateCardsOperationsFilterDto,
   ): Promise<CorporateCardsOperationsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       await this.loyaltyValidateRules.getCorporateClientByIdValidate(
         id,
-        ability,
+        user.id,
       );
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);
@@ -1364,20 +1497,31 @@ export class LoyaltyController {
     }
   }
 
+  // Marketologist or Manager Only
   @Get('marketing-campaigns')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadLoyaltyAbility())
   @HttpCode(200)
   async getMarketingCampaigns(
     @Request() req: any,
-    @Query('organizationId', ParseIntPipe) organizationId: number,
-  ): Promise<MarketingCampaignResponseDto[]> {
+    @Query() filter: MarketingCampaignsFilterDto,
+  ): Promise<MarketingCampaignsPaginatedResponseDto> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
 
-      await this.loyaltyValidateRules.getMarketingCampaignsValidate(ability, organizationId);
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        filter.organizationId,
+      );
 
-      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationId(organizationId);
+      await this.loyaltyValidateRules.getMarketingCampaignsValidate(
+        ability,
+        filter.organizationId,
+      );
+
+      return await this.findMethodsMarketingCampaignUseCase.getAllByOrganizationIdPaginated(
+        filter,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1442,7 +1586,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,
@@ -1481,7 +1625,7 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.updateMarketingCampaignValidate(
         id,
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
           posIds: data.posIds,
         },
         ability,
@@ -1492,6 +1636,292 @@ export class LoyaltyController {
         data,
         user.id,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Post('programs/:id/request-hub')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(201)
+  async requestHub(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramHubRequestDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.requestHubValidate(
+        id,
+        ability,
+      );
+
+      return await this.loyaltyProgramHubRequestUseCase.execute(
+        id,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/approve-hub')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async approveHub(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramHubApproveDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.approveHubValidate(id, ability);
+
+      return await this.loyaltyProgramHubApproveUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/reject-hub')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async rejectHub(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramHubRejectDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.rejectHubValidate(id, ability);
+
+      return await this.loyaltyProgramHubRejectUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('hub-requests')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  async getLoyaltyHubRequests(
+    @Request() req: any,
+    @Query() filter: LoyaltyHubRequestsFilterDto,
+  ): Promise<LoyaltyHubRequestsListResponseDto> {
+    try {
+
+      await this.loyaltyValidateRules.getHubRequestsValidate(req.ability);
+
+      return await this.findLoyaltyHubRequestsUseCase.execute(filter);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Marketologist or Manager Only
+  @Post('participant-request')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(201)
+  async createParticipantRequest(
+    @Request() req: any,
+    @Body() data: LoyaltyProgramParticipantRequestDto,
+  ): Promise<any> {
+    try {
+      const { user } = req;
+      
+      await this.loyaltyValidateRules.createLoyaltyProgramParticipantRequestValidate(
+        data.ltyProgramId,
+        data.organizationId,
+        user.id
+      );
+
+      return await this.createLoyaltyProgramParticipantRequestUseCase.execute(
+        data.ltyProgramId,
+        data.organizationId,
+        data.requestComment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/approve-participant')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async approveParticipant(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramParticipantApproveDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.approveParticipantRequestValidate(id, ability);
+
+      return await this.loyaltyProgramParticipantApproveUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Put('programs/:id/reject-participant')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  @HttpCode(200)
+  async rejectParticipant(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: LoyaltyProgramParticipantRejectDto,
+  ): Promise<any> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.rejectParticipantRequestValidate(id, ability);
+
+      return await this.loyaltyProgramParticipantRejectUseCase.execute(
+        id,
+        user,
+        data.comment,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  // Super Admin only
+  @Get('participant-requests')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new SuperAdminAbility())
+  async getLoyaltyParticipantRequests(
+    @Request() req: any,
+    @Query() filter: LoyaltyParticipantRequestsFilterDto,
+  ): Promise<LoyaltyParticipantRequestsListResponseDto> {
+    try {
+
+      await this.loyaltyValidateRules.getParticipantRequestsValidate(req.ability);
+
+      return await this.findLoyaltyParticipantRequestsUseCase.execute(filter);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

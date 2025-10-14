@@ -61,8 +61,11 @@ import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-up
 import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/category-update.dto';
 import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
+import { WarehousePaginatedResponseDto } from '@platform-user/core-controller/dto/response/warehouse-paginated-response.dto';
+import { WarehousePaginatedFilterDto } from '@platform-user/core-controller/dto/receive/warehouse-paginated-filter.dto';
 import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { NomenclatureFilterDto } from '@platform-user/core-controller/dto/receive/nomenclature-filter.dto';
 import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
 import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
 import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
@@ -276,7 +279,7 @@ export class WarehouseController {
   @HttpCode(200)
   async getAllNomenclatureByOrgId(
     @Param('orgId', ParseIntPipe) orgId: number,
-    @Query() params: PaginationDto,
+    @Query() params: NomenclatureFilterDto,
   ): Promise<any> {
     try {
       let skip = undefined;
@@ -293,6 +296,7 @@ export class WarehouseController {
         status: NomenclatureStatus.ACTIVE,
         skip: skip,
         take: take,
+        search: params.search,
       });
     } catch (e) {
       if (e instanceof WarehouseException) {
@@ -887,6 +891,58 @@ export class WarehouseController {
       }
     }
   }
+
+  @Get('paginated')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllByPosIdPaginated(
+    @Request() req: any,
+    @Query() params: WarehousePaginatedFilterDto,
+  ): Promise<WarehousePaginatedResponseDto> {
+    try {
+      const { ability } = req;
+
+      const page = params.page || 1;
+      const size = params.size || 10;
+      const skip = size * (page - 1);
+      const take = size;
+
+      const [data, { count: total }] = await Promise.all([
+        this.findMethodsWarehouseUseCase.getAllByOrganizationId(params.organizationId, ability, params.posId, skip, take),
+        this.findMethodsWarehouseUseCase.getCountAllByOrganizationId(params.organizationId, ability, params.posId),
+      ]);
+      
+      const totalPages = Math.ceil(total / size);
+      const hasNext = page < totalPages;
+      const hasPrevious = page > 1;
+      
+      return {
+        data,
+        total,
+        page,
+        size,
+        totalPages,
+        hasNext,
+        hasPrevious,
+      };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   @Get('count')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
@@ -1140,6 +1196,8 @@ export class WarehouseController {
         ability,
         params.placementId,
         warehouse,
+        params.page,
+        params.size,
       );
     } catch (e) {
       if (e instanceof WarehouseException) {

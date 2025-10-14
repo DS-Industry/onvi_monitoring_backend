@@ -9,11 +9,11 @@ datasource db {
 }
 
 model Organization {
-  id                       Int                       @id @default(autoincrement())
-  name                     String                    @unique
-  slug                     String                    @unique
+  id                       Int                            @id @default(autoincrement())
+  name                     String                         @unique
+  slug                     String                         @unique
   address                  String?
-  organizationDocumentId   Int?                      @unique
+  organizationDocumentId   Int?                           @unique
   organizationStatus       StatusOrganization
   organizationType         TypeOrganization
   createdAt                DateTime
@@ -25,15 +25,17 @@ model Organization {
   hrWorker                 HrWorker[]
   cards                    LTYCard[]
   LTYCorporate             LTYCorporate[]
-  ownedLtyPrograms         LTYProgram[]              @relation("LTYProgramOwner")
+  ownedLtyPrograms         LTYProgram[]                   @relation("LTYProgramOwner")
+  LTYProgramParticipant    LTYProgramParticipant[]
+  ltyProgramRequests       LTYProgramParticipantRequest[]
+  promocodes               LTYPromocode[]
   nomenclatures            Nomenclature[]
-  organizationDocument     OrganizationDocument?     @relation(fields: [organizationDocumentId], references: [id])
-  owner                    User?                     @relation("Owner", fields: [ownerId], references: [id])
-  placement                Placement?                @relation(fields: [placementId], references: [id])
+  organizationDocument     OrganizationDocument?          @relation(fields: [organizationDocumentId], references: [id])
+  owner                    User?                          @relation("Owner", fields: [ownerId], references: [id])
+  placement                Placement?                     @relation(fields: [placementId], references: [id])
   organizationMailConfirms OrganizationMailConfirm[]
   poses                    Pos[]
-  ltyPrograms              LTYProgram[]              @relation("LTYProgramToOrganization")
-  users                    User[]                    @relation("OrganizationToUser")
+  users                    User[]                         @relation("OrganizationToUser")
 }
 
 model Address {
@@ -46,14 +48,14 @@ model Address {
 }
 
 model Placement {
-  id                  Int                  @id @default(autoincrement())
+  id                  Int            @id @default(autoincrement())
   country             String
   region              String
   utc                 String
   regionCode          String?
   hrWorkers           HrWorker[]
+  marketingPromocodes LTYPromocode[]
   clients             LTYUser[]
-  marketingPromocodes MarketingPromocode[]
   organization        Organization[]
   pos                 Pos[]
 
@@ -98,70 +100,74 @@ model OrganizationMailConfirm {
 }
 
 model User {
-  id                           Int                         @id @default(autoincrement())
-  userRoleId                   Int
-  name                         String
-  surname                      String?
-  middlename                   String?
-  birthday                     DateTime
-  phone                        String
-  email                        String                      @unique
-  password                     String
-  gender                       String?
-  position                     PositionUser?               @default(Operator)
-  status                       StatusUser?                 @default(ACTIVE)
-  avatar                       String?
-  country                      String?
-  countryCode                  Int?
-  timezone                     Int?
-  refreshTokenId               String?
-  receiveNotifications         Int?                        @default(1)
-  createdAt                    DateTime?
-  updatedAt                    DateTime?
-  fcmToken                     String?
-  cashCollectionCreated        CashCollection[]            @relation("CreatedByUser")
-  cashCollectionUpdated        CashCollection[]            @relation("UpdateByUser")
-  hrPaymentCreated             HrPayment[]                 @relation("CreatedByUser")
-  hrPaymentUpdated             HrPayment[]                 @relation("UpdatedByUser")
-  incidentsCreated             Incident[]                  @relation("CreatedByUser")
-  incidentsUpdated             Incident[]                  @relation("UpdateByUser")
-  incidentWorker               Incident[]                  @relation("Worker")
-  bonusOpers                   LTYBonusOper[]
-  mngSaleDocumentCreated       MNGSaleDocument[]           @relation("CreatedByUser")
-  mngSaleDocumentResponsible   MNGSaleDocument[]           @relation("ResponsibleManager")
-  mngSaleDocumentUpdated       MNGSaleDocument[]           @relation("UpdateByUser")
-  workDayShiftReportCreated    MNGShiftReport[]            @relation("CreatedByUser")
-  workDayShiftReportUpdated    MNGShiftReport[]            @relation("UpdateByUser")
-  managerPaperCreated          ManagerPaper[]              @relation("CreatedByUser")
-  managerPaperUpdated          ManagerPaper[]              @relation("UpdatedByUser")
-  managerPapers                ManagerPaper[]
-  managerReportPeriodCreated   ManagerReportPeriod[]       @relation("CreatedByUser")
-  managerReportPeriodUpdated   ManagerReportPeriod[]       @relation("UpdatedByUser")
-  managerReportPeriod          ManagerReportPeriod[]
-  marketingCampaignsCreated    MarketingCampaign[]         @relation("MarketingCampaignCreatedBy")
-  marketingCampaignsUpdated    MarketingCampaign[]         @relation("MarketingCampaignUpdatedBy")
-  nomenclatureCreated          Nomenclature[]              @relation("CreatedByUser")
-  nomenclatureUpdated          Nomenclature[]              @relation("UpdateByUser")
-  authorNotifications          Notification[]
-  organizationOwner            Organization[]              @relation("Owner")
-  posesCreated                 Pos[]                       @relation("CreatedByUser")
-  posesUpdated                 Pos[]                       @relation("UpdateByUser")
-  reportTemplateTransactions   ReportTemplateTransaction[]
-  techTaskCreated              TechTask[]                  @relation("CreatedByUser")
-  techTaskExecutor             TechTask[]                  @relation("Executor")
-  techTaskUpdated              TechTask[]                  @relation("UpdateByUser")
-  userRole                     UserRole                    @relation(fields: [userRoleId], references: [id])
-  recipientNotifications       UserNotification[]
-  notificationTags             UserNotificationTag[]
-  warehouseCreated             Warehouse[]                 @relation("CreatedByUser")
-  warehouseManager             Warehouse[]                 @relation("Manager")
-  warehouseUpdated             Warehouse[]                 @relation("UpdateByUser")
-  warehouseDocumentCreated     WarehouseDocument[]         @relation("CreatedByUser")
-  warehouseDocumentResponsible WarehouseDocument[]         @relation("responsibleUser")
-  warehouseDocumentUpdated     WarehouseDocument[]         @relation("UpdateByUser")
-  ltyPrograms                  LTYProgram[]                @relation("LTYProgramToUser")
-  organizations                Organization[]              @relation("OrganizationToUser")
-  posesPermissions             Pos[]                       @relation("PosToUser")
+  id                            Int                            @id @default(autoincrement())
+  userRoleId                    Int
+  name                          String
+  surname                       String?
+  middlename                    String?
+  birthday                      DateTime
+  phone                         String
+  email                         String                         @unique
+  password                      String
+  gender                        String?
+  position                      PositionUser?                  @default(Operator)
+  status                        StatusUser?                    @default(ACTIVE)
+  avatar                        String?
+  country                       String?
+  countryCode                   Int?
+  timezone                      Int?
+  refreshTokenId                String?
+  receiveNotifications          Int?                           @default(1)
+  createdAt                     DateTime?
+  updatedAt                     DateTime?
+  fcmToken                      String?
+  isSuperAdmin                  Boolean                        @default(false)
+  cashCollectionCreated         CashCollection[]               @relation("CreatedByUser")
+  cashCollectionUpdated         CashCollection[]               @relation("UpdateByUser")
+  hrPaymentCreated              HrPayment[]                    @relation("CreatedByUser")
+  hrPaymentUpdated              HrPayment[]                    @relation("UpdatedByUser")
+  incidentsCreated              Incident[]                     @relation("CreatedByUser")
+  incidentsUpdated              Incident[]                     @relation("UpdateByUser")
+  incidentWorker                Incident[]                     @relation("Worker")
+  bonusOpers                    LTYBonusOper[]
+  reviewedLtyProgramHubRequests LTYProgramHubRequest[]         @relation("LTYProgramHubRequestReviewer")
+  reviewedLtyProgramRequests    LTYProgramParticipantRequest[] @relation("LTYProgramParticipantRequestReviewer")
+  createdPromocodes             LTYPromocode[]                 @relation("PromocodeCreatedBy")
+  mngSaleDocumentCreated        MNGSaleDocument[]              @relation("CreatedByUser")
+  mngSaleDocumentResponsible    MNGSaleDocument[]              @relation("ResponsibleManager")
+  mngSaleDocumentUpdated        MNGSaleDocument[]              @relation("UpdateByUser")
+  workDayShiftReportCreated     MNGShiftReport[]               @relation("CreatedByUser")
+  workDayShiftReportUpdated     MNGShiftReport[]               @relation("UpdateByUser")
+  managerPaperCreated           ManagerPaper[]                 @relation("CreatedByUser")
+  managerPaperUpdated           ManagerPaper[]                 @relation("UpdatedByUser")
+  managerPapers                 ManagerPaper[]
+  managerReportPeriodCreated    ManagerReportPeriod[]          @relation("CreatedByUser")
+  managerReportPeriodUpdated    ManagerReportPeriod[]          @relation("UpdatedByUser")
+  managerReportPeriod           ManagerReportPeriod[]
+  marketingCampaignsCreated     MarketingCampaign[]            @relation("MarketingCampaignCreatedBy")
+  marketingCampaignsUpdated     MarketingCampaign[]            @relation("MarketingCampaignUpdatedBy")
+  nomenclatureCreated           Nomenclature[]                 @relation("CreatedByUser")
+  nomenclatureUpdated           Nomenclature[]                 @relation("UpdateByUser")
+  authorNotifications           Notification[]
+  organizationOwner             Organization[]                 @relation("Owner")
+  posesCreated                  Pos[]                          @relation("CreatedByUser")
+  posesUpdated                  Pos[]                          @relation("UpdateByUser")
+  reportTemplateTransactions    ReportTemplateTransaction[]
+  techTaskCreated               TechTask[]                     @relation("CreatedByUser")
+  techTaskExecutor              TechTask[]                     @relation("Executor")
+  techTaskUpdated               TechTask[]                     @relation("UpdateByUser")
+  techTaskComments              TechTaskComment[]              @relation("TechTaskCommentAuthor")
+  userRole                      UserRole                       @relation(fields: [userRoleId], references: [id])
+  recipientNotifications        UserNotification[]
+  notificationTags              UserNotificationTag[]
+  warehouseCreated              Warehouse[]                    @relation("CreatedByUser")
+  warehouseManager              Warehouse[]                    @relation("Manager")
+  warehouseUpdated              Warehouse[]                    @relation("UpdateByUser")
+  warehouseDocumentCreated      WarehouseDocument[]            @relation("CreatedByUser")
+  warehouseDocumentResponsible  WarehouseDocument[]            @relation("responsibleUser")
+  warehouseDocumentUpdated      WarehouseDocument[]            @relation("UpdateByUser")
+  organizations                 Organization[]                 @relation("OrganizationToUser")
+  posesPermissions              Pos[]                          @relation("PosToUser")
 }
 
 model UserMailConfirm {
@@ -215,7 +221,6 @@ model Pos {
   id                     Int                      @id @default(autoincrement())
   name                   String
   slug                   String
-  timeWork               String                   @default("24")
   organizationId         Int
   posMetaData            String?
   timezone               Int
@@ -228,9 +233,12 @@ model Pos {
   createdById            Int
   updateById             Int
   placementId            Int?
+  endTime                String?
+  startTime              String?
   carWashPos             CarWashPos?
   cashCollection         CashCollection[]
   incident               Incident[]
+  promocodes             LTYPromocode[]
   loyaltyPosPromocodes   LoyaltyPosPromocode[]
   shiftReport            MNGShiftReport[]
   managerPaper           ManagerPaper[]
@@ -514,17 +522,94 @@ model ErrNum {
 }
 
 model LTYProgram {
-  id                  Int                 @id @default(autoincrement())
+  id                  Int                            @id @default(autoincrement())
   name                String
   status              LTYProgramStatus
   startDate           DateTime
   lifetimeBonusDays   Int?
   ownerOrganizationId Int?
+  isHub               Boolean                        @default(false)
+  participantLimit    Int?
+  isPublic            Boolean                        @default(false)
   cardTiers           LTYCardTier[]
-  ownerOrganization   Organization?       @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
+  ownerOrganization   Organization?                  @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
+  hubRequest          LTYProgramHubRequest?
+  programParticipants LTYProgramParticipant[]
+  participantRequests LTYProgramParticipantRequest[]
   marketingCampaigns  MarketingCampaign[]
-  organizations       Organization[]      @relation("LTYProgramToOrganization")
-  managers            User[]              @relation("LTYProgramToUser")
+}
+
+model LTYProgramParticipant {
+  id                 Int                           @id @default(autoincrement())
+  ltyProgramId       Int
+  organizationId     Int
+  status             LTYProgramParticipantStatus   @default(ACTIVE)
+  registeredAt       DateTime                      @default(now())
+  deactivatedAt      DateTime?
+  requestId          Int?
+  comment            String?
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  commissionRate     Decimal?
+  ltyProgram         LTYProgram                    @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
+  organization       Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  originalRequest    LTYProgramParticipantRequest? @relation("OriginalRequest", fields: [requestId], references: [id])
+  marketingCampaigns MarketingCampaign[]
+
+  @@unique([ltyProgramId, organizationId])
+  @@index([status])
+  @@index([ltyProgramId])
+  @@index([organizationId])
+  @@index([requestId])
+}
+
+model LTYProgramParticipantRequest {
+  id                 Int                     @id @default(autoincrement())
+  ltyProgramId       Int
+  organizationId     Int
+  status             LTYProgramRequestStatus @default(PENDING)
+  requestedAt        DateTime                @default(now())
+  reviewedAt         DateTime?
+  approvedAt         DateTime?
+  reviewedBy         Int?
+  requestComment     String?
+  responseComment    String?
+  rejectionReason    String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  createdParticipant LTYProgramParticipant[] @relation("OriginalRequest")
+  ltyProgram         LTYProgram              @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
+  organization       Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reviewer           User?                   @relation("LTYProgramParticipantRequestReviewer", fields: [reviewedBy], references: [id])
+
+  @@unique([ltyProgramId, organizationId])
+  @@index([status])
+  @@index([ltyProgramId])
+  @@index([organizationId])
+  @@index([requestedAt])
+  @@index([approvedAt])
+}
+
+model LTYProgramHubRequest {
+  id              Int                     @id @default(autoincrement())
+  ltyProgramId    Int                     @unique
+  status          LTYProgramRequestStatus @default(PENDING)
+  requestedAt     DateTime                @default(now())
+  reviewedAt      DateTime?
+  approvedAt      DateTime?
+  reviewedBy      Int?
+  requestComment  String?
+  responseComment String?
+  rejectionReason String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  ltyProgram      LTYProgram              @relation(fields: [ltyProgramId], references: [id], onDelete: Cascade)
+  reviewer        User?                   @relation("LTYProgramHubRequestReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([status])
+  @@index([ltyProgramId])
+  @@index([requestedAt])
+  @@index([approvedAt])
 }
 
 model LoyaltyPosPromocode {
@@ -615,6 +700,7 @@ model LTYUser {
   is_notifications_enabled Boolean?                 @default(true)
   card                     LTYCard?
   ownerCorporates          LTYCorporate[]           @relation("Owner")
+  promocodes               LTYPromocode[]
   placement                Placement?               @relation(fields: [placementId], references: [id])
   workerCorporate          LTYCorporate?            @relation("Worker", fields: [workerCorporateId], references: [id])
   meta                     LTYUserMeta?             @relation("LTYUserToLTYUserMeta")
@@ -833,13 +919,27 @@ model TechTask {
   nextCreateDate               DateTime?
   endSpecifiedDate             DateTime?
   markdownDescription          String?
-  period                       Int?
+  periodType                   PeriodType?
+  customPeriodDays             Int?
   createdBy                    User                          @relation("CreatedByUser", fields: [createdById], references: [id])
   executor                     User?                         @relation("Executor", fields: [executorId], references: [id])
   pos                          Pos?                          @relation(fields: [posId], references: [id])
   updateBy                     User                          @relation("UpdateByUser", fields: [updateById], references: [id])
   techTaskItemValueToTechTasks TechTaskItemValueToTechTask[]
   tags                         TechTaskTag[]                 @relation("TechTaskToTechTaskTag")
+  comments                     TechTaskComment[]
+}
+
+model TechTaskComment {
+  id         Int      @id @default(autoincrement())
+  content    String
+  imageUrl   String?
+  techTaskId Int
+  authorId   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  techTask   TechTask @relation(fields: [techTaskId], references: [id], onDelete: Cascade)
+  author     User     @relation("TechTaskCommentAuthor", fields: [authorId], references: [id])
 }
 
 model TechTaskTag {
@@ -1115,6 +1215,7 @@ model MNGShiftReport {
   status                      StatusWorkDayShiftReport?
   cashAtStart                 Int?
   cashAtEnd                   Int?
+  dailyShiftPayout            Int?
   comment                     String?
   createdAt                   DateTime
   updatedAt                   DateTime
@@ -1200,13 +1301,14 @@ model HrWorker {
   avatar              String?
   monthlySalary       Int
   dailySalary         Int
-  percentageSalary    Int
+  bonusPayout         Int?
   gender              String?
   citizenship         String?
   passportSeries      String?
   passportNumber      String?
   passportExtradition String?
   passportDateIssue   DateTime?
+  registrationAddress String?
   inn                 String?
   snils               String?
   placementId         Int
@@ -1241,6 +1343,8 @@ model HrPayment {
   createdById  Int
   paymentType  PaymentType
   countShifts  Int
+  virtualSum   Int?        @default(0)
+  comment      String?
   updatedAt    DateTime?
   updatedById  Int?
   createdBy    User        @relation("CreatedByUser", fields: [createdById], references: [id])
@@ -1363,68 +1467,91 @@ model MNGSaleItem {
 }
 
 model MarketingCampaign {
-  id            Int                      @id @default(autoincrement())
-  name          String
-  status        MarketingCampaignStatus  @default(DRAFT)
-  type          MarketingCampaignType
-  launchDate    DateTime
-  endDate       DateTime?
-  description   String?
-  ltyProgramId  Int?
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-  createdById   Int
-  updatedById   Int
-  discountType  MarketingDiscountType?
-  discountValue Float?
-  createdBy     User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
-  ltyProgram    LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
-  updatedBy     User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
-  campaignUsage MarketingCampaignUsage[]
-  promocodes    MarketingPromocode[]
-  ltyUsers      LTYUser[]                @relation("MarketingCampaignToLTYUser")
-  poses         Pos[]                    @relation("MarketingCampaignToPos")
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+  status                  MarketingCampaignStatus  @default(DRAFT)
+  type                    MarketingCampaignType
+  launchDate              DateTime
+  endDate                 DateTime?
+  description             String?
+  ltyProgramId            Int?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  createdById             Int
+  updatedById             Int
+  discountType            MarketingDiscountType?
+  discountValue           Float?
+  ltyProgramParticipantId Int?
+  promocodes              LTYPromocode[]
+  createdBy               User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  ltyProgram              LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramParticipant   LTYProgramParticipant?   @relation(fields: [ltyProgramParticipantId], references: [id])
+  updatedBy               User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  campaignUsage           MarketingCampaignUsage[]
+  ltyUsers                LTYUser[]                @relation("MarketingCampaignToLTYUser")
+  poses                   Pos[]                    @relation("MarketingCampaignToPos")
 
   @@index([status])
   @@index([type])
   @@index([launchDate])
   @@index([ltyProgramId])
+  @@index([ltyProgramParticipantId])
 }
 
-model MarketingPromocode {
-  id            Int                      @id @default(autoincrement())
-  campaignId    Int
-  promocode     String                   @unique
-  discountType  MarketingDiscountType
-  discountValue Float
-  maxUsage      Int?
-  currentUsage  Int                      @default(0)
-  isActive      Boolean                  @default(true)
-  createdAt     DateTime                 @default(now())
-  updatedAt     DateTime                 @updatedAt
-  placementId   Int?
-  usage         MarketingCampaignUsage[]
-  campaign      MarketingCampaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  placement     Placement?               @relation(fields: [placementId], references: [id])
+model LTYPromocode {
+  id                 Int                      @id @default(autoincrement())
+  campaignId         Int?
+  code               String                   @unique
+  promocodeType      PromocodeType
+  personalUserId     Int?
+  discountType       DiscountType
+  discountValue      Decimal                  @db.Decimal(10, 2)
+  minOrderAmount     Decimal?                 @db.Decimal(10, 2)
+  maxDiscountAmount  Decimal?                 @db.Decimal(10, 2)
+  maxUsage           Int?
+  maxUsagePerUser    Int                      @default(1)
+  currentUsage       Int                      @default(0)
+  validFrom          DateTime                 @default(now())
+  validUntil         DateTime?
+  isActive           Boolean                  @default(true)
+  createdByManagerId Int?
+  createdReason      String?
+  usageRestrictions  Json?
+  organizationId     Int?
+  posId              Int?
+  placementId        Int?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  campaign           MarketingCampaign?       @relation(fields: [campaignId], references: [id])
+  createdByManager   User?                    @relation("PromocodeCreatedBy", fields: [createdByManagerId], references: [id])
+  organization       Organization?            @relation(fields: [organizationId], references: [id])
+  personalUser       LTYUser?                 @relation(fields: [personalUserId], references: [id])
+  placement          Placement?               @relation(fields: [placementId], references: [id])
+  pos                Pos?                     @relation(fields: [posId], references: [id])
+  usage              MarketingCampaignUsage[]
 
-  @@index([campaignId])
-  @@index([promocode])
-  @@index([isActive])
+  @@index([code, isActive])
+  @@index([campaignId, promocodeType])
+  @@index([personalUserId, isActive])
+  @@index([createdByManagerId, promocodeType])
+  @@index([organizationId, isActive])
+  @@index([posId, isActive])
+  @@index([validFrom, validUntil])
 }
 
 model MarketingCampaignUsage {
-  id             Int                 @id @default(autoincrement())
+  id             Int               @id @default(autoincrement())
   campaignId     Int
   promocodeId    Int?
   ltyUserId      Int
-  usedAt         DateTime            @default(now())
+  usedAt         DateTime          @default(now())
   discountAmount Float
   orderAmount    Float
   posId          Int?
-  campaign       MarketingCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  ltyUser        LTYUser             @relation(fields: [ltyUserId], references: [id], onDelete: Cascade)
-  pos            Pos?                @relation(fields: [posId], references: [id])
-  promocode      MarketingPromocode? @relation(fields: [promocodeId], references: [id])
+  campaign       MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  ltyUser        LTYUser           @relation(fields: [ltyUserId], references: [id], onDelete: Cascade)
+  pos            Pos?              @relation(fields: [posId], references: [id])
+  promocode      LTYPromocode?     @relation(fields: [promocodeId], references: [id])
 
   @@index([campaignId])
   @@index([ltyUserId])
@@ -1515,6 +1642,14 @@ enum StatusTechTask {
   PAUSE
   OVERDUE
   RETURNED
+}
+
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
 }
 
 enum TypeTechTaskItemTemplate {
@@ -1708,6 +1843,7 @@ enum CurrencyType {
 enum CurrencyView {
   COIN
   PAPER
+  POS
 }
 
 enum PermissionAction {
@@ -1740,4 +1876,28 @@ enum StatusDeviceDataRaw {
   NEW
   PENDING
   DONE
+}
+
+enum LTYProgramRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum LTYProgramParticipantStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum PromocodeType {
+  CAMPAIGN
+  PERSONAL
+  STANDALONE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SERVICE
 }

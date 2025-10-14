@@ -33,8 +33,8 @@ export class WorkerCreateDto {
   @IsNotEmpty({ message: 'dailySalary is required' })
   dailySalary: number;
   @Transform(({ value }) => parseInt(value))
-  @IsNotEmpty({ message: 'percentageSalary is required' })
-  percentageSalary: number;
+  @IsNotEmpty({ message: 'bonusPayout is required' })
+  bonusPayout: number;
   @IsOptional()
   @IsString()
   gender?: string;
@@ -59,4 +59,7 @@ export class WorkerCreateDto {
   @IsOptional()
   @IsString()
   snils?: string;
+  @IsOptional()
+  @IsString()
+  registrationAddress?: string;
 }

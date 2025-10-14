@@ -57,10 +57,10 @@ export class Corporate extends BaseEntity<CorporateProps> {
   set address(address: string) {
     this.props.address = address;
   }
-  get ownerId(): number {
+  get ownerId(): number | undefined {
     return this.props.ownerId;
   }
-  set ownerId(ownerId: number) {
+  set ownerId(ownerId: number | undefined) {
     this.props.ownerId = ownerId;
   }
   get createdAt(): Date {

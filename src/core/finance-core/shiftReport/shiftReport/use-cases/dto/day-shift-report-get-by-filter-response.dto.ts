@@ -9,6 +9,8 @@ export class ShiftReportReceiverResponseDto {
   workerId: number;
   posId: number;
   workerName?: string;
+  dailySalary?: number;
+  bonusPayout?: number;
   totalCar?: number;
   workDate: Date;
   typeWorkDay: TypeWorkDay;
@@ -29,10 +31,12 @@ export class ShiftReportReceiverResponseDto {
 export class GradingParameterInfo {
   id: number;
   name: string;
+  weightPercent: number;
   estimationId?: number;
 }
 
 export class GradingEstimationInfo {
   id: number;
   name: string;
+  weightPercent: number;
 }

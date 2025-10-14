@@ -1,13 +1,14 @@
 import { Address } from '@address/domain/address';
 import { BaseEntity } from '@utils/entity';
-import { StatusPos } from '@prisma/client';
+import { CarWashPosType, StatusPos } from '@prisma/client';
 
 
 export interface PosProps {
   id?: number;
   name: string;
   slug: string;
-  timeWork: string;
+  startTime?: string;
+  endTime?: string;
   organizationId: number;
   posMetaData?: string;
   timezone: number;
@@ -21,6 +22,10 @@ export interface PosProps {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  carWashPosType?: CarWashPosType;
+  minSumOrder?: number;
+  maxSumOrder?: number;
+  stepSumOrder?: number;
 }
 
 export class Pos extends BaseEntity<PosProps> {
@@ -40,8 +45,12 @@ export class Pos extends BaseEntity<PosProps> {
     return this.props.slug;
   }
 
-  get timeWork(): string {
-    return this.props.timeWork;
+  get startTime(): string {
+    return this.props.startTime;
+  }
+
+  get endTime(): string {
+    return this.props.endTime;
   }
 
   get organizationId(): number {
@@ -96,6 +105,22 @@ export class Pos extends BaseEntity<PosProps> {
     return this.props.updatedById;
   }
 
+  get carWashPosType(): CarWashPosType {
+    return this.props.carWashPosType;
+  }
+
+  get minSumOrder(): number {
+    return this.props.minSumOrder;
+  }
+
+  get maxSumOrder(): number {
+    return this.props.maxSumOrder;
+  }
+
+  get stepSumOrder(): number {
+    return this.props.stepSumOrder;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -104,8 +129,12 @@ export class Pos extends BaseEntity<PosProps> {
     this.props.slug = slug;
   }
 
-  set timeWork(timeWork: string) {
-    this.props.timeWork = timeWork;
+  set startTime(startTime: string) {
+    this.props.startTime = startTime;
+  }
+
+  set endTime(endTime: string) {
+    this.props.endTime = endTime;
   }
 
   set organizationId(organizationId: number) {
@@ -146,5 +175,21 @@ export class Pos extends BaseEntity<PosProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set carWashPosType(carWashPosType: CarWashPosType) {
+    this.props.carWashPosType = carWashPosType;
+  }
+
+  set minSumOrder(minSumOrder: number) {
+    this.props.minSumOrder = minSumOrder;
+  }
+  
+  set maxSumOrder(maxSumOrder: number) {
+    this.props.maxSumOrder = maxSumOrder;
+  }
+
+  set stepSumOrder(stepSumOrder: number) {
+    this.props.stepSumOrder = stepSumOrder;
   }
 }

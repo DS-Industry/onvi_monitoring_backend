@@ -58,6 +58,9 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         where: {
           cashCollectionId: cashCollectionId,
         },
+        orderBy: {
+          carWashDeviceId: 'asc',
+        },
       });
     return cashCollectionDevices.map((cashCollectionDevice) =>
       PrismaCashCollectionDeviceMapper.toDomain(cashCollectionDevice),
@@ -198,7 +201,7 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         "Currency" c ON cwoe."currencyId" = c.id
       WHERE
         cwoe."operDate" BETWEEN tr."oldTookMoneyTime" AND tr."tookMoneyTime"
-        AND (c."currencyView" IS NULL OR (c."currencyView" != 'COIN' AND c."currencyView" != 'PAPER'))
+        AND c."currencyView" = 'POS'
       GROUP BY
         tr."deviceId"
     ),
@@ -346,7 +349,7 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         "Currency" c ON cwoe."currencyId" = c.id
       WHERE
         cwoe."operDate" BETWEEN tr."oldTookMoneyTime" AND tr."tookMoneyTime"
-        AND (c."currencyView" IS NULL OR (c."currencyView" != 'COIN' AND c."currencyView" != 'PAPER'))
+        AND c."currencyView" = 'POS'
     ),
     card_operations AS (
       SELECT

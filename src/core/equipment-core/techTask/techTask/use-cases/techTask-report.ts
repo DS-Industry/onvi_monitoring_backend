@@ -17,24 +17,47 @@ export class ReportTechTaskUseCase {
 
   async execute(
     user: User,
-    posId?: number,
-    type?: TypeTechTask,
+    filterData: {
+      posId?: number;
+      organizationId?: number;
+      type?: TypeTechTask;
+      name?: string;
+      executorId?: number;
+      tags?: string[];
+      startDate?: Date;
+      endDate?: Date;
+      authorId?: number;
+    },
     skip?: number,
     take?: number,
   ): Promise<TechTaskReadAllResponseDto> {
     const response: TechTaskReadAllResponse[] = [];
     const [totalCount, techTasks] = await Promise.all([
       this.findMethodsTechTaskUseCase.getCountByFilter({
-        posId: posId,
+        posId: filterData.posId,
         userId: user.id,
+        organizationId: filterData.organizationId,
         statuses: [StatusTechTask.FINISHED],
-        type: type,
+        type: filterData.type,
+        name: filterData.name,
+        tags: filterData.tags,
+        gteStartDate: filterData.startDate,
+        lteEndSpecifiedDate: filterData.endDate,
+        authorId: filterData.authorId,
+        executorId: filterData.executorId,
       }),
       this.findMethodsTechTaskUseCase.getAllByFilter({
-        posId: posId,
+        posId: filterData.posId,
         userId: user.id,
+        organizationId: filterData.organizationId,
         statuses: [StatusTechTask.FINISHED],
-        type: type,
+        type: filterData.type,
+        name: filterData.name,
+        tags: filterData.tags,
+        gteStartDate: filterData.startDate,
+        lteEndSpecifiedDate: filterData.endDate,
+        authorId: filterData.authorId,
+        executorId: filterData.executorId,
         skip: skip,
         take: take,
       }),
@@ -47,6 +70,7 @@ export class ReportTechTaskUseCase {
         id: techTask.id,
         name: techTask.name,
         posId: techTask.posId,
+        posName: techTask.posName,
         type: techTask.type,
         status: techTask.status,
         endSpecifiedDate: techTask?.endSpecifiedDate,
@@ -54,6 +78,8 @@ export class ReportTechTaskUseCase {
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,
         tags: techTags.map((tag) => tag.getProps()),
+        createdBy: techTask.createdBy || null,
+        executor: techTask.executor || null
       });
     }
 

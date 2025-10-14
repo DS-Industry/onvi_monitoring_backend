@@ -67,4 +67,41 @@ export class FindMethodsPaymentUseCase {
       billingMonthCorrect,
     );
   }
+
+  async getCountByFilter(
+    startPaymentDate?: Date | '*',
+    endPaymentDate?: Date | '*',
+    hrWorkerId?: number | '*',
+    paymentType?: PaymentType | '*',
+    billingMonth?: Date | '*',
+  ): Promise<number> {
+    let startPaymentDateCorrect = undefined;
+    let endPaymentDateCorrect = undefined;
+    let hrWorkerIdCorrect = undefined;
+    let paymentTypeCorrect = undefined;
+    let billingMonthCorrect = undefined;
+    if (startPaymentDate != '*') {
+      startPaymentDateCorrect = startPaymentDate;
+    }
+    if (endPaymentDate != '*') {
+      endPaymentDateCorrect = endPaymentDate;
+    }
+    if (hrWorkerId != '*') {
+      hrWorkerIdCorrect = hrWorkerId;
+    }
+    if (paymentType != '*') {
+      paymentTypeCorrect = paymentType;
+    }
+    if (billingMonth != '*') {
+      billingMonthCorrect = billingMonth;
+    }
+
+    return await this.paymentRepository.findCountByFilter(
+      startPaymentDateCorrect,
+      endPaymentDateCorrect,
+      hrWorkerIdCorrect,
+      paymentTypeCorrect,
+      billingMonthCorrect,
+    );
+  }
 }

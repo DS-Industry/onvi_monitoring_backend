@@ -18,6 +18,11 @@ export abstract class ITechTaskRepository {
     codeTag?: string,
     skip?: number,
     take?: number,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
+    executorId?: number,
   ): Promise<TechTask[]>;
   abstract countAllByFilter(
     posId?: number,
@@ -31,6 +36,11 @@ export abstract class ITechTaskRepository {
     type?: TypeTechTask,
     statuses?: StatusTechTask[],
     codeTag?: string,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
+    executorId?: number,
   ): Promise<number>;
   abstract update(input: TechTask): Promise<TechTask>;
   abstract updateConnectionTag(
@@ -38,4 +48,7 @@ export abstract class ITechTaskRepository {
     addTagIds: number[],
     deleteTagIds: number[],
   ): Promise<any>;
+  abstract delete(id: number): Promise<void>;
+  abstract deleteMany(ids: number[]): Promise<void>;
+  abstract findManyByIds(ids: number[], posId?: number, organizationId?: number): Promise<TechTask[]>;
 }

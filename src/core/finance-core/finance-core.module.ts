@@ -1,6 +1,6 @@
-import { Module, Provider } from '@nestjs/common';
+import { Module, Provider, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
-import { BusinessCoreModule } from '@business-core/business-core.module';
+import { HrCoreModule } from '@hr/hr-core.module';
 import { CashCollectionRepositoryProvider } from '@finance/cashCollection/cashCollection/provider/cashCollection';
 import { CashCollectionDeviceRepositoryProvider } from '@finance/cashCollection/cashCollectionDevice/provider/cashCollectionDevice';
 import { CashCollectionDeviceTypeRepositoryProvider } from '@finance/cashCollection/cashCollectionDeviceType/provider/cashCollectionDeviceType';
@@ -29,6 +29,7 @@ import { FindMethodsShiftReportCashOperUseCase } from '@finance/shiftReport/shif
 import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
 import { GetOperDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-oper-data';
 import { SendShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-send';
+import { DeleteShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-delete';
 import { GradingEstimationRepositoryProvider } from '@finance/shiftReport/gradingEstimation/provider/gradingEstimation';
 import { GradingParameterRepositoryProvider } from '@finance/shiftReport/gradingParameter/provider/gradingParameter';
 import { ShiftGradingRepositoryProvider } from '@finance/shiftReport/shiftGrading/provider/shiftGrading';
@@ -39,6 +40,7 @@ import { FullDataShiftReportUseCase } from "@finance/shiftReport/shiftReport/use
 import {
   CalculationPaymentShiftReportUseCase
 } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment";
+import { CalculateDailyPayoutShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout";
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -83,6 +85,8 @@ const shiftReportUseCase: Provider[] = [
   SendShiftReportUseCase,
   FullDataShiftReportUseCase,
   CalculationPaymentShiftReportUseCase,
+  CalculateDailyPayoutShiftReportUseCase,
+  DeleteShiftReportUseCase,
 ];
 
 const shiftReportCashOperUseCase: Provider[] = [
@@ -97,7 +101,7 @@ const shiftGradingUseCase: Provider[] = [
   FindMethodsGradingEstimationUseCase,
 ];
 @Module({
-  imports: [PrismaModule, BusinessCoreModule],
+  imports: [PrismaModule, forwardRef(() => HrCoreModule)],
   providers: [
     ...repositories,
     ...cashCollectionUseCase,

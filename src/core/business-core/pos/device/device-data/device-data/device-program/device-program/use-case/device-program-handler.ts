@@ -35,7 +35,7 @@ export class DeviceProgramHandlerUseCase {
       input.deviceId,
     );
     if (!device) {
-      errNumId = 7;
+      throw new Error('Неизвестное устройство: ' + input.deviceId);
     } else {
       deviceId = device.id;
     }
