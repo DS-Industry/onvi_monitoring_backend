@@ -22,10 +22,6 @@ export class CardService {
     return {
       unqNumber: card.unqNumber,
       balance: card.balance,
-      // Note: onviBonusSum and promoCodeSum don't exist in LTYCard
-      // These would need to be calculated from related tables if needed
-      onviBonusSum: 0,
-      promoCodeSum: 0,
     };
   }
 }

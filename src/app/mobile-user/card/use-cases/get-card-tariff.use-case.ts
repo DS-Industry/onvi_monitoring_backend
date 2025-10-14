@@ -1,21 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { ICardRepository } from '../domain/card.repository.interface';
 
 @Injectable()
 export class GetCardTariffUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject('ICardRepository') private readonly cardRepository: ICardRepository) {}
 
   async execute(user: any): Promise<{ cashBack: number }> {
-    const card = await this.prisma.lTYCard.findFirst({
-      where: { clientId: user.clientId },
-      include: {
-        cardTier: {
-          include: {
-            benefits: true,
-          },
-        },
-      },
-    });
+    const card = await this.cardRepository.findFirstByClientIdWithCardTierAndBenefits(user.clientId);
 
     if (!card || !card.cardTier) {
       throw new Error('Card or card tier not found');

@@ -1,4 +1,4 @@
-import { LTYCard, LTYCardTier, LTYUser, Organization } from '@prisma/client';
+import { LTYCard, LTYCardTier, LTYUser, Organization, LTYBenefit } from '@prisma/client';
 
 export class Card {
   constructor(
@@ -13,12 +13,14 @@ export class Card {
     public readonly updatedAt: Date | null,
     public readonly cardTierId: number | null,
     public readonly organizationId: number | null,
-    public readonly cardTier?: LTYCardTier | null,
+    public readonly isLocked: boolean | null,
+    public readonly isDeleted: boolean | null,
+    public readonly cardTier?: (LTYCardTier & { benefits?: LTYBenefit[] }) | null,
     public readonly client?: LTYUser | null,
     public readonly organization?: Organization | null,
   ) {}
 
-  static fromPrisma(card: LTYCard & { cardTier?: LTYCardTier | null; client?: LTYUser | null; organization?: Organization | null }): Card {
+  static fromPrisma(card: LTYCard & { cardTier?: (LTYCardTier & { benefits?: LTYBenefit[] }) | null; client?: LTYUser | null; organization?: Organization | null }): Card {
     return new Card(
       card.id,
       card.balance,
@@ -31,6 +33,8 @@ export class Card {
       card.updatedAt,
       card.cardTierId,
       card.organizationId,
+      card.isLocked,
+      card.isDeleted,
       card.cardTier,
       card.client,
       card.organization,
@@ -45,11 +49,19 @@ export class Card {
     return this.unqNumber;
   }
 
-  getCardTier(): LTYCardTier | null {
+  getCardTier(): (LTYCardTier & { benefits?: LTYBenefit[] }) | null {
     return this.cardTier || null;
   }
 
   getClient(): LTYUser | null {
     return this.client || null;
+  }
+
+  isCardActive(): boolean {
+    return this.isDeleted === null || this.isDeleted === false;
+  }
+
+  isCardLocked(): boolean {
+    return this.isLocked === true;
   }
 }

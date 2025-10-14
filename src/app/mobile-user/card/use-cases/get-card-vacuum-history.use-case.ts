@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { ICardRepository } from '../domain/card.repository.interface';
 import { CardHistoryRepository } from '../repository/card-history.repository';
 import { CardHist } from '../domain/card-hist.entity';
 import { OrderStatus } from '@prisma/client';
@@ -7,7 +7,7 @@ import { OrderStatus } from '@prisma/client';
 @Injectable()
 export class GetCardVacuumHistoryUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject('ICardRepository') private readonly cardRepository: ICardRepository,
     private readonly cardHistoryRepository: CardHistoryRepository,
   ) {}
 
@@ -17,9 +17,7 @@ export class GetCardVacuumHistoryUseCase {
     endDate?: Date,
     deviceType: string = 'VACUUM',
   ): Promise<CardHist[]> {
-    const card = await this.prisma.lTYCard.findFirst({
-      where: { clientId: user.clientId },
-    });
+    const card = await this.cardRepository.findFirstByClientId(user.clientId);
 
     if (!card) {
       return [];
@@ -30,7 +28,7 @@ export class GetCardVacuumHistoryUseCase {
     defaultStartDate.setDate(defaultEndDate.getDate() - 30);
 
     return await this.cardHistoryRepository.findByDeviceTypeAndDate(
-      card.unqNumber,
+      card.getUnqNumber(),
       defaultStartDate,
       defaultEndDate,
       deviceType,

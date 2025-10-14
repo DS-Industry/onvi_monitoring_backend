@@ -60,21 +60,95 @@ export class CardRepository implements ICardRepository {
     return card?.cardTierId || null;
   }
 
-  async delete(cardId: number): Promise<void> {
-    await this.prisma.lTYCard.delete({
+  async delete(cardId: number, tx?: any): Promise<void> {
+    const client = tx || this.prisma;
+    await client.lTYCard.delete({
       where: { id: cardId },
     });
   }
 
   async lock(cardId: number): Promise<void> {
-    // For now, we'll implement this as a soft delete or status change
-    // Since LTYCard doesn't have a locked field, we might need to add one
-    // or implement this differently based on business requirements
-    throw new Error('Lock functionality not implemented yet');
+    await this.prisma.lTYCard.update({
+      where: { id: cardId },
+      data: { isLocked: true },
+    });
   }
 
   async reactivate(cardId: number): Promise<void> {
-    // Similar to lock, this might need to be implemented based on business requirements
-    throw new Error('Reactivate functionality not implemented yet');
+    await this.prisma.lTYCard.update({
+      where: { id: cardId },
+      data: { 
+        isDeleted: false,
+        isLocked: false,
+      },
+    });
+  }
+
+  async findActiveCards(clientId: number): Promise<Card[]> {
+    const cards = await this.prisma.lTYCard.findMany({
+      where: { 
+        clientId,
+        isDeleted: { not: true }, 
+        isLocked: { not: true },
+      },
+      include: {
+        cardTier: true,
+        client: true,
+        organization: true,
+      },
+    });
+
+    return cards.map(card => Card.fromPrisma(card));
+  }
+
+  async findFirstByClientId(clientId: number): Promise<Card | null> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: { clientId },
+      include: {
+        cardTier: true,
+        client: true,
+        organization: true,
+      },
+    });
+
+    return card ? Card.fromPrisma(card) : null;
+  }
+
+  async findFirstByClientIdWithCardTier(clientId: number): Promise<Card | null> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: { clientId },
+      include: {
+        cardTier: true,
+        client: true,
+        organization: true,
+      },
+    });
+
+    return card ? Card.fromPrisma(card) : null;
+  }
+
+  async findFirstByClientIdWithCardTierAndBenefits(clientId: number): Promise<Card | null> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: { clientId },
+      include: {
+        cardTier: {
+          include: {
+            benefits: true,
+          },
+        },
+        client: true,
+        organization: true,
+      },
+    });
+
+    return card ? Card.fromPrisma(card) : null;
+  }
+
+  async updateBalance(cardId: number, newBalance: number, tx?: any): Promise<void> {
+    const client = tx || this.prisma;
+    await client.lTYCard.update({
+      where: { id: cardId },
+      data: { balance: newBalance },
+    });
   }
 }

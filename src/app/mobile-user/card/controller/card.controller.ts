@@ -78,7 +78,7 @@ export class CardController {
     @Request() request: any,
   ): Promise<any> {
     const { user } = request;
-    return await this.getCardTransferDataUseCase.execute(query.devNomer, user);
+    return await this.getCardTransferDataUseCase.execute(query.devNomer);
   }
 
   @Post('/transfer')

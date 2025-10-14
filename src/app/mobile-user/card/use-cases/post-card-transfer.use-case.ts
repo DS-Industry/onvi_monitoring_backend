@@ -1,98 +1,68 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
-import { CardRepository } from '../infrastructure/card.repository';
+import { Injectable, Inject } from '@nestjs/common';
+import { ICardRepository } from '../domain/card.repository.interface';
+import { IClientRepository } from '../domain/client.repository.interface';
+import { IBonusOperRepository } from '../domain/bonus-oper.repository.interface';
+import { ITransactionService } from '../domain/transaction.service.interface';
 import { CardTransferDto } from '../controller/dto/card-transfer.dto';
 
 @Injectable()
 export class PostCardTransferUseCase {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly cardRepository: CardRepository,
+    @Inject('ICardRepository') private readonly cardRepository: ICardRepository,
+    @Inject('IClientRepository') private readonly clientRepository: IClientRepository,
+    @Inject('IBonusOperRepository') private readonly bonusOperRepository: IBonusOperRepository,
+    @Inject('ITransactionService') private readonly transactionService: ITransactionService,
   ) {}
 
   async execute(input: CardTransferDto, user: any): Promise<any> {
-    // Get the card to transfer from
     const card = await this.cardRepository.findOneByUnqNumberWithClient(input.devNomer);
     
     if (!card) {
       throw new Error(`Card with number ${input.devNomer} not found`);
     }
 
-    // Get the old client
-    const oldClient = await this.prisma.lTYUser.findUnique({
-      where: { id: card.clientId! },
-    });
+    const oldClient = await this.clientRepository.findById(card.clientId!);
 
     if (!oldClient) {
       throw new Error('Old client not found');
     }
 
-    // Check if phone numbers match (original validation)
     if (oldClient.phone !== user.phone) {
       throw new Error('Phone numbers do not match');
     }
-
-    // Check if client is already an ONVI user
-    // Since LTYUser doesn't have userOnvi field, we'll skip this check for now
-    // This would need to be implemented based on business requirements
-
-    // Get the new client's card
-    const newCard = await this.prisma.lTYCard.findFirst({
-      where: { clientId: user.clientId },
-    });
+    
+    const newCard = await this.cardRepository.findFirstByClientId(user.clientId);
 
     if (!newCard) {
       throw new Error('New client card not found');
     }
 
-    // Generate unique external ID
     const extId = this.generateUniqueExt();
 
     try {
-      // Start transaction
-      await this.prisma.$transaction(async (tx) => {
-        // Delete the old card
-        await tx.lTYCard.delete({
-          where: { id: card.id },
-        });
+      await this.transactionService.executeTransaction(async (tx) => {
+        await this.cardRepository.delete(card.id, tx);
 
-        // Update the old client status (assuming we have a status field)
-        await tx.lTYUser.update({
-          where: { id: oldClient.id },
-          data: { status: 'BLOCKED' }, // or whatever status represents deactivated
-        });
+        await this.clientRepository.updateStatus(oldClient.id, 'BLOCKED', tx);
 
-        // Create a new transaction record (LTYBonusOper)
-        await tx.lTYBonusOper.create({
-          data: {
-            cardId: newCard.id,
-            operDate: new Date(),
-            loadDate: new Date(),
-            sum: input.realBalance,
-            comment: `ONVI BALANCE TRANSFER ${extId}`,
-            creatorId: 3, // Admin ID
-            typeId: 1, // Assuming type 1 is for balance transfer
-          },
-        });
+        await this.bonusOperRepository.create({
+          cardId: newCard.id,
+          operDate: new Date(),
+          loadDate: new Date(),
+          sum: input.balance,
+          comment: `ONVI BALANCE TRANSFER ${extId}`,
+          creatorId: 3, 
+          typeId: 1, 
+        }, tx);
 
-        // Update new card balance
-        await tx.lTYCard.update({
-          where: { id: newCard.id },
-          data: {
-            balance: newCard.balance + input.realBalance,
-          },
-        });
+        await this.cardRepository.updateBalance(newCard.id, newCard.getBalance() + input.balance, tx);
       });
 
-      // Handle airBalance (promo codes) if > 0
-      if (input.airBalance > 0 && input.airBalance >= 50) {
-        // Create promo codes for airBalance
-        // This would need to be implemented based on the promo code system
-        // For now, we'll return a simple response
+      if (input.balance > 0 && input.balance >= 50) {
         return {
           message: 'Transfer completed successfully',
           extId,
-          airBalanceProcessed: input.airBalance,
+          balanceProcessed: input.balance,
         };
       }
 

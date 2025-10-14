@@ -1,22 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { ICardRepository } from '../domain/card.repository.interface';
 import { CardHistoryRepository } from '../repository/card-history.repository';
 import { OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class GetCardFreeVacuumUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject('ICardRepository') private readonly cardRepository: ICardRepository,
     private readonly cardHistoryRepository: CardHistoryRepository,
   ) {}
 
   async execute(user: any): Promise<{ limit: number; remains: number }> {
-    const card = await this.prisma.lTYCard.findFirst({
-      where: { clientId: user.clientId },
-      include: {
-        cardTier: true,
-      },
-    });
+    const card = await this.cardRepository.findFirstByClientIdWithCardTier(user.clientId);
 
     if (!card) {
       return { limit: 0, remains: 0 };
@@ -34,7 +29,7 @@ export class GetCardFreeVacuumUseCase {
     tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
 
     const orderVacuum = await this.cardHistoryRepository.findByDeviceTypeAndDate(
-      card.unqNumber,
+      card.getUnqNumber(),
       todayUTC,
       tomorrowUTC,
       'VACUUM',

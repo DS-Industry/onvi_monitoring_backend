@@ -7,9 +7,5 @@ export class CardTransferDto {
 
   @IsNumber()
   @Min(0)
-  realBalance: number;
-
-  @IsNumber()
-  @Min(0)
-  airBalance: number;
+  balance: number;
 }

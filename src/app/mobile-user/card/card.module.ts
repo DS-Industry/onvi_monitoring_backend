@@ -9,6 +9,10 @@ import { GetCardTransferDataUseCase } from './use-cases/get-card-transfer-data.u
 import { PostCardTransferUseCase } from './use-cases/post-card-transfer.use-case';
 import { GetCardVacuumHistoryUseCase } from './use-cases/get-card-vacuum-history.use-case';
 import { CardRepository } from './infrastructure/card.repository';
+import { OrderRepository } from './infrastructure/order.repository';
+import { ClientRepository } from './infrastructure/client.repository';
+import { BonusOperRepository } from './infrastructure/bonus-oper.repository';
+import { TransactionService } from './infrastructure/transaction.service';
 import { CardHistoryRepository } from './repository/card-history.repository';
 
 @Module({
@@ -23,7 +27,31 @@ import { CardHistoryRepository } from './repository/card-history.repository';
     PostCardTransferUseCase,
     GetCardVacuumHistoryUseCase,
     CardRepository,
+    OrderRepository,
+    ClientRepository,
+    BonusOperRepository,
+    TransactionService,
     CardHistoryRepository,
+    {
+      provide: 'ICardRepository',
+      useClass: CardRepository,
+    },
+    {
+      provide: 'IOrderRepository',
+      useClass: OrderRepository,
+    },
+    {
+      provide: 'IClientRepository',
+      useClass: ClientRepository,
+    },
+    {
+      provide: 'IBonusOperRepository',
+      useClass: BonusOperRepository,
+    },
+    {
+      provide: 'ITransactionService',
+      useClass: TransactionService,
+    },
   ],
   exports: [CardService],
 })

@@ -754,6 +754,8 @@ model LTYCard {
   updatedAt      DateTime?
   cardTierId     Int?
   organizationId Int?
+  isLocked       Boolean?          @default(false)
+  isDeleted      Boolean?          @default(false)
   bonusBanks     LTYBonusBank[]
   bonusOpers     LTYBonusOper[]
   cardTier       LTYCardTier?      @relation(fields: [cardTierId], references: [id])
