@@ -445,42 +445,35 @@ export class PosController {
       }
     }
   }
-  @Get('false-operations/:id')
+  @Get('false-operations/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   @CacheSWR(120)
   async falseOperationsPos(
     @Request() req: any,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('posId', ParseIntPipe) posId: number,
     @Query() data: DataFilterDto,
   ): Promise<FalseOperationResponseDto> {
     try {
       const { ability } = req;
-      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+      const pos = await this.posValidateRules.getOneByIdValidate(
+        posId,
+        ability,
+      );
       return {
-        oper: [
+        falseData: [
           {
-            id: 0,
-            posName: pos.name,
+            deviceId: 428,
             deviceName: 'Пост 1',
-            sumOper: 10,
-            dateOper: new Date(),
-            dateLoad: new Date(),
-            counter: '1',
-            localId: 0,
-            currencyType: 'Монета',
+            operDay: new Date(),
+            falseOperCount: 10,
           },
           {
-            id: 0,
-            posName: pos.name,
+            deviceId: 429,
             deviceName: 'Пост 2',
-            sumOper: 100,
-            dateOper: new Date(),
-            dateLoad: new Date(),
-            counter: '2',
-            localId: 0,
-            currencyType: 'Монета',
+            operDay: new Date(),
+            falseOperCount: 15,
           },
         ],
         totalCount: 2,

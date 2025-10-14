@@ -1,16 +1,11 @@
 export class FalseOperationResponseDto {
-  oper: FalseOperationDto[];
+  falseData: FalseDataDto[];
   totalCount: number;
 }
 
-export class FalseOperationDto {
-  id: number;
-  posName: string;
+export class FalseDataDto {
+  deviceId: number;
   deviceName: string;
-  sumOper: number;
-  dateOper: Date;
-  dateLoad: Date;
-  counter: string;
-  localId: number;
-  currencyType: string;
+  operDay: Date;
+  falseOperCount: number;
 }

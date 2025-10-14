@@ -45,6 +45,10 @@ import { Currency } from '@pos/device/device-data/currency/currency/domain/curre
 import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
 import { DeleteDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-delete';
 import { DeleteManyDto } from '@platform-user/core-controller/dto/receive/delete-many.dto';
+import { CacheSWR } from "@common/decorators/cache-swr.decorator";
+import {
+  FalseOperationDeviceResponseDto
+} from "@platform-user/core-controller/dto/response/false-operation-device-response.dto";
 
 @Controller('device')
 export class DeviceController {
@@ -329,6 +333,93 @@ export class DeviceController {
       const { ability } = req;
       await this.posValidateRules.getOneByIdValidate(id, ability);
       return await this.findMethodsCarWashDeviceUseCase.getAllByPos(id);
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('false-operations/:deviceId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  @CacheSWR(120)
+  async falseOperationsDevice(
+    @Request() req: any,
+    @Param('deviceId', ParseIntPipe) deviceId: number,
+    @Query() data: DataFilterDto,
+  ): Promise<FalseOperationDeviceResponseDto> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      const { ability } = req;
+      await this.deviceValidateRules.getByIdValidate(deviceId, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
+      return {
+        oper: [
+          {
+            id: 0,
+            sumOper: 10,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '10',
+            localId: 10,
+            currencyType: 'Монета',
+            falseCheck: false,
+          },
+          {
+            id: 0,
+            sumOper: 100,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '100',
+            localId: 100,
+            currencyType: 'Монета',
+            falseCheck: true,
+          },
+          {
+            id: 0,
+            sumOper: 1000,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '1000',
+            localId: 1000,
+            currencyType: 'Купюра',
+            falseCheck: true,
+          },
+          {
+            id: 0,
+            sumOper: 50,
+            dateOper: new Date(),
+            dateLoad: new Date(),
+            counter: '50',
+            localId: 50,
+            currencyType: 'Pos',
+            falseCheck: false,
+          },
+        ],
+        totalCount: 4,
+      };
     } catch (e) {
       if (e instanceof DeviceException) {
         throw new CustomHttpException({
