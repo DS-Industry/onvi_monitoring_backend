@@ -14,6 +14,7 @@ import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/devi
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
+import { FalseOperationDeviceDto } from '@platform-user/core-controller/dto/response/false-operation-device-response.dto';
 
 @Injectable()
 export class DeviceOperationRepository extends IDeviceOperationRepository {
@@ -544,6 +545,98 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     FROM all_false_ops
     GROUP BY device_id, device_name, oper_day
     ORDER BY device_id, oper_day;
+  `);
+  }
+
+  public async findFalseOperationsByDeviceId(
+    carWashDeviceId: number,
+    dateStart: Date,
+    dateEnd: Date,
+    skip?: number,
+    take?: number,
+  ): Promise<FalseOperationDeviceDto[]> {
+    const toPostgresTimestamp = (date: Date): string =>
+      date.toISOString().slice(0, 19).replace('T', ' ');
+
+    const dateStartStr = toPostgresTimestamp(dateStart);
+    const dateEndStr = toPostgresTimestamp(dateEnd);
+
+    const skipSql =
+      skip !== undefined ? Prisma.sql`OFFSET ${skip}` : Prisma.empty;
+    const takeSql =
+      take !== undefined ? Prisma.sql`LIMIT ${take}` : Prisma.empty;
+
+    return this.prisma.$queryRaw<FalseOperationDeviceDto[]>(Prisma.sql`
+    WITH ops AS (
+        SELECT
+            e.id,
+            e."carWashDeviceId" AS device_id,
+            d.name AS device_name,
+            c."currencyView",
+            e."operSum",
+            e."operDate",
+            TO_CHAR(e."operDate", 'YYYY-MM-DD HH24:MI:SS') AS oper_second
+        FROM "CarWashDeviceOperationsEvent" e
+        JOIN "CarWashDevice" d ON e."carWashDeviceId" = d.id
+        JOIN "Currency" c ON e."currencyId" = c.id
+        WHERE e."carWashDeviceId" = ${carWashDeviceId}
+          AND e."operDate" BETWEEN ${dateStartStr}::timestamp AND ${dateEndStr}::timestamp
+          AND c."currencyView" IN ('COIN', 'PAPER', 'POS')
+    ),
+    -- группируем по секундам для монет и купюр
+    grouped_sec AS (
+        SELECT
+            device_id,
+            "currencyView",
+            oper_second,
+            COUNT(*) AS ops_count
+        FROM ops
+        WHERE "currencyView" IN ('COIN', 'PAPER')
+        GROUP BY device_id, "currencyView", oper_second
+    ),
+    -- секунды, где превышен лимит по монетам и купюрам
+    violating_sec AS (
+        SELECT device_id, "currencyView", oper_second
+        FROM grouped_sec
+        WHERE ("currencyView" = 'COIN' AND ops_count > 2)
+           OR ("currencyView" = 'PAPER' AND ops_count > 1)
+    ),
+    -- операции по безналу, которые ложные
+    violating_pos AS (
+        SELECT a.id
+        FROM ops a
+        WHERE a."currencyView" = 'POS'
+          AND EXISTS (
+              SELECT 1 FROM ops b
+              WHERE b."currencyView" = 'POS'
+                AND b.device_id = a.device_id
+                AND b.id <> a.id
+                AND ABS(EXTRACT(EPOCH FROM (b."operDate" - a."operDate"))) <= 5
+          )
+    ),
+    -- помечаем все ложные операции
+    flagged AS (
+        SELECT o.id, true AS "falseCheck"
+        FROM ops o
+        JOIN violating_sec v
+          ON v.device_id = o.device_id
+         AND v."currencyView" = o."currencyView"
+         AND v.oper_second = o.oper_second
+        UNION ALL
+        SELECT id, true FROM violating_pos
+    )
+    SELECT 
+        o.id,
+        o.device_id AS "carWashDeviceId",
+        o.device_name AS "deviceName",
+        o."operSum",
+        o."operDate",
+        o."currencyView",
+        COALESCE(f."falseCheck", false) AS "falseCheck"
+    FROM ops o
+    LEFT JOIN flagged f ON f.id = o.id
+    ORDER BY o."operDate" ASC
+    ${takeSql} ${skipSql};
   `);
   }
 
