@@ -566,15 +566,32 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
     const takeSql =
       take !== undefined ? Prisma.sql`LIMIT ${take}` : Prisma.empty;
 
-    return this.prisma.$queryRaw<FalseOperationDeviceDto[]>(Prisma.sql`
+    const result = await this.prisma.$queryRaw<
+      {
+        id: number;
+        carWashDeviceId: number;
+        deviceName: string;
+        operSum: number;
+        operDate: Date;
+        loadDate: Date;
+        counter: string;
+        localId: number;
+        currencyType: string;
+        falseCheck: boolean;
+      }[]
+    >(Prisma.sql`
     WITH ops AS (
         SELECT
             e.id,
             e."carWashDeviceId" AS device_id,
             d.name AS device_name,
             c."currencyView",
+            c."currencyType",
             e."operSum",
             e."operDate",
+            e."loadDate",
+            e."counter",
+            e."localId",
             TO_CHAR(e."operDate", 'YYYY-MM-DD HH24:MI:SS') AS oper_second
         FROM "CarWashDeviceOperationsEvent" e
         JOIN "CarWashDevice" d ON e."carWashDeviceId" = d.id
@@ -583,7 +600,6 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
           AND e."operDate" BETWEEN ${dateStartStr}::timestamp AND ${dateEndStr}::timestamp
           AND c."currencyView" IN ('COIN', 'PAPER', 'POS')
     ),
-    -- группируем по секундам для монет и купюр
     grouped_sec AS (
         SELECT
             device_id,
@@ -594,14 +610,12 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
         WHERE "currencyView" IN ('COIN', 'PAPER')
         GROUP BY device_id, "currencyView", oper_second
     ),
-    -- секунды, где превышен лимит по монетам и купюрам
     violating_sec AS (
         SELECT device_id, "currencyView", oper_second
         FROM grouped_sec
         WHERE ("currencyView" = 'COIN' AND ops_count > 2)
            OR ("currencyView" = 'PAPER' AND ops_count > 1)
     ),
-    -- операции по безналу, которые ложные
     violating_pos AS (
         SELECT a.id
         FROM ops a
@@ -614,7 +628,6 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
                 AND ABS(EXTRACT(EPOCH FROM (b."operDate" - a."operDate"))) <= 5
           )
     ),
-    -- помечаем все ложные операции
     flagged AS (
         SELECT o.id, true AS "falseCheck"
         FROM ops o
@@ -631,13 +644,29 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
         o.device_name AS "deviceName",
         o."operSum",
         o."operDate",
-        o."currencyView",
+        o."loadDate",
+        o."counter",
+        o."localId",
+        o."currencyType",
         COALESCE(f."falseCheck", false) AS "falseCheck"
     FROM ops o
     LEFT JOIN flagged f ON f.id = o.id
     ORDER BY o."operDate" ASC
     ${takeSql} ${skipSql};
   `);
+
+    return result.map((item) => ({
+      id: item.id,
+      carWashDeviceId: item.carWashDeviceId,
+      deviceName: item.deviceName,
+      sumOper: item.operSum,
+      dateOper: item.operDate,
+      dateLoad: item.loadDate,
+      counter: item.counter ? item.counter.toString() : null,
+      localId: item.localId,
+      currencyType: item.currencyType,
+      falseCheck: item.falseCheck,
+    }));
   }
 
   public async delete(id: number): Promise<void> {

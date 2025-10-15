@@ -5,6 +5,8 @@ export class FalseOperationDeviceResponseDto {
 
 export class FalseOperationDeviceDto {
   id: number;
+  carWashDeviceId: number;
+  deviceName: string;
   sumOper: number;
   dateOper: Date;
   dateLoad: Date;
