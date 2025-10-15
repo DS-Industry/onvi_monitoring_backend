@@ -47,6 +47,7 @@
       "@hr/*": ["src/core/hr-core/*"],
       "@notification/*": ["src/core/notification-core/*"],
       "@manager-paper/*": ["src/core/manager-paper-core/*"],
+      "@mobile-core/*": ["src/core/mobile-core/*"],
       "@infra/*": ["src/infra/*"]
     }
   }
