@@ -577,6 +577,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
         counter: string;
         localId: number;
         currencyType: string;
+        currencyName: string;
         falseCheck: boolean;
       }[]
     >(Prisma.sql`
@@ -587,6 +588,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
             d.name AS device_name,
             c."currencyView",
             c."currencyType",
+            c."name",
             e."operSum",
             e."operDate",
             e."loadDate",
@@ -648,6 +650,7 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
         o."counter",
         o."localId",
         o."currencyType",
+        o."name" AS "currencyName",
         COALESCE(f."falseCheck", false) AS "falseCheck"
     FROM ops o
     LEFT JOIN flagged f ON f.id = o.id
@@ -662,9 +665,9 @@ export class DeviceOperationRepository extends IDeviceOperationRepository {
       sumOper: item.operSum,
       dateOper: item.operDate,
       dateLoad: item.loadDate,
-      counter: item.counter ? item.counter.toString() : null,
+      counter: item.counter ? item.counter.toString() : '0',
       localId: item.localId,
-      currencyType: item.currencyType,
+      currencyType: item.currencyName,
       falseCheck: item.falseCheck,
     }));
   }
