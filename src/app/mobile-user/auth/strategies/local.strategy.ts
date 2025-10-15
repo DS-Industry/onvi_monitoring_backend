@@ -1,8 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-local';
-import { ValidateClientForLocalStrategyUseCase } from '@mobile-user/auth/use-cases/auth-validate-local-strategy';
-import { Client } from '../../../../core/loyalty-core/mobile-user/client/domain/client';
+import { ValidateClientForLocalStrategyUseCase } from '@mobile-core/auth/use-cases/validate-client-for-local-strategy';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'clientLocal') {
@@ -21,16 +20,13 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'clientLocal') {
     done: (error: Error, data: any) => Record<string, unknown>,
   ) {
     try {
-      const client: Client = await this.validateLocalStrategyUseCase.execute(
-        phone,
-        otp,
-      );
+      const result = await this.validateLocalStrategyUseCase.execute(phone, otp);
 
-      if (!client) {
+      if ('register' in result) {
         return done(null, { register: true });
       }
 
-      return done(null, client);
+      return done(null, result);
     } catch (e) {
       throw new Error(e);
     }
