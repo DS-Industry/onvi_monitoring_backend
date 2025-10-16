@@ -260,7 +260,8 @@ export class LoyaltyController {
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
-          organizationIds: data.organizationIds,
+          description: data.description,
+          maxLevels: data.maxLevels,
           ownerOrganizationId: data.ownerOrganizationId,
           lifetimeDays: data?.lifetimeDays,
         },

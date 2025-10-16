@@ -23,6 +23,8 @@ export class CreateLoyaltyProgramUseCase {
 
     const loyaltyProgram = new LTYProgram({
       name: data.name,
+      description: data.description,
+      maxLevels: data.maxLevels,
       ownerOrganizationId: data.ownerOrganizationId,
       status: LTYProgramStatus.ACTIVE,
       startDate: new Date(Date.now()),

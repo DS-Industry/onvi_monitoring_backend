@@ -10,9 +10,12 @@ export class LoyaltyProgramCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'name is required' })
   name: string;
-  @IsArray()
-  @IsNotEmpty({ message: 'OrganizationIds is required' })
-  organizationIds: number[];
+  @IsString()
+  @IsOptional()
+  description?: string;
+  @IsNumber()
+  @IsNotEmpty({ message: 'maxLevels is required' })
+  maxLevels: number;
   @IsNumber()
   @IsOptional()
   lifetimeDays?: number;

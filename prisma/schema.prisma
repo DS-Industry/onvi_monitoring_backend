@@ -524,8 +524,10 @@ model ErrNum {
 model LTYProgram {
   id                  Int                            @id @default(autoincrement())
   name                String
+  description         String?
   status              LTYProgramStatus
   startDate           DateTime
+  maxLevels           Int                            @default(3)
   lifetimeBonusDays   Int?
   ownerOrganizationId Int?
   isHub               Boolean                        @default(false)

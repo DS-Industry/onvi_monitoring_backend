@@ -26,6 +26,8 @@ export class PrismaLoyaltyProgramMapper {
       isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
       isPublic: (entity as any).isPublic,
       programParticipantOrganizationIds: (entity.programParticipants ?? []).map((participant) => participant.organizationId),
+      description: entity.description,
+      maxLevels: entity.maxLevels,
     });
   }
 
@@ -39,6 +41,8 @@ export class PrismaLoyaltyProgramMapper {
       ownerOrganization: loyaltyProgram.ownerOrganizationId
         ? { connect: { id: loyaltyProgram.ownerOrganizationId } }
         : undefined,
+      description: loyaltyProgram.description,
+      maxLevels: loyaltyProgram.maxLevels,
     } 
   }
 }

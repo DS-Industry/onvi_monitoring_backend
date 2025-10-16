@@ -1,6 +1,7 @@
 export interface CreateDto {
   name: string;
-  organizationIds: number[];
+  description?: string;
+  maxLevels: number;
   ownerOrganizationId: number;
   lifetimeDays?: number;
 }
