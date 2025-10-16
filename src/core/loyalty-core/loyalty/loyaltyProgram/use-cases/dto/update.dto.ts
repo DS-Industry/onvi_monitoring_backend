@@ -1,4 +1,6 @@
 export class UpdateDto {
   name?: string;
-  organizationIds?: number[];
+  description?: string;
+  maxLevels?: number;
+  lifetimeDays?: number;
 }

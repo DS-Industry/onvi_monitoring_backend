@@ -299,14 +299,9 @@ export class LoyaltyController {
           data.loyaltyProgramId,
           ability,
         );
-      const organizations =
-        await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
-          loyaltyProgram.id,
-        );
       return await this.updateLoyaltyProgramUseCase.execute(
         data,
         loyaltyProgram,
-        organizations,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
