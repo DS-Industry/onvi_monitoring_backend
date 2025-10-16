@@ -13,6 +13,8 @@ export interface LTYProgramProps {
   isHubRejected?: boolean
   isPublic?: boolean;
   programParticipantOrganizationIds?: number[];
+  description?: string;
+  maxLevels: number;
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -46,6 +48,14 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   get ownerOrganizationId(): number {
     return this.props.ownerOrganizationId;
+  }
+
+  get description(): string {
+    return this.props.description;
+  }
+
+  get maxLevels(): number {
+    return this.props.maxLevels;
   }
 
   set status(status: LTYProgramStatus) {
@@ -93,5 +103,13 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   set programParticipantOrganizationIds(programParticipantIds: number[]) {
     this.props.programParticipantOrganizationIds = programParticipantIds;
+  }
+
+  set description(description: string) {
+    this.props.description = description;
+  }
+
+  set maxLevels(maxLevels: number) {
+    this.props.maxLevels = maxLevels;
   }
 }
