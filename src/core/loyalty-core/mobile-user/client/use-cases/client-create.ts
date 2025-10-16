@@ -20,10 +20,13 @@ export class CreateClientUseCase {
   ) {}
 
   async execute(data: ClientCreateDto): Promise<ClientFullResponseDto> {
+
+    const cleanPhone = data.phone.replace(/^\+/, '')
+
     const clientData = new Client({
       name: data.name,
       birthday: data?.birthday,
-      phone: data.phone,
+      phone: cleanPhone,
       email: data?.email,
       gender: data?.gender,
       status: StatusUser.VERIFICATE,
