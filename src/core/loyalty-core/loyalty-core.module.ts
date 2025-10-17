@@ -48,6 +48,7 @@ import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
 import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
+import { UpdateBonusRedemptionRulesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-update-bonus-redemption-rules';
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 import { CorporateRepositoryProvider } from '@loyalty/mobile-user/corporate/provider/corporate';
@@ -130,6 +131,7 @@ const loyaltyProgramUseCase: Provider[] = [
   CreateLoyaltyProgramUseCase,
   FindMethodsLoyaltyProgramUseCase,
   UpdateLoyaltyProgramUseCase,
+  UpdateBonusRedemptionRulesUseCase,
   LoyaltyProgramHubRequestUseCase,
   LoyaltyProgramHubApproveUseCase,
   LoyaltyProgramHubRejectUseCase,

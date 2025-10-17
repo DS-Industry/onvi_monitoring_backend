@@ -1,6 +1,8 @@
 import { BaseEntity } from '@utils/entity';
 import { LTYProgramStatus } from "@prisma/client";
 
+export type BonusBurnoutType = 'year' | 'month' | 'custom';
+
 export interface LTYProgramProps {
   id?: number;
   name: string;
@@ -15,6 +17,10 @@ export interface LTYProgramProps {
   programParticipantOrganizationIds?: number[];
   description?: string;
   maxLevels: number;
+  burnoutType?: BonusBurnoutType;
+  lifetimeBonusDays?: number;
+  maxRedeemPercentage?: number;
+  hasBonusWithSale?: boolean;
 }
 
 export class LTYProgram extends BaseEntity<LTYProgramProps> {
@@ -111,5 +117,65 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
 
   set maxLevels(maxLevels: number) {
     this.props.maxLevels = maxLevels;
+  }
+
+  get burnoutType(): BonusBurnoutType {
+    return this.props.burnoutType;
+  }
+
+  set burnoutType(burnoutType: BonusBurnoutType) {
+    this.props.burnoutType = burnoutType;
+  }
+
+  get lifetimeBonusDays(): number {
+    return this.props.lifetimeBonusDays;
+  }
+
+  set lifetimeBonusDays(lifetimeBonusDays: number) {
+    this.props.lifetimeBonusDays = lifetimeBonusDays;
+  }
+
+  getCalculatedExpiryDate(creationDate: Date = new Date()): Date {
+    const expiryDate = new Date(creationDate);
+
+    if (!this.burnoutType) {
+      const days = this.lifetimeBonusDays || 0;
+      expiryDate.setUTCDate(expiryDate.getUTCDate() + days);
+      return expiryDate;
+    }
+
+    switch (this.burnoutType) {
+      case 'year':
+        expiryDate.setUTCFullYear(expiryDate.getUTCFullYear() + 1);
+        break;
+      case 'month':
+        expiryDate.setUTCMonth(expiryDate.getUTCMonth() + 1);
+        break;
+      case 'custom':
+        const days = this.lifetimeBonusDays || 0;
+        expiryDate.setUTCDate(expiryDate.getUTCDate() + days);
+        break;
+      default:
+        const fallbackDays = this.lifetimeBonusDays || 0;
+        expiryDate.setUTCDate(expiryDate.getUTCDate() + fallbackDays);
+    }
+
+    return expiryDate;
+  }
+
+  get maxRedeemPercentage(): number {
+    return this.props.maxRedeemPercentage;
+  }
+
+  set maxRedeemPercentage(maxRedeemPercentage: number) {
+    this.props.maxRedeemPercentage = maxRedeemPercentage;
+  }
+
+  get hasBonusWithSale(): boolean {
+    return this.props.hasBonusWithSale || false;
+  }
+
+  set hasBonusWithSale(hasBonusWithSale: boolean) {
+    this.props.hasBonusWithSale = hasBonusWithSale;
   }
 }
