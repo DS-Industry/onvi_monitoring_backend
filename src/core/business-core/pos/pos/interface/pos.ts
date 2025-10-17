@@ -26,4 +26,7 @@ export abstract class IPosRepository {
     deleteWorkerIds: number[],
   ): Promise<any>;
   abstract softDelete(id: number): Promise<Pos>;
+  abstract findAllByOrganizationIds(
+    organizationIds: number[],
+  ): Promise<PosResponseDto[]>;
 }

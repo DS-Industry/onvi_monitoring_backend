@@ -17,6 +17,9 @@ export abstract class IOrganizationRepository {
   abstract findAllByLoyaltyProgramId(
     loyaltyProgramId: number,
   ): Promise<Organization[]>;
+  abstract findAllParticipantOrganizationsByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<Organization[]>;
   abstract findAllUser(id: number): Promise<User[]>;
   abstract findAllPos(id: number): Promise<Pos[]>;
   abstract findAllByPermission(

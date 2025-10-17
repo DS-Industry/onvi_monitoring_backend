@@ -110,6 +110,33 @@ export class OrganizationRepository extends IOrganizationRepository {
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 
+  public async findAllParticipantOrganizationsByLoyaltyProgramId(
+    ltyProgramId: number,
+  ): Promise<Organization[]> {
+    const organizations = await this.prisma.organization.findMany({
+      where: {
+        OR: [
+          {
+            ownedLtyPrograms: {
+              some: {
+                id: ltyProgramId,
+              },
+            },
+          },
+          {
+            LTYProgramParticipant: {
+              some: {
+                ltyProgramId: ltyProgramId,
+                status: 'ACTIVE',
+              },
+            },
+          },
+        ],
+      },
+    });
+    return organizations.map((item) => PrismaOrganizationMapper.toDomain(item));
+  }
+
   public async findAllUser(id: number): Promise<User[]> {
     const organization = await this.prisma.organization.findFirst({
       where: {
