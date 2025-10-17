@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { UpdateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/update.dto';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
-import { Organization } from '@organization/organization/domain/organization';
 
 @Injectable()
 export class UpdateLoyaltyProgramUseCase {
@@ -13,26 +12,13 @@ export class UpdateLoyaltyProgramUseCase {
   async execute(
     input: UpdateDto,
     oldLoyaltyProgram: LTYProgram,
-    organizations: Organization[],
   ): Promise<LTYProgram> {
-    const { name, organizationIds } = input;
+    const { name, description, maxLevels, lifetimeDays } = input;
 
     oldLoyaltyProgram.name = name ? name : oldLoyaltyProgram.name;
-    let deleteOrganizationIds = [];
-    let addOrganizationIds = [];
-
-    if (input.organizationIds) {
-      const existingOrganizationIds = organizations.map(
-        (organization) => organization.id,
-      );
-
-      deleteOrganizationIds = existingOrganizationIds.filter(
-        (id) => !organizationIds.includes(id),
-      );
-      addOrganizationIds = organizationIds.filter(
-        (id) => !existingOrganizationIds.includes(id),
-      );
-    }
+    oldLoyaltyProgram.description = description ? description : oldLoyaltyProgram.description;
+    oldLoyaltyProgram.maxLevels = maxLevels ? maxLevels : oldLoyaltyProgram.maxLevels;
+    oldLoyaltyProgram.lifetimeDays = lifetimeDays ? lifetimeDays : oldLoyaltyProgram.lifetimeDays;
 
     return await this.loyaltyProgramRepository.update(
       oldLoyaltyProgram,

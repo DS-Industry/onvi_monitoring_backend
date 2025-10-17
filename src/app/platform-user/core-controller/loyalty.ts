@@ -130,6 +130,8 @@ import { LoyaltyParticipantRequestsListResponseDto } from './dto/response/loyalt
 import { LoyaltyProgramParticipantApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-approve';
 import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-reject';
 import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
+import { UpdateBonusRedemptionRulesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-update-bonus-redemption-rules';
+import { BonusRedemptionRulesDto } from '@platform-user/core-controller/dto/receive/bonus-redemption-rules.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -177,6 +179,7 @@ export class LoyaltyController {
     private readonly loyaltyProgramParticipantApproveUseCase: LoyaltyProgramParticipantApproveUseCase,
     private readonly loyaltyProgramParticipantRejectUseCase: LoyaltyProgramParticipantRejectUseCase,
     private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
+    private readonly updateBonusRedemptionRulesUseCase: UpdateBonusRedemptionRulesUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -299,14 +302,45 @@ export class LoyaltyController {
           data.loyaltyProgramId,
           ability,
         );
-      const organizations =
-        await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
-          loyaltyProgram.id,
-        );
       return await this.updateLoyaltyProgramUseCase.execute(
         data,
         loyaltyProgram,
-        organizations,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('program/bonus-redemption-rules')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(201)
+  async updateBonusRedemptionRules(
+    @Request() req: any,
+    @Body() data: BonusRedemptionRulesDto,
+  ): Promise<LTYProgram> {
+    try {
+      const { ability } = req;
+      const loyaltyProgram =
+        await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
+          data.loyaltyProgramId,
+          ability,
+        );
+      return await this.updateBonusRedemptionRulesUseCase.execute(
+        data,
+        loyaltyProgram,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
