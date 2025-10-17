@@ -164,4 +164,33 @@ export class PosRepository extends IPosRepository {
     });
     return PrismaPosMapper.toDomain(pos);
   }
+
+  public async findAllByOrganizationIds(
+    organizationIds: number[],
+  ): Promise<PosResponseDto[]> {
+    const poses = await this.prisma.pos.findMany({
+      where: {
+        organizationId: {
+          in: organizationIds,
+        },
+        status: {
+          not: 'DELETED',
+        },
+      },
+      orderBy: {
+        id: 'asc',
+      },
+      include: {
+        carWashPos: true,
+        address: true,
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return poses.map((item) => PrismaPosMapper.toDomainFullData(item));
+  }
 }

@@ -132,6 +132,8 @@ import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyalty
 import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
 import { UpdateBonusRedemptionRulesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-update-bonus-redemption-rules';
 import { BonusRedemptionRulesDto } from '@platform-user/core-controller/dto/receive/bonus-redemption-rules.dto';
+import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-participant-poses';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -180,6 +182,7 @@ export class LoyaltyController {
     private readonly loyaltyProgramParticipantRejectUseCase: LoyaltyProgramParticipantRejectUseCase,
     private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
     private readonly updateBonusRedemptionRulesUseCase: UpdateBonusRedemptionRulesUseCase,
+    private readonly getParticipantPosesUseCase: GetParticipantPosesUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1957,6 +1960,37 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getParticipantRequestsValidate(req.ability);
 
       return await this.findLoyaltyParticipantRequestsUseCase.execute(filter);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('program/:id/participant-poses')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getParticipantPoses(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PosResponseDto[]> {
+    try {
+      const { ability, user } = req;
+      
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
+      
+      return await this.getParticipantPosesUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

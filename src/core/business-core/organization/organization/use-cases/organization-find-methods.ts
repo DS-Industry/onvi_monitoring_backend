@@ -45,6 +45,14 @@ export class FindMethodsOrganizationUseCase {
     );
   }
 
+  async getAllParticipantOrganizationsByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<Organization[]> {
+    return await this.organizationRepository.findAllParticipantOrganizationsByLoyaltyProgramId(
+      loyaltyProgramId,
+    );
+  }
+
   async getAllWorker(input: number): Promise<User[]> {
     return await this.organizationRepository.findAllUser(input);
   }

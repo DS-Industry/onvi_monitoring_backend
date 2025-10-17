@@ -46,4 +46,8 @@ export class FindMethodsPosUseCase {
       data.userId,
     );
   }
+
+  async getAllByOrganizationIds(organizationIds: number[]): Promise<PosResponseDto[]> {
+    return await this.posRepository.findAllByOrganizationIds(organizationIds);
+  }
 }
