@@ -29,7 +29,7 @@ export class UpdateBonusRedemptionRulesUseCase {
 
     // Update bonus burnout settings
     oldLoyaltyProgram.burnoutType = burnoutType;
-    oldLoyaltyProgram.lifetimeBonusDays = lifetimeBonusDays;
+    oldLoyaltyProgram.lifetimeBonusDays = lifetimeBonusDays || null;
     oldLoyaltyProgram.maxRedeemPercentage = maxRedeemPercentage;
     oldLoyaltyProgram.hasBonusWithSale = hasBonusWithSale;
 

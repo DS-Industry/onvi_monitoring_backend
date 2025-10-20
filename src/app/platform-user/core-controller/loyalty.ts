@@ -512,6 +512,12 @@ export class LoyaltyController {
           return { id: item.id, name: item.name };
         }),
         lifetimeDays: loyaltyProgram?.lifetimeDays,
+        description: loyaltyProgram?.description,
+        maxLevels: loyaltyProgram?.maxLevels,
+        burnoutType: loyaltyProgram?.burnoutType,
+        lifetimeBonusDays: loyaltyProgram?.lifetimeBonusDays,
+        maxRedeemPercentage: loyaltyProgram?.maxRedeemPercentage,
+        hasBonusWithSale: loyaltyProgram?.hasBonusWithSale,
       };
     } catch (e) {
       if (e instanceof LoyaltyException) {
