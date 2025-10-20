@@ -522,26 +522,27 @@ model ErrNum {
 }
 
 model LTYProgram {
-  id                     Int                            @id @default(autoincrement())
-  name                   String
-  description            String?
-  status                 LTYProgramStatus
-  startDate              DateTime
-  maxLevels              Int                            @default(3)
-  lifetimeBonusDays      Int?
-  burnoutType            String?
-  maxRedeemPercentage    Int?
-  hasBonusWithSale       Boolean                        @default(false)
-  ownerOrganizationId    Int?
-  isHub                  Boolean                        @default(false)
-  participantLimit        Int?
-  isPublic               Boolean                        @default(false)
-  cardTiers              LTYCardTier[]
-  ownerOrganization      Organization?                  @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
-  hubRequest             LTYProgramHubRequest?
-  programParticipants    LTYProgramParticipant[]
-  participantRequests    LTYProgramParticipantRequest[]
-  marketingCampaigns     MarketingCampaign[]
+  id                  Int                            @id @default(autoincrement())
+  name                String
+  description         String?
+  status              LTYProgramStatus
+  startDate           DateTime
+  maxLevels           Int                            @default(3)
+  lifetimeBonusDays   Int?
+  burnoutType         String?
+  maxRedeemPercentage Int?
+  hasBonusWithSale    Boolean                        @default(false)
+  ownerOrganizationId Int?
+  isHub               Boolean                        @default(false)
+  participantLimit    Int?
+  isPublic            Boolean                        @default(false)
+  cardTiers           LTYCardTier[]
+  ownerOrganization   Organization?                  @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
+  hubRequest          LTYProgramHubRequest?
+  programParticipants LTYProgramParticipant[]
+  participantRequests LTYProgramParticipantRequest[]
+  marketingCampaigns  MarketingCampaign[]
+  LTYBenefit          LTYBenefit[]
 }
 
 model LTYProgramParticipant {
@@ -646,10 +647,12 @@ model LTYBenefit {
   id                  Int                   @id @default(autoincrement())
   name                String
   bonus               Int
+  ltyProgramId        Int?
   benefitActionTypeId Int?
   benefitType         LTYBenefitType        @default(CASHBACK)
   benefitActionType   LTYBenefitActionType? @relation(fields: [benefitActionTypeId], references: [id])
   cardTiers           LTYCardTier[]         @relation("LTYBenefitToLTYCardTier")
+  ltyProgram          LTYProgram?           @relation(fields: [ltyProgramId], references: [id])
 }
 
 model LTYBenefitActionType {

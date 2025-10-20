@@ -715,6 +715,7 @@ export class LoyaltyController {
         data.name,
         data.bonus,
         data.type,
+        data.ltyProgramId,
         data?.benefitActionTypeId,
       );
     } catch (e) {

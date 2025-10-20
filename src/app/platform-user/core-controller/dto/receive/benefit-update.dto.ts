@@ -21,4 +21,7 @@ export class BenefitUpdateDto {
   @IsEnum(LTYBenefitType)
   @IsOptional()
   benefitType?: LTYBenefitType;
+  @IsNumber()
+  @IsOptional()
+  ltyProgramId?: number;
 }

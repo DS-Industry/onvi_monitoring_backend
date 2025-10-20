@@ -12,6 +12,7 @@ export class PrismaBenefitMapper {
       benefitType: entity.benefitType,
       bonus: entity.bonus,
       benefitActionTypeId: entity.benefitActionTypeId,
+      ltyProgramId: entity.ltyProgramId,
     });
   }
 
@@ -22,6 +23,7 @@ export class PrismaBenefitMapper {
       benefitType: benefit.benefitType,
       bonus: benefit.bonus,
       benefitActionTypeId: benefit?.benefitActionTypeId,
+      ltyProgramId: benefit.ltyProgramId,
     };
   }
 }
