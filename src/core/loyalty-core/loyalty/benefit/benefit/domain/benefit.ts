@@ -7,6 +7,7 @@ export interface BenefitProps {
   bonus: number;
   benefitType: LTYBenefitType;
   benefitActionTypeId?: number;
+  ltyProgramId: number;
 }
 
 export class Benefit extends BaseEntity<BenefitProps> {
@@ -34,6 +35,10 @@ export class Benefit extends BaseEntity<BenefitProps> {
     return this.props.benefitActionTypeId;
   }
 
+  get ltyProgramId(): number {
+    return this.props.ltyProgramId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -48,5 +53,9 @@ export class Benefit extends BaseEntity<BenefitProps> {
 
   set benefitActionTypeId(benefitActionTypeId: number) {
     this.props.benefitActionTypeId = benefitActionTypeId;
+  }
+
+  set ltyProgramId(ltyProgramId: number) {
+    this.props.ltyProgramId = ltyProgramId;
   }
 }

@@ -11,6 +11,7 @@ export class CreateBenefitUseCase {
     name: string,
     bonus: number,
     benefitType: LTYBenefitType,
+    ltyProgramId: number,
     benefitActionId?: number,
   ): Promise<Benefit> {
     const benefit = new Benefit({
@@ -18,6 +19,7 @@ export class CreateBenefitUseCase {
       bonus: bonus,
       benefitType: benefitType,
       benefitActionTypeId: benefitActionId,
+      ltyProgramId: ltyProgramId,
     });
     return await this.benefitRepository.create(benefit);
   }

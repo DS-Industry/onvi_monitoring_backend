@@ -18,6 +18,9 @@ export class BenefitCreateDto {
   @IsNotEmpty({ message: 'bonus is required' })
   bonus: number;
   @IsNumber()
+  @IsNotEmpty({ message: 'ltyProgramId is required' })
+  ltyProgramId: number;
+  @IsNumber()
   @IsOptional()
   benefitActionTypeId?: number;
 }
