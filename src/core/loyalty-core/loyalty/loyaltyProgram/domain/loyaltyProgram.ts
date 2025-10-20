@@ -1,7 +1,7 @@
 import { BaseEntity } from '@utils/entity';
 import { LTYProgramStatus } from "@prisma/client";
 
-export type BonusBurnoutType = 'year' | 'month' | 'custom';
+export type BonusBurnoutType = 'year' | 'month' | 'custom' | 'never';
 
 export interface LTYProgramProps {
   id?: number;
@@ -150,6 +150,9 @@ export class LTYProgram extends BaseEntity<LTYProgramProps> {
         break;
       case 'month':
         expiryDate.setUTCMonth(expiryDate.getUTCMonth() + 1);
+        break;
+      case 'never':
+        expiryDate.setUTCFullYear(expiryDate.getUTCFullYear() + 100);
         break;
       case 'custom':
         const days = this.lifetimeBonusDays || 0;

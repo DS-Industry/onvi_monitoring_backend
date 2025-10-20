@@ -15,7 +15,7 @@ export class BonusRedemptionRulesDto {
   @IsNotEmpty({ message: 'loyaltyProgramId is required' })
   loyaltyProgramId: number;
 
-  @IsEnum(['year', 'month', 'custom'])
+  @IsEnum(['year', 'month', 'custom', 'never'])
   @IsNotEmpty({ message: 'burnoutType is required' })
   burnoutType: BonusBurnoutType;
 
