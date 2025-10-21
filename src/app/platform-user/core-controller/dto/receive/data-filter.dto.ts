@@ -14,4 +14,7 @@ export class DataFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  ltyProgramId?: number;
 }

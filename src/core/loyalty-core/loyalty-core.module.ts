@@ -86,6 +86,7 @@ import { FindParticipantRequestByIdUseCase } from '@loyalty/loyalty/loyaltyProgr
 import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-participant-poses';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-analytics';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -148,6 +149,7 @@ const loyaltyProgramUseCase: Provider[] = [
   GetParticipantPosesUseCase,
   PublishLoyaltyProgramUseCase,
   UnpublishLoyaltyProgramUseCase,
+  GetLoyaltyProgramAnalyticsUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [

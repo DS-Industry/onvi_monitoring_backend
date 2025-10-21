@@ -1,32 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { OrganizationStatisticGrafResponseDto } from '@platform-user/core-controller/dto/response/organization-statistic-graf-response.dto';
+import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
+import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 
 @Injectable()
 export class GetStatisticsGrafOrganizationUseCase {
   constructor(
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
+    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
+    private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
   ) {}
 
   async execute(
     dateStart: Date,
     dateEnd: Date,
     ability: any,
+    ltyProgramId?: number,
   ): Promise<OrganizationStatisticGrafResponseDto[]> {
-    const posIds = ability.rules
-      .filter(
-        (rule: {
-          subject: string;
-          action: string;
-          conditions: { id: { in: any } };
-        }) =>
-          rule.action === 'read' &&
-          rule.subject === 'Pos' &&
-          rule.conditions?.id?.in,
-      )
-      .flatMap(
-        (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+    let posIds: number[];
+
+    if (ltyProgramId) {
+      const organizations = await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+        ltyProgramId,
       );
+
+      if (organizations.length === 0) {
+        return [];
+      }
+
+      const organizationIds = organizations.map(org => org.id);
+      const poses = await this.findMethodsPosUseCase.getAllByOrganizationIds(organizationIds);
+      posIds = poses.map(pos => pos.id);
+    } else {
+      posIds = ability.rules
+        .filter(
+          (rule: {
+            subject: string;
+            action: string;
+            conditions: { id: { in: any } };
+          }) =>
+            rule.action === 'read' &&
+            rule.subject === 'Pos' &&
+            rule.conditions?.id?.in,
+        )
+        .flatMap(
+          (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+        );
+    }
+
     if (!posIds.length) {
       return [];
     }

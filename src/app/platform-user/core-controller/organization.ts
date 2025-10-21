@@ -289,6 +289,7 @@ export class OrganizationController {
         data.dateStart,
         data.dateEnd,
         ability,
+        data.ltyProgramId,
       );
     } catch (e) {
       if (e instanceof OrganizationException) {
@@ -321,6 +322,7 @@ export class OrganizationController {
         data.dateStart,
         data.dateEnd,
         ability,
+        data.ltyProgramId,
       );
     } catch (e) {
       if (e instanceof OrganizationException) {

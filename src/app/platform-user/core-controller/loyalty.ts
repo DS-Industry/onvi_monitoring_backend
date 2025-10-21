@@ -136,6 +136,8 @@ import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-analytics';
+import { LoyaltyProgramAnalyticsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-analytics-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -187,6 +189,7 @@ export class LoyaltyController {
     private readonly getParticipantPosesUseCase: GetParticipantPosesUseCase,
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
+    private readonly getLoyaltyProgramAnalyticsUseCase: GetLoyaltyProgramAnalyticsUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -2069,6 +2072,37 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
       
       return await this.getParticipantPosesUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('program/:id/analytics')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getLoyaltyProgramAnalytics(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<LoyaltyProgramAnalyticsResponseDto> {
+    try {
+      const { ability, user } = req;
+      
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
+      
+      return await this.getLoyaltyProgramAnalyticsUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
