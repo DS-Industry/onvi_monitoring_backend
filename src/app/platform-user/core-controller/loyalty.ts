@@ -134,6 +134,8 @@ import { UpdateBonusRedemptionRulesUseCase } from '@loyalty/loyalty/loyaltyProgr
 import { BonusRedemptionRulesDto } from '@platform-user/core-controller/dto/receive/bonus-redemption-rules.dto';
 import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-participant-poses';
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
+import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -183,6 +185,8 @@ export class LoyaltyController {
     private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
     private readonly updateBonusRedemptionRulesUseCase: UpdateBonusRedemptionRulesUseCase,
     private readonly getParticipantPosesUseCase: GetParticipantPosesUseCase,
+    private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
+    private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -345,6 +349,73 @@ export class LoyaltyController {
         data,
         loyaltyProgram,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('program/:id/publish')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async publishProgram(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<LTYProgram> {
+    try {
+      const { ability } = req;
+      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
+        id,
+        ability,
+      );
+      
+      return await this.publishLoyaltyProgramUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('program/:id/unpublish')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async unpublishProgram(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<LTYProgram> {
+    try {
+      const { ability } = req;
+      
+      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
+        id,
+        ability,
+      );
+      
+      return await this.unpublishLoyaltyProgramUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

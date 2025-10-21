@@ -26,7 +26,7 @@ export class CreateLoyaltyProgramUseCase {
       description: data.description,
       maxLevels: data.maxLevels,
       ownerOrganizationId: data.ownerOrganizationId,
-      status: LTYProgramStatus.ACTIVE,
+      status: LTYProgramStatus.PAUSE,
       startDate: new Date(Date.now()),
       lifetimeDays: data?.lifetimeDays,
     });
