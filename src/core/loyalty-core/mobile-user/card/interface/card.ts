@@ -37,4 +37,5 @@ export abstract class ICardRepository {
     devNumber: string,
     uniqueNumber: string,
   ): Promise<boolean>;
+  abstract countByLoyaltyProgramId(loyaltyProgramId: number): Promise<number>;
 }

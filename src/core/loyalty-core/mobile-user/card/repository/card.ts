@@ -544,4 +544,17 @@ export class CardRepository extends ICardRepository {
     });
     return !!existingCard;
   }
+
+  public async countByLoyaltyProgramId(loyaltyProgramId: number): Promise<number> {
+    return await this.prisma.lTYCard.count({
+      where: {
+        cardTier: {
+          ltyProgramId: loyaltyProgramId,
+        },
+        clientId: {
+          not: null, 
+        },
+      },
+    });
+  }
 }

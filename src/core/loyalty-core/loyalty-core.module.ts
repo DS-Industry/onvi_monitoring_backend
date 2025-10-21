@@ -84,6 +84,7 @@ import { LoyaltyProgramParticipantRejectUseCase } from '@loyalty/loyalty/loyalty
 import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-requests';
 import { FindParticipantRequestByIdUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-request-by-id';
 import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-participant-poses';
+import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-analytics';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
 
@@ -146,6 +147,7 @@ const loyaltyProgramUseCase: Provider[] = [
   FindLoyaltyParticipantRequestsUseCase,
   FindParticipantRequestByIdUseCase,
   GetParticipantPosesUseCase,
+  GetLoyaltyProgramAnalyticsUseCase,
   PublishLoyaltyProgramUseCase,
   UnpublishLoyaltyProgramUseCase,
 ];
