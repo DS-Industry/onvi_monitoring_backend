@@ -38,4 +38,9 @@ export abstract class ICardRepository {
     uniqueNumber: string,
   ): Promise<boolean>;
   abstract countByLoyaltyProgramId(loyaltyProgramId: number): Promise<number>;
+  abstract getTransactionAnalyticsByLoyaltyProgramId(
+    loyaltyProgramId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ date: string; accruals: number; debits: number }[]>;
 }
