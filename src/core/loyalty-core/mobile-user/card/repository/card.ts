@@ -539,7 +539,7 @@ export class CardRepository extends ICardRepository {
   ): Promise<boolean> {
     const existingCard = await this.prisma.lTYCard.findFirst({
       where: {
-        OR: [{ unqNumber: devNumber }, { number: uniqueNumber }],
+        OR: [{ unqNumber: uniqueNumber }, { number: devNumber }],
       },
     });
     return !!existingCard;

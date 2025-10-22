@@ -42,14 +42,14 @@ export class CardImportUseCase {
         );
 
         if (cardExists) {
-          errors.push(`Card with unqNumber ${cardData.devNumber} or number ${cardData.uniqueNumber} already exists`);
+          errors.push(`Card with unqNumber ${cardData.uniqueNumber} or number ${cardData.devNumber} already exists`);
           errorCount++;
           continue;
         }
 
         const newCard = new Card({
-          devNumber: cardData.devNumber,
-          number: cardData.uniqueNumber,
+          devNumber: cardData.uniqueNumber,
+          number: cardData.devNumber,
           balance: 0,
           loyaltyCardTierId: cardData.tierId,
           mobileUserId: undefined, 
