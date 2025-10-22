@@ -133,7 +133,12 @@ import { FindLoyaltyParticipantRequestsUseCase } from '@loyalty/loyalty/loyaltyP
 import { UpdateBonusRedemptionRulesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-update-bonus-redemption-rules';
 import { BonusRedemptionRulesDto } from '@platform-user/core-controller/dto/receive/bonus-redemption-rules.dto';
 import { GetParticipantPosesUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-participant-poses';
+import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-analytics';
+import { GetLoyaltyProgramTransactionAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-transaction-analytics';
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import { LoyaltyProgramAnalyticsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-analytics-response.dto';
+import { LoyaltyProgramTransactionAnalyticsRequestDto } from '@platform-user/core-controller/dto/receive/loyalty-program-transaction-analytics-request.dto';
+import { LoyaltyProgramTransactionAnalyticsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-transaction-analytics-response.dto';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
 
@@ -185,6 +190,8 @@ export class LoyaltyController {
     private readonly findLoyaltyParticipantRequestsUseCase: FindLoyaltyParticipantRequestsUseCase,
     private readonly updateBonusRedemptionRulesUseCase: UpdateBonusRedemptionRulesUseCase,
     private readonly getParticipantPosesUseCase: GetParticipantPosesUseCase,
+    private readonly getLoyaltyProgramAnalyticsUseCase: GetLoyaltyProgramAnalyticsUseCase,
+    private readonly getLoyaltyProgramTransactionAnalyticsUseCase: GetLoyaltyProgramTransactionAnalyticsUseCase,
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
   ) {}
@@ -2069,6 +2076,76 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
       
       return await this.getParticipantPosesUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('program/:id/analytics')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getLoyaltyProgramAnalytics(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<LoyaltyProgramAnalyticsResponseDto> {
+    try {
+      const { ability, user } = req;
+      
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
+      
+      return await this.getLoyaltyProgramAnalyticsUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('program/:id/transaction-analytics')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getLoyaltyProgramTransactionAnalytics(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: LoyaltyProgramTransactionAnalyticsRequestDto,
+  ): Promise<LoyaltyProgramTransactionAnalyticsResponseDto> {
+    try {
+      const { ability, user } = req;
+      
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
+      
+      const request: LoyaltyProgramTransactionAnalyticsRequestDto = {
+        loyaltyProgramId: id,
+        period: query.period || 'lastMonth',
+        startDate: query.startDate,
+        endDate: query.endDate,
+      };
+      
+      return await this.getLoyaltyProgramTransactionAnalyticsUseCase.execute(request);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
