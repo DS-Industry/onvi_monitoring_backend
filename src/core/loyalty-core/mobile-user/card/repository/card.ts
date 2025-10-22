@@ -544,4 +544,44 @@ export class CardRepository extends ICardRepository {
     });
     return !!existingCard;
   }
+
+  public async countByLoyaltyProgramId(loyaltyProgramId: number): Promise<number> {
+    return await this.prisma.lTYCard.count({
+      where: {
+        cardTier: {
+          ltyProgramId: loyaltyProgramId,
+        },
+        clientId: {
+          not: null, 
+        },
+      },
+    });
+  }
+
+  public async getTransactionAnalyticsByLoyaltyProgramId(
+    loyaltyProgramId: number,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ date: string; accruals: number; debits: number }[]> {
+    const result = await this.prisma.$queryRaw<
+      { date: string; accruals: number; debits: number }[]
+    >`
+      SELECT 
+        DATE(bo."operDate") as date,
+        COALESCE(SUM(CASE WHEN bot."signOper" = 'REPLENISHMENT' THEN bo.sum ELSE 0 END), 0) as accruals,
+        COALESCE(SUM(CASE WHEN bot."signOper" = 'DEDUCTION' THEN bo.sum ELSE 0 END), 0) as debits
+      FROM "LTYBonusOper" bo
+      INNER JOIN "LTYCard" c ON bo."cardId" = c.id
+      INNER JOIN "LTYCardTier" ct ON c."cardTierId" = ct.id
+      INNER JOIN "LTYBonusOperType" bot ON bo."typeId" = bot.id
+      WHERE ct."ltyProgramId" = ${loyaltyProgramId}
+        AND bo."operDate" >= ${startDate}
+        AND bo."operDate" <= ${endDate}
+        AND c."clientId" IS NOT NULL
+      GROUP BY DATE(bo."operDate")
+      ORDER BY DATE(bo."operDate") ASC
+    `;
+
+    return result;
+  }
 }
