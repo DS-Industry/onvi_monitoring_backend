@@ -14,6 +14,7 @@ export class LoyaltyProgramParticipantResponseDto {
         ownerOrganizationId: number;
         connectedPoses: number;
         engagedClients: number;
+        description?: string;
     }
 }
 
@@ -37,6 +38,7 @@ export function mapLoyaltyProgramToParticipantResponse(
         ownerOrganizationId: program.ownerOrganizationId,
         connectedPoses: connectedPoses ?? 0,
         engagedClients: engagedClients ?? 0,
+        description: program.description,
     }
   };
 }
