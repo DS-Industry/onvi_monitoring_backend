@@ -12,12 +12,16 @@ export class LoyaltyProgramParticipantResponseDto {
         lifetimeDays?: number;
         participantId: number; 
         ownerOrganizationId: number;
+        connectedPoses: number;
+        engagedClients: number;
     }
 }
 
 export function mapLoyaltyProgramToParticipantResponse(
   program: LTYProgram,
   participantId: number,
+  connectedPoses?: number,
+  engagedClients?: number,
 ): LoyaltyProgramParticipantResponseDto {
   return {
     props: {
@@ -31,6 +35,8 @@ export function mapLoyaltyProgramToParticipantResponse(
         lifetimeDays: program.lifetimeDays,
         participantId: participantId,
         ownerOrganizationId: program.ownerOrganizationId,
+        connectedPoses: connectedPoses ?? 0,
+        engagedClients: engagedClients ?? 0,
     }
   };
 }

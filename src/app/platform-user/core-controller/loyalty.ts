@@ -43,6 +43,8 @@ import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/clien
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
+import { LoyaltyParticipantProgramsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-participant-programs-filter.dto';
+import { LoyaltyParticipantProgramsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/loyalty-participant-programs-paginated-response.dto';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
 import { LoyaltyProgramCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-create.dto';
 import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-create';
@@ -544,6 +546,46 @@ export class LoyaltyController {
 
       return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationId(
         Number(organizationId),
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('participant-programs-paginated')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(201)
+  async getParticipantProgramsPaginated(
+    @Request() req: any,
+    @Query() params: LoyaltyParticipantProgramsFilterDto,
+  ): Promise<LoyaltyParticipantProgramsPaginatedResponseDto> {
+    try {
+      const { user } = req;
+
+      await this.loyaltyValidateRules.validateUserBelongsToOrganization(
+        user.id,
+        params.organizationId,
+      );
+
+      return await this.findMethodsLoyaltyProgramUseCase.getAllParticipantProgramsByOrganizationIdPaginated(
+        params.organizationId,
+        params.page,
+        params.size,
+        params.status,
+        params.participationRole,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {

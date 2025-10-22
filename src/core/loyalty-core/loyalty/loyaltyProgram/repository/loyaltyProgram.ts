@@ -180,6 +180,103 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     }));
   }
 
+  public async findAllParticipantProgramsByOrganizationIdPaginated(
+    organizationId: number, 
+    skip?: number, 
+    take?: number,
+    status?: string,
+    participationRole?: string
+  ): Promise<{ program: LTYProgram; participantId: number }[]> {
+    const whereClause: any = {};
+
+    if (participationRole === 'owner') {
+      whereClause.ownerOrganizationId = organizationId;
+    } else if (participationRole === 'participant') {
+      whereClause.programParticipants = {
+        some: {
+          organizationId: organizationId,
+          status: 'ACTIVE',
+        },
+      };
+      whereClause.ownerOrganizationId = { not: organizationId };
+    } else if (participationRole === 'all' || !participationRole) {
+      whereClause.OR = [
+        { ownerOrganizationId: organizationId },
+        {
+          programParticipants: {
+            some: {
+              organizationId: organizationId,
+              status: 'ACTIVE',
+            },
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
+      where: whereClause,
+      include: {
+        programParticipants: {
+          where: {
+            organizationId: organizationId,
+            status: 'ACTIVE',
+          }
+        },
+      },
+      skip,
+      take,
+    });
+    
+    return loyaltyPrograms.map((item) => ({
+      program: PrismaLoyaltyProgramMapper.toDomain(item),
+      participantId: item.programParticipants[0]?.id || null, 
+    }));
+  }
+
+  public async countParticipantProgramsByOrganizationId(
+    organizationId: number,
+    status?: string,
+    participationRole?: string
+  ): Promise<number> {
+    const whereClause: any = {};
+
+    if (participationRole === 'owner') {
+      whereClause.ownerOrganizationId = organizationId;
+    } else if (participationRole === 'participant') {
+      whereClause.programParticipants = {
+        some: {
+          organizationId: organizationId,
+          status: 'ACTIVE',
+        },
+      };
+      whereClause.ownerOrganizationId = { not: organizationId };
+    } else if (participationRole === 'all' || !participationRole) {
+      whereClause.OR = [
+        { ownerOrganizationId: organizationId },
+        {
+          programParticipants: {
+            some: {
+              organizationId: organizationId,
+              status: 'ACTIVE',
+            },
+          },
+        },
+      ];
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    return await this.prisma.lTYProgram.count({
+      where: whereClause,
+    });
+  }
+
   public async findAllPublicPrograms(filters?: {
     search?: string;
     status?: string;
