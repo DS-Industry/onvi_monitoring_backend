@@ -20,4 +20,5 @@ export class LoyaltyProgramGetByIdResponseDto {
   lifetimeBonusDays?: number;
   maxRedeemPercentage?: number;
   hasBonusWithSale?: boolean;
+  ownerOrganizationId: number;
 }
