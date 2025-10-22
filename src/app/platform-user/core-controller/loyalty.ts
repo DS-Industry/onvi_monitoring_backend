@@ -596,6 +596,7 @@ export class LoyaltyController {
         lifetimeBonusDays: loyaltyProgram?.lifetimeBonusDays,
         maxRedeemPercentage: loyaltyProgram?.maxRedeemPercentage,
         hasBonusWithSale: loyaltyProgram?.hasBonusWithSale,
+        ownerOrganizationId: loyaltyProgram?.ownerOrganizationId,
       };
     } catch (e) {
       if (e instanceof LoyaltyException) {
