@@ -11,10 +11,8 @@ import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/ca
 import { User } from '@platform-user/user/domain/user';
 import { StatusCashCollection } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CashCollectionDevice } from "@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice";
-import {
-  CashCollectionDeviceType
-} from "@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType";
+import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
+import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
 
 @Injectable()
 export class RecalculateCashCollectionUseCase {

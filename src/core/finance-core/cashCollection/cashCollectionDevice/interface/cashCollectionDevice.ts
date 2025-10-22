@@ -14,6 +14,7 @@ export abstract class ICashCollectionDeviceRepository {
   abstract findRecalculateDataByDevice(
     cashCollectionDeviceId: number,
     tookMoneyTime: Date,
+    oldTookMoneyTime?: Date,
   ): Promise<CashCollectionDeviceCalculateResponseDto>;
   abstract update(input: CashCollectionDevice): Promise<CashCollectionDevice>;
 }

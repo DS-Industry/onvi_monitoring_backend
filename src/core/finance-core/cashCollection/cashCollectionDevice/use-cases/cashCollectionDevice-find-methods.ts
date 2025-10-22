@@ -20,10 +20,12 @@ export class FindMethodsCashCollectionDeviceUseCase {
   async getRecalculateDataByDevice(
     cashCollectionDeviceId: number,
     tookMoneyTime: Date,
+    oldTookMoneyTime?: Date,
   ): Promise<CashCollectionDeviceCalculateResponseDto> {
     return await this.cashCollectionDeviceRepository.findRecalculateDataByDevice(
       cashCollectionDeviceId,
       tookMoneyTime,
+      oldTookMoneyTime,
     );
   }
 

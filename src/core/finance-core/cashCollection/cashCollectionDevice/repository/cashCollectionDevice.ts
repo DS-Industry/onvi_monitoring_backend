@@ -253,13 +253,14 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
   public async findRecalculateDataByDevice(
     cashCollectionDeviceId: number,
     tookMoneyTime: Date,
+    oldTookMoneyTime?: Date,
   ): Promise<CashCollectionDeviceCalculateResponseDto> {
     const calculateData = await this.prisma
       .$queryRaw<RawDeviceOperationsSummary>`
     WITH device_info AS (
       SELECT
         ccd."carWashDeviceId" AS "deviceId",
-        ccd."oldTookMoneyTime"
+        ${oldTookMoneyTime ? oldTookMoneyTime : `ccd."oldTookMoneyTime"`} AS "oldTookMoneyTime"
       FROM
         "CashCollectionDevice" ccd
       WHERE

@@ -12,6 +12,9 @@ export class CashCollectionDeviceDataDto {
   @IsNumber()
   @IsNotEmpty({ message: 'cashCollectionDeviceId is required' })
   cashCollectionDeviceId: number;
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  oldTookMoneyTime?: Date;
   @IsNotEmpty({ message: 'tookMoneyTime is required' })
   @Transform(({ value }) => new Date(value))
   tookMoneyTime: Date;

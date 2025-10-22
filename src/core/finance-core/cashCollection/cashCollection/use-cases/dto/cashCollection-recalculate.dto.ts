@@ -5,6 +5,7 @@ export class CashCollectionRecalculateDto {
 
 export class CashCollectionDeviceDataDto {
   cashCollectionDeviceId: number;
+  oldTookMoneyTime?: Date;
   tookMoneyTime: Date;
 }
 

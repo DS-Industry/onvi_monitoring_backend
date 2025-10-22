@@ -14,6 +14,7 @@ export class UpdateCashCollectionDeviceUseCase {
     oldCashCollectionDevice: CashCollectionDevice,
   ): Promise<CashCollectionDevice> {
     const {
+      oldTookMoneyTime,
       tookMoneyTime,
       sum,
       sumCoin,
@@ -23,6 +24,9 @@ export class UpdateCashCollectionDeviceUseCase {
       virtualSum,
     } = input;
 
+    oldCashCollectionDevice.oldTookMoneyTime = oldTookMoneyTime
+      ? oldTookMoneyTime
+      : oldCashCollectionDevice.oldTookMoneyTime;
     oldCashCollectionDevice.tookMoneyTime = tookMoneyTime
       ? tookMoneyTime
       : oldCashCollectionDevice.tookMoneyTime;
