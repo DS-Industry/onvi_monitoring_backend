@@ -20,6 +20,18 @@ export abstract class ILoyaltyProgramRepository {
   ): Promise<LTYProgram[]>;
   abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
   abstract findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<{ program: LTYProgram; participantId: number }[]>;
+  abstract findAllParticipantProgramsByOrganizationIdPaginated(
+    organizationId: number, 
+    skip?: number, 
+    take?: number,
+    status?: string,
+    participationRole?: string
+  ): Promise<{ program: LTYProgram; participantId: number }[]>;
+  abstract countParticipantProgramsByOrganizationId(
+    organizationId: number,
+    status?: string,
+    participationRole?: string
+  ): Promise<number>;
   abstract findAllPublicPrograms(filters?: {
     search?: string;
     status?: string;
