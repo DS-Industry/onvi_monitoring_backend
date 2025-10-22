@@ -9,6 +9,7 @@ import {
   LOYALTY_DELETE_TAG_EXCEPTION_CODE,
   LOYALTY_GET_ONE_EXCEPTION_CODE,
   LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+  LOYALTY_DELETE_TIER_WITH_CARDS_EXCEPTION_CODE,
 } from '@constant/error.constants';
 import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
@@ -16,14 +17,17 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { LoyaltyException } from '@exception/option.exceptions';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 
 @Injectable()
 export class LoyaltyValidateRules {
   constructor(
     private readonly validateLib: ValidateLib,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly cardRepository: ICardRepository,
   ) {}
 
   public async createLoyaltyProgramValidate(
@@ -375,6 +379,27 @@ export class LoyaltyValidateRules {
       LOYALTY_DELETE_TAG_EXCEPTION_CODE,
     );
     return checkTag.object;
+  }
+
+  public async deleteLoyaltyTierValidate(id: number): Promise<LoyaltyTier> {
+    const response = [];
+    const checkLoyaltyTier = await this.validateLib.loyaltyTierByIdExists(id);
+    response.push(checkLoyaltyTier);
+    
+    const cardsUsingTier = await this.cardRepository.findCardsByTierId(id);
+    if (cardsUsingTier.length > 0) {
+      response.push({
+        code: 400,
+        errorMessage: `Cannot delete tier. ${cardsUsingTier.length} card(s) are currently using this tier.`,
+      });
+    }
+    
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_DELETE_TIER_WITH_CARDS_EXCEPTION_CODE,
+    );
+    return checkLoyaltyTier.object;
   }
 
   public async validateExcelCsvFileValidate(

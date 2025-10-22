@@ -28,6 +28,7 @@ import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgra
 import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-create';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { UpdateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update';
+import { DeleteLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-delete';
 import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
 import { CreateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-create';
 import { CardRepositoryProvider } from '@loyalty/mobile-user/card/provider/card';
@@ -159,6 +160,7 @@ const loyaltyTierUseCase: Provider[] = [
   FindMethodsLoyaltyTierUseCase,
   UpdateLoyaltyTierUseCase,
   UpdateHandlerLoyaltyTierUseCase,
+  DeleteLoyaltyTierUseCase,
 ];
 
 const loyaltyTierHistUseCase: Provider[] = [

@@ -138,4 +138,12 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
       },
     });
   }
+
+  public async delete(loyaltyTierId: number): Promise<void> {
+    await this.prisma.lTYCardTier.delete({
+      where: {
+        id: loyaltyTierId,
+      },
+    });
+  }
 }

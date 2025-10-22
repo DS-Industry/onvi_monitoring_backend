@@ -21,4 +21,5 @@ export abstract class ILoyaltyTierRepository {
     addBenefitIds: number[],
     deleteBenefitIds: number[],
   ): Promise<any>;
+  abstract delete(loyaltyTierId: number): Promise<void>;
 }
