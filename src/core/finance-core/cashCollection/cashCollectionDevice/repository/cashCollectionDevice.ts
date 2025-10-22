@@ -257,12 +257,16 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
   ): Promise<CashCollectionDeviceCalculateResponseDto> {
     const calculateData = await this.prisma
       .$queryRaw<RawDeviceOperationsSummary>`
-    WITH device_info AS (
+    WITH input_values AS (
+    SELECT ${oldTookMoneyTime ?? null}::timestamp AS "customOldTookMoneyTime"
+    ),
+    device_info AS (
       SELECT
         ccd."carWashDeviceId" AS "deviceId",
-        ${oldTookMoneyTime ? oldTookMoneyTime : `ccd."oldTookMoneyTime"`} AS "oldTookMoneyTime"
+        COALESCE(iv."customOldTookMoneyTime", ccd."oldTookMoneyTime") AS "oldTookMoneyTime"
       FROM
-        "CashCollectionDevice" ccd
+        "CashCollectionDevice" ccd,
+        input_values iv
       WHERE
         ccd.id = ${cashCollectionDeviceId}
     ),
