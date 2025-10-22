@@ -584,4 +584,13 @@ export class CardRepository extends ICardRepository {
 
     return result;
   }
+
+  public async findCardsByTierId(tierId: number): Promise<Card[]> {
+    const cards = await this.prisma.lTYCard.findMany({
+      where: {
+        cardTierId: tierId,
+      },
+    });
+    return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
+  }
 }

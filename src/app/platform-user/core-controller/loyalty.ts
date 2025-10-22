@@ -56,6 +56,7 @@ import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases
 import { LoyaltyTierCreateDto } from '@platform-user/core-controller/dto/receive/loyaltyTier-create.dto';
 import { LoyaltyTierUpdateDto } from '@platform-user/core-controller/dto/receive/loyaltyTier-update.dto';
 import { UpdateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update';
+import { DeleteLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-delete';
 import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
 import { BenefitActionCreateDto } from '@platform-user/core-controller/dto/receive/benefitAction-create.dto';
 import { CreateBenefitActionUseCase } from '@loyalty/loyalty/benefit/benefitAction/use-case/benefitAction-create';
@@ -157,6 +158,7 @@ export class LoyaltyController {
     private readonly deleteTagUseCase: DeleteTagUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
     private readonly updateLoyaltyTierUseCase: UpdateLoyaltyTierUseCase,
+    private readonly deleteLoyaltyTierUseCase: DeleteLoyaltyTierUseCase,
     private readonly createBenefitUseCase: CreateBenefitUseCase,
     private readonly createBenefitActionUseCase: CreateBenefitActionUseCase,
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
@@ -636,6 +638,30 @@ export class LoyaltyController {
         data?.description,
         data?.upCardTierId,
       );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('tier/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async deleteTier(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    try {
+      const loyaltyTier = await this.loyaltyValidateRules.deleteLoyaltyTierValidate(id);
+      return await this.deleteLoyaltyTierUseCase.execute(loyaltyTier.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

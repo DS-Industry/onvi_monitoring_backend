@@ -43,4 +43,5 @@ export abstract class ICardRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<{ date: string; accruals: number; debits: number }[]>;
+  abstract findCardsByTierId(tierId: number): Promise<Card[]>;
 }
