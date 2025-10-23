@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsEnum, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum LoyaltyProgramStatus {
@@ -32,4 +32,8 @@ export class LoyaltyParticipantProgramsFilterDto {
   @IsOptional()
   @IsEnum(ParticipationRole, { message: 'participationRole must be owner, participant, or all' })
   participationRole?: ParticipationRole;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

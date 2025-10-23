@@ -185,7 +185,8 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
     skip?: number, 
     take?: number,
     status?: string,
-    participationRole?: string
+    participationRole?: string,
+    search?: string
   ): Promise<{ program: LTYProgram; participantId: number }[]> {
     const whereClause: any = {};
 
@@ -217,6 +218,13 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
       whereClause.status = status;
     }
 
+    if (search) {
+      whereClause.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
     const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: whereClause,
       include: {
@@ -240,7 +248,8 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async countParticipantProgramsByOrganizationId(
     organizationId: number,
     status?: string,
-    participationRole?: string
+    participationRole?: string,
+    search?: string
   ): Promise<number> {
     const whereClause: any = {};
 
@@ -270,6 +279,13 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
     if (status) {
       whereClause.status = status;
+    }
+
+    if (search) {
+      whereClause.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
     }
 
     return await this.prisma.lTYProgram.count({

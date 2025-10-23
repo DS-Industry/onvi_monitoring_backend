@@ -74,7 +74,8 @@ export class FindMethodsLoyaltyProgramUseCase {
     page?: number, 
     size?: number,
     status?: string,
-    participationRole?: string
+    participationRole?: string,
+    search?: string
   ): Promise<LoyaltyParticipantProgramsPaginatedResponseDto> {
     const pageNum = page || 1;
     const sizeNum = size || 10;
@@ -87,12 +88,14 @@ export class FindMethodsLoyaltyProgramUseCase {
         skip, 
         take, 
         status, 
-        participationRole
+        participationRole,
+        search
       ),
       this.loyaltyProgramRepository.countParticipantProgramsByOrganizationId(
         organizationId, 
         status, 
-        participationRole
+        participationRole,
+        search
       ),
     ]);
 

@@ -586,6 +586,7 @@ export class LoyaltyController {
         params.size,
         params.status,
         params.participationRole,
+        params.search,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
