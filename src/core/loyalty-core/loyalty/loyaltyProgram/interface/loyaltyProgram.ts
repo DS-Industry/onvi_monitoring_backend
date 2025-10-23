@@ -25,12 +25,14 @@ export abstract class ILoyaltyProgramRepository {
     skip?: number, 
     take?: number,
     status?: string,
-    participationRole?: string
+    participationRole?: string,
+    search?: string
   ): Promise<{ program: LTYProgram; participantId: number }[]>;
   abstract countParticipantProgramsByOrganizationId(
     organizationId: number,
     status?: string,
-    participationRole?: string
+    participationRole?: string,
+    search?: string
   ): Promise<number>;
   abstract findAllPublicPrograms(filters?: {
     search?: string;
