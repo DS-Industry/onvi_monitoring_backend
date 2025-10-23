@@ -562,9 +562,9 @@ export class CardRepository extends ICardRepository {
     loyaltyProgramId: number,
     startDate: Date,
     endDate: Date,
-  ): Promise<{ date: string; accruals: number; debits: number }[]> {
+  ): Promise<{ date: Date; accruals: number; debits: number }[]> {
     const result = await this.prisma.$queryRaw<
-      { date: string; accruals: number; debits: number }[]
+      { date: Date; accruals: bigint; debits: bigint }[]
     >`
       SELECT 
         DATE(bo."operDate") as date,
@@ -582,7 +582,12 @@ export class CardRepository extends ICardRepository {
       ORDER BY DATE(bo."operDate") ASC
     `;
 
-    return result;
+    // Convert BigInt values to regular numbers
+    return result.map(item => ({
+      date: item.date,
+      accruals: Number(item.accruals),
+      debits: Number(item.debits),
+    }));
   }
 
   public async findCardsByTierId(tierId: number): Promise<Card[]> {
