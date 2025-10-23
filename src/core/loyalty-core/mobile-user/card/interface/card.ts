@@ -42,6 +42,6 @@ export abstract class ICardRepository {
     loyaltyProgramId: number,
     startDate: Date,
     endDate: Date,
-  ): Promise<{ date: string; accruals: number; debits: number }[]>;
+  ): Promise<{ date: Date; accruals: number; debits: number }[]>;
   abstract findCardsByTierId(tierId: number): Promise<Card[]>;
 }

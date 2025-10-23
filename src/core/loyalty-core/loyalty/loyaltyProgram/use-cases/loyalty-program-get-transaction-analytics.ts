@@ -75,14 +75,15 @@ export class GetLoyaltyProgramTransactionAnalyticsUseCase {
   }
 
   private fillMissingDates(
-    rawData: { date: string; accruals: number; debits: number }[],
+    rawData: { date: Date; accruals: number; debits: number }[],
     startDate: Date,
     endDate: Date,
   ): TransactionDataPoint[] {
     const dataMap = new Map<string, { accruals: number; debits: number }>();
     
     rawData.forEach(item => {
-      dataMap.set(item.date, { accruals: item.accruals, debits: item.debits });
+      const dateKey = item.date.toISOString().split('T')[0];
+      dataMap.set(dateKey, { accruals: item.accruals, debits: item.debits });
     });
 
     const result: TransactionDataPoint[] = [];
