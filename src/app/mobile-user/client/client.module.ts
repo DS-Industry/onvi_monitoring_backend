@@ -1,16 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '@db/prisma/prisma.module';
 import { ClientController } from '@mobile-user/client/controller/client';
-import { FileModule } from '@libs/file/module';
-import { HttpModule } from '@nestjs/axios';
-import { ClientRepository } from './infrastructure/client.repository';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { ClientMetaRepository } from './infrastructure/client-meta.repository';
 import { ClientFavoritesRepository } from './infrastructure/client-favorites.repository';
-import { GetClientByIdUseCase } from './use-cases/get-client-by-id.use-case';
-import { CreateClientUseCase } from './use-cases/create-client.use-case';
-import { UpdateClientUseCase } from './use-cases/update-client.use-case';
 import { UpdateAccountUseCase } from './use-cases/update-account.use-case';
-import { DeleteClientUseCase } from './use-cases/delete-client.use-case';
 import { GetCurrentAccountUseCase } from './use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from './use-cases/create-client-meta.use-case';
 import { UpdateClientMetaUseCase } from './use-cases/update-client-meta.use-case';
@@ -20,17 +13,12 @@ import { RemoveClientFavoriteUseCase } from './use-cases/remove-client-favorite.
 import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.use-case';
 
 @Module({
-  imports: [PrismaModule, FileModule, HttpModule],
+  imports: [LoyaltyCoreModule],
   controllers: [ClientController],
   providers: [
-    ClientRepository,
     ClientMetaRepository,
     ClientFavoritesRepository,
-    GetClientByIdUseCase,
-    CreateClientUseCase,
-    UpdateClientUseCase,
     UpdateAccountUseCase,
-    DeleteClientUseCase,
     GetCurrentAccountUseCase,
     CreateClientMetaUseCase,
     UpdateClientMetaUseCase,
@@ -40,14 +28,9 @@ import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.us
     GetActivePromotionsUseCase,
   ],
   exports: [
-    ClientRepository,
     ClientMetaRepository,
     ClientFavoritesRepository,
-    GetClientByIdUseCase,
-    CreateClientUseCase,
-    UpdateClientUseCase,
     UpdateAccountUseCase,
-    DeleteClientUseCase,
     GetCurrentAccountUseCase,
     CreateClientMetaUseCase,
     UpdateClientMetaUseCase,

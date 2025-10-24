@@ -13,11 +13,10 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { GetClientByIdUseCase } from '../use-cases/get-client-by-id.use-case';
-import { CreateClientUseCase } from '../use-cases/create-client.use-case';
-import { UpdateClientUseCase } from '../use-cases/update-client.use-case';
+import { GetByIdClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-get-by-id';
+import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
+import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { UpdateAccountUseCase } from '../use-cases/update-account.use-case';
-import { DeleteClientUseCase } from '../use-cases/delete-client.use-case';
 import { GetCurrentAccountUseCase } from '../use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from '../use-cases/create-client-meta.use-case';
 import { UpdateClientMetaUseCase } from '../use-cases/update-client-meta.use-case';
@@ -33,16 +32,16 @@ import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientFavoritesDto } from './dto/client-favorites.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
+import { ContractType } from '@prisma/client';
 
 
 @Controller('client')
 export class ClientController {
   constructor(
-    private readonly getClientByIdUseCase: GetClientByIdUseCase,
+    private readonly getClientByIdUseCase: GetByIdClientUseCase,
     private readonly createClientUseCase: CreateClientUseCase,
     private readonly updateClientUseCase: UpdateClientUseCase,
     private readonly updateAccountUseCase: UpdateAccountUseCase,
-    private readonly deleteClientUseCase: DeleteClientUseCase,
     private readonly getCurrentAccountUseCase: GetCurrentAccountUseCase,
     private readonly createClientMetaUseCase: CreateClientMetaUseCase,
     private readonly updateClientMetaUseCase: UpdateClientMetaUseCase,
@@ -54,7 +53,19 @@ export class ClientController {
   @Post()
   @HttpCode(201)
   async createClient(@Body() createData: CreateClientDto): Promise<ClientResponseDto> {
-    const client = await this.createClientUseCase.execute(createData);
+    // Map the DTO to core DTO format
+    const coreCreateData = {
+      name: createData.name,
+      phone: createData.phone,
+      email: createData.email,
+      gender: createData.gender,
+      contractType: createData.contractType || ContractType.INDIVIDUAL,
+      comment: createData.comment,
+      birthday: createData.birthday ? new Date(createData.birthday) : undefined,
+      placementId: createData.placementId,
+    };
+    
+    const client = await this.createClientUseCase.execute(coreCreateData);
     return new ClientResponseDto(client);
   }
 
@@ -116,8 +127,9 @@ export class ClientController {
   @UseGuards(JwtGuard)
   async deleteAccount(@Request() request: any): Promise<any> {
     const { user } = request;
-    await this.deleteClientUseCase.execute(user.clientId);
-    return { status: 'SUCCESS' };
+    // Note: Core doesn't have a proper delete implementation
+    // This would need to be implemented in the core or handled differently
+    throw new Error('Delete functionality not implemented in core');
   }
 
   @Get('/favorites')
@@ -149,7 +161,6 @@ export class ClientController {
   @HttpCode(200)
   async getOneById(@Param('id', ParseIntPipe) id: number): Promise<ClientResponseDto> {
     const client = await this.getClientByIdUseCase.execute(id);
-    console.log('hey hey hye')
     return new ClientResponseDto(client);
   }
 
@@ -159,13 +170,27 @@ export class ClientController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: UpdateClientDto,
   ): Promise<ClientResponseDto> {
-    const client = await this.updateClientUseCase.execute(id, updateData);
+    // First get the existing client
+    const existingClient = await this.getClientByIdUseCase.execute(id);
+    
+    // Map the DTO to core DTO format
+    const coreUpdateData = {
+      name: updateData.name,
+      status: updateData.status,
+      avatar: updateData.avatar,
+      refreshTokenId: updateData.refreshTokenId,
+      email: updateData.email,
+    };
+    
+    const client = await this.updateClientUseCase.execute(coreUpdateData, existingClient);
     return new ClientResponseDto(client);
   }
 
   @Delete(':id')
   @HttpCode(204)
   async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.deleteClientUseCase.execute(id);
+    // Note: Core doesn't have a proper delete implementation
+    // This would need to be implemented in the core or handled differently
+    throw new Error('Delete functionality not implemented in core');
   }
 }
