@@ -81,16 +81,19 @@ export class InventoryItemRepository extends IInventoryItemRepository {
 
     where.quantity = { gt: 0 };
 
+    const nomenclatureFilter: any = {};
     if (organizationId !== undefined) {
-      where.nomenclature = { organizationId };
+      nomenclatureFilter.organizationId = organizationId;
     }
-
     if (categoryId !== undefined) {
-      where.nomenclature = { categoryId };
+      nomenclatureFilter.categoryId = categoryId;
+    }
+    if (status !== undefined) {
+      nomenclatureFilter.status = status;
     }
 
-    if (status !== undefined) {
-      where.nomenclature = { status };
+    if (Object.keys(nomenclatureFilter).length > 0) {
+      where.nomenclature = nomenclatureFilter;
     }
 
     const inventoryItems = await this.prisma.inventoryItem.findMany({
@@ -119,16 +122,19 @@ export class InventoryItemRepository extends IInventoryItemRepository {
 
     where.quantity = { gt: 0 };
 
+    const nomenclatureFilter: any = {};
     if (organizationId !== undefined) {
-      where.nomenclature = { organizationId };
+      nomenclatureFilter.organizationId = organizationId;
     }
-
     if (categoryId !== undefined) {
-      where.nomenclature = { categoryId };
+      nomenclatureFilter.categoryId = categoryId;
+    }
+    if (status !== undefined) {
+      nomenclatureFilter.status = status;
     }
 
-    if (status !== undefined) {
-      where.nomenclature = { status };
+    if (Object.keys(nomenclatureFilter).length > 0) {
+      where.nomenclature = nomenclatureFilter;
     }
 
     const result = await this.prisma.inventoryItem.groupBy({
