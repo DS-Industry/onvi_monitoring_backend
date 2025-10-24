@@ -11,7 +11,7 @@ export class UpdateManyCashCollectionDeviceUseCase {
   ) {}
 
   async execute(data: CashCollectionDeviceDataDto[]): Promise<void> {
-    data.map(async (updateData) => {
+    for (const updateData of data) {
       const oldCashCollectionDevice =
         await this.findMethodsCashCollectionDeviceUseCase.getOneById(
           updateData.cashCollectionDeviceId,
@@ -20,15 +20,13 @@ export class UpdateManyCashCollectionDeviceUseCase {
         await this.findMethodsCashCollectionDeviceUseCase.getRecalculateDataByDevice(
           updateData.cashCollectionDeviceId,
           updateData.tookMoneyTime,
-          updateData.oldTookMoneyTime ??
-            oldCashCollectionDevice.oldTookMoneyTime,
+          updateData.oldTookMoneyTime ?? oldCashCollectionDevice.oldTookMoneyTime,
         );
 
       await this.updateCashCollectionDeviceUseCase.execute(
         {
           oldTookMoneyTime:
-            updateData.oldTookMoneyTime ??
-            oldCashCollectionDevice.oldTookMoneyTime,
+            updateData.oldTookMoneyTime ?? oldCashCollectionDevice.oldTookMoneyTime,
           tookMoneyTime: recalculateData.tookMoneyTime,
           sum: recalculateData.sumCoin + recalculateData.sumPaper,
           sumCoin: recalculateData.sumCoin,
@@ -39,6 +37,6 @@ export class UpdateManyCashCollectionDeviceUseCase {
         },
         oldCashCollectionDevice,
       );
-    });
+    }
   }
 }
