@@ -16,4 +16,5 @@ export interface ClientUpdateDto {
   gender?: string;
   cardId?: number;
   email?: string;
+  is_notifications_enabled?: boolean;
 }

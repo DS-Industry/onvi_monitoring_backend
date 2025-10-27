@@ -16,10 +16,8 @@ export class UpdateAccountUseCase {
   async execute(
     input: AccountClientUpdateDto,
     client: Client,
-  ): Promise<any> {
-    const { name, email, avatar, notification, is_notifications_enabled } = input;
-
-    // Map the input to core update DTO format
+  ) {
+    const { name, email, avatar, is_notifications_enabled } = input;
     const coreUpdateData: any = {};
 
     if (name !== undefined) coreUpdateData.name = name;
@@ -36,13 +34,7 @@ export class UpdateAccountUseCase {
     }
 
     if (is_notifications_enabled !== undefined) {
-      // Note: Core domain doesn't have is_notifications_enabled field
-      // This might need to be handled differently or added to core
-    }
-
-    if (notification !== undefined) {
-      // Note: Core domain doesn't have isNotifications field
-      // This might need to be handled differently or added to core
+      coreUpdateData.is_notifications_enabled = is_notifications_enabled;
     }
 
     const updatedClient = await this.updateClientUseCase.execute(coreUpdateData, client);
