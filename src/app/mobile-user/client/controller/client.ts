@@ -16,6 +16,7 @@ import {
 import { GetByIdClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-get-by-id';
 import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
+import { DeleteClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-delete';
 import { UpdateAccountUseCase } from '../use-cases/update-account.use-case';
 import { GetCurrentAccountUseCase } from '../use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from '../use-cases/create-client-meta.use-case';
@@ -41,6 +42,7 @@ export class ClientController {
     private readonly getClientByIdUseCase: GetByIdClientUseCase,
     private readonly createClientUseCase: CreateClientUseCase,
     private readonly updateClientUseCase: UpdateClientUseCase,
+    private readonly deleteClientUseCase: DeleteClientUseCase,
     private readonly updateAccountUseCase: UpdateAccountUseCase,
     private readonly getCurrentAccountUseCase: GetCurrentAccountUseCase,
     private readonly createClientMetaUseCase: CreateClientMetaUseCase,
@@ -53,7 +55,6 @@ export class ClientController {
   @Post()
   @HttpCode(201)
   async createClient(@Body() createData: CreateClientDto): Promise<ClientResponseDto> {
-    // Map the DTO to core DTO format
     const coreCreateData = {
       name: createData.name,
       phone: createData.phone,
@@ -125,11 +126,10 @@ export class ClientController {
 
   @Delete()
   @UseGuards(JwtGuard)
-  async deleteAccount(@Request() request: any): Promise<any> {
+  @HttpCode(204)
+  async deleteAccount(@Request() request: any): Promise<void> {
     const { user } = request;
-    // Note: Core doesn't have a proper delete implementation
-    // This would need to be implemented in the core or handled differently
-    throw new Error('Delete functionality not implemented in core');
+    await this.deleteClientUseCase.execute(user.clientId);
   }
 
   @Get('/favorites')
@@ -170,10 +170,8 @@ export class ClientController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: UpdateClientDto,
   ): Promise<ClientResponseDto> {
-    // First get the existing client
     const existingClient = await this.getClientByIdUseCase.execute(id);
     
-    // Map the DTO to core DTO format
     const coreUpdateData = {
       name: updateData.name,
       status: updateData.status,
@@ -189,8 +187,6 @@ export class ClientController {
   @Delete(':id')
   @HttpCode(204)
   async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    // Note: Core doesn't have a proper delete implementation
-    // This would need to be implemented in the core or handled differently
-    throw new Error('Delete functionality not implemented in core');
+    await this.deleteClientUseCase.execute(id);
   }
 }

@@ -10,6 +10,7 @@ import { UploadAvatarClientUseCase } from './mobile-user/client/use-cases/client
 import { DownloadAvatarClientUseCase } from './mobile-user/client/use-cases/client-avatar-download';
 import { TagRepositoryProvider } from '@loyalty/mobile-user/tag/provider/tag';
 import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
+import { DeleteClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-delete';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { CreateTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-create';
 import { DeleteTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-delete';
@@ -113,6 +114,7 @@ const repositories: Provider[] = [
 const clientUseCase: Provider[] = [
   CreateClientUseCase,
   UpdateClientUseCase,
+  DeleteClientUseCase,
   GetByIdClientUseCase,
   UploadAvatarClientUseCase,
   DownloadAvatarClientUseCase,
