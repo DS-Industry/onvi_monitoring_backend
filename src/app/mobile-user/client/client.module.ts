@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { ClientController } from '@mobile-user/client/controller/client';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { ClientMetaRepository } from './infrastructure/client-meta.repository';
@@ -13,7 +14,7 @@ import { RemoveClientFavoriteUseCase } from './use-cases/remove-client-favorite.
 import { GetActivePromotionsUseCase } from './use-cases/get-active-promotions.use-case';
 
 @Module({
-  imports: [LoyaltyCoreModule],
+  imports: [LoyaltyCoreModule, HttpModule],
   controllers: [ClientController],
   providers: [
     ClientMetaRepository,
