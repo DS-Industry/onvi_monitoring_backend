@@ -30,4 +30,6 @@ export abstract class IMarketingCampaignRepository {
   abstract findActiveCampaignsToComplete(now: Date): Promise<{ id: number; name: string; endDate: Date | null }[]>;
 
   abstract updateStatus(id: number, status: MarketingCampaignStatus): Promise<void>;
+
+  abstract findActiveCampaignsForClient(clientId: number, regionCode?: string | null): Promise<any[]>;
 }

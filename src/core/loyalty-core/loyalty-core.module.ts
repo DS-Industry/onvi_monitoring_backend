@@ -1,6 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { FileModule } from '@libs/file/module';
+import { HttpModule } from '@nestjs/axios';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
@@ -8,6 +9,7 @@ import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-updat
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
 import { UploadAvatarClientUseCase } from './mobile-user/client/use-cases/client-avatar-upload';
 import { DownloadAvatarClientUseCase } from './mobile-user/client/use-cases/client-avatar-download';
+import { GetActivePromotionsForClientUseCase } from './mobile-user/client/use-cases/get-active-promotions-for-client';
 import { TagRepositoryProvider } from '@loyalty/mobile-user/tag/provider/tag';
 import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
 import { DeleteClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-delete';
@@ -120,6 +122,7 @@ const clientUseCase: Provider[] = [
   DownloadAvatarClientUseCase,
   FindMethodsClientUseCase,
   FindByFilterClientUseCase,
+  GetActivePromotionsForClientUseCase,
 ];
 
 const tagUseCase: Provider[] = [
@@ -226,7 +229,7 @@ const redisProviders: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule, FileModule, BusinessCoreModule],
+  imports: [PrismaModule, FileModule, HttpModule, BusinessCoreModule],
   providers: [
     ...repositories,
     ...clientUseCase,

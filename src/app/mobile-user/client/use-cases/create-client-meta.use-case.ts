@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { ClientMetaRepository } from '../infrastructure/client-meta.repository';
-import { ClientMeta } from '../domain/client-meta.entity';
+import { IClientMetaRepository } from '@loyalty/mobile-user/client/interfaces/clientMeta';
+import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
 import { ClientMetaCreateDto } from '../controller/dto/client-meta-create.dto';
 
 @Injectable()
 export class CreateClientMetaUseCase {
-  constructor(private readonly clientMetaRepository: ClientMetaRepository) {}
+  constructor(private readonly clientMetaRepository: IClientMetaRepository) {}
 
   async execute(dto: ClientMetaCreateDto): Promise<ClientMeta> {
-    const existingMeta = await this.clientMetaRepository.findByClientId(dto.clientId);
+    const existingMeta = await this.clientMetaRepository.findOneByClientId(dto.clientId);
     if (existingMeta) {
       throw new Error('Meta already exists for this client');
     }

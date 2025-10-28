@@ -1,27 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { ClientMetaRepository } from '../infrastructure/client-meta.repository';
-import { ClientMeta } from '../domain/client-meta.entity';
+import { IClientMetaRepository } from '@loyalty/mobile-user/client/interfaces/clientMeta';
+import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
 import { ClientMetaUpdateDto } from '../controller/dto/client-meta-update.dto';
 
 @Injectable()
 export class UpdateClientMetaUseCase {
-  constructor(private readonly clientMetaRepository: ClientMetaRepository) {}
+  constructor(private readonly clientMetaRepository: IClientMetaRepository) {}
 
   async execute(dto: ClientMetaUpdateDto): Promise<ClientMeta> {
-    const existingMeta = await this.clientMetaRepository.findById(dto.metaId);
+    const existingMeta = await this.clientMetaRepository.findOneById(dto.metaId);
     if (!existingMeta) {
       throw new Error('Meta not found');
     }
 
-    const updateData: Partial<ClientMeta> = {};
-    
-    if (dto.clientId !== undefined) updateData.clientId = dto.clientId;
-    if (dto.deviceId !== undefined) updateData.deviceId = dto.deviceId;
-    if (dto.model !== undefined) updateData.model = dto.model;
-    if (dto.name !== undefined) updateData.name = dto.name;
-    if (dto.platform !== undefined) updateData.platform = dto.platform;
+    if (dto.deviceId !== undefined) existingMeta.deviceId = dto.deviceId;
+    if (dto.model !== undefined) existingMeta.model = dto.model;
+    if (dto.name !== undefined) existingMeta.name = dto.name;
+    if (dto.platform !== undefined) existingMeta.platform = dto.platform;
 
-    existingMeta.update(updateData);
     return await this.clientMetaRepository.update(existingMeta);
   }
 }

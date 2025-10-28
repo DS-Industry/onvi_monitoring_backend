@@ -631,4 +631,48 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
     });
   }
+
+  async findActiveCampaignsForClient(clientId: number, regionCode?: string | null): Promise<any[]> {
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where: {
+        status: 'ACTIVE',
+        launchDate: {
+          lte: new Date(),
+        },
+        OR: [
+          { endDate: null },
+          { endDate: { gte: new Date() } },
+        ],
+      },
+      include: {
+        promocodes: {
+          where: {
+            isActive: true,
+            ...(regionCode && {
+              placement: {
+                regionCode: regionCode,
+              },
+            }),
+          },
+        },
+        poses: true,
+      },
+    });
+
+    const availableCampaigns = [];
+    for (const campaign of campaigns) {
+      const usage = await this.prisma.marketingCampaignUsage.findFirst({
+        where: {
+          campaignId: campaign.id,
+          ltyUserId: clientId,
+        },
+      });
+
+      if (!usage) {
+        availableCampaigns.push(campaign);
+      }
+    }
+
+    return availableCampaigns;
+  }
 }

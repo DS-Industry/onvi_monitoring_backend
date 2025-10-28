@@ -21,16 +21,12 @@ import { UpdateAccountUseCase } from '../use-cases/update-account.use-case';
 import { GetCurrentAccountUseCase } from '../use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from '../use-cases/create-client-meta.use-case';
 import { UpdateClientMetaUseCase } from '../use-cases/update-client-meta.use-case';
-import { GetClientFavoritesUseCase } from '../use-cases/get-client-favorites.use-case';
-import { AddClientFavoriteUseCase } from '../use-cases/add-client-favorite.use-case';
-import { RemoveClientFavoriteUseCase } from '../use-cases/remove-client-favorite.use-case';
-import { GetActivePromotionsUseCase } from '../use-cases/get-active-promotions.use-case';
+import { GetActivePromotionsForClientUseCase } from '@loyalty/mobile-user/client/use-cases/get-active-promotions-for-client';
 import { CreateClientDto } from './dto/client-create.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { AccountClientUpdateDto } from './dto/account-client-update.dto';
 import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
-import { ClientFavoritesDto } from './dto/client-favorites.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
 import { ContractType } from '@prisma/client';
@@ -47,10 +43,7 @@ export class ClientController {
     private readonly getCurrentAccountUseCase: GetCurrentAccountUseCase,
     private readonly createClientMetaUseCase: CreateClientMetaUseCase,
     private readonly updateClientMetaUseCase: UpdateClientMetaUseCase,
-    private readonly getClientFavoritesUseCase: GetClientFavoritesUseCase,
-    private readonly addClientFavoriteUseCase: AddClientFavoriteUseCase,
-    private readonly removeClientFavoriteUseCase: RemoveClientFavoriteUseCase,
-    private readonly getActivePromotionsUseCase: GetActivePromotionsUseCase,
+    private readonly getActivePromotionsUseCase: GetActivePromotionsForClientUseCase,
   ) {}
   @Post()
   @HttpCode(201)
@@ -75,7 +68,8 @@ export class ClientController {
   @UseGuards(JwtGuard)
   async getCurrentAccount(@Request() req: any): Promise<any> {
     const { user } = req;
-    return await this.getCurrentAccountUseCase.execute(user.clientId);
+
+    return await this.getCurrentAccountUseCase.execute(user.props.id);
   }
 
 
@@ -92,7 +86,7 @@ export class ClientController {
       latitude !== undefined && longitude !== undefined
         ? { latitude, longitude }
         : undefined;
-    return await this.getActivePromotionsUseCase.execute(user.clientId, location);
+    return await this.getActivePromotionsUseCase.execute(user.props.id, location);
   }
 
   @Patch('/account/update')
@@ -103,7 +97,7 @@ export class ClientController {
   ) {
     const { user } = req;
     
-    const accountData = await this.getCurrentAccountUseCase.execute(user.clientId);
+    const accountData = await this.getCurrentAccountUseCase.execute(user.props.id);
     const currentClient = accountData.client;
     
     return await this.updateAccountUseCase.execute(body, currentClient);
@@ -131,31 +125,6 @@ export class ClientController {
     const { user } = request;
     await this.deleteClientUseCase.execute(user.clientId);
   }
-
-  @Get('/favorites')
-  @HttpCode(200)
-  @UseGuards(JwtGuard)
-  async getFavorites(@Request() request: any): Promise<number[]> {
-    const { user } = request;
-    return await this.getClientFavoritesUseCase.execute(user.clientId);
-  }
-
-  @Post('/favorites')
-  @HttpCode(201)
-  @UseGuards(JwtGuard)
-  async addFavorites(@Body() body: ClientFavoritesDto, @Request() request: any): Promise<number[]> {
-    const { user } = request;
-    return await this.addClientFavoriteUseCase.execute(user.clientId, body);
-  }
-
-  @Delete('/favorites')
-  @HttpCode(200)
-  @UseGuards(JwtGuard)
-  async removeFavorite(@Body() body: ClientFavoritesDto, @Request() request: any): Promise<number[]> {
-    const { user } = request;
-    return await this.removeClientFavoriteUseCase.execute(user.clientId, body);
-  }
-
 
   @Get(':id')
   @HttpCode(200)
