@@ -19,6 +19,7 @@ export interface ClientProps {
   updatedAt?: Date;
   mobileUserRoleId?: number;
   cardId?: number;
+  is_notifications_enabled?: boolean;
   meta?: ClientMeta;
 }
 
@@ -145,5 +146,13 @@ export class Client extends BaseEntity<ClientProps> {
 
   set meta(meta: ClientMeta) {
     this.props.meta = meta;
+  }
+
+  get is_notifications_enabled(): boolean {
+    return this.props.is_notifications_enabled;
+  }
+
+  set is_notifications_enabled(is_notifications_enabled: boolean) {
+    this.props.is_notifications_enabled = is_notifications_enabled;
   }
 }

@@ -16,6 +16,8 @@ export class ClientResponseDto {
   placementId?: number;
   workerCorporateId?: number;
   refreshTokenId?: string;
+  tags?: any[];
+  card?: any;
 
   constructor(client: any) {
     this.id = client.id;
@@ -33,5 +35,7 @@ export class ClientResponseDto {
     this.placementId = client.placementId;
     this.workerCorporateId = client.workerCorporateId;
     this.refreshTokenId = client.refreshTokenId;
+    this.tags = client.tags;
+    this.card = client.card;
   }
 }

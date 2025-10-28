@@ -17,13 +17,5 @@ export class AccountClientUpdateDto {
 
   @IsOptional()
   @IsBoolean()
-  notification?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  isActivated?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
   is_notifications_enabled?: boolean;
 }

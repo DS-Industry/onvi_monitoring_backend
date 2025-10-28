@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { ClientRepository } from '../infrastructure/client.repository';
-import { ClientMetaRepository } from '../infrastructure/client-meta.repository';
-import { Client } from '../domain/client.entity';
-import { ClientMeta } from '../domain/client-meta.entity';
+import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
+import { IClientMetaRepository } from '@loyalty/mobile-user/client/interfaces/clientMeta';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
 
 @Injectable()
 export class GetCurrentAccountUseCase {
   constructor(
-    private readonly clientRepository: ClientRepository,
-    private readonly clientMetaRepository: ClientMetaRepository,
+    private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
+    private readonly clientMetaRepository: IClientMetaRepository,
   ) {}
 
   async execute(clientId: number): Promise<{
     client: Client;
     meta?: ClientMeta;
   }> {
-    const client = await this.clientRepository.findById(clientId);
+    const client = await this.findMethodsClientUseCase.getById(clientId);
     if (!client) {
       throw new Error('Client not found');
     }
 
-    const meta = await this.clientMetaRepository.findByClientId(clientId);
+    const meta = await this.clientMetaRepository.findOneByClientId(clientId);
 
     return {
       client,

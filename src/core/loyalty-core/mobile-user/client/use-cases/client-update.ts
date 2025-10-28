@@ -27,7 +27,8 @@ export class UpdateClientUseCase {
       refreshTokenId,
       gender,
       cardId,
-      email
+      email,
+      is_notifications_enabled
     } = input;
 
     oldClient.name = name ? name : oldClient.name;
@@ -46,6 +47,9 @@ export class UpdateClientUseCase {
     oldClient.gender = gender ? gender : oldClient.gender;
     oldClient.updatedAt = new Date(Date.now());
     oldClient.email = email ? email : oldClient.email;
+    oldClient.is_notifications_enabled = is_notifications_enabled !== undefined 
+      ? is_notifications_enabled 
+      : oldClient.is_notifications_enabled;
     const client = await this.clientRepository.update(oldClient);
     
     let card;
