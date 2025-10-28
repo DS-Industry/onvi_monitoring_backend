@@ -15,18 +15,12 @@ export class GetCurrentAccountUseCase {
     client: Client;
     meta?: ClientMeta;
   }> {
-    console.log("clientId => ", clientId)
     const client = await this.findMethodsClientUseCase.getById(clientId);
     if (!client) {
       throw new Error('Client not found');
     }
 
     const meta = await this.clientMetaRepository.findOneByClientId(clientId);
-
-    console.log({
-      client,
-      meta,
-    })
 
     return {
       client,
