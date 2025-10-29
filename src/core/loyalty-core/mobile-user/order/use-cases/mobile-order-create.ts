@@ -12,18 +12,14 @@ import { Queue } from 'bullmq';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
-  sumFull: number;
-  sumReal: number;
+  sum: number;
   sumBonus: number;
-  sumDiscount: number;
-  sumCashback: number;
   carWashId: number;
   cardMobileUserId: number;
   bayNumber: number;
   bayType?: DeviceType;
   promoCodeId?: number;
   rewardPointsUsed?: number;
-  originalSum?: number;
 }
 
 export interface CreateMobileOrderResponse {
@@ -70,7 +66,7 @@ export class CreateMobileOrderUseCase {
       throw new BadRequestException('Card not found for client');
     }
 
-    const isFreeVacuum = request.sumFull === 0 && request.bayType === DeviceType.VACUUME;
+    const isFreeVacuum = request.sum === 0 && request.bayType === DeviceType.VACUUME;
     if (isFreeVacuum) {
       const todayUTC = new Date();
       todayUTC.setUTCHours(0, 0, 0, 0);
@@ -99,7 +95,7 @@ export class CreateMobileOrderUseCase {
 
     const tariff = await this.tariffRepository.findCardTariff(card.id);
     const bonusPercent = tariff?.bonus ?? 0;
-    const cashbackRaw = (request.sumFull * bonusPercent) / 100;
+    const cashbackRaw = (request.sum * bonusPercent) / 100;
     const computedCashback = cashbackRaw < 1 ? 0 : Math.ceil(cashbackRaw);
 
     const initialOrderStatus = isFreeVacuum 
@@ -108,10 +104,10 @@ export class CreateMobileOrderUseCase {
 
     const order = new Order({
       transactionId: request.transactionId,
-      sumFull: request.sumFull,
-      sumReal: request.sumReal,
+      sumFull: request.sum,
+      sumReal: request.sum,
       sumBonus: request.sumBonus || 0,
-      sumDiscount: request.sumDiscount || 0,
+      sumDiscount: 0,
       sumCashback: computedCashback,
       carWashDeviceId: carWashDeviceId,
       platform: PlatformType.ONVI,
@@ -131,10 +127,12 @@ export class CreateMobileOrderUseCase {
         carWashDeviceId,
       );
       order.sumDiscount = discountAmount;
-      order.sumReal = request.sumReal - discountAmount;
+      order.sumReal = request.sum - discountAmount;
     }
 
     const createdOrder = await this.orderRepository.create(order);
+
+    console.log("createdOrder => ", createdOrder)
 
     if (isFreeVacuum) {
       await this.dataQueue.add('pos-process', {

@@ -40,18 +40,14 @@ export class OrderController {
 
       return await this.createMobileOrderUseCase.execute({
         transactionId,
-        sumFull: data.sum,
-        sumReal: data.sum,
+        sum: data.sum,
         sumBonus: data.sumBonus,
-        sumDiscount: 0,
-        sumCashback: 0,
         carWashId: data.carWashId,
         cardMobileUserId: user.props.id,
         bayNumber: data.bayNumber,
         bayType: data?.bayType ?? null,
         promoCodeId: data?.promoCodeId ?? null,
         rewardPointsUsed: data.rewardPointsUsed ?? 0,
-        originalSum: data?.sum ?? 0,
       });
     } catch (e) {
       throw new CustomHttpException({

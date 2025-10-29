@@ -1151,6 +1151,9 @@ export class LoyaltyController {
 
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
+
+      console.log("card => ", card)
+
       return {
         id: client.id,
         name: client.name,
