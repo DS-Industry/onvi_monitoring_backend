@@ -3,6 +3,9 @@ import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
 import { OrderStatus, PlatformType, ContractType, OrderHandlerStatus } from '@prisma/client';
 import { PrismaService } from '@db/prisma/prisma.service';
+import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { PromoCodeService } from './promo-code-service';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
@@ -13,6 +16,11 @@ export interface CreateMobileOrderRequest {
   sumCashback: number;
   carWashDeviceId: number;
   cardMobileUserId: number;
+  bayNumber: number;
+  bayType?: DeviceType;
+  promoCodeId?: number;
+  rewardPointsUsed?: number;
+  originalSum?: number;
 }
 
 export interface CreateMobileOrderResponse {
@@ -26,11 +34,26 @@ export class CreateMobileOrderUseCase {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly prisma: PrismaService,
+    private readonly posService: IPosService,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly promoCodeService: PromoCodeService,
   ) {}
 
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
+    const ping = await this.posService.ping({
+      posId: request.carWashDeviceId,
+      bayNumber: request.bayNumber,
+      type: request?.bayType ?? null,
+    });
+    if (ping.status === 'Busy') {
+      throw new BadRequestException('Bay is busy');
+    }
+    if (ping.status === 'Unavailable') {
+      throw new BadRequestException('Carwash is unavailable');
+    }
+
     const carWashDevice = await this.prisma.carWashDevice.findUnique({
       where: { id: request.carWashDeviceId },
     });
@@ -41,12 +64,47 @@ export class CreateMobileOrderUseCase {
       );
     }
 
+    const card = await this.findMethodsCardUseCase.getByClientId(
+      request.cardMobileUserId,
+    );
+
+    if (!card) {
+      throw new BadRequestException('Card not found for client');
+    }
+
+    const isFreeVacuum = request.sumFull === 0 && request.bayType === DeviceType.VACUUME;
+    if (isFreeVacuum) {
+      const todayUTC = new Date();
+      todayUTC.setUTCHours(0, 0, 0, 0);
+      const tomorrowUTC = new Date(todayUTC);
+      tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
+
+      const orders = await this.orderRepository.findAllByFilter(
+        todayUTC,
+        tomorrowUTC,
+        undefined,
+        undefined,
+        OrderStatus.COMPLETED,
+        undefined,
+        card.id,
+        DeviceType.VACUUME,
+      );
+
+      const freeOperations = orders.filter((order) => order.sumFull === 0);
+      const limit = card.monthlyLimit || 0;
+      const remains = Math.max(0, limit - freeOperations.length);
+
+      if (remains <= 0) {
+        throw new BadRequestException('Insufficient free vacuum remaining');
+      }
+    }
+
     const order = new Order({
       transactionId: request.transactionId,
       sumFull: request.sumFull,
       sumReal: request.sumReal,
-      sumBonus: request.sumBonus,
-      sumDiscount: request.sumDiscount,
+      sumBonus: request.sumBonus || 0,
+      sumDiscount: request.sumDiscount || 0,
       sumCashback: request.sumCashback,
       carWashDeviceId: request.carWashDeviceId,
       platform: PlatformType.ONVI,
@@ -54,9 +112,20 @@ export class CreateMobileOrderUseCase {
       typeMobileUser: ContractType.INDIVIDUAL,
       orderData: new Date(),
       createData: new Date(),
-      orderStatus: OrderStatus.CREATED,
+      orderStatus: isFreeVacuum ? OrderStatus.CREATED : OrderStatus.CREATED,
       orderHandlerStatus: OrderHandlerStatus.CREATED,
     });
+
+    if (request.promoCodeId) {
+      const discountAmount = await this.promoCodeService.applyPromoCode(
+        request.promoCodeId,
+        order,
+        card,
+        request.carWashDeviceId,
+      );
+      order.sumDiscount = discountAmount;
+      order.sumReal = request.sumReal - discountAmount;
+    }
 
     const createdOrder = await this.orderRepository.create(order);
 

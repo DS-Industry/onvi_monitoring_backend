@@ -2,6 +2,7 @@ import { Module, Provider } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { FileModule } from '@libs/file/module';
 import { HttpModule } from '@nestjs/axios';
+import { PosModule } from '@infra/pos/pos.module';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
@@ -96,6 +97,7 @@ import { CreateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-o
 import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-id';
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
+import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -215,6 +217,7 @@ const mobileOrderUseCase: Provider[] = [
   GetMobileOrderByIdUseCase,
   UpdateMobileOrderUseCase,
   GetMobileOrderByTransactionIdUseCase,
+  PromoCodeService,
 ];
 
 const corporateUseCase: Provider[] = [
@@ -240,7 +243,7 @@ const redisProviders: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule, FileModule, HttpModule, BusinessCoreModule],
+  imports: [PrismaModule, FileModule, HttpModule, BusinessCoreModule, PosModule],
   providers: [
     ...repositories,
     ...clientUseCase,

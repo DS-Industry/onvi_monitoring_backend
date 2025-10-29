@@ -45,6 +45,7 @@ export class OrderRepository extends IOrderRepository {
     orderStatus?: OrderStatus,
     carWashDeviceId?: number,
     cardId?: number,
+    deviceTypeCode?: string,
   ): Promise<Order[]> {
     const where: any = {};
 
@@ -71,6 +72,14 @@ export class OrderRepository extends IOrderRepository {
 
     if (cardId !== undefined) {
       where.cardId = cardId;
+    }
+
+    if (deviceTypeCode !== undefined) {
+      where.carWashDevice = {
+        carWashDeviceType: {
+          code: deviceTypeCode,
+        },
+      } as any;
     }
 
     const orders = await this.prisma.lTYOrder.findMany({

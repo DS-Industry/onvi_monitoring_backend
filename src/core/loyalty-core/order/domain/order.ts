@@ -157,4 +157,12 @@ export class Order extends BaseEntity<OrderProps> {
   set handlerError(handlerError: string) {
     this.props.handlerError = handlerError;
   }
+
+  set sumDiscount(sumDiscount: number) {
+    this.props.sumDiscount = sumDiscount;
+  }
+
+  set sumReal(sumReal: number) {
+    this.props.sumReal = sumReal;
+  }
 }

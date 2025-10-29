@@ -13,6 +13,7 @@ export abstract class IOrderRepository {
     orderStatus?: OrderStatus,
     carWashDeviceId?: number,
     cardId?: number,
+    deviceTypeCode?: string,
   ): Promise<Order[]>;
   abstract update(input: Order): Promise<Order>;
 }

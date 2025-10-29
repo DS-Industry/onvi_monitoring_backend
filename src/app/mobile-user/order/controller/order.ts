@@ -19,6 +19,7 @@ import { GetMobileOrderByTransactionIdUseCase } from '@loyalty/mobile-user/order
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
+import { IPosService } from '@infra/pos/interface/pos.interface';
 
 @Controller('order')
 export class OrderController {
@@ -27,6 +28,7 @@ export class OrderController {
     private readonly getMobileOrderByIdUseCase: GetMobileOrderByIdUseCase,
     private readonly updateMobileOrderUseCase: UpdateMobileOrderUseCase,
     private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
+    private readonly posService: IPosService,
   ) {}
   @UseGuards(JwtGuard)
   @Post('create')
@@ -34,15 +36,22 @@ export class OrderController {
   async createOrder(@Body() data: CreateOrderDto, @Req() req: any) {
     try {
       const { user } = req;
+      const transactionId = this.generateTransactionId();
+      
       return await this.createMobileOrderUseCase.execute({
-        transactionId: data.transactionId,
-        sumFull: data.sumFull,
-        sumReal: data.sumReal,
-        sumBonus: data.sumBonus,
-        sumDiscount: data.sumDiscount,
-        sumCashback: data.sumCashback,
+        transactionId,
+        sumFull: data.sum,
+        sumReal: data.sum,
+        sumBonus: 0,
+        sumDiscount: 0,
+        sumCashback: 0,
         carWashDeviceId: data.carWashDeviceId,
         cardMobileUserId: user.clientId,
+        bayNumber: data.bayNumber,
+        bayType: data?.bayType,
+        promoCodeId: data?.promoCodeId,
+        rewardPointsUsed: data.rewardPointsUsed,
+        originalSum: data?.originalSum,
       });
     } catch (e) {
       throw new CustomHttpException({
@@ -50,6 +59,12 @@ export class OrderController {
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
+  }
+
+  private generateTransactionId(): string {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8);
+    return `${timestamp}-${random}`;
   }
 
   @UseGuards(JwtGuard)
@@ -121,11 +136,13 @@ export class OrderController {
   @Get('ping')
   @UseGuards(JwtGuard)
   async pingCarWash(@Query() query: any) {
-    // TODO
-    return {
-      message: 'POS ping endpoint - needs POS service integration',
-      query,
-    };
+    const res = await this.posService.ping({
+      posId: Number(query.carWashId),
+      bayNumber: Number(query.bayNumber),
+      type: query?.bayType ?? null,
+    });
+    
+    return res;
   }
 
   @Get('/latest')

@@ -1,37 +1,34 @@
-import { IsNumber, IsNotEmpty, IsString, Min } from 'class-validator';
+import { Optional } from '@nestjs/common';
+import { IsNumber, IsDefined, IsEnum, IsOptional } from 'class-validator';
+import { DeviceType } from '@infra/pos/interface/pos.interface';
 
 export class CreateOrderDto {
-  @IsString()
-  @IsNotEmpty()
-  transactionId: string;
+  @IsNumber()
+  @IsDefined()
+  sum: number;
 
   @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  sumFull: number;
+  @IsDefined()
+  rewardPointsUsed: number;
+
+  @IsOptional()
+  @IsNumber()
+  originalSum?: number;
+
+  @Optional()
+  promoCodeId?: number;
 
   @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  sumReal: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  sumBonus: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  sumDiscount: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  sumCashback: number;
-
-  @IsNumber()
-  @IsNotEmpty()
+  @IsDefined()
   carWashDeviceId: number;
-}
 
+  @IsNumber()
+  @IsDefined()
+  bayNumber: number;
+
+  @Optional()
+  bayType?: DeviceType;
+
+  @Optional()
+  err?: number;
+}
