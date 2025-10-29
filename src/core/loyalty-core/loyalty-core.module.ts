@@ -5,6 +5,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PosModule } from '@infra/pos/pos.module';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
+import { BullModule } from '@nestjs/bullmq';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
@@ -100,6 +101,8 @@ import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-ca
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
 import { ITariffRepository } from './mobile-user/order/interface/tariff';
 import { TariffRepository } from './mobile-user/order/repository/tariff';
+import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-case';
+import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -221,6 +224,7 @@ const mobileOrderUseCase: Provider[] = [
   UpdateMobileOrderUseCase,
   GetMobileOrderByTransactionIdUseCase,
   PromoCodeService,
+  StartPosUseCase,
 ];
 
 const corporateUseCase: Provider[] = [
@@ -246,7 +250,22 @@ const redisProviders: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule, FileModule, HttpModule, BusinessCoreModule, PosModule],
+  imports: [
+    PrismaModule,
+    FileModule,
+    HttpModule,
+    BusinessCoreModule,
+    PosModule,
+    BullModule.registerQueue({
+      configKey: 'worker',
+      name: 'pos-process',
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
+    }),
+  ],
   providers: [
     ...repositories,
     ...clientUseCase,
@@ -265,6 +284,7 @@ const redisProviders: Provider[] = [
     ...marketingCampaignUseCase,
     ...loyaltyTierHistUseCase,
     ...redisProviders,
+    StartPosProcess,
   ],
   exports: [
     ...repositories,

@@ -7,6 +7,8 @@ import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
 import { ITariffRepository } from '../interface/tariff';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
@@ -16,7 +18,6 @@ export interface CreateMobileOrderRequest {
   sumDiscount: number;
   sumCashback: number;
   carWashId: number;
-  carWashDeviceId: number;
   cardMobileUserId: number;
   bayNumber: number;
   bayType?: DeviceType;
@@ -40,6 +41,7 @@ export class CreateMobileOrderUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
     private readonly tariffRepository: ITariffRepository,
+    @InjectQueue('pos-process') private readonly dataQueue: Queue,
   ) {}
 
   async execute(
@@ -58,15 +60,7 @@ export class CreateMobileOrderUseCase {
       throw new BadRequestException('Carwash is unavailable');
     }
 
-    const carWashDevice = await this.prisma.carWashDevice.findUnique({
-      where: { id: request.carWashDeviceId },
-    });
-
-    if (!carWashDevice) {
-      throw new BadRequestException(
-        `Car wash device with ID ${request.carWashDeviceId} not found`,
-      );
-    }
+    const carWashDeviceId = Number(ping.id);
 
     const card = await this.findMethodsCardUseCase.getByClientId(
       request.cardMobileUserId,
@@ -108,6 +102,10 @@ export class CreateMobileOrderUseCase {
     const cashbackRaw = (request.sumFull * bonusPercent) / 100;
     const computedCashback = cashbackRaw < 1 ? 0 : Math.ceil(cashbackRaw);
 
+    const initialOrderStatus = isFreeVacuum 
+      ? OrderStatus.FREE_PROCESSING 
+      : OrderStatus.CREATED;
+
     const order = new Order({
       transactionId: request.transactionId,
       sumFull: request.sumFull,
@@ -115,13 +113,13 @@ export class CreateMobileOrderUseCase {
       sumBonus: request.sumBonus || 0,
       sumDiscount: request.sumDiscount || 0,
       sumCashback: computedCashback,
-      carWashDeviceId: request.carWashDeviceId,
+      carWashDeviceId: carWashDeviceId,
       platform: PlatformType.ONVI,
       cardMobileUserId: request.cardMobileUserId,
       typeMobileUser: ContractType.INDIVIDUAL,
       orderData: new Date(),
       createData: new Date(),
-      orderStatus: OrderStatus.CREATED,
+      orderStatus: initialOrderStatus,
       orderHandlerStatus: OrderHandlerStatus.CREATED,
     });
 
@@ -130,13 +128,22 @@ export class CreateMobileOrderUseCase {
         request.promoCodeId,
         order,
         card,
-        request.carWashDeviceId,
+        carWashDeviceId,
       );
       order.sumDiscount = discountAmount;
       order.sumReal = request.sumReal - discountAmount;
     }
 
     const createdOrder = await this.orderRepository.create(order);
+
+    if (isFreeVacuum) {
+      await this.dataQueue.add('pos-process', {
+        orderId: createdOrder.id,
+        carWashId: request.carWashId,
+        bayNumber: request.bayNumber,
+        bayType: request.bayType,
+      });
+    }
 
     return {
       orderId: createdOrder.id,

@@ -1627,6 +1627,9 @@ enum OrderStatus {
   CREATED
   COMPLETED
   CANCELED
+  FREE_PROCESSING
+  PAYED
+  FAILED
 }
 
 enum ExecutionStatus {

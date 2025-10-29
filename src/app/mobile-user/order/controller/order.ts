@@ -46,7 +46,6 @@ export class OrderController {
         sumDiscount: 0,
         sumCashback: 0,
         carWashId: data.carWashId,
-        carWashDeviceId: data.carWashDeviceId,
         cardMobileUserId: user.props.id,
         bayNumber: data.bayNumber,
         bayType: data?.bayType ?? null,
