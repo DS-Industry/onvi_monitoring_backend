@@ -92,6 +92,10 @@ import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgr
 import { GetLoyaltyProgramTransactionAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-transaction-analytics';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { CreateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-create';
+import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-id';
+import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
+import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -206,6 +210,13 @@ const orderUseCase: Provider[] = [
   FindMethodsOrderUseCase,
 ];
 
+const mobileOrderUseCase: Provider[] = [
+  CreateMobileOrderUseCase,
+  GetMobileOrderByIdUseCase,
+  UpdateMobileOrderUseCase,
+  GetMobileOrderByTransactionIdUseCase,
+];
+
 const corporateUseCase: Provider[] = [
   CorporateFindByFilterUseCase,
   CorporateGetByIdUseCase,
@@ -243,6 +254,7 @@ const redisProviders: Provider[] = [
     ...cardBonusOper,
     ...cardBonusOperType,
     ...orderUseCase,
+    ...mobileOrderUseCase,
     ...corporateUseCase,
     ...marketingCampaignUseCase,
     ...loyaltyTierHistUseCase,
@@ -259,6 +271,7 @@ const redisProviders: Provider[] = [
     ...benefitActionUseCase,
     ...cardBonusOper,
     ...orderUseCase,
+    ...mobileOrderUseCase,
     ...cardBonusBank,
     ...corporateUseCase,
     ...marketingCampaignUseCase,

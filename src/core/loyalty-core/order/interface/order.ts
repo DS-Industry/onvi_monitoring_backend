@@ -4,6 +4,7 @@ import { OrderStatus, PlatformType, ContractType } from "@prisma/client";
 export abstract class IOrderRepository {
   abstract create(input: Order): Promise<Order>;
   abstract findOneById(id: number): Promise<Order>;
+  abstract findOneByTransactionId(transactionId: string): Promise<Order>;
   abstract findAllByFilter(
     dateStart: Date,
     dateEnd: Date,

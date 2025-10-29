@@ -28,6 +28,15 @@ export class OrderRepository extends IOrderRepository {
     return PrismaOrderMapper.toDomain(order);
   }
 
+  public async findOneByTransactionId(transactionId: string): Promise<Order> {
+    const order = await this.prisma.lTYOrder.findFirst({
+      where: {
+        transactionId,
+      },
+    });
+    return PrismaOrderMapper.toDomain(order);
+  }
+
   public async findAllByFilter(
     dateStart: Date,
     dateEnd: Date,
