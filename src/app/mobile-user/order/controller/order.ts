@@ -37,21 +37,22 @@ export class OrderController {
     try {
       const { user } = req;
       const transactionId = this.generateTransactionId();
-      
+
       return await this.createMobileOrderUseCase.execute({
         transactionId,
         sumFull: data.sum,
         sumReal: data.sum,
-        sumBonus: 0,
+        sumBonus: data.sumBonus,
         sumDiscount: 0,
         sumCashback: 0,
+        carWashId: data.carWashId,
         carWashDeviceId: data.carWashDeviceId,
-        cardMobileUserId: user.clientId,
+        cardMobileUserId: user.props.id,
         bayNumber: data.bayNumber,
-        bayType: data?.bayType,
-        promoCodeId: data?.promoCodeId,
-        rewardPointsUsed: data.rewardPointsUsed,
-        originalSum: data?.originalSum,
+        bayType: data?.bayType ?? null,
+        promoCodeId: data?.promoCodeId ?? null,
+        rewardPointsUsed: data.rewardPointsUsed ?? 0,
+        originalSum: data?.sum ?? 0,
       });
     } catch (e) {
       throw new CustomHttpException({

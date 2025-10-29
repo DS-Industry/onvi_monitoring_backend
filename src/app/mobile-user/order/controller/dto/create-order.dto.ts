@@ -13,10 +13,14 @@ export class CreateOrderDto {
 
   @IsOptional()
   @IsNumber()
-  originalSum?: number;
+  sumBonus?: number;
 
   @Optional()
   promoCodeId?: number;
+
+  @IsNumber()
+  @IsDefined()
+  carWashId: number;
 
   @IsNumber()
   @IsDefined()

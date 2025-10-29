@@ -98,6 +98,8 @@ import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
+import { ITariffRepository } from './mobile-user/order/interface/tariff';
+import { TariffRepository } from './mobile-user/order/repository/tariff';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -117,6 +119,7 @@ const repositories: Provider[] = [
   LoyaltyTierHistRepositoryProvider,
   LoyaltyProgramHubRequestRepositoryProvider,
   LoyaltyProgramParticipantRequestRepositoryProvider,
+  { provide: ITariffRepository, useClass: TariffRepository },
 ];
 
 const clientUseCase: Provider[] = [

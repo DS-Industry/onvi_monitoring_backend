@@ -6,6 +6,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
+import { ITariffRepository } from '../interface/tariff';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
@@ -14,6 +15,7 @@ export interface CreateMobileOrderRequest {
   sumBonus: number;
   sumDiscount: number;
   sumCashback: number;
+  carWashId: number;
   carWashDeviceId: number;
   cardMobileUserId: number;
   bayNumber: number;
@@ -37,16 +39,18 @@ export class CreateMobileOrderUseCase {
     private readonly posService: IPosService,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
+    private readonly tariffRepository: ITariffRepository,
   ) {}
 
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
     const ping = await this.posService.ping({
-      posId: request.carWashDeviceId,
+      posId: request.carWashId,
       bayNumber: request.bayNumber,
       type: request?.bayType ?? null,
     });
+
     if (ping.status === 'Busy') {
       throw new BadRequestException('Bay is busy');
     }
@@ -99,20 +103,25 @@ export class CreateMobileOrderUseCase {
       }
     }
 
+    const tariff = await this.tariffRepository.findCardTariff(card.id);
+    const bonusPercent = tariff?.bonus ?? 0;
+    const cashbackRaw = (request.sumFull * bonusPercent) / 100;
+    const computedCashback = cashbackRaw < 1 ? 0 : Math.ceil(cashbackRaw);
+
     const order = new Order({
       transactionId: request.transactionId,
       sumFull: request.sumFull,
       sumReal: request.sumReal,
       sumBonus: request.sumBonus || 0,
       sumDiscount: request.sumDiscount || 0,
-      sumCashback: request.sumCashback,
+      sumCashback: computedCashback,
       carWashDeviceId: request.carWashDeviceId,
       platform: PlatformType.ONVI,
       cardMobileUserId: request.cardMobileUserId,
       typeMobileUser: ContractType.INDIVIDUAL,
       orderData: new Date(),
       createData: new Date(),
-      orderStatus: isFreeVacuum ? OrderStatus.CREATED : OrderStatus.CREATED,
+      orderStatus: OrderStatus.CREATED,
       orderHandlerStatus: OrderHandlerStatus.CREATED,
     });
 
