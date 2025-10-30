@@ -6,6 +6,7 @@ import { AllExceptionFilter } from '@exception/exception.filter';
 import { ReportWorkerModule } from './workers/report-worker/report-worker.module';
 import { DataRawWorkerModule } from './workers/data-raw-worker/data-raw-worker.module';
 import { CronModule } from './cron/raw-data-cron/cron.module';
+import { PaymentOrchestratorModule } from './workers/payment-orchestrator/payment-orchestrator.module';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 
@@ -101,6 +102,20 @@ export const rolesMapBootstrap = {
 
     await app.listen(portCron);
     console.log(`Application ${appNameCron} ready port ${portCron}`);
+    return app;
+  },
+
+  paymentOrchestrator: async () => {
+    const app = await NestFactory.create(PaymentOrchestratorModule);
+    const configService = app.get(ConfigService);
+
+    const appName = configService.get<string>('appNamePaymentOrchestrator');
+    const port = configService.get<number>('portPaymentOrchestrator');
+    
+    app.useGlobalFilters(new AllExceptionFilter());
+    app.enableShutdownHooks();
+    await app.listen(port);
+    console.log(`Application ${appName} ready`);
     return app;
   },
 };

@@ -6,6 +6,7 @@ import { PosModule } from '@infra/pos/pos.module';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { BullModule } from '@nestjs/bullmq';
+import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
@@ -256,15 +257,26 @@ const redisProviders: Provider[] = [
     HttpModule,
     BusinessCoreModule,
     PosModule,
-    BullModule.registerQueue({
-      configKey: 'worker',
-      name: 'pos-process',
-      defaultJobOptions: {
-        removeOnComplete: true,
-        removeOnFail: true,
-        attempts: 3,
+    BullModule.registerQueue(
+      {
+        configKey: 'worker',
+        name: 'pos-process',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+        },
       },
-    }),
+      {
+        configKey: 'worker',
+        name: 'order-finished',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 1,
+        },
+      }
+    ),
   ],
   providers: [
     ...repositories,
@@ -285,6 +297,7 @@ const redisProviders: Provider[] = [
     ...loyaltyTierHistUseCase,
     ...redisProviders,
     StartPosProcess,
+    OrderFinishedConsumer,
   ],
   exports: [
     ...repositories,

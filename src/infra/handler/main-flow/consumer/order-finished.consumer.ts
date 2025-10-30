@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Injectable, Logger } from '@nestjs/common';
-import { OrderRepository } from '@loyalty/order/repository/order';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { IOrderRepository } from '@loyalty/order/interface/order';
 import { OrderStatus } from '@prisma/client';
 
 @Processor('order-finished')
@@ -9,11 +9,15 @@ import { OrderStatus } from '@prisma/client';
 export class OrderFinishedConsumer extends WorkerHost {
   private readonly logger = new Logger(OrderFinishedConsumer.name);
 
-  constructor(private readonly orderRepository: OrderRepository) {
+  constructor(
+    @Inject(IOrderRepository)
+    private readonly orderRepository: IOrderRepository,
+  ) {
     super();
   }
 
   async process(job: Job<any>): Promise<void> {
+    console.log("order-finished starteed")
     const { orderId } = job.data;
     this.logger.log(`[ORDER-FINISHED] Parent job ${job.id} for order#${orderId}`);
     const order = await this.orderRepository.findOneById(orderId);

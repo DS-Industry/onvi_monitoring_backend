@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IPaymentGateway } from './payment-gateway.interface';
+import { IPaymentGateway } from '../../core/payment-core/interfaces/payment-gateway.interface';
 import { CreatePaymentDto, RefundPaymentDto } from './dto/create-payment.dto';
 
 @Injectable()

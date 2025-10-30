@@ -11,6 +11,7 @@ import {
 } from '@constant/constants';
 import { UpdateOrderUseCase } from '@loyalty/order/use-cases/order-update';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
+import { IOrderRepository } from '@loyalty/order/interface/order';
 
 @Injectable()
 export class HandlerOrderUseCase {
@@ -19,11 +20,13 @@ export class HandlerOrderUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly createCardBonusOperUseCase: CreateCardBonusOperUseCase,
     private readonly updateOrderUseCase: UpdateOrderUseCase,
+    private readonly orderRepository: IOrderRepository,
   ) {}
 
   async execute(
     data: HandlerDto,
     ownerCard?: LoyaltyCardInfoFullResponseDto,
+    existingOrderId?: number,
   ): Promise<Order> {
     if (data.platform != PlatformType.ONVI && data.clientPhone) {
       const card = await this.findMethodsCardUseCase.getByClientPhone(
@@ -33,7 +36,13 @@ export class HandlerOrderUseCase {
         data.cardMobileUserId = card.id;
       }
     }
-    const order = await this.createOrderUseCase.execute(data);
+    let order: Order;
+    if (existingOrderId) {
+      const found = await this.orderRepository.findOneById(existingOrderId);
+      order = found ? found : await this.createOrderUseCase.execute(data);
+    } else {
+      order = await this.createOrderUseCase.execute(data);
+    }
 
     let orderHandlerStatus: OrderHandlerStatus = OrderHandlerStatus.COMPLETED;
     let handlerError = '';

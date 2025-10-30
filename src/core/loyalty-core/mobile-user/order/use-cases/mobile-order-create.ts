@@ -41,8 +41,10 @@ export class CreateMobileOrderUseCase {
   ) {
     this.flowProducer = new FlowProducer({
       connection: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        host: process.env.REDIS_WORKER_DATA_HOST || process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_WORKER_DATA_PORT || process.env.REDIS_PORT || '6379', 10),
+        username: process.env.REDIS_WORKER_DATA_USER,
+        password: process.env.REDIS_WORKER_DATA_PASSWORD,
       },
     });
   }

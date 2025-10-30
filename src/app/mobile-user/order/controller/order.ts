@@ -20,6 +20,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 import { IPosService } from '@infra/pos/interface/pos.interface';
+import { RegisterPaymentUseCase } from '../use-cases/register-payment.use-case';
 
 @Controller('order')
 export class OrderController {
@@ -29,6 +30,7 @@ export class OrderController {
     private readonly updateMobileOrderUseCase: UpdateMobileOrderUseCase,
     private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
     private readonly posService: IPosService,
+    private readonly registerPaymentUseCase: RegisterPaymentUseCase, 
   ) {}
   @UseGuards(JwtGuard)
   @Post('create')
@@ -126,6 +128,22 @@ export class OrderController {
         message: e.message,
         code: HttpStatus.NOT_FOUND,
       });
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('register')
+  @HttpCode(201)
+  async registerPayment(@Body() data: {
+    orderId: number;
+    paymentToken: string;
+    amount: number;
+    receiptReturnPhoneNumber: string;
+  }, @Req() req: any) {
+    try {
+      return await this.registerPaymentUseCase.execute(data);
+    } catch (e) {
+      throw e;
     }
   }
 

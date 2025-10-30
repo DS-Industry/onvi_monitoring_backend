@@ -1631,6 +1631,8 @@ enum OrderStatus {
   PAYED
   FAILED
   POS_PROCESSED
+  PAYMENT_PROCESSING
+  WAITING_PAYMENT
 }
 
 enum ExecutionStatus {

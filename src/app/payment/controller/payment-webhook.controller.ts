@@ -1,14 +1,15 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Logger } from '@nestjs/common';
-import { OrderRepository } from '@loyalty/order/repository/order';
+import { Body, Controller, HttpCode, HttpStatus, Post, Logger, Inject } from '@nestjs/common';
+import { IOrderRepository } from '@loyalty/order/interface/order';
 import { ConfigService } from '@nestjs/config';
-import { PaymentWebhookOrchestrateUseCase } from './payment-webhook-orchestrate.use-case';
+import { PaymentWebhookOrchestrateUseCase } from '../use-cases/payment-webhook-orchestrate.use-case';
 
 @Controller('payment-webhook')
 export class PaymentWebhookController {
   private readonly logger = new Logger(PaymentWebhookController.name);
 
   constructor(
-    private readonly orderRepository: OrderRepository,
+    @Inject(IOrderRepository)
+    private readonly orderRepository: IOrderRepository,
     private readonly configService: ConfigService,
     private readonly orchestratePaymentUseCase: PaymentWebhookOrchestrateUseCase,
   ) {}
@@ -25,3 +26,5 @@ export class PaymentWebhookController {
     return { ok: true };
   }
 }
+
+

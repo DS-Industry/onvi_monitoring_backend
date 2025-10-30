@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { YooCheckout } from '@a2seven/yoo-checkout';
-import { IPaymentGateway } from './payment-gateway.interface';
-import { CreatePaymentDto, RefundPaymentDto } from './dto/create-payment.dto';
+import { IPaymentGateway, CreatePaymentDto, RefundPaymentDto } from '../../../core/payment-core/interfaces/payment-gateway.interface';
 
 @Injectable()
 export class YooKassaGateway implements IPaymentGateway {
@@ -15,7 +14,7 @@ export class YooKassaGateway implements IPaymentGateway {
   }
 
   createPayment(data: CreatePaymentDto) {
-    const { paymentToken, ...rest } = data;
+    const { paymentToken, ...rest } = data as any;
     return this.checkout.createPayment({
       ...rest,
       payment_token: paymentToken,
@@ -30,3 +29,5 @@ export class YooKassaGateway implements IPaymentGateway {
     return this.checkout.createRefund(data);
   }
 }
+
+
