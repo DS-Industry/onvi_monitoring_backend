@@ -1,8 +1,8 @@
-import { LTYOrder as PrismaOrder, Prisma } from '@prisma/client';
+import { LTYOrder as PrismaOrder, Prisma, CarWashDevice, CarWashDeviceType } from '@prisma/client';
 import { Order } from '@loyalty/order/domain/order';
 
 export class PrismaOrderMapper {
-  static toDomain(entity: PrismaOrder): Order {
+  static toDomain(entity: PrismaOrder & { carWashDevice?: CarWashDevice & { carWashDeviceType?: CarWashDeviceType } }): Order {
     if (!entity) {
       return null;
     }
@@ -15,7 +15,9 @@ export class PrismaOrderMapper {
       sumDiscount: entity.sumDiscount,
       sumCashback: entity.sumCashback,
       carWashDeviceId: entity.carWashDeviceId,
+      carWashId: entity.carWashDevice.id,
       platform: entity.platform,
+      bayType: entity.carWashDevice.carWashDeviceType.name,
       cardMobileUserId: entity.cardId,
       typeMobileUser: entity.contractType,
       orderData: entity.orderData,

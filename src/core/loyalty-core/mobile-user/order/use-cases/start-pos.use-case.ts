@@ -14,7 +14,7 @@ export class StartPosUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
-  async execute(orderId: number, carWashId: number, bayNumber: number, bayType?: DeviceType): Promise<any> {
+  async execute(orderId: number, carWashId: number, carWashDeviceId: number, bayType?: DeviceType): Promise<any> {
     const order = await this.orderRepository.findOneById(orderId);
 
     if (!order) {
@@ -28,14 +28,10 @@ export class StartPosUseCase {
     }
 
     if (isFreeVacuum && order.orderStatus !== OrderStatus.FREE_PROCESSING) {
-      order.orderStatus = OrderStatus.FAILED;
-      await this.orderRepository.update(order);
       throw new BadRequestException(
         `Invalid order state for order ${order.id}. Expected ${OrderStatus.FREE_PROCESSING}, got ${order.orderStatus}`,
       );
     } else if (!isFreeVacuum && order.orderStatus !== OrderStatus.PAYED) {
-      order.orderStatus = OrderStatus.FAILED;
-      await this.orderRepository.update(order);
       throw new BadRequestException(
         `Invalid order state for order ${order.id}. Expected ${OrderStatus.PAYED}, got ${order.orderStatus}`,
       );
@@ -49,7 +45,8 @@ export class StartPosUseCase {
 
       const bayDetails = await this.posService.ping({
         posId: carWashId,
-        bayNumber: bayNumber,
+        // carWashDeviceId: carWashDeviceId,
+        bayNumber: 1,
         type: bayType ?? null,
       });
 
@@ -73,7 +70,7 @@ export class StartPosUseCase {
 
       const startSuccess: boolean = await this.verifyCarWashStartedRecursive(
         carWashId,
-        bayNumber,
+        carWashDeviceId,
         bayType ?? null,
         1,
       );
@@ -84,7 +81,7 @@ export class StartPosUseCase {
         );
       }
 
-      order.orderStatus = OrderStatus.COMPLETED;
+      order.orderStatus = OrderStatus.POS_PROCESSED;
       await this.orderRepository.update(order);
 
       this.logger.log(
@@ -99,14 +96,10 @@ export class StartPosUseCase {
 
       return {
         orderId: order.id,
-        orderStatus: OrderStatus.COMPLETED,
+        orderStatus: OrderStatus.POS_PROCESSED,
         posStatus: carWashResponse.sendStatus,
       };
     } catch (error: any) {
-      order.orderStatus = OrderStatus.FAILED;
-      order.executionError = error.message;
-      await this.orderRepository.update(order);
-
       this.logger.log(
         {
           orderId: order.id,
@@ -116,14 +109,13 @@ export class StartPosUseCase {
         },
         `Order failed ${order.id}`,
       );
-
       throw error;
     }
   }
 
   private async verifyCarWashStartedRecursive(
     carWashId: number,
-    bayNumber: number,
+    carWashDeviceId: number,
     bayType: DeviceType | null,
     cycle: number,
   ): Promise<boolean> {
@@ -134,7 +126,7 @@ export class StartPosUseCase {
         {
           action: 'verify_carwash_failed_final',
           carWashId,
-          bayNumber,
+          carWashDeviceId,
           totalCycles: MAX_RETRY_CYCLES,
           timestamp: new Date(),
         },
@@ -143,7 +135,7 @@ export class StartPosUseCase {
       return false;
     }
 
-    const pingResult = await this.performPingAttempts(carWashId, bayNumber, bayType, cycle);
+    const pingResult = await this.performPingAttempts(carWashId, carWashDeviceId,  bayType, cycle);
 
     if (pingResult.success) {
       this.logger.log(`Car wash verified as started on cycle ${cycle}`);
@@ -153,7 +145,7 @@ export class StartPosUseCase {
     if (cycle < MAX_RETRY_CYCLES) {
       this.logger.log(`Retrying verification after cycle ${cycle}`);
       await this.sleep(1000);
-      return this.verifyCarWashStartedRecursive(carWashId, bayNumber, bayType, cycle + 1);
+      return this.verifyCarWashStartedRecursive(carWashId, carWashDeviceId, bayType, cycle + 1);
     }
 
     return false;
@@ -161,7 +153,7 @@ export class StartPosUseCase {
 
   private async performPingAttempts(
     carWashId: number,
-    bayNumber: number,
+    carWashDeviceId: number,
     bayType: DeviceType | null,
     cycle: number,
   ): Promise<{ success: boolean }> {
@@ -173,7 +165,8 @@ export class StartPosUseCase {
       try {
         const pingResult = await this.posService.ping({
           posId: carWashId,
-          bayNumber: bayNumber,
+          // carWashDeviceId: carWashDeviceId,
+          bayNumber: 1,
           type: bayType,
         });
 

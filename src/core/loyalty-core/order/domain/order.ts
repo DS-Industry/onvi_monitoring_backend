@@ -17,6 +17,8 @@ export interface OrderProps {
   sumDiscount: number;
   sumCashback: number;
   carWashDeviceId: number;
+  carWashId?: number;
+  bayType?: string;
   platform: PlatformType;
   cardMobileUserId?: number;
   typeMobileUser: ContractType;
@@ -124,6 +126,22 @@ export class Order extends BaseEntity<OrderProps> {
 
   get handlerError(): string {
     return this.props.handlerError;
+  }
+
+  get carWashId(): number {
+    return this.props.carWashId;
+  }
+
+  get bayType(): string {
+    return this.props.bayType;
+  }
+
+  set carWashId(carWashId: number) {
+    this.props.carWashId = carWashId;
+  }
+
+  set bayType(bayType: string) {
+    this.props.bayType = bayType;
   }
 
   set orderStatus(orderStatus: OrderStatus) {

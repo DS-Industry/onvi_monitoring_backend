@@ -7,8 +7,7 @@ import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
 import { ITariffRepository } from '../interface/tariff';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { FlowProducer } from 'bullmq';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
@@ -30,6 +29,8 @@ export interface CreateMobileOrderResponse {
 
 @Injectable()
 export class CreateMobileOrderUseCase {
+  private readonly flowProducer: FlowProducer;
+
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly prisma: PrismaService,
@@ -37,15 +38,22 @@ export class CreateMobileOrderUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
     private readonly tariffRepository: ITariffRepository,
-    @InjectQueue('pos-process') private readonly dataQueue: Queue,
-  ) {}
+  ) {
+    this.flowProducer = new FlowProducer({
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      },
+    });
+  }
 
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
     const ping = await this.posService.ping({
       posId: request.carWashId,
-      bayNumber: request.bayNumber,
+      // carWashDeviceId: request.carWashDeviceId,
+      bayNumber: 1,
       type: request?.bayType ?? null,
     });
 
@@ -132,14 +140,23 @@ export class CreateMobileOrderUseCase {
 
     const createdOrder = await this.orderRepository.create(order);
 
-    console.log("createdOrder => ", createdOrder)
-
     if (isFreeVacuum) {
-      await this.dataQueue.add('pos-process', {
-        orderId: createdOrder.id,
-        carWashId: request.carWashId,
-        bayNumber: request.bayNumber,
-        bayType: request.bayType,
+      await this.flowProducer.add({
+        name: 'order-finished',
+        queueName: 'order-finished',
+        data: { orderId: createdOrder.id },
+        children: [
+          {
+            name: 'pos-process',
+            queueName: 'pos-process',
+            data: {
+              orderId: createdOrder.id,
+              carWashId: request.carWashId,
+              carWashDeviceId: createdOrder.carWashDeviceId,
+              bayType: request.bayType,
+            },
+          },
+        ],
       });
     }
 

@@ -11,6 +11,7 @@ export abstract class IPosService {
 
 export interface PingRequestDto {
   posId: number;
+  // carWashDeviceId: number;
   bayNumber: number;
   type?: DeviceType | null;
 }

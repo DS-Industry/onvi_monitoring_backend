@@ -15,6 +15,13 @@ export class OrderRepository extends IOrderRepository {
     const orderEntity = PrismaOrderMapper.toPrisma(input);
     const order = await this.prisma.lTYOrder.create({
       data: orderEntity,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return PrismaOrderMapper.toDomain(order);
   }
@@ -24,12 +31,26 @@ export class OrderRepository extends IOrderRepository {
       where: {
         id,
       },
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return PrismaOrderMapper.toDomain(order);
   }
 
   public async findOneByTransactionId(transactionId: string): Promise<Order> {
     const order = await this.prisma.lTYOrder.findFirst({
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
       where: {
         transactionId,
       },
@@ -84,6 +105,13 @@ export class OrderRepository extends IOrderRepository {
 
     const orders = await this.prisma.lTYOrder.findMany({
       where,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
   }
@@ -95,6 +123,13 @@ export class OrderRepository extends IOrderRepository {
         id: input.id,
       },
       data: orderEntity,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return PrismaOrderMapper.toDomain(order);
   }

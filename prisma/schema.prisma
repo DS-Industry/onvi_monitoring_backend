@@ -1630,6 +1630,7 @@ enum OrderStatus {
   FREE_PROCESSING
   PAYED
   FAILED
+  POS_PROCESSED
 }
 
 enum ExecutionStatus {

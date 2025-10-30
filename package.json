@@ -36,6 +36,7 @@
     "start:infra": ""
   },
   "dependencies": {
+    "@a2seven/yoo-checkout": "^1.1.4",
     "@aws-sdk/client-s3": "^3.907.0",
     "@aws-sdk/s3-request-presigner": "^3.907.0",
     "@casl/ability": "^6.7.1",
