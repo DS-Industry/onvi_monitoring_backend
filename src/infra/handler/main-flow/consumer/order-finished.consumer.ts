@@ -3,6 +3,8 @@ import { Job } from 'bullmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { OrderStatus } from '@prisma/client';
+import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
+import { HandlerDto } from '@loyalty/order/use-cases/dto/handler.dto';
 
 @Processor('order-finished')
 @Injectable()
@@ -12,6 +14,7 @@ export class OrderFinishedConsumer extends WorkerHost {
   constructor(
     @Inject(IOrderRepository)
     private readonly orderRepository: IOrderRepository,
+    private readonly handlerOrderUseCase: HandlerOrderUseCase,
   ) {
     super();
     this.logger.log('[ORDER-FINISHED] Consumer initialized');
@@ -26,40 +29,71 @@ export class OrderFinishedConsumer extends WorkerHost {
       throw new Error('Order not found');
     }
 
-    let childResult: any = null;
-    let hasFailure = false;
+    let allChildrenSuccessful = false;
 
     try {
       const childrenResults = await job.getChildrenValues<any>();
       const childResultsArray = Object.values(childrenResults);
       
       if (childResultsArray.length > 0) {
-        childResult = childResultsArray[0];
-        if (!childResult || childResult !== 'success') {
-          hasFailure = true;
+        allChildrenSuccessful = childResultsArray.every(
+          (result) => result === 'success',
+        );
+        
+        if (!allChildrenSuccessful) {
+          const failedResults = childResultsArray.filter(
+            (result) => result !== 'success',
+          );
           this.logger.warn(
-            `[ORDER-FINISHED] Child job failed for order#${orderId}. Result: ${JSON.stringify(childResult)}`,
+            `[ORDER-FINISHED] Some child jobs failed for order#${orderId}. Failed results: ${JSON.stringify(failedResults)}`,
           );
         }
       } else {
-        hasFailure = true;
         this.logger.warn(`[ORDER-FINISHED] No child results found for order#${orderId} - child jobs failed`);
       }
     } catch (error: any) {
-      hasFailure = true;
       this.logger.warn(
         `[ORDER-FINISHED] Child jobs failed for order#${orderId}: ${error.message}`,
       );
     }
 
-    if (hasFailure) {
+    if (!allChildrenSuccessful) {
       order.orderStatus = OrderStatus.FAILED;
       await this.orderRepository.update(order);
       this.logger.warn(`[ORDER-FINISHED] Order#${orderId} marked as FAILED`);
     } else {
-      order.orderStatus = OrderStatus.COMPLETED;
       await this.orderRepository.update(order);
-      this.logger.log(`[ORDER-FINISHED] Order#${orderId} marked as COMPLETED`);
+      this.logger.log(`[ORDER-FINISHED] Order#${orderId} marked as COMPLETED - all children successful`);
+
+      try {
+        const handlerDto: HandlerDto = {
+          transactionId: order.transactionId,
+          sumFull: order.sumFull,
+          sumReal: order.sumReal,
+          sumBonus: order.sumBonus,
+          sumDiscount: order.sumDiscount,
+          sumCashback: order.sumCashback,
+          carWashDeviceId: order.carWashDeviceId,
+          platform: order.platform,
+          orderData: order.orderData,
+          typeMobileUser: order.typeMobileUser,
+          cardMobileUserId: order.cardMobileUserId,
+          orderStatus: order.orderStatus,
+          sendAnswerStatus: order.sendAnswerStatus,
+          sendTime: order.sendTime,
+          debitingMoney: order.debitingMoney,
+          executionStatus: order.executionStatus,
+          reasonError: order.reasonError,
+          executionError: order.executionError,
+        };
+
+        await this.handlerOrderUseCase.execute(handlerDto, undefined, order.id);
+        this.logger.log(`[ORDER-FINISHED] Order#${orderId} processed by order handler`);
+      } catch (error: any) {
+        this.logger.error(
+          `[ORDER-FINISHED] Failed to process order#${orderId} with order handler: ${error.message}`,
+        );
+      }
     }
   }
 }
