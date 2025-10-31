@@ -47,7 +47,7 @@ export class OrderController {
         sumBonus: data.sumBonus,
         carWashId: data.carWashId,
         cardMobileUserId: user.props.id,
-        bayNumber: data.bayNumber,
+        carWashDeviceId: data.carWashDeviceId,
         bayType: data?.bayType ?? null,
         promoCodeId: data?.promoCodeId ?? null,
         rewardPointsUsed: data.rewardPointsUsed ?? 0,
@@ -159,7 +159,7 @@ export class OrderController {
   async pingCarWash(@Query() query: any) {
     const res = await this.posService.ping({
       posId: Number(query.carWashId),
-      bayNumber: Number(query.bayNumber),
+      carWashDeviceId: Number(query.carWashDeviceId),
       type: query?.bayType ?? null,
     });
     

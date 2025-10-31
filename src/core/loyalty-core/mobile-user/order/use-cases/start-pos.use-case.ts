@@ -45,8 +45,7 @@ export class StartPosUseCase {
 
       const bayDetails = await this.posService.ping({
         posId: carWashId,
-        // carWashDeviceId: carWashDeviceId,
-        bayNumber: 1,
+        carWashDeviceId: carWashDeviceId,
         type: bayType ?? null,
       });
 
@@ -165,8 +164,7 @@ export class StartPosUseCase {
       try {
         const pingResult = await this.posService.ping({
           posId: carWashId,
-          // carWashDeviceId: carWashDeviceId,
-          bayNumber: 1,
+          carWashDeviceId: carWashDeviceId,
           type: bayType,
         });
 

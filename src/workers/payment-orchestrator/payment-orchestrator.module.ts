@@ -75,7 +75,15 @@ import { LoggerModule } from 'nestjs-pino';
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'check-car-wash-started',
-      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000, 
+        },
+      },
     }),
   ],
   providers: [PaymentOrchestrateConsumer],

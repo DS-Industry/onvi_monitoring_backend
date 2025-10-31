@@ -15,7 +15,7 @@ export interface CreateMobileOrderRequest {
   sumBonus: number;
   carWashId: number;
   cardMobileUserId: number;
-  bayNumber: number;
+  carWashDeviceId: number;
   bayType?: DeviceType;
   promoCodeId?: number;
   rewardPointsUsed?: number;
@@ -54,8 +54,7 @@ export class CreateMobileOrderUseCase {
   ): Promise<CreateMobileOrderResponse> {
     const ping = await this.posService.ping({
       posId: request.carWashId,
-      // carWashDeviceId: request.carWashDeviceId,
-      bayNumber: 1,
+      carWashDeviceId: request.carWashDeviceId,
       type: request?.bayType ?? null,
     });
 

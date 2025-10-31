@@ -24,7 +24,7 @@ export class CreateOrderDto {
 
   @IsNumber()
   @IsDefined()
-  bayNumber: number;
+  carWashDeviceId: number;
 
   @Optional()
   bayType?: DeviceType;
