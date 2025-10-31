@@ -46,8 +46,19 @@ export class PaymentWebhookOrchestrateUseCase {
         return;
       }
 
-      order.orderStatus = OrderStatus.CANCELED;
-      await this.orderRepository.update(order);
+      const updatedOrder = await this.orderRepository.updateStatusIf(
+        order.id,
+        order.orderStatus,
+        OrderStatus.CANCELED,
+      );
+
+      if (!updatedOrder) {
+        this.logger.log(
+          `Webhook already processed by concurrent request or order status changed for order#${order.id}. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
       this.logger.log(`Order#${order.id} canceled via webhook. Request ID: ${requestId || 'unknown'}`);
       return;
     }
