@@ -14,10 +14,11 @@ export class YooKassaGateway implements IPaymentGateway {
   }
 
   createPayment(data: CreatePaymentDto) {
-    const { paymentToken, ...rest } = data as any;
+    const { paymentToken, idempotenceKey, ...rest } = data as any;
     return this.checkout.createPayment({
       ...rest,
       payment_token: paymentToken,
+      ...(idempotenceKey && { idempotence_key: idempotenceKey }),
     });
   }
 

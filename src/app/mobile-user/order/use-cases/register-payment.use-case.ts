@@ -1,9 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order, OrderProps } from '@loyalty/order/domain/order';
 import { OrderStatus } from '@prisma/client';
 import { CreatePaymentUseCaseCore } from '../../../../core/payment-core/use-cases/create-payment.use-case';
+import { VerifyPaymentUseCaseCore } from '../../../../core/payment-core/use-cases/verify-payment.use-case';
 
 export interface IRegisterPaymentDto {
   orderId: number;
@@ -19,25 +20,26 @@ export class RegisterPaymentUseCase {
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly paymentUseCase: CreatePaymentUseCaseCore,
+    private readonly verifyPaymentUseCase: VerifyPaymentUseCaseCore,
   ) {}
 
   async execute(data: IRegisterPaymentDto): Promise<any> {
-    const order = await this.orderRepository.findOneById(data.orderId);
+    const order = await this.orderRepository.updateStatusIf(
+      data.orderId,
+      OrderStatus.CREATED,
+      OrderStatus.PAYMENT_PROCESSING,
+    );
 
     if (!order) {
-      throw new Error(`Order not found: ${data.orderId}`);
-    }
-
-    if (order.orderStatus !== OrderStatus.CREATED) {
       throw new Error(
-        `Invalid order state. Expected CREATED, got ${order.orderStatus} for order ${order.id}`,
+        `Order ${data.orderId} not found or already processed (not in CREATED status)`,
       );
     }
 
-    try {
-      order.orderStatus = OrderStatus.PAYMENT_PROCESSING;
-      await this.orderRepository.update(order);
+    let paymentResult: any = null;
+    let paymentCreated = false;
 
+    try {
       this.logger.log(
         {
           orderId: order.id,
@@ -51,43 +53,63 @@ export class RegisterPaymentUseCase {
         `Payment processing initiated for order ${order.id} with amount ${data.amount}`,
       );
 
-      const paymentResult = process.env.PAYMENT_TEST_MODE === 'true'
-        ? { id: randomUUID(), confirmation: { confirmation_url: '' } } as any
+      const idempotenceKey = `order-${order.id}-register`;
+
+      paymentResult = process.env.PAYMENT_TEST_MODE === 'true'
+        ? { id: randomUUID(), confirmation: { confirmation_url: '' }, status: 'pending' } as any
         : await this.paymentUseCase.create({
             amount: String(data.amount),
             paymentToken: data.paymentToken,
             description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
             phone: data.receiptReturnPhoneNumber,
+            idempotenceKey,
           });
 
-      const refreshed = await this.orderRepository.findOneById(order.id);
-      if (!refreshed) throw new Error('Order disappeared during payment registration');
+      paymentCreated = true;
+
+      if (process.env.PAYMENT_TEST_MODE !== 'true') {
+        try {
+          const payment = await this.verifyPaymentUseCase.execute(paymentResult.id);
+          
+          if (payment.status === 'canceled') {
+            throw new Error(`Payment ${paymentResult.id} was canceled during creation`);
+          }
+
+          this.logger.log(
+            `Payment ${paymentResult.id} created with status: ${payment.status} for order ${order.id}`,
+          );
+        } catch (verifyError: any) {
+          this.logger.warn(
+            `Payment verification failed for payment ${paymentResult.id}, order ${order.id}: ${verifyError.message}`,
+          );
+        }
+      }
 
       const updatedOrder = new Order({
-        id: refreshed.id,
+        id: order.id,
         transactionId: paymentResult.id,
-        sumFull: refreshed.sumFull,
-        sumReal: refreshed.sumReal,
-        sumBonus: refreshed.sumBonus,
-        sumDiscount: refreshed.sumDiscount,
-        sumCashback: refreshed.sumCashback,
-        carWashDeviceId: refreshed.carWashDeviceId,
-        carWashId: refreshed.carWashId,
-        bayType: refreshed.bayType,
-        platform: refreshed.platform,
-        cardMobileUserId: refreshed.cardMobileUserId,
-        typeMobileUser: refreshed.typeMobileUser,
-        orderData: refreshed.orderData,
-        createData: refreshed.createData,
+        sumFull: order.sumFull,
+        sumReal: order.sumReal,
+        sumBonus: order.sumBonus,
+        sumDiscount: order.sumDiscount,
+        sumCashback: order.sumCashback,
+        carWashDeviceId: order.carWashDeviceId,
+        carWashId: order.carWashId,
+        bayType: order.bayType,
+        platform: order.platform,
+        cardMobileUserId: order.cardMobileUserId,
+        typeMobileUser: order.typeMobileUser,
+        orderData: order.orderData,
+        createData: order.createData,
         orderStatus: OrderStatus.WAITING_PAYMENT,
-        sendAnswerStatus: refreshed.sendAnswerStatus,
-        sendTime: refreshed.sendTime,
-        debitingMoney: refreshed.debitingMoney,
-        executionStatus: refreshed.executionStatus,
-        reasonError: refreshed.reasonError,
-        executionError: refreshed.executionError,
-        orderHandlerStatus: refreshed.orderHandlerStatus,
-        handlerError: refreshed.handlerError,
+        sendAnswerStatus: order.sendAnswerStatus,
+        sendTime: order.sendTime,
+        debitingMoney: order.debitingMoney,
+        executionStatus: order.executionStatus,
+        reasonError: order.reasonError,
+        executionError: order.executionError,
+        orderHandlerStatus: order.orderHandlerStatus,
+        handlerError: order.handlerError,
       } as OrderProps);
       await this.orderRepository.update(updatedOrder);
 
@@ -107,19 +129,31 @@ export class RegisterPaymentUseCase {
         confirmation_url: paymentResult?.confirmation?.confirmation_url || '',
       };
     } catch (error: any) {
-      order.orderStatus = OrderStatus.CANCELED;
-      order.executionError = error?.message ?? String(error);
-      await this.orderRepository.update(order);
-
-      this.logger.error(
-        {
-          orderId: order.id,
-          action: 'payment_failed',
-          timestamp: new Date(),
-          details: JSON.stringify({ error: error?.message ?? String(error) }),
-        },
-        `Payment registration failed for order ${order.id}`,
-      );
+      const currentOrder = await this.orderRepository.findOneById(data.orderId);
+      
+      if (paymentCreated && paymentResult?.id && currentOrder) {
+        if (currentOrder.orderStatus === OrderStatus.PAYMENT_PROCESSING) {
+          try {
+            const recoveryOrder = new Order({
+              ...currentOrder,
+              transactionId: paymentResult.id,
+              orderStatus: OrderStatus.WAITING_PAYMENT,
+            } as OrderProps);
+            await this.orderRepository.update(recoveryOrder);
+            this.logger.log(`Recovered order ${currentOrder.id} to WAITING_PAYMENT state`);
+          } catch (recoveryError: any) {
+            this.logger.error(`Failed to recover order ${currentOrder.id}: ${recoveryError.message}`);
+          }
+        }
+        this.logger.warn(
+          `Payment ${paymentResult.id} created but registration incomplete for order ${currentOrder.id}`,
+        );
+      } else if (currentOrder) {
+        currentOrder.orderStatus = OrderStatus.CANCELED;
+        currentOrder.executionError = error?.message ?? String(error);
+        await this.orderRepository.update(currentOrder);
+        this.logger.error(`Payment registration failed for order ${currentOrder.id}`);
+      }
 
       throw error;
     }

@@ -7,6 +7,7 @@ export interface CreateGenericPaymentInput {
   description: string;
   paymentToken?: string;
   phone?: string;
+  idempotenceKey?: string;
 }
 
 @Injectable()
@@ -40,6 +41,7 @@ export class CreatePaymentUseCaseCore {
       description: data.description,
       paymentToken: data.paymentToken,
       capture: true,
+      idempotenceKey: data.idempotenceKey,
       receipt: data.phone
         ? {
             phone: data.phone,

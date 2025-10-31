@@ -16,4 +16,13 @@ export abstract class IOrderRepository {
     deviceTypeCode?: string,
   ): Promise<Order[]>;
   abstract update(input: Order): Promise<Order>;
+  abstract updateStatusIf(
+    id: number,
+    fromStatus: OrderStatus,
+    toStatus: OrderStatus,
+  ): Promise<Order | null>;
+  abstract updateStatusTo(
+    id: number,
+    newStatus: OrderStatus,
+  ): Promise<Order | null>;
 }

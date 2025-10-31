@@ -6,6 +6,7 @@ export interface CreatePaymentDto {
   metadata?: Record<string, any>;
   paymentToken?: string;
   capture?: boolean;
+  idempotenceKey?: string;
   receipt?: {
     phone: string;
     items: Array<{

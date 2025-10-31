@@ -29,6 +29,6 @@ import { RefundPaymentUseCaseCore } from '../../core/payment-core/use-cases/refu
     { provide: 'PAYMENT_GATEWAY', useClass: YooKassaGateway },
   ],
   controllers: [PaymentController, PaymentWebhookController],
-  exports: [PaymentService, CreatePaymentUseCaseCore],
+  exports: [PaymentService, CreatePaymentUseCaseCore, VerifyPaymentUseCaseCore],
 })
 export class PaymentModule {}

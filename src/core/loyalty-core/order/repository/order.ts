@@ -133,4 +133,47 @@ export class OrderRepository extends IOrderRepository {
     });
     return PrismaOrderMapper.toDomain(order);
   }
+
+  public async updateStatusIf(
+    id: number,
+    fromStatus: OrderStatus,
+    toStatus: OrderStatus,
+  ): Promise<Order | null> {
+    const result = await this.prisma.lTYOrder.updateMany({
+      where: {
+        id,
+        orderStatus: fromStatus,
+      },
+      data: {
+        orderStatus: toStatus,
+      },
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    return await this.findOneById(id);
+  }
+
+  public async updateStatusTo(
+    id: number,
+    newStatus: OrderStatus,
+  ): Promise<Order | null> {
+    const result = await this.prisma.lTYOrder.updateMany({
+      where: {
+        id,
+        orderStatus: { not: newStatus },
+      },
+      data: {
+        orderStatus: newStatus,
+      },
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    return await this.findOneById(id);
+  }
 }

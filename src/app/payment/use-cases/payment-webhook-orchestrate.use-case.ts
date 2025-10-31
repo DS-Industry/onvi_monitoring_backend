@@ -60,6 +60,13 @@ export class PaymentWebhookOrchestrateUseCase {
         return;
       }
 
+      if (order.orderStatus !== OrderStatus.WAITING_PAYMENT) {
+        this.logger.warn(
+          `Order ${order.id} in invalid state for payment.succeeded webhook: ${order.orderStatus}. Expected WAITING_PAYMENT. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
       try {
         const payment = await this.verifyPaymentUseCase.execute(paymentId);
         
@@ -78,8 +85,18 @@ export class PaymentWebhookOrchestrateUseCase {
         throw error;
       }
 
-      order.orderStatus = OrderStatus.PAYED;
-      await this.orderRepository.update(order);
+      const updatedOrder = await this.orderRepository.updateStatusIf(
+        order.id,
+        OrderStatus.WAITING_PAYMENT,
+        OrderStatus.PAYED,
+      );
+
+      if (!updatedOrder) {
+        this.logger.log(
+          `Webhook already processed by concurrent request for order#${order.id}. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
 
       await this.paymentOrchestrateQueue.add(
         'payment-orchestrate',
