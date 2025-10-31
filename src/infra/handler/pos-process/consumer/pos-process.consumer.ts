@@ -14,6 +14,7 @@ export class StartPosProcess extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<string> {
+    console.log("pos-process starteed")
     await this.startPosUseCase.execute(
       job.data.orderId,
       job.data.carWashId,

@@ -9,13 +9,9 @@ export class RegisterPaymentDto {
   @IsNotEmpty()
   paymentToken: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  amount: string;
-
-  @IsString()
-  @IsNotEmpty()
-  description: string;
+  amount: number;
 
   @IsString()
   @IsNotEmpty()

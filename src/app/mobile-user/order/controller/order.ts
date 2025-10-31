@@ -21,6 +21,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 import { IPosService } from '@infra/pos/interface/pos.interface';
 import { RegisterPaymentUseCase } from '../use-cases/register-payment.use-case';
+import { RegisterPaymentDto } from './dto/register-payment.dto';
 
 @Controller('order')
 export class OrderController {
@@ -134,16 +135,22 @@ export class OrderController {
   @UseGuards(JwtGuard)
   @Post('register')
   @HttpCode(201)
-  async registerPayment(@Body() data: {
-    orderId: number;
-    paymentToken: string;
-    amount: number;
-    receiptReturnPhoneNumber: string;
-  }, @Req() req: any) {
+  async registerPayment(@Body() data: RegisterPaymentDto, @Req() req: any) {
     try {
       return await this.registerPaymentUseCase.execute(data);
-    } catch (e) {
-      throw e;
+    } catch (e: any) {
+      if (e?.type && e?.innerCode) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: HttpStatus.UNPROCESSABLE_ENTITY,
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Internal server error',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
