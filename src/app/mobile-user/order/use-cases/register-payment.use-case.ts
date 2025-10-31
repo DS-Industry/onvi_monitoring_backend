@@ -111,6 +111,7 @@ export class RegisterPaymentUseCase {
         orderHandlerStatus: order.orderHandlerStatus,
         handlerError: order.handlerError,
       } as OrderProps);
+      
       await this.orderRepository.update(updatedOrder);
 
       this.logger.log(
@@ -140,9 +141,19 @@ export class RegisterPaymentUseCase {
               orderStatus: OrderStatus.WAITING_PAYMENT,
             } as OrderProps);
             await this.orderRepository.update(recoveryOrder);
-            this.logger.log(`Recovered order ${currentOrder.id} to WAITING_PAYMENT state`);
+            this.logger.log(
+              `Recovered order ${currentOrder.id} to WAITING_PAYMENT state with payment ${paymentResult.id}`,
+            );
+            
+            return {
+              status: OrderStatus.WAITING_PAYMENT,
+              paymentId: paymentResult.id,
+              confirmation_url: paymentResult?.confirmation?.confirmation_url || '',
+            };
           } catch (recoveryError: any) {
-            this.logger.error(`Failed to recover order ${currentOrder.id}: ${recoveryError.message}`);
+            this.logger.error(
+              `CRITICAL: Failed to recover order ${currentOrder.id} after payment creation. Payment ID: ${paymentResult.id}. Error: ${recoveryError.message}`,
+            );
           }
         }
         this.logger.warn(
