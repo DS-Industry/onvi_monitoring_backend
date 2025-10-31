@@ -38,9 +38,16 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
       data: { orderId: order.id, transactionId },
       children: [
         {
-          name: 'pos-process',
-          queueName: 'pos-process',
+          name: 'car-wash-launch',
+          queueName: 'car-wash-launch',
           data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
+          children: [
+            {
+              name: 'check-car-wash-started',
+              queueName: 'check-car-wash-started',
+              data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
+            },
+          ],
         },
       ],
     });

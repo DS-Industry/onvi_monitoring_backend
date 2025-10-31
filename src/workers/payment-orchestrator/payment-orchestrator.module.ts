@@ -67,6 +67,16 @@ import { LoggerModule } from 'nestjs-pino';
       name: 'pos-process',
       defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
     }),
+    BullModule.registerQueue({
+      configKey: 'worker',
+      name: 'car-wash-launch',
+      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+    }),
+    BullModule.registerQueue({
+      configKey: 'worker',
+      name: 'check-car-wash-started',
+      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+    }),
   ],
   providers: [PaymentOrchestrateConsumer],
 })

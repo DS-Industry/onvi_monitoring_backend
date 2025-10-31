@@ -149,14 +149,26 @@ export class CreateMobileOrderUseCase {
         data: { orderId: createdOrder.id },
         children: [
           {
-            name: 'pos-process',
-            queueName: 'pos-process',
+            name: 'car-wash-launch',
+            queueName: 'car-wash-launch',
             data: {
               orderId: createdOrder.id,
               carWashId: request.carWashId,
               carWashDeviceId: createdOrder.carWashDeviceId,
               bayType: request.bayType,
             },
+            children: [
+              {
+                name: 'check-car-wash-started',
+                queueName: 'check-car-wash-started',
+                data: {
+                  orderId: createdOrder.id,
+                  carWashId: request.carWashId,
+                  carWashDeviceId: createdOrder.carWashDeviceId,
+                  bayType: request.bayType,
+                },
+              },
+            ],
           },
         ],
       });
