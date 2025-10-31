@@ -148,23 +148,41 @@ export class CreateMobileOrderUseCase {
         data: { orderId: createdOrder.id },
         children: [
           {
-            name: 'car-wash-launch',
-            queueName: 'car-wash-launch',
+            name: 'check-car-wash-started',
+            queueName: 'check-car-wash-started',
             data: {
               orderId: createdOrder.id,
               carWashId: request.carWashId,
               carWashDeviceId: createdOrder.carWashDeviceId,
               bayType: request.bayType,
             },
+            opts: {
+              failParentOnFailure: false, 
+              ignoreDependencyOnFailure: true, 
+              attempts: 3,              
+              backoff: {
+                type: 'fixed',
+                delay: 5000,           
+              },
+            },
             children: [
               {
-                name: 'check-car-wash-started',
-                queueName: 'check-car-wash-started',
+                name: 'car-wash-launch',
+                queueName: 'car-wash-launch',
                 data: {
                   orderId: createdOrder.id,
                   carWashId: request.carWashId,
                   carWashDeviceId: createdOrder.carWashDeviceId,
                   bayType: request.bayType,
+                },
+                opts: {
+                  failParentOnFailure: false, 
+                  ignoreDependencyOnFailure: true, 
+                  attempts: 3,              
+                  backoff: {
+                    type: 'fixed',
+                    delay: 5000,           
+                  },
                 },
               },
             ],

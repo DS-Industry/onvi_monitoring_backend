@@ -325,9 +325,6 @@ const redisProviders: Provider[] = [
     ...loyaltyTierHistUseCase,
     ...redisProviders,
     StartPosProcess,
-    OrderFinishedConsumer,
-    CarWashLaunchConsumer,
-    CheckCarWashStartedConsumer,
   ],
   exports: [
     ...repositories,

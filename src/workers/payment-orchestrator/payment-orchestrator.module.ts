@@ -6,6 +6,9 @@ import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { PaymentOrchestrateConsumer } from '@infra/handler/payment-orchestrate/consumer/payment-orchestrate.consumer';
+import { CarWashLaunchConsumer } from '@infra/handler/car-wash-launch/consumer/car-wash-launch.consumer';
+import { CheckCarWashStartedConsumer } from '@infra/handler/check-car-wash-started/consumer/check-car-wash-started.consumer';
+import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RedisModule } from '@infra/cache/redis.module';
 import { LoggerModule } from 'nestjs-pino';
@@ -86,7 +89,12 @@ import { LoggerModule } from 'nestjs-pino';
       },
     }),
   ],
-  providers: [PaymentOrchestrateConsumer],
+  providers: [
+    PaymentOrchestrateConsumer,
+    OrderFinishedConsumer,
+    CarWashLaunchConsumer,
+    CheckCarWashStartedConsumer,
+  ],
 })
 export class PaymentOrchestratorModule {}
 

@@ -15,6 +15,7 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
     private readonly orderRepository: IOrderRepository,
   ) {
     super();
+    this.logger.log('[PAYMENT-ORCHESTRATE] Consumer initialized');
     this.flowProducer = new FlowProducer({
       connection: {
         host: process.env.REDIS_WORKER_DATA_HOST || process.env.REDIS_HOST || 'localhost',
@@ -27,6 +28,8 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
 
   async process(job: Job<any>): Promise<void> {
     const { orderId, transactionId, carWashId, carWashDeviceId, bayType } = job.data || {};
+    this.logger.log(`[PAYMENT-ORCHESTRATE] Processing job ${job.id} for order#${orderId}`);
+    
     this.logger.log(`[PAYMENT-ORCHESTRATE] Building flow for order#${orderId}`);
 
     const order = await this.orderRepository.findOneById(orderId);
@@ -38,19 +41,38 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
       data: { orderId: order.id, transactionId },
       children: [
         {
-          name: 'car-wash-launch',
-          queueName: 'car-wash-launch',
+          name: 'check-car-wash-started',
+          queueName: 'check-car-wash-started',
           data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
+          opts: {
+            ignoreDependencyOnFailure: true, 
+            failParentOnFailure: false,
+            attempts: 3,              
+            backoff: {
+              type: 'fixed',
+              delay: 5000,           
+            },
+          },
           children: [
             {
-              name: 'check-car-wash-started',
-              queueName: 'check-car-wash-started',
+              name: 'car-wash-launch',
+              queueName: 'car-wash-launch',
               data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
+              opts: {
+                ignoreDependencyOnFailure: true, 
+                failParentOnFailure: false,
+                attempts: 3,          
+                backoff: {
+                  type: 'fixed',
+                  delay: 5000,        
+                },
+              },
             },
           ],
         },
       ],
     });
+    
   }
 }
 
