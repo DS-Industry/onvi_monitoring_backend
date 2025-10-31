@@ -61,7 +61,7 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
               opts: {
                 ignoreDependencyOnFailure: true, 
                 failParentOnFailure: false,
-                attempts: 3,          
+                attempts: 5,          
                 backoff: {
                   type: 'fixed',
                   delay: 5000,        
