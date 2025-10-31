@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IClientRepository } from '../interfaces/client';
 import { FindMethodsClientUseCase } from './client-find-methods';
-import { StatusUser } from '@prisma/client';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class DeleteClientUseCase {

@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Pos } from '@pos/pos/domain/pos';
 import { LoyaltyCardBalanceResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardBalance-response.dto';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { LTYBenefitType, OrderStatus, StatusUser } from '@prisma/client';
+import { LTYBenefitType, StatusUser } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 

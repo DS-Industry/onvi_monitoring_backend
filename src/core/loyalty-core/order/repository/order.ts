@@ -3,7 +3,11 @@ import { IOrderRepository } from '@loyalty/order/interface/order';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Order } from '@loyalty/order/domain/order';
 import { PrismaOrderMapper } from '@db/mapper/prisma-order-mapper';
-import { OrderStatus, PlatformType, ContractType } from '@prisma/client';
+import {
+  OrderStatus,
+  PlatformType,
+  ContractType,
+} from '@loyalty/order/domain/enums';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {

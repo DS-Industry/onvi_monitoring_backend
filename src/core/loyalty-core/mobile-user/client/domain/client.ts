@@ -1,4 +1,4 @@
-import { StatusUser, ContractType } from '@prisma/client';
+import { StatusUser, ContractType } from './enums';
 import { BaseEntity } from '@utils/entity';
 import { ClientMeta } from './clientMeta';
 

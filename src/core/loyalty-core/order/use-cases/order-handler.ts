@@ -3,7 +3,7 @@ import { CreateOrderUseCase } from '@loyalty/order/use-cases/order-create';
 import { Order } from '@loyalty/order/domain/order';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { HandlerDto } from '@loyalty/order/use-cases/dto/handler.dto';
-import { OrderHandlerStatus, PlatformType } from '@prisma/client';
+import { OrderHandlerStatus, PlatformType } from '@loyalty/order/domain/enums';
 import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
 import {
   CASHBACK_BONUSES_OPER_TYPE_ID,

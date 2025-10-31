@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 
 export interface UpdateMobileOrderRequest {
   orderId: number;

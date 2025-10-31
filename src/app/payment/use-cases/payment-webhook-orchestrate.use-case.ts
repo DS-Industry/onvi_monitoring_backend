@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { VerifyPaymentUseCaseCore } from '../../../core/payment-core/use-cases/verify-payment.use-case';

@@ -6,8 +6,8 @@ import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/
 import { IClientRepository } from '@loyalty/mobile-user/client/interfaces/client';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { ClientSession } from '../domain/client-session';
-import { ContractType } from '../domain/contract-type';
-import { UserStatus } from '../domain/user-status';
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
@@ -49,7 +49,7 @@ export class RegisterClientUseCase {
 
     const existingClient = await this.findClientUseCase.getByPhone(phone);
     if (existingClient) {
-      if (existingClient.status === UserStatus.BLOCKED || existingClient.status === UserStatus.DELETED) {
+      if (existingClient.status === StatusUser.BLOCKED || existingClient.status === StatusUser.DELETED) {
         throw new Error('Client account is blocked or deleted');
       }
       throw new Error('Client already exists');
@@ -59,7 +59,7 @@ export class RegisterClientUseCase {
       name: `Onvi ${phone}`,
       phone: phone,
       contractType: ContractType.INDIVIDUAL,
-      status: UserStatus.ACTIVE,
+      status: StatusUser.ACTIVE,
     });
 
     const client = await this.clientRepository.create(clientData);

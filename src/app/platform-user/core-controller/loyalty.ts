@@ -73,6 +73,7 @@ import { FindMethodsOrganizationUseCase } from '@organization/organization/use-c
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { OrderCreateDto } from '@platform-user/core-controller/dto/receive/orderCreate';
+import { PlatformType, OrderStatus, ContractType, SendAnswerStatus, ExecutionStatus } from '@loyalty/order/domain/enums';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { BenefitUpdateDto } from '@platform-user/core-controller/dto/receive/benefit-update.dto';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
@@ -244,7 +245,15 @@ export class LoyaltyController {
     @Body() data: OrderCreateDto,
   ): Promise<any> {
     try {
-      return await this.handlerOrderUseCase.execute(data);
+      const handlerData = {
+        ...data,
+        platform: data.platform as PlatformType,
+        orderStatus: data.orderStatus as OrderStatus,
+        typeMobileUser: data.typeMobileUser ? data.typeMobileUser as ContractType : undefined,
+        sendAnswerStatus: data.sendAnswerStatus ? data.sendAnswerStatus as SendAnswerStatus : undefined,
+        executionStatus: data.executionStatus ? data.executionStatus as ExecutionStatus : undefined,
+      };
+      return await this.handlerOrderUseCase.execute(handlerData);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

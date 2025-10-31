@@ -1,4 +1,4 @@
-import { StatusUser, ContractType } from "@prisma/client";
+import { StatusUser, ContractType } from "@loyalty/mobile-user/client/domain/enums";
 import { TagProps } from "@loyalty/mobile-user/tag/domain/tag";
 
 export class ClientResponseDto {

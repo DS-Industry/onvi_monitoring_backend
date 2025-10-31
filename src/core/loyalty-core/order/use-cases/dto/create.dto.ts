@@ -4,7 +4,7 @@ import {
   PlatformType,
   SendAnswerStatus,
   ContractType,
-} from '@prisma/client';
+} from '@loyalty/order/domain/enums';
 
 export class CreateDto {
   transactionId: string;

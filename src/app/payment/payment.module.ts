@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { PrismaModule } from '@db/prisma/prisma.module';
@@ -14,7 +14,7 @@ import { RefundPaymentUseCaseCore } from '../../core/payment-core/use-cases/refu
 
 @Module({
   imports: [
-    LoyaltyCoreModule,
+    forwardRef(() => LoyaltyCoreModule),
     PrismaModule,
     BullModule.registerQueue({ configKey: 'worker', name: 'payment-orchestrate' }),
   ],

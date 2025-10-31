@@ -29,7 +29,7 @@ import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
-import { ContractType } from '@prisma/client';
+import { ContractType, StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 
 @Controller('client')
@@ -53,7 +53,7 @@ export class ClientController {
       phone: createData.phone,
       email: createData.email,
       gender: createData.gender,
-      contractType: createData.contractType || ContractType.INDIVIDUAL,
+      contractType: (createData.contractType ? createData.contractType as ContractType : ContractType.INDIVIDUAL),
       comment: createData.comment,
       birthday: createData.birthday ? new Date(createData.birthday) : undefined,
       placementId: createData.placementId,
@@ -143,7 +143,7 @@ export class ClientController {
     
     const coreUpdateData = {
       name: updateData.name,
-      status: updateData.status,
+      status: updateData.status ? updateData.status as StatusUser : undefined,
       avatar: updateData.avatar,
       refreshTokenId: updateData.refreshTokenId,
       email: updateData.email,

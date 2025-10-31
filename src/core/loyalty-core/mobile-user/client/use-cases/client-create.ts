@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IClientRepository } from '@loyalty/mobile-user/client/interfaces/client';
 import { ClientCreateDto } from '@loyalty/mobile-user/client/use-cases/dto/client-create.dto';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { StatusUser } from '@prisma/client';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-create';
 import { ClientFullResponseDto } from '@platform-user/core-controller/dto/response/client-full-response.dto';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';

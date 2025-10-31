@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 
 @Injectable()
 export class GetFreeVacuumUseCase {

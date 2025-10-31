@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
-import { LTYProgramStatus } from '@prisma/client';
+import { LTYProgramStatus } from '@loyalty/loyalty/loyaltyProgram/domain/enums';
 
 @Injectable()
 export class UnpublishLoyaltyProgramUseCase {

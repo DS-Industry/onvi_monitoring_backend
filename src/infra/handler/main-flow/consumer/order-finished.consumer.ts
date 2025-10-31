@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { HandlerDto } from '@loyalty/order/use-cases/dto/handler.dto';
 

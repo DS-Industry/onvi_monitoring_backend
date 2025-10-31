@@ -2,14 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order, OrderProps } from '@loyalty/order/domain/order';
-import { OrderStatus } from '@prisma/client';
-import { CreatePaymentUseCaseCore } from '../../../../core/payment-core/use-cases/create-payment.use-case';
-import { VerifyPaymentUseCaseCore } from '../../../../core/payment-core/use-cases/verify-payment.use-case';
+import { OrderStatus } from '@loyalty/order/domain/enums';
+import { CreatePaymentUseCaseCore } from '../../../payment-core/use-cases/create-payment.use-case';
+import { VerifyPaymentUseCaseCore } from '../../../payment-core/use-cases/verify-payment.use-case';
 
 export interface IRegisterPaymentDto {
   orderId: number;
   paymentToken: string;
-  amount: number; 
+  amount: number;
   receiptReturnPhoneNumber: string;
 }
 
@@ -55,24 +55,33 @@ export class RegisterPaymentUseCase {
 
       const idempotenceKey = `order-${order.id}-register`;
 
-      paymentResult = process.env.PAYMENT_TEST_MODE === 'true'
-        ? { id: randomUUID(), confirmation: { confirmation_url: '' }, status: 'pending' } as any
-        : await this.paymentUseCase.create({
-            amount: String(data.amount),
-            paymentToken: data.paymentToken,
-            description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
-            phone: data.receiptReturnPhoneNumber,
-            idempotenceKey,
-          });
+      paymentResult =
+        process.env.PAYMENT_TEST_MODE === 'true'
+          ? ({
+              id: randomUUID(),
+              confirmation: { confirmation_url: '' },
+              status: 'pending',
+            } as any)
+          : await this.paymentUseCase.create({
+              amount: String(data.amount),
+              paymentToken: data.paymentToken,
+              description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
+              phone: data.receiptReturnPhoneNumber,
+              idempotenceKey,
+            });
 
       paymentCreated = true;
 
       if (process.env.PAYMENT_TEST_MODE !== 'true') {
         try {
-          const payment = await this.verifyPaymentUseCase.execute(paymentResult.id);
-          
+          const payment = await this.verifyPaymentUseCase.execute(
+            paymentResult.id,
+          );
+
           if (payment.status === 'canceled') {
-            throw new Error(`Payment ${paymentResult.id} was canceled during creation`);
+            throw new Error(
+              `Payment ${paymentResult.id} was canceled during creation`,
+            );
           }
 
           this.logger.log(
@@ -111,7 +120,7 @@ export class RegisterPaymentUseCase {
         orderHandlerStatus: order.orderHandlerStatus,
         handlerError: order.handlerError,
       } as OrderProps);
-      
+
       await this.orderRepository.update(updatedOrder);
 
       this.logger.log(
@@ -127,11 +136,14 @@ export class RegisterPaymentUseCase {
       return {
         status: OrderStatus.WAITING_PAYMENT,
         paymentId: paymentResult.id,
-        confirmation_url: paymentResult?.confirmation?.confirmation_url || '',
+        confirmation_url:
+          paymentResult?.confirmation?.confirmation_url || '',
       };
     } catch (error: any) {
-      const currentOrder = await this.orderRepository.findOneById(data.orderId);
-      
+      const currentOrder = await this.orderRepository.findOneById(
+        data.orderId,
+      );
+
       if (paymentCreated && paymentResult?.id && currentOrder) {
         if (currentOrder.orderStatus === OrderStatus.PAYMENT_PROCESSING) {
           try {
@@ -144,11 +156,12 @@ export class RegisterPaymentUseCase {
             this.logger.log(
               `Recovered order ${currentOrder.id} to WAITING_PAYMENT state with payment ${paymentResult.id}`,
             );
-            
+
             return {
               status: OrderStatus.WAITING_PAYMENT,
               paymentId: paymentResult.id,
-              confirmation_url: paymentResult?.confirmation?.confirmation_url || '',
+              confirmation_url:
+                paymentResult?.confirmation?.confirmation_url || '',
             };
           } catch (recoveryError: any) {
             this.logger.error(
@@ -163,13 +176,13 @@ export class RegisterPaymentUseCase {
         currentOrder.orderStatus = OrderStatus.CANCELED;
         currentOrder.executionError = error?.message ?? String(error);
         await this.orderRepository.update(currentOrder);
-        this.logger.error(`Payment registration failed for order ${currentOrder.id}`);
+        this.logger.error(
+          `Payment registration failed for order ${currentOrder.id}`,
+        );
       }
 
       throw error;
     }
   }
 }
-
-
 

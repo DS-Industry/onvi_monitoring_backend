@@ -5,7 +5,7 @@ import {
   PlatformType,
   SendAnswerStatus,
   ContractType,
-} from '@prisma/client';
+} from './enums';
 import { BaseEntity } from '@utils/entity';
 
 export interface OrderProps {

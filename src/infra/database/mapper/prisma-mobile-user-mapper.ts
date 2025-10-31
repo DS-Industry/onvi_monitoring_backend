@@ -6,6 +6,7 @@ import {
   Prisma,
   LTYCard,
 } from '@prisma/client';
+import { EnumMapper } from './enum-mapper';
 
 export class PrismaMobileUserMapper {
   static toDomain(
@@ -21,9 +22,9 @@ export class PrismaMobileUserMapper {
       phone: entity.phone,
       email: entity.email,
       gender: entity.gender,
-      status: entity.status,
+      status: entity.status ? EnumMapper.toDomainStatusUser(entity.status) : undefined,
       avatar: entity.avatar,
-      contractType: entity.contractType,
+      contractType: EnumMapper.toDomainContractType(entity.contractType),
       comment: entity.comment,
       placementId: entity.placementId,
       refreshTokenId: entity.refreshTokenId,
@@ -43,9 +44,9 @@ export class PrismaMobileUserMapper {
       phone: client.phone,
       email: client?.email,
       gender: client?.gender,
-      status: client?.status,
+      status: client?.status ? EnumMapper.toPrismaStatusUser(client.status) : undefined,
       avatar: client?.avatar,
-      contractType: client.contractType,
+      contractType: EnumMapper.toPrismaContractType(client.contractType),
       comment: client?.comment,
       placementId: client?.placementId,
       refreshTokenId: client?.refreshTokenId,

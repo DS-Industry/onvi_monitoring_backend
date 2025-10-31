@@ -1,5 +1,11 @@
-import { LTYOrder as PrismaOrder, Prisma, CarWashDevice, CarWashDeviceType } from '@prisma/client';
+import {
+  LTYOrder as PrismaOrder,
+  Prisma,
+  CarWashDevice,
+  CarWashDeviceType,
+} from '@prisma/client';
 import { Order } from '@loyalty/order/domain/order';
+import { EnumMapper } from './enum-mapper';
 
 export class PrismaOrderMapper {
   static toDomain(entity: PrismaOrder & { carWashDevice?: CarWashDevice & { carWashDeviceType?: CarWashDeviceType } }): Order {
@@ -16,21 +22,27 @@ export class PrismaOrderMapper {
       sumCashback: entity.sumCashback,
       carWashDeviceId: entity.carWashDeviceId,
       carWashId: entity.carWashDevice.id,
-      platform: entity.platform,
+      platform: EnumMapper.toDomainPlatformType(entity.platform),
       bayType: entity.carWashDevice.carWashDeviceType.name,
       cardMobileUserId: entity.cardId,
-      typeMobileUser: entity.contractType,
+      typeMobileUser: EnumMapper.toDomainContractType(entity.contractType),
       orderData: entity.orderData,
       createData: entity.createData,
-      orderStatus: entity.orderStatus,
-      sendAnswerStatus: entity.sendAnswerStatus,
+      orderStatus: EnumMapper.toDomainOrderStatus(entity.orderStatus),
+      sendAnswerStatus: entity.sendAnswerStatus
+        ? EnumMapper.toDomainSendAnswerStatus(entity.sendAnswerStatus)
+        : undefined,
       sendTime: entity.sendTime,
       debitingMoney: entity.debitingMoney,
-      executionStatus: entity.executionStatus,
+      executionStatus: entity.executionStatus
+        ? EnumMapper.toDomainExecutionStatus(entity.executionStatus)
+        : undefined,
       reasonError: entity.reasonError,
       executionError: entity.executionError,
       handlerError: entity.handlerError,
-      orderHandlerStatus: entity.orderHandlerStatus,
+      orderHandlerStatus: entity.orderHandlerStatus
+        ? EnumMapper.toDomainOrderHandlerStatus(entity.orderHandlerStatus)
+        : undefined,
     });
   }
 
@@ -44,20 +56,26 @@ export class PrismaOrderMapper {
       sumDiscount: order.sumDiscount,
       sumCashback: order.sumCashback,
       carWashDeviceId: order.carWashDeviceId,
-      platform: order.platform,
+      platform: EnumMapper.toPrismaPlatformType(order.platform),
       cardId: order?.cardMobileUserId,
-      contractType: order.typeMobileUser,
+      contractType: EnumMapper.toPrismaContractType(order.typeMobileUser),
       orderData: order.orderData,
       createData: order.createData,
-      orderStatus: order.orderStatus,
-      sendAnswerStatus: order?.sendAnswerStatus,
+      orderStatus: EnumMapper.toPrismaOrderStatus(order.orderStatus),
+      sendAnswerStatus: order?.sendAnswerStatus
+        ? EnumMapper.toPrismaSendAnswerStatus(order.sendAnswerStatus)
+        : undefined,
       sendTime: order?.sendTime,
       debitingMoney: order?.debitingMoney,
-      executionStatus: order?.executionStatus,
+      executionStatus: order?.executionStatus
+        ? EnumMapper.toPrismaExecutionStatus(order.executionStatus)
+        : undefined,
       reasonError: order?.reasonError,
       executionError: order?.executionError,
       handlerError: order?.handlerError,
-      orderHandlerStatus: order?.orderHandlerStatus,
+      orderHandlerStatus: order?.orderHandlerStatus
+        ? EnumMapper.toPrismaOrderHandlerStatus(order.orderHandlerStatus)
+        : undefined,
     };
   }
 }

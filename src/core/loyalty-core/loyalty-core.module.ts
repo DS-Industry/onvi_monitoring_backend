@@ -1,4 +1,4 @@
-import { Module, Provider } from '@nestjs/common';
+import { Module, Provider, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { FileModule } from '@libs/file/module';
 import { HttpModule } from '@nestjs/axios';
@@ -6,6 +6,8 @@ import { PosModule } from '@infra/pos/pos.module';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
 import { BullModule } from '@nestjs/bullmq';
+import { QueueModule } from '@infra/queue/queue.module';
+import { PaymentModule } from '../../app/payment/payment.module';
 import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
@@ -73,8 +75,10 @@ import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { MarketingCampaignStatusHandlerUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-status-handler';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
+import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
+import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
@@ -124,6 +128,7 @@ const repositories: Provider[] = [
   OrderProvider,
   CorporateRepositoryProvider,
   MarketingCampaignRepositoryProvider,
+  PromoCodeRepositoryProvider,
   LoyaltyTierHistRepositoryProvider,
   LoyaltyProgramHubRequestRepositoryProvider,
   LoyaltyProgramParticipantRequestRepositoryProvider,
@@ -221,6 +226,7 @@ const orderUseCase: Provider[] = [
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
   FindMethodsOrderUseCase,
+  RegisterPaymentUseCase,
 ];
 
 const mobileOrderUseCase: Provider[] = [
@@ -263,6 +269,8 @@ const redisProviders: Provider[] = [
     HttpModule,
     BusinessCoreModule,
     PosModule,
+    QueueModule,
+    forwardRef(() => PaymentModule),
     BullModule.registerQueue(
       {
         configKey: 'worker',

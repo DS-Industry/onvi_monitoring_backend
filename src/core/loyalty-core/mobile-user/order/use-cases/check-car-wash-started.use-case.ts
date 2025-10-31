@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, Inject, NotFoundException } from '@nes
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Logger } from 'nestjs-pino';
 import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 
 @Injectable()
 export class CheckCarWashStartedUseCase {

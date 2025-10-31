@@ -1,12 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
 import { Order } from '@loyalty/order/domain/order';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
-import { DiscountType } from '@prisma/client';
+import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
+import { DiscountType } from '@loyalty/marketing-campaign/domain/enums/discount-type.enum';
 
 @Injectable()
 export class PromoCodeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly promoCodeRepository: IPromoCodeRepository,
+  ) {}
 
   async applyPromoCode(
     promoCodeId: number,
@@ -14,9 +16,7 @@ export class PromoCodeService {
     card: Card,
     carWashId: number,
   ): Promise<number> {
-    const promoCode = await this.prisma.lTYPromocode.findUnique({
-      where: { id: promoCodeId },
-    });
+    const promoCode = await this.promoCodeRepository.findById(promoCodeId);
 
     if (!promoCode) {
       throw new BadRequestException('Promo code not found');
@@ -34,12 +34,10 @@ export class PromoCodeService {
       throw new BadRequestException('Promo code has expired');
     }
 
-    const usageCount = await this.prisma.marketingCampaignUsage.count({
-      where: {
-        promocodeId: promoCodeId,
-        ltyUserId: card.mobileUserId,
-      },
-    });
+    const usageCount = await this.promoCodeRepository.countUsageByUser(
+      promoCodeId,
+      card.mobileUserId || 0,
+    );
 
     if (usageCount >= promoCode.maxUsagePerUser) {
       throw new BadRequestException('Promo code usage limit exceeded');
@@ -51,43 +49,36 @@ export class PromoCodeService {
       order.sumBonus,
     );
 
-    await this.prisma.marketingCampaignUsage.create({
-      data: {
-        campaignId: promoCode.campaignId || 0,
-        promocodeId: promoCodeId,
-        ltyUserId: card.mobileUserId || 0,
-        discountAmount,
-        orderAmount: order.sumFull,
-        posId: carWashId,
-        usedAt: new Date(),
-      },
+    await this.promoCodeRepository.createUsage({
+      campaignId: promoCode.campaignId || 0,
+      promocodeId: promoCodeId,
+      ltyUserId: card.mobileUserId || 0,
+      discountAmount,
+      orderAmount: order.sumFull,
+      posId: carWashId,
     });
 
-    await this.prisma.lTYPromocode.update({
-      where: { id: promoCodeId },
-      data: {
-        currentUsage: promoCode.currentUsage + 1,
-      },
-    });
+    await this.promoCodeRepository.incrementUsage(promoCodeId);
 
     return discountAmount;
   }
 
   private calculateDiscount(
     originalSum: number,
-    promoCode: any,
+    promoCode: { discountType: string; discountValue: number; maxDiscountAmount: number | null },
     rewardPointsUsed: number,
   ): number {
     if (promoCode.discountType === DiscountType.FIXED_AMOUNT) {
-      const fixedDiscount = Number(promoCode.discountValue);
+      const fixedDiscount = promoCode.discountValue;
       return Math.min(fixedDiscount, originalSum - rewardPointsUsed);
     } else if (promoCode.discountType === DiscountType.PERCENTAGE) {
-      const percentageDiscount =
-        (Number(promoCode.discountValue) / 100) * originalSum;
-      const maxDiscount = promoCode.maxDiscountAmount
-        ? Number(promoCode.maxDiscountAmount)
-        : originalSum;
-      return Math.min(percentageDiscount, maxDiscount, originalSum - rewardPointsUsed);
+      const percentageDiscount = (promoCode.discountValue / 100) * originalSum;
+      const maxDiscount = promoCode.maxDiscountAmount || originalSum;
+      return Math.min(
+        percentageDiscount,
+        maxDiscount,
+        originalSum - rewardPointsUsed,
+      );
     }
     return 0;
   }

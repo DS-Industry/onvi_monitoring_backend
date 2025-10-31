@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Inject } from '@nes
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Logger } from 'nestjs-pino';
 import { IPosService, DeviceType, SendStatus } from '@infra/pos/interface/pos.interface';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
 @Injectable()

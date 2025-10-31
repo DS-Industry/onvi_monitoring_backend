@@ -1,13 +1,17 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
-import { OrderStatus, PlatformType, ContractType, OrderHandlerStatus } from '@prisma/client';
-import { PrismaService } from '@db/prisma/prisma.service';
+import {
+  OrderStatus,
+  PlatformType,
+  ContractType,
+  OrderHandlerStatus,
+} from '@loyalty/order/domain/enums';
 import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
 import { ITariffRepository } from '../interface/tariff';
-import { FlowProducer } from 'bullmq';
+import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
 
 export interface CreateMobileOrderRequest {
   transactionId: string;
@@ -29,25 +33,15 @@ export interface CreateMobileOrderResponse {
 
 @Injectable()
 export class CreateMobileOrderUseCase {
-  private readonly flowProducer: FlowProducer;
-
   constructor(
     private readonly orderRepository: IOrderRepository,
-    private readonly prisma: PrismaService,
     private readonly posService: IPosService,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
     private readonly tariffRepository: ITariffRepository,
-  ) {
-    this.flowProducer = new FlowProducer({
-      connection: {
-        host: process.env.REDIS_WORKER_DATA_HOST || process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_WORKER_DATA_PORT || process.env.REDIS_PORT || '6379', 10),
-        username: process.env.REDIS_WORKER_DATA_USER,
-        password: process.env.REDIS_WORKER_DATA_PASSWORD,
-      },
-    });
-  }
+    @Inject(IFLOW_PRODUCER)
+    private readonly flowProducer: IFlowProducer,
+  ) {}
 
   async execute(
     request: CreateMobileOrderRequest,
@@ -157,12 +151,12 @@ export class CreateMobileOrderUseCase {
               bayType: request.bayType,
             },
             opts: {
-              failParentOnFailure: false, 
-              ignoreDependencyOnFailure: true, 
-              attempts: 3,              
+              failParentOnFailure: false,
+              ignoreDependencyOnFailure: true,
+              attempts: 3,
               backoff: {
                 type: 'fixed',
-                delay: 5000,           
+                delay: 5000,
               },
             },
             children: [
@@ -176,12 +170,12 @@ export class CreateMobileOrderUseCase {
                   bayType: request.bayType,
                 },
                 opts: {
-                  failParentOnFailure: false, 
-                  ignoreDependencyOnFailure: true, 
-                  attempts: 3,              
+                  failParentOnFailure: false,
+                  ignoreDependencyOnFailure: true,
+                  attempts: 3,
                   backoff: {
                     type: 'fixed',
-                    delay: 5000,           
+                    delay: 5000,
                   },
                 },
               },

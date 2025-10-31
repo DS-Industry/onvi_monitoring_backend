@@ -20,8 +20,9 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 import { IPosService } from '@infra/pos/interface/pos.interface';
-import { RegisterPaymentUseCase } from '../use-cases/register-payment.use-case';
+import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { RegisterPaymentDto } from './dto/register-payment.dto';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 
 @Controller('order')
 export class OrderController {
@@ -100,7 +101,7 @@ export class OrderController {
       await this.updateMobileOrderUseCase.execute({
         orderId: id,
         clientId: user.clientId,
-        status: data.status,
+        status: data.status as OrderStatus,
       });
       return { message: 'Order status updated successfully' };
     } catch (e) {

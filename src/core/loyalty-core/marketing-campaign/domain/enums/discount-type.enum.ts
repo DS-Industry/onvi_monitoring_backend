@@ -1,0 +1,6 @@
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED_AMOUNT = 'FIXED_AMOUNT',
+  FREE_SERVICE = 'FREE_SERVICE',
+}
+
