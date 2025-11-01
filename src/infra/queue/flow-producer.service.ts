@@ -21,6 +21,13 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
   }
 
   async add(config: FlowJobConfig): Promise<void> {
+    if (!config.name) {
+      throw new Error('FlowJobConfig.name is required');
+    }
+    if (!config.queueName) {
+      throw new Error('FlowJobConfig.queueName is required');
+    }
+
     try {
       await this.flowProducer.add({
         name: config.name,
@@ -29,10 +36,17 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
         children: config.children,
         opts: config.opts,
       });
+      
+      this.logger.debug(
+        `Flow job added successfully: ${config.name} to queue: ${config.queueName}`,
+      );
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      
       this.logger.error(
-        `Failed to add flow job: ${config.name} to queue: ${config.queueName}`,
-        error.stack,
+        `Failed to add flow job: ${config.name} to queue: ${config.queueName}. Error: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }
@@ -54,9 +68,23 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
       password:
         this.configService.get<string>('REDIS_WORKER_DATA_PASSWORD') ||
         this.configService.get<string>('REDIS_PASSWORD'),
-      keepAlive: 30000,
-      connectTimeout: 60000,
-      retryStrategy: (times: number) => Math.min(times * 100, 3000),
+      keepAlive:
+        parseInt(
+          this.configService.get<string>('REDIS_KEEPALIVE') || '30000',
+          10,
+        ),
+      connectTimeout:
+        parseInt(
+          this.configService.get<string>('REDIS_CONNECT_TIMEOUT') || '60000',
+          10,
+        ),
+      retryStrategy: (times: number) => {
+        const maxDelay = parseInt(
+          this.configService.get<string>('REDIS_RETRY_MAX_DELAY') || '3000',
+          10,
+        );
+        return Math.min(times * 100, maxDelay);
+      },
     };
   }
 }
