@@ -1,8 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { Card } from '@loyalty/mobile-user/card/domain/card';
-import { Order } from '@loyalty/order/domain/order';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { OrderStatus } from '@loyalty/order/domain/enums';
+
+export interface TransactionHistoryItem {
+  id: number;
+  transactionId: string;
+  sumFull: number;
+  sumReal: number;
+  sumBonus: number;
+  sumDiscount: number;
+  sumCashback: number;
+  orderData: Date;
+  orderStatus: OrderStatus;
+  platform: string;
+  carWashDeviceId: number;
+}
+
+export interface TransactionsHistoryResponse {
+  data: TransactionHistoryItem[];
+  meta: {
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+  };
+}
 
 @Injectable()
 export class GetCardTransactionsHistoryUseCase {
@@ -11,15 +35,14 @@ export class GetCardTransactionsHistoryUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
-  async execute(user: any, size: number, page: number): Promise<any> {
-    const clientId = user.props.id;
-    
-    const card = await this.findMethodsCardUseCase.getByClientId(clientId);
+  async execute(
+    user: Client,
+    size: number,
+    page: number,
+  ): Promise<TransactionsHistoryResponse> {
+    const clientId = user.id;
 
-    console.log("card => ", card)
-    console.log("clientId => ", clientId)
-    console.log("size => ", size)
-    console.log("page => ", page)
+    const card = await this.findMethodsCardUseCase.getByClientId(clientId);
 
     if (!card) {
       return {
@@ -44,22 +67,22 @@ export class GetCardTransactionsHistoryUseCase {
       undefined,
       undefined,
       undefined,
+      card.id,
       undefined,
     );
 
-    const filteredOrders = orders.filter(order => order.cardMobileUserId === card.id);
-
-    filteredOrders.sort((a, b) => 
-      new Date(b.orderData).getTime() - new Date(a.orderData).getTime()
+    orders.sort(
+      (a, b) =>
+        new Date(b.orderData).getTime() - new Date(a.orderData).getTime(),
     );
 
-    const total = filteredOrders.length;
+    const total = orders.length;
     const totalPages = Math.ceil(total / size);
     const skip = (page - 1) * size;
-    const paginatedOrders = filteredOrders.slice(skip, skip + size);
+    const paginatedOrders = orders.slice(skip, skip + size);
 
     return {
-      data: paginatedOrders.map(order => ({
+      data: paginatedOrders.map((order) => ({
         id: order.id,
         transactionId: order.transactionId,
         sumFull: order.sumFull,

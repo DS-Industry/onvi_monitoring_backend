@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { CardNotMatchExceptions } from '../exceptions/card-not-match.exceptions';
 import { AccountTransferDataResponseDto } from '../controller/dto/card-orders.dto';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
 
 @Injectable()
 export class GetAccountTransferDataUseCase {
@@ -9,10 +10,17 @@ export class GetAccountTransferDataUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
-  async execute(devNomer: string, user: any): Promise<AccountTransferDataResponseDto> {
+  async execute(
+    devNomer: string,
+    user: Client,
+  ): Promise<AccountTransferDataResponseDto> {
     const targetCard = await this.findMethodsCardUseCase.getByDevNumber(devNomer);
-    
+
     if (!targetCard) {
+      throw new CardNotMatchExceptions(devNomer);
+    }
+
+    if (targetCard.mobileUserId !== user.id) {
       throw new CardNotMatchExceptions(devNomer);
     }
 

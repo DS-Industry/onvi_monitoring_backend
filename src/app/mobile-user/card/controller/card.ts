@@ -23,6 +23,9 @@ import {
   AccountTransferDataResponseDto,
 } from './dto/card-orders.dto';
 import { CardNotMatchExceptions } from '../exceptions/card-not-match.exceptions';
+import { CardNotFoundExceptions } from '../exceptions/card-not-found.exceptions';
+import { InsufficientBalanceExceptions } from '../exceptions/insufficient-balance.exceptions';
+import { PhoneMismatchExceptions } from '../exceptions/phone-mismatch.exceptions';
 import { AccountNotFoundExceptions } from '@mobile-user/client/exceptions/account-not-found.exceptions';
 
 @Controller('card')
@@ -137,12 +140,17 @@ export class CardController {
     try {
       return await this.transferAccountUseCase.execute(body, user);
     } catch (e) {
-      if (e instanceof CardNotMatchExceptions) {
+      if (
+        e instanceof CardNotMatchExceptions ||
+        e instanceof CardNotFoundExceptions ||
+        e instanceof InsufficientBalanceExceptions ||
+        e instanceof PhoneMismatchExceptions
+      ) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,
           message: e.message,
-          code: HttpStatus.NOT_FOUND,
+          code: e.getHttpStatus(),
         });
       } else {
         throw new CustomHttpException({

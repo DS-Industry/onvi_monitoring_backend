@@ -2,10 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
 import { CardNotMatchExceptions } from '../exceptions/card-not-match.exceptions';
+import { CardNotFoundExceptions } from '../exceptions/card-not-found.exceptions';
+import { InsufficientBalanceExceptions } from '../exceptions/insufficient-balance.exceptions';
+import { PhoneMismatchExceptions } from '../exceptions/phone-mismatch.exceptions';
 import { AccountTransferDto } from '../controller/dto/card-orders.dto';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
-import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { CreateCardBonusBankUseCase } from '@loyalty/mobile-user/bonus/cardBonusBank/use-case/cardBonusBank-create';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { ClientNotFoundExceptions } from '@mobile-user/shared/exceptions/clinet.exceptions';
+
+export interface TransferAccountResponse {
+  success: boolean;
+  transferred: number;
+  newCardBalance: number;
+  oldCardBalance: number;
+  bonusExpiresAt: Date;
+  message: string;
+}
 
 @Injectable()
 export class TransferAccountUseCase {
@@ -13,68 +26,88 @@ export class TransferAccountUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly updateCardUseCase: UpdateCardUseCase,
     private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
-    private readonly cardRepository: ICardRepository,
     private readonly createCardBonusBankUseCase: CreateCardBonusBankUseCase,
   ) {}
 
-  async execute(body: AccountTransferDto, user: any): Promise<any> {
-    const clientId = user.props.id;
-    
-    const newCard = await this.findMethodsCardUseCase.getByClientId(clientId);
-    
-    if (!newCard) {
-      throw new Error('User card not found');
+  async execute(
+    body: AccountTransferDto,
+    user: Client,
+  ): Promise<TransferAccountResponse> {
+    if (!body.sum || body.sum <= 0) {
+      throw new InsufficientBalanceExceptions(
+        body.devNumber,
+        0,
+        body.sum || 0,
+      );
     }
 
-    const oldCard = await this.findMethodsCardUseCase.getByDevNumber(body.devNumber);
-    
+    if (!body.devNumber || body.devNumber.trim() === '') {
+      throw new CardNotMatchExceptions(body.devNumber || '');
+    }
+
+    const clientId = user.id;
+
+    const newCard = await this.findMethodsCardUseCase.getByClientId(clientId);
+
+    if (!newCard) {
+      throw new CardNotFoundExceptions(clientId);
+    }
+
+    const oldCard = await this.findMethodsCardUseCase.getByDevNumber(
+      body.devNumber,
+    );
+
     if (!oldCard) {
       throw new CardNotMatchExceptions(body.devNumber);
     }
 
-    const oldCardClient = await this.findMethodsClientUseCase.getById(oldCard.mobileUserId);
-    
+    if (!oldCard.mobileUserId) {
+      throw new CardNotMatchExceptions(body.devNumber);
+    }
+
+    const oldCardClient =
+      await this.findMethodsClientUseCase.getById(oldCard.mobileUserId);
+
     if (!oldCardClient) {
       throw new CardNotMatchExceptions(body.devNumber);
     }
 
     const currentClient = await this.findMethodsClientUseCase.getById(clientId);
-    
+
     if (!currentClient) {
-      throw new Error('Current client not found');
+      throw new ClientNotFoundExceptions(clientId.toString());
     }
 
     if (oldCardClient.phone !== currentClient.phone) {
-      throw new Error('Phone numbers do not match');
+      throw new PhoneMismatchExceptions(
+        oldCardClient.phone,
+        currentClient.phone,
+      );
     }
 
     if (oldCard.balance < body.sum) {
-      throw new Error('Insufficient balance on old card');
+      throw new InsufficientBalanceExceptions(
+        body.devNumber,
+        oldCard.balance,
+        body.sum,
+      );
     }
 
     const newCardBalance = newCard.balance + body.sum;
     const oldCardBalance = oldCard.balance - body.sum;
 
-    await this.updateCardUseCase.execute(
+    const updatedNewCard = await this.updateCardUseCase.execute(
       { balance: newCardBalance },
       newCard,
     );
 
-    if (oldCard.id) {
-      const updatedOldCard = await this.findMethodsCardUseCase.getById(oldCard.id);
-      if (updatedOldCard) {
-        await this.updateCardUseCase.execute(
-          { balance: oldCardBalance },
-          updatedOldCard,
-        );
-      }
-    }
+    await this.updateCardUseCase.execute({ balance: oldCardBalance }, oldCard);
 
     const expiryDate = new Date();
     expiryDate.setMonth(expiryDate.getMonth() + 6);
-    
+
     await this.createCardBonusBankUseCase.execute({
-      cardMobileUserId: newCard.id,
+      cardMobileUserId: updatedNewCard.id,
       sum: body.sum,
       expiryAt: expiryDate,
     });
@@ -82,8 +115,8 @@ export class TransferAccountUseCase {
     return {
       success: true,
       transferred: body.sum,
-      newCardBalance: newCardBalance,
-      oldCardBalance: oldCardBalance,
+      newCardBalance: updatedNewCard.balance,
+      oldCardBalance,
       bonusExpiresAt: expiryDate,
       message: `Balance transfer completed. ${body.sum} transferred to your card as bonus (valid until ${expiryDate.toLocaleDateString()}).`,
     };
