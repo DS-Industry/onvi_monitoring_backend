@@ -111,7 +111,7 @@ export class WarehouseController {
   //Create warehouse
   @Post()
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async createWarehouse(
     @Body() data: WarehouseCreateDto,

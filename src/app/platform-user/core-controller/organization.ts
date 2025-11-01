@@ -35,10 +35,10 @@ import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
-  CreateOrgAbility,
+  CreateOrgAbility, ReadOrgAbility,
   ReadPosAbility,
-  UpdateOrgAbility,
-} from '@common/decorators/abilities.decorator';
+  UpdateOrgAbility
+} from "@common/decorators/abilities.decorator";
 import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
@@ -228,6 +228,7 @@ export class OrganizationController {
   //Statistics for organization
   @Get('statistics')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   @CacheSWR(120)
   async statisticsOrg(
@@ -277,6 +278,7 @@ export class OrganizationController {
   //Statistics-graf for organization
   @Get('statistics-graf')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   @CacheSWR(120)
   async statisticsGrafOrg(
@@ -309,6 +311,7 @@ export class OrganizationController {
   //Rating for organization
   @Get('rating')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
   @CacheSWR(120)
   async ratingPosByOrg(

@@ -21,10 +21,10 @@ import { UserPermissionValidateRules } from '@platform-user/validate/validate-ru
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
-  ManageOrgAbility,
+  ManageOrgAbility, ReadOrgAbility,
   ReadPosAbility,
-  UpdateOrgAbility,
-} from '@common/decorators/abilities.decorator';
+  UpdateOrgAbility
+} from "@common/decorators/abilities.decorator";
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { UserException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
@@ -89,6 +89,7 @@ export class PermissionController {
 
   @Get('roles')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadOrgAbility())
   @HttpCode(200)
   async getRoles(): Promise<UserRoleResponseDto[]> {
     try {
@@ -139,6 +140,7 @@ export class PermissionController {
   }
   @Get('worker/:orgId')
   @UseGuards(JwtGuard)
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(200)
   async getWorker(
     @Param('orgId', ParseIntPipe) orgId: number,
@@ -179,6 +181,7 @@ export class PermissionController {
   }
   @Get('worker-count/:orgId')
   @UseGuards(JwtGuard)
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(200)
   async getCountWorker(
     @Param('orgId', ParseIntPipe) orgId: number,

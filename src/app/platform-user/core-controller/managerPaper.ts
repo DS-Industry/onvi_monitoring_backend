@@ -409,7 +409,7 @@ export class ManagerPaperController {
   }
   @Post('period')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ManageManagerPaperAbility())
+  @CheckAbilities(new CreateManagerPaperAbility())
   @HttpCode(201)
   async createManagerPaperPeriod(
     @Request() req: any,
