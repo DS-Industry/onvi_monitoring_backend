@@ -5,6 +5,7 @@ import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
+import { QueueModule } from '@infra/queue/queue.module';
 import { PaymentOrchestrateConsumer } from '@infra/handler/payment-orchestrate/consumer/payment-orchestrate.consumer';
 import { CarWashLaunchConsumer } from '@infra/handler/car-wash-launch/consumer/car-wash-launch.consumer';
 import { CheckCarWashStartedConsumer } from '@infra/handler/check-car-wash-started/consumer/check-car-wash-started.consumer';
@@ -55,6 +56,7 @@ import { LoggerModule } from 'nestjs-pino';
     RedisModule,
     PrismaModule,
     LoyaltyCoreModule,
+    QueueModule,
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'payment-orchestrate',

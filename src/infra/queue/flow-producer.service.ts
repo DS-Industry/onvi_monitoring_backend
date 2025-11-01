@@ -28,9 +28,7 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleInit {
     });
   }
 
-  async onModuleInit() {
-    // Connection is established on constructor
-  }
+  async onModuleInit() {}
 
   async add(config: FlowJobConfig): Promise<void> {
     await this.flowProducer.add({
