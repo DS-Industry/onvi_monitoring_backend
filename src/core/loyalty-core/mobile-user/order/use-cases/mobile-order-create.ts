@@ -14,7 +14,6 @@ import { ITariffRepository } from '../interface/tariff';
 import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
 
 export interface CreateMobileOrderRequest {
-  transactionId: string;
   sum: number;
   sumBonus: number;
   carWashId: number;
@@ -28,7 +27,6 @@ export interface CreateMobileOrderRequest {
 export interface CreateMobileOrderResponse {
   orderId: number;
   status: OrderStatus;
-  transactionId: string;
 }
 
 @Injectable()
@@ -46,9 +44,11 @@ export class CreateMobileOrderUseCase {
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
+    const carWashDeviceId = request.carWashDeviceId
+
     const ping = await this.posService.ping({
       posId: request.carWashId,
-      carWashDeviceId: request.carWashDeviceId,
+      carWashDeviceId: carWashDeviceId,
       type: request?.bayType ?? null,
     });
 
@@ -59,7 +59,6 @@ export class CreateMobileOrderUseCase {
       throw new BadRequestException('Carwash is unavailable');
     }
 
-    const carWashDeviceId = Number(ping.id);
 
     const card = await this.findMethodsCardUseCase.getByClientId(
       request.cardMobileUserId,
@@ -106,7 +105,6 @@ export class CreateMobileOrderUseCase {
       : OrderStatus.CREATED;
 
     const order = new Order({
-      transactionId: request.transactionId,
       sumFull: request.sum,
       sumReal: request.sum,
       sumBonus: request.sumBonus || 0,
@@ -188,7 +186,6 @@ export class CreateMobileOrderUseCase {
     return {
       orderId: createdOrder.id,
       status: createdOrder.orderStatus,
-      transactionId: createdOrder.transactionId,
     };
   }
 }

@@ -10,7 +10,7 @@ import { BaseEntity } from '@utils/entity';
 
 export interface OrderProps {
   id?: number;
-  transactionId: string;
+  transactionId?: string;
   sumFull: number;
   sumReal: number;
   sumBonus: number;

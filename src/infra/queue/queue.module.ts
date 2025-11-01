@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
+import { IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
 import { BullMQFlowProducer } from './flow-producer.service';
 
 @Module({

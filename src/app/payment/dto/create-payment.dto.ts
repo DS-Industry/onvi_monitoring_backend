@@ -1,4 +1,4 @@
-import { IPaymentSubject, IPaymentMode } from '@a2seven/yoo-checkout';
+import { PaymentSubject, PaymentMode } from '../../../core/payment-core/domain/payment.types';
 
 export class CreatePaymentDto {
   amount: { value: string; currency: string };
@@ -13,8 +13,8 @@ export class CreatePaymentDto {
       amount: { value: string; currency: string };
       quantity: string;
       vat_code: number;
-      payment_subject: IPaymentSubject;
-      payment_mode: IPaymentMode;
+      payment_subject: PaymentSubject;
+      payment_mode: PaymentMode;
     }>;
   };
 }

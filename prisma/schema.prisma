@@ -808,7 +808,7 @@ model LTYBonusOperType {
 
 model LTYOrder {
   id                 Int                 @id @default(autoincrement())
-  transactionId      String
+  transactionId      String?
   sumFull            Int
   sumReal            Int
   sumBonus           Int

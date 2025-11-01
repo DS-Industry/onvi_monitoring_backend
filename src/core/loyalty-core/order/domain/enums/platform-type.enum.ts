@@ -5,3 +5,4 @@ export enum PlatformType {
   LOCAL_LOYALTY = 'LOCAL_LOYALTY',
 }
 
+

@@ -30,3 +30,4 @@ export abstract class IPromoCodeRepository {
   abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
 }
 
+

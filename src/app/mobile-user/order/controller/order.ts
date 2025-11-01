@@ -40,10 +40,8 @@ export class OrderController {
   async createOrder(@Body() data: CreateOrderDto, @Req() req: any) {
     try {
       const { user } = req;
-      const transactionId = this.generateTransactionId();
 
       return await this.createMobileOrderUseCase.execute({
-        transactionId,
         sum: data.sum,
         sumBonus: data.sumBonus,
         carWashId: data.carWashId,
@@ -59,12 +57,6 @@ export class OrderController {
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
-  }
-
-  private generateTransactionId(): string {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `${timestamp}-${random}`;
   }
 
   @UseGuards(JwtGuard)
@@ -136,7 +128,7 @@ export class OrderController {
   @UseGuards(JwtGuard)
   @Post('register')
   @HttpCode(201)
-  async registerPayment(@Body() data: RegisterPaymentDto, @Req() req: any) {
+  async registerPayment(@Body() data: RegisterPaymentDto) {
     try {
       return await this.registerPaymentUseCase.execute(data);
     } catch (e: any) {

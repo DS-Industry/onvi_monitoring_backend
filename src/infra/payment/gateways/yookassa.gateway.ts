@@ -1,33 +1,86 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { YooCheckout } from '@a2seven/yoo-checkout';
+import { IPaymentMode, IPaymentSubject } from '@a2seven/yoo-checkout';
 import { IPaymentGateway, CreatePaymentDto, RefundPaymentDto } from '../../../core/payment-core/interfaces/payment-gateway.interface';
+import { PaymentSubject, PaymentMode } from '../../../core/payment-core/domain/payment.types';
 
 @Injectable()
 export class YooKassaGateway implements IPaymentGateway {
+  private readonly logger = new Logger(YooKassaGateway.name);
   private checkout: YooCheckout;
 
   constructor() {
+    const shopId = process.env.YOOKASSA_SHOP_ID;
+    const secretKey = process.env.YOOKASSA_SECRET_KEY;
+
+    if (!shopId || !secretKey) {
+      throw new Error('YooKassa credentials are not configured. Please set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY environment variables.');
+    }
+
     this.checkout = new YooCheckout({
-      shopId: process.env.YOOKASSA_SHOP_ID!,
-      secretKey: process.env.YOOKASSA_SECRET_KEY!,
+      shopId,
+      secretKey,
     });
   }
 
-  createPayment(data: CreatePaymentDto) {
-    const { paymentToken, idempotenceKey, ...rest } = data as any;
-    return this.checkout.createPayment({
-      ...rest,
-      payment_token: paymentToken,
-      ...(idempotenceKey && { idempotence_key: idempotenceKey }),
-    });
+  private mapPaymentSubject(subject: PaymentSubject): IPaymentSubject {
+    return subject as unknown as IPaymentSubject;
   }
 
-  getPayment(id: string) {
-    return this.checkout.getPayment(id);
+  private mapPaymentMode(mode: PaymentMode): IPaymentMode {
+    return mode as unknown as IPaymentMode;
   }
 
-  createRefund(data: RefundPaymentDto) {
-    return this.checkout.createRefund(data);
+  async createPayment(data: CreatePaymentDto): Promise<any> {
+    try {
+      const { paymentToken, idempotenceKey, receipt, ...rest } = data;
+
+      const paymentRequest: any = {
+        ...rest,
+      };
+
+      if (paymentToken) {
+        paymentRequest.payment_token = paymentToken;
+      }
+
+      if (idempotenceKey) {
+        paymentRequest.idempotence_key = idempotenceKey;
+      }
+
+      if (receipt) {
+        paymentRequest.receipt = {
+          phone: receipt.phone,
+          items: receipt.items.map((item) => ({
+            ...item,
+            payment_subject: this.mapPaymentSubject(item.payment_subject),
+            payment_mode: this.mapPaymentMode(item.payment_mode),
+          })),
+        };
+      }
+
+      return await this.checkout.createPayment(paymentRequest);
+    } catch (error) {
+      this.logger.error(`Failed to create payment: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async getPayment(id: string): Promise<any> {
+    try {
+      return await this.checkout.getPayment(id);
+    } catch (error) {
+      this.logger.error(`Failed to get payment ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async createRefund(data: RefundPaymentDto): Promise<any> {
+    try {
+      return await this.checkout.createRefund(data);
+    } catch (error) {
+      this.logger.error(`Failed to create refund for payment ${data.payment_id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 }
 

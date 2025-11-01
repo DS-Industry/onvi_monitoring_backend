@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IPaymentMode, IPaymentSubject } from '@a2seven/yoo-checkout';
+import { PaymentSubject, PaymentMode } from '../domain/payment.types';
 import { IPaymentGateway, RefundPaymentDto, CreatePaymentDto } from '../interfaces/payment-gateway.interface';
 
 export interface CreateGenericPaymentInput {
@@ -25,15 +25,15 @@ export class CreatePaymentUseCaseCore {
       amount: { value: string; currency: string };
       quantity: string;
       vat_code: number;
-      payment_subject: IPaymentSubject;
-      payment_mode: IPaymentMode;
+      payment_subject: PaymentSubject;
+      payment_mode: PaymentMode;
     } = {
       description: data.description,
       amount,
       quantity: '1',
       vat_code: 2,
-      payment_subject: 'commodity',
-      payment_mode: 'full_payment',
+      payment_subject: PaymentSubject.COMMODITY,
+      payment_mode: PaymentMode.FULL_PAYMENT,
     };
 
     const payload: CreatePaymentDto = {

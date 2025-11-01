@@ -1,5 +1,5 @@
 import { Optional } from '@nestjs/common';
-import { IsNumber, IsDefined, IsEnum, IsOptional } from 'class-validator';
+import { IsNumber, IsDefined, IsOptional } from 'class-validator';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 
 export class CreateOrderDto {
