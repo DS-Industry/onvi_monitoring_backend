@@ -8,10 +8,12 @@ import {
   Inject,
   Headers,
   UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { ConfigService } from '@nestjs/config';
 import { PaymentWebhookOrchestrateUseCase } from '../use-cases/payment-webhook-orchestrate.use-case';
+import { createHmac } from 'crypto';
 
 @Controller('payment-webhook')
 export class PaymentWebhookController {
@@ -24,42 +26,78 @@ export class PaymentWebhookController {
     private readonly orchestratePaymentUseCase: PaymentWebhookOrchestrateUseCase,
   ) {}
 
-  private verifyWebhookSignature(authHeader: string): boolean {
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
+
+  private verifyWebhookSignature(
+    httpMethod: string,
+    url: string,
+    rawBody: Buffer | string,
+    signature: string,
+  ): boolean {
+    if (!signature) {
+      this.logger.warn('Missing Webhook-Signature header');
+      return false;
+    }
+
+    const webhookSecretKey = this.configService.get<string>('YOOKASSA_WEBHOOK_SECRET_KEY');
+    
+    if (!webhookSecretKey) {
+      this.logger.error('YooKassa webhook secret key not configured. Please set YOOKASSA_WEBHOOK_SECRET_KEY environment variable.');
       return false;
     }
 
     try {
-      const credentials = Buffer.from(authHeader.slice(6), 'base64').toString('utf-8');
-      const [shopId, secretKey] = credentials.split(':');
+      const bodyString = Buffer.isBuffer(rawBody) ? rawBody.toString('utf-8') : rawBody;
+      
+      const message = `${httpMethod}|${url}|${bodyString}`;
+      
+      const computedSignature = createHmac('sha256', webhookSecretKey)
+        .update(message)
+        .digest('hex');
 
-      const expectedShopId = this.configService.get<string>('YOOKASSA_SHOP_ID');
-      const expectedSecretKey = this.configService.get<string>('YOOKASSA_SECRET_KEY');
-
-      if (!expectedShopId || !expectedSecretKey) {
-        this.logger.error('YooKassa credentials not configured');
-        return false;
+      const isValid = this.constantTimeCompare(computedSignature, signature);
+      
+      if (!isValid) {
+        this.logger.warn(
+          `Signature mismatch. Method: ${httpMethod}, URL: ${url}, Expected: ${computedSignature.substring(0, 16)}..., Got: ${signature.substring(0, 16)}...`,
+        );
+      } else {
+        this.logger.debug(`Signature verified successfully for ${httpMethod} ${url}`);
       }
 
-      if (shopId !== expectedShopId || secretKey !== expectedSecretKey) {
-        return false;
-      }
-
-      return true;
+      return isValid;
     } catch (error) {
       this.logger.error(`Error verifying webhook signature: ${error.message}`);
       return false;
     }
   }
 
+  private constantTimeCompare(a: string, b: string): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+      result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+
+    return result === 0;
+  }
+
   @Post('/webhook')
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
+    @Req() req: any,
     @Body() webhookData: any,
-    @Headers('authorization') authHeader: string,
+    @Headers('webhook-signature') signature: string,
     @Headers('x-request-id') requestId?: string,
   ) {
-    if (!this.verifyWebhookSignature(authHeader)) {
+    const rawBody = req.rawBody || Buffer.from(JSON.stringify(webhookData), 'utf-8');
+    
+    const httpMethod = req.method || 'POST';
+    const url = req.path || req.url?.split('?')[0] || '/payment-webhook/webhook';
+
+    if (!this.verifyWebhookSignature(httpMethod, url, rawBody, signature)) {
       this.logger.warn(`Invalid webhook signature. Request ID: ${requestId || 'unknown'}`);
       throw new UnauthorizedException('Invalid webhook signature');
     }

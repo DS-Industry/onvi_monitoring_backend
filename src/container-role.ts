@@ -9,6 +9,7 @@ import { CronModule } from './cron/raw-data-cron/cron.module';
 import { PaymentOrchestratorModule } from './workers/payment-orchestrator/payment-orchestrator.module';
 import { ValidationError, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import * as express from 'express';
 
 export const rolesMapBootstrap = {
   app: async () => {
@@ -32,6 +33,22 @@ export const rolesMapBootstrap = {
 
     app.use(cookieParser());
 
+    app.use('/payment-webhook/webhook', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      if (req.headers['content-type']?.includes('application/json')) {
+        let data = '';
+        req.setEncoding('utf8');
+        req.on('data', (chunk: string) => {
+          data += chunk;
+        });
+        req.on('end', () => {
+          (req as any).rawBody = Buffer.from(data, 'utf-8');
+          next();
+        });
+      } else {
+        next();
+      }
+    });
+    
     // CSRF Protection temporarily disabled due to deprecated csurf package issues
     // TODO: Implement modern CSRF protection
 
