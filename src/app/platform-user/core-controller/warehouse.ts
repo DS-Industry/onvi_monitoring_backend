@@ -861,7 +861,7 @@ export class WarehouseController {
       }
 
       if (params.posId) {
-        await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
+        await this.warehouseValidateRules.getAllByPosId(params.posId);
         return await this.findMethodsWarehouseUseCase.getAllByPosId(
           params.posId,
           skip,
@@ -909,14 +909,24 @@ export class WarehouseController {
       const take = size;
 
       const [data, { count: total }] = await Promise.all([
-        this.findMethodsWarehouseUseCase.getAllByOrganizationId(params.organizationId, ability, params.posId, skip, take),
-        this.findMethodsWarehouseUseCase.getCountAllByOrganizationId(params.organizationId, ability, params.posId),
+        this.findMethodsWarehouseUseCase.getAllByOrganizationId(
+          params.organizationId,
+          ability,
+          params.posId,
+          skip,
+          take,
+        ),
+        this.findMethodsWarehouseUseCase.getCountAllByOrganizationId(
+          params.organizationId,
+          ability,
+          params.posId,
+        ),
       ]);
-      
+
       const totalPages = Math.ceil(total / size);
       const hasNext = page < totalPages;
       const hasPrevious = page > 1;
-      
+
       return {
         data,
         total,
@@ -955,7 +965,7 @@ export class WarehouseController {
       const { ability } = req;
 
       if (params.posId) {
-        await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
+        await this.warehouseValidateRules.getAllByPosId(params.posId);
         return await this.findMethodsWarehouseUseCase.getCountAllByPosId(
           params.posId,
         );

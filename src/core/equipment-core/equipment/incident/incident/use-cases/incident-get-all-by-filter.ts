@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IncidentByFilterResponseDto } from '@equipment/incident/incident/use-cases/dto/incident-by-filter-response.dto';
 import { FindMethodsIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-find-methods';
 import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
+import { User } from "@platform-user/user/domain/user";
 
 @Injectable()
 export class GetAllByFilterIncidentUseCase {
@@ -10,15 +11,15 @@ export class GetAllByFilterIncidentUseCase {
   ) {}
 
   async execute(
-    ability: any,
+    user: User,
     dateStart: Date,
     dateEnd: Date,
     posId?: number,
   ): Promise<IncidentByFilterResponseDto[]> {
     const response: IncidentByFilterResponseDto[] = [];
     const incidents = await this.findMethodsIncidentUseCase.getAllByFilter({
+      userId: user.id,
       posId: posId,
-      ability: posId ? undefined : ability,
       dateStart: dateStart,
       dateEnd: dateEnd,
     });

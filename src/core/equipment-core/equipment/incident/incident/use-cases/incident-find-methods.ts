@@ -11,13 +11,13 @@ export class FindMethodsIncidentUseCase {
     return await this.incidentRepository.findOneById(input);
   }
   async getAllByFilter(date: {
-    ability?: any;
+    userId: number;
     posId?: number;
     dateStart?: Date;
     dateEnd?: Date;
   }): Promise<IncidentWithInfoDataDto[]> {
     return await this.incidentRepository.findAllByFilter(
-      date.ability,
+      date.userId,
       date.posId,
       date.dateStart,
       date.dateEnd,

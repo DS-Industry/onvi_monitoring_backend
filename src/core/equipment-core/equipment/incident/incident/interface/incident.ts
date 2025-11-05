@@ -5,7 +5,7 @@ export abstract class IIncidentRepository {
   abstract create(input: Incident): Promise<Incident>;
   abstract findOneById(id: number): Promise<Incident>;
   abstract findAllByFilter(
-    ability?: any,
+    userId: number,
     posId?: number,
     dateStart?: Date,
     dateEnd?: Date,

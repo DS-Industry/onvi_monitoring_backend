@@ -302,15 +302,11 @@ export class WarehouseValidateRules {
     }
   }
 
-  public async getAllByPosId(posId: number, ability: any) {
+  public async getAllByPosId(posId: number) {
     const posCheck = await this.validateLib.posByIdExists(posId);
     if (posCheck.code !== 200) {
       throw new WarehouseException(WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE, posCheck.errorMessage);
     }
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      posCheck.object,
-    );
   }
 
   public async getOneByIdValidate(id: number, ability: any) {

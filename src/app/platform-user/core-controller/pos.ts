@@ -178,18 +178,17 @@ export class PosController {
 
   //Get all pos for permission user
   @Get('filter')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
+  @UseGuards(JwtGuard)
   @HttpCode(200)
   async filterViewPosByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
   ): Promise<PosFilterResponseDto[]> {
     try {
-      const { ability } = req;
+      const { user } = req;
 
       const poses = await this.findMethodsPosUseCase.getAllByFilter({
-        ability: ability,
+        userId: user.id,
         placementId: data?.placementId,
         organizationId: data?.organizationId
           ? Number(data.organizationId)

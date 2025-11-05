@@ -33,7 +33,7 @@ export class IncidentRepository extends IIncidentRepository {
   }
 
   public async findAllByFilter(
-    ability?: any,
+    userId: number,
     posId?: number,
     dateStart?: Date,
     dateEnd?: Date,
@@ -42,6 +42,15 @@ export class IncidentRepository extends IIncidentRepository {
 
     if (posId !== undefined) {
       where.posId = posId;
+    } else {
+      where.pos = {
+        ...where.pos,
+        usersPermissions: {
+          some: {
+            id: userId,
+          },
+        },
+      };
     }
 
     if (dateStart !== undefined && dateEnd !== undefined) {
@@ -51,19 +60,8 @@ export class IncidentRepository extends IIncidentRepository {
       };
     }
 
-    const finalWhere = ability
-      ? {
-          AND: [
-            {
-              pos: accessibleBy(ability).Pos,
-            },
-            where,
-          ],
-        }
-      : where;
-
     const incidents = await this.prisma.incident.findMany({
-      where: finalWhere,
+      where: where,
       include: {
         equipmentKnot: true,
         incidentName: true,

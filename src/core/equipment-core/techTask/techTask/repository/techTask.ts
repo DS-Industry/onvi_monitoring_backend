@@ -26,7 +26,7 @@ export class TechTaskRepository extends ITechTaskRepository {
           select: {
             name: true,
             surname: true,
-            id: true
+            id: true,
           },
         },
       },
@@ -50,14 +50,14 @@ export class TechTaskRepository extends ITechTaskRepository {
           select: {
             name: true,
             surname: true,
-            id: true
+            id: true,
           },
         },
         executor: {
           select: {
             name: true,
             surname: true,
-            id: true
+            id: true,
           },
         },
       },
@@ -88,17 +88,21 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (posId !== undefined) {
       where.posId = posId;
-    } else if (organizationId !== undefined) {
-      where.pos = {
-        organizationId: organizationId,
-      };
     } else {
       where.pos = {
+        ...where.pos,
         usersPermissions: {
           some: {
             id: userId,
           },
         },
+      };
+    }
+
+    if (organizationId !== undefined) {
+      where.pos = {
+        ...where.pos,
+        organizationId: organizationId,
       };
     }
 
@@ -112,7 +116,10 @@ export class TechTaskRepository extends ITechTaskRepository {
       }
     }
 
-    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+    if (
+      gteEndSpecifiedDate !== undefined ||
+      lteEndSpecifiedDate !== undefined
+    ) {
       where.endSpecifiedDate = {};
       if (gteEndSpecifiedDate !== undefined) {
         where.endSpecifiedDate.gte = gteEndSpecifiedDate;
@@ -149,12 +156,12 @@ export class TechTaskRepository extends ITechTaskRepository {
     if (tags !== undefined && tags.length > 0) {
       where.tags = {
         some: {
-          OR: tags.map(tag => ({
+          OR: tags.map((tag) => ({
             OR: [
               { name: { contains: tag, mode: 'insensitive' } },
-              { code: { contains: tag, mode: 'insensitive' } }
-            ]
-          }))
+              { code: { contains: tag, mode: 'insensitive' } },
+            ],
+          })),
         },
       };
     } else if (codeTag !== undefined) {
@@ -180,24 +187,24 @@ export class TechTaskRepository extends ITechTaskRepository {
       orderBy: {
         endSpecifiedDate: 'desc',
       },
-      include:{
+      include: {
         tags: true,
         pos: true,
         createdBy: {
           select: {
             name: true,
             surname: true,
-            id: true
+            id: true,
           },
         },
         executor: {
           select: {
             name: true,
             surname: true,
-            id: true
+            id: true,
           },
         },
-      }
+      },
     });
 
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
@@ -225,17 +232,21 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (posId !== undefined) {
       where.posId = posId;
-    } else if (organizationId !== undefined) {
-      where.pos = {
-        organizationId: organizationId,
-      };
     } else {
       where.pos = {
+        ...where.pos,
         usersPermissions: {
           some: {
             id: userId,
           },
         },
+      };
+    }
+
+    if (organizationId !== undefined) {
+      where.pos = {
+        ...where.pos,
+        organizationId: organizationId,
       };
     }
 
@@ -249,7 +260,10 @@ export class TechTaskRepository extends ITechTaskRepository {
       }
     }
 
-    if (gteEndSpecifiedDate !== undefined || lteEndSpecifiedDate !== undefined) {
+    if (
+      gteEndSpecifiedDate !== undefined ||
+      lteEndSpecifiedDate !== undefined
+    ) {
       where.endSpecifiedDate = {};
       if (gteEndSpecifiedDate !== undefined) {
         where.endSpecifiedDate.gte = gteEndSpecifiedDate;
@@ -287,12 +301,12 @@ export class TechTaskRepository extends ITechTaskRepository {
     if (tags !== undefined && tags.length > 0) {
       where.tags = {
         some: {
-          OR: tags.map(tag => ({
+          OR: tags.map((tag) => ({
             OR: [
               { name: { contains: tag, mode: 'insensitive' } },
-              { code: { contains: tag, mode: 'insensitive' } }
-            ]
-          }))
+              { code: { contains: tag, mode: 'insensitive' } },
+            ],
+          })),
         },
       };
     } else if (codeTag !== undefined) {
@@ -384,7 +398,11 @@ export class TechTaskRepository extends ITechTaskRepository {
     });
   }
 
-  public async findManyByIds(ids: number[], posId?: number, organizationId?: number): Promise<TechTask[]> {
+  public async findManyByIds(
+    ids: number[],
+    posId?: number,
+    organizationId?: number,
+  ): Promise<TechTask[]> {
     const where: any = {
       id: {
         in: ids,
