@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
 import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
 
@@ -22,6 +23,14 @@ export class FindMethodsMarketingCampaignUseCase {
 
   async getAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
     return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(filter);
+  }
+
+  async getConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null> {
+    return this.marketingCampaignRepository.findConditionsByCampaignId(campaignId);
+  }
+
+  async getConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
+    return this.marketingCampaignRepository.findConditionById(conditionId);
   }
 }
 

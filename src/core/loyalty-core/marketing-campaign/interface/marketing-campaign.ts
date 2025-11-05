@@ -3,6 +3,9 @@ import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/r
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
 import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
+import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
+import { MarketingCampaignConditionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
+import { CreateMarketingCampaignConditionDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-condition-create.dto';
 import { MarketingCampaignStatus } from '@prisma/client';
 
 export abstract class IMarketingCampaignRepository {
@@ -32,4 +35,12 @@ export abstract class IMarketingCampaignRepository {
   abstract updateStatus(id: number, status: MarketingCampaignStatus): Promise<void>;
 
   abstract findActiveCampaignsForClient(clientId: number, regionCode?: string | null): Promise<any[]>;
+
+  abstract findConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null>;
+
+  abstract createCondition(campaignId: number, data: CreateMarketingCampaignConditionDto): Promise<MarketingCampaignConditionResponseDto>;
+
+  abstract deleteCondition(conditionId: number): Promise<void>;
+
+  abstract findConditionById(conditionId: number): Promise<{ campaignId: number } | null>;
 }

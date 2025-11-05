@@ -38,6 +38,12 @@ import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 import { SaleDocumentFullResponse } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-full-response';
 import { FindMethodsSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-cases/saleItem-find-methods';
+import {
+  CheckAbilities,
+  CreateManagerPaperAbility,
+  ReadManagerPaperAbility, ReadWarehouseAbility, UpdateWarehouseAbility
+} from "@common/decorators/abilities.decorator";
+import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
 
 @Controller('sale')
 export class SaleController {
@@ -53,7 +59,8 @@ export class SaleController {
     private readonly findMethodsSaleItemUseCase: FindMethodsSaleItemUseCase,
   ) {}
   @Post('document')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateManagerPaperAbility())
   @HttpCode(201)
   async createDocument(
     @Request() req: any,
@@ -88,7 +95,8 @@ export class SaleController {
     }
   }
   @Get('document/:documentId')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadManagerPaperAbility())
   @HttpCode(201)
   async getDocument(
     @Request() req: any,
@@ -118,7 +126,8 @@ export class SaleController {
     }
   }
   @Get('documents')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadManagerPaperAbility())
   @HttpCode(201)
   async getDocuments(
     @Request() req: any,
@@ -155,7 +164,8 @@ export class SaleController {
     }
   }
   @Post('price')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
   @HttpCode(201)
   async createPrice(
     @Request() req: any,
@@ -213,7 +223,8 @@ export class SaleController {
     }
   }
   @Patch('price')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
   @HttpCode(201)
   async updatePrice(
     @Request() req: any,
@@ -238,7 +249,8 @@ export class SaleController {
     }
   }
   @Delete('price/many')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
   @HttpCode(201)
   async deleteManyPrice(
     @Request() req: any,
@@ -268,7 +280,8 @@ export class SaleController {
     }
   }
   @Get('price/:warehouseId')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(201)
   async getPriceTable(
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
