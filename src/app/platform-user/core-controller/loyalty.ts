@@ -1908,7 +1908,9 @@ export class LoyaltyController {
     }
   }
 
-  @Post('marketing-campaigns')
+  
+
+  @Post('marketing-campaign/create')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
@@ -1921,8 +1923,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramParticipantId: data.ltyProgramParticipantId,
-          posIds: data.posIds,
+          ltyProgramId: data.ltyProgramId,
         },
         ability,
       );
@@ -1945,7 +1946,7 @@ export class LoyaltyController {
     }
   }
 
-  @Put('marketing-campaigns/:id')
+  @Put('marketing-campaign/edit/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(200)

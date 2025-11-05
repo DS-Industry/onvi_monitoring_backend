@@ -24,17 +24,14 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaign = await this.prisma.marketingCampaign.create({
       data: {
         name: data.name,
-        status: data.status || MarketingCampaignStatus.DRAFT,
-        type: data.type,
+        status: MarketingCampaignStatus.DRAFT,
+        type: MarketingCampaignType.DISCOUNT,
         launchDate: data.launchDate,
         endDate: data.endDate,
         description: data.description,
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
-        discountType: data.type === MarketingCampaignType.DISCOUNT ? data.discountType || "PERCENTAGE" : null,
-        discountValue: data.type === MarketingCampaignType.DISCOUNT ? data.discountValue : null,
-        ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
         ltyProgram: true,
@@ -50,31 +47,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
             name: true,
           },
         },
+        promocodes: true,
       },
     });
-
-    await this.prisma.marketingCampaign.update({
-      where: { id: campaign.id },
-      data: {
-        poses: {
-          connect: data.posIds.map(posId => ({ id: posId })),
-        },
-      },
-    });
-
-    let promocode = null;
-    if (data.promocode) {
-      promocode = await this.prisma.lTYPromocode.create({
-        data: {
-          campaignId: campaign.id,
-          code: data.promocode || '',
-          promocodeType: 'CAMPAIGN',
-          discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
-          discountValue: data.discountValue,
-          maxUsage: data.maxUsage,
-        },
-      });
-    }
 
     const poses = await this.prisma.pos.findMany({
       where: {
@@ -91,6 +66,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     const posCount = poses.length;
     const posIds = poses.map(pos => pos.id);
+    const promocode = campaign.promocodes?.[0] || null;
 
     return {
       id: campaign.id,
