@@ -5,6 +5,9 @@ import { MarketingCampaignUpdateDto } from '@platform-user/core-controller/dto/r
 import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-response.dto';
 import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
+import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
+import { MarketingCampaignConditionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
+import { CreateMarketingCampaignConditionDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-condition-create.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { MarketingCampaignStatus, MarketingCampaignType } from '@prisma/client';
 
@@ -21,17 +24,14 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaign = await this.prisma.marketingCampaign.create({
       data: {
         name: data.name,
-        status: data.status || MarketingCampaignStatus.DRAFT,
-        type: data.type,
+        status: MarketingCampaignStatus.DRAFT,
+        type: MarketingCampaignType.DISCOUNT,
         launchDate: data.launchDate,
         endDate: data.endDate,
         description: data.description,
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
-        discountType: data.type === MarketingCampaignType.DISCOUNT ? data.discountType || "PERCENTAGE" : null,
-        discountValue: data.type === MarketingCampaignType.DISCOUNT ? data.discountValue : null,
-        ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
         ltyProgram: true,
@@ -47,31 +47,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
             name: true,
           },
         },
+        promocodes: true,
       },
     });
-
-    await this.prisma.marketingCampaign.update({
-      where: { id: campaign.id },
-      data: {
-        poses: {
-          connect: data.posIds.map(posId => ({ id: posId })),
-        },
-      },
-    });
-
-    let promocode = null;
-    if (data.promocode) {
-      promocode = await this.prisma.lTYPromocode.create({
-        data: {
-          campaignId: campaign.id,
-          code: data.promocode || '',
-          promocodeType: 'CAMPAIGN',
-          discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
-          discountValue: data.discountValue,
-          maxUsage: data.maxUsage,
-        },
-      });
-    }
 
     const poses = await this.prisma.pos.findMany({
       where: {
@@ -88,6 +66,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     const posCount = poses.length;
     const posIds = poses.map(pos => pos.id);
+    const promocode = campaign.promocodes?.[0] || null;
 
     return {
       id: campaign.id,
@@ -674,5 +653,157 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     }
 
     return availableCampaigns;
+  }
+
+  async findConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null> {
+    const campaign = await this.prisma.marketingCampaign.findUnique({
+      where: { id: campaignId },
+      select: { id: true },
+    });
+
+    if (!campaign) {
+      return null;
+    }
+
+    const conditions = await this.prisma.marketingCampaignCondition.findMany({
+      where: { campaignId },
+      include: {
+        benefit: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        promocode: {
+          select: {
+            id: true,
+            code: true,
+          },
+        },
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    });
+
+    return {
+      campaignId,
+      conditions: conditions.map(condition => ({
+        id: condition.id,
+        type: condition.type as any,
+        order: condition.order,
+        startTime: condition.startTime?.toISOString(),
+        endTime: condition.endTime?.toISOString(),
+        weekdays: condition.weekdays.length > 0 ? (condition.weekdays as any) : undefined,
+        visitCount: condition.visitCount ?? undefined,
+        minAmount: condition.minAmount ? Number(condition.minAmount) : undefined,
+        promocodeId: condition.promocodeId ?? undefined,
+        promocode: condition.promocode ? {
+          id: condition.promocode.id,
+          code: condition.promocode.code,
+        } : undefined,
+        benefitId: condition.benefitId ?? undefined,
+        benefit: condition.benefit ? {
+          id: condition.benefit.id,
+          name: condition.benefit.name,
+        } : undefined,
+      })),
+    };
+  }
+
+  async createCondition(campaignId: number, data: CreateMarketingCampaignConditionDto): Promise<MarketingCampaignConditionResponseDto> {
+    const campaign = await this.prisma.marketingCampaign.findUnique({
+      where: { id: campaignId },
+      select: { id: true },
+    });
+
+    if (!campaign) {
+      throw new Error('Marketing campaign not found');
+    }
+
+    const conditionData: any = {
+      campaignId,
+      type: data.type,
+      order: data.order ?? 0,
+    };
+
+    if (data.type === 'TIME_RANGE') {
+      conditionData.startTime = data.startTime;
+      conditionData.endTime = data.endTime;
+    } else if (data.type === 'WEEKDAY') {
+      conditionData.weekdays = data.weekdays || [];
+    } else if (data.type === 'VISIT_COUNT') {
+      conditionData.visitCount = data.visitCount;
+    } else if (data.type === 'PURCHASE_AMOUNT') {
+      conditionData.minAmount = data.minAmount;
+      conditionData.maxAmount = data.maxAmount;
+    } else if (data.type === 'PROMOCODE_ENTRY') {
+      conditionData.promocodeId = data.promocodeId;
+    } else if (data.type === 'EVENT') {
+      conditionData.benefitId = data.benefitId;
+    }
+
+    const condition = await this.prisma.marketingCampaignCondition.create({
+      data: conditionData,
+      include: {
+        benefit: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        promocode: {
+          select: {
+            id: true,
+            code: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: condition.id,
+      type: condition.type as any,
+      order: condition.order,
+      startTime: condition.startTime?.toISOString(),
+      endTime: condition.endTime?.toISOString(),
+      weekdays: condition.weekdays.length > 0 ? (condition.weekdays as any) : undefined,
+      visitCount: condition.visitCount ?? undefined,
+      minAmount: condition.minAmount ? Number(condition.minAmount) : undefined,
+      promocodeId: condition.promocodeId ?? undefined,
+      promocode: condition.promocode ? {
+        id: condition.promocode.id,
+        code: condition.promocode.code,
+      } : undefined,
+      benefitId: condition.benefitId ?? undefined,
+      benefit: condition.benefit ? {
+        id: condition.benefit.id,
+        name: condition.benefit.name,
+      } : undefined,
+    };
+  }
+
+  async deleteCondition(conditionId: number): Promise<void> {
+    const condition = await this.prisma.marketingCampaignCondition.findUnique({
+      where: { id: conditionId },
+      select: { id: true, campaignId: true },
+    });
+
+    if (!condition) {
+      throw new Error('Marketing campaign condition not found');
+    }
+
+    await this.prisma.marketingCampaignCondition.delete({
+      where: { id: conditionId },
+    });
+  }
+
+  async findConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
+    const condition = await this.prisma.marketingCampaignCondition.findUnique({
+      where: { id: conditionId },
+      select: { campaignId: true },
+    });
+
+    return condition ? { campaignId: condition.campaignId } : null;
   }
 }

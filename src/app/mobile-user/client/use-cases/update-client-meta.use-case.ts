@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IClientMetaRepository } from '@loyalty/mobile-user/client/interfaces/clientMeta';
 import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
 import { ClientMetaUpdateDto } from '../controller/dto/client-meta-update.dto';
+import { ClientMetaNotFoundExceptions } from '@mobile-user/shared/exceptions/clinet.exceptions';
 
 @Injectable()
 export class UpdateClientMetaUseCase {
@@ -10,7 +11,7 @@ export class UpdateClientMetaUseCase {
   async execute(dto: ClientMetaUpdateDto): Promise<ClientMeta> {
     const existingMeta = await this.clientMetaRepository.findOneById(dto.metaId);
     if (!existingMeta) {
-      throw new Error('Meta not found');
+      throw new ClientMetaNotFoundExceptions(dto.metaId);
     }
 
     if (dto.deviceId !== undefined) existingMeta.deviceId = dto.deviceId;

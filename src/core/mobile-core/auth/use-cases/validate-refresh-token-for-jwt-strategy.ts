@@ -3,7 +3,7 @@ import { ITokenService } from '../interfaces/token-service';
 import { IClientAuthRepository } from '../interfaces/client-auth-repository';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { UserStatus } from '../domain/user-status';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 export interface ValidateRefreshTokenForJwtStrategyRequest {
   refreshToken: string;
@@ -37,7 +37,7 @@ export class ValidateRefreshTokenForJwtStrategyUseCase {
       throw new Error('Client not found');
     }
 
-    if (client.status !== UserStatus.ACTIVE) {
+    if (client.status !== StatusUser.ACTIVE) {
       throw new Error('Client account is not active');
     }
 

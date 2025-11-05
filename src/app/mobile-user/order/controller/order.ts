@@ -1,0 +1,206 @@
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { CustomHttpException } from '@exception/custom-http.exception';
+import { BaseException } from '@infra/exceptions/base.exception';
+import { CreateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-create';
+import { GetMobileOrderByIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-id';
+import { UpdateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-update';
+import { GetMobileOrderByTransactionIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
+import { IPosService } from '@infra/pos/interface/pos.interface';
+import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
+import { RegisterPaymentDto } from './dto/register-payment.dto';
+import { OrderStatus } from '@loyalty/order/domain/enums';
+
+@Controller('order')
+export class OrderController {
+  constructor(
+    private readonly createMobileOrderUseCase: CreateMobileOrderUseCase,
+    private readonly getMobileOrderByIdUseCase: GetMobileOrderByIdUseCase,
+    private readonly updateMobileOrderUseCase: UpdateMobileOrderUseCase,
+    private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
+    private readonly posService: IPosService,
+    private readonly registerPaymentUseCase: RegisterPaymentUseCase, 
+  ) {}
+  @UseGuards(JwtGuard)
+  @Post('create')
+  @HttpCode(201)
+  async createOrder(@Body() data: CreateOrderDto, @Req() req: any) {
+    try {
+      const { user } = req;
+
+      return await this.createMobileOrderUseCase.execute({
+        sum: data.sum,
+        sumBonus: data.sumBonus,
+        carWashId: data.carWashId,
+        cardMobileUserId: user.props.id,
+        carWashDeviceId: data.carWashDeviceId,
+        bayType: data?.bayType ?? null,
+        promoCodeId: data?.promoCodeId ?? null,
+        rewardPointsUsed: data.rewardPointsUsed ?? 0,
+      });
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Internal server error',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getOrderById(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
+    try {
+      const { user } = req;
+      return await this.getMobileOrderByIdUseCase.execute({
+        orderId: id,
+        clientId: user.clientId,
+      });
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Order not found',
+        code: HttpStatus.NOT_FOUND,
+      });
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('status/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateOrderStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateOrderStatusDto,
+    @Req() req: any,
+  ) {
+    try {
+      const { user } = req;
+      await this.updateMobileOrderUseCase.execute({
+        orderId: id,
+        clientId: user.clientId,
+        status: data.status as OrderStatus,
+      });
+      return { message: 'Order status updated successfully' };
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Internal server error',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @Get('transaction/:transactionId')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  async getOrderByTransactionId(
+    @Param('transactionId') transactionId: string,
+    @Req() req: any,
+  ) {
+    try {
+      const { user } = req;
+      return await this.getMobileOrderByTransactionIdUseCase.execute({
+        transactionId,
+        clientId: user.clientId,
+      });
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Order not found',
+        code: HttpStatus.NOT_FOUND,
+      });
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('register')
+  @HttpCode(201)
+  async registerPayment(@Body() data: RegisterPaymentDto) {
+    try {
+      return await this.registerPaymentUseCase.execute(data);
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Internal server error',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @Get('ping')
+  @UseGuards(JwtGuard)
+  async pingCarWash(@Query() query: any) {
+    const res = await this.posService.ping({
+      posId: Number(query.carWashId),
+      carWashDeviceId: Number(query.carWashDeviceId),
+      type: query?.bayType ?? null,
+    });
+    
+    return res;
+  }
+
+  @Get('/latest')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  async getLatestCarwash(@Req() request: any, @Query() query: any) {
+    // TODO
+    return {
+      message: 'Get latest carwash - needs implementation',
+      query,
+    };
+  }
+}
+

@@ -1,4 +1,4 @@
-import { StatusUser, ContractType } from '@prisma/client';
+import { StatusUser, ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 export class ClientResponseDto {
   id: number;

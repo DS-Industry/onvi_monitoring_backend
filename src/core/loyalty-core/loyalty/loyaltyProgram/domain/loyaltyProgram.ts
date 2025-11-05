@@ -1,5 +1,5 @@
 import { BaseEntity } from '@utils/entity';
-import { LTYProgramStatus } from "@prisma/client";
+import { LTYProgramStatus } from './enums';
 
 export type BonusBurnoutType = 'year' | 'month' | 'custom' | 'never';
 

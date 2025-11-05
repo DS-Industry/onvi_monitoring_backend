@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IOtpService } from '../interfaces/otp-service';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { UserStatus } from '../domain/user-status';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class ValidateClientForLocalStrategyUseCase {
@@ -23,11 +23,11 @@ export class ValidateClientForLocalStrategyUseCase {
       return { register: true };
     }
 
-    if (client.status === UserStatus.BLOCKED || client.status === UserStatus.DELETED) {
+    if (client.status === StatusUser.BLOCKED || client.status === StatusUser.DELETED) {
       throw new Error('Client account is blocked or deleted');
     }
 
-    if (client.status !== UserStatus.ACTIVE) {
+    if (client.status !== StatusUser.ACTIVE) {
       throw new Error('Client account is not active');
     }
 

@@ -73,6 +73,7 @@ import { FindMethodsOrganizationUseCase } from '@organization/organization/use-c
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { OrderCreateDto } from '@platform-user/core-controller/dto/receive/orderCreate';
+import { PlatformType, OrderStatus, ContractType, SendAnswerStatus, ExecutionStatus } from '@loyalty/order/domain/enums';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { BenefitUpdateDto } from '@platform-user/core-controller/dto/receive/benefit-update.dto';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
@@ -109,10 +110,15 @@ import { MarketingCampaignCreateDto } from './dto/receive/marketing-campaign-cre
 import { MarketingCampaignUpdateDto } from './dto/receive/marketing-campaign-update.dto';
 import { MarketingCampaignResponseDto } from './dto/response/marketing-campaign-response.dto';
 import { MarketingCampaignsPaginatedResponseDto } from './dto/response/marketing-campaigns-paginated-response.dto';
+import { MarketingCampaignConditionsResponseDto } from './dto/response/marketing-campaign-condition-response.dto';
+import { MarketingCampaignConditionResponseDto } from './dto/response/marketing-campaign-condition-response.dto';
+import { CreateMarketingCampaignConditionDto } from './dto/receive/marketing-campaign-condition-create.dto';
 import { MarketingCampaignsFilterDto } from './dto/receive/marketing-campaigns-filter.dto';
 import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-create';
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
+import { CreateMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-create';
+import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-delete';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
 import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
@@ -184,6 +190,8 @@ export class LoyaltyController {
     private readonly createMarketingCampaignUseCase: CreateMarketingCampaignUseCase,
     private readonly updateMarketingCampaignUseCase: UpdateMarketingCampaignUseCase,
     private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
+    private readonly createMarketingCampaignConditionUseCase: CreateMarketingCampaignConditionUseCase,
+    private readonly deleteMarketingCampaignConditionUseCase: DeleteMarketingCampaignConditionUseCase,
     private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
@@ -244,7 +252,15 @@ export class LoyaltyController {
     @Body() data: OrderCreateDto,
   ): Promise<any> {
     try {
-      return await this.handlerOrderUseCase.execute(data);
+      const handlerData = {
+        ...data,
+        platform: data.platform as PlatformType,
+        orderStatus: data.orderStatus as OrderStatus,
+        typeMobileUser: data.typeMobileUser ? data.typeMobileUser as ContractType : undefined,
+        sendAnswerStatus: data.sendAnswerStatus ? data.sendAnswerStatus as SendAnswerStatus : undefined,
+        executionStatus: data.executionStatus ? data.executionStatus as ExecutionStatus : undefined,
+      };
+      return await this.handlerOrderUseCase.execute(handlerData);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1151,6 +1167,9 @@ export class LoyaltyController {
 
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
+
+      console.log("card => ", card)
+
       return {
         id: client.id,
         name: client.name,
@@ -1766,7 +1785,132 @@ export class LoyaltyController {
     }
   }
 
-  @Post('marketing-campaigns')
+  @Get('marketing-campaigns/:id/conditions')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getMarketingCampaignConditions(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<MarketingCampaignConditionsResponseDto> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        id,
+        ability,
+      );
+
+      const conditions = await this.findMethodsMarketingCampaignUseCase.getConditionsByCampaignId(id);
+
+      if (!conditions) {
+        throw new LoyaltyException(
+          404,
+          'Marketing campaign not found',
+        );
+      }
+
+      return conditions;
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('marketing-campaigns/:id/conditions')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(201)
+  async createMarketingCampaignCondition(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) campaignId: number,
+    @Body() data: CreateMarketingCampaignConditionDto,
+  ): Promise<MarketingCampaignConditionResponseDto> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        campaignId,
+        ability,
+      );
+
+      return await this.createMarketingCampaignConditionUseCase.execute(campaignId, data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('marketing-campaigns/conditions/:conditionId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async deleteMarketingCampaignCondition(
+    @Request() req: any,
+    @Param('conditionId', ParseIntPipe) conditionId: number,
+  ): Promise<{ message: string }> {
+    try {
+      const { ability } = req;
+
+      const condition = await this.findMethodsMarketingCampaignUseCase.getConditionById(conditionId);
+
+      if (!condition) {
+        throw new LoyaltyException(
+          404,
+          'Marketing campaign condition not found',
+        );
+      }
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        condition.campaignId,
+        ability,
+      );
+
+      await this.deleteMarketingCampaignConditionUseCase.execute(conditionId);
+
+      return { message: 'Condition deleted successfully' };
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  
+
+  @Post('marketing-campaign/create')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
@@ -1779,8 +1923,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramParticipantId: data.ltyProgramParticipantId,
-          posIds: data.posIds,
+          ltyProgramId: data.ltyProgramId,
         },
         ability,
       );
@@ -1803,7 +1946,7 @@ export class LoyaltyController {
     }
   }
 
-  @Put('marketing-campaigns/:id')
+  @Put('marketing-campaign/edit/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(200)

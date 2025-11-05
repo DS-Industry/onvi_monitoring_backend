@@ -1,0 +1,9 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src/workers/payment-orchestrator",
+  "entryFile": "payment-orchestrator",
+  "compilerOptions": {
+    "watchAssets": true
+  }
+}
+

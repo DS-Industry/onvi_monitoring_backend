@@ -4,10 +4,9 @@ import { Pos } from '@pos/pos/domain/pos';
 import { LoyaltyCardOperResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardOper-response.dto';
 import {
   LTYBenefitType,
-  OrderStatus,
-  PlatformType,
   StatusUser,
 } from '@prisma/client';
+import { OrderStatus, PlatformType } from '@loyalty/order/domain/enums';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { FindMethodsOrderUseCase } from "@loyalty/order/use-cases/order-find-methods";

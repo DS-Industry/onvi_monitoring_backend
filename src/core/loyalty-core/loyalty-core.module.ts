@@ -1,9 +1,14 @@
-import { Module, Provider } from '@nestjs/common';
+import { Module, Provider, forwardRef } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma/prisma.module';
 import { FileModule } from '@libs/file/module';
 import { HttpModule } from '@nestjs/axios';
+import { PosModule } from '@infra/pos/pos.module';
 import { RedisService } from '@infra/cache/redis.service';
 import { BusinessCoreModule } from '@business-core/business-core.module';
+import { BullModule } from '@nestjs/bullmq';
+import { QueueModule } from '@infra/queue/queue.module';
+import { PaymentModule } from '../../app/payment/payment.module';
+import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
@@ -69,9 +74,13 @@ import { CreateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-
 import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-update';
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { MarketingCampaignStatusHandlerUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-status-handler';
+import { CreateMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-create';
+import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-delete';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
+import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
+import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
@@ -92,6 +101,23 @@ import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgr
 import { GetLoyaltyProgramTransactionAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-transaction-analytics';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { CreateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-create';
+import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-id';
+import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
+import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
+import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
+import { ITariffRepository } from './mobile-user/order/interface/tariff';
+import { TariffRepository } from './mobile-user/order/repository/tariff';
+import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-case';
+import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
+import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
+import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
+import {
+  OrderValidationService,
+  CashbackCalculationService,
+  FreeVacuumValidationService,
+  OrderStatusDeterminationService,
+} from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -108,9 +134,11 @@ const repositories: Provider[] = [
   OrderProvider,
   CorporateRepositoryProvider,
   MarketingCampaignRepositoryProvider,
+  PromoCodeRepositoryProvider,
   LoyaltyTierHistRepositoryProvider,
   LoyaltyProgramHubRequestRepositoryProvider,
   LoyaltyProgramParticipantRequestRepositoryProvider,
+  { provide: ITariffRepository, useClass: TariffRepository },
 ];
 
 const clientUseCase: Provider[] = [
@@ -204,6 +232,25 @@ const orderUseCase: Provider[] = [
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
   FindMethodsOrderUseCase,
+  RegisterPaymentUseCase,
+];
+
+const mobileOrderUseCase: Provider[] = [
+  CreateMobileOrderUseCase,
+  GetMobileOrderByIdUseCase,
+  UpdateMobileOrderUseCase,
+  GetMobileOrderByTransactionIdUseCase,
+  PromoCodeService,
+  StartPosUseCase,
+  CarWashLaunchUseCase,
+  CheckCarWashStartedUseCase,
+];
+
+const orderDomainServices: Provider[] = [
+  OrderValidationService,
+  CashbackCalculationService,
+  FreeVacuumValidationService,
+  OrderStatusDeterminationService,
 ];
 
 const corporateUseCase: Provider[] = [
@@ -222,6 +269,8 @@ const marketingCampaignUseCase: Provider[] = [
   UpdateMarketingCampaignUseCase,
   FindMethodsMarketingCampaignUseCase,
   MarketingCampaignStatusHandlerUseCase,
+  CreateMarketingCampaignConditionUseCase,
+  DeleteMarketingCampaignConditionUseCase,
 ];
 
 const redisProviders: Provider[] = [
@@ -229,7 +278,57 @@ const redisProviders: Provider[] = [
 ];
 
 @Module({
-  imports: [PrismaModule, FileModule, HttpModule, BusinessCoreModule],
+  imports: [
+    PrismaModule,
+    FileModule,
+    HttpModule,
+    BusinessCoreModule,
+    PosModule,
+    QueueModule,
+    forwardRef(() => PaymentModule),
+    BullModule.registerQueue(
+      {
+        configKey: 'worker',
+        name: 'pos-process',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+        },
+      },
+      {
+        configKey: 'worker',
+        name: 'order-finished',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 1,
+        },
+      },
+      {
+        configKey: 'worker',
+        name: 'car-wash-launch',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+        },
+      },
+      {
+        configKey: 'worker',
+        name: 'check-car-wash-started',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 5000, 
+          },
+        },
+      }
+    ),
+  ],
   providers: [
     ...repositories,
     ...clientUseCase,
@@ -243,10 +342,13 @@ const redisProviders: Provider[] = [
     ...cardBonusOper,
     ...cardBonusOperType,
     ...orderUseCase,
+    ...mobileOrderUseCase,
     ...corporateUseCase,
     ...marketingCampaignUseCase,
     ...loyaltyTierHistUseCase,
+    ...orderDomainServices,
     ...redisProviders,
+    StartPosProcess,
   ],
   exports: [
     ...repositories,
@@ -259,6 +361,7 @@ const redisProviders: Provider[] = [
     ...benefitActionUseCase,
     ...cardBonusOper,
     ...orderUseCase,
+    ...mobileOrderUseCase,
     ...cardBonusBank,
     ...corporateUseCase,
     ...marketingCampaignUseCase,

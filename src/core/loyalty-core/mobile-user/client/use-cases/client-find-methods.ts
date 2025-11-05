@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IClientRepository } from '@loyalty/mobile-user/client/interfaces/client';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { ContractType } from '@prisma/client';
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class FindMethodsClientUseCase {

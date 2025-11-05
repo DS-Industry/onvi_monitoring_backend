@@ -3,7 +3,11 @@ import { IOrderRepository } from '@loyalty/order/interface/order';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Order } from '@loyalty/order/domain/order';
 import { PrismaOrderMapper } from '@db/mapper/prisma-order-mapper';
-import { OrderStatus, PlatformType, ContractType } from '@prisma/client';
+import {
+  OrderStatus,
+  PlatformType,
+  ContractType,
+} from '@loyalty/order/domain/enums';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {
@@ -15,6 +19,13 @@ export class OrderRepository extends IOrderRepository {
     const orderEntity = PrismaOrderMapper.toPrisma(input);
     const order = await this.prisma.lTYOrder.create({
       data: orderEntity,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return PrismaOrderMapper.toDomain(order);
   }
@@ -23,6 +34,29 @@ export class OrderRepository extends IOrderRepository {
     const order = await this.prisma.lTYOrder.findFirst({
       where: {
         id,
+      },
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
+    });
+    return PrismaOrderMapper.toDomain(order);
+  }
+
+  public async findOneByTransactionId(transactionId: string): Promise<Order> {
+    const order = await this.prisma.lTYOrder.findFirst({
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
+      where: {
+        transactionId,
       },
     });
     return PrismaOrderMapper.toDomain(order);
@@ -36,6 +70,7 @@ export class OrderRepository extends IOrderRepository {
     orderStatus?: OrderStatus,
     carWashDeviceId?: number,
     cardId?: number,
+    deviceTypeCode?: string,
   ): Promise<Order[]> {
     const where: any = {};
 
@@ -64,8 +99,23 @@ export class OrderRepository extends IOrderRepository {
       where.cardId = cardId;
     }
 
+    if (deviceTypeCode !== undefined) {
+      where.carWashDevice = {
+        carWashDeviceType: {
+          code: deviceTypeCode,
+        },
+      } as any;
+    }
+
     const orders = await this.prisma.lTYOrder.findMany({
       where,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
   }
@@ -77,7 +127,57 @@ export class OrderRepository extends IOrderRepository {
         id: input.id,
       },
       data: orderEntity,
+      include: {
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+          },
+        }
+      },
     });
     return PrismaOrderMapper.toDomain(order);
+  }
+
+  public async updateStatusIf(
+    id: number,
+    fromStatus: OrderStatus,
+    toStatus: OrderStatus,
+  ): Promise<Order | null> {
+    const result = await this.prisma.lTYOrder.updateMany({
+      where: {
+        id,
+        orderStatus: fromStatus,
+      },
+      data: {
+        orderStatus: toStatus,
+      },
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    return await this.findOneById(id);
+  }
+
+  public async updateStatusTo(
+    id: number,
+    newStatus: OrderStatus,
+  ): Promise<Order | null> {
+    const result = await this.prisma.lTYOrder.updateMany({
+      where: {
+        id,
+        orderStatus: { not: newStatus },
+      },
+      data: {
+        orderStatus: newStatus,
+      },
+    });
+
+    if (result.count === 0) {
+      return null;
+    }
+
+    return await this.findOneById(id);
   }
 }

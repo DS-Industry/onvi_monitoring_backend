@@ -1,4 +1,4 @@
-import { ExecutionStatus, OrderStatus, PlatformType, SendAnswerStatus, ContractType } from "@prisma/client";
+import { ExecutionStatus, OrderStatus, PlatformType, SendAnswerStatus, ContractType } from "@loyalty/order/domain/enums";
 
 export class HandlerDto {
   transactionId: string;

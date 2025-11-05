@@ -3,6 +3,7 @@ import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/
 import { IClientMetaRepository } from '@loyalty/mobile-user/client/interfaces/clientMeta';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
+import { ClientNotFoundExceptions } from '@mobile-user/shared/exceptions/clinet.exceptions';
 
 @Injectable()
 export class GetCurrentAccountUseCase {
@@ -15,9 +16,15 @@ export class GetCurrentAccountUseCase {
     client: Client;
     meta?: ClientMeta;
   }> {
-    const client = await this.findMethodsClientUseCase.getById(clientId);
+    let client: Client;
+    try {
+      client = await this.findMethodsClientUseCase.getById(clientId);
+    } catch (error) {
+      throw new ClientNotFoundExceptions(`Client with id ${clientId}`);
+    }
+
     if (!client) {
-      throw new Error('Client not found');
+      throw new ClientNotFoundExceptions(`Client with id ${clientId}`);
     }
 
     const meta = await this.clientMetaRepository.findOneByClientId(clientId);

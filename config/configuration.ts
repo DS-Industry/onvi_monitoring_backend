@@ -10,6 +10,8 @@ export const configuration = () => ({
   appNameReportWorker: process.env.APP_NAME_REPORT_WORKER,
   appNameDataRawWorker: process.env.APP_NAME_DATA_RAW_WORKER,
   appNameCron: process.env.APP_NAME_CRON,
+  appNamePaymentOrchestrator: process.env.APP_NAME_PAYMENT_ORCHESTRATOR,
+  portPaymentOrchestrator: parseInt(process.env.APP_PORT_PAYMENT_ORCHESTRATOR, 10) || 3003,
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpirationTime: process.env.JWT_EXPIRATION_TIME,

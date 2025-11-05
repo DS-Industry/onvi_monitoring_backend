@@ -14,14 +14,14 @@ import {
   Request,
 } from '@nestjs/common';
 import { GetByIdClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-get-by-id';
-import { CreateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-create';
-import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { DeleteClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-delete';
 import { UpdateAccountUseCase } from '../use-cases/update-account.use-case';
 import { GetCurrentAccountUseCase } from '../use-cases/get-current-account.use-case';
 import { CreateClientMetaUseCase } from '../use-cases/create-client-meta.use-case';
 import { UpdateClientMetaUseCase } from '../use-cases/update-client-meta.use-case';
 import { GetActivePromotionsForClientUseCase } from '@loyalty/mobile-user/client/use-cases/get-active-promotions-for-client';
+import { CreateClientUseCaseWrapper } from '../use-cases/create-client.use-case';
+import { UpdateClientUseCaseWrapper } from '../use-cases/update-client.use-case';
 import { CreateClientDto } from './dto/client-create.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { AccountClientUpdateDto } from './dto/account-client-update.dto';
@@ -29,15 +29,14 @@ import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
-import { ContractType } from '@prisma/client';
 
 
 @Controller('client')
 export class ClientController {
   constructor(
     private readonly getClientByIdUseCase: GetByIdClientUseCase,
-    private readonly createClientUseCase: CreateClientUseCase,
-    private readonly updateClientUseCase: UpdateClientUseCase,
+    private readonly createClientUseCaseWrapper: CreateClientUseCaseWrapper,
+    private readonly updateClientUseCaseWrapper: UpdateClientUseCaseWrapper,
     private readonly deleteClientUseCase: DeleteClientUseCase,
     private readonly updateAccountUseCase: UpdateAccountUseCase,
     private readonly getCurrentAccountUseCase: GetCurrentAccountUseCase,
@@ -48,18 +47,7 @@ export class ClientController {
   @Post()
   @HttpCode(201)
   async createClient(@Body() createData: CreateClientDto): Promise<ClientResponseDto> {
-    const coreCreateData = {
-      name: createData.name,
-      phone: createData.phone,
-      email: createData.email,
-      gender: createData.gender,
-      contractType: createData.contractType || ContractType.INDIVIDUAL,
-      comment: createData.comment,
-      birthday: createData.birthday ? new Date(createData.birthday) : undefined,
-      placementId: createData.placementId,
-    };
-    
-    const client = await this.createClientUseCase.execute(coreCreateData);
+    const client = await this.createClientUseCaseWrapper.execute(createData);
     return new ClientResponseDto(client);
   }
 
@@ -139,17 +127,7 @@ export class ClientController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: UpdateClientDto,
   ): Promise<ClientResponseDto> {
-    const existingClient = await this.getClientByIdUseCase.execute(id);
-    
-    const coreUpdateData = {
-      name: updateData.name,
-      status: updateData.status,
-      avatar: updateData.avatar,
-      refreshTokenId: updateData.refreshTokenId,
-      email: updateData.email,
-    };
-    
-    const client = await this.updateClientUseCase.execute(coreUpdateData, existingClient);
+    const client = await this.updateClientUseCaseWrapper.execute(id, updateData);
     return new ClientResponseDto(client);
   }
 

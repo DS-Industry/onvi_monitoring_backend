@@ -644,15 +644,16 @@ model PromocodeTransaction {
 }
 
 model LTYBenefit {
-  id                  Int                   @id @default(autoincrement())
+  id                  Int                          @id @default(autoincrement())
   name                String
   bonus               Int
   ltyProgramId        Int?
   benefitActionTypeId Int?
-  benefitType         LTYBenefitType        @default(CASHBACK)
-  benefitActionType   LTYBenefitActionType? @relation(fields: [benefitActionTypeId], references: [id])
-  cardTiers           LTYCardTier[]         @relation("LTYBenefitToLTYCardTier")
-  ltyProgram          LTYProgram?           @relation(fields: [ltyProgramId], references: [id])
+  benefitType         LTYBenefitType               @default(CASHBACK)
+  benefitActionType   LTYBenefitActionType?        @relation(fields: [benefitActionTypeId], references: [id])
+  cardTiers           LTYCardTier[]                @relation("LTYBenefitToLTYCardTier")
+  ltyProgram          LTYProgram?                  @relation(fields: [ltyProgramId], references: [id])
+  campaignConditions  MarketingCampaignCondition[]
 }
 
 model LTYBenefitActionType {
@@ -808,7 +809,7 @@ model LTYBonusOperType {
 
 model LTYOrder {
   id                 Int                 @id @default(autoincrement())
-  transactionId      String
+  transactionId      String?
   sumFull            Int
   sumReal            Int
   sumBonus           Int
@@ -1475,29 +1476,30 @@ model MNGSaleItem {
 }
 
 model MarketingCampaign {
-  id                      Int                      @id @default(autoincrement())
+  id                      Int                          @id @default(autoincrement())
   name                    String
-  status                  MarketingCampaignStatus  @default(DRAFT)
+  status                  MarketingCampaignStatus      @default(DRAFT)
   type                    MarketingCampaignType
   launchDate              DateTime
   endDate                 DateTime?
   description             String?
   ltyProgramId            Int?
-  createdAt               DateTime                 @default(now())
-  updatedAt               DateTime                 @updatedAt
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
   createdById             Int
   updatedById             Int
   discountType            MarketingDiscountType?
   discountValue           Float?
   ltyProgramParticipantId Int?
   promocodes              LTYPromocode[]
-  createdBy               User                     @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
-  ltyProgram              LTYProgram?              @relation(fields: [ltyProgramId], references: [id])
-  ltyProgramParticipant   LTYProgramParticipant?   @relation(fields: [ltyProgramParticipantId], references: [id])
-  updatedBy               User                     @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  conditions              MarketingCampaignCondition[]
+  createdBy               User                         @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  ltyProgram              LTYProgram?                  @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramParticipant   LTYProgramParticipant?       @relation(fields: [ltyProgramParticipantId], references: [id])
+  updatedBy               User                         @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage           MarketingCampaignUsage[]
-  ltyUsers                LTYUser[]                @relation("MarketingCampaignToLTYUser")
-  poses                   Pos[]                    @relation("MarketingCampaignToPos")
+  ltyUsers                LTYUser[]                    @relation("MarketingCampaignToLTYUser")
+  poses                   Pos[]                        @relation("MarketingCampaignToPos")
 
   @@index([status])
   @@index([type])
@@ -1507,36 +1509,37 @@ model MarketingCampaign {
 }
 
 model LTYPromocode {
-  id                 Int                      @id @default(autoincrement())
+  id                 Int                          @id @default(autoincrement())
   campaignId         Int?
-  code               String                   @unique
+  code               String                       @unique
   promocodeType      PromocodeType
   personalUserId     Int?
   discountType       DiscountType
-  discountValue      Decimal                  @db.Decimal(10, 2)
-  minOrderAmount     Decimal?                 @db.Decimal(10, 2)
-  maxDiscountAmount  Decimal?                 @db.Decimal(10, 2)
+  discountValue      Decimal                      @db.Decimal(10, 2)
+  minOrderAmount     Decimal?                     @db.Decimal(10, 2)
+  maxDiscountAmount  Decimal?                     @db.Decimal(10, 2)
   maxUsage           Int?
-  maxUsagePerUser    Int                      @default(1)
-  currentUsage       Int                      @default(0)
-  validFrom          DateTime                 @default(now())
+  maxUsagePerUser    Int                          @default(1)
+  currentUsage       Int                          @default(0)
+  validFrom          DateTime                     @default(now())
   validUntil         DateTime?
-  isActive           Boolean                  @default(true)
+  isActive           Boolean                      @default(true)
   createdByManagerId Int?
   createdReason      String?
   usageRestrictions  Json?
   organizationId     Int?
   posId              Int?
   placementId        Int?
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
-  campaign           MarketingCampaign?       @relation(fields: [campaignId], references: [id])
-  createdByManager   User?                    @relation("PromocodeCreatedBy", fields: [createdByManagerId], references: [id])
-  organization       Organization?            @relation(fields: [organizationId], references: [id])
-  personalUser       LTYUser?                 @relation(fields: [personalUserId], references: [id])
-  placement          Placement?               @relation(fields: [placementId], references: [id])
-  pos                Pos?                     @relation(fields: [posId], references: [id])
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
+  campaign           MarketingCampaign?           @relation(fields: [campaignId], references: [id])
+  createdByManager   User?                        @relation("PromocodeCreatedBy", fields: [createdByManagerId], references: [id])
+  organization       Organization?                @relation(fields: [organizationId], references: [id])
+  personalUser       LTYUser?                     @relation(fields: [personalUserId], references: [id])
+  placement          Placement?                   @relation(fields: [placementId], references: [id])
+  pos                Pos?                         @relation(fields: [posId], references: [id])
   usage              MarketingCampaignUsage[]
+  campaignConditions MarketingCampaignCondition[] @relation("CampaignConditionPromocode")
 
   @@index([code, isActive])
   @@index([campaignId, promocodeType])
@@ -1565,6 +1568,27 @@ model MarketingCampaignUsage {
   @@index([ltyUserId])
   @@index([usedAt])
   @@index([promocodeId])
+}
+
+model MarketingCampaignCondition {
+  id          Int                            @id @default(autoincrement())
+  campaignId  Int
+  type        MarketingCampaignConditionType
+  order       Int                            @default(0)
+  startTime   DateTime?
+  endTime     DateTime?
+  weekdays    Weekday[]
+  visitCount  Int?
+  minAmount   Decimal?                       @db.Decimal(10, 2)
+  promocodeId Int?
+  benefitId   Int?
+  benefit     LTYBenefit?                    @relation(fields: [benefitId], references: [id])
+  promocode   LTYPromocode?                  @relation("CampaignConditionPromocode", fields: [promocodeId], references: [id])
+  campaign    MarketingCampaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([type])
+  @@index([campaignId, order])
 }
 
 enum LTYProgramStatus {
@@ -1627,6 +1651,12 @@ enum OrderStatus {
   CREATED
   COMPLETED
   CANCELED
+  FREE_PROCESSING
+  PAYED
+  FAILED
+  POS_PROCESSED
+  PAYMENT_PROCESSING
+  WAITING_PAYMENT
 }
 
 enum ExecutionStatus {
@@ -1908,4 +1938,23 @@ enum DiscountType {
   PERCENTAGE
   FIXED_AMOUNT
   FREE_SERVICE
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum MarketingCampaignConditionType {
+  TIME_RANGE
+  WEEKDAY
+  EVENT
+  VISIT_COUNT
+  PURCHASE_AMOUNT
+  PROMOCODE_ENTRY
 }

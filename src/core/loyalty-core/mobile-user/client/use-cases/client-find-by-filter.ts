@@ -3,7 +3,7 @@ import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/
 import { ClientFilterDto } from '@loyalty/mobile-user/client/use-cases/dto/client-filter.dto';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { ClientPaginatedResponseDto } from '@platform-user/core-controller/dto/response/client-paginated-response.dto';
-import { ContractType } from '@prisma/client';
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class FindByFilterClientUseCase {
