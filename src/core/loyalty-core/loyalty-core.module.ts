@@ -110,8 +110,12 @@ import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-cas
 import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
 import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
-import { CarWashLaunchConsumer } from '@infra/handler/car-wash-launch/consumer/car-wash-launch.consumer';
-import { CheckCarWashStartedConsumer } from '@infra/handler/check-car-wash-started/consumer/check-car-wash-started.consumer';
+import {
+  OrderValidationService,
+  CashbackCalculationService,
+  FreeVacuumValidationService,
+  OrderStatusDeterminationService,
+} from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
   ClientRepositoryProvider,
@@ -240,6 +244,13 @@ const mobileOrderUseCase: Provider[] = [
   CheckCarWashStartedUseCase,
 ];
 
+const orderDomainServices: Provider[] = [
+  OrderValidationService,
+  CashbackCalculationService,
+  FreeVacuumValidationService,
+  OrderStatusDeterminationService,
+];
+
 const corporateUseCase: Provider[] = [
   CorporateFindByFilterUseCase,
   CorporateGetByIdUseCase,
@@ -331,6 +342,7 @@ const redisProviders: Provider[] = [
     ...corporateUseCase,
     ...marketingCampaignUseCase,
     ...loyaltyTierHistUseCase,
+    ...orderDomainServices,
     ...redisProviders,
     StartPosProcess,
   ],

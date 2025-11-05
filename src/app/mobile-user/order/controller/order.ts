@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CustomHttpException } from '@exception/custom-http.exception';
+import { BaseException } from '@infra/exceptions/base.exception';
 import { CreateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-create';
 import { GetMobileOrderByIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-id';
 import { UpdateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-update';
@@ -51,9 +52,17 @@ export class OrderController {
         promoCodeId: data?.promoCodeId ?? null,
         rewardPointsUsed: data.rewardPointsUsed ?? 0,
       });
-    } catch (e) {
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
       throw new CustomHttpException({
-        message: e.message,
+        message: e?.message ?? 'Internal server error',
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
@@ -72,9 +81,17 @@ export class OrderController {
         orderId: id,
         clientId: user.clientId,
       });
-    } catch (e) {
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
       throw new CustomHttpException({
-        message: e.message,
+        message: e?.message ?? 'Order not found',
         code: HttpStatus.NOT_FOUND,
       });
     }
@@ -96,9 +113,17 @@ export class OrderController {
         status: data.status as OrderStatus,
       });
       return { message: 'Order status updated successfully' };
-    } catch (e) {
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
       throw new CustomHttpException({
-        message: e.message,
+        message: e?.message ?? 'Internal server error',
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
@@ -117,9 +142,17 @@ export class OrderController {
         transactionId,
         clientId: user.clientId,
       });
-    } catch (e) {
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
       throw new CustomHttpException({
-        message: e.message,
+        message: e?.message ?? 'Order not found',
         code: HttpStatus.NOT_FOUND,
       });
     }
@@ -132,12 +165,12 @@ export class OrderController {
     try {
       return await this.registerPaymentUseCase.execute(data);
     } catch (e: any) {
-      if (e?.type && e?.innerCode) {
+      if (e instanceof BaseException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,
           message: e.message,
-          code: HttpStatus.UNPROCESSABLE_ENTITY,
+          code: e.getHttpStatus(),
         });
       }
       throw new CustomHttpException({

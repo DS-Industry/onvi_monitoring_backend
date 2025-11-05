@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
 import {
@@ -7,11 +7,20 @@ import {
   ContractType,
   OrderHandlerStatus,
 } from '@loyalty/order/domain/enums';
-import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
+import { DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
 import { ITariffRepository } from '../interface/tariff';
 import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
+import {
+  OrderValidationService,
+  CashbackCalculationService,
+  FreeVacuumValidationService,
+  OrderStatusDeterminationService,
+} from '@loyalty/order/domain/services';
+import {
+  CardNotFoundForOrderException,
+} from '@loyalty/order/domain/exceptions';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -33,10 +42,13 @@ export interface CreateMobileOrderResponse {
 export class CreateMobileOrderUseCase {
   constructor(
     private readonly orderRepository: IOrderRepository,
-    private readonly posService: IPosService,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
     private readonly tariffRepository: ITariffRepository,
+    private readonly orderValidationService: OrderValidationService,
+    private readonly cashbackCalculationService: CashbackCalculationService,
+    private readonly freeVacuumValidationService: FreeVacuumValidationService,
+    private readonly orderStatusDeterminationService: OrderStatusDeterminationService,
     @Inject(IFLOW_PRODUCER)
     private readonly flowProducer: IFlowProducer,
   ) {}
@@ -44,65 +56,47 @@ export class CreateMobileOrderUseCase {
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
-    const carWashDeviceId = request.carWashDeviceId
+    const carWashDeviceId = request.carWashDeviceId;
 
-    const ping = await this.posService.ping({
+    await this.orderValidationService.validatePosStatus({
       posId: request.carWashId,
       carWashDeviceId: carWashDeviceId,
-      type: request?.bayType ?? null,
+      bayType: request?.bayType ?? null,
     });
-
-    if (ping.status === 'Busy') {
-      throw new BadRequestException('Bay is busy');
-    }
-    if (ping.status === 'Unavailable') {
-      throw new BadRequestException('Carwash is unavailable');
-    }
-
 
     const card = await this.findMethodsCardUseCase.getByClientId(
       request.cardMobileUserId,
     );
 
     if (!card) {
-      throw new BadRequestException('Card not found for client');
+      throw new CardNotFoundForOrderException(request.cardMobileUserId);
     }
 
-    const isFreeVacuum = request.sum === 0 && request.bayType === DeviceType.VACUUME;
+    const isFreeVacuum = this.orderStatusDeterminationService.isFreeVacuum({
+      sum: request.sum,
+      bayType: request?.bayType ?? null,
+    });
+
     if (isFreeVacuum) {
-      const todayUTC = new Date();
-      todayUTC.setUTCHours(0, 0, 0, 0);
-      const tomorrowUTC = new Date(todayUTC);
-      tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
-
-      const orders = await this.orderRepository.findAllByFilter(
-        todayUTC,
-        tomorrowUTC,
-        undefined,
-        undefined,
-        OrderStatus.COMPLETED,
-        undefined,
-        card.id,
-        DeviceType.VACUUME,
-      );
-
-      const freeOperations = orders.filter((order) => order.sumFull === 0);
-      const limit = card.monthlyLimit || 0;
-      const remains = Math.max(0, limit - freeOperations.length);
-
-      if (remains <= 0) {
-        throw new BadRequestException('Insufficient free vacuum remaining');
-      }
+      await this.freeVacuumValidationService.validateFreeVacuumAccess({
+        card,
+        orderDate: new Date(),
+      });
     }
 
+  
     const tariff = await this.tariffRepository.findCardTariff(card.id);
     const bonusPercent = tariff?.bonus ?? 0;
-    const cashbackRaw = (request.sum * bonusPercent) / 100;
-    const computedCashback = cashbackRaw < 1 ? 0 : Math.ceil(cashbackRaw);
+    const computedCashback = this.cashbackCalculationService.calculateCashback({
+      sum: request.sum,
+      bonusPercent,
+    });
 
-    const initialOrderStatus = isFreeVacuum 
-      ? OrderStatus.FREE_PROCESSING 
-      : OrderStatus.CREATED;
+    const initialOrderStatus =
+      this.orderStatusDeterminationService.determineInitialStatus({
+        sum: request.sum,
+        bayType: request?.bayType ?? null,
+      });
 
     const order = new Order({
       sumFull: request.sum,
