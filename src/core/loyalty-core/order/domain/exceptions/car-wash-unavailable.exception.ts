@@ -18,3 +18,4 @@ export class CarWashUnavailableException extends BaseException {
   }
 }
 
+
