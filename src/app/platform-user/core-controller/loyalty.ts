@@ -1928,7 +1928,31 @@ export class LoyaltyController {
         ability,
       );
 
-      return await this.createMarketingCampaignUseCase.execute(data, user.id);
+      const campaign = await this.createMarketingCampaignUseCase.execute(data, user.id);
+
+      const poses = await this.getParticipantPosesUseCase.execute(data.ltyProgramId);
+      const posIds = poses.map(pos => pos.id);
+
+      if (posIds.length > 0) {
+        await this.loyaltyValidateRules.updateMarketingCampaignValidate(
+          campaign.id,
+          {
+            ltyProgramParticipantId: data.ltyProgramParticipantId,
+            posIds: posIds,
+          },
+          ability,
+        );
+
+        await this.updateMarketingCampaignUseCase.execute(
+          campaign.id,
+          { posIds },
+          user.id,
+        );
+
+        return await this.findMethodsMarketingCampaignUseCase.getOneById(campaign.id);
+      }
+
+      return campaign;
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
