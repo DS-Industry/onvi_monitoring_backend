@@ -32,6 +32,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         ltyProgramId: data.ltyProgramId,
         createdById: userId,
         updatedById: userId,
+        ltyProgramParticipantId: data.ltyProgramParticipantId,
       },
       include: {
         ltyProgram: true,

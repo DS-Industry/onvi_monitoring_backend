@@ -30,5 +30,9 @@ export class MarketingCampaignCreateDto {
   @IsNotEmpty({ message: 'Loyalty program ID is required' })
   ltyProgramId: number;
 
+  @IsNumber()
+  @IsNotEmpty({ message: 'Loyalty program participant ID is required' })
+  ltyProgramParticipantId: number;
+
   
 }
