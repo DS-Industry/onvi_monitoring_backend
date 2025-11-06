@@ -491,8 +491,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     const total = await this.prisma.marketingCampaign.count({ where });
 
-    console.log("where: ", where)
-
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where,
       skip,
