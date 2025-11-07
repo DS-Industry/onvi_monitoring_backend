@@ -177,7 +177,7 @@ export class Worker extends BaseEntity<WorkerProps> {
   }
 
   set passportExtradition(passportExtradition: string) {
-    this.props.passportNumber = passportExtradition;
+    this.props.passportExtradition = passportExtradition;
   }
 
   get passportDateIssue(): Date {

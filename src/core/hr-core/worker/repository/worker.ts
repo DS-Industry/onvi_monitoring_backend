@@ -43,6 +43,7 @@ export class WorkerRepository extends IWorkerRepository {
   }
 
   public async findAllByFilter(
+    userId?: number,
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
@@ -73,7 +74,18 @@ export class WorkerRepository extends IWorkerRepository {
       where.posWorks = { some: { id: posId } };
     }
 
-    console.log('where', where);
+    if (userId !== undefined) {
+      where.posWorks = {
+        ...where.posWorks,
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
+    }
 
     const workers = await this.prisma.hrWorker.findMany({
       skip: skip ?? undefined,
@@ -87,6 +99,7 @@ export class WorkerRepository extends IWorkerRepository {
   }
 
   public async findAllByFilterCount(
+    userId?: number,
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
@@ -115,10 +128,24 @@ export class WorkerRepository extends IWorkerRepository {
       where.posWorks = { some: { id: posId } };
     }
 
+    if (userId !== undefined) {
+      where.posWorks = {
+        ...where.posWorks,
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
+    }
+
     return this.prisma.hrWorker.count({ where: where });
   }
 
   public async findAllForCalculatePayment(
+    userId: number,
     organizationId: number,
     billingMonth: Date,
     hrPositionId?: number,
@@ -137,6 +164,19 @@ export class WorkerRepository extends IWorkerRepository {
     if (hrPositionId !== undefined) {
       where.hrPositionId = hrPositionId;
     }
+
+    if (userId !== undefined) {
+      where.posWorks = {
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
+    }
+
     const workers = await this.prisma.hrWorker.findMany({
       where,
     });

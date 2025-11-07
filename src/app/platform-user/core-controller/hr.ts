@@ -166,8 +166,12 @@ export class HrController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
-  async getWorkers(@Query() data: WorkerFilterDto): Promise<Worker[]> {
+  async getWorkers(
+    @Request() req: any,
+    @Query() data: WorkerFilterDto,
+  ): Promise<Worker[]> {
     try {
+      const { user } = req;
       let skip = undefined;
       let take = undefined;
       if (data.page && data.size) {
@@ -175,6 +179,7 @@ export class HrController {
         take = data.size;
       }
       return await this.findMethodsWorkerUseCase.getAllByFilter(
+        user,
         data.placementId,
         data.hrPositionId,
         data.organizationId,
@@ -204,10 +209,13 @@ export class HrController {
   @CheckAbilities(new ReadHrAbility())
   @HttpCode(201)
   async getWorkersCount(
+    @Request() req: any,
     @Query() data: WorkerFilterDto,
   ): Promise<{ count: number }> {
     try {
+      const { user } = req;
       const count = await this.findMethodsWorkerUseCase.getAllByFilterCount(
+        user,
         data.placementId,
         data.hrPositionId,
         data.organizationId,
@@ -412,11 +420,14 @@ export class HrController {
   @CheckAbilities(new CreateHrAbility())
   @HttpCode(201)
   async calculatePrepayment(
+    @Request() req: any,
     @Body() data: PaymentCalculateDto,
   ): Promise<PrepaymentCalculateResponseDro[]> {
     try {
+      const { user } = req;
       const workers =
         await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          user: user,
           organizationId: data.organizationId,
           billingMonth: data.billingMonth,
           hrPositionId: data.hrPositionId,
@@ -453,8 +464,10 @@ export class HrController {
     @Body() data: PaymentCalculateWorkersDto,
   ): Promise<ShiftReportCalculationPaymentResponseDto[]> {
     try {
+      const { user } = req;
       const workers =
         await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          user: user,
           organizationId: data.organizationId,
           billingMonth: data.billingMonth,
         });
@@ -490,8 +503,10 @@ export class HrController {
     @Body() data: PaymentCalculateDto,
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
+      const { user } = req;
       const workers =
         await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          user: user,
           organizationId: data.organizationId,
           billingMonth: data.billingMonth,
           hrPositionId: data.hrPositionId,
@@ -528,8 +543,10 @@ export class HrController {
     @Body() data: PaymentCalculateWorkersDto,
   ): Promise<PaymentCalculateResponseDro[]> {
     try {
+      const { user } = req;
       const workers =
         await this.findMethodsWorkerUseCase.getAllForCalculatePayment({
+          user: user,
           organizationId: data.organizationId,
           billingMonth: data.billingMonth,
           paymentType: PaymentType.PAYMENT,

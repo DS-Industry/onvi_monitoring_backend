@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IWorkerRepository } from '@hr/worker/interface/worker';
 import { Worker } from '@hr/worker/domain/worker';
 import { PaymentType } from '@prisma/client';
+import { User } from "@platform-user/user/domain/user";
 
 @Injectable()
 export class FindMethodsWorkerUseCase {
@@ -12,6 +13,7 @@ export class FindMethodsWorkerUseCase {
   }
 
   async getAllByFilter(
+    user: User,
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
@@ -21,6 +23,7 @@ export class FindMethodsWorkerUseCase {
     posId?: number,
   ): Promise<Worker[]> {
     return await this.workerRepository.findAllByFilter(
+      user.id,
       placementId,
       hrPositionId,
       organizationId,
@@ -32,6 +35,7 @@ export class FindMethodsWorkerUseCase {
   }
 
   async getAllByFilterCount(
+    user: User,
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
@@ -39,6 +43,7 @@ export class FindMethodsWorkerUseCase {
     posId?: number,
   ): Promise<number> {
     return await this.workerRepository.findAllByFilterCount(
+      user.id,
       placementId,
       hrPositionId,
       organizationId,
@@ -48,12 +53,14 @@ export class FindMethodsWorkerUseCase {
   }
 
   async getAllForCalculatePayment(data: {
+    user: User,
     organizationId: number;
     billingMonth: Date;
     hrPositionId?: number;
     paymentType?: PaymentType;
   }): Promise<Worker[]> {
     return await this.workerRepository.findAllForCalculatePayment(
+      data.user.id,
       data.organizationId,
       data.billingMonth,
       data.hrPositionId,
