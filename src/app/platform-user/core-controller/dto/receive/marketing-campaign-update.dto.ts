@@ -5,10 +5,10 @@ import {
   IsOptional,
   IsNumber,
   IsString,
-  Min,
   ArrayMinSize,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { CampaignExecutionType } from '@prisma/client';
 
 enum MarketingCampaignType {
   PROMOCODE = 'PROMOCODE',
@@ -65,26 +65,13 @@ export class MarketingCampaignUpdateDto {
   @IsNumber({}, { each: true })
   posIds?: number[];
 
-  @IsEnum(MarketingDiscountType)
-  @IsOptional()
-  discountType?: MarketingDiscountType;
-
-  @IsNumber()
-  @Min(0, { message: 'Discount value must be greater than or equal to 0' })
-  @IsOptional()
-  discountValue?: number;
-
-  @IsString()
-  @IsOptional()
-  promocode?: string;
-
-  @IsNumber()
-  @IsOptional()
-  @Min(1, { message: 'Max usage must be at least 1' })
-  maxUsage?: number;
-
   @IsEnum(MarketingCampaignStatus)
   @IsOptional()
   status?: MarketingCampaignStatus;
+
+
+  @IsEnum(CampaignExecutionType)
+  @IsOptional()
+  executionType?: CampaignExecutionType;
 }
 

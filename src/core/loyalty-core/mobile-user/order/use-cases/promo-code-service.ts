@@ -53,8 +53,7 @@ export class PromoCodeService {
       campaignId: promoCode.campaignId || 0,
       promocodeId: promoCodeId,
       ltyUserId: card.mobileUserId || 0,
-      discountAmount,
-      orderAmount: order.sumFull,
+      orderId: order.id,
       posId: carWashId,
     });
 

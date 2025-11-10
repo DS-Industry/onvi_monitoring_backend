@@ -5,7 +5,6 @@ import {
   PromoCode,
   CreateMarketingCampaignUsageInput,
 } from '../interface/promo-code-repository.interface';
-import { EnumMapper } from '@db/mapper/enum-mapper';
 
 @Injectable()
 export class PromoCodeRepository extends IPromoCodeRepository {
@@ -72,9 +71,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
         campaignId: input.campaignId || 0,
         promocodeId: input.promocodeId,
         ltyUserId: input.ltyUserId,
-        discountAmount: input.discountAmount,
-        orderAmount: input.orderAmount,
-        posId: input.posId,
+        orderId: input.orderId,
         usedAt: new Date(),
       },
     });
