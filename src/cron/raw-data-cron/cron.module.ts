@@ -19,6 +19,7 @@ import { RedisModule } from '@infra/cache/redis.module';
 import { HandlerUpdateTierCron } from '@infra/handler/loyalty/cron/handler-update-tier';
 import { HandlerMarketingCampaignCron } from '@infra/handler/marketing-campaign/cron/handler-marketing-campaign';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
+import { LoggerModule } from 'nestjs-pino';
 
 const cronUseCases: Provider[] = [
   HandlerDeviceDataRawCron,
@@ -62,6 +63,13 @@ const cronUseCases: Provider[] = [
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot({
       wildcard: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        customProps: (req, res) => ({
+          context: 'HTTP',
+        }),
+      },
     }),
     CacheModule.register({
       ttl: 3600000,
