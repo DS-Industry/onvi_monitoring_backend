@@ -119,6 +119,9 @@ import { UpdateMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-
 import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
 import { CreateMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-create';
 import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-delete';
+import { UpsertMarketingCampaignMobileDisplayUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-mobile-display-upsert';
+import { UpsertMarketingCampaignMobileDisplayDto } from './dto/receive/marketing-campaign-mobile-display-upsert.dto';
+import { MarketingCampaignMobileDisplayResponseDto } from './dto/response/marketing-campaign-mobile-display-response.dto';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
 import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
@@ -192,6 +195,7 @@ export class LoyaltyController {
     private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
     private readonly createMarketingCampaignConditionUseCase: CreateMarketingCampaignConditionUseCase,
     private readonly deleteMarketingCampaignConditionUseCase: DeleteMarketingCampaignConditionUseCase,
+    private readonly upsertMarketingCampaignMobileDisplayUseCase: UpsertMarketingCampaignMobileDisplayUseCase,
     private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
@@ -1891,6 +1895,41 @@ export class LoyaltyController {
       await this.deleteMarketingCampaignConditionUseCase.execute(conditionId);
 
       return { message: 'Condition deleted successfully' };
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Put('marketing-campaigns/:id/mobile-display')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async upsertMarketingCampaignMobileDisplay(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) campaignId: number,
+    @Body() data: UpsertMarketingCampaignMobileDisplayDto,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        campaignId,
+        ability,
+      );
+
+      return await this.upsertMarketingCampaignMobileDisplayUseCase.execute(campaignId, data);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

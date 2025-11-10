@@ -8,8 +8,11 @@ import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/
 import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { MarketingCampaignConditionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { CreateMarketingCampaignConditionDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-condition-create.dto';
+import { UpsertMarketingCampaignMobileDisplayDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-mobile-display-upsert.dto';
+import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { MarketingCampaignStatus } from '@prisma/client';
+import { MarketingCampaignMobileDisplayType } from '@loyalty/marketing-campaign/domain';
 
 @Injectable()
 export class MarketingCampaignRepository extends IMarketingCampaignRepository {
@@ -589,5 +592,48 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
   async findConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
     // TODO: Implement this
     return null;
+  }
+
+  async upsertMobileDisplay(
+    campaignId: number,
+    data: UpsertMarketingCampaignMobileDisplayDto,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto> {
+    const campaign = await this.prisma.marketingCampaign.findUnique({
+      where: { id: campaignId },
+    });
+
+    if (!campaign) {
+      throw new Error('Marketing campaign not found');
+    }
+
+    const displayData: {
+      marketingCampaignId: number;
+      imageLink: string;
+      type: MarketingCampaignMobileDisplayType;
+      description?: string | null;
+    } = {
+      marketingCampaignId: campaignId,
+      imageLink: data.imageLink,
+      type: data.type,
+      description: data.type === MarketingCampaignMobileDisplayType.PersonalPromocode 
+        ? null 
+        : data.description || null,
+    };
+
+    const mobileDisplay = await this.prisma.marketingCampaignMobileDisplay.upsert({
+      where: { marketingCampaignId: campaignId },
+      update: displayData,
+      create: displayData,
+    });
+
+    return {
+      id: mobileDisplay.id,
+      marketingCampaignId: mobileDisplay.marketingCampaignId,
+      imageLink: mobileDisplay.imageLink,
+      description: mobileDisplay.description || undefined,
+      type: mobileDisplay.type as MarketingCampaignMobileDisplayType,
+      createdAt: mobileDisplay.createdAt.toISOString(),
+      updatedAt: mobileDisplay.updatedAt.toISOString(),
+    };
   }
 }
