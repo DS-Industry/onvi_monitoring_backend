@@ -50,4 +50,8 @@ export abstract class IMarketingCampaignRepository {
     campaignId: number,
     data: UpsertMarketingCampaignMobileDisplayDto,
   ): Promise<MarketingCampaignMobileDisplayResponseDto>;
+
+  abstract findMobileDisplayByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto | null>;
 }

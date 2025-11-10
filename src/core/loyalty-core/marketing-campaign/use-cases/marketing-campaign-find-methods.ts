@@ -3,6 +3,7 @@ import { MarketingCampaignResponseDto } from '@platform-user/core-controller/dto
 import { MarketingCampaignsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaigns-paginated-response.dto';
 import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
+import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
 
 @Injectable()
@@ -31,6 +32,12 @@ export class FindMethodsMarketingCampaignUseCase {
 
   async getConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
     return this.marketingCampaignRepository.findConditionById(conditionId);
+  }
+
+  async getMobileDisplayByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto | null> {
+    return this.marketingCampaignRepository.findMobileDisplayByCampaignId(campaignId);
   }
 }
 
