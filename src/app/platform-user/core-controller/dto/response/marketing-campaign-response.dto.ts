@@ -2,17 +2,12 @@ export class MarketingCampaignResponseDto {
   id: number;
   name: string;
   status: string;
-  type: string;
+  executionType: string;
   launchDate: string;
   endDate?: string;
   description?: string;
   ltyProgramId?: number;
   ltyProgramName?: string;
-  discountType: string;
-  discountValue: number;
-  promocode?: string;
-  maxUsage?: number;
-  currentUsage: number;
   posCount: number;
   posIds: number[];
   createdAt: string;

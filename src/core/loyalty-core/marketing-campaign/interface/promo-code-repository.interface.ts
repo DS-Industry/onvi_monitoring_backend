@@ -18,9 +18,8 @@ export interface CreateMarketingCampaignUsageInput {
   campaignId: number;
   promocodeId: number;
   ltyUserId: number;
-  discountAmount: number;
-  orderAmount: number;
   posId: number;
+  orderId: number;
 }
 
 export abstract class IPromoCodeRepository {

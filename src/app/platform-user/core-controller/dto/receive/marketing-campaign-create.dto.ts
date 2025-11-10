@@ -1,11 +1,13 @@
 import {
   IsDate,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { CampaignExecutionType } from '@prisma/client';
 
 export class MarketingCampaignCreateDto {
   @IsString()
@@ -33,6 +35,11 @@ export class MarketingCampaignCreateDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Loyalty program participant ID is required' })
   ltyProgramParticipantId: number;
+
+  
+  @IsEnum(CampaignExecutionType)
+  @IsNotEmpty({ message: 'Execution type is required' })
+  executionType: CampaignExecutionType;
 
   
 }

@@ -8,8 +8,11 @@ import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/
 import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { MarketingCampaignConditionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { CreateMarketingCampaignConditionDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-condition-create.dto';
+import { UpsertMarketingCampaignMobileDisplayDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-mobile-display-upsert.dto';
+import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { MarketingCampaignStatus, MarketingCampaignType } from '@prisma/client';
+import { MarketingCampaignStatus } from '@prisma/client';
+import { MarketingCampaignMobileDisplayType } from '@loyalty/marketing-campaign/domain';
 
 @Injectable()
 export class MarketingCampaignRepository extends IMarketingCampaignRepository {
@@ -25,7 +28,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       data: {
         name: data.name,
         status: MarketingCampaignStatus.DRAFT,
-        type: MarketingCampaignType.DISCOUNT,
+        executionType: data.executionType,
         launchDate: data.launchDate,
         endDate: data.endDate,
         description: data.description,
@@ -48,17 +51,14 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
             name: true,
           },
         },
-        promocodes: true,
       },
     });
 
     const poses = await this.prisma.pos.findMany({
       where: {
-        marketingCampaigns: {
-          some: {
-            id: campaign.id,
-          },
-        },
+        organization: {
+          id: data.ltyProgramParticipantId,
+        }
       },
       select: {
         id: true,
@@ -67,23 +67,27 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     const posCount = poses.length;
     const posIds = poses.map(pos => pos.id);
-    const promocode = campaign.promocodes?.[0] || null;
+
+    await this.prisma.marketingCampaign.update({
+      where: { id: campaign.id },
+      data: {
+        poses: {
+          connect: posIds.map(posId => ({ id: posId })),
+        },
+      },
+    });
+
 
     return {
       id: campaign.id,
       name: campaign.name,
       status: campaign.status,
-      type: campaign.type,
+      executionType: campaign.executionType,
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || '',
-      discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
-      promocode: promocode?.code,
-      maxUsage: promocode?.maxUsage,
-      currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
       posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -140,6 +144,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     if (data.description !== undefined) updateData.description = data.description;
     if (data.ltyProgramId !== undefined) updateData.ltyProgramId = data.ltyProgramId;
     if (data.status !== undefined) updateData.status = data.status;
+    if (data.executionType !== undefined) updateData.executionType = data.executionType;
 
     const campaign = await this.prisma.marketingCampaign.update({
       where: { id },
@@ -182,61 +187,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       });
     }
 
-    let promocode = null;
-
-    if (data.type === MarketingCampaignType.DISCOUNT) {
-      if (existingCampaign.promocodes.length > 0) {
-        await this.prisma.lTYPromocode.deleteMany({
-          where: { campaignId: id },
-        });
-      }
-      
-      if (data.discountType !== undefined || data.discountValue !== undefined) {
-        await this.prisma.marketingCampaign.update({
-          where: { id },
-          data: {
-            discountType: data.discountType,
-            discountValue: data.discountValue,
-          },
-        });
-      }
-    } else if (data.type === MarketingCampaignType.PROMOCODE) {
-      if (existingCampaign.type === MarketingCampaignType.DISCOUNT) {
-        await this.prisma.marketingCampaign.update({
-          where: { id },
-          data: {
-            discountType: null,
-            discountValue: null,
-          },
-        });
-      }
-      
-      const existingPromocode = campaign.promocodes[0];
-      if (existingPromocode) {
-        const promocodeUpdateData: any = {};
-        if (data.promocode !== undefined) promocodeUpdateData.code = data.promocode;
-        if (data.discountType !== undefined) promocodeUpdateData.discountType = data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE';
-        if (data.discountValue !== undefined) promocodeUpdateData.discountValue = data.discountValue;
-        if (data.maxUsage !== undefined) promocodeUpdateData.maxUsage = data.maxUsage;
-
-        promocode = await this.prisma.lTYPromocode.update({
-          where: { id: existingPromocode.id },
-          data: promocodeUpdateData,
-        });
-      } else {
-        promocode = await this.prisma.lTYPromocode.create({
-          data: {
-            campaignId: campaign.id,
-            code: data.promocode || '',
-            promocodeType: 'CAMPAIGN',
-            discountType: data.discountType === 'FIXED' ? 'FIXED_AMOUNT' : 'PERCENTAGE',
-            discountValue: data.discountValue || 0,
-            maxUsage: data.maxUsage,
-          },
-        });
-      }
-    }
-
     const poses = await this.prisma.pos.findMany({
       where: {
         marketingCampaigns: {
@@ -257,21 +207,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       id: campaign.id,
       name: campaign.name,
       status: campaign.status,
-      type: campaign.type,
+      executionType: campaign.executionType,
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: campaign.type === MarketingCampaignType.DISCOUNT 
-        ? campaign.discountType || ''
-        : (promocode?.discountType || campaign.promocodes[0]?.discountType || ''),
-      discountValue: campaign.type === MarketingCampaignType.DISCOUNT
-        ? campaign.discountValue || 0
-        : (promocode?.discountValue || campaign.promocodes[0]?.discountValue || 0),
-      promocode: promocode?.code || campaign.promocodes[0]?.code,
-      maxUsage: promocode?.maxUsage || campaign.promocodes[0]?.maxUsage,
-      currentUsage: promocode?.currentUsage || campaign.promocodes[0]?.currentUsage || 0,
       posCount: posCount,
       posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -313,25 +254,19 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       return null;
     }
 
-    const posCount = campaign.poses.length;
-    const promocode = campaign.promocodes[0]; 
+    const posCount = campaign.poses.length; 
     const posIds = campaign.poses.map(pos => pos.id);
 
     return {
       id: campaign.id,
       name: campaign.name,
       status: campaign.status,
-      type: campaign.type,
+      executionType: campaign.executionType,
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      discountType: promocode?.discountType || campaign.discountType || '',
-      discountValue: Number(promocode?.discountValue) || Number(campaign.discountValue) || 0,
-      promocode: promocode?.code,
-      maxUsage: promocode?.maxUsage,
-      currentUsage: promocode?.currentUsage || 0,
       posCount: posCount,
       posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -370,24 +305,18 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     return campaigns.map(campaign => {
       const posCount = campaign.poses.length;
-      const promocode = campaign.promocodes[0];
       const posIds = campaign.poses.map(pos => pos.id);
 
       return {
         id: campaign.id,
         name: campaign.name,
         status: campaign.status,
-        type: campaign.type,
+        executionType: campaign.executionType,
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
-        discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
-        promocode: promocode?.code,
-        maxUsage: promocode?.maxUsage,
-        currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
@@ -433,23 +362,17 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
     return campaigns.map(campaign => {
       const posCount = campaign.poses.length;
-      const promocode = campaign.promocodes[0];
       const posIds = campaign.poses.map(pos => pos.id);
       return {
         id: campaign.id,
         name: campaign.name,
         status: campaign.status,
-        type: campaign.type,
+        executionType: campaign.executionType,
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
-        discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
-        promocode: promocode?.code,
-        maxUsage: promocode?.maxUsage,
-        currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
@@ -525,17 +448,12 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         id: campaign.id,
         name: campaign.name,
         status: campaign.status,
-        type: campaign.type,
+        executionType: campaign.executionType,
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
-        discountType: promocode?.discountType || '',
-        discountValue: promocode?.discountValue ? Number(promocode.discountValue) : 0,
-        promocode: promocode?.code,
-        maxUsage: promocode?.maxUsage,
-        currentUsage: promocode?.currentUsage || 0,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
@@ -657,154 +575,65 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
   }
 
   async findConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null> {
-    const campaign = await this.prisma.marketingCampaign.findUnique({
-      where: { id: campaignId },
-      select: { id: true },
-    });
-
-    if (!campaign) {
-      return null;
-    }
-
-    const conditions = await this.prisma.marketingCampaignCondition.findMany({
-      where: { campaignId },
-      include: {
-        benefit: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        promocode: {
-          select: {
-            id: true,
-            code: true,
-          },
-        },
-      },
-      orderBy: {
-        order: 'asc',
-      },
-    });
-
-    return {
-      campaignId,
-      conditions: conditions.map(condition => ({
-        id: condition.id,
-        type: condition.type as any,
-        order: condition.order,
-        startTime: condition.startTime?.toISOString(),
-        endTime: condition.endTime?.toISOString(),
-        weekdays: condition.weekdays.length > 0 ? (condition.weekdays as any) : undefined,
-        visitCount: condition.visitCount ?? undefined,
-        minAmount: condition.minAmount ? Number(condition.minAmount) : undefined,
-        promocodeId: condition.promocodeId ?? undefined,
-        promocode: condition.promocode ? {
-          id: condition.promocode.id,
-          code: condition.promocode.code,
-        } : undefined,
-        benefitId: condition.benefitId ?? undefined,
-        benefit: condition.benefit ? {
-          id: condition.benefit.id,
-          name: condition.benefit.name,
-        } : undefined,
-      })),
-    };
+    // TODO: Implement this
+    return null;
   }
 
   async createCondition(campaignId: number, data: CreateMarketingCampaignConditionDto): Promise<MarketingCampaignConditionResponseDto> {
+    // TODO: Implement this
+    return null;
+  }
+
+  async deleteCondition(conditionId: number): Promise<void> {
+    // TODO: Implement this
+    return null;
+  }
+
+  async findConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
+    // TODO: Implement this
+    return null;
+  }
+
+  async upsertMobileDisplay(
+    campaignId: number,
+    data: UpsertMarketingCampaignMobileDisplayDto,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto> {
     const campaign = await this.prisma.marketingCampaign.findUnique({
       where: { id: campaignId },
-      select: { id: true },
     });
 
     if (!campaign) {
       throw new Error('Marketing campaign not found');
     }
 
-    const conditionData: any = {
-      campaignId,
+    const displayData: {
+      marketingCampaignId: number;
+      imageLink: string;
+      type: MarketingCampaignMobileDisplayType;
+      description?: string | null;
+    } = {
+      marketingCampaignId: campaignId,
+      imageLink: data.imageLink,
       type: data.type,
-      order: data.order ?? 0,
+      description: data.type === MarketingCampaignMobileDisplayType.PersonalPromocode 
+        ? null 
+        : data.description || null,
     };
 
-    if (data.type === 'TIME_RANGE') {
-      conditionData.startTime = data.startTime;
-      conditionData.endTime = data.endTime;
-    } else if (data.type === 'WEEKDAY') {
-      conditionData.weekdays = data.weekdays || [];
-    } else if (data.type === 'VISIT_COUNT') {
-      conditionData.visitCount = data.visitCount;
-    } else if (data.type === 'PURCHASE_AMOUNT') {
-      conditionData.minAmount = data.minAmount;
-      conditionData.maxAmount = data.maxAmount;
-    } else if (data.type === 'PROMOCODE_ENTRY') {
-      conditionData.promocodeId = data.promocodeId;
-    } else if (data.type === 'EVENT') {
-      conditionData.benefitId = data.benefitId;
-    }
-
-    const condition = await this.prisma.marketingCampaignCondition.create({
-      data: conditionData,
-      include: {
-        benefit: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        promocode: {
-          select: {
-            id: true,
-            code: true,
-          },
-        },
-      },
+    const mobileDisplay = await this.prisma.marketingCampaignMobileDisplay.upsert({
+      where: { marketingCampaignId: campaignId },
+      update: displayData,
+      create: displayData,
     });
 
     return {
-      id: condition.id,
-      type: condition.type as any,
-      order: condition.order,
-      startTime: condition.startTime?.toISOString(),
-      endTime: condition.endTime?.toISOString(),
-      weekdays: condition.weekdays.length > 0 ? (condition.weekdays as any) : undefined,
-      visitCount: condition.visitCount ?? undefined,
-      minAmount: condition.minAmount ? Number(condition.minAmount) : undefined,
-      promocodeId: condition.promocodeId ?? undefined,
-      promocode: condition.promocode ? {
-        id: condition.promocode.id,
-        code: condition.promocode.code,
-      } : undefined,
-      benefitId: condition.benefitId ?? undefined,
-      benefit: condition.benefit ? {
-        id: condition.benefit.id,
-        name: condition.benefit.name,
-      } : undefined,
+      id: mobileDisplay.id,
+      marketingCampaignId: mobileDisplay.marketingCampaignId,
+      imageLink: mobileDisplay.imageLink,
+      description: mobileDisplay.description || undefined,
+      type: mobileDisplay.type as MarketingCampaignMobileDisplayType,
+      createdAt: mobileDisplay.createdAt.toISOString(),
+      updatedAt: mobileDisplay.updatedAt.toISOString(),
     };
-  }
-
-  async deleteCondition(conditionId: number): Promise<void> {
-    const condition = await this.prisma.marketingCampaignCondition.findUnique({
-      where: { id: conditionId },
-      select: { id: true, campaignId: true },
-    });
-
-    if (!condition) {
-      throw new Error('Marketing campaign condition not found');
-    }
-
-    await this.prisma.marketingCampaignCondition.delete({
-      where: { id: conditionId },
-    });
-  }
-
-  async findConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
-    const condition = await this.prisma.marketingCampaignCondition.findUnique({
-      where: { id: conditionId },
-      select: { campaignId: true },
-    });
-
-    return condition ? { campaignId: condition.campaignId } : null;
   }
 }

@@ -6,6 +6,8 @@ import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/
 import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { MarketingCampaignConditionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-condition-response.dto';
 import { CreateMarketingCampaignConditionDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-condition-create.dto';
+import { UpsertMarketingCampaignMobileDisplayDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-mobile-display-upsert.dto';
+import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { MarketingCampaignStatus } from '@prisma/client';
 
 export abstract class IMarketingCampaignRepository {
@@ -43,4 +45,9 @@ export abstract class IMarketingCampaignRepository {
   abstract deleteCondition(conditionId: number): Promise<void>;
 
   abstract findConditionById(conditionId: number): Promise<{ campaignId: number } | null>;
+
+  abstract upsertMobileDisplay(
+    campaignId: number,
+    data: UpsertMarketingCampaignMobileDisplayDto,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto>;
 }
