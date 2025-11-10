@@ -636,4 +636,26 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       updatedAt: mobileDisplay.updatedAt.toISOString(),
     };
   }
+
+  async findMobileDisplayByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto | null> {
+    const mobileDisplay = await this.prisma.marketingCampaignMobileDisplay.findUnique({
+      where: { marketingCampaignId: campaignId },
+    });
+
+    if (!mobileDisplay) {
+      return null;
+    }
+
+    return {
+      id: mobileDisplay.id,
+      marketingCampaignId: mobileDisplay.marketingCampaignId,
+      imageLink: mobileDisplay.imageLink,
+      description: mobileDisplay.description || undefined,
+      type: mobileDisplay.type as MarketingCampaignMobileDisplayType,
+      createdAt: mobileDisplay.createdAt.toISOString(),
+      updatedAt: mobileDisplay.updatedAt.toISOString(),
+    };
+  }
 }

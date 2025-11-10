@@ -1947,6 +1947,41 @@ export class LoyaltyController {
     }
   }
 
+  @Get('marketing-campaigns/:id/mobile-display')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getMarketingCampaignMobileDisplay(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) campaignId: number,
+  ): Promise<MarketingCampaignMobileDisplayResponseDto | null> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        campaignId,
+        ability,
+      );
+
+      return await this.findMethodsMarketingCampaignUseCase.getMobileDisplayByCampaignId(campaignId);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  
   
 
   @Post('marketing-campaign/create')

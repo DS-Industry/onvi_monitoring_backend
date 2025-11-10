@@ -534,6 +534,7 @@ model LTYProgram {
   hasBonusWithSale    Boolean                        @default(false)
   ownerOrganizationId Int?
   isHub               Boolean                        @default(false)
+  isHubPlus           Boolean                        @default(false)
   participantLimit    Int?
   isPublic            Boolean                        @default(false)
   cardTiers           LTYCardTier[]
