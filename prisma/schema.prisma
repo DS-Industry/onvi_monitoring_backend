@@ -1497,19 +1497,33 @@ model MarketingCampaign {
   action                MarketingCampaignAction?
   userProgress          UserCampaignProgress[]
   activationWindows     ActivationWindow[]
-  createdBy             User                         @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
-  ltyProgram            LTYProgram?                  @relation(fields: [ltyProgramId], references: [id])
-  ltyProgramParticipant LTYProgramParticipant?       @relation(fields: [ltyProgramParticipantId], references: [id])
-  updatedBy             User                         @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
+  createdBy             User                            @relation("MarketingCampaignCreatedBy", fields: [createdById], references: [id])
+  ltyProgram            LTYProgram?                     @relation(fields: [ltyProgramId], references: [id])
+  ltyProgramParticipant LTYProgramParticipant?          @relation(fields: [ltyProgramParticipantId], references: [id])
+  updatedBy             User                            @relation("MarketingCampaignUpdatedBy", fields: [updatedById], references: [id])
   campaignUsage         MarketingCampaignUsage[]
-  ltyUsers              LTYUser[]                    @relation("MarketingCampaignToLTYUser")
-  poses                 Pos[]                        @relation("MarketingCampaignToPos")
+  ltyUsers              LTYUser[]                       @relation("MarketingCampaignToLTYUser")
+  poses                 Pos[]                           @relation("MarketingCampaignToPos")
+  mobileDisplay         MarketingCampaignMobileDisplay?
 
   @@index([status])
   @@index([executionType])
   @@index([launchDate])
   @@index([ltyProgramId])
   @@index([ltyProgramParticipantId])
+}
+
+model MarketingCampaignMobileDisplay {
+  id                  Int                                @id @default(autoincrement())
+  marketingCampaignId Int                                @unique
+  imageLink           String
+  description         String?
+  type                MarketingCampaignMobileDisplayType
+  createdAt           DateTime                           @default(now())
+  updatedAt           DateTime                           @updatedAt
+  marketingCampaign   MarketingCampaign                  @relation(fields: [marketingCampaignId], references: [id], onDelete: Cascade)
+
+  @@index([marketingCampaignId])
 }
 
 model LTYPromocode {
@@ -1544,7 +1558,7 @@ model LTYPromocode {
   pos                Pos?                     @relation(fields: [posId], references: [id])
   usage              MarketingCampaignUsage[]
   action             MarketingCampaignAction? @relation(fields: [actionId], references: [id]) // Link to action that created this promocode (if actionType = PROMOCODE_ISSUE)
-  actionId           Int?                     @unique                   
+  actionId           Int?                     @unique
 
   @@index([code, isActive])
   @@index([actionId])
@@ -2030,4 +2044,9 @@ enum ActivationWindowStatus {
   ACTIVE
   EXPIRED
   CANCELLED
+}
+
+enum MarketingCampaignMobileDisplayType {
+  PersonalPromocode
+  Promo
 }
