@@ -654,7 +654,7 @@ export class FinanceController {
   }
   @Patch('shift-report/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async updateShiftReportById(
     @Request() req: any,
