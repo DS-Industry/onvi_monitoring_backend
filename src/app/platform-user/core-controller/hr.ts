@@ -245,7 +245,7 @@ export class HrController {
   async getWorker(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Position> {
+  ): Promise<Worker> {
     try {
       return await this.hrValidateRules.findOneByIdWorkerValidate(id);
     } catch (e) {

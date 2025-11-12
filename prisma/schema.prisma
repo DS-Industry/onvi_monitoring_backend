@@ -1315,6 +1315,7 @@ model HrWorker {
   dailySalary         Int
   bonusPayout         Int?
   gender              String?
+  birthday            DateTime?
   citizenship         String?
   passportSeries      String?
   passportNumber      String?

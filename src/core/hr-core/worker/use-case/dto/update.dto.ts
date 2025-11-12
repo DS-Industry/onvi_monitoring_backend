@@ -13,6 +13,7 @@ export interface UpdateDto {
   bonusPayout?: number;
   status?: StatusHrWorker;
   gender?: string;
+  birthday?: Date;
   citizenship?: string;
   passportSeries?: string;
   passportNumber?: string;

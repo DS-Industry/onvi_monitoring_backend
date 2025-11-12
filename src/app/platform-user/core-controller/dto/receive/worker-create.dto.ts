@@ -36,6 +36,9 @@ export class WorkerCreateDto {
   @IsNotEmpty({ message: 'bonusPayout is required' })
   bonusPayout: number;
   @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  birthday?: Date;
+  @IsOptional()
   @IsString()
   gender?: string;
   @IsOptional()

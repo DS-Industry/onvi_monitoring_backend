@@ -15,9 +15,9 @@ export class LoyaltyDeviceController {
 
   @Post('card-balance')
   async cardBalance(
-    @Headers('deviceId') deviceId: string,
+    @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
-    @Headers('devNumber') devNumber: string,
+    @Headers('ucn') devNumber: string,
   ): Promise<string> {
     try {
       const pos = await this.deviceValidateRules.cardBalanceValidate(
@@ -39,9 +39,9 @@ export class LoyaltyDeviceController {
 
   @Post('card-oper')
   async cardOper(
-    @Headers('deviceId') deviceId: string,
+    @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
-    @Headers('devNumber') devNumber: string,
+    @Headers('ucn') devNumber: string,
     @Headers('sum') sum: string,
   ): Promise<string> {
     try {

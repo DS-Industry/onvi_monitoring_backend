@@ -40,6 +40,9 @@ export class WorkerUpdateDto {
   @IsEnum(StatusHrWorker)
   status?: StatusHrWorker;
   @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  birthday?: Date;
+  @IsOptional()
   @IsString()
   gender?: string;
   @IsOptional()

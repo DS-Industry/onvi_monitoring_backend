@@ -28,6 +28,7 @@ export class CreateWorkerUseCase {
       bonusPayout: data.bonusPayout || 0,
       status: StatusHrWorker.WORKS,
       gender: data?.gender,
+      birthday: data?.birthday,
       citizenship: data?.citizenship,
       passportSeries: data?.passportSeries,
       passportNumber: data?.passportNumber,

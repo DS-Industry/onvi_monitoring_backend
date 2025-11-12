@@ -11,6 +11,7 @@ export interface CreateDto {
   dailySalary: number;
   bonusPayout: number;
   gender?: string;
+  birthday?: Date;
   citizenship?: string;
   passportSeries?: string;
   passportNumber?: string;
