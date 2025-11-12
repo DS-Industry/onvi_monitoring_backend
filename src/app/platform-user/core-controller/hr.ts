@@ -178,16 +178,17 @@ export class HrController {
         skip = data.size * (data.page - 1);
         take = data.size;
       }
-      return await this.findMethodsWorkerUseCase.getAllByFilter(
-        user,
-        data.placementId,
-        data.hrPositionId,
-        data.organizationId,
-        data?.name,
-        skip,
-        take,
-        data.posId,
-      );
+      return await this.findMethodsWorkerUseCase.getAllByFilter({
+        user: user,
+        placementId: data.placementId,
+        hrPositionId: data.hrPositionId,
+        organizationId: data.organizationId,
+        name: data?.name,
+        skip: skip,
+        take: take,
+        posId: data.posId,
+        search: data.search,
+      });
     } catch (e) {
       if (e instanceof HrException) {
         throw new CustomHttpException({
@@ -214,13 +215,14 @@ export class HrController {
   ): Promise<{ count: number }> {
     try {
       const { user } = req;
-      const count = await this.findMethodsWorkerUseCase.getAllByFilterCount(
-        user,
-        data.placementId,
-        data.hrPositionId,
-        data.organizationId,
-        data?.name,
-      );
+      const count = await this.findMethodsWorkerUseCase.getAllByFilterCount({
+        user: user,
+        placementId: data.placementId,
+        hrPositionId: data.hrPositionId,
+        organizationId: data.organizationId,
+        name: data?.name,
+        search: data.search,
+      });
       return { count };
     } catch (e) {
       if (e instanceof HrException) {

@@ -15,6 +15,7 @@ export abstract class IWorkerRepository {
     skip?: number,
     take?: number,
     posId?: number,
+    search?: string,
   ): Promise<Worker[]>;
   abstract findAllByFilterCount(
     userId?: number,
@@ -23,6 +24,7 @@ export abstract class IWorkerRepository {
     organizationId?: number,
     name?: string,
     posId?: number,
+    search?: string,
   ): Promise<number>;
   abstract findAllForCalculatePayment(
     userId: number,

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IWorkerRepository } from '@hr/worker/interface/worker';
 import { Worker } from '@hr/worker/domain/worker';
 import { PaymentType } from '@prisma/client';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class FindMethodsWorkerUseCase {
@@ -12,48 +12,52 @@ export class FindMethodsWorkerUseCase {
     return await this.workerRepository.findOneById(id);
   }
 
-  async getAllByFilter(
-    user: User,
-    placementId?: number,
-    hrPositionId?: number,
-    organizationId?: number,
-    name?: string,
-    skip?: number,
-    take?: number,
-    posId?: number,
-  ): Promise<Worker[]> {
+  async getAllByFilter(data: {
+    user: User;
+    placementId?: number;
+    hrPositionId?: number;
+    organizationId?: number;
+    name?: string;
+    skip?: number;
+    take?: number;
+    posId?: number;
+    search?: string;
+  }): Promise<Worker[]> {
     return await this.workerRepository.findAllByFilter(
-      user.id,
-      placementId,
-      hrPositionId,
-      organizationId,
-      name,
-      skip,
-      take,
-      posId,
+      data.user.id,
+      data.placementId,
+      data.hrPositionId,
+      data.organizationId,
+      data.name,
+      data.skip,
+      data.take,
+      data.posId,
+      data.search,
     );
   }
 
-  async getAllByFilterCount(
-    user: User,
-    placementId?: number,
-    hrPositionId?: number,
-    organizationId?: number,
-    name?: string,
-    posId?: number,
-  ): Promise<number> {
+  async getAllByFilterCount(data: {
+    user: User;
+    placementId?: number;
+    hrPositionId?: number;
+    organizationId?: number;
+    name?: string;
+    posId?: number;
+    search?: string;
+  }): Promise<number> {
     return await this.workerRepository.findAllByFilterCount(
-      user.id,
-      placementId,
-      hrPositionId,
-      organizationId,
-      name,
-      posId,
+      data.user.id,
+      data.placementId,
+      data.hrPositionId,
+      data.organizationId,
+      data.name,
+      data.posId,
+      data.search,
     );
   }
 
   async getAllForCalculatePayment(data: {
-    user: User,
+    user: User;
     organizationId: number;
     billingMonth: Date;
     hrPositionId?: number;

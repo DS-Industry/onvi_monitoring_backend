@@ -51,6 +51,7 @@ export class WorkerRepository extends IWorkerRepository {
     skip?: number,
     take?: number,
     posId?: number,
+    search?: string,
   ): Promise<Worker[]> {
     const where: any = {};
 
@@ -60,6 +61,13 @@ export class WorkerRepository extends IWorkerRepository {
 
     if (organizationId !== undefined) {
       where.organizationId = organizationId;
+    }
+
+    if (search !== undefined && search.trim() !== '') {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
     }
 
     if (name !== undefined) {
@@ -105,6 +113,7 @@ export class WorkerRepository extends IWorkerRepository {
     organizationId?: number,
     name?: string,
     posId?: number,
+    search?: string,
   ): Promise<number> {
     const where: any = {};
 
@@ -114,6 +123,13 @@ export class WorkerRepository extends IWorkerRepository {
 
     if (organizationId !== undefined) {
       where.organizationId = organizationId;
+    }
+
+    if (search !== undefined && search.trim() !== '') {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
     }
 
     if (name !== undefined) {
