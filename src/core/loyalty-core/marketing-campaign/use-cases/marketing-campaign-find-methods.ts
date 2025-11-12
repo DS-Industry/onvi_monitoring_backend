@@ -38,10 +38,17 @@ export class FindMethodsMarketingCampaignUseCase {
 
   async getConditionsByCampaignId(
     campaignId: number,
-  ): Promise<MarketingCampaignConditionsResponseDto | null> {
-    return this.marketingCampaignRepository.findConditionsByCampaignId(
-      campaignId,
-    );
+  ): Promise<MarketingCampaignConditionsResponseDto> {
+    const conditions =
+      await this.marketingCampaignRepository.findConditionsByCampaignId(
+        campaignId,
+      );
+
+    if (!conditions) {
+      throw new Error('Marketing campaign not found');
+    }
+
+    return conditions;
   }
 
   async getConditionById(

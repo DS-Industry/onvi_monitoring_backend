@@ -11,6 +11,7 @@ import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-c
 import { MarketingCampaignStatus } from '@prisma/client';
 import { MarketingCampaignActionCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-create.dto';
 import { MarketingCampaignActionUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-update.dto';
+import { MarketingCampaignActionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-action-response.dto';
 
 export abstract class IMarketingCampaignRepository {
   abstract create(
@@ -80,27 +81,16 @@ export abstract class IMarketingCampaignRepository {
     campaignId: number,
   ): Promise<MarketingCampaignMobileDisplayResponseDto | null>;
 
-  abstract createAction(data: MarketingCampaignActionCreateDto): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }>;
+  abstract createAction(
+    data: MarketingCampaignActionCreateDto,
+  ): Promise<MarketingCampaignActionResponseDto>;
 
   abstract updateAction(
     campaignId: number,
     data: MarketingCampaignActionUpdateDto,
-  ): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }>;
+  ): Promise<MarketingCampaignActionResponseDto>;
 
-  abstract findActionByCampaignId(campaignId: number): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  } | null>;
+  abstract findActionByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignActionResponseDto | null>;
 }

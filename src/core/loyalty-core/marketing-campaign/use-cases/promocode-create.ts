@@ -4,16 +4,35 @@ import {
   PromoCode,
 } from '../interface/promo-code-repository.interface';
 import { PromocodeCreateDto } from '@platform-user/core-controller/dto/receive/promocode-create.dto';
+import { PromocodeResponseDto } from '@platform-user/core-controller/dto/response/promocode-response.dto';
 
 @Injectable()
 export class CreatePromocodeUseCase {
   constructor(private readonly promoCodeRepository: IPromoCodeRepository) {}
 
+  private mapToResponseDto(promoCode: PromoCode): PromocodeResponseDto {
+    return {
+      id: promoCode.id,
+      campaignId: promoCode.campaignId,
+      code: promoCode.code,
+      discountType: promoCode.discountType as any,
+      discountValue: promoCode.discountValue,
+      minOrderAmount: promoCode.minOrderAmount,
+      maxDiscountAmount: promoCode.maxDiscountAmount,
+      maxUsage: promoCode.maxUsage,
+      maxUsagePerUser: promoCode.maxUsagePerUser,
+      currentUsage: promoCode.currentUsage,
+      validFrom: promoCode.validFrom.toISOString(),
+      validUntil: promoCode.validUntil?.toISOString() || null,
+      isActive: promoCode.isActive,
+    };
+  }
+
   async execute(
     data: PromocodeCreateDto,
     createdByManagerId?: number,
-  ): Promise<PromoCode> {
-    return this.promoCodeRepository.create({
+  ): Promise<PromocodeResponseDto> {
+    const promoCode = await this.promoCodeRepository.create({
       campaignId: data.campaignId,
       code: data.code,
       promocodeType: data.promocodeType,
@@ -34,5 +53,7 @@ export class CreatePromocodeUseCase {
       posId: data.posId,
       placementId: data.placementId,
     });
+
+    return this.mapToResponseDto(promoCode);
   }
 }

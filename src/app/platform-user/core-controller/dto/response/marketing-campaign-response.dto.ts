@@ -1,4 +1,6 @@
-import { DiscountType, MarketingCampaignActionType } from '@prisma/client';
+import { DiscountType } from '@loyalty/marketing-campaign/domain/enums/discount-type.enum';
+import { MarketingCampaignActionType } from '@loyalty/marketing-campaign/domain/enums/marketing-campaign-action-type.enum';
+
 export class MarketingCampaignResponseDto {
   id: number;
   name: string;

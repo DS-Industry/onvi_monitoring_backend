@@ -8,7 +8,7 @@ import {
   ArrayMinSize,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { CampaignExecutionType } from '@prisma/client';
+import { CampaignExecutionType } from '@loyalty/marketing-campaign/domain/enums/campaign-execution-type.enum';
 
 enum MarketingCampaignType {
   PROMOCODE = 'PROMOCODE',

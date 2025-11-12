@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
 import { MarketingCampaignActionCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-create.dto';
+import { MarketingCampaignActionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-action-response.dto';
 
 @Injectable()
 export class CreateMarketingCampaignActionUseCase {
@@ -8,12 +9,9 @@ export class CreateMarketingCampaignActionUseCase {
     private readonly marketingCampaignRepository: IMarketingCampaignRepository,
   ) {}
 
-  async execute(data: MarketingCampaignActionCreateDto): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  async execute(
+    data: MarketingCampaignActionCreateDto,
+  ): Promise<MarketingCampaignActionResponseDto> {
     const existingAction =
       await this.marketingCampaignRepository.findActionByCampaignId(
         data.campaignId,

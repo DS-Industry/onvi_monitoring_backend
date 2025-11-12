@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { DiscountType } from '../enums/discount-type.enum';
-import { MarketingCampaignActionType } from '@prisma/client';
+import { MarketingCampaignActionType } from '../enums/marketing-campaign-action-type.enum';
 
 const discountPayloadSchema = z.object({
   discountType: z.nativeEnum(DiscountType),

@@ -5,7 +5,7 @@ import {
   IsObject,
   IsOptional,
 } from 'class-validator';
-import { MarketingCampaignActionType } from '@prisma/client';
+import { MarketingCampaignActionType } from '@loyalty/marketing-campaign/domain/enums/marketing-campaign-action-type.enum';
 import {
   actionPayloadSchemas,
   getEmptyPayloadForActionType,

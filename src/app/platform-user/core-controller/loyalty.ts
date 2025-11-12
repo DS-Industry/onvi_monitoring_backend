@@ -168,7 +168,9 @@ import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/us
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
 import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
 import { PromocodeCreateDto } from '@platform-user/core-controller/dto/receive/promocode-create.dto';
-import { PromoCode } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
+import { PromocodeResponseDto } from './dto/response/promocode-response.dto';
+import { MarketingCampaignActionResponseDto } from './dto/response/marketing-campaign-action-response.dto';
+import { DeleteResponseDto } from './dto/response/delete-response.dto';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -355,7 +357,7 @@ export class LoyaltyController {
   async createPromocode(
     @Request() req: any,
     @Body() data: PromocodeCreateDto,
-  ): Promise<PromoCode> {
+  ): Promise<PromocodeResponseDto> {
     try {
       const { user, ability } = req;
 
@@ -1868,16 +1870,9 @@ export class LoyaltyController {
         ability,
       );
 
-      const conditions =
-        await this.findMethodsMarketingCampaignUseCase.getConditionsByCampaignId(
-          id,
-        );
-
-      if (!conditions) {
-        throw new LoyaltyException(404, 'Marketing campaign not found');
-      }
-
-      return conditions;
+      return await this.findMethodsMarketingCampaignUseCase.getConditionsByCampaignId(
+        id,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1940,7 +1935,7 @@ export class LoyaltyController {
   async deleteMarketingCampaignCondition(
     @Request() req: any,
     @Param('conditionId', ParseIntPipe) conditionId: number,
-  ): Promise<{ message: string }> {
+  ): Promise<DeleteResponseDto> {
     try {
       const { ability } = req;
 
@@ -1949,17 +1944,12 @@ export class LoyaltyController {
           conditionId,
         );
 
-      if (!condition) {
-        throw new LoyaltyException(
-          404,
-          'Marketing campaign condition not found',
+      if (condition) {
+        await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+          condition.campaignId,
+          ability,
         );
       }
-
-      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
-        condition.campaignId,
-        ability,
-      );
 
       await this.deleteMarketingCampaignConditionUseCase.execute(conditionId);
 
@@ -2073,38 +2063,7 @@ export class LoyaltyController {
         ability,
       );
 
-      const campaign = await this.createMarketingCampaignUseCase.execute(
-        data,
-        user.id,
-      );
-
-      const poses = await this.getParticipantPosesUseCase.execute(
-        data.ltyProgramId,
-      );
-      const posIds = poses.map((pos) => pos.id);
-
-      if (posIds.length > 0) {
-        await this.loyaltyValidateRules.updateMarketingCampaignValidate(
-          campaign.id,
-          {
-            ltyProgramParticipantId: data.ltyProgramParticipantId,
-            posIds: posIds,
-          },
-          ability,
-        );
-
-        await this.updateMarketingCampaignUseCase.execute(
-          campaign.id,
-          { posIds },
-          user.id,
-        );
-
-        return await this.findMethodsMarketingCampaignUseCase.getOneById(
-          campaign.id,
-        );
-      }
-
-      return campaign;
+      return await this.createMarketingCampaignUseCase.execute(data, user.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -2172,12 +2131,7 @@ export class LoyaltyController {
   async createMarketingCampaignAction(
     @Request() req: any,
     @Body() data: MarketingCampaignActionCreateDto,
-  ): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  ): Promise<MarketingCampaignActionResponseDto> {
     try {
       const { ability } = req;
 
@@ -2213,16 +2167,10 @@ export class LoyaltyController {
     @Request() req: any,
     @Param('campaignId', ParseIntPipe) campaignId: number,
     @Body() data: MarketingCampaignActionUpdateDto,
-  ): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  ): Promise<MarketingCampaignActionResponseDto> {
     try {
       const { ability } = req;
 
-      // Validate that campaign exists and user has access
       await this.loyaltyValidateRules.updateMarketingCampaignValidate(
         campaignId,
         {},

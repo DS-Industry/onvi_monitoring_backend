@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
 import { MarketingCampaignActionUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-update.dto';
+import { MarketingCampaignActionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-action-response.dto';
 
 @Injectable()
 export class UpdateMarketingCampaignActionUseCase {
@@ -11,12 +12,7 @@ export class UpdateMarketingCampaignActionUseCase {
   async execute(
     campaignId: number,
     data: MarketingCampaignActionUpdateDto,
-  ): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  ): Promise<MarketingCampaignActionResponseDto> {
     return await this.marketingCampaignRepository.updateAction(
       campaignId,
       data,

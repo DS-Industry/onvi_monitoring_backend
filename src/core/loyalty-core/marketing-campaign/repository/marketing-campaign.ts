@@ -15,6 +15,9 @@ import { MarketingCampaignStatus } from '@prisma/client';
 import { MarketingCampaignMobileDisplayType } from '@loyalty/marketing-campaign/domain';
 import { MarketingCampaignActionCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-create.dto';
 import { MarketingCampaignActionUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-update.dto';
+import { MarketingCampaignActionResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-action-response.dto';
+import { MarketingCampaignActionType } from '@loyalty/marketing-campaign/domain/enums/marketing-campaign-action-type.enum';
+import { DiscountType } from '@loyalty/marketing-campaign/domain/enums/discount-type.enum';
 import { campaignConditionTreeSchema } from '@loyalty/marketing-campaign/domain/schemas/condition-tree.schema';
 import { CampaignConditionType } from '@loyalty/marketing-campaign/domain/enums/condition-type.enum';
 
@@ -107,13 +110,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         id: campaign.updatedBy.id,
         name: campaign.updatedBy.name,
       },
-      actionType: campaign.action?.actionType,
+      actionType: campaign.action?.actionType
+        ? (campaign.action.actionType as MarketingCampaignActionType)
+        : null,
       actionPayload: campaign.action?.payload as any,
       actionPromocode: campaign.action?.promocode
         ? {
             id: campaign.action.promocode.id,
             code: campaign.action.promocode.code,
-            discountType: campaign.action.promocode.discountType,
+            discountType: campaign.action.promocode
+              .discountType as DiscountType,
             discountValue: Number(campaign.action.promocode.discountValue),
             maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
           }
@@ -251,13 +257,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         id: campaign.updatedBy.id,
         name: campaign.updatedBy.name,
       },
-      actionType: campaign.action?.actionType,
+      actionType: campaign.action?.actionType
+        ? (campaign.action.actionType as MarketingCampaignActionType)
+        : null,
       actionPayload: campaign.action?.payload as any,
       actionPromocode: campaign.action?.promocode
         ? {
             id: campaign.action.promocode.id,
             code: campaign.action.promocode.code,
-            discountType: campaign.action.promocode.discountType,
+            discountType: campaign.action.promocode
+              .discountType as DiscountType,
             discountValue: Number(campaign.action.promocode.discountValue),
             maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
           }
@@ -321,13 +330,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         id: campaign.updatedBy.id,
         name: campaign.updatedBy.name,
       },
-      actionType: campaign.action?.actionType,
+      actionType: campaign.action?.actionType
+        ? (campaign.action.actionType as MarketingCampaignActionType)
+        : null,
       actionPayload: campaign.action?.payload as any,
       actionPromocode: campaign.action?.promocode
         ? {
             id: campaign.action.promocode.id,
             code: campaign.action.promocode.code,
-            discountType: campaign.action.promocode.discountType,
+            discountType: campaign.action.promocode
+              .discountType as DiscountType,
             discountValue: Number(campaign.action.promocode.discountValue),
             maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
           }
@@ -387,13 +399,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           id: campaign.updatedBy.id,
           name: campaign.updatedBy.name,
         },
-        actionType: campaign.action?.actionType,
+        actionType: campaign.action?.actionType
+          ? (campaign.action.actionType as MarketingCampaignActionType)
+          : null,
         actionPayload: campaign.action?.payload as any,
         actionPromocode: campaign.action?.promocode
           ? {
               id: campaign.action.promocode.id,
               code: campaign.action.promocode.code,
-              discountType: campaign.action.promocode.discountType,
+              discountType: campaign.action.promocode
+                .discountType as DiscountType,
               discountValue: Number(campaign.action.promocode.discountValue),
               maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
             }
@@ -460,13 +475,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           id: campaign.updatedBy.id,
           name: campaign.updatedBy.name,
         },
-        actionType: campaign.action?.actionType,
+        actionType: campaign.action?.actionType
+          ? (campaign.action.actionType as MarketingCampaignActionType)
+          : null,
         actionPayload: campaign.action?.payload as any,
         actionPromocode: campaign.action?.promocode
           ? {
               id: campaign.action.promocode.id,
               code: campaign.action.promocode.code,
-              discountType: campaign.action.promocode.discountType,
+              discountType: campaign.action.promocode
+                .discountType as DiscountType,
               discountValue: Number(campaign.action.promocode.discountValue),
               maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
             }
@@ -557,13 +575,16 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           id: campaign.updatedBy.id,
           name: campaign.updatedBy.name,
         },
-        actionType: campaign.action?.actionType,
+        actionType: campaign.action?.actionType
+          ? (campaign.action.actionType as MarketingCampaignActionType)
+          : null,
         actionPayload: campaign.action?.payload as any,
         actionPromocode: campaign.action?.promocode
           ? {
               id: campaign.action.promocode.id,
               code: campaign.action.promocode.code,
-              discountType: campaign.action.promocode.discountType,
+              discountType: campaign.action.promocode
+                .discountType as DiscountType,
               discountValue: Number(campaign.action.promocode.discountValue),
               maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
             }
@@ -825,7 +846,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       TIME_RANGE: CampaignConditionType.TIME_RANGE,
       WEEKDAY: CampaignConditionType.WEEKDAY,
       BIRTHDAY: CampaignConditionType.BIRTHDAY,
-      EVENT: CampaignConditionType.BIRTHDAY, // Map legacy EVENT to BIRTHDAY
       VISIT_COUNT: CampaignConditionType.VISIT_COUNT,
       PURCHASE_AMOUNT: CampaignConditionType.PURCHASE_AMOUNT,
       PROMOCODE_ENTRY: CampaignConditionType.PROMOCODE_ENTRY,
@@ -1092,12 +1112,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     };
   }
 
-  async createAction(data: MarketingCampaignActionCreateDto): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  async createAction(
+    data: MarketingCampaignActionCreateDto,
+  ): Promise<MarketingCampaignActionResponseDto> {
     const validatedPayload =
       MarketingCampaignActionCreateDto.validateAndSetDefaultPayload(
         data.actionType,
@@ -1107,7 +1124,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const action = await this.prisma.marketingCampaignAction.create({
       data: {
         campaignId: data.campaignId,
-        actionType: data.actionType,
+        actionType: data.actionType as any,
         payload: validatedPayload,
       },
     });
@@ -1115,7 +1132,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     return {
       id: action.id,
       campaignId: action.campaignId,
-      actionType: action.actionType,
+      actionType: action.actionType as MarketingCampaignActionType,
       payload: action.payload as any,
     };
   }
@@ -1123,12 +1140,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
   async updateAction(
     campaignId: number,
     data: MarketingCampaignActionUpdateDto,
-  ): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  }> {
+  ): Promise<MarketingCampaignActionResponseDto> {
     const existingAction = await this.prisma.marketingCampaignAction.findUnique(
       {
         where: { campaignId },
@@ -1139,7 +1151,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       throw new Error(`Action not found for campaign ${campaignId}`);
     }
 
-    const actionType = data.actionType || existingAction.actionType;
+    const actionType = (data.actionType ||
+      existingAction.actionType) as MarketingCampaignActionType;
     let validatedPayload = data.payload;
 
     if (data.payload) {
@@ -1165,17 +1178,14 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     return {
       id: action.id,
       campaignId: action.campaignId,
-      actionType: action.actionType,
+      actionType: action.actionType as MarketingCampaignActionType,
       payload: action.payload as any,
     };
   }
 
-  async findActionByCampaignId(campaignId: number): Promise<{
-    id: number;
-    campaignId: number;
-    actionType: string;
-    payload: any;
-  } | null> {
+  async findActionByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignActionResponseDto | null> {
     const action = await this.prisma.marketingCampaignAction.findUnique({
       where: { campaignId },
     });
@@ -1187,7 +1197,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     return {
       id: action.id,
       campaignId: action.campaignId,
-      actionType: action.actionType,
+      actionType: action.actionType as MarketingCampaignActionType,
       payload: action.payload as any,
     };
   }
