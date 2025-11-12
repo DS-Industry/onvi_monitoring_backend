@@ -1928,30 +1928,24 @@ export class LoyaltyController {
     }
   }
 
-  @Delete('marketing-campaigns/conditions/:conditionId')
+  @Delete('marketing-campaigns/:id/conditions/:order')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(200)
   async deleteMarketingCampaignCondition(
     @Request() req: any,
-    @Param('conditionId', ParseIntPipe) conditionId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('order', ParseIntPipe) order: number,
   ): Promise<DeleteResponseDto> {
     try {
       const { ability } = req;
 
-      const condition =
-        await this.findMethodsMarketingCampaignUseCase.getConditionById(
-          conditionId,
-        );
+      await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
+        id,
+        ability,
+      );
 
-      if (condition) {
-        await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
-          condition.campaignId,
-          ability,
-        );
-      }
-
-      await this.deleteMarketingCampaignConditionUseCase.execute(conditionId);
+      await this.deleteMarketingCampaignConditionUseCase.execute(id, order);
 
       return { message: 'Condition deleted successfully' };
     } catch (e) {

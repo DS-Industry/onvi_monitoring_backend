@@ -66,11 +66,7 @@ export abstract class IMarketingCampaignRepository {
     data: CreateMarketingCampaignConditionDto,
   ): Promise<MarketingCampaignConditionResponseDto>;
 
-  abstract deleteCondition(conditionId: number): Promise<void>;
-
-  abstract findConditionById(
-    conditionId: number,
-  ): Promise<{ campaignId: number } | null>;
+  abstract deleteCondition(id: number, order: number): Promise<void>;
 
   abstract upsertMobileDisplay(
     campaignId: number,

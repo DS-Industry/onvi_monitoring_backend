@@ -5,6 +5,7 @@ import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-cont
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
+import { LoyaltyException } from '@exception/option.exceptions';
 
 @Injectable()
 export class FindMethodsMarketingCampaignUseCase {
@@ -45,16 +46,10 @@ export class FindMethodsMarketingCampaignUseCase {
       );
 
     if (!conditions) {
-      throw new Error('Marketing campaign not found');
+      throw new LoyaltyException(404, 'Marketing campaign not found');
     }
 
     return conditions;
-  }
-
-  async getConditionById(
-    conditionId: number,
-  ): Promise<{ campaignId: number } | null> {
-    return this.marketingCampaignRepository.findConditionById(conditionId);
   }
 
   async getMobileDisplayByCampaignId(

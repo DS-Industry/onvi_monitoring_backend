@@ -1033,15 +1033,48 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     return response;
   }
 
-  async deleteCondition(/*conditionId: number*/): Promise<void> {
-    // TODO: Implement this
-    return null;
-  }
+  async deleteCondition(id: number, order: number): Promise<void> {
+    const conditionRecord =
+      await this.prisma.marketingCampaignCondition.findFirst({
+        where: { id },
+      });
 
-  async findConditionById() // conditionId: number,
-  : Promise<{ campaignId: number } | null> {
-    // TODO: Implement this
-    return null;
+    if (!conditionRecord || !conditionRecord.tree) {
+      throw new Error('Marketing campaign condition not found');
+    }
+
+    const tree: any[] = Array.isArray(conditionRecord.tree)
+      ? conditionRecord.tree
+      : [];
+
+    if (order < 0 || order >= tree.length) {
+      throw new Error(
+        `Condition order ${order} is out of bounds. Tree has ${tree.length} conditions.`,
+      );
+    }
+
+    const updatedTree = tree.filter((_, index) => index !== order);
+
+    if (updatedTree.length > 0) {
+      const validationResult =
+        campaignConditionTreeSchema.safeParse(updatedTree);
+      if (!validationResult.success) {
+        throw new Error(
+          `Invalid condition tree after deletion: ${validationResult.error.errors.map((e) => e.message).join(', ')}`,
+        );
+      }
+    }
+
+    if (updatedTree.length === 0) {
+      await this.prisma.marketingCampaignCondition.delete({
+        where: { id: conditionRecord.id },
+      });
+    } else {
+      await this.prisma.marketingCampaignCondition.update({
+        where: { id: conditionRecord.id },
+        data: { tree: updatedTree },
+      });
+    }
   }
 
   async upsertMobileDisplay(

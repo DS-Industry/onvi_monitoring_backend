@@ -1,24 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
-import { FindMethodsMarketingCampaignUseCase } from './marketing-campaign-find-methods';
+import { LoyaltyException } from '@exception/option.exceptions';
 
 @Injectable()
 export class DeleteMarketingCampaignConditionUseCase {
   constructor(
     private readonly marketingCampaignRepository: IMarketingCampaignRepository,
-    private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
   ) {}
 
-  async execute(conditionId: number): Promise<void> {
-    const condition =
-      await this.findMethodsMarketingCampaignUseCase.getConditionById(
-        conditionId,
-      );
-
-    if (!condition) {
-      throw new Error('Marketing campaign condition not found');
+  async execute(id: number, order: number): Promise<void> {
+    try {
+      await this.marketingCampaignRepository.deleteCondition(id, order);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new LoyaltyException(404, error.message);
+      }
+      throw error;
     }
-
-    return this.marketingCampaignRepository.deleteCondition(conditionId);
   }
 }
