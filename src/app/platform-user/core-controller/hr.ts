@@ -183,11 +183,10 @@ export class HrController {
         placementId: data.placementId,
         hrPositionId: data.hrPositionId,
         organizationId: data.organizationId,
-        name: data?.name,
         skip: skip,
         take: take,
         posId: data.posId,
-        search: data.search,
+        search: data.name,
       });
     } catch (e) {
       if (e instanceof HrException) {
@@ -220,8 +219,7 @@ export class HrController {
         placementId: data.placementId,
         hrPositionId: data.hrPositionId,
         organizationId: data.organizationId,
-        name: data?.name,
-        search: data.search,
+        search: data.name,
       });
       return { count };
     } catch (e) {

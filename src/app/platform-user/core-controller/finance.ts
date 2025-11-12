@@ -1025,7 +1025,7 @@ export class FinanceController {
 
   @Delete('shift-report/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new DeleteShiftReportAbility())
+  @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(204)
   async deleteShiftReport(
     @Request() req: any,
@@ -1033,10 +1033,11 @@ export class FinanceController {
   ): Promise<void> {
     try {
       const { ability } = req;
-      const shiftReport = await this.financeValidateRules.deleteShiftReportValidate(
-        shiftReportId,
-        ability,
-      );
+      const shiftReport =
+        await this.financeValidateRules.deleteShiftReportValidate(
+          shiftReportId,
+          ability,
+        );
       await this.deleteShiftReportUseCase.execute(shiftReport);
     } catch (e) {
       if (e instanceof FinanceException) {

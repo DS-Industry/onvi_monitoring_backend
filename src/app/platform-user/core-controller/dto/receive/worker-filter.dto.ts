@@ -31,7 +31,4 @@ export class WorkerFilterDto {
     return parseInt(value);
   })
   posId?: number;
-  @IsOptional()
-  @IsString()
-  search?: string;
 }
