@@ -1,4 +1,4 @@
-import { MarketingCampaignActionType } from '@prisma/client';
+import { DiscountType, MarketingCampaignActionType } from '@prisma/client';
 export class MarketingCampaignResponseDto {
   id: number;
   name: string;
@@ -23,4 +23,11 @@ export class MarketingCampaignResponseDto {
   };
   actionType: MarketingCampaignActionType | null;
   actionPayload: JSON | null;
+  actionPromocode: {
+    id: number;
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    maxUsagePerUser: number;
+  } | null;
 }

@@ -35,8 +35,6 @@ export interface PurchaseAmountCondition extends BaseCondition {
 
 export interface BirthdayCondition extends BaseCondition {
   type: CampaignConditionType.BIRTHDAY;
-  daysBefore: number;
-  daysAfter: number;
 }
 
 export interface InactivityCondition extends BaseCondition {

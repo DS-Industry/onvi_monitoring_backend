@@ -399,9 +399,8 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { user } = req;
-      const data = await this.warehouseValidateRules.createNomenclatureFile(
-        file,
-      );
+      const data =
+        await this.warehouseValidateRules.createNomenclatureFile(file);
       await this.createNomenclatureUseCase.createMany(data, user);
       return { status: 'SUCCESS' };
     } catch (e) {

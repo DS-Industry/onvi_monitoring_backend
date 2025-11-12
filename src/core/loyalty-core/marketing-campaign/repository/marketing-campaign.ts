@@ -54,7 +54,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
             name: true,
           },
         },
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
       },
     });
 
@@ -105,6 +109,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
       actionType: campaign.action?.actionType,
       actionPayload: campaign.action?.payload as any,
+      actionPromocode: campaign.action?.promocode
+        ? {
+            id: campaign.action.promocode.id,
+            code: campaign.action.promocode.code,
+            discountType: campaign.action.promocode.discountType,
+            discountValue: Number(campaign.action.promocode.discountValue),
+            maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+          }
+        : null,
     };
   }
 
@@ -172,7 +185,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           },
         },
         promocodes: true,
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
       },
     });
 
@@ -236,6 +253,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
       actionType: campaign.action?.actionType,
       actionPayload: campaign.action?.payload as any,
+      actionPromocode: campaign.action?.promocode
+        ? {
+            id: campaign.action.promocode.id,
+            code: campaign.action.promocode.code,
+            discountType: campaign.action.promocode.discountType,
+            discountValue: Number(campaign.action.promocode.discountValue),
+            maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+          }
+        : null,
     };
   }
 
@@ -243,7 +269,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     const campaign = await this.prisma.marketingCampaign.findUnique({
       where: { id },
       include: {
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
         ltyProgram: true,
         createdBy: {
           select: {
@@ -293,6 +323,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
       actionType: campaign.action?.actionType,
       actionPayload: campaign.action?.payload as any,
+      actionPromocode: campaign.action?.promocode
+        ? {
+            id: campaign.action.promocode.id,
+            code: campaign.action.promocode.code,
+            discountType: campaign.action.promocode.discountType,
+            discountValue: Number(campaign.action.promocode.discountValue),
+            maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+          }
+        : null,
     };
   }
 
@@ -314,7 +353,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         promocodes: true,
         poses: true,
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
       },
     });
 
@@ -346,6 +389,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         actionType: campaign.action?.actionType,
         actionPayload: campaign.action?.payload as any,
+        actionPromocode: campaign.action?.promocode
+          ? {
+              id: campaign.action.promocode.id,
+              code: campaign.action.promocode.code,
+              discountType: campaign.action.promocode.discountType,
+              discountValue: Number(campaign.action.promocode.discountValue),
+              maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+            }
+          : null,
       };
     });
   }
@@ -375,7 +427,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         promocodes: true,
         poses: true,
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
       },
     });
 
@@ -406,6 +462,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         actionType: campaign.action?.actionType,
         actionPayload: campaign.action?.payload as any,
+        actionPromocode: campaign.action?.promocode
+          ? {
+              id: campaign.action.promocode.id,
+              code: campaign.action.promocode.code,
+              discountType: campaign.action.promocode.discountType,
+              discountValue: Number(campaign.action.promocode.discountValue),
+              maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+            }
+          : null,
       };
     });
   }
@@ -456,7 +521,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         promocodes: true,
         poses: true,
-        action: true,
+        action: {
+          include: {
+            promocode: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -490,6 +559,15 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         },
         actionType: campaign.action?.actionType,
         actionPayload: campaign.action?.payload as any,
+        actionPromocode: campaign.action?.promocode
+          ? {
+              id: campaign.action.promocode.id,
+              code: campaign.action.promocode.code,
+              discountType: campaign.action.promocode.discountType,
+              discountValue: Number(campaign.action.promocode.discountValue),
+              maxUsagePerUser: campaign.action.promocode.maxUsagePerUser,
+            }
+          : null,
       };
     });
 
@@ -608,7 +686,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
   async findConditionsByCampaignId(
     campaignId: number,
   ): Promise<MarketingCampaignConditionsResponseDto | null> {
-    // Verify campaign exists
     const campaign = await this.prisma.marketingCampaign.findUnique({
       where: { id: campaignId },
     });
@@ -617,7 +694,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       return null;
     }
 
-    // Find condition record for this campaign
     const conditionRecord =
       await this.prisma.marketingCampaignCondition.findFirst({
         where: { campaignId },
@@ -630,12 +706,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       };
     }
 
-    // Parse the tree
     const tree: any[] = Array.isArray(conditionRecord.tree)
       ? conditionRecord.tree
       : [];
 
-    // Convert each condition in tree to response format
     const conditions: MarketingCampaignConditionResponseDto[] =
       await Promise.all(
         tree.map(async (treeCondition, index) => {
@@ -645,7 +719,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
             order: index,
           };
 
-          // Map tree format to response format based on condition type
           switch (treeCondition.type) {
             case 'TIME_RANGE':
               if (treeCondition.start && treeCondition.end) {
@@ -695,7 +768,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
             case 'PROMOCODE_ENTRY':
               if (treeCondition.code) {
-                // Find promocode by code
                 const promocode = await this.prisma.lTYPromocode.findFirst({
                   where: { code: treeCondition.code },
                   select: { id: true, code: true },
@@ -710,21 +782,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
               }
               break;
 
-            case 'EVENT':
-              if (treeCondition.benefitId) {
-                condition.benefitId = treeCondition.benefitId;
-                // Fetch benefit details
-                const benefit = await this.prisma.lTYBenefit.findUnique({
-                  where: { id: treeCondition.benefitId },
-                  select: { id: true, name: true },
-                });
-                if (benefit) {
-                  condition.benefit = {
-                    id: benefit.id,
-                    name: benefit.name,
-                  };
-                }
-              }
+            case CampaignConditionType.BIRTHDAY:
+            case 'BIRTHDAY':
               break;
           }
 
@@ -742,7 +801,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     campaignId: number,
     data: CreateMarketingCampaignConditionDto,
   ): Promise<MarketingCampaignConditionResponseDto> {
-    // Verify campaign exists
     const campaign = await this.prisma.marketingCampaign.findUnique({
       where: { id: campaignId },
     });
@@ -751,13 +809,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       throw new Error('Marketing campaign not found');
     }
 
-    // Get existing condition record for this campaign
     const existingCondition =
       await this.prisma.marketingCampaignCondition.findFirst({
         where: { campaignId },
       });
 
-    // Parse existing tree or create empty array
     let existingTree: any[] = [];
     if (existingCondition?.tree) {
       existingTree = Array.isArray(existingCondition.tree)
@@ -765,16 +821,23 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         : [];
     }
 
-    // Convert DTO to tree format
-    const newCondition: any = {
-      type: data.type,
+    const typeMap: Record<string, CampaignConditionType> = {
+      TIME_RANGE: CampaignConditionType.TIME_RANGE,
+      WEEKDAY: CampaignConditionType.WEEKDAY,
+      BIRTHDAY: CampaignConditionType.BIRTHDAY,
+      EVENT: CampaignConditionType.BIRTHDAY, // Map legacy EVENT to BIRTHDAY
+      VISIT_COUNT: CampaignConditionType.VISIT_COUNT,
+      PURCHASE_AMOUNT: CampaignConditionType.PURCHASE_AMOUNT,
+      PROMOCODE_ENTRY: CampaignConditionType.PROMOCODE_ENTRY,
     };
 
-    // Handle different condition types
+    const newCondition: any = {
+      type: typeMap[data.type] || data.type,
+    };
+
     switch (data.type) {
       case 'TIME_RANGE':
         if (data.startTime && data.endTime) {
-          // Convert Date to HH:mm format
           const startHours = data.startTime
             .getHours()
             .toString()
@@ -801,7 +864,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
       case 'VISIT_COUNT':
         if (data.visitCount !== undefined) {
-          // Default to GREATER_THAN_OR_EQUAL if operator not provided
           newCondition.operator = '>=' as any;
           newCondition.value = data.visitCount;
         }
@@ -819,36 +881,51 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
 
       case 'PROMOCODE_ENTRY':
         if (data.promocodeId) {
-          // Fetch promocode to get the code
           const promocode = await this.prisma.lTYPromocode.findUnique({
             where: { id: data.promocodeId },
             select: { code: true },
           });
           if (promocode) {
             newCondition.code = promocode.code;
+
+            await this.prisma.marketingCampaignAction.update({
+              where: { campaignId },
+              data: {
+                promocode: {
+                  connect: {
+                    id: data.promocodeId,
+                  },
+                },
+              },
+            });
           } else {
             throw new Error(`Promocode with id ${data.promocodeId} not found`);
           }
         }
         break;
 
-      case 'EVENT':
-        // EVENT type is not in the tree schema, but we'll store it
-        if (data.benefitId) {
-          newCondition.benefitId = data.benefitId;
-        }
+      case 'BIRTHDAY':
         break;
     }
 
-    // Add new condition to tree
     existingTree.push(newCondition);
 
-    // Validate the tree using zod schema (skip validation for EVENT type as it's not in the schema)
-    const conditionsToValidate = existingTree.filter(
-      (c) =>
-        c.type !== 'EVENT' &&
-        c.type !== CampaignConditionType.BIRTHDAY &&
-        c.type !== CampaignConditionType.INACTIVITY,
+    const normalizedTree = existingTree.map((condition) => {
+      if (
+        condition.type &&
+        typeof condition.type === 'string' &&
+        typeMap[condition.type]
+      ) {
+        return {
+          ...condition,
+          type: typeMap[condition.type],
+        };
+      }
+      return condition;
+    });
+
+    const conditionsToValidate = normalizedTree.filter(
+      (c) => c.type !== CampaignConditionType.INACTIVITY,
     );
 
     if (conditionsToValidate.length > 0) {
@@ -856,41 +933,43 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         campaignConditionTreeSchema.safeParse(conditionsToValidate);
 
       if (!validationResult.success) {
+        const typeValues = conditionsToValidate.map((c) => ({
+          type: c.type,
+          typeOf: typeof c.type,
+        }));
         throw new Error(
-          `Invalid condition tree: ${validationResult.error.errors.map((e) => e.message).join(', ')}`,
+          `Invalid condition tree: ${validationResult.error.errors.map((e) => e.message).join(', ')}. Condition types: ${JSON.stringify(typeValues)}`,
         );
       }
     }
 
-    // Update or create condition record
+    const finalTree = normalizedTree;
+
     let finalCondition;
     if (existingCondition) {
       finalCondition = await this.prisma.marketingCampaignCondition.update({
         where: { id: existingCondition.id },
         data: {
-          tree: existingTree,
+          tree: finalTree,
         },
       });
     } else {
       finalCondition = await this.prisma.marketingCampaignCondition.create({
         data: {
           campaignId,
-          tree: existingTree,
+          tree: finalTree,
         },
       });
     }
 
-    // Convert tree condition back to response format
-    const treeCondition = existingTree[existingTree.length - 1];
+    const treeCondition = finalTree[finalTree.length - 1];
     const response: MarketingCampaignConditionResponseDto = {
       id: finalCondition.id,
       type: data.type as any,
-      order: data.order ?? existingTree.length - 1,
+      order: data.order ?? finalTree.length - 1,
     };
 
-    // Map tree format back to response format
     if (treeCondition.type === 'TIME_RANGE') {
-      // Parse HH:mm back to Date (using today's date as base)
       if (treeCondition.start && treeCondition.end) {
         const [startHours, startMinutes] = treeCondition.start.split(':');
         const [endHours, endMinutes] = treeCondition.end.split(':');
@@ -914,7 +993,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     } else if (treeCondition.type === 'PROMOCODE_ENTRY') {
       if (data.promocodeId) {
         response.promocodeId = data.promocodeId;
-        // Fetch promocode details
         const promocode = await this.prisma.lTYPromocode.findUnique({
           where: { id: data.promocodeId },
           select: { id: true, code: true },
@@ -926,21 +1004,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
           };
         }
       }
-    } else if (treeCondition.type === 'EVENT' || data.type === 'EVENT') {
-      if (data.benefitId) {
-        response.benefitId = data.benefitId;
-        // Fetch benefit details
-        const benefit = await this.prisma.lTYBenefit.findUnique({
-          where: { id: data.benefitId },
-          select: { id: true, name: true },
-        });
-        if (benefit) {
-          response.benefit = {
-            id: benefit.id,
-            name: benefit.name,
-          };
-        }
-      }
+    } else if (
+      treeCondition.type === CampaignConditionType.BIRTHDAY ||
+      data.type === 'BIRTHDAY'
+    ) {
     }
 
     return response;

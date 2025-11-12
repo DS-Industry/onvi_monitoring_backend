@@ -4,12 +4,59 @@ import {
   IPromoCodeRepository,
   PromoCode,
   CreateMarketingCampaignUsageInput,
+  CreatePromoCodeInput,
 } from '../interface/promo-code-repository.interface';
 
 @Injectable()
 export class PromoCodeRepository extends IPromoCodeRepository {
   constructor(private readonly prisma: PrismaService) {
     super();
+  }
+
+  async create(input: CreatePromoCodeInput): Promise<PromoCode> {
+    const promocode = await this.prisma.lTYPromocode.create({
+      data: {
+        campaignId: input.campaignId,
+        code: input.code,
+        promocodeType: input.promocodeType as any,
+        personalUserId: input.personalUserId,
+        discountType: input.discountType as any,
+        discountValue: input.discountValue,
+        minOrderAmount: input.minOrderAmount,
+        maxDiscountAmount: input.maxDiscountAmount,
+        maxUsage: input.maxUsage,
+        maxUsagePerUser: input.maxUsagePerUser ?? 1,
+        validFrom: input.validFrom ?? new Date(),
+        validUntil: input.validUntil,
+        isActive: input.isActive ?? true,
+        createdByManagerId: input.createdByManagerId,
+        createdReason: input.createdReason,
+        usageRestrictions: input.usageRestrictions,
+        organizationId: input.organizationId,
+        posId: input.posId,
+        placementId: input.placementId,
+      },
+    });
+
+    return {
+      id: promocode.id,
+      campaignId: promocode.campaignId,
+      code: promocode.code,
+      discountType: promocode.discountType || '',
+      discountValue: Number(promocode.discountValue || 0),
+      minOrderAmount: promocode.minOrderAmount
+        ? Number(promocode.minOrderAmount)
+        : null,
+      maxDiscountAmount: promocode.maxDiscountAmount
+        ? Number(promocode.maxDiscountAmount)
+        : null,
+      maxUsage: promocode.maxUsage,
+      maxUsagePerUser: promocode.maxUsagePerUser,
+      currentUsage: promocode.currentUsage,
+      validFrom: promocode.validFrom,
+      validUntil: promocode.validUntil,
+      isActive: promocode.isActive,
+    };
   }
 
   async findById(id: number): Promise<PromoCode | null> {

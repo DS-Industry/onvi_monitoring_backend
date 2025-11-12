@@ -166,6 +166,9 @@ import { LoyaltyProgramTransactionAnalyticsRequestDto } from '@platform-user/cor
 import { LoyaltyProgramTransactionAnalyticsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-transaction-analytics-response.dto';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
+import { PromocodeCreateDto } from '@platform-user/core-controller/dto/receive/promocode-create.dto';
+import { PromoCode } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -225,6 +228,7 @@ export class LoyaltyController {
     private readonly getLoyaltyProgramTransactionAnalyticsUseCase: GetLoyaltyProgramTransactionAnalyticsUseCase,
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
+    private readonly createPromocodeUseCase: CreatePromocodeUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -344,6 +348,43 @@ export class LoyaltyController {
       }
     }
   }
+  @Post('promocode')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(201)
+  async createPromocode(
+    @Request() req: any,
+    @Body() data: PromocodeCreateDto,
+  ): Promise<PromoCode> {
+    try {
+      const { user, ability } = req;
+
+      if (data.campaignId) {
+        await this.loyaltyValidateRules.updateMarketingCampaignValidate(
+          data.campaignId,
+          {},
+          ability,
+        );
+      }
+
+      return await this.createPromocodeUseCase.execute(data, user.id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   //Update program
   @Patch('program')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -2027,7 +2068,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.createMarketingCampaignValidate(
         {
-          ltyProgramId: data.ltyProgramId,
+          ltyProgramParticipantId: data.ltyProgramParticipantId,
         },
         ability,
       );

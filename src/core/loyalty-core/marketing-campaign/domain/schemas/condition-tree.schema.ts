@@ -38,8 +38,6 @@ const purchaseAmountConditionSchema = z.object({
 
 const birthdayConditionSchema = z.object({
   type: z.literal(CampaignConditionType.BIRTHDAY),
-  daysBefore: z.number().int().min(0, { message: 'daysBefore must be >= 0' }),
-  daysAfter: z.number().int().min(0, { message: 'daysAfter must be >= 0' }),
 });
 
 const inactivityConditionSchema = z.object({

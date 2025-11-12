@@ -78,6 +78,7 @@ import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-camp
 import { CreateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-create';
 import { UpdateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-update';
 import { UpsertMarketingCampaignMobileDisplayUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-mobile-display-upsert';
+import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
@@ -276,6 +277,7 @@ const marketingCampaignUseCase: Provider[] = [
   UpsertMarketingCampaignMobileDisplayUseCase,
   CreateMarketingCampaignActionUseCase,
   UpdateMarketingCampaignActionUseCase,
+  CreatePromocodeUseCase,
 ];
 
 const redisProviders: Provider[] = [RedisService];

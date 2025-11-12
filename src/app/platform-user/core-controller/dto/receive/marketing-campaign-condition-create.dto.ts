@@ -61,9 +61,4 @@ export class CreateMarketingCampaignConditionDto {
   @IsNumber()
   @IsOptional()
   promocodeId?: number;
-
-  @ValidateIf((o) => o.type === 'EVENT')
-  @IsNumber()
-  @IsOptional()
-  benefitId?: number;
 }

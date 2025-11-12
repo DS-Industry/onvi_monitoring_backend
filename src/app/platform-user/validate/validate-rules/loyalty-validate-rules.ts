@@ -639,36 +639,69 @@ export class LoyaltyValidateRules {
 
   public async createMarketingCampaignValidate(
     data: {
-      ltyProgramId: number;
+      ltyProgramParticipantId: number;
+      posIds?: number[];
     },
     ability: any,
   ) {
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
+    const response = [];
 
-    if (userLoyaltyProgramIds.length === 0) {
-      throw new LoyaltyException(
-        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Access denied: No loyalty program permissions',
-      );
+    const userOrganizationIds = this.extractOrganizationIds(ability);
+
+    if (userOrganizationIds.length === 0) {
+      response.push({
+        code: 403,
+        errorMessage: 'Access denied: No organization permissions',
+      });
     }
 
-    const loyaltyProgramCheck = await this.validateLib.loyaltyProgramByIdExists(
-      data.ltyProgramId,
+    const participantCheck =
+      await this.validateLib.ltyProgramParticipantByIdExists(
+        data.ltyProgramParticipantId,
+      );
+    response.push(participantCheck);
+
+    if (participantCheck.code !== 200 || !participantCheck.object) {
+      response.push({
+        code: 400,
+        errorMessage: 'The loyalty program participant does not exist',
+      });
+    }
+
+    if (!userOrganizationIds.includes(participantCheck.object.organizationId)) {
+      response.push({
+        code: 403,
+        errorMessage:
+          'Access denied: You do not have access to this organization',
+      });
+    }
+
+    if (data.posIds && data.posIds.length > 0) {
+      const posCheckPromises = data.posIds.map((posId) =>
+        this.validateLib.posByIdExists(posId),
+      );
+      const posCheckResults = await Promise.all(posCheckPromises);
+      response.push(...posCheckResults);
+
+      for (const posCheck of posCheckResults) {
+        if (posCheck.code === 200 && posCheck.object) {
+          const pos = posCheck.object;
+
+          if (!userOrganizationIds.includes(pos.organizationId)) {
+            response.push({
+              code: 403,
+              errorMessage: `Access denied: You do not have access to POS organization ${pos.organizationId}`,
+            });
+          }
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
-
-    if (loyaltyProgramCheck.code !== 200 || !loyaltyProgramCheck.object) {
-      throw new LoyaltyException(
-        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Loyalty program does not exist',
-      );
-    }
-
-    if (!userLoyaltyProgramIds.includes(data.ltyProgramId)) {
-      throw new LoyaltyException(
-        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Access denied: You do not have access to this loyalty program',
-      );
-    }
   }
 
   public async getMarketingCampaignsValidate(
