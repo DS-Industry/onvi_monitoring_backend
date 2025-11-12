@@ -1,4 +1,4 @@
-export class CreateDto{
+export class CreateDto {
   heading: string;
   body: string;
   userIds: number[];

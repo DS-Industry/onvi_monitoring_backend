@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { IPaymentGateway, RefundPaymentDto } from '../interfaces/payment-gateway.interface';
+import {
+  IPaymentGateway,
+  RefundPaymentDto,
+} from '../interfaces/payment-gateway.interface';
 
 @Injectable()
 export class RefundPaymentUseCaseCore {
@@ -17,5 +20,3 @@ export class RefundPaymentUseCaseCore {
     return this.paymentGateway.createRefund(payload);
   }
 }
-
-

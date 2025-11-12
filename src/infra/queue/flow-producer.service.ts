@@ -1,7 +1,10 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FlowProducer } from 'bullmq';
-import { IFlowProducer, FlowJobConfig } from '@loyalty/order/interface/flow-producer.interface';
+import {
+  IFlowProducer,
+  FlowJobConfig,
+} from '@loyalty/order/interface/flow-producer.interface';
 
 @Injectable()
 export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
@@ -36,14 +39,15 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
         children: config.children,
         opts: config.opts,
       });
-      
+
       this.logger.debug(
         `Flow job added successfully: ${config.name} to queue: ${config.queueName}`,
       );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      
+
       this.logger.error(
         `Failed to add flow job: ${config.name} to queue: ${config.queueName}. Error: ${errorMessage}`,
         errorStack,
@@ -68,16 +72,14 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
       password:
         this.configService.get<string>('REDIS_WORKER_DATA_PASSWORD') ||
         this.configService.get<string>('REDIS_PASSWORD'),
-      keepAlive:
-        parseInt(
-          this.configService.get<string>('REDIS_KEEPALIVE') || '30000',
-          10,
-        ),
-      connectTimeout:
-        parseInt(
-          this.configService.get<string>('REDIS_CONNECT_TIMEOUT') || '60000',
-          10,
-        ),
+      keepAlive: parseInt(
+        this.configService.get<string>('REDIS_KEEPALIVE') || '30000',
+        10,
+      ),
+      connectTimeout: parseInt(
+        this.configService.get<string>('REDIS_CONNECT_TIMEOUT') || '60000',
+        10,
+      ),
       retryStrategy: (times: number) => {
         const maxDelay = parseInt(
           this.configService.get<string>('REDIS_RETRY_MAX_DELAY') || '3000',
@@ -88,5 +90,3 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
     };
   }
 }
-
-

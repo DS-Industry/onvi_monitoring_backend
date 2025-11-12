@@ -42,14 +42,19 @@ export class HandlerTechTaskUseCase {
       errors: [],
     };
 
-    this.logger.log(`Processing tech tasks for date range: ${format(todayUTC, 'yyyy-MM-dd')} to ${format(tomorrowUTC, 'yyyy-MM-dd')}`);
+    this.logger.log(
+      `Processing tech tasks for date range: ${format(todayUTC, 'yyyy-MM-dd')} to ${format(tomorrowUTC, 'yyyy-MM-dd')}`,
+    );
 
     try {
-      const overdueResult = await this.processOverdueTasks(todayUTC, tomorrowUTC);
+      const overdueResult = await this.processOverdueTasks(todayUTC);
       result.overdueTasksUpdated = overdueResult.updated;
       result.errors.push(...overdueResult.errors);
 
-      const recurringResult = await this.processRecurringTasks(todayUTC, tomorrowUTC);
+      const recurringResult = await this.processRecurringTasks(
+        todayUTC,
+        tomorrowUTC,
+      );
       result.createdTasks = recurringResult.created;
       result.processedTasks = recurringResult.processed;
       result.errors.push(...recurringResult.errors);
@@ -63,7 +68,9 @@ export class HandlerTechTaskUseCase {
     return result;
   }
 
-  private async processOverdueTasks(todayUTC: Date, tomorrowUTC: Date): Promise<{ updated: number; errors: string[] }> {
+  private async processOverdueTasks(
+    todayUTC: Date,
+  ): Promise<{ updated: number; errors: string[] }> {
     const result = { updated: 0, errors: [] };
 
     try {
@@ -72,12 +79,14 @@ export class HandlerTechTaskUseCase {
       yesterdayEnd.setHours(23, 59, 59, 999);
 
       const activeTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
-        lteEndSpecifiedDate: yesterdayEnd, 
+        lteEndSpecifiedDate: yesterdayEnd,
         statuses: [StatusTechTask.ACTIVE, StatusTechTask.RETURNED],
         take: this.config.maxTasksPerBatch,
       });
 
-      this.logger.log(`Searching for overdue tasks with endSpecifiedDate <= ${format(yesterdayEnd, 'yyyy-MM-dd HH:mm:ss')}`);
+      this.logger.log(
+        `Searching for overdue tasks with endSpecifiedDate <= ${format(yesterdayEnd, 'yyyy-MM-dd HH:mm:ss')}`,
+      );
 
       this.logger.log(`Found ${activeTasks.length} tasks to mark as overdue`);
 
@@ -107,9 +116,13 @@ export class HandlerTechTaskUseCase {
       );
 
       result.updated = batchResult.successful.length;
-      result.errors = batchResult.failed.map(f => `Failed to mark task as overdue: ${f.error.message}`);
+      result.errors = batchResult.failed.map(
+        (f) => `Failed to mark task as overdue: ${f.error.message}`,
+      );
 
-      this.logger.log(`Overdue tasks processing completed: ${result.updated} updated, ${result.errors.length} errors`);
+      this.logger.log(
+        `Overdue tasks processing completed: ${result.updated} updated, ${result.errors.length} errors`,
+      );
     } catch (error) {
       const errorMsg = `Failed to fetch overdue tasks: ${error.message}`;
       this.logger.error(errorMsg);
@@ -119,29 +132,39 @@ export class HandlerTechTaskUseCase {
     return result;
   }
 
-  private async processRecurringTasks(todayUTC: Date, tomorrowUTC: Date): Promise<{ processed: number; created: number; errors: string[] }> {
+  private async processRecurringTasks(
+    todayUTC: Date,
+    tomorrowUTC: Date,
+  ): Promise<{ processed: number; created: number; errors: string[] }> {
     const result = { processed: 0, created: 0, errors: [] };
 
     try {
-      const allRecurringTasks = await this.findMethodsTechTaskUseCase.getAllByFilter({
-        lteNextCreateDate: tomorrowUTC,
-        type: TypeTechTask.REGULAR,
-        statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE], 
-        take: this.config.maxTasksPerBatch, 
-      });
+      const allRecurringTasks =
+        await this.findMethodsTechTaskUseCase.getAllByFilter({
+          lteNextCreateDate: tomorrowUTC,
+          type: TypeTechTask.REGULAR,
+          statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE],
+          take: this.config.maxTasksPerBatch,
+        });
 
-      const recurringTasks = allRecurringTasks.filter(task => {
+      const recurringTasks = allRecurringTasks.filter((task) => {
         if (!task.periodType) {
-          this.logger.warn(`Skipping task ${task.id} (${task.name}) - missing periodType (legacy task)`);
+          this.logger.warn(
+            `Skipping task ${task.id} (${task.name}) - missing periodType (legacy task)`,
+          );
           return false;
         }
         return true;
       });
 
-      this.logger.log(`Found ${recurringTasks.length} recurring tasks to process`);
+      this.logger.log(
+        `Found ${recurringTasks.length} recurring tasks to process`,
+      );
       if (this.config.enableDetailedLogging) {
-        recurringTasks.forEach(task => {
-          this.logger.debug(`Task ${task.id} (${task.name}): nextCreateDate=${task.nextCreateDate}, status=${task.status}`);
+        recurringTasks.forEach((task) => {
+          this.logger.debug(
+            `Task ${task.id} (${task.name}): nextCreateDate=${task.nextCreateDate}, status=${task.status}`,
+          );
         });
       }
       result.processed = recurringTasks.length;
@@ -157,7 +180,7 @@ export class HandlerTechTaskUseCase {
         },
         {
           batchSize: this.config.batchSize,
-          maxConcurrency: 3, 
+          maxConcurrency: 3,
           timeoutMs: this.config.taskTimeoutMs,
           retryAttempts: this.config.maxRetries,
           retryDelayMs: this.config.retryDelayMs,
@@ -165,9 +188,13 @@ export class HandlerTechTaskUseCase {
       );
 
       result.created = batchResult.successful.length;
-      result.errors = batchResult.failed.map(f => `Failed to create recurring task: ${f.error.message}`);
+      result.errors = batchResult.failed.map(
+        (f) => `Failed to create recurring task: ${f.error.message}`,
+      );
 
-      this.logger.log(`Recurring tasks processing completed: ${result.created} created, ${result.errors.length} errors`);
+      this.logger.log(
+        `Recurring tasks processing completed: ${result.created} created, ${result.errors.length} errors`,
+      );
     } catch (error) {
       const errorMsg = `Failed to fetch recurring tasks: ${error.message}`;
       this.logger.error(errorMsg);
@@ -177,28 +204,35 @@ export class HandlerTechTaskUseCase {
     return result;
   }
 
-  private async createRecurringTask(task: TechTask, todayUTC: Date): Promise<number> {
+  private async createRecurringTask(
+    task: TechTask,
+    todayUTC: Date,
+  ): Promise<number> {
     const tomorrowUTC = endOfDay(new Date());
-    
-    const existingTasksToday = await this.findMethodsTechTaskUseCase.getAllByFilter({
-      posId: task.posId,
-      gteStartDate: todayUTC,
-      lteStartDate: tomorrowUTC,
-      type: TypeTechTask.REGULAR,
-      name: task.name,
-    });
 
-    const duplicateTask = existingTasksToday.find(existingTask => 
-      existingTask.name === task.name && 
-      existingTask.posId === task.posId &&
-      existingTask.periodType === task.periodType &&
-      existingTask.customPeriodDays === task.customPeriodDays &&
-      existingTask.id !== task.id
+    const existingTasksToday =
+      await this.findMethodsTechTaskUseCase.getAllByFilter({
+        posId: task.posId,
+        gteStartDate: todayUTC,
+        lteStartDate: tomorrowUTC,
+        type: TypeTechTask.REGULAR,
+        name: task.name,
+      });
+
+    const duplicateTask = existingTasksToday.find(
+      (existingTask) =>
+        existingTask.name === task.name &&
+        existingTask.posId === task.posId &&
+        existingTask.periodType === task.periodType &&
+        existingTask.customPeriodDays === task.customPeriodDays &&
+        existingTask.id !== task.id,
     );
 
     if (duplicateTask) {
       if (this.config.enableDetailedLogging) {
-        this.logger.warn(`Skipping task creation for ${task.name} (ID: ${task.id}) - duplicate already exists (ID: ${duplicateTask.id})`);
+        this.logger.warn(
+          `Skipping task creation for ${task.name} (ID: ${task.id}) - duplicate already exists (ID: ${duplicateTask.id})`,
+        );
       }
       return duplicateTask.id;
     }
@@ -223,7 +257,9 @@ export class HandlerTechTaskUseCase {
     );
 
     if (this.config.enableDetailedLogging) {
-      this.logger.log(`Created new recurring task: ${task.name} (Original ID: ${task.id}, New ID: ${newTask.id})`);
+      this.logger.log(
+        `Created new recurring task: ${task.name} (Original ID: ${task.id}, New ID: ${newTask.id})`,
+      );
     }
 
     return newTask.id;

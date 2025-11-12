@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
-import { LoyaltyProgramParticipantResponseDto, mapLoyaltyProgramToParticipantResponse } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
+import {
+  LoyaltyProgramParticipantResponseDto,
+  mapLoyaltyProgramToParticipantResponse,
+} from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { LoyaltyParticipantProgramsPaginatedResponseDto } from '@platform-user/core-controller/dto/response/loyalty-participant-programs-paginated-response.dto';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
@@ -24,9 +27,7 @@ export class FindMethodsLoyaltyProgramUseCase {
     return await this.loyaltyProgramRepository.findOneById(id);
   }
 
-  async getOneByOrganizationId(
-    organizationId: number,
-  ): Promise<LTYProgram> {
+  async getOneByOrganizationId(organizationId: number): Promise<LTYProgram> {
     return await this.loyaltyProgramRepository.findOneByOrganizationId(
       organizationId,
     );
@@ -62,20 +63,25 @@ export class FindMethodsLoyaltyProgramUseCase {
     return await this.loyaltyProgramRepository.findAllByUserId(userId);
   }
 
-  async getAllParticipantProgramsByOrganizationId(organizationId: number): Promise<LoyaltyProgramParticipantResponseDto[]> {
-    const results = await this.loyaltyProgramRepository.findAllParticipantProgramsByOrganizationId(organizationId);
-    return results.map(({ program, participantId }) => 
-      mapLoyaltyProgramToParticipantResponse(program, participantId)
+  async getAllParticipantProgramsByOrganizationId(
+    organizationId: number,
+  ): Promise<LoyaltyProgramParticipantResponseDto[]> {
+    const results =
+      await this.loyaltyProgramRepository.findAllParticipantProgramsByOrganizationId(
+        organizationId,
+      );
+    return results.map(({ program, participantId }) =>
+      mapLoyaltyProgramToParticipantResponse(program, participantId),
     );
   }
 
   async getAllParticipantProgramsByOrganizationIdPaginated(
-    organizationId: number, 
-    page?: number, 
+    organizationId: number,
+    page?: number,
     size?: number,
     status?: string,
     participationRole?: string,
-    search?: string
+    search?: string,
   ): Promise<LoyaltyParticipantProgramsPaginatedResponseDto> {
     const pageNum = page || 1;
     const sizeNum = size || 10;
@@ -84,36 +90,48 @@ export class FindMethodsLoyaltyProgramUseCase {
 
     const [results, total] = await Promise.all([
       this.loyaltyProgramRepository.findAllParticipantProgramsByOrganizationIdPaginated(
-        organizationId, 
-        skip, 
-        take, 
-        status, 
+        organizationId,
+        skip,
+        take,
+        status,
         participationRole,
-        search
+        search,
       ),
       this.loyaltyProgramRepository.countParticipantProgramsByOrganizationId(
-        organizationId, 
-        status, 
+        organizationId,
+        status,
         participationRole,
-        search
+        search,
       ),
     ]);
 
     const programsWithAnalytics = await Promise.all(
       results.map(async ({ program, participantId }) => {
-        const organizations = await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(program.id);
-        
+        const organizations =
+          await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+            program.id,
+          );
+
         let connectedPoses = 0;
         if (organizations.length > 0) {
-          const organizationIds = organizations.map(org => org.id);
-          const poses = await this.findMethodsPosUseCase.getAllByOrganizationIds(organizationIds);
+          const organizationIds = organizations.map((org) => org.id);
+          const poses =
+            await this.findMethodsPosUseCase.getAllByOrganizationIds(
+              organizationIds,
+            );
           connectedPoses = poses.length;
         }
 
-        const engagedClients = await this.cardRepository.countByLoyaltyProgramId(program.id);
+        const engagedClients =
+          await this.cardRepository.countByLoyaltyProgramId(program.id);
 
-        return mapLoyaltyProgramToParticipantResponse(program, participantId, connectedPoses, engagedClients);
-      })
+        return mapLoyaltyProgramToParticipantResponse(
+          program,
+          participantId,
+          connectedPoses,
+          engagedClients,
+        );
+      }),
     );
 
     const totalPages = Math.ceil(total / sizeNum);

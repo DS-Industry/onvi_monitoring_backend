@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { TypeOrganization } from "@organization/organization/domain/typeOrganization";
+import { TypeOrganization } from '@organization/organization/domain/typeOrganization';
 
 export class OrganizationPreCreateDto {
   @IsString()

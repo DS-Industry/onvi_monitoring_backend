@@ -1,4 +1,8 @@
-import { ManagerPaperGroup, ManagerPaperTypeClass, ManagerReportPeriodStatus } from "@prisma/client";
+import {
+  ManagerPaperGroup,
+  ManagerPaperTypeClass,
+  ManagerReportPeriodStatus,
+} from '@prisma/client';
 
 export class GetDetailDto {
   id: number;

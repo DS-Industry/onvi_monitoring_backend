@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class PaymentCreateDto {

@@ -20,10 +20,12 @@ export class GetAllPermissionsInfoUseCases {
 
   async getPermissionsInfoForUser(user: User) {
     const role = await this.findMethodsRoleUseCase.getById(user.userRoleId);
-    const isSuperAdmin = role.name === "Разработчик"
+    const isSuperAdmin = role.name === 'Разработчик';
 
-    const ability =
-      await this.caslAbilityFactory.createForPlatformManager(user, isSuperAdmin);
+    const ability = await this.caslAbilityFactory.createForPlatformManager(
+      user,
+      isSuperAdmin,
+    );
     const organizationCondition =
       await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
     return {

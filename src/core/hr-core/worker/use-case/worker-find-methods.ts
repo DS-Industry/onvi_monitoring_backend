@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IWorkerRepository } from '@hr/worker/interface/worker';
 import { Worker } from '@hr/worker/domain/worker';
 import { PaymentType } from '@prisma/client';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class FindMethodsWorkerUseCase {
@@ -53,7 +53,7 @@ export class FindMethodsWorkerUseCase {
   }
 
   async getAllForCalculatePayment(data: {
-    user: User,
+    user: User;
     organizationId: number;
     billingMonth: Date;
     hrPositionId?: number;

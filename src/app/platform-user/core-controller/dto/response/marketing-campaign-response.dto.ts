@@ -1,3 +1,4 @@
+import { MarketingCampaignActionType } from '@prisma/client';
 export class MarketingCampaignResponseDto {
   id: number;
   name: string;
@@ -20,4 +21,6 @@ export class MarketingCampaignResponseDto {
     id: number;
     name: string;
   };
+  actionType: MarketingCampaignActionType | null;
+  actionPayload: JSON | null;
 }

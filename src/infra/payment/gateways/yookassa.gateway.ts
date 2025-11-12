@@ -1,8 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { YooCheckout } from '@a2seven/yoo-checkout';
 import { IPaymentMode, IPaymentSubject } from '@a2seven/yoo-checkout';
-import { IPaymentGateway, CreatePaymentDto, RefundPaymentDto } from '../../../core/payment-core/interfaces/payment-gateway.interface';
-import { PaymentSubject, PaymentMode } from '../../../core/payment-core/domain/payment.types';
+import {
+  IPaymentGateway,
+  CreatePaymentDto,
+  RefundPaymentDto,
+} from '../../../core/payment-core/interfaces/payment-gateway.interface';
+import {
+  PaymentSubject,
+  PaymentMode,
+} from '../../../core/payment-core/domain/payment.types';
 
 @Injectable()
 export class YooKassaGateway implements IPaymentGateway {
@@ -14,7 +21,9 @@ export class YooKassaGateway implements IPaymentGateway {
     const secretKey = process.env.YOOKASSA_SECRET_KEY;
 
     if (!shopId || !secretKey) {
-      throw new Error('YooKassa credentials are not configured. Please set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY environment variables.');
+      throw new Error(
+        'YooKassa credentials are not configured. Please set YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY environment variables.',
+      );
     }
 
     this.checkout = new YooCheckout({
@@ -60,7 +69,10 @@ export class YooKassaGateway implements IPaymentGateway {
 
       return await this.checkout.createPayment(paymentRequest);
     } catch (error) {
-      this.logger.error(`Failed to create payment: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create payment: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -69,7 +81,10 @@ export class YooKassaGateway implements IPaymentGateway {
     try {
       return await this.checkout.getPayment(id);
     } catch (error) {
-      this.logger.error(`Failed to get payment ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get payment ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -78,10 +93,11 @@ export class YooKassaGateway implements IPaymentGateway {
     try {
       return await this.checkout.createRefund(data);
     } catch (error) {
-      this.logger.error(`Failed to create refund for payment ${data.payment_id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create refund for payment ${data.payment_id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 }
-
-

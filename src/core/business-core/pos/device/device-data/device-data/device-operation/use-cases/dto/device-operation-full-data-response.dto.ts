@@ -1,6 +1,6 @@
-import { CurrencyType, CurrencyView } from "@prisma/client";
+import { CurrencyType, CurrencyView } from '@prisma/client';
 
-export class DeviceOperationFullDataResponseDto{
+export class DeviceOperationFullDataResponseDto {
   id?: number;
   carWashDeviceId: number;
   operDate: Date;

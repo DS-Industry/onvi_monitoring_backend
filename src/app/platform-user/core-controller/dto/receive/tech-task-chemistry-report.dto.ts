@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
-export class TechTaskChemistryReportDto{
+export class TechTaskChemistryReportDto {
   @IsNotEmpty({ message: 'dateStart is required' })
   @Transform(({ value }) => new Date(value))
   dateStart: Date;

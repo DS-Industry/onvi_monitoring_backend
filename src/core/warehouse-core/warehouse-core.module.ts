@@ -42,12 +42,12 @@ import { CreateSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-cases/sal
 import { FindMethodsSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-cases/saleItem-find-methods';
 import { CreateSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-create';
 import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
-import { SaleInventoryItemUseCase } from "@warehouse/inventoryItem/use-cases/inventoryItem-sale";
-import { DeleteCategoryUseCase } from "@warehouse/category/use-cases/category-delete";
-import { DeleteSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-delete";
-import { UpdateSupplierUseCase } from "@warehouse/supplier/use-cases/supplier-update";
-import { DeleteWarehouseDocumentUseCase } from "@warehouse/document/document/use-cases/warehouseDocument-delete";
-import { DeleteSalePriceUseCase } from "@warehouse/sale/MNGSalePrice/use-cases/salePrice-delete";
+import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
+import { DeleteCategoryUseCase } from '@warehouse/category/use-cases/category-delete';
+import { DeleteSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-delete';
+import { UpdateSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-update';
+import { DeleteWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-delete';
+import { DeleteSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-delete';
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,

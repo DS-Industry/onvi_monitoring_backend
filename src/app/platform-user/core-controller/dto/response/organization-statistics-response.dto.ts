@@ -1,4 +1,4 @@
-export class OrganizationStatisticsResponseDto{
+export class OrganizationStatisticsResponseDto {
   sum: number;
   cars: number;
 }

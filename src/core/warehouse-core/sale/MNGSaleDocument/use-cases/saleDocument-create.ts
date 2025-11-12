@@ -12,7 +12,7 @@ import { SandWarehouseDocumentUseCase } from '@warehouse/document/document/use-c
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
-import { SaleDocumentResponseDto } from "@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto";
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 
 @Injectable()
 export class CreateSaleDocumentUseCase {

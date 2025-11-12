@@ -27,12 +27,12 @@ export interface TechTaskProps {
   createdBy?: {
     firstName: string;
     lastName: string;
-    id: number
+    id: number;
   };
   executor?: {
     firstName: string;
     lastName: string;
-    id: number
+    id: number;
   };
 }
 
@@ -193,11 +193,15 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     this.props.tags = tags;
   }
 
-  set createdBy(createdBy: { firstName: string; lastName: string, id: number }) {
+  set createdBy(createdBy: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  }) {
     this.props.createdBy = createdBy;
   }
 
-  set executor(executor: { firstName: string; lastName: string, id: number }) {
+  set executor(executor: { firstName: string; lastName: string; id: number }) {
     this.props.executor = executor;
   }
 }

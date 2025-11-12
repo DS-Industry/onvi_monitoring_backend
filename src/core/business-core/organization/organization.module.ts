@@ -17,11 +17,9 @@ import { DateModule } from '@libs/date/module';
 import { MailModule } from '@libs/mail/module';
 import { FileModule } from '@libs/file/module';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';
-import { UpdateConfirmMailUseCase } from "@organization/confirmMail/use-case/confirm-mail-update";
-import {
-  GetStatisticsGrafOrganizationUseCase
-} from "@organization/organization/use-cases/organization-get-statistics-graf";
-import { PreCreateOrganizationUseCase } from "@organization/organization/use-cases/organization-pre-create";
+import { UpdateConfirmMailUseCase } from '@organization/confirmMail/use-case/confirm-mail-update';
+import { GetStatisticsGrafOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics-graf';
+import { PreCreateOrganizationUseCase } from '@organization/organization/use-cases/organization-pre-create';
 
 const repositories: Provider[] = [
   OrganizationRepositoryProvider,
@@ -47,18 +45,10 @@ const confirmMailOrganizationUseCase: Provider[] = [
   UpdateConfirmMailUseCase,
 ];
 
-const documentOrganizationUseCase: Provider[] = [
-  FindMethodsDocumentUseCase,
-];
+const documentOrganizationUseCase: Provider[] = [FindMethodsDocumentUseCase];
 
 @Module({
-  imports: [
-    PrismaModule,
-    PosModule,
-    DateModule,
-    MailModule,
-    FileModule,
-  ],
+  imports: [PrismaModule, PosModule, DateModule, MailModule, FileModule],
   providers: [
     ...repositories,
     ...organizationUseCase,

@@ -136,13 +136,10 @@ export class RegisterPaymentUseCase {
       return {
         status: OrderStatus.WAITING_PAYMENT,
         paymentId: paymentResult.id,
-        confirmation_url:
-          paymentResult?.confirmation?.confirmation_url || '',
+        confirmation_url: paymentResult?.confirmation?.confirmation_url || '',
       };
     } catch (error: any) {
-      const currentOrder = await this.orderRepository.findOneById(
-        data.orderId,
-      );
+      const currentOrder = await this.orderRepository.findOneById(data.orderId);
 
       if (paymentCreated && paymentResult?.id && currentOrder) {
         if (currentOrder.orderStatus === OrderStatus.PAYMENT_PROCESSING) {
@@ -185,4 +182,3 @@ export class RegisterPaymentUseCase {
     }
   }
 }
-

@@ -35,10 +35,10 @@ import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
-  CreateOrgAbility, ReadOrgAbility,
+  CreateOrgAbility,
   ReadPosAbility,
-  UpdateOrgAbility
-} from "@common/decorators/abilities.decorator";
+  UpdateOrgAbility,
+} from '@common/decorators/abilities.decorator';
 import { OrganizationException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
 import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/document-find-methods';

@@ -12,7 +12,7 @@ export class CorporateFindByFilterUseCase {
     data: CorporateClientsFilterDto,
   ): Promise<CorporateClientsPaginatedResponseDto> {
     let placementId: number | undefined = undefined;
-    
+
     if (data.placementId !== null && data.placementId !== undefined) {
       placementId = Number(data.placementId);
       if (isNaN(placementId)) {
@@ -49,10 +49,10 @@ export class CorporateFindByFilterUseCase {
       data.registrationTo,
     );
 
-    
-    const corporateData = corporates.map(corporate => this.mapToResponse(corporate));
+    const corporateData = corporates.map((corporate) =>
+      this.mapToResponse(corporate),
+    );
 
-    
     const totalPages = size > 0 ? Math.ceil(total / size) : 1;
     const hasNext = page < totalPages;
     const hasPrevious = page > 1;

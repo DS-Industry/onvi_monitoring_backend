@@ -5,13 +5,11 @@ import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class ValidateClientForJwtStrategyUseCase {
-  constructor(
-    private readonly clientRepository: FindMethodsClientUseCase,
-  ) {}
+  constructor(private readonly clientRepository: FindMethodsClientUseCase) {}
 
   async execute(phone: string): Promise<Client> {
     const client = await this.clientRepository.getByPhone(phone);
-    
+
     if (!client) {
       throw new Error('Client not found');
     }

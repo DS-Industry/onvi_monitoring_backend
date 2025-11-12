@@ -38,19 +38,13 @@ const purchaseAmountConditionSchema = z.object({
 
 const birthdayConditionSchema = z.object({
   type: z.literal(CampaignConditionType.BIRTHDAY),
-  daysBefore: z
-    .number()
-    .int()
-    .min(0, { message: 'daysBefore must be >= 0' }),
+  daysBefore: z.number().int().min(0, { message: 'daysBefore must be >= 0' }),
   daysAfter: z.number().int().min(0, { message: 'daysAfter must be >= 0' }),
 });
 
 const inactivityConditionSchema = z.object({
   type: z.literal(CampaignConditionType.INACTIVITY),
-  days: z
-    .number()
-    .int()
-    .min(1, { message: 'Inactivity days must be >= 1' }),
+  days: z.number().int().min(1, { message: 'Inactivity days must be >= 1' }),
 });
 
 const promocodeEntryConditionSchema = z.object({
@@ -72,8 +66,5 @@ export const campaignConditionTreeSchema = z
   .array(campaignConditionSchema)
   .min(1, { message: 'At least one condition is required' });
 
-export type CampaignConditionTree = z.infer<
-  typeof campaignConditionTreeSchema
->;
+export type CampaignConditionTree = z.infer<typeof campaignConditionTreeSchema>;
 export type CampaignCondition = z.infer<typeof campaignConditionSchema>;
-

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IAdminRepository } from '@platform-admin/admin/interfaces/admin';
 import { Admin } from '@platform-admin/admin/domain/admin';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { StatusUser } from "@prisma/client";
+import { StatusUser } from '@prisma/client';
 
 @Injectable()
 export class ValidateAdminForLocalStrategyUseCase {

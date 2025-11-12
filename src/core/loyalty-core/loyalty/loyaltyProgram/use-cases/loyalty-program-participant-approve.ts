@@ -11,27 +11,27 @@ export class LoyaltyProgramParticipantApproveUseCase {
     private readonly prisma: PrismaService,
   ) {}
 
-  async execute(
-    requestId: number,
-    user: User,
-    comment?: string,
-  ): Promise<any> {
-    const participantRequest = await this.participantRequestRepository.findFirstById(
-      requestId,
-      LTYProgramRequestStatus.PENDING,
-    );
+  async execute(requestId: number, user: User, comment?: string): Promise<any> {
+    const participantRequest =
+      await this.participantRequestRepository.findFirstById(
+        requestId,
+        LTYProgramRequestStatus.PENDING,
+      );
 
     if (!participantRequest) {
       throw new Error('No pending participant request found with this ID');
     }
 
-    const updatedRequest = await this.participantRequestRepository.update(participantRequest.id, {
-      status: LTYProgramRequestStatus.APPROVED,
-      reviewedAt: new Date(),
-      approvedAt: new Date(),
-      reviewedBy: user.id,
-      responseComment: comment,
-    });
+    const updatedRequest = await this.participantRequestRepository.update(
+      participantRequest.id,
+      {
+        status: LTYProgramRequestStatus.APPROVED,
+        reviewedAt: new Date(),
+        approvedAt: new Date(),
+        reviewedBy: user.id,
+        responseComment: comment,
+      },
+    );
 
     await this.prisma.lTYProgramParticipant.create({
       data: {

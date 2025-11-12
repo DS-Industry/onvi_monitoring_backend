@@ -4,7 +4,7 @@ import { CreateDto } from '@hr/worker/use-case/dto/create.dto';
 import { Worker } from '@hr/worker/domain/worker';
 import { IFileAdapter } from '@libs/file/adapter';
 import { v4 as uuid } from 'uuid';
-import { StatusHrWorker } from "@prisma/client";
+import { StatusHrWorker } from '@prisma/client';
 
 @Injectable()
 export class CreateWorkerUseCase {

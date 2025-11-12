@@ -6,7 +6,3 @@ export const PromoCodeRepositoryProvider: Provider = {
   provide: IPromoCodeRepository,
   useClass: PromoCodeRepository,
 };
-
-
-
-

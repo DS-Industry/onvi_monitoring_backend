@@ -256,7 +256,9 @@ export class CardRepository extends ICardRepository {
 
     if (
       !card.cardTier?.ltyProgram?.programParticipants ||
-      card.cardTier.ltyProgram.programParticipants.filter(p => p.status === 'ACTIVE').length === 0
+      card.cardTier.ltyProgram.programParticipants.filter(
+        (p) => p.status === 'ACTIVE',
+      ).length === 0
     ) {
       throw new Error(
         `Card does not belong to organization ${data.organizationId}`,
@@ -368,7 +370,9 @@ export class CardRepository extends ICardRepository {
 
     if (
       !card.cardTier?.ltyProgram?.programParticipants ||
-      card.cardTier.ltyProgram.programParticipants.filter(p => p.status === 'ACTIVE').length === 0
+      card.cardTier.ltyProgram.programParticipants.filter(
+        (p) => p.status === 'ACTIVE',
+      ).length === 0
     ) {
       throw new Error(
         `Card does not belong to organization ${data.organizationId}`,
@@ -545,14 +549,16 @@ export class CardRepository extends ICardRepository {
     return !!existingCard;
   }
 
-  public async countByLoyaltyProgramId(loyaltyProgramId: number): Promise<number> {
+  public async countByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<number> {
     return await this.prisma.lTYCard.count({
       where: {
         cardTier: {
           ltyProgramId: loyaltyProgramId,
         },
         clientId: {
-          not: null, 
+          not: null,
         },
       },
     });
@@ -583,7 +589,7 @@ export class CardRepository extends ICardRepository {
     `;
 
     // Convert BigInt values to regular numbers
-    return result.map(item => ({
+    return result.map((item) => ({
       date: item.date,
       accruals: Number(item.accruals),
       debits: Number(item.debits),

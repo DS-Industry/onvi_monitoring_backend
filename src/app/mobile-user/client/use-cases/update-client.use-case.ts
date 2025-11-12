@@ -23,7 +23,9 @@ export class UpdateClientUseCaseWrapper {
       email: dto.email,
     };
 
-    return await this.updateClientUseCase.execute(coreUpdateData, existingClient);
+    return await this.updateClientUseCase.execute(
+      coreUpdateData,
+      existingClient,
+    );
   }
 }
-

@@ -12,13 +12,19 @@ export class PaymentWebhookOrchestrateUseCase {
   constructor(
     @Inject(IOrderRepository)
     private readonly orderRepository: IOrderRepository,
-    @InjectQueue('payment-orchestrate') private readonly paymentOrchestrateQueue: Queue,
+    @InjectQueue('payment-orchestrate')
+    private readonly paymentOrchestrateQueue: Queue,
     private readonly verifyPaymentUseCase: VerifyPaymentUseCaseCore,
   ) {}
 
-  async execute(event: string, paymentId: string, data?: any, requestId?: string) {
+  async execute(
+    event: string,
+    paymentId: string,
+    data?: any,
+    requestId?: string,
+  ) {
     const order = await this.orderRepository.findOneByTransactionId(paymentId);
-    
+
     if (!order) {
       this.logger.warn(
         `Webhook received for unknown order. Payment ID: ${paymentId}, Event: ${event}, Request ID: ${requestId || 'unknown'}`,
@@ -59,7 +65,9 @@ export class PaymentWebhookOrchestrateUseCase {
         return;
       }
 
-      this.logger.log(`Order#${order.id} canceled via webhook. Request ID: ${requestId || 'unknown'}`);
+      this.logger.log(
+        `Order#${order.id} canceled via webhook. Request ID: ${requestId || 'unknown'}`,
+      );
       return;
     }
 
@@ -80,7 +88,7 @@ export class PaymentWebhookOrchestrateUseCase {
 
       try {
         const payment = await this.verifyPaymentUseCase.execute(paymentId);
-        
+
         if (payment.status !== 'succeeded') {
           this.logger.warn(
             `Payment ${paymentId} status mismatch: expected 'succeeded', got '${payment.status}'. Order#${order.id}. Request ID: ${requestId || 'unknown'}`,
@@ -88,7 +96,9 @@ export class PaymentWebhookOrchestrateUseCase {
           return;
         }
 
-        this.logger.log(`Payment ${paymentId} verified successfully for order#${order.id}`);
+        this.logger.log(
+          `Payment ${paymentId} verified successfully for order#${order.id}`,
+        );
       } catch (error) {
         this.logger.error(
           `Payment verification failed for payment ${paymentId}, order#${order.id}: ${error.message}. Request ID: ${requestId || 'unknown'}`,
@@ -136,5 +146,3 @@ export class PaymentWebhookOrchestrateUseCase {
     await this.orderRepository.update(order);
   }
 }
-
-

@@ -1,4 +1,4 @@
-import { PositionUser, StatusUser } from "@prisma/client";
+import { PositionUser, StatusUser } from '@prisma/client';
 
 export class UpdateUserDto {
   id: number;

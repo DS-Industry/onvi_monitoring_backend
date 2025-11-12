@@ -36,13 +36,17 @@ export class BatchProcessor {
       return result;
     }
 
-    this.logger.log(`Starting batch processing of ${items.length} items with batch size ${options.batchSize}`);
+    this.logger.log(
+      `Starting batch processing of ${items.length} items with batch size ${options.batchSize}`,
+    );
 
     const batches = this.chunkArray(items, options.batchSize);
-    
+
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i];
-      this.logger.debug(`Processing batch ${i + 1}/${batches.length} with ${batch.length} items`);
+      this.logger.debug(
+        `Processing batch ${i + 1}/${batches.length} with ${batch.length} items`,
+      );
 
       const batchResults = await this.processBatchWithConcurrency(
         batch,
@@ -56,7 +60,9 @@ export class BatchProcessor {
     }
 
     result.executionTimeMs = Date.now() - startTime;
-    this.logger.log(`Batch processing completed: ${result.successful.length} successful, ${result.failed.length} failed, ${result.executionTimeMs}ms`);
+    this.logger.log(
+      `Batch processing completed: ${result.successful.length} successful, ${result.failed.length} failed, ${result.executionTimeMs}ms`,
+    );
 
     return result;
   }
@@ -73,7 +79,7 @@ export class BatchProcessor {
 
     const promises = items.map(async (item) => {
       await semaphore.acquire();
-      
+
       try {
         const result = await this.processWithRetry(item, processor, options);
         successful.push(result);
@@ -105,10 +111,12 @@ export class BatchProcessor {
         }
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt < maxAttempts) {
           const delay = options.retryDelayMs || 1000;
-          this.logger.warn(`Attempt ${attempt} failed, retrying in ${delay}ms: ${error.message}`);
+          this.logger.warn(
+            `Attempt ${attempt} failed, retrying in ${delay}ms: ${error.message}`,
+          );
           await this.sleep(delay);
         }
       }
@@ -117,9 +125,15 @@ export class BatchProcessor {
     throw lastError!;
   }
 
-  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error(`Operation timed out after ${timeoutMs}ms`)), timeoutMs);
+      setTimeout(
+        () => reject(new Error(`Operation timed out after ${timeoutMs}ms`)),
+        timeoutMs,
+      );
     });
 
     return Promise.race([promise, timeoutPromise]);
@@ -134,7 +148,7 @@ export class BatchProcessor {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

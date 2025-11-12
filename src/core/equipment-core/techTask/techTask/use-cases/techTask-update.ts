@@ -39,13 +39,17 @@ export class UpdateTechTaskUseCase {
     oldTechTask.name = name ? name : oldTechTask.name;
     oldTechTask.type = type ? type : oldTechTask.type;
     oldTechTask.status = status ? status : oldTechTask.status;
-    oldTechTask.periodType = periodType !== undefined ? periodType : oldTechTask.periodType;
-    oldTechTask.customPeriodDays = customPeriodDays !== undefined ? customPeriodDays : oldTechTask.customPeriodDays;
+    oldTechTask.periodType =
+      periodType !== undefined ? periodType : oldTechTask.periodType;
+    oldTechTask.customPeriodDays =
+      customPeriodDays !== undefined
+        ? customPeriodDays
+        : oldTechTask.customPeriodDays;
 
     if (periodType !== undefined && periodType !== PeriodType.CUSTOM) {
       oldTechTask.customPeriodDays = undefined;
     }
-    
+
     oldTechTask.markdownDescription = markdownDescription
       ? markdownDescription
       : oldTechTask.markdownDescription;
@@ -53,7 +57,10 @@ export class UpdateTechTaskUseCase {
       ? endSpecifiedDate
       : oldTechTask.endSpecifiedDate;
     if (periodType !== undefined) {
-      PeriodCalculator.validatePeriodConfig(oldTechTask.periodType, oldTechTask.customPeriodDays);
+      PeriodCalculator.validatePeriodConfig(
+        oldTechTask.periodType,
+        oldTechTask.customPeriodDays,
+      );
     }
 
     oldTechTask.updatedAt = new Date(Date.now());
@@ -61,12 +68,16 @@ export class UpdateTechTaskUseCase {
     if (status) {
       if (status === StatusTechTask.PAUSE) {
         oldTechTask.nextCreateDate = null;
-      } else if ((status === StatusTechTask.FINISHED || status === StatusTechTask.OVERDUE) && oldTechTask.type === TypeTechTask.REGULAR) {
+      } else if (
+        (status === StatusTechTask.FINISHED ||
+          status === StatusTechTask.OVERDUE) &&
+        oldTechTask.type === TypeTechTask.REGULAR
+      ) {
         if (oldTechTask.nextCreateDate && oldTechTask.periodType) {
           oldTechTask.nextCreateDate = PeriodCalculator.calculateNextDate(
-            oldTechTask.nextCreateDate, 
-            oldTechTask.periodType, 
-            oldTechTask.customPeriodDays
+            oldTechTask.nextCreateDate,
+            oldTechTask.periodType,
+            oldTechTask.customPeriodDays,
           );
         }
       }

@@ -9,7 +9,3 @@ export enum OrderStatus {
   PAYMENT_PROCESSING = 'PAYMENT_PROCESSING',
   WAITING_PAYMENT = 'WAITING_PAYMENT',
 }
-
-
-
-

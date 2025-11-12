@@ -9,7 +9,7 @@ import { FindMethodsGradingParameterUseCase } from '@finance/shiftReport/grading
 import { ShiftGrading } from '@finance/shiftReport/shiftGrading/domain/shiftGrading';
 import { IShiftGradingRepository } from '@finance/shiftReport/shiftGrading/interface/shiftGrading';
 import { FindMethodsGradingEstimationUseCase } from '@finance/shiftReport/gradingEstimation/use-cases/gradingEstimation-find-methods';
-import { FullDataShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data";
+import { FullDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data';
 
 @Injectable()
 export class ReceiverShiftReportUseCase {

@@ -3,7 +3,3 @@ export enum DiscountType {
   FIXED_AMOUNT = 'FIXED_AMOUNT',
   FREE_SERVICE = 'FREE_SERVICE',
 }
-
-
-
-

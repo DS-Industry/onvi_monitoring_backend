@@ -6,9 +6,7 @@ import { Card } from '@loyalty/mobile-user/card/domain/card';
 
 @Injectable()
 export class CardImportUseCase {
-  constructor(
-    private readonly cardRepository: ICardRepository,
-  ) {}
+  constructor(private readonly cardRepository: ICardRepository) {}
 
   async execute(
     organizationId: number,
@@ -18,31 +16,37 @@ export class CardImportUseCase {
     let successCount = 0;
     let errorCount = 0;
 
-    const organizationExists = await this.cardRepository.validateOrganizationExists(organizationId);
+    const organizationExists =
+      await this.cardRepository.validateOrganizationExists(organizationId);
     if (!organizationExists) {
       throw new Error(`Organization with id ${organizationId} not found`);
     }
 
     for (const cardData of cardsData) {
       try {
-        const tierExists = await this.cardRepository.validateTierExistsAndAccessible(
-          cardData.tierId, 
-          organizationId
-        );
+        const tierExists =
+          await this.cardRepository.validateTierExistsAndAccessible(
+            cardData.tierId,
+            organizationId,
+          );
 
         if (!tierExists) {
-          errors.push(`Tier ${cardData.tierId} not found or not accessible for organization ${organizationId}`);
+          errors.push(
+            `Tier ${cardData.tierId} not found or not accessible for organization ${organizationId}`,
+          );
           errorCount++;
           continue;
         }
 
         const cardExists = await this.cardRepository.checkCardExists(
-          cardData.devNumber, 
-          cardData.uniqueNumber
+          cardData.devNumber,
+          cardData.uniqueNumber,
         );
 
         if (cardExists) {
-          errors.push(`Card with unqNumber ${cardData.uniqueNumber} or number ${cardData.devNumber} already exists`);
+          errors.push(
+            `Card with unqNumber ${cardData.uniqueNumber} or number ${cardData.devNumber} already exists`,
+          );
           errorCount++;
           continue;
         }
@@ -52,16 +56,17 @@ export class CardImportUseCase {
           number: cardData.devNumber,
           balance: 0,
           loyaltyCardTierId: cardData.tierId,
-          mobileUserId: undefined, 
+          mobileUserId: undefined,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
 
         await this.cardRepository.create(newCard);
         successCount++;
-
       } catch (error) {
-        errors.push(`Error processing card ${cardData.devNumber}: ${error.message}`);
+        errors.push(
+          `Error processing card ${cardData.devNumber}: ${error.message}`,
+        );
         errorCount++;
       }
     }

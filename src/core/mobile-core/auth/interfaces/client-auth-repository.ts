@@ -6,5 +6,7 @@ export abstract class IClientAuthRepository {
   abstract createSession(session: ClientSession): Promise<ClientSession>;
   abstract updateSession(session: ClientSession): Promise<ClientSession>;
   abstract deleteSession(clientId: number): Promise<void>;
-  abstract findActiveSessionByRefreshToken(refreshToken: string): Promise<ClientSession>;
+  abstract findActiveSessionByRefreshToken(
+    refreshToken: string,
+  ): Promise<ClientSession>;
 }

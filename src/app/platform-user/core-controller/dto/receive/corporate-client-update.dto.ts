@@ -4,11 +4,11 @@ export class CorporateClientUpdateDto {
   @IsOptional()
   @IsString()
   name?: string;
-  
+
   @IsOptional()
   @IsString()
   inn?: string;
-  
+
   @IsOptional()
   @IsString()
   address?: string;

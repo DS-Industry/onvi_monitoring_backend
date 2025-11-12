@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IWarehouseDocumentRepository, PaginatedWarehouseDocuments } from '@warehouse/document/document/interface/warehouseDocument';
+import {
+  IWarehouseDocumentRepository,
+  PaginatedWarehouseDocuments,
+} from '@warehouse/document/document/interface/warehouseDocument';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { WarehouseDocumentType } from '@prisma/client';
 import { PureAbility } from '@casl/ability';

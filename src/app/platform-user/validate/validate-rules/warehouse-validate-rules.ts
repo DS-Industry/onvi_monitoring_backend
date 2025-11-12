@@ -16,26 +16,30 @@ import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
 import { InventoryItemMonitoringDto } from '@platform-user/validate/validate-rules/dto/inventoryItem-monitoring.dto';
 import { WarehouseDocumentSaveDto } from '@platform-user/validate/validate-rules/dto/warehouseDocument-save.dto';
 import {
-  SALE_DOCUMENT_CREATE_EXCEPTION_CODE, SALE_DOCUMENT_GET_EXCEPTION_CODE, SALE_PRICE_DELETE_EXCEPTION_CODE,
+  SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
+  SALE_DOCUMENT_GET_EXCEPTION_CODE,
+  SALE_PRICE_DELETE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
   WAREHOUSE_CREATE_EXCEPTION_CODE,
   WAREHOUSE_CREATE_NOMENCLATURE_EXCEPTION_CODE,
-  WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE, WAREHOUSE_DELETE_DOCUMENT_EXCEPTION_CODE,
-  WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE, WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE,
+  WAREHOUSE_CREATE_NOMENCLATURE_FILE_EXCEPTION_CODE,
+  WAREHOUSE_DELETE_DOCUMENT_EXCEPTION_CODE,
+  WAREHOUSE_DELETE_NOMENCLATURE_EXCEPTION_CODE,
+  WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_INVENTORY_ITEM_EXCEPTION_CODE,
   WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE,
   WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE,
   WAREHOUSE_SAVE_DOCUMENT_EXCEPTION_CODE,
-  WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE
-} from "@constant/error.constants";
+  WAREHOUSE_UPDATE_NOMENCLATURE_EXCEPTION_CODE,
+} from '@constant/error.constants';
 import { WarehouseException } from '@exception/option.exceptions';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { User } from '@platform-user/user/domain/user';
 import { SaleDocumentCreateDto } from '@platform-user/core-controller/dto/receive/sale-document-create.dto';
-import { WarehouseDocument } from "@warehouse/document/document/domain/warehouseDocument";
-import { SalePrice } from "@warehouse/sale/MNGSalePrice/domain/salePrice";
-import { SaleDocumentResponseDto } from "@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto";
+import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
+import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 
 @Injectable()
 export class WarehouseValidateRules {
@@ -183,7 +187,7 @@ export class WarehouseValidateRules {
     }
   }
 
-  public async createNomenclatureFile(file: Express.Multer.File, ability: any) {
+  public async createNomenclatureFile(file: Express.Multer.File) {
     const response = [];
 
     const workbook = XLSX.read(file.buffer, { type: 'buffer' });
@@ -193,10 +197,10 @@ export class WarehouseValidateRules {
 
     /* eslint-disable prettier/prettier */
     const columnMappings = {
-      'Наименование': 'name',
-      'Артикул': 'sku',
-      'Категория': 'category',
-      'Организация': 'organization',
+      Наименование: 'name',
+      Артикул: 'sku',
+      Категория: 'category',
+      Организация: 'organization',
     };
 
     const headers = Object.keys(jsonData[0]);
@@ -210,32 +214,38 @@ export class WarehouseValidateRules {
       return transformedRow;
     });
 
-    response.push(await this.validateLib.nomenclatureExel(headers, columnMappings))
+    response.push(
+      await this.validateLib.nomenclatureExel(headers, columnMappings),
+    );
 
     jsonData = jsonData.map((row) => {
       if (row.category) {
         row.category = row.category.trim();
-        row.category = row.category.charAt(0).toUpperCase() + row.category.slice(1).toLowerCase();
+        row.category =
+          row.category.charAt(0).toUpperCase() +
+          row.category.slice(1).toLowerCase();
       }
       return row;
     });
     const organizations = Array.from(
       new Set(jsonData.map((row) => row.organization)),
     );
-    const categories = Array.from(
-      new Set(jsonData.map((row) => row.category)),
-    );
+    const categories = Array.from(new Set(jsonData.map((row) => row.category)));
     const organizationMap = new Map<string, number>();
     const categoriesMap = new Map<string, number>();
     await Promise.all(
       organizations.map(async (item) => {
-        const organizationCheck = await this.validateLib.organizationByNameExists(item);
+        const organizationCheck =
+          await this.validateLib.organizationByNameExists(item);
         response.push(organizationCheck);
         if (organizationCheck.object) {
-          organizationMap.set(organizationCheck.object.name, organizationCheck.object.id);
+          organizationMap.set(
+            organizationCheck.object.name,
+            organizationCheck.object.id,
+          );
         }
-      })
-    )
+      }),
+    );
     await Promise.all(
       categories.map(async (item) => {
         const categoryCheck = await this.validateLib.categoryByNameExists(item);
@@ -243,8 +253,8 @@ export class WarehouseValidateRules {
         if (categoryCheck.object) {
           categoriesMap.set(categoryCheck.object.name, categoryCheck.object.id);
         }
-      })
-    )
+      }),
+    );
 
     jsonData = jsonData.map((row) => {
       const organizationId = organizationMap.get(row.organization);
@@ -261,8 +271,12 @@ export class WarehouseValidateRules {
       };
     });
 
-    response.push(await this.validateLib.nomenclatureExelOriginalValues(jsonData))
-    response.push(await this.validateLib.nomenclatureExelDBOriginalValues(jsonData))
+    response.push(
+      await this.validateLib.nomenclatureExelOriginalValues(jsonData),
+    );
+    response.push(
+      await this.validateLib.nomenclatureExelDBOriginalValues(jsonData),
+    );
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -275,14 +289,20 @@ export class WarehouseValidateRules {
   public async createCategoryValidate(categoryId: number) {
     const categoryCheck = await this.validateLib.categoryByIdExists(categoryId);
     if (categoryCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE, categoryCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
+        categoryCheck.errorMessage,
+      );
     }
   }
 
   public async updateCategoryValidate(categoryId: number) {
     const categoryCheck = await this.validateLib.categoryByIdExists(categoryId);
     if (categoryCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE, categoryCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_CREATE_CATEGORY_EXCEPTION_CODE,
+        categoryCheck.errorMessage,
+      );
     }
     return categoryCheck.object;
   }
@@ -290,7 +310,10 @@ export class WarehouseValidateRules {
   public async updateSupplierValidate(supplierId: number) {
     const supplierCheck = await this.validateLib.supplierByIdExists(supplierId);
     if (supplierCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE, supplierCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_EXIST_SUPPLIER_EXCEPTION_CODE,
+        supplierCheck.errorMessage,
+      );
     }
     return supplierCheck.object;
   }
@@ -298,21 +321,30 @@ export class WarehouseValidateRules {
   public async getAllNomenclatureByOrgIdValidate(orgId: number) {
     const orgCheck = await this.validateLib.organizationByIdExists(orgId);
     if (orgCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE, orgCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_GET_ALL_NOMENCLATURE_BY_ORG_EXCEPTION_CODE,
+        orgCheck.errorMessage,
+      );
     }
   }
 
   public async getAllByPosId(posId: number) {
     const posCheck = await this.validateLib.posByIdExists(posId);
     if (posCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE, posCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_GET_ALL_BY_POS_EXCEPTION_CODE,
+        posCheck.errorMessage,
+      );
     }
   }
 
   public async getOneByIdValidate(id: number, ability: any) {
     const warehouseCheck = await this.validateLib.warehouseByIdExists(id);
     if (warehouseCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE, warehouseCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE,
+        warehouseCheck.errorMessage,
+      );
     }
     ForbiddenError.from(ability).throwUnlessCan(
       PermissionAction.read,
@@ -324,7 +356,10 @@ export class WarehouseValidateRules {
   public async getOneByIdCheck(id: number) {
     const warehouseCheck = await this.validateLib.warehouseByIdExists(id);
     if (warehouseCheck.code !== 200) {
-      throw new WarehouseException(WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE, warehouseCheck.errorMessage);
+      throw new WarehouseException(
+        WAREHOUSE_GET_ONE_BY_ID_EXCEPTION_CODE,
+        warehouseCheck.errorMessage,
+      );
     }
     return warehouseCheck.object;
   }
@@ -339,7 +374,9 @@ export class WarehouseValidateRules {
       );
     }
     if (input.warehouseId) {
-      const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
+      const warehouseCheck = await this.validateLib.warehouseByIdExists(
+        input.warehouseId,
+      );
       response.push(warehouseCheck);
       if (warehouseCheck.object) {
         ForbiddenError.from(input.ability).throwUnlessCan(
@@ -357,36 +394,54 @@ export class WarehouseValidateRules {
 
   public async saveDocumentValidate(input: WarehouseDocumentSaveDto) {
     const response = [];
-    const warehouseDocumentCheck = await this.validateLib.warehouseDocumentByIdExists(input.warehouseDocumentId);
-    response.push(warehouseDocumentCheck)
-    const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
-    response.push(warehouseCheck)
+    const warehouseDocumentCheck =
+      await this.validateLib.warehouseDocumentByIdExists(
+        input.warehouseDocumentId,
+      );
+    response.push(warehouseDocumentCheck);
+    const warehouseCheck = await this.validateLib.warehouseByIdExists(
+      input.warehouseId,
+    );
+    response.push(warehouseCheck);
     response.push(await this.validateLib.userByIdExists(input.responsibleId));
-
 
     if (warehouseDocumentCheck.object) {
       await Promise.all(
         input.details.map(async (item) => {
-          response.push(await this.validateLib.nomenclatureByIdExists(item.nomenclatureId));
-          if (warehouseDocumentCheck.object.type === WarehouseDocumentType.INVENTORY) {
+          response.push(
+            await this.validateLib.nomenclatureByIdExists(item.nomenclatureId),
+          );
+          if (
+            warehouseDocumentCheck.object.type ===
+            WarehouseDocumentType.INVENTORY
+          ) {
             if (!this.isValidInventoryMetaData(item.metaData)) {
               response.push({ code: 465 });
             }
-          } else if (warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING) {
+          } else if (
+            warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING
+          ) {
             if (!this.isValidMovingMetaData(item.metaData)) {
               response.push({ code: 465 });
             }
           }
-        })
+        }),
       );
 
-      if (warehouseDocumentCheck.object.status === WarehouseDocumentStatus.SENT) {
-        response.push({ code: 465 })
+      if (
+        warehouseDocumentCheck.object.status === WarehouseDocumentStatus.SENT
+      ) {
+        response.push({ code: 465 });
       }
 
-      if (warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING && input.details[0].metaData &&
-        "warehouseReceirId" in input.details[0].metaData) {
-        const warehouseNewCheck = await this.validateLib.warehouseByIdExists(input.details[0].metaData.warehouseReceirId);
+      if (
+        warehouseDocumentCheck.object.type === WarehouseDocumentType.MOVING &&
+        input.details[0].metaData &&
+        'warehouseReceirId' in input.details[0].metaData
+      ) {
+        const warehouseNewCheck = await this.validateLib.warehouseByIdExists(
+          input.details[0].metaData.warehouseReceirId,
+        );
         /*if (warehouseNewCheck.object) {
           ForbiddenError.from(input.ability).throwUnlessCan(
             PermissionAction.update,
@@ -396,7 +451,6 @@ export class WarehouseValidateRules {
         response.push(warehouseNewCheck);
       }
     }
-
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -410,12 +464,15 @@ export class WarehouseValidateRules {
     return warehouseDocumentCheck.object;
   }
 
-  public async deleteDocumentValidate(documentId: number): Promise<WarehouseDocument> {
+  public async deleteDocumentValidate(
+    documentId: number,
+  ): Promise<WarehouseDocument> {
     const response = [];
-    const warehouseDocumentCheck = await this.validateLib.warehouseDocumentByIdExists(documentId);
-    response.push(warehouseDocumentCheck)
+    const warehouseDocumentCheck =
+      await this.validateLib.warehouseDocumentByIdExists(documentId);
+    response.push(warehouseDocumentCheck);
     if (warehouseDocumentCheck.object.status === WarehouseDocumentStatus.SENT) {
-      response.push({ code: 465 })
+      response.push({ code: 465 });
     }
 
     this.validateLib.handlerArrayResponse(
@@ -425,12 +482,16 @@ export class WarehouseValidateRules {
     );
     return warehouseDocumentCheck.object;
   }
-  
-  public async createSaleDocumentValidate(input: SaleDocumentCreateDto): Promise<{warehouse: Warehouse, manager: User}> {
+
+  public async createSaleDocumentValidate(
+    input: SaleDocumentCreateDto,
+  ): Promise<{ warehouse: Warehouse; manager: User }> {
     const response = [];
 
-    const warehouseCheck = await this.validateLib.warehouseByIdExists(input.warehouseId);
-    response.push(warehouseCheck)
+    const warehouseCheck = await this.validateLib.warehouseByIdExists(
+      input.warehouseId,
+    );
+    response.push(warehouseCheck);
     const managerCheck = await this.validateLib.userByIdExists(input.managerId);
     response.push(managerCheck);
 
@@ -439,14 +500,17 @@ export class WarehouseValidateRules {
       ExceptionType.WAREHOUSE,
       SALE_DOCUMENT_CREATE_EXCEPTION_CODE,
     );
-    return { warehouse: warehouseCheck.object, manager: managerCheck.object}
+    return { warehouse: warehouseCheck.object, manager: managerCheck.object };
   }
 
-  public async getSaleDocumentValidate(input: number): Promise<SaleDocumentResponseDto> {
+  public async getSaleDocumentValidate(
+    input: number,
+  ): Promise<SaleDocumentResponseDto> {
     const response = [];
 
-    const saleDocumentCheck = await this.validateLib.saleDocumentByIdExists(input);
-    response.push(saleDocumentCheck)
+    const saleDocumentCheck =
+      await this.validateLib.saleDocumentByIdExists(input);
+    response.push(saleDocumentCheck);
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -460,7 +524,7 @@ export class WarehouseValidateRules {
     const response = [];
 
     const salePriceCheck = await this.validateLib.salePriceByIdExists(input);
-    response.push(salePriceCheck)
+    response.push(salePriceCheck);
 
     this.validateLib.handlerArrayResponse(
       response,
@@ -479,9 +543,6 @@ export class WarehouseValidateRules {
   }
 
   private isValidMovingMetaData(metaData: any): boolean {
-    return (
-      metaData &&
-      typeof metaData.warehouseReceirId === 'number'
-    );
+    return metaData && typeof metaData.warehouseReceirId === 'number';
   }
 }

@@ -30,7 +30,9 @@ export class LoyaltyParticipantProgramsFilterDto {
   status?: LoyaltyProgramStatus;
 
   @IsOptional()
-  @IsEnum(ParticipationRole, { message: 'participationRole must be owner, participant, or all' })
+  @IsEnum(ParticipationRole, {
+    message: 'participationRole must be owner, participant, or all',
+  })
   participationRole?: ParticipationRole;
 
   @IsOptional()

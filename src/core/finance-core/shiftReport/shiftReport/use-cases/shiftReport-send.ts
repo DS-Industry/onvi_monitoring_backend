@@ -5,7 +5,7 @@ import { CalculateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftR
 import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
 import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
 import { StatusWorkDayShiftReport } from '@prisma/client';
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 @Injectable()
 export class SendShiftReportUseCase {
   constructor(
@@ -24,12 +24,13 @@ export class SendShiftReportUseCase {
     const cashOperData = await this.calculateShiftReportCashOperUseCase.execute(
       shiftReport.id,
     );
-    
-    const dailyShiftPayout = await this.calculateDailyPayoutShiftReportUseCase.execute(
-      shiftReport.id,
-      shiftReport.workerId,
-    );
-    
+
+    const dailyShiftPayout =
+      await this.calculateDailyPayoutShiftReportUseCase.execute(
+        shiftReport.id,
+        shiftReport.workerId,
+      );
+
     return await this.updateShiftReportUseCase.execute(
       {
         status: StatusWorkDayShiftReport.SENT,

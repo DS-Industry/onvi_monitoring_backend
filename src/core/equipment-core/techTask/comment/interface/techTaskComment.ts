@@ -7,4 +7,3 @@ export abstract class ITechTaskCommentRepository {
   abstract update(comment: TechTaskComment): Promise<TechTaskComment>;
   abstract delete(id: number): Promise<void>;
 }
-

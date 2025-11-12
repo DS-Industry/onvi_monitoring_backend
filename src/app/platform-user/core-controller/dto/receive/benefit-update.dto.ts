@@ -5,8 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { LTYBenefitType } from "@loyalty/loyalty/benefit/benefit/domain/benefitType";
-import { Transform } from "class-transformer";
+import { LTYBenefitType } from '@loyalty/loyalty/benefit/benefit/domain/benefitType';
+import { Transform } from 'class-transformer';
 
 export class BenefitUpdateDto {
   @IsNumber()

@@ -1,7 +1,6 @@
 import { BaseEntity } from '@utils/entity';
 import { PermissionAction } from '@prisma/client';
 
-
 export interface PermissionProps {
   id?: number;
   action: PermissionAction;
@@ -33,4 +32,3 @@ export class UserPermission extends BaseEntity<PermissionProps> {
     this.props.objectId = objectId;
   }
 }
-  

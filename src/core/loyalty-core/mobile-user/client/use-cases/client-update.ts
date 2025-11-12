@@ -28,7 +28,7 @@ export class UpdateClientUseCase {
       gender,
       cardId,
       email,
-      is_notifications_enabled
+      is_notifications_enabled,
     } = input;
 
     oldClient.name = name ? name : oldClient.name;
@@ -47,28 +47,35 @@ export class UpdateClientUseCase {
     oldClient.gender = gender ? gender : oldClient.gender;
     oldClient.updatedAt = new Date(Date.now());
     oldClient.email = email ? email : oldClient.email;
-    oldClient.is_notifications_enabled = is_notifications_enabled !== undefined 
-      ? is_notifications_enabled 
-      : oldClient.is_notifications_enabled;
+    oldClient.is_notifications_enabled =
+      is_notifications_enabled !== undefined
+        ? is_notifications_enabled
+        : oldClient.is_notifications_enabled;
     const client = await this.clientRepository.update(oldClient);
-    
+
     let card;
-    
+
     if (cardId) {
       if (cardId <= 0) {
-        throw new Error(`Invalid cardId: ${cardId}. Card ID must be a positive number.`);
+        throw new Error(
+          `Invalid cardId: ${cardId}. Card ID must be a positive number.`,
+        );
       }
-      
+
       const newCard = await this.findMethodsCardUseCase.getById(cardId);
       if (!newCard) {
         throw new Error(`Card with id ${cardId} not found`);
       }
-      
+
       if (newCard.mobileUserId && newCard.mobileUserId !== client.id) {
-        throw new Error(`Card with id ${cardId} is already assigned to another client`);
+        throw new Error(
+          `Card with id ${cardId} is already assigned to another client`,
+        );
       }
-      
-      const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
+
+      const oldCard = await this.findMethodsCardUseCase.getByClientId(
+        client.id,
+      );
       if (oldCard) {
         oldCard.mobileUserId = null;
         await this.updateCardUseCase.execute(
@@ -78,7 +85,7 @@ export class UpdateClientUseCase {
           oldCard,
         );
       }
-      
+
       newCard.mobileUserId = client.id;
       card = await this.updateCardUseCase.execute(
         {
@@ -87,8 +94,14 @@ export class UpdateClientUseCase {
         newCard,
       );
     } else {
-      if (input.balance !== undefined || input.monthlyLimit !== undefined || input.loyaltyCardTierId !== undefined) {
-        const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
+      if (
+        input.balance !== undefined ||
+        input.monthlyLimit !== undefined ||
+        input.loyaltyCardTierId !== undefined
+      ) {
+        const oldCard = await this.findMethodsCardUseCase.getByClientId(
+          client.id,
+        );
         if (oldCard) {
           card = await this.updateCardUseCase.execute(
             {
@@ -139,16 +152,18 @@ export class UpdateClientUseCase {
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
       tags: clientTags.map((tag) => tag.getProps()),
-      card: card ? {
-        id: card.id,
-        balance: card.balance,
-        mobileUserId: card.mobileUserId,
-        devNumber: card.devNumber,
-        number: card.number,
-        monthlyLimit: card?.monthlyLimit,
-        createdAt: card.createdAt,
-        updatedAt: card.updatedAt,
-      } : null,
+      card: card
+        ? {
+            id: card.id,
+            balance: card.balance,
+            mobileUserId: card.mobileUserId,
+            devNumber: card.devNumber,
+            number: card.number,
+            monthlyLimit: card?.monthlyLimit,
+            createdAt: card.createdAt,
+            updatedAt: card.updatedAt,
+          }
+        : null,
     };
   }
 }

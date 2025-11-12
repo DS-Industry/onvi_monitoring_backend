@@ -21,7 +21,7 @@ export class RedisOtpService extends IOtpService {
   async generateOtp(phone: string): Promise<OtpToken> {
     const otpTime = this.dateService.generateOtpTime();
     const otpCode = this.generateOtpCode();
-    
+
     const oldOtp = await this.otpRepository.findOne(phone);
     if (oldOtp) {
       await this.otpRepository.removeOne(phone);
@@ -33,20 +33,29 @@ export class RedisOtpService extends IOtpService {
       expireDate: otpTime,
       createDate: new Date(Date.now()),
     });
-    
+
     await this.otpRepository.create(otpModel);
 
-    return OtpToken.create(phone, otpCode, AUTH_CONSTANTS.OTP_EXPIRY_TIME_MINUTES); 
+    return OtpToken.create(
+      phone,
+      otpCode,
+      AUTH_CONSTANTS.OTP_EXPIRY_TIME_MINUTES,
+    );
   }
 
   async validateOtp(phone: string, code: string): Promise<boolean> {
     const currentOtp = await this.otpRepository.findOne(phone);
-    
+
     if (!currentOtp) {
       return false;
     }
 
-    if (this.dateService.isExpired(currentOtp.expireDate, AUTH_CONSTANTS.OTP_EXPIRY_TIME_MINUTES)) {
+    if (
+      this.dateService.isExpired(
+        currentOtp.expireDate,
+        AUTH_CONSTANTS.OTP_EXPIRY_TIME_MINUTES,
+      )
+    ) {
       return false;
     }
 
@@ -65,7 +74,7 @@ export class RedisOtpService extends IOtpService {
       expireDate: new Date(),
       createDate: new Date(),
     });
-    
+
     await this.smsService.send(otpModel, 'Ваш код доступа: ');
   }
 

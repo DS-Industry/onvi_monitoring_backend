@@ -189,7 +189,7 @@ export class InventoryItemRepository extends IInventoryItemRepository {
     const inventoryItemEntities = input.map((item) =>
       PrismaInventoryItemMapper.toPrisma(item),
     );
-    const inventoryItems = await this.prisma.inventoryItem.createMany({
+    await this.prisma.inventoryItem.createMany({
       data: inventoryItemEntities,
     });
     return input;

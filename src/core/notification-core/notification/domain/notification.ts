@@ -1,4 +1,4 @@
-import { BaseEntity } from "@utils/entity";
+import { BaseEntity } from '@utils/entity';
 
 export interface NotificationProps {
   id?: number;

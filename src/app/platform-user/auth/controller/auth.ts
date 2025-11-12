@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Req,
   Request,
@@ -82,7 +81,8 @@ export class Auth {
         response.tokens.refreshToken,
       );
 
-      console.log(response.tokens.accessToken)
+      console.log(response.tokens.accessToken);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tokens, ...responseWithoutTokens } = response;
       return { ...responseWithoutTokens, permissionInfo };
     } catch (e) {
@@ -324,7 +324,7 @@ export class Auth {
   @Post('/password/valid/confirm')
   @UseGuards(EmailGuard)
   @HttpCode(201)
-  async passwordValidConfirm(@Body() body: AuthActivationDto): Promise<any> {
+  async passwordValidConfirm(): Promise<any> {
     try {
       return true;
     } catch (e) {

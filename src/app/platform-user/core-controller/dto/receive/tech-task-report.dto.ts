@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString, IsDateString, IsArray } from 'class-validator';
+import { IsOptional, IsString, IsDateString, IsArray } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { TypeTechTask } from "@tech-task/techTask/domain/typeTechTask";
+import { TypeTechTask } from '@tech-task/techTask/domain/typeTechTask';
 
 export class TechTaskReportDto {
   @IsOptional()
@@ -31,7 +31,7 @@ export class TechTaskReportDto {
   @IsArray()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
-      return value.split(',').map(tag => tag.trim());
+      return value.split(',').map((tag) => tag.trim());
     }
     return value;
   })

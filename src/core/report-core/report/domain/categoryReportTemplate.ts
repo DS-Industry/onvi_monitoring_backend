@@ -1,3 +1,3 @@
 export enum CategoryReportTemplate {
-  POS = 'POS'
+  POS = 'POS',
 }

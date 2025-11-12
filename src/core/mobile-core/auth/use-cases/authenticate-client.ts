@@ -25,7 +25,9 @@ export class AuthenticateClientUseCase {
     private readonly tokenService: ITokenService,
   ) {}
 
-  async execute(request: AuthenticateClientRequest): Promise<AuthenticateClientResponse> {
+  async execute(
+    request: AuthenticateClientRequest,
+  ): Promise<AuthenticateClientResponse> {
     const { client } = request;
 
     const tokens = await this.tokenService.generateTokens({
@@ -34,7 +36,7 @@ export class AuthenticateClientUseCase {
     });
 
     let session = await this.authRepository.findSessionByClientId(client.id);
-    
+
     if (!session) {
       session = new ClientSession({
         clientId: client.id,
@@ -43,9 +45,9 @@ export class AuthenticateClientUseCase {
         createdAt: new Date(),
       });
     }
-    
+
     session.setRefreshToken(tokens.refreshToken);
-    
+
     if (session.id) {
       await this.authRepository.updateSession(session);
     } else {

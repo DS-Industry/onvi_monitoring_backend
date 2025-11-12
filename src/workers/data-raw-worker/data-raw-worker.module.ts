@@ -5,8 +5,8 @@ import { configuration } from '@config/configuration';
 import { BullModule } from '@nestjs/bullmq';
 import { DeviceDataRawConsumer } from '../../infra/handler/device-data-raw/consumer/device-data-raw.consumer';
 import { PosModule } from '@pos/pos.module';
-import { RedisModule } from "@infra/cache/redis.module";
-import { EventEmitterModule } from "@nestjs/event-emitter";
+import { RedisModule } from '@infra/cache/redis.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [

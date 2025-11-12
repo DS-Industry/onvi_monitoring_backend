@@ -11,12 +11,16 @@ export class ManagerPaperValidationService {
   ) {}
 
   async validatePeriodNotSent(eventDate: Date, userId: number): Promise<void> {
-    const existingPeriod = await this.managerReportPeriodRepository.findByDateAndUser(
-      eventDate,
-      userId,
-    );
+    const existingPeriod =
+      await this.managerReportPeriodRepository.findByDateAndUser(
+        eventDate,
+        userId,
+      );
 
-    if (existingPeriod && existingPeriod.status === ManagerReportPeriodStatus.SENT) {
+    if (
+      existingPeriod &&
+      existingPeriod.status === ManagerReportPeriodStatus.SENT
+    ) {
       throw new ManagerPaperException(
         MANAGER_PAPER_PERIOD_ALREADY_SENT_EXCEPTION_CODE,
         'The existing period has already been sent',

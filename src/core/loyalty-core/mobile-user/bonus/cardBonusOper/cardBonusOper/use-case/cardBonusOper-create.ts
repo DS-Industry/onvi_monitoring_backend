@@ -38,11 +38,7 @@ export class CreateCardBonusOperUseCase {
           card.loyaltyCardTierId,
         );
       const expiryDate = loyaltyProgram.getCalculatedExpiryDate();
-      await this.handleBonusCreation(
-        card.id,
-        input.sum,
-        expiryDate,
-      );
+      await this.handleBonusCreation(card.id, input.sum, expiryDate);
     }
     const cardBonusOper = new CardBonusOper({
       cardMobileUserId: card.id,

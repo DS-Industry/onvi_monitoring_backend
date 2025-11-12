@@ -34,7 +34,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     return this.props.inn;
   }
 
-
   get okpo(): string {
     return this.props.okpo;
   }
@@ -42,7 +41,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
   get kpp(): string {
     return this.props.kpp;
   }
-
 
   get ogrn(): string {
     return this.props.ogrn;
@@ -88,7 +86,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
     this.props.inn = inn;
   }
 
-
   set okpo(okpo: string) {
     this.props.okpo = okpo;
   }
@@ -96,7 +93,6 @@ export class Documents extends BaseEntity<DocumentsProps> {
   set kpp(kpp: string) {
     this.props.kpp = kpp;
   }
-
 
   set ogrn(ogrn: string) {
     this.props.ogrn = ogrn;

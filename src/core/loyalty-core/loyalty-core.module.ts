@@ -8,7 +8,6 @@ import { BusinessCoreModule } from '@business-core/business-core.module';
 import { BullModule } from '@nestjs/bullmq';
 import { QueueModule } from '@infra/queue/queue.module';
 import { PaymentModule } from '../../app/payment/payment.module';
-import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
 import { ClientRepositoryProvider } from './mobile-user/client/provider/client';
 import { UpdateClientUseCase } from './mobile-user/client/use-cases/client-update';
 import { GetByIdClientUseCase } from './mobile-user/client/use-cases/client-get-by-id';
@@ -76,6 +75,8 @@ import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign
 import { MarketingCampaignStatusHandlerUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-status-handler';
 import { CreateMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-create';
 import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-delete';
+import { CreateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-create';
+import { UpdateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-update';
 import { UpsertMarketingCampaignMobileDisplayUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-mobile-display-upsert';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
@@ -85,7 +86,7 @@ import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-paymen
 import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
-import { UpdateHandlerLoyaltyTierUseCase } from "@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update-handler";
+import { UpdateHandlerLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-update-handler';
 import { LoyaltyProgramHubRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-request';
 import { LoyaltyProgramHubApproveUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-approve';
 import { LoyaltyProgramHubRejectUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-hub-reject';
@@ -273,11 +274,11 @@ const marketingCampaignUseCase: Provider[] = [
   CreateMarketingCampaignConditionUseCase,
   DeleteMarketingCampaignConditionUseCase,
   UpsertMarketingCampaignMobileDisplayUseCase,
+  CreateMarketingCampaignActionUseCase,
+  UpdateMarketingCampaignActionUseCase,
 ];
 
-const redisProviders: Provider[] = [
-  RedisService,
-];
+const redisProviders: Provider[] = [RedisService];
 
 @Module({
   imports: [
@@ -325,10 +326,10 @@ const redisProviders: Provider[] = [
           attempts: 3,
           backoff: {
             type: 'exponential',
-            delay: 5000, 
+            delay: 5000,
           },
         },
-      }
+      },
     ),
   ],
   providers: [

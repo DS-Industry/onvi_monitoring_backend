@@ -4,10 +4,9 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString,
 } from 'class-validator';
 import { ReadStatus } from '@notification/userNotification/use-case/dto/userNotification-update.dto';
-import { UserNotificationType } from "@notification/notification/domain/userNotificationType";
+import { UserNotificationType } from '@notification/notification/domain/userNotificationType';
 
 export class UserNotificationUpdateDto {
   @IsNumber()

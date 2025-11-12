@@ -3,7 +3,6 @@ import { IIncidentRepository } from '@equipment/incident/incident/interface/inci
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Incident } from '@equipment/incident/incident/domain/incident';
 import { PrismaIncidentMapper } from '@db/mapper/prisma-incident-mapper';
-import { accessibleBy } from '@casl/prisma';
 import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
 
 @Injectable()

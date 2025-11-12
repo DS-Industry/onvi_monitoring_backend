@@ -25,9 +25,9 @@ export interface CreateMarketingCampaignUsageInput {
 export abstract class IPromoCodeRepository {
   abstract findById(id: number): Promise<PromoCode | null>;
   abstract incrementUsage(id: number): Promise<void>;
-  abstract countUsageByUser(promocodeId: number, userId: number): Promise<number>;
+  abstract countUsageByUser(
+    promocodeId: number,
+    userId: number,
+  ): Promise<number>;
   abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
 }
-
-
-

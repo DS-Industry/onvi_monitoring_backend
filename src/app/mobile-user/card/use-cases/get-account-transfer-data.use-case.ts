@@ -14,7 +14,8 @@ export class GetAccountTransferDataUseCase {
     devNomer: string,
     user: Client,
   ): Promise<AccountTransferDataResponseDto> {
-    const targetCard = await this.findMethodsCardUseCase.getByDevNumber(devNomer);
+    const targetCard =
+      await this.findMethodsCardUseCase.getByDevNumber(devNomer);
 
     if (!targetCard) {
       throw new CardNotMatchExceptions(devNomer);
@@ -31,4 +32,3 @@ export class GetAccountTransferDataUseCase {
     };
   }
 }
-

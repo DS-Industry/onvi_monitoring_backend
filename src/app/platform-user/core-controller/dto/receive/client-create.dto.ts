@@ -1,14 +1,16 @@
 import {
   IsArray,
-  IsEmail, IsEnum,
+  IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsString, Length,
-  Matches
-} from "class-validator";
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ContractType } from "@loyalty/mobile-user/client/domain/contractType";
+import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
 
 export class ClientCreateDto {
   @IsString()

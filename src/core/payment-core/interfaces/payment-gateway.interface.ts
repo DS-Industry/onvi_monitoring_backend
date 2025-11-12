@@ -31,5 +31,3 @@ export interface IPaymentGateway {
   getPayment(id: string): Promise<any>;
   createRefund(data: RefundPaymentDto): Promise<any>;
 }
-
-

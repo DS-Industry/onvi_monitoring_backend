@@ -3,16 +3,22 @@ import {
   Controller,
   Get,
   HttpCode,
-  HttpStatus,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '@platform-admin/auth/guards/jwt.guard';
 import { AbilitiesGuard } from '@platform-admin/admin-permissions/guards/abilities.guard';
-import { CheckAbilities, ManageOrgAbility } from '@common/decorators/abilities.decorator';
+import {
+  CheckAbilities,
+  ManageOrgAbility,
+} from '@common/decorators/abilities.decorator';
 import { RedisService } from '@infra/cache/redis.service';
 import { ConfigService } from '@nestjs/config';
-import { CacheInvalidationRequest, CacheInvalidationResponse, SystemStatusResponse } from './dto/system.dto';
+import {
+  CacheInvalidationRequest,
+  CacheInvalidationResponse,
+  SystemStatusResponse,
+} from './dto/system.dto';
 
 @Controller('system')
 export class SystemController {
@@ -60,7 +66,7 @@ export class SystemController {
     try {
       // Check Redis connection
       const redisStatus = await this.redisService.exists('health-check');
-      
+
       return {
         status: redisStatus ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),

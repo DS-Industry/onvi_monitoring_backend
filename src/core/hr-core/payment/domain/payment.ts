@@ -1,5 +1,5 @@
-import { BaseEntity } from "@utils/entity";
-import { PaymentType } from "@prisma/client";
+import { BaseEntity } from '@utils/entity';
+import { PaymentType } from '@prisma/client';
 
 export interface PaymentProps {
   id?: number;
@@ -16,7 +16,7 @@ export interface PaymentProps {
   createdAt: Date;
   updatedAt: Date;
   createdById: number;
-  updatedById: number
+  updatedById: number;
 }
 
 export class Payment extends BaseEntity<PaymentProps> {
@@ -123,5 +123,4 @@ export class Payment extends BaseEntity<PaymentProps> {
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
   }
-
 }

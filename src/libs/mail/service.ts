@@ -3,7 +3,6 @@ import { IMailAdapter } from '@libs/mail/adapter';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { map } from 'rxjs/operators';
-import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class MailService implements IMailAdapter {
@@ -30,7 +29,7 @@ export class MailService implements IMailAdapter {
         this.httpService
           .post(this.emailUrl, params, header)
           .pipe(
-            map((axiosResponse: AxiosResponse) => {
+            map(() => {
               return { message: 'Success', to: email };
             }),
           )

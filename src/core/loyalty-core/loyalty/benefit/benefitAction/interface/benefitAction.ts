@@ -1,4 +1,4 @@
-import { BenefitAction } from "@loyalty/loyalty/benefit/benefitAction/domain/benefitAction";
+import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
 
 export abstract class IBenefitActionRepository {
   abstract create(input: BenefitAction): Promise<BenefitAction>;

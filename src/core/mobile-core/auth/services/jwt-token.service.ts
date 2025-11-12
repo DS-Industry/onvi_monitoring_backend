@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ITokenService } from '../interfaces/token-service';
-import { TokenPayload, TokenPair, AccessToken, RefreshToken } from '../domain/token-pair';
+import {
+  TokenPayload,
+  TokenPair,
+  AccessToken,
+  RefreshToken,
+} from '../domain/token-pair';
 import { IJwtAdapter } from '@libs/auth/adapter';
 import ms = require('ms');
 
@@ -29,14 +34,14 @@ export class JwtTokenService extends ITokenService {
   async generateAccessToken(payload: TokenPayload): Promise<AccessToken> {
     const secret = this.configService.get<string>('jwtSecret');
     const expiresIn = this.configService.get<string>('jwtExpirationTime');
-    
+
     if (!secret) {
       throw new Error('JWT_SECRET is not configured');
     }
     if (!expiresIn) {
       throw new Error('JWT_EXPIRATION_TIME is not configured');
     }
-    
+
     const token = this.jwtService.signToken(payload, secret, expiresIn);
     const expirationDate = new Date(
       new Date().getTime() + Math.floor(ms(expiresIn) / 1000) * 1000,
@@ -50,15 +55,17 @@ export class JwtTokenService extends ITokenService {
 
   async generateRefreshToken(payload: TokenPayload): Promise<RefreshToken> {
     const secret = this.configService.get<string>('jwtRefreshTokenSecret');
-    const expiresIn = this.configService.get<string>('jwtRefreshTokenExpiration');
-    
+    const expiresIn = this.configService.get<string>(
+      'jwtRefreshTokenExpiration',
+    );
+
     if (!secret) {
       throw new Error('JWT_REFRESH_TOKEN_SECRET is not configured');
     }
     if (!expiresIn) {
       throw new Error('JWT_REFRESH_TOKEN_EXPIRATION_TIME is not configured');
     }
-    
+
     const token = this.jwtService.signToken(payload, secret, expiresIn);
     const expirationDate = new Date(
       new Date().getTime() + Math.floor(ms(expiresIn) / 1000) * 1000,

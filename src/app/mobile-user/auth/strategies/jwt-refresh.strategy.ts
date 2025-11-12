@@ -28,7 +28,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
         refreshToken,
         phone: payload.phone,
       });
-      
+
       return {
         client: result.client,
         refreshToken: result.refreshToken,

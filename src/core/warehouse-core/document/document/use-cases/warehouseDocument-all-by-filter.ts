@@ -21,7 +21,10 @@ export class AllByFilterWarehouseDocumentUseCase {
     warehouse?: Warehouse,
     page?: number,
     size?: number,
-  ): Promise<WarehouseDocumentPaginatedResponseDto | WarehouseDocumentAllByFilterResponseDto[]> {
+  ): Promise<
+    | WarehouseDocumentPaginatedResponseDto
+    | WarehouseDocumentAllByFilterResponseDto[]
+  > {
     if (page && size) {
       const result =
         await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdsAndDatePaginated(

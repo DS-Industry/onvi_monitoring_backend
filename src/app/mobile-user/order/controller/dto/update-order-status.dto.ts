@@ -6,4 +6,3 @@ export class UpdateOrderStatusDto {
   @IsNotEmpty()
   status: OrderStatus;
 }
-

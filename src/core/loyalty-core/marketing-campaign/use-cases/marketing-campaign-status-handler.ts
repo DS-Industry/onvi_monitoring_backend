@@ -10,15 +10,16 @@ export class MarketingCampaignStatusHandlerUseCase {
 
   async execute(): Promise<void> {
     const now = new Date();
-    
+
     await this.activateDraftCampaigns(now);
-    
+
     await this.completeActiveCampaigns(now);
   }
 
   private async activateDraftCampaigns(now: Date): Promise<void> {
-    const draftCampaigns = await this.marketingCampaignRepository.findDraftCampaignsToActivate(now);
-    
+    const draftCampaigns =
+      await this.marketingCampaignRepository.findDraftCampaignsToActivate(now);
+
     for (const campaign of draftCampaigns) {
       await this.marketingCampaignRepository.updateStatus(
         campaign.id,
@@ -29,8 +30,9 @@ export class MarketingCampaignStatusHandlerUseCase {
   }
 
   private async completeActiveCampaigns(now: Date): Promise<void> {
-    const activeCampaigns = await this.marketingCampaignRepository.findActiveCampaignsToComplete(now);
-    
+    const activeCampaigns =
+      await this.marketingCampaignRepository.findActiveCampaignsToComplete(now);
+
     for (const campaign of activeCampaigns) {
       await this.marketingCampaignRepository.updateStatus(
         campaign.id,

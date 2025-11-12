@@ -1,4 +1,4 @@
-import { Tag } from "@loyalty/mobile-user/tag/domain/tag";
+import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 
 export abstract class ITagRepository {
   abstract create(input: Tag): Promise<Tag>;

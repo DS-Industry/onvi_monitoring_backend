@@ -39,7 +39,9 @@ export class RegisterClientUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
-  async execute(request: RegisterClientRequest): Promise<RegisterClientResponse> {
+  async execute(
+    request: RegisterClientRequest,
+  ): Promise<RegisterClientResponse> {
     const { phone, otp } = request;
 
     const isValidOtp = await this.otpService.validateOtp(phone, otp);
@@ -49,7 +51,10 @@ export class RegisterClientUseCase {
 
     const existingClient = await this.findClientUseCase.getByPhone(phone);
     if (existingClient) {
-      if (existingClient.status === StatusUser.BLOCKED || existingClient.status === StatusUser.DELETED) {
+      if (
+        existingClient.status === StatusUser.BLOCKED ||
+        existingClient.status === StatusUser.DELETED
+      ) {
         throw new Error('Client account is blocked or deleted');
       }
       throw new Error('Client already exists');
@@ -77,7 +82,7 @@ export class RegisterClientUseCase {
       isActive: true,
       createdAt: new Date(),
     });
-    
+
     session.setRefreshToken(tokens.refreshToken);
     await this.authRepository.createSession(session);
 
@@ -125,9 +130,9 @@ export class RegisterClientUseCase {
   }
 
   private generateRandom12DigitNumber(): string {
-    const min = 100000000000; 
-    const max = 999999999999; 
+    const min = 100000000000;
+    const max = 999999999999;
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-    return randomNumber.toString(); 
+    return randomNumber.toString();
   }
 }

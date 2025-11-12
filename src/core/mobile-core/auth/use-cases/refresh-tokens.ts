@@ -22,8 +22,9 @@ export class RefreshTokensUseCase {
     const { refreshToken } = request;
 
     const payload = await this.tokenService.validateRefreshToken(refreshToken);
-    
-    const session = await this.authRepository.findActiveSessionByRefreshToken(refreshToken);
+
+    const session =
+      await this.authRepository.findActiveSessionByRefreshToken(refreshToken);
     if (!session || !session.isActive) {
       throw new Error('Invalid or expired refresh token');
     }

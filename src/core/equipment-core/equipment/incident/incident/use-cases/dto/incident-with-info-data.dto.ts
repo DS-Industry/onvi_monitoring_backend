@@ -1,4 +1,4 @@
-export class IncidentWithInfoDataDto{
+export class IncidentWithInfoDataDto {
   id: number;
   workerId: number;
   posId: number;

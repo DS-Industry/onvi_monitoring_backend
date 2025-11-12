@@ -45,7 +45,8 @@ export class UpdateShiftReportUseCase {
     oldShiftReport.status = status ?? oldShiftReport.status;
     oldShiftReport.cashAtStart = cashAtStart ?? oldShiftReport.cashAtStart;
     oldShiftReport.cashAtEnd = cashAtEnd ?? oldShiftReport.cashAtEnd;
-    oldShiftReport.dailyShiftPayout = dailyShiftPayout ?? oldShiftReport.dailyShiftPayout;
+    oldShiftReport.dailyShiftPayout =
+      dailyShiftPayout ?? oldShiftReport.dailyShiftPayout;
     oldShiftReport.comment = comment ?? oldShiftReport.comment;
     oldShiftReport.updatedAt = new Date();
     oldShiftReport.updatedById = user.id;

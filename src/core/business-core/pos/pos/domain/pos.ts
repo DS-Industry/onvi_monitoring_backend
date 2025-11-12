@@ -2,7 +2,6 @@ import { Address } from '@address/domain/address';
 import { BaseEntity } from '@utils/entity';
 import { CarWashPosType, StatusPos } from '@prisma/client';
 
-
 export interface PosProps {
   id?: number;
   name: string;
@@ -184,7 +183,7 @@ export class Pos extends BaseEntity<PosProps> {
   set minSumOrder(minSumOrder: number) {
     this.props.minSumOrder = minSumOrder;
   }
-  
+
   set maxSumOrder(maxSumOrder: number) {
     this.props.maxSumOrder = maxSumOrder;
   }

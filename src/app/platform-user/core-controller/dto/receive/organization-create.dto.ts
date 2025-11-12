@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { TypeOrganization } from "@organization/organization/domain/typeOrganization";
+import { TypeOrganization } from '@organization/organization/domain/typeOrganization';
 
 export class OrganizationCreateDto {
   @IsString()

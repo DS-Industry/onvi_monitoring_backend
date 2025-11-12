@@ -1,5 +1,5 @@
 export interface TransactionDataPoint {
-  date: string; 
+  date: string;
   accruals: number;
   debits: number;
 }

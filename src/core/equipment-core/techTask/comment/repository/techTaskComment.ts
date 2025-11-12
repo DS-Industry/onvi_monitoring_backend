@@ -27,7 +27,9 @@ export class TechTaskCommentRepository extends ITechTaskCommentRepository {
     return PrismaTechTaskCommentMapper.toDomain(createdComment);
   }
 
-  public async findByTechTaskId(techTaskId: number): Promise<TechTaskComment[]> {
+  public async findByTechTaskId(
+    techTaskId: number,
+  ): Promise<TechTaskComment[]> {
     const comments = await this.prisma.techTaskComment.findMany({
       where: {
         techTaskId,
@@ -46,7 +48,9 @@ export class TechTaskCommentRepository extends ITechTaskCommentRepository {
       },
     });
 
-    return comments.map((comment) => PrismaTechTaskCommentMapper.toDomain(comment));
+    return comments.map((comment) =>
+      PrismaTechTaskCommentMapper.toDomain(comment),
+    );
   }
 
   public async findById(id: number): Promise<TechTaskComment | null> {
@@ -96,4 +100,3 @@ export class TechTaskCommentRepository extends ITechTaskCommentRepository {
     });
   }
 }
-

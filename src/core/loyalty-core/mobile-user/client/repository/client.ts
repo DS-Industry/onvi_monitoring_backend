@@ -58,7 +58,11 @@ export class ClientRepository extends IClientRepository {
       ];
     }
 
-    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
+    if (
+      placementId !== undefined &&
+      placementId !== null &&
+      typeof placementId === 'number'
+    ) {
       where.placementId = placementId;
     }
 
@@ -81,7 +85,11 @@ export class ClientRepository extends IClientRepository {
       };
     }
 
-    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
+    if (
+      workerCorporateId !== undefined &&
+      workerCorporateId !== null &&
+      typeof workerCorporateId === 'number'
+    ) {
       where.workerCorporateId = workerCorporateId;
     }
 
@@ -90,7 +98,9 @@ export class ClientRepository extends IClientRepository {
     }
 
     if (tagIds !== undefined && tagIds.length > 0) {
-      const validTagIds = tagIds.filter(id => id !== null && id !== undefined && typeof id === 'number');
+      const validTagIds = tagIds.filter(
+        (id) => id !== null && id !== undefined && typeof id === 'number',
+      );
       if (validTagIds.length > 0) {
         where.tags = { some: { id: { in: validTagIds } } };
       }
@@ -140,7 +150,11 @@ export class ClientRepository extends IClientRepository {
       ];
     }
 
-    if (placementId !== undefined && placementId !== null && typeof placementId === 'number') {
+    if (
+      placementId !== undefined &&
+      placementId !== null &&
+      typeof placementId === 'number'
+    ) {
       where.placementId = placementId;
     }
 
@@ -163,7 +177,11 @@ export class ClientRepository extends IClientRepository {
       };
     }
 
-    if (workerCorporateId !== undefined && workerCorporateId !== null && typeof workerCorporateId === 'number') {
+    if (
+      workerCorporateId !== undefined &&
+      workerCorporateId !== null &&
+      typeof workerCorporateId === 'number'
+    ) {
       where.workerCorporateId = workerCorporateId;
     }
 
@@ -184,8 +202,8 @@ export class ClientRepository extends IClientRepository {
         id,
       },
       include: {
-        card: true
-      }
+        card: true,
+      },
     });
     return PrismaMobileUserMapper.toDomain(client);
   }
@@ -203,7 +221,7 @@ export class ClientRepository extends IClientRepository {
     return PrismaMobileUserMapper.toDomain(client);
   }
 
-  public async remove(id: number): Promise<any> {
+  public async remove(): Promise<any> {
     return Promise.resolve(undefined);
   }
 

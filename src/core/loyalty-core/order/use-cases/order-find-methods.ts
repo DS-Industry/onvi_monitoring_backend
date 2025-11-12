@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
-import { ContractType, OrderStatus, PlatformType } from '@loyalty/order/domain/enums';
+import {
+  ContractType,
+  OrderStatus,
+  PlatformType,
+} from '@loyalty/order/domain/enums';
 
 @Injectable()
 export class FindMethodsOrderUseCase {

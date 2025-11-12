@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ManagerPaperGroup } from "@manager-paper/managerPaper/domain/managerPaperGroup";
+import { ManagerPaperGroup } from '@manager-paper/managerPaper/domain/managerPaperGroup';
 
 export class ManagerPaperFilterDto {
   @IsOptional()

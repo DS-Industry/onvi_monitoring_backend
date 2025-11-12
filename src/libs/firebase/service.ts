@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as path from 'path';
 import * as fs from 'fs';
 import { IFirebaseAdapter } from '@libs/firebase/adapter';

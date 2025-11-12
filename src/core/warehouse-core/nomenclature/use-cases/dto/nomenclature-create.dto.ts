@@ -1,4 +1,4 @@
-import { DestinyNomenclature, MeasurementNomenclature } from "@prisma/client";
+import { DestinyNomenclature, MeasurementNomenclature } from '@prisma/client';
 import { NomenclatureMeta } from '@warehouse/nomenclature/interface/nomenclatureMeta';
 
 export class NomenclatureCreateDto {

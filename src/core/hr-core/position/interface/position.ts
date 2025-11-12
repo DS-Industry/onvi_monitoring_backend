@@ -1,5 +1,5 @@
 import { Position } from '@hr/position/domain/position';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
 
 export abstract class IPositionRepository {
   abstract create(input: Position): Promise<Position>;

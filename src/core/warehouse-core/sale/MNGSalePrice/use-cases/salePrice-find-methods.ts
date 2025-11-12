@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ISalePriceRepository } from '@warehouse/sale/MNGSalePrice/interface/salePrice';
 import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
-import { SalePriceResponseDto } from "@warehouse/sale/MNGSalePrice/use-cases/dto/salePrice-response.dto";
+import { SalePriceResponseDto } from '@warehouse/sale/MNGSalePrice/use-cases/dto/salePrice-response.dto';
 
 @Injectable()
 export class FindMethodsSalePriceUseCase {

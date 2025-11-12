@@ -1,5 +1,5 @@
 import { BaseEntity } from '@utils/entity';
-import { CurrencyType, CurrencyView } from "@prisma/client";
+import { CurrencyType, CurrencyView } from '@prisma/client';
 
 export interface DeviceOperationProps {
   id?: number;

@@ -6,6 +6,3 @@ export const UserRepositoryProvider: Provider = {
   provide: IUserRepository,
   useClass: UserRepository,
 };
-
-
-

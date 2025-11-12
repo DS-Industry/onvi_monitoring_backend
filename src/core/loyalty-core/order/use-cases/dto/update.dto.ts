@@ -1,4 +1,9 @@
-import { ExecutionStatus, OrderHandlerStatus, OrderStatus, SendAnswerStatus } from "@loyalty/order/domain/enums";
+import {
+  ExecutionStatus,
+  OrderHandlerStatus,
+  OrderStatus,
+  SendAnswerStatus,
+} from '@loyalty/order/domain/enums';
 
 export class UpdateDto {
   orderStatus?: OrderStatus;

@@ -51,7 +51,10 @@ import { CreateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use
 import { LoyaltyProgramParticipantRequestDto } from '@platform-user/core-controller/dto/receive/loyalty-program-participant-request.dto';
 import { CreateLoyaltyProgramParticipantRequestUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-participant-request';
 import { PublicLoyaltyProgramsFilterDto } from '@platform-user/core-controller/dto/receive/public-loyalty-programs-filter.dto';
-import { PublicLoyaltyProgramResponseDto, PublicLoyaltyProgramsListResponseDto } from '@platform-user/core-controller/dto/response/public-loyalty-programs-response.dto';
+import {
+  PublicLoyaltyProgramResponseDto,
+  PublicLoyaltyProgramsListResponseDto,
+} from '@platform-user/core-controller/dto/response/public-loyalty-programs-response.dto';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { CreateLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-create';
@@ -73,7 +76,13 @@ import { FindMethodsOrganizationUseCase } from '@organization/organization/use-c
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { OrderCreateDto } from '@platform-user/core-controller/dto/receive/orderCreate';
-import { PlatformType, OrderStatus, ContractType, SendAnswerStatus, ExecutionStatus } from '@loyalty/order/domain/enums';
+import {
+  PlatformType,
+  OrderStatus,
+  ContractType,
+  SendAnswerStatus,
+  ExecutionStatus,
+} from '@loyalty/order/domain/enums';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { BenefitUpdateDto } from '@platform-user/core-controller/dto/receive/benefit-update.dto';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
@@ -120,6 +129,10 @@ import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign
 import { CreateMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-create';
 import { DeleteMarketingCampaignConditionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-condition-delete';
 import { UpsertMarketingCampaignMobileDisplayUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-mobile-display-upsert';
+import { CreateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-create';
+import { UpdateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-update';
+import { MarketingCampaignActionCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-create.dto';
+import { MarketingCampaignActionUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-update.dto';
 import { UpsertMarketingCampaignMobileDisplayDto } from './dto/receive/marketing-campaign-mobile-display-upsert.dto';
 import { MarketingCampaignMobileDisplayResponseDto } from './dto/response/marketing-campaign-mobile-display-response.dto';
 import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards';
@@ -196,6 +209,8 @@ export class LoyaltyController {
     private readonly createMarketingCampaignConditionUseCase: CreateMarketingCampaignConditionUseCase,
     private readonly deleteMarketingCampaignConditionUseCase: DeleteMarketingCampaignConditionUseCase,
     private readonly upsertMarketingCampaignMobileDisplayUseCase: UpsertMarketingCampaignMobileDisplayUseCase,
+    private readonly createMarketingCampaignActionUseCase: CreateMarketingCampaignActionUseCase,
+    private readonly updateMarketingCampaignActionUseCase: UpdateMarketingCampaignActionUseCase,
     private readonly loyaltyProgramHubRequestUseCase: LoyaltyProgramHubRequestUseCase,
     private readonly loyaltyProgramHubApproveUseCase: LoyaltyProgramHubApproveUseCase,
     private readonly loyaltyProgramHubRejectUseCase: LoyaltyProgramHubRejectUseCase,
@@ -215,10 +230,9 @@ export class LoyaltyController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
-  async testOper(
-    @Request() req: any,
-    //@Body() data: CardBonusOperCreateDto,
-  ): Promise<any> {
+  async testOper() // @Request() req: any,
+  //@Body() data: CardBonusOperCreateDto,
+  : Promise<any> {
     try {
       /*const { user, ability } = req;
       const card = await this.loyaltyValidateRules.testOperValidate(
@@ -260,9 +274,15 @@ export class LoyaltyController {
         ...data,
         platform: data.platform as PlatformType,
         orderStatus: data.orderStatus as OrderStatus,
-        typeMobileUser: data.typeMobileUser ? data.typeMobileUser as ContractType : undefined,
-        sendAnswerStatus: data.sendAnswerStatus ? data.sendAnswerStatus as SendAnswerStatus : undefined,
-        executionStatus: data.executionStatus ? data.executionStatus as ExecutionStatus : undefined,
+        typeMobileUser: data.typeMobileUser
+          ? (data.typeMobileUser as ContractType)
+          : undefined,
+        sendAnswerStatus: data.sendAnswerStatus
+          ? (data.sendAnswerStatus as SendAnswerStatus)
+          : undefined,
+        executionStatus: data.executionStatus
+          ? (data.executionStatus as ExecutionStatus)
+          : undefined,
       };
       return await this.handlerOrderUseCase.execute(handlerData);
     } catch (e) {
@@ -297,7 +317,7 @@ export class LoyaltyController {
         user.id,
         Number(data.ownerOrganizationId),
       );
-      
+
       return await this.createLoyaltyProgramUseCase.execute(
         {
           name: data.name,
@@ -407,11 +427,8 @@ export class LoyaltyController {
   ): Promise<LTYProgram> {
     try {
       const { ability } = req;
-      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
-        id,
-        ability,
-      );
-      
+      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(id, ability);
+
       return await this.publishLoyaltyProgramUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -440,12 +457,9 @@ export class LoyaltyController {
   ): Promise<LTYProgram> {
     try {
       const { ability } = req;
-      
-      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(
-        id,
-        ability,
-      );
-      
+
+      await this.loyaltyValidateRules.updateLoyaltyProgramValidate(id, ability);
+
       return await this.unpublishLoyaltyProgramUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -505,18 +519,23 @@ export class LoyaltyController {
     @Query() filters: PublicLoyaltyProgramsFilterDto,
   ): Promise<PublicLoyaltyProgramsListResponseDto> {
     try {
-      const programs = await this.findMethodsLoyaltyProgramUseCase.getAllPublicPrograms(filters);
-      
-      const programResponses: PublicLoyaltyProgramResponseDto[] = programs.map((program) => ({
-        id: program.id,
-        name: program.name,
-        status: program.status,
-        startDate: program.startDate,
-        lifetimeDays: program.lifetimeDays,
-        ownerOrganizationId: program.ownerOrganizationId,
-        isHub: program.isHub,
-        isPublic: program.isPublic,
-      }));
+      const programs =
+        await this.findMethodsLoyaltyProgramUseCase.getAllPublicPrograms(
+          filters,
+        );
+
+      const programResponses: PublicLoyaltyProgramResponseDto[] = programs.map(
+        (program) => ({
+          id: program.id,
+          name: program.name,
+          status: program.status,
+          startDate: program.startDate,
+          lifetimeDays: program.lifetimeDays,
+          ownerOrganizationId: program.ownerOrganizationId,
+          isHub: program.isHub,
+          isPublic: program.isPublic,
+        }),
+      );
 
       return {
         programs: programResponses,
@@ -637,7 +656,11 @@ export class LoyaltyController {
     try {
       const { ability, user } = req;
       const loyaltyProgram =
-        await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
+        await this.loyaltyValidateRules.getLoyaltyProgramValidate(
+          id,
+          ability,
+          user.id,
+        );
       const organizations =
         await this.findMethodsOrganizationUseCase.getAllByLoyaltyProgramId(
           loyaltyProgram.id,
@@ -723,7 +746,8 @@ export class LoyaltyController {
   @HttpCode(200)
   async deleteTier(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
-      const loyaltyTier = await this.loyaltyValidateRules.deleteLoyaltyTierValidate(id);
+      const loyaltyTier =
+        await this.loyaltyValidateRules.deleteLoyaltyTierValidate(id);
       return await this.deleteLoyaltyTierUseCase.execute(loyaltyTier.id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1122,7 +1146,7 @@ export class LoyaltyController {
 
       await this.loyaltyValidateRules.getClientsValidate(
         data.organizationId,
-        user.id
+        user.id,
       );
 
       let skip = undefined;
@@ -1171,8 +1195,6 @@ export class LoyaltyController {
 
       const tags = await this.findMethodsTagUseCase.getAllByClientId(client.id);
       const card = await this.findMethodsCardUseCase.getByClientId(client.id);
-
-      console.log("card => ", card)
 
       return {
         id: client.id,
@@ -1805,13 +1827,13 @@ export class LoyaltyController {
         ability,
       );
 
-      const conditions = await this.findMethodsMarketingCampaignUseCase.getConditionsByCampaignId(id);
+      const conditions =
+        await this.findMethodsMarketingCampaignUseCase.getConditionsByCampaignId(
+          id,
+        );
 
       if (!conditions) {
-        throw new LoyaltyException(
-          404,
-          'Marketing campaign not found',
-        );
+        throw new LoyaltyException(404, 'Marketing campaign not found');
       }
 
       return conditions;
@@ -1849,7 +1871,10 @@ export class LoyaltyController {
         ability,
       );
 
-      return await this.createMarketingCampaignConditionUseCase.execute(campaignId, data);
+      return await this.createMarketingCampaignConditionUseCase.execute(
+        campaignId,
+        data,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1878,7 +1903,10 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      const condition = await this.findMethodsMarketingCampaignUseCase.getConditionById(conditionId);
+      const condition =
+        await this.findMethodsMarketingCampaignUseCase.getConditionById(
+          conditionId,
+        );
 
       if (!condition) {
         throw new LoyaltyException(
@@ -1929,7 +1957,10 @@ export class LoyaltyController {
         ability,
       );
 
-      return await this.upsertMarketingCampaignMobileDisplayUseCase.execute(campaignId, data);
+      return await this.upsertMarketingCampaignMobileDisplayUseCase.execute(
+        campaignId,
+        data,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1963,7 +1994,9 @@ export class LoyaltyController {
         ability,
       );
 
-      return await this.findMethodsMarketingCampaignUseCase.getMobileDisplayByCampaignId(campaignId);
+      return await this.findMethodsMarketingCampaignUseCase.getMobileDisplayByCampaignId(
+        campaignId,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
@@ -1980,9 +2013,6 @@ export class LoyaltyController {
       }
     }
   }
-
-  
-  
 
   @Post('marketing-campaign/create')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -2002,10 +2032,15 @@ export class LoyaltyController {
         ability,
       );
 
-      const campaign = await this.createMarketingCampaignUseCase.execute(data, user.id);
+      const campaign = await this.createMarketingCampaignUseCase.execute(
+        data,
+        user.id,
+      );
 
-      const poses = await this.getParticipantPosesUseCase.execute(data.ltyProgramId);
-      const posIds = poses.map(pos => pos.id);
+      const poses = await this.getParticipantPosesUseCase.execute(
+        data.ltyProgramId,
+      );
+      const posIds = poses.map((pos) => pos.id);
 
       if (posIds.length > 0) {
         await this.loyaltyValidateRules.updateMarketingCampaignValidate(
@@ -2023,7 +2058,9 @@ export class LoyaltyController {
           user.id,
         );
 
-        return await this.findMethodsMarketingCampaignUseCase.getOneById(campaign.id);
+        return await this.findMethodsMarketingCampaignUseCase.getOneById(
+          campaign.id,
+        );
       }
 
       return campaign;
@@ -2087,6 +2124,91 @@ export class LoyaltyController {
     }
   }
 
+  @Post('marketing-campaign/action/create')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(201)
+  async createMarketingCampaignAction(
+    @Request() req: any,
+    @Body() data: MarketingCampaignActionCreateDto,
+  ): Promise<{
+    id: number;
+    campaignId: number;
+    actionType: string;
+    payload: any;
+  }> {
+    try {
+      const { ability } = req;
+
+      await this.loyaltyValidateRules.updateMarketingCampaignValidate(
+        data.campaignId,
+        {},
+        ability,
+      );
+
+      return await this.createMarketingCampaignActionUseCase.execute(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Put('marketing-campaign/action/update/:campaignId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async updateMarketingCampaignAction(
+    @Request() req: any,
+    @Param('campaignId', ParseIntPipe) campaignId: number,
+    @Body() data: MarketingCampaignActionUpdateDto,
+  ): Promise<{
+    id: number;
+    campaignId: number;
+    actionType: string;
+    payload: any;
+  }> {
+    try {
+      const { ability } = req;
+
+      // Validate that campaign exists and user has access
+      await this.loyaltyValidateRules.updateMarketingCampaignValidate(
+        campaignId,
+        {},
+        ability,
+      );
+
+      return await this.updateMarketingCampaignActionUseCase.execute(
+        campaignId,
+        data,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
   // Super Admin only
   @Post('programs/:id/request-hub')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -2100,10 +2222,7 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
-      await this.loyaltyValidateRules.requestHubValidate(
-        id,
-        ability,
-      );
+      await this.loyaltyValidateRules.requestHubValidate(id, ability);
 
       return await this.loyaltyProgramHubRequestUseCase.execute(
         id,
@@ -2208,7 +2327,6 @@ export class LoyaltyController {
     @Query() filter: LoyaltyHubRequestsFilterDto,
   ): Promise<LoyaltyHubRequestsListResponseDto> {
     try {
-
       await this.loyaltyValidateRules.getHubRequestsValidate(req.ability);
 
       return await this.findLoyaltyHubRequestsUseCase.execute(filter);
@@ -2240,11 +2358,11 @@ export class LoyaltyController {
   ): Promise<any> {
     try {
       const { user } = req;
-      
+
       await this.loyaltyValidateRules.createLoyaltyProgramParticipantRequestValidate(
         data.ltyProgramId,
         data.organizationId,
-        user.id
+        user.id,
       );
 
       return await this.createLoyaltyProgramParticipantRequestUseCase.execute(
@@ -2282,7 +2400,10 @@ export class LoyaltyController {
     try {
       const { ability, user } = req;
 
-      await this.loyaltyValidateRules.approveParticipantRequestValidate(id, ability);
+      await this.loyaltyValidateRules.approveParticipantRequestValidate(
+        id,
+        ability,
+      );
 
       return await this.loyaltyProgramParticipantApproveUseCase.execute(
         id,
@@ -2319,7 +2440,10 @@ export class LoyaltyController {
     try {
       const { ability, user } = req;
 
-      await this.loyaltyValidateRules.rejectParticipantRequestValidate(id, ability);
+      await this.loyaltyValidateRules.rejectParticipantRequestValidate(
+        id,
+        ability,
+      );
 
       return await this.loyaltyProgramParticipantRejectUseCase.execute(
         id,
@@ -2352,8 +2476,9 @@ export class LoyaltyController {
     @Query() filter: LoyaltyParticipantRequestsFilterDto,
   ): Promise<LoyaltyParticipantRequestsListResponseDto> {
     try {
-
-      await this.loyaltyValidateRules.getParticipantRequestsValidate(req.ability);
+      await this.loyaltyValidateRules.getParticipantRequestsValidate(
+        req.ability,
+      );
 
       return await this.findLoyaltyParticipantRequestsUseCase.execute(filter);
     } catch (e) {
@@ -2383,9 +2508,13 @@ export class LoyaltyController {
   ): Promise<PosResponseDto[]> {
     try {
       const { ability, user } = req;
-      
-      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
-      
+
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(
+        id,
+        ability,
+        user.id,
+      );
+
       return await this.getParticipantPosesUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -2414,9 +2543,13 @@ export class LoyaltyController {
   ): Promise<LoyaltyProgramAnalyticsResponseDto> {
     try {
       const { ability, user } = req;
-      
-      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
-      
+
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(
+        id,
+        ability,
+        user.id,
+      );
+
       return await this.getLoyaltyProgramAnalyticsUseCase.execute(id);
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -2446,17 +2579,23 @@ export class LoyaltyController {
   ): Promise<LoyaltyProgramTransactionAnalyticsResponseDto> {
     try {
       const { ability, user } = req;
-      
-      await this.loyaltyValidateRules.getLoyaltyProgramValidate(id, ability, user.id);
-      
+
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(
+        id,
+        ability,
+        user.id,
+      );
+
       const request: LoyaltyProgramTransactionAnalyticsRequestDto = {
         loyaltyProgramId: id,
         period: query.period || 'lastMonth',
         startDate: query.startDate,
         endDate: query.endDate,
       };
-      
-      return await this.getLoyaltyProgramTransactionAnalyticsUseCase.execute(request);
+
+      return await this.getLoyaltyProgramTransactionAnalyticsUseCase.execute(
+        request,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

@@ -28,8 +28,15 @@ export class CreateTechTaskUseCase {
       if (!input.periodType) {
         throw new Error('periodType is required for REGULAR tasks');
       }
-      PeriodCalculator.validatePeriodConfig(input.periodType, input.customPeriodDays);
-      nextCreateDate = PeriodCalculator.calculateNextDate(input.startDate, input.periodType, input.customPeriodDays);
+      PeriodCalculator.validatePeriodConfig(
+        input.periodType,
+        input.customPeriodDays,
+      );
+      nextCreateDate = PeriodCalculator.calculateNextDate(
+        input.startDate,
+        input.periodType,
+        input.customPeriodDays,
+      );
       endSpecifiedDate = input.endSpecifiedDate || nextCreateDate;
     } else if (input.type === TypeTechTask.ONETIME) {
       endSpecifiedDate = input.endSpecifiedDate;

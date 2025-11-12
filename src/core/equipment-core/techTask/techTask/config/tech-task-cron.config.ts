@@ -10,7 +10,7 @@ export interface TechTaskCronConfig {
 export const DEFAULT_TECH_TASK_CRON_CONFIG: TechTaskCronConfig = {
   maxTasksPerBatch: 100,
   batchSize: 10,
-  taskTimeoutMs: 30000, 
+  taskTimeoutMs: 30000,
   maxRetries: 3,
   retryDelayMs: 1000,
   enableDetailedLogging: false,
@@ -18,7 +18,10 @@ export const DEFAULT_TECH_TASK_CRON_CONFIG: TechTaskCronConfig = {
 
 export const getTechTaskCronConfig = (): TechTaskCronConfig => {
   return {
-    maxTasksPerBatch: parseInt(process.env.TECH_TASK_MAX_BATCH_SIZE || '100', 10),
+    maxTasksPerBatch: parseInt(
+      process.env.TECH_TASK_MAX_BATCH_SIZE || '100',
+      10,
+    ),
     batchSize: parseInt(process.env.TECH_TASK_BATCH_SIZE || '10', 10),
     taskTimeoutMs: parseInt(process.env.TECH_TASK_TIMEOUT_MS || '30000', 10),
     maxRetries: parseInt(process.env.TECH_TASK_MAX_RETRIES || '3', 10),

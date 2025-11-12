@@ -13,22 +13,25 @@ export class GetParticipantPosesUseCase {
   ) {}
 
   async execute(loyaltyProgramId: number): Promise<PosResponseDto[]> {
-    const loyaltyProgram = await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
-    
+    const loyaltyProgram =
+      await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
+
     if (!loyaltyProgram) {
       throw new Error(`Loyalty program with ID ${loyaltyProgramId} not found`);
     }
-    const organizations = await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
-      loyaltyProgramId,
-    );
+    const organizations =
+      await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+        loyaltyProgramId,
+      );
 
     if (organizations.length === 0) {
       return [];
     }
 
-    const organizationIds = organizations.map(org => org.id);
+    const organizationIds = organizations.map((org) => org.id);
 
-    const poses = await this.findMethodsPosUseCase.getAllByOrganizationIds(organizationIds);
+    const poses =
+      await this.findMethodsPosUseCase.getAllByOrganizationIds(organizationIds);
 
     return poses;
   }

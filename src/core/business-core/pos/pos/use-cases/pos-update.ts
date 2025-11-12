@@ -27,7 +27,6 @@ export class UpdatePosUseCase {
     pos: Pos,
     file?: Express.Multer.File,
   ): Promise<PosResponseDto> {
-    
     if (!pos) {
       throw new Error('POS not found');
     }
@@ -49,8 +48,13 @@ export class UpdatePosUseCase {
     posProps.slug = input.name ? slugify(input.name, '_') : posProps.slug;
     posProps.startTime = input.startTime ? input.startTime : posProps.startTime;
     posProps.endTime = input.endTime ? input.endTime : posProps.endTime;
-    posProps.organizationId = input.organizationId ? input.organizationId : posProps.organizationId;
-    posProps.posMetaData = input.posMetaData !== undefined ? input.posMetaData : posProps.posMetaData;
+    posProps.organizationId = input.organizationId
+      ? input.organizationId
+      : posProps.organizationId;
+    posProps.posMetaData =
+      input.posMetaData !== undefined
+        ? input.posMetaData
+        : posProps.posMetaData;
     posProps.addressId = addressId;
     posProps.updatedAt = new Date(Date.now());
     posProps.updatedById = user.id;
@@ -68,19 +72,34 @@ export class UpdatePosUseCase {
     const updatedPos = await this.posRepository.update(pos);
 
     let carWashPos = await this.carWashPosRepository.findOneByPosId(id);
-    if (input.carWashPosType || input.minSumOrder || input.maxSumOrder || input.stepSumOrder) {
+    if (
+      input.carWashPosType ||
+      input.minSumOrder ||
+      input.maxSumOrder ||
+      input.stepSumOrder
+    ) {
       if (carWashPos) {
-        carWashPos.carWashPosType = input.carWashPosType ? input.carWashPosType : carWashPos.carWashPosType;
-        carWashPos.minSumOrder = input.minSumOrder ? input.minSumOrder : carWashPos.minSumOrder;
-        carWashPos.maxSumOrder = input.maxSumOrder ? input.maxSumOrder : carWashPos.maxSumOrder;
-        carWashPos.stepSumOrder = input.stepSumOrder ? input.stepSumOrder : carWashPos.stepSumOrder;
-        
+        carWashPos.carWashPosType = input.carWashPosType
+          ? input.carWashPosType
+          : carWashPos.carWashPosType;
+        carWashPos.minSumOrder = input.minSumOrder
+          ? input.minSumOrder
+          : carWashPos.minSumOrder;
+        carWashPos.maxSumOrder = input.maxSumOrder
+          ? input.maxSumOrder
+          : carWashPos.maxSumOrder;
+        carWashPos.stepSumOrder = input.stepSumOrder
+          ? input.stepSumOrder
+          : carWashPos.stepSumOrder;
+
         carWashPos = await this.carWashPosRepository.update(carWashPos);
       }
     }
 
     const updatedPosProps = updatedPos.getProps();
-    const address = await this.addressRepository.findOneById(updatedPosProps.addressId);
+    const address = await this.addressRepository.findOneById(
+      updatedPosProps.addressId,
+    );
 
     return {
       id: updatedPosProps.id,

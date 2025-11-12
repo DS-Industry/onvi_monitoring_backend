@@ -1,5 +1,5 @@
 import { SaleItem } from '@warehouse/sale/MNGSaleItem/domain/saleItem';
-import { SaleItemResponseDto } from "@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto";
+import { SaleItemResponseDto } from '@warehouse/sale/MNGSaleItem/use-cases/dto/saleItem-response.dto';
 
 export abstract class ISaleItemRepository {
   abstract create(input: SaleItem): Promise<SaleItem>;

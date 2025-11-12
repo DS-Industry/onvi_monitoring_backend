@@ -1,4 +1,4 @@
-import { StatusUser } from "@prisma/client";
+import { StatusUser } from '@prisma/client';
 
 export class CreateUserDto {
   name?: string;

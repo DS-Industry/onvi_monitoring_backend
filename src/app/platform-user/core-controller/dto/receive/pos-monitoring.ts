@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PosMonitoringDto {

@@ -8,7 +8,9 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 
 @Injectable()
 export class FindMethodsMarketingCampaignUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
   async getOneById(id: number): Promise<MarketingCampaignResponseDto | null> {
     return this.marketingCampaignRepository.findOneById(id);
@@ -18,26 +20,41 @@ export class FindMethodsMarketingCampaignUseCase {
     return this.marketingCampaignRepository.findAll();
   }
 
-  async getAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
-    return this.marketingCampaignRepository.findAllByOrganizationId(organizationId);
+  async getAllByOrganizationId(
+    organizationId: number,
+  ): Promise<MarketingCampaignResponseDto[]> {
+    return this.marketingCampaignRepository.findAllByOrganizationId(
+      organizationId,
+    );
   }
 
-  async getAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
-    return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(filter);
+  async getAllByOrganizationIdPaginated(
+    filter: MarketingCampaignsFilterDto,
+  ): Promise<MarketingCampaignsPaginatedResponseDto> {
+    return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(
+      filter,
+    );
   }
 
-  async getConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null> {
-    return this.marketingCampaignRepository.findConditionsByCampaignId(campaignId);
+  async getConditionsByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignConditionsResponseDto | null> {
+    return this.marketingCampaignRepository.findConditionsByCampaignId(
+      campaignId,
+    );
   }
 
-  async getConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
+  async getConditionById(
+    conditionId: number,
+  ): Promise<{ campaignId: number } | null> {
     return this.marketingCampaignRepository.findConditionById(conditionId);
   }
 
   async getMobileDisplayByCampaignId(
     campaignId: number,
   ): Promise<MarketingCampaignMobileDisplayResponseDto | null> {
-    return this.marketingCampaignRepository.findMobileDisplayByCampaignId(campaignId);
+    return this.marketingCampaignRepository.findMobileDisplayByCampaignId(
+      campaignId,
+    );
   }
 }
-

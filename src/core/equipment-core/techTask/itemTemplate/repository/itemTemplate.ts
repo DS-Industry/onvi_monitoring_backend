@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  ITechTaskItemTemplateRepository
-} from "@tech-task/itemTemplate/interface/itemTemplate";
+import { ITechTaskItemTemplateRepository } from '@tech-task/itemTemplate/interface/itemTemplate';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { TechTaskItemTemplate,} from "@tech-task/itemTemplate/domain/itemTemplate";
+import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplate';
 import { PrismaTechTaskItemTemplateMapper } from '@db/mapper/prisma-tech-task-item-template-mapper';
 
 @Injectable()

@@ -6,10 +6,7 @@ import { LTYProgramRequestStatus } from '@prisma/client';
 export class LoyaltyProgramHubRequestUseCase {
   constructor(private readonly prisma: PrismaService) {}
 
-  async execute(
-    loyaltyProgramId: number,
-    comment?: string,
-  ): Promise<any> {
+  async execute(loyaltyProgramId: number, comment?: string): Promise<any> {
     const loyaltyProgram = await this.prisma.lTYProgram.findFirst({
       where: {
         id: loyaltyProgramId,

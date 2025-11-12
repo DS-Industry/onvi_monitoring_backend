@@ -12,5 +12,3 @@ export class VerifyPaymentUseCaseCore {
     return this.paymentGateway.getPayment(paymentId);
   }
 }
-
-

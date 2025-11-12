@@ -50,5 +50,9 @@ export abstract class ITechTaskRepository {
   ): Promise<any>;
   abstract delete(id: number): Promise<void>;
   abstract deleteMany(ids: number[]): Promise<void>;
-  abstract findManyByIds(ids: number[], posId?: number, organizationId?: number): Promise<TechTask[]>;
+  abstract findManyByIds(
+    ids: number[],
+    posId?: number,
+    organizationId?: number,
+  ): Promise<TechTask[]>;
 }

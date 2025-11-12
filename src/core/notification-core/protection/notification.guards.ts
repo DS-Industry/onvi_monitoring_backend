@@ -1,8 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { NotificationException } from '@exception/option.exceptions';
@@ -19,7 +15,7 @@ export class NotificationGuard
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any) {
     if (err || !user) {
       throw (
         new Error(err) ||

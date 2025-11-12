@@ -3,7 +3,10 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { ILoyaltyProgramHubRequestRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyalty-program-hub-request';
 import { LTYProgramRequestStatus } from '@prisma/client';
 import { LoyaltyHubRequestsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-hub-requests-filter.dto';
-import { LoyaltyHubRequestsListResponseDto, LoyaltyHubRequestsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-hub-requests-response.dto';
+import {
+  LoyaltyHubRequestsListResponseDto,
+  LoyaltyHubRequestsResponseDto,
+} from '@platform-user/core-controller/dto/response/loyalty-hub-requests-response.dto';
 
 @Injectable()
 export class LoyaltyProgramHubRequestRepository extends ILoyaltyProgramHubRequestRepository {

@@ -4,7 +4,6 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  Inject,
 } from '@nestjs/common';
 import { RedisService } from '@infra/cache/redis.service';
 import { FindMethodsPlacementUseCase } from '@business-core/placement/use-case/placement-find-methods';

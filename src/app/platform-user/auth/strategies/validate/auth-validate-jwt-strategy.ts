@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IUserRepository } from "@platform-user/user/interfaces/user";
-import { User } from "@platform-user/user/domain/user";
-import { UserException } from "@exception/option.exceptions";
-import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
+import { IUserRepository } from '@platform-user/user/interfaces/user';
+import { User } from '@platform-user/user/domain/user';
+import { UserException } from '@exception/option.exceptions';
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from '@constant/error.constants';
 
 @Injectable()
 export class ValidateUserForJwtStrategyUseCase {

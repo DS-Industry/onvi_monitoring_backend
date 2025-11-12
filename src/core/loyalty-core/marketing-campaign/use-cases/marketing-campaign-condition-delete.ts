@@ -3,10 +3,11 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 
 @Injectable()
 export class DeleteMarketingCampaignConditionUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
   async execute(conditionId: number): Promise<void> {
     return this.marketingCampaignRepository.deleteCondition(conditionId);
   }
 }
-

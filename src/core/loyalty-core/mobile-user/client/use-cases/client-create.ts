@@ -20,8 +20,7 @@ export class CreateClientUseCase {
   ) {}
 
   async execute(data: ClientCreateDto): Promise<ClientFullResponseDto> {
-
-    const cleanPhone = data.phone.replace(/^\+/, '')
+    const cleanPhone = data.phone.replace(/^\+/, '');
 
     const clientData = new Client({
       name: data.name,
@@ -37,23 +36,29 @@ export class CreateClientUseCase {
       updatedAt: new Date(Date.now()),
     });
     const client = await this.clientRepository.create(clientData);
-    
+
     let card;
-    
+
     if (data.cardId) {
       if (data.cardId <= 0) {
-        throw new Error(`Invalid cardId: ${data.cardId}. Card ID must be a positive number.`);
+        throw new Error(
+          `Invalid cardId: ${data.cardId}. Card ID must be a positive number.`,
+        );
       }
-      
-      const existingCard = await this.findMethodsCardUseCase.getById(data.cardId);
+
+      const existingCard = await this.findMethodsCardUseCase.getById(
+        data.cardId,
+      );
       if (!existingCard) {
         throw new Error(`Card with id ${data.cardId} not found`);
       }
-      
+
       if (existingCard.mobileUserId) {
-        throw new Error(`Card with id ${data.cardId} is already assigned to another client`);
+        throw new Error(
+          `Card with id ${data.cardId} is already assigned to another client`,
+        );
       }
-      
+
       existingCard.mobileUserId = client.id;
       card = await this.updateCardUseCase.execute(
         {
@@ -69,8 +74,7 @@ export class CreateClientUseCase {
         monthlyLimit: data?.monthlyLimit,
       });
     }
-    
-  
+
     const tagIds = data.tagIds || [];
     await this.clientRepository.updateConnectionTag(client.id, tagIds, []);
     const clientTags = await this.findMethodsTagUseCase.getAllByClientId(
@@ -92,16 +96,18 @@ export class CreateClientUseCase {
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
       tags: clientTags.map((tag) => tag.getProps()),
-      card: card ? {
-        id: card.id,
-        balance: card.balance,
-        mobileUserId: card.mobileUserId,
-        devNumber: card.devNumber,
-        number: card.number,
-        monthlyLimit: card?.monthlyLimit,
-        createdAt: card.createdAt,
-        updatedAt: card.updatedAt,
-      } : null,
+      card: card
+        ? {
+            id: card.id,
+            balance: card.balance,
+            mobileUserId: card.mobileUserId,
+            devNumber: card.devNumber,
+            number: card.number,
+            monthlyLimit: card?.monthlyLimit,
+            createdAt: card.createdAt,
+            updatedAt: card.updatedAt,
+          }
+        : null,
     };
   }
 }

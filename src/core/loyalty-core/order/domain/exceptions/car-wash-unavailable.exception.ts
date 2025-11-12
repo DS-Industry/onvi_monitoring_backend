@@ -17,6 +17,3 @@ export class CarWashUnavailableException extends BaseException {
     return HttpStatus.SERVICE_UNAVAILABLE;
   }
 }
-
-
-

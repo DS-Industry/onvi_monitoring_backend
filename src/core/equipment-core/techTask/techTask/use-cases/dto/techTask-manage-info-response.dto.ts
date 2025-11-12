@@ -1,5 +1,5 @@
 import { StatusTechTask, TypeTechTask } from '@prisma/client';
-import { TechTagProps } from "@tech-task/tag/domain/techTag";
+import { TechTagProps } from '@tech-task/tag/domain/techTag';
 import { PeriodType } from '../../domain/periodType';
 
 export class TechTaskManageInfoResponseDto {

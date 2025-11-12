@@ -9,21 +9,14 @@ export interface DetermineOrderStatusRequest {
 
 @Injectable()
 export class OrderStatusDeterminationService {
-  determineInitialStatus(
-    request: DetermineOrderStatusRequest,
-  ): OrderStatus {
+  determineInitialStatus(request: DetermineOrderStatusRequest): OrderStatus {
     const isFreeVacuum =
       request.sum === 0 && request.bayType === DeviceType.VACUUME;
 
-    return isFreeVacuum
-      ? OrderStatus.FREE_PROCESSING
-      : OrderStatus.CREATED;
+    return isFreeVacuum ? OrderStatus.FREE_PROCESSING : OrderStatus.CREATED;
   }
 
   isFreeVacuum(request: DetermineOrderStatusRequest): boolean {
     return request.sum === 0 && request.bayType === DeviceType.VACUUME;
   }
 }
-
-
-

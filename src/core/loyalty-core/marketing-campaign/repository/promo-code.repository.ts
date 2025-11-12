@@ -63,9 +63,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
     return count;
   }
 
-  async createUsage(
-    input: CreateMarketingCampaignUsageInput,
-  ): Promise<void> {
+  async createUsage(input: CreateMarketingCampaignUsageInput): Promise<void> {
     await this.prisma.marketingCampaignUsage.create({
       data: {
         campaignId: input.campaignId || 0,
@@ -77,6 +75,3 @@ export class PromoCodeRepository extends IPromoCodeRepository {
     });
   }
 }
-
-
-

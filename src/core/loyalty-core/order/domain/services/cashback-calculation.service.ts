@@ -25,6 +25,3 @@ export class CashbackCalculationService {
     return Math.ceil(cashbackRaw);
   }
 }
-
-
-

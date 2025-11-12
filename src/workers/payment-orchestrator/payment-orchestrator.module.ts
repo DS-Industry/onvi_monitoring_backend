@@ -48,7 +48,7 @@ import { LoggerModule } from 'nestjs-pino';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        customProps: (req, res) => ({
+        customProps: () => ({
           context: 'HTTP',
         }),
       },
@@ -60,22 +60,38 @@ import { LoggerModule } from 'nestjs-pino';
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'payment-orchestrate',
-      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
     }),
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'order-finished',
-      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 1 },
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 1,
+      },
     }),
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'pos-process',
-      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
     }),
     BullModule.registerQueue({
       configKey: 'worker',
       name: 'car-wash-launch',
-      defaultJobOptions: { removeOnComplete: true, removeOnFail: true, attempts: 3 },
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+      },
     }),
     BullModule.registerQueue({
       configKey: 'worker',
@@ -86,7 +102,7 @@ import { LoggerModule } from 'nestjs-pino';
         attempts: 3,
         backoff: {
           type: 'exponential',
-          delay: 5000, 
+          delay: 5000,
         },
       },
     }),
@@ -99,7 +115,3 @@ import { LoggerModule } from 'nestjs-pino';
   ],
 })
 export class PaymentOrchestratorModule {}
-
-
-
-

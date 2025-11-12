@@ -8,11 +8,7 @@ import { MobileAuthCoreModule } from '@mobile-core/auth/mobile-auth-core.module'
 @Module({
   imports: [MobileAuthCoreModule],
   controllers: [Auth],
-  providers: [
-    LocalStrategy,
-    JwtStrategy,
-    JwtRefreshStrategy,
-  ],
+  providers: [LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   exports: [],
 })
 export class ClientAuthModule {}

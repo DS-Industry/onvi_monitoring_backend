@@ -33,6 +33,7 @@ export class UserRepository extends IUserRepository {
   }
 
   public async createMany(input: User[]): Promise<User[]> {
+    console.log(input);
     return Promise.resolve([]);
   }
 
@@ -156,7 +157,7 @@ export class UserRepository extends IUserRepository {
     return PrismaPlatformUserMapper.toDomain(user);
   }
 
-  public async remove(id: number): Promise<any> {
+  public async remove(): Promise<any> {
     return Promise.resolve(undefined);
   }
 
@@ -242,11 +243,7 @@ export class UserRepository extends IUserRepository {
     });
   }
 
-  public async updateConnectionLoyaltyProgram(
-    userId: number,
-    addLoyaltyProgramIds: number[],
-    deleteLoyaltyProgramIds: number[],
-  ): Promise<any> {
+  public async updateConnectionLoyaltyProgram(): Promise<any> {
     // TODO: Remove this method ?
   }
 

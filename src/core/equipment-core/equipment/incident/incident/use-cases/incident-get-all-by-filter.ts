@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IncidentByFilterResponseDto } from '@equipment/incident/incident/use-cases/dto/incident-by-filter-response.dto';
 import { FindMethodsIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-find-methods';
-import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class GetAllByFilterIncidentUseCase {

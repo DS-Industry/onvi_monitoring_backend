@@ -13,9 +13,8 @@ export class CreateCarWashDeviceUseCase {
 
   async execute(
     input: CarWashDeviceCreateDto,
-    carWashDeviceType: CarWashDeviceType
+    carWashDeviceType: CarWashDeviceType,
   ): Promise<CarWashDeviceFullDataResponseDto> {
-
     const carWashDeviceData = new CarWashDevice({
       name: input.name,
       carWashDeviceMetaData: input.carWashDeviceMetaData,

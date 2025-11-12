@@ -1,5 +1,8 @@
-import { StatusUser, ContractType } from "@loyalty/mobile-user/client/domain/enums";
-import { TagProps } from "@loyalty/mobile-user/tag/domain/tag";
+import {
+  StatusUser,
+  ContractType,
+} from '@loyalty/mobile-user/client/domain/enums';
+import { TagProps } from '@loyalty/mobile-user/tag/domain/tag';
 
 export class ClientResponseDto {
   id: number;

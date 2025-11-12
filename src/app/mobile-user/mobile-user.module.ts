@@ -6,7 +6,13 @@ import { CardModule } from '@mobile-user/card/card.module';
 import { MobileOrderModule } from '@mobile-user/order/order.module';
 
 @Module({
-  imports: [ClientModule, PrismaModule, ClientAuthModule, CardModule, MobileOrderModule],
+  imports: [
+    ClientModule,
+    PrismaModule,
+    ClientAuthModule,
+    CardModule,
+    MobileOrderModule,
+  ],
   exports: [ClientModule, ClientAuthModule, CardModule, MobileOrderModule],
 })
 export class MobileUserModule {}

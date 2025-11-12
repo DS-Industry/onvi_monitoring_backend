@@ -1,6 +1,12 @@
-import { IsEnum, IsOptional, IsString, IsDateString, IsArray } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsArray,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
-import { StatusTechTask } from "@tech-task/techTask/domain/statusTechTask";
+import { StatusTechTask } from '@tech-task/techTask/domain/statusTechTask';
 
 export class TechTaskMeFilterDto {
   @IsOptional()
@@ -29,7 +35,7 @@ export class TechTaskMeFilterDto {
   @IsArray()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
-      return value.split(',').map(tag => tag.trim());
+      return value.split(',').map((tag) => tag.trim());
     }
     return value;
   })

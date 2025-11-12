@@ -9,4 +9,3 @@ export class VerifyPromoDto {
   @IsNotEmpty()
   carWashId: number;
 }
-

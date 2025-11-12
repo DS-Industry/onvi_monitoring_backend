@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IWarehouseDocumentRepository, PaginatedWarehouseDocuments } from '@warehouse/document/document/interface/warehouseDocument';
+import {
+  IWarehouseDocumentRepository,
+  PaginatedWarehouseDocuments,
+} from '@warehouse/document/document/interface/warehouseDocument';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { WarehouseDocument } from '@warehouse/document/document/domain/warehouseDocument';
 import { PrismaWarehouseDocumentMapper } from '@db/mapper/prisma-warehouse-document-mapper';

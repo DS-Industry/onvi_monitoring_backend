@@ -4,7 +4,7 @@ import { CreatePaymentUseCaseCore } from '../../../core/payment-core/use-cases/c
 export class CreateGenericPaymentDto {
   amount: string;
   description: string;
-  paymentToken?: string; 
+  paymentToken?: string;
   phone?: string;
 }
 
@@ -19,5 +19,3 @@ export class PaymentController {
     return payment;
   }
 }
-
-

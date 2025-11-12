@@ -32,14 +32,9 @@ const useCases = [
   ValidateRefreshTokenForJwtStrategyUseCase,
 ];
 
-const repositories = [
-  PrismaClientAuthRepository,
-];
+const repositories = [PrismaClientAuthRepository];
 
-const services = [
-  RedisOtpService,
-  JwtTokenService,
-];
+const services = [RedisOtpService, JwtTokenService];
 
 const providers = [
   ClientAuthRepositoryProvider,
@@ -56,12 +51,7 @@ const providers = [
     SmsModule,
     OtpModule,
   ],
-  providers: [
-    ...repositories,
-    ...services,
-    ...providers,
-    ...useCases,
-  ],
+  providers: [...repositories, ...services, ...providers, ...useCases],
   exports: [...useCases],
 })
 export class MobileAuthCoreModule {}

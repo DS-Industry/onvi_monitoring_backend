@@ -18,6 +18,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { RedisModule } from '@infra/cache/redis.module';
 import { HandlerUpdateTierCron } from '@infra/handler/loyalty/cron/handler-update-tier';
 import { HandlerMarketingCampaignCron } from '@infra/handler/marketing-campaign/cron/handler-marketing-campaign';
+import { HandlerMarketingCampaignActivationWindowCron } from '@infra/handler/marketing-campaign/cron/handler-marketing-campaign-activation-window';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { LoggerModule } from 'nestjs-pino';
 
@@ -29,6 +30,7 @@ const cronUseCases: Provider[] = [
   HandlerManagerPaperCron,
   HandlerUpdateTierCron,
   HandlerMarketingCampaignCron,
+  HandlerMarketingCampaignActivationWindowCron,
 ];
 
 @Module({
@@ -66,7 +68,7 @@ const cronUseCases: Provider[] = [
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        customProps: (req, res) => ({
+        customProps: () => ({
           context: 'HTTP',
         }),
       },

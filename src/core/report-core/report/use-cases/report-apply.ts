@@ -4,10 +4,7 @@ import { Queue } from 'bullmq';
 import { ReportApplyDto } from '@platform-user/validate/validate-rules/dto/report-apply.dto';
 import { User } from '@platform-user/user/domain/user';
 import { CreateTransactionUseCase } from '@report/transaction/use-cases/transaction-create';
-import { ReportTemplateTransaction } from '@report/transaction/domain/reportTemplateTransaction';
-import {
-  ReportTransactionResponseDto
-} from "@platform-user/core-controller/dto/response/report-transaction-response.dto";
+import { ReportTransactionResponseDto } from '@platform-user/core-controller/dto/response/report-transaction-response.dto';
 
 @Injectable()
 export class ApplyReportUseCase {

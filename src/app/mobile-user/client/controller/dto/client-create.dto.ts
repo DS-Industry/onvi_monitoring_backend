@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsOptional, IsString, IsEmail, IsEnum, IsDateString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsEmail,
+  IsEnum,
+  IsDateString,
+} from 'class-validator';
 import { ContractType, StatusUser } from '@prisma/client';
 
 export class CreateClientDto {

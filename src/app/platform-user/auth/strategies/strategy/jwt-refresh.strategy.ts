@@ -6,8 +6,8 @@ import { Request } from 'express';
 import { TokenPayload } from '@platform-user/auth/domain/jwt-payload';
 import { IUserRepository } from '@platform-user/user/interfaces/user';
 import { IBcryptAdapter } from '@libs/bcrypt/adapter';
-import { UserException } from "@exception/option.exceptions";
-import { USER_AUTHORIZATION_EXCEPTION_CODE } from "@constant/error.constants";
+import { UserException } from '@exception/option.exceptions';
+import { USER_AUTHORIZATION_EXCEPTION_CODE } from '@constant/error.constants';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -31,7 +31,8 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   async validate(request: Request, payload: TokenPayload) {
     try {
-      const refreshToken = request?.cookies?.refreshToken || request.body['refreshToken'];
+      const refreshToken =
+        request?.cookies?.refreshToken || request.body['refreshToken'];
       const user = await this.userRepository.findOneByEmail(payload.email);
       if (!user) {
         throw new Error('email not exists');

@@ -19,7 +19,7 @@ export class CreateUserPermissionUseCase {
   ): Promise<UserPermission> {
     // Get user's roles
     const userRoles = await this.findMethodsRoleUseCase.getAllByUserId(user.id);
-    
+
     if (userRoles.length === 0) {
       throw new Error('User has no roles assigned');
     }

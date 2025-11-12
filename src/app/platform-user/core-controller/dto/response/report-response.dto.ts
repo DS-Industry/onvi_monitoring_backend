@@ -1,4 +1,4 @@
-import { CategoryReportTemplate } from "@prisma/client";
+import { CategoryReportTemplate } from '@prisma/client';
 
 export class ReportResponseDto {
   id: number;

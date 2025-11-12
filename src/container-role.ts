@@ -33,22 +33,29 @@ export const rolesMapBootstrap = {
 
     app.use(cookieParser());
 
-    app.use('/payment-webhook/webhook', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.headers['content-type']?.includes('application/json')) {
-        let data = '';
-        req.setEncoding('utf8');
-        req.on('data', (chunk: string) => {
-          data += chunk;
-        });
-        req.on('end', () => {
-          (req as any).rawBody = Buffer.from(data, 'utf-8');
+    app.use(
+      '/payment-webhook/webhook',
+      (
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ) => {
+        if (req.headers['content-type']?.includes('application/json')) {
+          let data = '';
+          req.setEncoding('utf8');
+          req.on('data', (chunk: string) => {
+            data += chunk;
+          });
+          req.on('end', () => {
+            (req as any).rawBody = Buffer.from(data, 'utf-8');
+            next();
+          });
+        } else {
           next();
-        });
-      } else {
-        next();
-      }
-    });
-    
+        }
+      },
+    );
+
     // CSRF Protection temporarily disabled due to deprecated csurf package issues
     // TODO: Implement modern CSRF protection
 
@@ -128,7 +135,7 @@ export const rolesMapBootstrap = {
 
     const appName = configService.get<string>('appNamePaymentOrchestrator');
     const port = configService.get<number>('portPaymentOrchestrator');
-    
+
     app.useGlobalFilters(new AllExceptionFilter());
     app.enableShutdownHooks();
     await app.listen(port);

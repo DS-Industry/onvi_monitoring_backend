@@ -1,5 +1,5 @@
 import { BaseEntity } from '@utils/entity';
-import { StatusHrWorker } from "@prisma/client";
+import { StatusHrWorker } from '@prisma/client';
 
 export interface WorkerProps {
   id?: number;

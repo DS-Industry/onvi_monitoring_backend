@@ -7,7 +7,7 @@ export class DeleteManyTechTaskUseCase {
   constructor(private readonly techTaskRepository: ITechTaskRepository) {}
 
   async execute(techTasks: TechTask[]): Promise<void> {
-    const ids = techTasks.map(task => task.id);
+    const ids = techTasks.map((task) => task.id);
     await this.techTaskRepository.deleteMany(ids);
   }
 }

@@ -21,10 +21,11 @@ import { UserPermissionValidateRules } from '@platform-user/validate/validate-ru
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
-  ManageOrgAbility, ReadOrgAbility,
+  ManageOrgAbility,
+  ReadOrgAbility,
   ReadPosAbility,
-  UpdateOrgAbility
-} from "@common/decorators/abilities.decorator";
+  UpdateOrgAbility,
+} from '@common/decorators/abilities.decorator';
 import { GetAllPermissionsInfoUseCases } from '@platform-user/permissions/use-cases/get-all-permissions-info';
 import { UserException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
@@ -320,7 +321,7 @@ export class PermissionController {
       }
     }
   }
-  
+
   @Get('loyalty-program/:userId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateOrgAbility())
@@ -331,10 +332,14 @@ export class PermissionController {
   ): Promise<LoyaltyProgramPermissionsResponseDto[]> {
     try {
       const { ability } = req;
-      
-      await this.userPermissionValidateRules.getUserLoyaltyProgramAccessValidate(userId, ability);
-      
-      const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
+
+      await this.userPermissionValidateRules.getUserLoyaltyProgramAccessValidate(
+        userId,
+        ability,
+      );
+
+      const loyaltyPrograms =
+        await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
       return loyaltyPrograms.map((loyaltyProgram) => ({
         id: loyaltyProgram.id,
         name: loyaltyProgram.name,
@@ -366,18 +371,19 @@ export class PermissionController {
   ): Promise<LoyaltyProgramPermissionsResponseDto[]> {
     try {
       const { ability } = req;
-      
+
       if (organizationId) {
-        const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByAbility(
-          ability,
-          Number(organizationId),
-        );
+        const loyaltyPrograms =
+          await this.findMethodsLoyaltyProgramUseCase.getAllByAbility(
+            ability,
+            Number(organizationId),
+          );
         return loyaltyPrograms.map((loyaltyProgram) => ({
           id: loyaltyProgram.id,
           name: loyaltyProgram.name,
         }));
       }
-      
+
       return await this.loyaltyProgramManageUserUseCase.execute(ability);
     } catch (e) {
       if (e instanceof UserException) {
@@ -414,7 +420,10 @@ export class PermissionController {
 
       await this.deleteUserKeysSafely(userId);
 
-      return await this.connectionUserLoyaltyProgramUseCase.execute(body.loyaltyProgramIds, userId);
+      return await this.connectionUserLoyaltyProgramUseCase.execute(
+        body.loyaltyProgramIds,
+        userId,
+      );
     } catch (e) {
       if (e instanceof UserException) {
         throw new CustomHttpException({

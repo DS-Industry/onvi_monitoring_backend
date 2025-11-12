@@ -1,4 +1,4 @@
-import { CardBonusBank } from "@loyalty/mobile-user/bonus/cardBonusBank/domain/cardBonusBank";
+import { CardBonusBank } from '@loyalty/mobile-user/bonus/cardBonusBank/domain/cardBonusBank';
 
 export abstract class ICardBonusBankRepository {
   abstract create(input: CardBonusBank): Promise<CardBonusBank>;
