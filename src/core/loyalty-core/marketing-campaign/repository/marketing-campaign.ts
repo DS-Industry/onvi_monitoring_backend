@@ -1052,6 +1052,36 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       );
     }
 
+    const conditionToDelete = tree[order];
+    if (
+      conditionToDelete &&
+      conditionToDelete.type === CampaignConditionType.PROMOCODE_ENTRY
+    ) {
+      const promocodeCode = conditionToDelete.code;
+      if (promocodeCode) {
+        const promocode = await this.prisma.lTYPromocode.findFirst({
+          where: {
+            code: promocodeCode,
+            campaignId: conditionRecord.campaignId,
+          },
+        });
+
+        if (promocode) {
+          await this.prisma.lTYPromocode.update({
+            where: { id: promocode.id },
+            data: {
+              campaignId: null,
+              actionId: null,
+            },
+          });
+
+          await this.prisma.lTYPromocode.delete({
+            where: { id: promocode.id },
+          });
+        }
+      }
+    }
+
     const updatedTree = tree.filter((_, index) => index !== order);
 
     if (updatedTree.length > 0) {
