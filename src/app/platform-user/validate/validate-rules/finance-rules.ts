@@ -149,7 +149,7 @@ export class FinanceValidateRules {
       FINANCE_RETURN_EXCEPTION_CODE,
     );
     ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
+      PermissionAction.create,
       cashCollectionCheck.object,
     );
     return cashCollectionCheck.object;
