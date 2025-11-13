@@ -29,7 +29,6 @@ import {
   CheckAbilities,
   CreateCashCollectionAbility,
   CreateShiftReportAbility,
-  DeleteShiftReportAbility,
   ReadCashCollectionAbility,
   ReadShiftReportAbility,
   UpdateCashCollectionAbility,

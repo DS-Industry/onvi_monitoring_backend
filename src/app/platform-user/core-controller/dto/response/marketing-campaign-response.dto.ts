@@ -11,10 +11,12 @@ export class MarketingCampaignResponseDto {
   description?: string;
   ltyProgramId?: number;
   ltyProgramName?: string;
+  ltyProgramHubPlus: boolean;
   posCount: number;
   posIds: number[];
   createdAt: string;
   updatedAt: string;
+  activeDays?: number;
   createdBy: {
     id: number;
     name: string;

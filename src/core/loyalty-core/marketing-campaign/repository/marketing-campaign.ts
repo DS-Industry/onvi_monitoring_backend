@@ -96,8 +96,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
+      activeDays: campaign.activeDays,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
+      ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
       posCount: posCount,
       posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -172,6 +174,9 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     if (data.status !== undefined) updateData.status = data.status;
     if (data.executionType !== undefined)
       updateData.executionType = data.executionType;
+    if (data.activeDays !== undefined && data.activeDays !== null) {
+      updateData.activeDays = data.activeDays;
+    }
 
     const campaign = await this.prisma.marketingCampaign.update({
       where: { id },
@@ -227,8 +232,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
+      activeDays: campaign.activeDays,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
+      ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
       posCount: data.posIds?.length || 0,
       posIds: data.posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -300,8 +307,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       launchDate: campaign.launchDate.toISOString(),
       endDate: campaign.endDate?.toISOString(),
       description: campaign.description,
+      activeDays: campaign.activeDays,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
+      ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
       posCount: posCount,
       posIds: posIds,
       createdAt: campaign.createdAt.toISOString(),
@@ -369,8 +378,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
+        activeDays: campaign.activeDays,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
+        ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
@@ -445,8 +456,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
+        activeDays: campaign.activeDays,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
+        ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),
@@ -545,8 +558,10 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         launchDate: campaign.launchDate.toISOString(),
         endDate: campaign.endDate?.toISOString(),
         description: campaign.description,
+        activeDays: campaign.activeDays,
         ltyProgramId: campaign.ltyProgramId,
         ltyProgramName: campaign.ltyProgram?.name,
+        ltyProgramHubPlus: campaign.ltyProgram?.isHubPlus || false,
         posCount: posCount,
         posIds: posIds,
         createdAt: campaign.createdAt.toISOString(),

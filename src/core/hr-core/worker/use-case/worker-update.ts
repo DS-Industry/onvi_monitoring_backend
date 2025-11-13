@@ -59,9 +59,7 @@ export class UpdateWorkerUseCase {
     oldWorker.bonusPayout = bonusPayout ? bonusPayout : oldWorker.bonusPayout;
     oldWorker.status = status ? status : oldWorker.status;
     oldWorker.gender = gender ? gender : oldWorker.gender;
-    oldWorker.birthday = birthday
-      ? birthday
-      : oldWorker.birthday;
+    oldWorker.birthday = birthday ? birthday : oldWorker.birthday;
     oldWorker.citizenship = citizenship ? citizenship : oldWorker.citizenship;
     oldWorker.passportSeries = passportSeries
       ? passportSeries

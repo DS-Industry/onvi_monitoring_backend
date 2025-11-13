@@ -1493,6 +1493,7 @@ model MarketingCampaign {
   createdById             Int
   updatedById             Int
   ltyProgramParticipantId Int?
+  activeDays              Int?
 
   promocodes            LTYPromocode[]
   conditions            MarketingCampaignCondition[]
@@ -1641,7 +1642,7 @@ model ActivationWindow {
   campaignId Int
   actionId   Int
   startAt    DateTime
-  endAt      DateTime
+  endAt      DateTime?
   status     ActivationWindowStatus
   campaign   MarketingCampaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   user       LTYUser                 @relation(fields: [ltyUserId], references: [id], onDelete: Cascade)
