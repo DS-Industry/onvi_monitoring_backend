@@ -171,6 +171,7 @@ import { PromocodeCreateDto } from '@platform-user/core-controller/dto/receive/p
 import { PromocodeResponseDto } from './dto/response/promocode-response.dto';
 import { MarketingCampaignActionResponseDto } from './dto/response/marketing-campaign-action-response.dto';
 import { DeleteResponseDto } from './dto/response/delete-response.dto';
+import { PrismaService } from '@db/prisma/prisma.service';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -231,6 +232,7 @@ export class LoyaltyController {
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
     private readonly createPromocodeUseCase: CreatePromocodeUseCase,
+    private readonly prisma: PrismaService,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -1941,8 +1943,17 @@ export class LoyaltyController {
     try {
       const { ability } = req;
 
+      const condition = await this.prisma.marketingCampaignCondition.findFirst({
+        where: { id },
+        select: { campaignId: true },
+      });
+
+      if (!condition) {
+        throw new LoyaltyException(404, 'Marketing campaign condition not found');
+      }
+
       await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
-        id,
+        condition.campaignId,
         ability,
       );
 
