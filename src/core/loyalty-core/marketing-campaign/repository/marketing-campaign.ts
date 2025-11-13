@@ -219,22 +219,6 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       });
     }
 
-    const poses = await this.prisma.pos.findMany({
-      where: {
-        marketingCampaigns: {
-          some: {
-            id: campaign.id,
-          },
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    const posCount = poses.length;
-    const posIds = poses.map((pos) => pos.id);
-
     return {
       id: campaign.id,
       name: campaign.name,
@@ -245,8 +229,8 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      posCount: posCount,
-      posIds: posIds,
+      posCount: data.posIds.length,
+      posIds: data.posIds,
       createdAt: campaign.createdAt.toISOString(),
       updatedAt: campaign.updatedAt.toISOString(),
       createdBy: {

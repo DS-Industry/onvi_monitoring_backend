@@ -1795,6 +1795,7 @@ export class LoyaltyController {
         filter.organizationId,
       );
 
+      // TODO: fix validation
       await this.loyaltyValidateRules.getMarketingCampaignsValidate(
         ability,
         filter.organizationId,
