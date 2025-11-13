@@ -67,4 +67,8 @@ export class MarketingCampaignUpdateDto {
   @IsEnum(CampaignExecutionType)
   @IsOptional()
   executionType?: CampaignExecutionType;
+
+  @IsNumber()
+  @IsOptional()
+  activeDays?: number;
 }
