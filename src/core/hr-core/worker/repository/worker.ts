@@ -80,9 +80,7 @@ export class WorkerRepository extends IWorkerRepository {
 
     if (posId !== undefined) {
       where.posWorks = { some: { id: posId } };
-    }
-
-    if (userId !== undefined) {
+    } else if (userId !== undefined) {
       where.posWorks = {
         ...where.posWorks,
         some: {
@@ -142,9 +140,7 @@ export class WorkerRepository extends IWorkerRepository {
 
     if (posId !== undefined) {
       where.posWorks = { some: { id: posId } };
-    }
-
-    if (userId !== undefined) {
+    } else if (userId !== undefined) {
       where.posWorks = {
         ...where.posWorks,
         some: {
