@@ -229,7 +229,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       description: campaign.description,
       ltyProgramId: campaign.ltyProgramId,
       ltyProgramName: campaign.ltyProgram?.name,
-      posCount: data.posIds.length,
+      posCount: data.posIds?.length || 0,
       posIds: data.posIds,
       createdAt: campaign.createdAt.toISOString(),
       updatedAt: campaign.updatedAt.toISOString(),
