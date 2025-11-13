@@ -16,16 +16,18 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<string> {
-    this.logger.log(`[CHECK-CAR-WASH-STARTED] Processing job ${job.id} for order#${job.data.orderId}`);
+    this.logger.log(
+      `[CHECK-CAR-WASH-STARTED] Processing job ${job.id} for order#${job.data.orderId}`,
+    );
     let carWashLaunchSuccess = false;
     try {
       const childrenResults = await job.getChildrenValues<any>();
       const childResultsArray = Object.values(childrenResults);
-      
+
       if (childResultsArray.length > 0) {
         const childResult = childResultsArray[0];
         carWashLaunchSuccess = childResult === 'success';
-        
+
         if (!carWashLaunchSuccess) {
           this.logger.warn(
             `[CHECK-CAR-WASH-STARTED] Child job car-wash-launch returned: ${childResult}`,
@@ -51,12 +53,15 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
         job.data.carWashDeviceId,
         job.data.bayType,
       );
-      this.logger.log(`[CHECK-CAR-WASH-STARTED] Job ${job.id} completed successfully`);
+      this.logger.log(
+        `[CHECK-CAR-WASH-STARTED] Job ${job.id} completed successfully`,
+      );
       return 'success';
     } else {
-      this.logger.warn(`[CHECK-CAR-WASH-STARTED] Job ${job.id} skipped - car-wash-launch did not succeed`);
+      this.logger.warn(
+        `[CHECK-CAR-WASH-STARTED] Job ${job.id} skipped - car-wash-launch did not succeed`,
+      );
       return 'skipped';
     }
   }
 }
-

@@ -10,14 +10,15 @@ export class PublishLoyaltyProgramUseCase {
   ) {}
 
   async execute(loyaltyProgramId: number): Promise<LTYProgram> {
-    const loyaltyProgram = await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
-    
+    const loyaltyProgram =
+      await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
+
     if (!loyaltyProgram) {
       throw new Error('Loyalty program not found');
     }
 
     loyaltyProgram.status = LTYProgramStatus.ACTIVE;
-    
+
     return await this.loyaltyProgramRepository.update(loyaltyProgram);
   }
 }

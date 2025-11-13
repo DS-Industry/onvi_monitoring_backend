@@ -9,4 +9,3 @@ export class MarketingCampaignMobileDisplayResponseDto {
   createdAt: string;
   updatedAt: string;
 }
-

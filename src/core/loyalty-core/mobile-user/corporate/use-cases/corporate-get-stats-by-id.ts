@@ -14,9 +14,12 @@ export class CorporateGetStatsByIdUseCase {
     }
 
     const workers = corporate.workers || [];
-    const cards = workers.flatMap(worker => worker.card || []);
-    
-    const totalBalance = cards.reduce((sum, card) => sum + (card.balance || 0), 0);
+    const cards = workers.flatMap((worker) => worker.card || []);
+
+    const totalBalance = cards.reduce(
+      (sum, card) => sum + (card.balance || 0),
+      0,
+    );
     const numberOfCards = cards.length;
 
     return {

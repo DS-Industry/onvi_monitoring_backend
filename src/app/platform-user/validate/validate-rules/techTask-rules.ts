@@ -9,11 +9,12 @@ import { PermissionAction } from '@prisma/client';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import {
   TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_CREATE_EXCEPTION_CODE, TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
+  TECH_TASK_CREATE_EXCEPTION_CODE,
+  TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
   TECH_TASK_DELETE_EXCEPTION_CODE,
   TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_UPDATE_EXCEPTION_CODE
-} from "@constant/error.constants";
+  TECH_TASK_UPDATE_EXCEPTION_CODE,
+} from '@constant/error.constants';
 import { TechTaskException } from '@exception/option.exceptions';
 import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
 
@@ -165,8 +166,8 @@ export class TechTaskValidateRules {
     );
 
     if (techTasks.length !== techTaskIds.length) {
-      const foundIds = techTasks.map(task => task.id);
-      const missingIds = techTaskIds.filter(id => !foundIds.includes(id));
+      const foundIds = techTasks.map((task) => task.id);
+      const missingIds = techTaskIds.filter((id) => !foundIds.includes(id));
       throw new TechTaskException(
         TECH_TASK_DELETE_EXCEPTION_CODE,
         `Tech tasks not found or not accessible: ${missingIds.join(', ')}`,

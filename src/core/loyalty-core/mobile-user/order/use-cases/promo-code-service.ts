@@ -6,9 +6,7 @@ import { DiscountType } from '@loyalty/marketing-campaign/domain/enums/discount-
 
 @Injectable()
 export class PromoCodeService {
-  constructor(
-    private readonly promoCodeRepository: IPromoCodeRepository,
-  ) {}
+  constructor(private readonly promoCodeRepository: IPromoCodeRepository) {}
 
   async applyPromoCode(
     promoCodeId: number,
@@ -64,7 +62,11 @@ export class PromoCodeService {
 
   private calculateDiscount(
     originalSum: number,
-    promoCode: { discountType: string; discountValue: number; maxDiscountAmount: number | null },
+    promoCode: {
+      discountType: string;
+      discountValue: number;
+      maxDiscountAmount: number | null;
+    },
     rewardPointsUsed: number,
   ): number {
     if (promoCode.discountType === DiscountType.FIXED_AMOUNT) {
@@ -82,4 +84,3 @@ export class PromoCodeService {
     return 0;
   }
 }
-

@@ -18,7 +18,7 @@ export class AdminRepository extends IAdminRepository {
     return PrismaPlatformAdminMapper.toDomain(admin);
   }
 
-  public async createMany(input: Admin[]): Promise<Admin[]> {
+  public async createMany(): Promise<Admin[]> {
     return Promise.resolve([]);
   }
 
@@ -45,7 +45,7 @@ export class AdminRepository extends IAdminRepository {
     return PrismaPlatformAdminMapper.toDomain(admin);
   }
 
-  public async remove(id: number): Promise<any> {
+  public async remove(): Promise<any> {
     return Promise.resolve(undefined);
   }
 

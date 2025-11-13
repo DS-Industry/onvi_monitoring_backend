@@ -1,4 +1,9 @@
-import { TokenPayload, TokenPair, AccessToken, RefreshToken } from '../domain/token-pair';
+import {
+  TokenPayload,
+  TokenPair,
+  AccessToken,
+  RefreshToken,
+} from '../domain/token-pair';
 
 export abstract class ITokenService {
   abstract generateTokens(payload: TokenPayload): Promise<TokenPair>;

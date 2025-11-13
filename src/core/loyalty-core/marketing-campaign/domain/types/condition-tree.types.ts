@@ -11,8 +11,8 @@ export interface BaseCondition {
 
 export interface TimeRangeCondition extends BaseCondition {
   type: CampaignConditionType.TIME_RANGE;
-  start: string; 
-  end: string; 
+  start: string;
+  end: string;
 }
 
 export interface WeekdayCondition extends BaseCondition {
@@ -23,7 +23,7 @@ export interface WeekdayCondition extends BaseCondition {
 export interface VisitCountCondition extends BaseCondition {
   type: CampaignConditionType.VISIT_COUNT;
   operator: ConditionOperator;
-  value: number; 
+  value: number;
   cycle?: VisitCycle;
 }
 
@@ -35,16 +35,14 @@ export interface PurchaseAmountCondition extends BaseCondition {
 
 export interface BirthdayCondition extends BaseCondition {
   type: CampaignConditionType.BIRTHDAY;
-  daysBefore: number; 
-  daysAfter: number; 
 }
 
 export interface InactivityCondition extends BaseCondition {
   type: CampaignConditionType.INACTIVITY;
-  days: number; 
+  days: number;
 }
 
 export interface PromocodeEntryCondition extends BaseCondition {
   type: CampaignConditionType.PROMOCODE_ENTRY;
-  code: string; 
+  code: string;
 }

@@ -5,10 +5,13 @@ import { MarketingCampaignConditionsResponseDto } from '@platform-user/core-cont
 import { MarketingCampaignsFilterDto } from '@platform-user/core-controller/dto/receive/marketing-campaigns-filter.dto';
 import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interface/marketing-campaign';
+import { LoyaltyException } from '@exception/option.exceptions';
 
 @Injectable()
 export class FindMethodsMarketingCampaignUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
   async getOneById(id: number): Promise<MarketingCampaignResponseDto | null> {
     return this.marketingCampaignRepository.findOneById(id);
@@ -18,26 +21,42 @@ export class FindMethodsMarketingCampaignUseCase {
     return this.marketingCampaignRepository.findAll();
   }
 
-  async getAllByOrganizationId(organizationId: number): Promise<MarketingCampaignResponseDto[]> {
-    return this.marketingCampaignRepository.findAllByOrganizationId(organizationId);
+  async getAllByOrganizationId(
+    organizationId: number,
+  ): Promise<MarketingCampaignResponseDto[]> {
+    return this.marketingCampaignRepository.findAllByOrganizationId(
+      organizationId,
+    );
   }
 
-  async getAllByOrganizationIdPaginated(filter: MarketingCampaignsFilterDto): Promise<MarketingCampaignsPaginatedResponseDto> {
-    return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(filter);
+  async getAllByOrganizationIdPaginated(
+    filter: MarketingCampaignsFilterDto,
+  ): Promise<MarketingCampaignsPaginatedResponseDto> {
+    return this.marketingCampaignRepository.findAllByOrganizationIdPaginated(
+      filter,
+    );
   }
 
-  async getConditionsByCampaignId(campaignId: number): Promise<MarketingCampaignConditionsResponseDto | null> {
-    return this.marketingCampaignRepository.findConditionsByCampaignId(campaignId);
-  }
+  async getConditionsByCampaignId(
+    campaignId: number,
+  ): Promise<MarketingCampaignConditionsResponseDto> {
+    const conditions =
+      await this.marketingCampaignRepository.findConditionsByCampaignId(
+        campaignId,
+      );
 
-  async getConditionById(conditionId: number): Promise<{ campaignId: number } | null> {
-    return this.marketingCampaignRepository.findConditionById(conditionId);
+    if (!conditions) {
+      throw new LoyaltyException(404, 'Marketing campaign not found');
+    }
+
+    return conditions;
   }
 
   async getMobileDisplayByCampaignId(
     campaignId: number,
   ): Promise<MarketingCampaignMobileDisplayResponseDto | null> {
-    return this.marketingCampaignRepository.findMobileDisplayByCampaignId(campaignId);
+    return this.marketingCampaignRepository.findMobileDisplayByCampaignId(
+      campaignId,
+    );
   }
 }
-

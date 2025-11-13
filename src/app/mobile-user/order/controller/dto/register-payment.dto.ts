@@ -17,4 +17,3 @@ export class RegisterPaymentDto {
   @IsNotEmpty()
   receiptReturnPhoneNumber: string;
 }
-

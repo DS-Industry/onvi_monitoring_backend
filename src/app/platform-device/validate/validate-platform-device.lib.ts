@@ -2,16 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { CarWashDevice } from '@pos/device/device/domain/device';
-import { ExceptionType, ValidateResponse } from "@platform-user/validate/validate.lib";
+import {
+  ExceptionType,
+  ValidateResponse,
+} from '@platform-user/validate/validate.lib';
 import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import {
-  DeviceException, FinanceException, HrException,
-  IncidentException, LoyaltyException, ManagerPaperException,
+  DeviceException,
+  FinanceException,
+  HrException,
+  IncidentException,
+  LoyaltyException,
+  ManagerPaperException,
   OrganizationException,
-  PosException, ReportTemplateException, TechTaskException,
-  UserException, WarehouseException
-} from "@exception/option.exceptions";
+  PosException,
+  ReportTemplateException,
+  TechTaskException,
+  UserException,
+  WarehouseException,
+} from '@exception/option.exceptions';
 
 @Injectable()
 export class ValidatePlatformDeviceLib {

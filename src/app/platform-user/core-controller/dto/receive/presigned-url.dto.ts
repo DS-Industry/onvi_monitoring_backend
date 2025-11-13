@@ -7,7 +7,7 @@ export class GetPresignedUrlDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(60) 
+  @Min(60)
   @Max(604800)
   @Transform(({ value }) => parseInt(value))
   expiresIn?: number = 3600;
@@ -19,7 +19,7 @@ export class PutPresignedUrlDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(60) 
+  @Min(60)
   @Max(604800)
   @Transform(({ value }) => parseInt(value))
   expiresIn?: number = 3600;

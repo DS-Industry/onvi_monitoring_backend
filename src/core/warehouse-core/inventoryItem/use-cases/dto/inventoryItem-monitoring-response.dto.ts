@@ -1,4 +1,4 @@
-import { MeasurementNomenclature } from "@prisma/client";
+import { MeasurementNomenclature } from '@prisma/client';
 
 export class InventoryItemMonitoringResponseDto {
   nomenclatureId: number;

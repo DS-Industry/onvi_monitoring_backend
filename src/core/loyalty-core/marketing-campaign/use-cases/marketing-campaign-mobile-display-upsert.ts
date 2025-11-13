@@ -5,14 +5,17 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 
 @Injectable()
 export class UpsertMarketingCampaignMobileDisplayUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
   async execute(
     campaignId: number,
     data: UpsertMarketingCampaignMobileDisplayDto,
   ): Promise<MarketingCampaignMobileDisplayResponseDto> {
-    return this.marketingCampaignRepository.upsertMobileDisplay(campaignId, data);
+    return this.marketingCampaignRepository.upsertMobileDisplay(
+      campaignId,
+      data,
+    );
   }
 }
-
-

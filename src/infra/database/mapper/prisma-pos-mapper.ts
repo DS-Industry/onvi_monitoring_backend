@@ -6,7 +6,7 @@ export type PrismaPosWithCarWashPosAndAddress = Prisma.PosGetPayload<{
   include: { carWashPos: true; address: true };
 }>;
 export type PrismaPosWithAddress = Prisma.PosGetPayload<{
-  include: { address: true, carWashPos: true };
+  include: { address: true; carWashPos: true };
 }>;
 export class PrismaPosMapper {
   static toDomain(entity: PrismaPos | PrismaPosWithAddress): Pos {
@@ -25,10 +25,22 @@ export class PrismaPosMapper {
         : undefined;
 
     // Extract carWashPos properties if available
-    const carWashPosType = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.carWashPosType : undefined;
-    const minSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.minSumOrder : undefined;
-    const maxSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.maxSumOrder : undefined;
-    const stepSumOrder = 'carWashPos' in entity && entity.carWashPos ? entity.carWashPos.stepSumOrder : undefined;
+    const carWashPosType =
+      'carWashPos' in entity && entity.carWashPos
+        ? entity.carWashPos.carWashPosType
+        : undefined;
+    const minSumOrder =
+      'carWashPos' in entity && entity.carWashPos
+        ? entity.carWashPos.minSumOrder
+        : undefined;
+    const maxSumOrder =
+      'carWashPos' in entity && entity.carWashPos
+        ? entity.carWashPos.maxSumOrder
+        : undefined;
+    const stepSumOrder =
+      'carWashPos' in entity && entity.carWashPos
+        ? entity.carWashPos.stepSumOrder
+        : undefined;
 
     return new Pos({
       id: entity.id,
@@ -52,7 +64,7 @@ export class PrismaPosMapper {
       carWashPosType: carWashPosType,
       minSumOrder: minSumOrder,
       maxSumOrder: maxSumOrder,
-      stepSumOrder: stepSumOrder,      
+      stepSumOrder: stepSumOrder,
     });
   }
 

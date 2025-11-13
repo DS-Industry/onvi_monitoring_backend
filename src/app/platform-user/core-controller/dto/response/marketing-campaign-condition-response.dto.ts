@@ -1,7 +1,7 @@
 export enum MarketingCampaignConditionType {
   TIME_RANGE = 'TIME_RANGE',
   WEEKDAY = 'WEEKDAY',
-  EVENT = 'EVENT',
+  BIRTHDAY = 'BIRTHDAY',
   VISIT_COUNT = 'VISIT_COUNT',
   PURCHASE_AMOUNT = 'PURCHASE_AMOUNT',
   PROMOCODE_ENTRY = 'PROMOCODE_ENTRY',
@@ -21,18 +21,18 @@ export class MarketingCampaignConditionResponseDto {
   id: number;
   type: MarketingCampaignConditionType;
   order: number;
-  startTime?: string; 
+  startTime?: string;
   endTime?: string;
   weekdays?: Weekday[];
-  visitCount?: number; 
-  minAmount?: number; 
-  maxAmount?: number; 
+  visitCount?: number;
+  minAmount?: number;
+  maxAmount?: number;
   promocodeId?: number;
-  promocode?: { 
+  promocode?: {
     id: number;
     code: string;
   };
-  benefitId?: number; 
+  benefitId?: number;
   benefit?: {
     id: number;
     name: string;
@@ -43,4 +43,3 @@ export class MarketingCampaignConditionsResponseDto {
   campaignId: number;
   conditions: MarketingCampaignConditionResponseDto[];
 }
-

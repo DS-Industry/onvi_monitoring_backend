@@ -20,28 +20,35 @@ export class GetLoyaltyProgramAnalyticsUseCase {
   ) {}
 
   async execute(loyaltyProgramId: number): Promise<LoyaltyProgramAnalyticsDto> {
-    const loyaltyProgram = await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
-    
+    const loyaltyProgram =
+      await this.loyaltyProgramRepository.findOneById(loyaltyProgramId);
+
     if (!loyaltyProgram) {
       throw new Error(`Loyalty program with ID ${loyaltyProgramId} not found`);
     }
 
-    const organizations = await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
-      loyaltyProgramId,
-    );
+    const organizations =
+      await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+        loyaltyProgramId,
+      );
 
     let connectedPoses = 0;
     if (organizations.length > 0) {
-      const organizationIds = organizations.map(org => org.id);
-      const poses = await this.findMethodsPosUseCase.getAllByOrganizationIds(organizationIds);
+      const organizationIds = organizations.map((org) => org.id);
+      const poses =
+        await this.findMethodsPosUseCase.getAllByOrganizationIds(
+          organizationIds,
+        );
       connectedPoses = poses.length;
     }
 
-    const engagedClients = await this.cardRepository.countByLoyaltyProgramId(loyaltyProgramId);
+    const engagedClients =
+      await this.cardRepository.countByLoyaltyProgramId(loyaltyProgramId);
 
     const now = new Date();
     const programDurationDays = Math.floor(
-      (now.getTime() - loyaltyProgram.startDate.getTime()) / (1000 * 60 * 60 * 24)
+      (now.getTime() - loyaltyProgram.startDate.getTime()) /
+        (1000 * 60 * 60 * 24),
     );
 
     return {

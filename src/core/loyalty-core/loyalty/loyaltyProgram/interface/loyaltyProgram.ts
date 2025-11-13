@@ -6,9 +6,7 @@ export abstract class ILoyaltyProgramRepository {
     ownerOrganizationId: number,
   ): Promise<LTYProgram>;
   abstract findOneById(id: number): Promise<LTYProgram>;
-  abstract findOneByOrganizationId(
-    organizationId: number,
-  ): Promise<LTYProgram>;
+  abstract findOneByOrganizationId(organizationId: number): Promise<LTYProgram>;
   abstract findOneByOwnerOrganizationId(
     ownerOrganizationId: number,
   ): Promise<LTYProgram>;
@@ -19,20 +17,22 @@ export abstract class ILoyaltyProgramRepository {
     organizationId?: number,
   ): Promise<LTYProgram[]>;
   abstract findAllByUserId(userId: number): Promise<LTYProgram[]>;
-  abstract findAllParticipantProgramsByOrganizationId(organizationId: number): Promise<{ program: LTYProgram; participantId: number }[]>;
+  abstract findAllParticipantProgramsByOrganizationId(
+    organizationId: number,
+  ): Promise<{ program: LTYProgram; participantId: number }[]>;
   abstract findAllParticipantProgramsByOrganizationIdPaginated(
-    organizationId: number, 
-    skip?: number, 
+    organizationId: number,
+    skip?: number,
     take?: number,
     status?: string,
     participationRole?: string,
-    search?: string
+    search?: string,
   ): Promise<{ program: LTYProgram; participantId: number }[]>;
   abstract countParticipantProgramsByOrganizationId(
     organizationId: number,
     status?: string,
     participationRole?: string,
-    search?: string
+    search?: string,
   ): Promise<number>;
   abstract findAllPublicPrograms(filters?: {
     search?: string;
@@ -40,11 +40,6 @@ export abstract class ILoyaltyProgramRepository {
     page?: number;
     size?: number;
   }): Promise<LTYProgram[]>;
-  abstract update(
-    input: LTYProgram,
-  ): Promise<LTYProgram>;
-  abstract updateIsHubStatus(
-    id: number,
-    isHub: boolean,
-  ): Promise<LTYProgram>;
+  abstract update(input: LTYProgram): Promise<LTYProgram>;
+  abstract updateIsHubStatus(id: number, isHub: boolean): Promise<LTYProgram>;
 }

@@ -15,6 +15,3 @@ export class InsufficientFreeVacuumException extends BaseException {
     return HttpStatus.BAD_REQUEST;
   }
 }
-
-
-

@@ -25,16 +25,22 @@ export class LoyaltyProgramHubApproveUseCase {
       throw new Error('No pending hub request found for this loyalty program');
     }
 
-    const updatedRequest = await this.hubRequestRepository.update(hubRequest.id, {
-      status: LTYProgramRequestStatus.APPROVED,
-      reviewedAt: new Date(),
-      approvedAt: new Date(),
-      reviewedBy: user.id,
-      responseComment: comment,
-    });
+    const updatedRequest = await this.hubRequestRepository.update(
+      hubRequest.id,
+      {
+        status: LTYProgramRequestStatus.APPROVED,
+        reviewedAt: new Date(),
+        approvedAt: new Date(),
+        reviewedBy: user.id,
+        responseComment: comment,
+      },
+    );
 
     // Update the loyalty program to be a hub
-    await this.loyaltyProgramRepository.updateIsHubStatus(loyaltyProgramId, true);
+    await this.loyaltyProgramRepository.updateIsHubStatus(
+      loyaltyProgramId,
+      true,
+    );
 
     return updatedRequest;
   }

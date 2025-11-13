@@ -5,7 +5,9 @@ import { LoyaltyParticipantRequestsListResponseDto } from '@platform-user/core-c
 
 @Injectable()
 export class FindLoyaltyParticipantRequestsUseCase {
-  constructor(private readonly participantRequestRepository: ILoyaltyProgramParticipantRequestRepository) {}
+  constructor(
+    private readonly participantRequestRepository: ILoyaltyProgramParticipantRequestRepository,
+  ) {}
 
   async execute(
     filter: LoyaltyParticipantRequestsFilterDto,

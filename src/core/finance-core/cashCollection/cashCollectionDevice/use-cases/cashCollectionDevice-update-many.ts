@@ -20,13 +20,15 @@ export class UpdateManyCashCollectionDeviceUseCase {
         await this.findMethodsCashCollectionDeviceUseCase.getRecalculateDataByDevice(
           updateData.cashCollectionDeviceId,
           updateData.tookMoneyTime,
-          updateData.oldTookMoneyTime ?? oldCashCollectionDevice.oldTookMoneyTime,
+          updateData.oldTookMoneyTime ??
+            oldCashCollectionDevice.oldTookMoneyTime,
         );
 
       await this.updateCashCollectionDeviceUseCase.execute(
         {
           oldTookMoneyTime:
-            updateData.oldTookMoneyTime ?? oldCashCollectionDevice.oldTookMoneyTime,
+            updateData.oldTookMoneyTime ??
+            oldCashCollectionDevice.oldTookMoneyTime,
           tookMoneyTime: recalculateData.tookMoneyTime,
           sum: recalculateData.sumCoin + recalculateData.sumPaper,
           sumCoin: recalculateData.sumCoin,

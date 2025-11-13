@@ -3,7 +3,7 @@ import { IShiftReportRepository } from '@finance/shiftReport/shiftReport/interfa
 import { PrismaService } from '@db/prisma/prisma.service';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
 import { PrismaShiftReportMapper } from '@db/mapper/prisma-shift-report-mapper';
-import { StatusWorkDayShiftReport, TypeWorkDay } from "@prisma/client";
+import { StatusWorkDayShiftReport, TypeWorkDay } from '@prisma/client';
 import { DataForCalculationResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto';
 
 @Injectable()
@@ -117,7 +117,7 @@ export class ShiftReportRepository extends IShiftReportRepository {
       })),
     }));
   }
-  
+
   public async findAllWithPayoutForCalculation(
     dateStart: Date,
     dateEnd: Date,
@@ -135,7 +135,7 @@ export class ShiftReportRepository extends IShiftReportRepository {
         typeWorkDay: TypeWorkDay.WORKING,
         status: StatusWorkDayShiftReport.SENT,
         dailyShiftPayout: {
-          not: null, 
+          not: null,
         },
       },
       orderBy: {
@@ -143,9 +143,11 @@ export class ShiftReportRepository extends IShiftReportRepository {
       },
     });
 
-    return shiftReports.map((report) => PrismaShiftReportMapper.toDomain(report));
+    return shiftReports.map((report) =>
+      PrismaShiftReportMapper.toDomain(report),
+    );
   }
-  
+
   public async update(input: ShiftReport): Promise<ShiftReport> {
     const shiftReportEntity = PrismaShiftReportMapper.toPrisma(input);
     const shiftReport = await this.prisma.mNGShiftReport.update({

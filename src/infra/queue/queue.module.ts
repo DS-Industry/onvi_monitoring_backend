@@ -14,4 +14,3 @@ import { BullMQFlowProducer } from './flow-producer.service';
   exports: [IFLOW_PRODUCER],
 })
 export class QueueModule {}
-

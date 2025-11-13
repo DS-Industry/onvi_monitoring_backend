@@ -3,11 +3,12 @@ import {
   Controller,
   Get,
   HttpCode,
-  Param, ParseIntPipe,
+  Param,
+  ParseIntPipe,
   Post,
   UploadedFile,
-  UseInterceptors
-} from "@nestjs/common";
+  UseInterceptors,
+} from '@nestjs/common';
 import { CreateAdminUseCase } from '@platform-admin/admin/use-cases/admin-create';
 import { GetByIdAdminUseCase } from '@platform-admin/admin/use-cases/admin-get-by-id';
 import { CreateAdminDto } from '@platform-admin/admin/controller/dto/admin-create.dto';

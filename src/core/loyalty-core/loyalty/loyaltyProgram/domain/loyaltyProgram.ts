@@ -11,8 +11,8 @@ export interface LTYProgramProps {
   startDate: Date;
   lifetimeDays?: number;
   isHub?: boolean;
-  isHubRequested?: boolean
-  isHubRejected?: boolean
+  isHubRequested?: boolean;
+  isHubRejected?: boolean;
   isPublic?: boolean;
   programParticipantOrganizationIds?: number[];
   description?: string;

@@ -3,7 +3,6 @@ import {
   IsNumber,
   IsBoolean,
   IsEnum,
-  IsOptional,
   Min,
   Max,
   ValidateIf,
@@ -22,7 +21,9 @@ export class BonusRedemptionRulesDto {
   @IsNumber()
   @Min(1, { message: 'lifetimeBonusDays must be at least 1' })
   @ValidateIf((o) => o.burnoutType === 'custom')
-  @IsNotEmpty({ message: 'lifetimeBonusDays is required when burnoutType is custom' })
+  @IsNotEmpty({
+    message: 'lifetimeBonusDays is required when burnoutType is custom',
+  })
   lifetimeBonusDays?: number;
 
   @IsNumber()

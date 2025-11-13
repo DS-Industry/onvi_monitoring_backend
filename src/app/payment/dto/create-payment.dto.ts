@@ -1,4 +1,7 @@
-import { PaymentSubject, PaymentMode } from '../../../core/payment-core/domain/payment.types';
+import {
+  PaymentSubject,
+  PaymentMode,
+} from '../../../core/payment-core/domain/payment.types';
 
 export class CreatePaymentDto {
   amount: { value: string; currency: string };

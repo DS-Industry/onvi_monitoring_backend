@@ -10,8 +10,8 @@ import { FindMethodsIncidentNameUseCase } from '@equipment/incident/incidentName
 import { FindMethodsIncidentInfoUseCase } from '@equipment/incident/incidentInfo/use-cases/incident-info-find-methods';
 import { FullInfoByEquipmentKnotIncidentUseCase } from '@equipment/incident/incidentName/use-cases/incident-full-info-by-equipment-knot';
 import { UpdateIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-update';
-import { FindMethodsIncidentUseCase } from "@equipment/incident/incident/use-cases/incident-find-methods";
-import { GetAllByFilterIncidentUseCase } from "@equipment/incident/incident/use-cases/incident-get-all-by-filter";
+import { FindMethodsIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-find-methods';
+import { GetAllByFilterIncidentUseCase } from '@equipment/incident/incident/use-cases/incident-get-all-by-filter';
 
 const repositories: Provider[] = [
   IncidentNameRepositoryProvider,

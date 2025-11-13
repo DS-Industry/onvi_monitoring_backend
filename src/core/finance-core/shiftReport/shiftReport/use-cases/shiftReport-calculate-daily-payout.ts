@@ -11,7 +11,7 @@ export class CalculateDailyPayoutShiftReportUseCase {
 
   async execute(shiftReportId: number, workerId: number): Promise<number> {
     const worker = await this.findMethodsWorkerUseCase.getById(workerId);
-    
+
     const shiftGradings = await this.prisma.mNGShiftGrading.findMany({
       where: {
         shiftReportId,
@@ -21,16 +21,20 @@ export class CalculateDailyPayoutShiftReportUseCase {
         gradingEstimation: true,
       },
     });
-    
+
     const totalPercentage = shiftGradings.reduce((sum, grading) => {
-      const parameterWeightPercent = grading.gradingParameter?.weightPercent || 0;
-      const estimationWeightPercent = grading.gradingEstimation?.weightPercent || 0;
-      const parameterPercent = (parameterWeightPercent * estimationWeightPercent) / 100;
+      const parameterWeightPercent =
+        grading.gradingParameter?.weightPercent || 0;
+      const estimationWeightPercent =
+        grading.gradingEstimation?.weightPercent || 0;
+      const parameterPercent =
+        (parameterWeightPercent * estimationWeightPercent) / 100;
       return sum + parameterPercent;
     }, 0);
 
-    const dailyShiftPayout = worker.dailySalary + (worker.bonusPayout * totalPercentage) / 100;
-    
+    const dailyShiftPayout =
+      worker.dailySalary + (worker.bonusPayout * totalPercentage) / 100;
+
     return Math.round(dailyShiftPayout);
   }
 }

@@ -18,7 +18,10 @@ export class AbilityFactory {
     private readonly redisService: RedisService,
   ) {}
 
-  async createForPlatformManager(user: User, isSuperAdmin?: boolean): Promise<any> {
+  async createForPlatformManager(
+    user: User,
+    isSuperAdmin?: boolean,
+  ): Promise<any> {
     const cacheKey = `ability:${user.id}:`;
     const cachedRulesJson = await this.redisService.get(cacheKey);
 

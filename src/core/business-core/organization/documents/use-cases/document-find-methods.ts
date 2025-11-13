@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { IDocumentsRepository } from "@organization/documents/interfaces/documents";
+import { Injectable } from '@nestjs/common';
+import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
 
 @Injectable()
 export class FindMethodsDocumentUseCase {

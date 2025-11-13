@@ -20,7 +20,10 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'clientLocal') {
     done: (error: Error, data: any) => Record<string, unknown>,
   ) {
     try {
-      const result = await this.validateLocalStrategyUseCase.execute(phone, otp);
+      const result = await this.validateLocalStrategyUseCase.execute(
+        phone,
+        otp,
+      );
 
       if ('register' in result) {
         return done(null, { register: true });

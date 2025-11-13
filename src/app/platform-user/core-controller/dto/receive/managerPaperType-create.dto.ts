@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { ManagerPaperType } from "@manager-paper/managerPaper/domain/managerPaperType";
+import { ManagerPaperType } from '@manager-paper/managerPaper/domain/managerPaperType';
 
 export class ManagerPaperTypeCreateDto {
   @IsString()

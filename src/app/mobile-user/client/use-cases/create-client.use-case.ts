@@ -6,9 +6,7 @@ import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class CreateClientUseCaseWrapper {
-  constructor(
-    private readonly createClientUseCase: CreateClientUseCase,
-  ) {}
+  constructor(private readonly createClientUseCase: CreateClientUseCase) {}
 
   async execute(dto: CreateClientDto): Promise<any> {
     const coreCreateData: CoreClientCreateDto = {
@@ -16,7 +14,8 @@ export class CreateClientUseCaseWrapper {
       phone: dto.phone,
       email: dto.email,
       gender: dto.gender,
-      contractType: (dto.contractType ?? ContractType.INDIVIDUAL) as ContractType,
+      contractType: (dto.contractType ??
+        ContractType.INDIVIDUAL) as ContractType,
       comment: dto.comment,
       birthday: dto.birthday ? new Date(dto.birthday) : undefined,
       placementId: dto.placementId,
@@ -25,4 +24,3 @@ export class CreateClientUseCaseWrapper {
     return await this.createClientUseCase.execute(coreCreateData);
   }
 }
-

@@ -53,9 +53,7 @@ const managerReportPeriodUseCases: Provider[] = [
   HandlerManagerReportPeriodUseCase,
 ];
 
-const validationServices: Provider[] = [
-  ManagerPaperValidationService,
-];
+const validationServices: Provider[] = [ManagerPaperValidationService];
 @Module({
   imports: [PrismaModule, FileModule],
   providers: [

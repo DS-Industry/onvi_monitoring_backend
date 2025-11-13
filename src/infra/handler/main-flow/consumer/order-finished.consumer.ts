@@ -22,7 +22,9 @@ export class OrderFinishedConsumer extends WorkerHost {
 
   async process(job: Job<any>): Promise<void> {
     const { orderId } = job.data;
-    this.logger.log(`[ORDER-FINISHED] Parent job ${job.id} for order#${orderId}`);
+    this.logger.log(
+      `[ORDER-FINISHED] Parent job ${job.id} for order#${orderId}`,
+    );
     const order = await this.orderRepository.findOneById(orderId);
     if (!order) {
       this.logger.error(`[ORDER-FINISHED] Order#${orderId} not found`);
@@ -34,12 +36,12 @@ export class OrderFinishedConsumer extends WorkerHost {
     try {
       const childrenResults = await job.getChildrenValues<any>();
       const childResultsArray = Object.values(childrenResults);
-      
+
       if (childResultsArray.length > 0) {
         allChildrenSuccessful = childResultsArray.every(
           (result) => result === 'success',
         );
-        
+
         if (!allChildrenSuccessful) {
           const failedResults = childResultsArray.filter(
             (result) => result !== 'success',
@@ -49,7 +51,9 @@ export class OrderFinishedConsumer extends WorkerHost {
           );
         }
       } else {
-        this.logger.warn(`[ORDER-FINISHED] No child results found for order#${orderId} - child jobs failed`);
+        this.logger.warn(
+          `[ORDER-FINISHED] No child results found for order#${orderId} - child jobs failed`,
+        );
       }
     } catch (error: any) {
       this.logger.warn(
@@ -63,7 +67,9 @@ export class OrderFinishedConsumer extends WorkerHost {
       this.logger.warn(`[ORDER-FINISHED] Order#${orderId} marked as FAILED`);
     } else {
       await this.orderRepository.update(order);
-      this.logger.log(`[ORDER-FINISHED] Order#${orderId} marked as COMPLETED - all children successful`);
+      this.logger.log(
+        `[ORDER-FINISHED] Order#${orderId} marked as COMPLETED - all children successful`,
+      );
 
       try {
         const handlerDto: HandlerDto = {
@@ -88,7 +94,9 @@ export class OrderFinishedConsumer extends WorkerHost {
         };
 
         await this.handlerOrderUseCase.execute(handlerDto, undefined, order.id);
-        this.logger.log(`[ORDER-FINISHED] Order#${orderId} processed by order handler`);
+        this.logger.log(
+          `[ORDER-FINISHED] Order#${orderId} processed by order handler`,
+        );
       } catch (error: any) {
         this.logger.error(
           `[ORDER-FINISHED] Failed to process order#${orderId} with order handler: ${error.message}`,

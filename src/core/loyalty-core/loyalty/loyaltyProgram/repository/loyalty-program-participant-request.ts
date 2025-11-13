@@ -3,7 +3,10 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { ILoyaltyProgramParticipantRequestRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyalty-program-participant-request';
 import { LTYProgramRequestStatus } from '@prisma/client';
 import { LoyaltyParticipantRequestsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-participant-requests-filter.dto';
-import { LoyaltyParticipantRequestsListResponseDto, LoyaltyParticipantRequestsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-participant-requests-response.dto';
+import {
+  LoyaltyParticipantRequestsListResponseDto,
+  LoyaltyParticipantRequestsResponseDto,
+} from '@platform-user/core-controller/dto/response/loyalty-participant-requests-response.dto';
 
 @Injectable()
 export class LoyaltyProgramParticipantRequestRepository extends ILoyaltyProgramParticipantRequestRepository {
@@ -169,24 +172,26 @@ export class LoyaltyProgramParticipantRequestRepository extends ILoyaltyProgramP
       },
     });
 
-    const data: LoyaltyParticipantRequestsResponseDto[] = requests.map((request) => ({
-      id: request.id,
-      ltyProgramId: request.ltyProgramId,
-      ltyProgramName: request.ltyProgram.name,
-      organizationId: request.organizationId,
-      organizationName: request.organization.name,
-      status: request.status,
-      requestedAt: request.requestedAt,
-      reviewedAt: request.reviewedAt,
-      approvedAt: request.approvedAt,
-      reviewedBy: request.reviewedBy,
-      reviewerName: request.reviewer?.name,
-      requestComment: request.requestComment,
-      responseComment: request.responseComment,
-      rejectionReason: request.rejectionReason,
-      createdAt: request.createdAt,
-      updatedAt: request.updatedAt,
-    }));
+    const data: LoyaltyParticipantRequestsResponseDto[] = requests.map(
+      (request) => ({
+        id: request.id,
+        ltyProgramId: request.ltyProgramId,
+        ltyProgramName: request.ltyProgram.name,
+        organizationId: request.organizationId,
+        organizationName: request.organization.name,
+        status: request.status,
+        requestedAt: request.requestedAt,
+        reviewedAt: request.reviewedAt,
+        approvedAt: request.approvedAt,
+        reviewedBy: request.reviewedBy,
+        reviewerName: request.reviewer?.name,
+        requestComment: request.requestComment,
+        responseComment: request.responseComment,
+        rejectionReason: request.rejectionReason,
+        createdAt: request.createdAt,
+        updatedAt: request.updatedAt,
+      }),
+    );
 
     return {
       data,

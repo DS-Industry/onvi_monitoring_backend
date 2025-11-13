@@ -372,7 +372,12 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     const dateEndStr = toPostgresTimestamp(dateEnd);
 
     const rawResults = await this.prisma.$queryRaw<
-      { deviceId: number; programName: string; counter: bigint | number; totalTime: bigint | number }[]
+      {
+        deviceId: number;
+        programName: string;
+        counter: bigint | number;
+        totalTime: bigint | number;
+      }[]
     >(
       Prisma.sql`
       SELECT 
@@ -392,11 +397,17 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     `,
     );
 
-    return rawResults.map(item => ({
+    return rawResults.map((item) => ({
       deviceId: item.deviceId,
       programName: item.programName,
-      counter: typeof item.counter === 'bigint' ? Number(item.counter) : Number(item.counter),
-      totalTime: typeof item.totalTime === 'bigint' ? Number(item.totalTime) : Number(item.totalTime || 0),
+      counter:
+        typeof item.counter === 'bigint'
+          ? Number(item.counter)
+          : Number(item.counter),
+      totalTime:
+        typeof item.totalTime === 'bigint'
+          ? Number(item.totalTime)
+          : Number(item.totalTime || 0),
     }));
   }
 

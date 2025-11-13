@@ -17,27 +17,42 @@ export class FindByFilterClientUseCase {
     let contractType: ContractType | undefined = undefined;
     let workerCorporateId: number | undefined = undefined;
     let organizationId: number | undefined = undefined;
-    
-    if (data.placementId !== '*' && data.placementId !== null && data.placementId !== undefined) {
+
+    if (
+      data.placementId !== '*' &&
+      data.placementId !== null &&
+      data.placementId !== undefined
+    ) {
       placementId = Number(data.placementId);
       if (isNaN(placementId)) {
         placementId = undefined;
       }
     }
-    
-    if (data.contractType !== '*' && data.contractType !== null && data.contractType !== undefined) {
+
+    if (
+      data.contractType !== '*' &&
+      data.contractType !== null &&
+      data.contractType !== undefined
+    ) {
       contractType = data.contractType;
     }
-    
-    if (data.workerCorporateId !== '*' && data.workerCorporateId !== null && data.workerCorporateId !== undefined) {
+
+    if (
+      data.workerCorporateId !== '*' &&
+      data.workerCorporateId !== null &&
+      data.workerCorporateId !== undefined
+    ) {
       workerCorporateId = Number(data.workerCorporateId);
       if (isNaN(workerCorporateId)) {
         workerCorporateId = undefined;
       }
     }
 
-     
-    if (data.organizationId !== '*' && data.organizationId !== null && data.organizationId !== undefined) {
+    if (
+      data.organizationId !== '*' &&
+      data.organizationId !== null &&
+      data.organizationId !== undefined
+    ) {
       organizationId = Number(data.organizationId);
       if (isNaN(organizationId)) {
         organizationId = undefined;
@@ -51,7 +66,7 @@ export class FindByFilterClientUseCase {
       workerCorporateId,
       data?.phone,
       data?.registrationFrom,
-      data?.registrationTo, 
+      data?.registrationTo,
       data?.search,
       organizationId,
     );

@@ -22,12 +22,35 @@ export interface CreateMarketingCampaignUsageInput {
   orderId: number;
 }
 
-export abstract class IPromoCodeRepository {
-  abstract findById(id: number): Promise<PromoCode | null>;
-  abstract incrementUsage(id: number): Promise<void>;
-  abstract countUsageByUser(promocodeId: number, userId: number): Promise<number>;
-  abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
+export interface CreatePromoCodeInput {
+  campaignId?: number;
+  code: string;
+  promocodeType: string;
+  personalUserId?: number;
+  discountType?: string;
+  discountValue?: number;
+  minOrderAmount?: number;
+  maxDiscountAmount?: number;
+  maxUsage?: number;
+  maxUsagePerUser?: number;
+  validFrom?: Date;
+  validUntil?: Date;
+  isActive?: boolean;
+  createdByManagerId?: number;
+  createdReason?: string;
+  usageRestrictions?: any;
+  organizationId?: number;
+  posId?: number;
+  placementId?: number;
 }
 
-
-
+export abstract class IPromoCodeRepository {
+  abstract findById(id: number): Promise<PromoCode | null>;
+  abstract create(input: CreatePromoCodeInput): Promise<PromoCode>;
+  abstract incrementUsage(id: number): Promise<void>;
+  abstract countUsageByUser(
+    promocodeId: number,
+    userId: number,
+  ): Promise<number>;
+  abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
+}

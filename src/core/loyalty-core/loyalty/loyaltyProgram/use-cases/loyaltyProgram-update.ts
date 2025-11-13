@@ -16,12 +16,16 @@ export class UpdateLoyaltyProgramUseCase {
     const { name, description, maxLevels, lifetimeDays } = input;
 
     oldLoyaltyProgram.name = name ? name : oldLoyaltyProgram.name;
-    oldLoyaltyProgram.description = description ? description : oldLoyaltyProgram.description;
-    oldLoyaltyProgram.maxLevels = maxLevels ? maxLevels : oldLoyaltyProgram.maxLevels;
-    oldLoyaltyProgram.lifetimeDays = lifetimeDays ? lifetimeDays : oldLoyaltyProgram.lifetimeDays;
+    oldLoyaltyProgram.description = description
+      ? description
+      : oldLoyaltyProgram.description;
+    oldLoyaltyProgram.maxLevels = maxLevels
+      ? maxLevels
+      : oldLoyaltyProgram.maxLevels;
+    oldLoyaltyProgram.lifetimeDays = lifetimeDays
+      ? lifetimeDays
+      : oldLoyaltyProgram.lifetimeDays;
 
-    return await this.loyaltyProgramRepository.update(
-      oldLoyaltyProgram,
-    );
+    return await this.loyaltyProgramRepository.update(oldLoyaltyProgram);
   }
 }

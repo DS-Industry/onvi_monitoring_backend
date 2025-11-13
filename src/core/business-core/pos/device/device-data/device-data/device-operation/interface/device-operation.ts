@@ -6,9 +6,7 @@ import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/devi
 import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
 import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
-import {
-  FalseOperationDeviceDto
-} from "@platform-user/core-controller/dto/response/false-operation-device-response.dto";
+import { FalseOperationDeviceDto } from '@platform-user/core-controller/dto/response/false-operation-device-response.dto';
 
 export abstract class IDeviceOperationRepository {
   abstract create(input: DeviceOperation): Promise<DeviceOperation>;

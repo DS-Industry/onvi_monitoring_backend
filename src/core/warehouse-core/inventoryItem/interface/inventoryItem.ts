@@ -1,5 +1,5 @@
 import { InventoryItem } from '@warehouse/inventoryItem/domain/inventoryItem';
-import { NomenclatureStatus } from "@prisma/client";
+import { NomenclatureStatus } from '@prisma/client';
 
 export abstract class IInventoryItemRepository {
   abstract create(input: InventoryItem): Promise<InventoryItem>;

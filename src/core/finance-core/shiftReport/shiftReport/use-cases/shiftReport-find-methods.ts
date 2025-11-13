@@ -53,7 +53,7 @@ export class FindMethodsShiftReportUseCase {
       workerIds,
     );
   }
-  
+
   async getShiftReportsWithPayout(
     dateStart: Date,
     dateEnd: Date,

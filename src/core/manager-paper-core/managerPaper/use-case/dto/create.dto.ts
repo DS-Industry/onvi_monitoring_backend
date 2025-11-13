@@ -1,4 +1,4 @@
-import { ManagerPaperGroup } from "@prisma/client";
+import { ManagerPaperGroup } from '@prisma/client';
 
 export class CreateDto {
   group: ManagerPaperGroup;

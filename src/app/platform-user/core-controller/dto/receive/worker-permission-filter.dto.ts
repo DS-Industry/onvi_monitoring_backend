@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsEnum } from "class-validator";
-import { Transform } from "class-transformer";
-import { StatusUser } from "@prisma/client";
+import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { StatusUser } from '@prisma/client';
 
 export class WorkerPermissionFilterDto {
   @IsOptional()

@@ -15,6 +15,3 @@ export class BayBusyException extends BaseException {
     return HttpStatus.CONFLICT;
   }
 }
-
-
-

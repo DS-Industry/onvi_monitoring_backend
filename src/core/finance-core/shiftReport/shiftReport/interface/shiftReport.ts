@@ -1,7 +1,5 @@
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import {
-  DataForCalculationResponseDto
-} from "@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto";
+import { DataForCalculationResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto';
 
 export abstract class IShiftReportRepository {
   abstract create(input: ShiftReport): Promise<ShiftReport>;

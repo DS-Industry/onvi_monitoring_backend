@@ -6,5 +6,5 @@ export class CleanDataResponseDto {
 export class ProgramDataDto {
   programName: string;
   countProgram: number;
-  time: string
+  time: string;
 }

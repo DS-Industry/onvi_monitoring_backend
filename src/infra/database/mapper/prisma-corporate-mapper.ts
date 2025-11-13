@@ -1,8 +1,13 @@
-import { LTYCorporate as PrismaCorporate, Prisma, LTYUser, LTYCorporateStatus } from '@prisma/client';
+import {
+  LTYCorporate as PrismaCorporate,
+  Prisma,
+  LTYUser,
+  LTYCorporateStatus,
+} from '@prisma/client';
 import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 
 export class PrismaCorporateMapper {
-  static toDomain(entity: PrismaCorporate & {owner?: LTYUser}): Corporate {
+  static toDomain(entity: PrismaCorporate & { owner?: LTYUser }): Corporate {
     if (!entity) {
       return null;
     }

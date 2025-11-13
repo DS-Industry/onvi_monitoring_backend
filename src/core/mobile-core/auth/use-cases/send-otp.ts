@@ -12,15 +12,13 @@ export interface SendOtpResponse {
 
 @Injectable()
 export class SendOtpUseCase {
-  constructor(
-    private readonly otpService: IOtpService,
-  ) {}
+  constructor(private readonly otpService: IOtpService) {}
 
   async execute(request: SendOtpRequest): Promise<SendOtpResponse> {
     const otpToken = await this.otpService.generateOtp(request.phone);
 
     console.log('otpToken', otpToken);
-    
+
     await this.otpService.sendOtp(request.phone, otpToken.code);
 
     return {

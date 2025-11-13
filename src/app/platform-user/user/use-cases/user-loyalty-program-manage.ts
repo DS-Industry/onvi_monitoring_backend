@@ -15,8 +15,9 @@ export class LoyaltyProgramManageUserUseCase {
     const organizations =
       await this.findMethodsOrganizationUseCase.getAllByAbility(ability);
     await Promise.all(
-      organizations.map(async (org) => {
-        const loyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAll()
+      organizations.map(async () => {
+        const loyaltyPrograms =
+          await this.findMethodsLoyaltyProgramUseCase.getAll();
 
         loyaltyPrograms.forEach((loyaltyProgram) => {
           response.push({

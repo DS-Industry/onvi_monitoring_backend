@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { OrderStatus } from '@loyalty/order/domain/enums';
 
@@ -35,4 +35,3 @@ export class UpdateMobileOrderUseCase {
     };
   }
 }
-

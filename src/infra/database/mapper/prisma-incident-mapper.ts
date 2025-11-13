@@ -1,7 +1,6 @@
 import { Incident as PrismaIncident, Prisma } from '@prisma/client';
 import { Incident } from '@equipment/incident/incident/domain/incident';
-import { IncidentByFilterResponseDto } from '@equipment/incident/incident/use-cases/dto/incident-by-filter-response.dto';
-import { IncidentWithInfoDataDto } from "@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto";
+import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
 export type PrismaIncidentWithInfo = Prisma.IncidentGetPayload<{
   include: {
     equipmentKnot: true;

@@ -10,7 +10,10 @@ import { EnumMapper } from './enum-mapper';
 
 export class PrismaLoyaltyProgramMapper {
   static toDomain(
-    entity: PrismaLoyaltyProgram & { hubRequest?: LTYProgramHubRequest, programParticipants?: LTYProgramParticipant[] },
+    entity: PrismaLoyaltyProgram & {
+      hubRequest?: LTYProgramHubRequest;
+      programParticipants?: LTYProgramParticipant[];
+    },
   ): LTYProgram {
     if (!entity) {
       return null;
@@ -24,9 +27,13 @@ export class PrismaLoyaltyProgramMapper {
       ownerOrganizationId: entity.ownerOrganizationId,
       isHub: entity.isHub,
       isHubRequested: entity.hubRequest ? true : false,
-      isHubRejected: entity.hubRequest ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED : false,
+      isHubRejected: entity.hubRequest
+        ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED
+        : false,
       isPublic: (entity as any).isPublic,
-      programParticipantOrganizationIds: (entity.programParticipants ?? []).map((participant) => participant.organizationId),
+      programParticipantOrganizationIds: (entity.programParticipants ?? []).map(
+        (participant) => participant.organizationId,
+      ),
       description: entity.description,
       maxLevels: entity.maxLevels,
       burnoutType: (entity as any).burnoutType,
@@ -50,6 +57,6 @@ export class PrismaLoyaltyProgramMapper {
       burnoutType: loyaltyProgram.burnoutType,
       maxRedeemPercentage: loyaltyProgram.maxRedeemPercentage,
       hasBonusWithSale: loyaltyProgram.hasBonusWithSale,
-    } 
+    };
   }
 }

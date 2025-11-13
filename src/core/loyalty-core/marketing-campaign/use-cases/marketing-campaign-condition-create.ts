@@ -5,10 +5,14 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 
 @Injectable()
 export class CreateMarketingCampaignConditionUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
-  async execute(campaignId: number, data: CreateMarketingCampaignConditionDto): Promise<MarketingCampaignConditionResponseDto> {
+  async execute(
+    campaignId: number,
+    data: CreateMarketingCampaignConditionDto,
+  ): Promise<MarketingCampaignConditionResponseDto> {
     return this.marketingCampaignRepository.createCondition(campaignId, data);
   }
 }
-

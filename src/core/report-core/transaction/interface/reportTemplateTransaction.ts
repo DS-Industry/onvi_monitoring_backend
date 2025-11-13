@@ -9,9 +9,7 @@ export abstract class IReportTemplateTransactionRepository {
     skip?: number,
     take?: number,
   ): Promise<ReportTemplateTransaction[]>;
-  abstract countAllByUserId(
-    userId: number,
-  ): Promise<number>;
+  abstract countAllByUserId(userId: number): Promise<number>;
   abstract update(
     input: ReportTemplateTransaction,
   ): Promise<ReportTemplateTransaction>;

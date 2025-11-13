@@ -37,5 +37,7 @@ export abstract class ILoyaltyProgramParticipantRequestRepository {
 
   abstract count(where: any): Promise<number>;
 
-  abstract findManyWithPagination(filter: LoyaltyParticipantRequestsFilterDto): Promise<LoyaltyParticipantRequestsListResponseDto>;
+  abstract findManyWithPagination(
+    filter: LoyaltyParticipantRequestsFilterDto,
+  ): Promise<LoyaltyParticipantRequestsListResponseDto>;
 }

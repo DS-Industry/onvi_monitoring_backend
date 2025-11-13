@@ -11,19 +11,25 @@ export class ValidateClientForLocalStrategyUseCase {
     private readonly clientRepository: FindMethodsClientUseCase,
   ) {}
 
-  async execute(phone: string, otp: string): Promise<Client | { register: boolean }> {
+  async execute(
+    phone: string,
+    otp: string,
+  ): Promise<Client | { register: boolean }> {
     const isValidOtp = await this.otpService.validateOtp(phone, otp);
     if (!isValidOtp) {
       throw new Error('Invalid OTP');
     }
 
     const client = await this.clientRepository.getByPhone(phone);
-    
+
     if (!client) {
       return { register: true };
     }
 
-    if (client.status === StatusUser.BLOCKED || client.status === StatusUser.DELETED) {
+    if (
+      client.status === StatusUser.BLOCKED ||
+      client.status === StatusUser.DELETED
+    ) {
       throw new Error('Client account is blocked or deleted');
     }
 

@@ -1,5 +1,10 @@
-import { GroupTechTaskItemTemplate, StatusTechTask, TypeTechTask, TypeTechTaskItemTemplate } from "@prisma/client";
-import { TechTagProps } from "@tech-task/tag/domain/techTag";
+import {
+  GroupTechTaskItemTemplate,
+  StatusTechTask,
+  TypeTechTask,
+  TypeTechTaskItemTemplate,
+} from '@prisma/client';
+import { TechTagProps } from '@tech-task/tag/domain/techTag';
 import { PeriodType } from '../../domain/periodType';
 
 export class TechTaskShapeResponseDto {

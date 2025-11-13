@@ -7,8 +7,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PurposeType } from "@warehouse/nomenclature/interface/nomenclatureMeta";
-import { MeasurementNomenclature } from "@warehouse/nomenclature/domain/measurementNomenclature";
+import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
+import { MeasurementNomenclature } from '@warehouse/nomenclature/domain/measurementNomenclature';
 export class NomenclatureMetaDto {
   @IsString()
   @IsOptional()

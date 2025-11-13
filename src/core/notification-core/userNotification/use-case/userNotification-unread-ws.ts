@@ -33,7 +33,7 @@ export class UserNotificationUnreadWs
 
   private userToSocketMap = new Map<number, string[]>();
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
     // Store the connection initially without user data
     this.connectedClients.set(client.id, {
       socket: client,

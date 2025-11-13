@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IManagerPaperRepository } from '@manager-paper/managerPaper/interface/managerPaper';
 import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
 import { ManagerPaperGroup } from '@prisma/client';
-import { ManagerPaperWithTypeDto } from "@manager-paper/managerPaper/use-case/dto/managerPaperWithType.dto";
+import { ManagerPaperWithTypeDto } from '@manager-paper/managerPaper/use-case/dto/managerPaperWithType.dto';
 
 @Injectable()
 export class FindMethodsManagerPaperUseCase {

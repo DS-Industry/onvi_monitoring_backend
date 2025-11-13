@@ -18,16 +18,19 @@ export class ValidateRefreshTokenForJwtStrategyUseCase {
     private readonly clientRepository: FindMethodsClientUseCase,
   ) {}
 
-  async execute(request: ValidateRefreshTokenForJwtStrategyRequest): Promise<{ client: Client; refreshToken: string }> {
+  async execute(
+    request: ValidateRefreshTokenForJwtStrategyRequest,
+  ): Promise<{ client: Client; refreshToken: string }> {
     const { refreshToken, phone } = request;
 
     const payload = await this.tokenService.validateRefreshToken(refreshToken);
-    
+
     if (payload.phone !== phone) {
       throw new Error('Phone mismatch in token payload');
     }
 
-    const session = await this.authRepository.findActiveSessionByRefreshToken(refreshToken);
+    const session =
+      await this.authRepository.findActiveSessionByRefreshToken(refreshToken);
     if (!session || !session.isActive) {
       throw new Error('Invalid or expired refresh token');
     }

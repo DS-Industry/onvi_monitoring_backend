@@ -5,10 +5,15 @@ import { IMarketingCampaignRepository } from '@loyalty/marketing-campaign/interf
 
 @Injectable()
 export class UpdateMarketingCampaignUseCase {
-  constructor(private readonly marketingCampaignRepository: IMarketingCampaignRepository) {}
+  constructor(
+    private readonly marketingCampaignRepository: IMarketingCampaignRepository,
+  ) {}
 
-  async execute(id: number, data: MarketingCampaignUpdateDto, userId: number): Promise<MarketingCampaignResponseDto> {
+  async execute(
+    id: number,
+    data: MarketingCampaignUpdateDto,
+    userId: number,
+  ): Promise<MarketingCampaignResponseDto> {
     return this.marketingCampaignRepository.update(id, data, userId);
   }
 }
-

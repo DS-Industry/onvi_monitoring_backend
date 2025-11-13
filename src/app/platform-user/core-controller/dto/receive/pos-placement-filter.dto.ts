@@ -1,5 +1,5 @@
-import { IsNotEmpty } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class PosPlacementFilterDto {
   @IsNotEmpty({ message: 'posId is required' })

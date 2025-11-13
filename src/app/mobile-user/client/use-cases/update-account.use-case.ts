@@ -13,16 +13,13 @@ export class UpdateAccountUseCase {
     private readonly updateClientUseCase: UpdateClientUseCase,
   ) {}
 
-  async execute(
-    input: AccountClientUpdateDto,
-    client: Client,
-  ) {
+  async execute(input: AccountClientUpdateDto, client: Client) {
     const { name, email, avatar, is_notifications_enabled } = input;
     const coreUpdateData: any = {};
 
     if (name !== undefined) coreUpdateData.name = name;
     if (email !== undefined) coreUpdateData.email = email;
-    
+
     if (avatar !== undefined) {
       if (avatar === 1) {
         coreUpdateData.avatar = AvatarType.ONE;
@@ -37,7 +34,10 @@ export class UpdateAccountUseCase {
       coreUpdateData.is_notifications_enabled = is_notifications_enabled;
     }
 
-    const updatedClient = await this.updateClientUseCase.execute(coreUpdateData, client);
+    const updatedClient = await this.updateClientUseCase.execute(
+      coreUpdateData,
+      client,
+    );
 
     if (!updatedClient) {
       throw new AccountNotFoundExceptions(client.phone);

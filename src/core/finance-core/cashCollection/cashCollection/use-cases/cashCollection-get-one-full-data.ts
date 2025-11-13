@@ -4,10 +4,8 @@ import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/ca
 import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { CarWashDevice } from '@pos/device/device/domain/device';
-import { CashCollectionDevice } from "@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice";
-import {
-  CashCollectionDeviceType
-} from "@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType";
+import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
+import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
 
 @Injectable()
 export class GetOneFullDataCashCollectionUseCase {

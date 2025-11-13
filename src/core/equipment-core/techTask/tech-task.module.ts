@@ -25,7 +25,7 @@ import { TechTagRepositoryProvider } from '@tech-task/tag/provider/techTag';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ReportTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-report";
+import { ReportTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-report';
 import { TechTaskCommentProvider } from '@tech-task/comment/provider/techTaskComment';
 import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
 import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';

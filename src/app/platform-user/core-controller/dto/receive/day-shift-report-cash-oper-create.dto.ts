@@ -6,9 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import {
-  TypeWorkDayShiftReportCashOper
-} from "@finance/shiftReport/shiftReportCashOper/doamin/typeWorkDayShiftReportCashOper";
+import { TypeWorkDayShiftReportCashOper } from '@finance/shiftReport/shiftReportCashOper/doamin/typeWorkDayShiftReportCashOper';
 
 export class DayShiftReportCashOperCreateDto {
   @IsNotEmpty({ message: 'type is required' })

@@ -1,11 +1,6 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ManagerPaperGroup } from "@manager-paper/managerPaper/domain/managerPaperGroup";
+import { ManagerPaperGroup } from '@manager-paper/managerPaper/domain/managerPaperGroup';
 
 export class ManagerPaperCreateDto {
   @IsEnum(ManagerPaperGroup)

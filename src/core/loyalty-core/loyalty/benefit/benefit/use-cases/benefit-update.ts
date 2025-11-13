@@ -13,7 +13,9 @@ export class UpdateBenefitUseCase {
     oldBenefit.name = name ? name : oldBenefit.name;
     oldBenefit.bonus = bonus ? bonus : oldBenefit.bonus;
     oldBenefit.benefitType = benefitType ? benefitType : oldBenefit.benefitType;
-    oldBenefit.ltyProgramId = ltyProgramId ? ltyProgramId : oldBenefit.ltyProgramId;
+    oldBenefit.ltyProgramId = ltyProgramId
+      ? ltyProgramId
+      : oldBenefit.ltyProgramId;
 
     return await this.benefitRepository.update(oldBenefit);
   }

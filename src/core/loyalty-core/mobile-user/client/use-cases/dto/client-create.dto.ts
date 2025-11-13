@@ -1,4 +1,4 @@
-import { ContractType } from "@loyalty/mobile-user/client/domain/enums";
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 export interface ClientCreateDto {
   name: string;

@@ -48,7 +48,9 @@ export class TechTaskComment extends BaseEntity<TechTaskCommentProps> {
     return this.props.updatedAt;
   }
 
-  get author(): { id: number; firstName: string; lastName: string } | undefined {
+  get author():
+    | { id: number; firstName: string; lastName: string }
+    | undefined {
     return this.props.author;
   }
 

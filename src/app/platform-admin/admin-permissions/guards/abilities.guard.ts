@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AbilityFactory } from '@platform-admin/permissions/ability.factory';
 import {
@@ -36,7 +31,10 @@ export class AbilitiesGuard implements CanActivate {
       return true;
     } catch (error) {
       if (error instanceof ForbiddenError) {
-        throw new PermissionException(PERMISSION_DENIED_EXCEPTION_CODE, error.message);
+        throw new PermissionException(
+          PERMISSION_DENIED_EXCEPTION_CODE,
+          error.message,
+        );
       }
     }
   }

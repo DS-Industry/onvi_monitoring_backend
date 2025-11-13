@@ -25,19 +25,23 @@ export class CompletionShapeTechTaskUseCase {
         itemValue.value,
         itemValue.imageUrl,
       );
-    } 
+    }
     techTask.status = StatusTechTask.FINISHED;
     techTask.sendWorkDate = new Date();
     techTask.executorId = user.id;
-    
-    if (techTask.type === TypeTechTask.REGULAR && techTask.nextCreateDate && techTask.periodType) {
+
+    if (
+      techTask.type === TypeTechTask.REGULAR &&
+      techTask.nextCreateDate &&
+      techTask.periodType
+    ) {
       techTask.nextCreateDate = PeriodCalculator.calculateNextDate(
-        techTask.nextCreateDate, 
-        techTask.periodType, 
-        techTask.customPeriodDays
+        techTask.nextCreateDate,
+        techTask.periodType,
+        techTask.customPeriodDays,
       );
     }
-    
+
     return await this.techTaskRepository.update(techTask);
   }
 }

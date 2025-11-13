@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDto } from '@loyalty/order/use-cases/dto/create.dto';
 import { Order } from '@loyalty/order/domain/order';
-import {
-  OrderHandlerStatus,
-  ContractType,
-} from '@loyalty/order/domain/enums';
+import { OrderHandlerStatus, ContractType } from '@loyalty/order/domain/enums';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 
 @Injectable()

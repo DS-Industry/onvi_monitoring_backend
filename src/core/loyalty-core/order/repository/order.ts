@@ -24,7 +24,7 @@ export class OrderRepository extends IOrderRepository {
           include: {
             carWashDeviceType: true,
           },
-        }
+        },
       },
     });
     return PrismaOrderMapper.toDomain(order);
@@ -40,7 +40,7 @@ export class OrderRepository extends IOrderRepository {
           include: {
             carWashDeviceType: true,
           },
-        }
+        },
       },
     });
     return PrismaOrderMapper.toDomain(order);
@@ -53,7 +53,7 @@ export class OrderRepository extends IOrderRepository {
           include: {
             carWashDeviceType: true,
           },
-        }
+        },
       },
       where: {
         transactionId,
@@ -114,7 +114,7 @@ export class OrderRepository extends IOrderRepository {
           include: {
             carWashDeviceType: true,
           },
-        }
+        },
       },
     });
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
@@ -132,7 +132,7 @@ export class OrderRepository extends IOrderRepository {
           include: {
             carWashDeviceType: true,
           },
-        }
+        },
       },
     });
     return PrismaOrderMapper.toDomain(order);

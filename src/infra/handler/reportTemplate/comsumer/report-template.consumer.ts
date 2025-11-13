@@ -10,7 +10,7 @@ export class ReportTemplateConsumer extends WorkerHost {
     super();
   }
 
-  async process(job: Job, token: string | undefined): Promise<any> {
+  async process(job: Job): Promise<any> {
     console.log('start proc worker');
     await this.handlerReportUseCase.execute(
       job.data.report.props,

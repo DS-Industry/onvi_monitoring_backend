@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { Transform } from "class-transformer";
-import { CategoryReportTemplate } from "@report/report/domain/categoryReportTemplate";
+import { Transform } from 'class-transformer';
+import { CategoryReportTemplate } from '@report/report/domain/categoryReportTemplate';
 
 export class ReportAllFilterDto {
   @IsOptional()

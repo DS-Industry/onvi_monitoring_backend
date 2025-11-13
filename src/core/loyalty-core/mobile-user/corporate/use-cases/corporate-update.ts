@@ -12,7 +12,7 @@ export class UpdateCorporateClientUseCase {
     data: CorporateClientUpdateDto,
   ): Promise<CorporateClientResponseDto> {
     const existingCorporate = await this.corporateRepository.findOneById(id);
-    
+
     if (!existingCorporate) {
       throw new Error(`Corporate client with id ${id} not found`);
     }
@@ -29,7 +29,8 @@ export class UpdateCorporateClientUseCase {
 
     existingCorporate.updatedAt = new Date(Date.now());
 
-    const updatedCorporate = await this.corporateRepository.update(existingCorporate);
+    const updatedCorporate =
+      await this.corporateRepository.update(existingCorporate);
 
     return {
       id: updatedCorporate.id,

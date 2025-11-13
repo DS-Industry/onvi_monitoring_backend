@@ -28,8 +28,7 @@ import { AccountClientUpdateDto } from './dto/account-client-update.dto';
 import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
-import { JwtGuard } from "@mobile-user/auth/guards/jwt.guard";
-
+import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 
 @Controller('client')
 export class ClientController {
@@ -46,7 +45,9 @@ export class ClientController {
   ) {}
   @Post()
   @HttpCode(201)
-  async createClient(@Body() createData: CreateClientDto): Promise<ClientResponseDto> {
+  async createClient(
+    @Body() createData: CreateClientDto,
+  ): Promise<ClientResponseDto> {
     const client = await this.createClientUseCaseWrapper.execute(createData);
     return new ClientResponseDto(client);
   }
@@ -59,7 +60,6 @@ export class ClientController {
 
     return await this.getCurrentAccountUseCase.execute(user.props.id);
   }
-
 
   @Get('/activePromotion')
   @HttpCode(200)
@@ -74,7 +74,10 @@ export class ClientController {
       latitude !== undefined && longitude !== undefined
         ? { latitude, longitude }
         : undefined;
-    return await this.getActivePromotionsUseCase.execute(user.props.id, location);
+    return await this.getActivePromotionsUseCase.execute(
+      user.props.id,
+      location,
+    );
   }
 
   @Patch('/account/update')
@@ -84,10 +87,12 @@ export class ClientController {
     @Request() req: any,
   ) {
     const { user } = req;
-    
-    const accountData = await this.getCurrentAccountUseCase.execute(user.props.id);
+
+    const accountData = await this.getCurrentAccountUseCase.execute(
+      user.props.id,
+    );
     const currentClient = accountData.client;
-    
+
     return await this.updateAccountUseCase.execute(body, currentClient);
   }
 
@@ -116,7 +121,9 @@ export class ClientController {
 
   @Get(':id')
   @HttpCode(200)
-  async getOneById(@Param('id', ParseIntPipe) id: number): Promise<ClientResponseDto> {
+  async getOneById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ClientResponseDto> {
     const client = await this.getClientByIdUseCase.execute(id);
     return new ClientResponseDto(client);
   }
@@ -127,7 +134,10 @@ export class ClientController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: UpdateClientDto,
   ): Promise<ClientResponseDto> {
-    const client = await this.updateClientUseCaseWrapper.execute(id, updateData);
+    const client = await this.updateClientUseCaseWrapper.execute(
+      id,
+      updateData,
+    );
     return new ClientResponseDto(client);
   }
 

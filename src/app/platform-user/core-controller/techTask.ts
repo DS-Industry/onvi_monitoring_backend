@@ -33,7 +33,10 @@ import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-up
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
 import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
-import { TechTaskCompletionShapeDto, itemValueDto } from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
+import {
+  TechTaskCompletionShapeDto,
+  itemValueDto,
+} from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
 import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
 import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
 import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
@@ -276,9 +279,9 @@ export class TechTaskController {
 
       return await this.readAllByPosTechTaskUseCase.execute(
         user,
-        { 
-          posId: params.posId, 
-          status: params.status, 
+        {
+          posId: params.posId,
+          status: params.status,
           organizationId: params.organizationId,
           name: params.name,
           tags: params.tags,
@@ -503,9 +506,8 @@ export class TechTaskController {
     try {
       const { ability, user } = req;
 
-
       const valueData = Array.isArray(data) ? data : data.valueData;
-      
+
       if (!valueData || !Array.isArray(valueData)) {
         throw new Error('valueData must be an array');
       }
@@ -549,8 +551,11 @@ export class TechTaskController {
   ): Promise<TechTaskCommentResponseDto[]> {
     try {
       const { ability } = req;
-      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
-      
+      await this.techTaskValidateRules.getShapeByIdValidate(
+        techTaskId,
+        ability,
+      );
+
       return await this.readTechTaskCommentsUseCase.execute(techTaskId);
     } catch (e) {
       if (e instanceof TechTaskException) {
@@ -580,9 +585,16 @@ export class TechTaskController {
   ): Promise<TechTaskCommentResponseDto> {
     try {
       const { ability, user } = req;
-      await this.techTaskValidateRules.getShapeByIdValidate(techTaskId, ability);
-      
-      return await this.createTechTaskCommentUseCase.execute(data, techTaskId, user.id);
+      await this.techTaskValidateRules.getShapeByIdValidate(
+        techTaskId,
+        ability,
+      );
+
+      return await this.createTechTaskCommentUseCase.execute(
+        data,
+        techTaskId,
+        user.id,
+      );
     } catch (e) {
       if (e instanceof TechTaskException) {
         throw new CustomHttpException({

@@ -17,9 +17,9 @@ export class ReadAllByPosTechTaskUseCase {
 
   async execute(
     user: User,
-    filterData: { 
-      posId?: number; 
-      status?: StatusTechTask; 
+    filterData: {
+      posId?: number;
+      status?: StatusTechTask;
       organizationId?: number;
       name?: string;
       tags?: string[];
@@ -34,9 +34,7 @@ export class ReadAllByPosTechTaskUseCase {
     const response: TechTaskReadAllResponse[] = [];
 
     const statuses =
-      filterData.status !== undefined
-        ? [filterData.status]
-        : undefined;
+      filterData.status !== undefined ? [filterData.status] : undefined;
 
     const [totalCount, techTasks] = await Promise.all([
       this.findMethodsTechTaskUseCase.getCountByFilter({

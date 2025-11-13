@@ -10,7 +10,7 @@ import { EnumMapper } from './enum-mapper';
 
 export class PrismaMobileUserMapper {
   static toDomain(
-    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta, card?: LTYCard },
+    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta; card?: LTYCard },
   ): Client {
     if (!entity) {
       return null;
@@ -22,7 +22,9 @@ export class PrismaMobileUserMapper {
       phone: entity.phone,
       email: entity.email,
       gender: entity.gender,
-      status: entity.status ? EnumMapper.toDomainStatusUser(entity.status) : undefined,
+      status: entity.status
+        ? EnumMapper.toDomainStatusUser(entity.status)
+        : undefined,
       avatar: entity.avatar,
       contractType: EnumMapper.toDomainContractType(entity.contractType),
       comment: entity.comment,
@@ -44,7 +46,9 @@ export class PrismaMobileUserMapper {
       phone: client.phone,
       email: client?.email,
       gender: client?.gender,
-      status: client?.status ? EnumMapper.toPrismaStatusUser(client.status) : undefined,
+      status: client?.status
+        ? EnumMapper.toPrismaStatusUser(client.status)
+        : undefined,
       avatar: client?.avatar,
       contractType: EnumMapper.toPrismaContractType(client.contractType),
       comment: client?.comment,

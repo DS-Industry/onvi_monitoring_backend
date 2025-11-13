@@ -3,7 +3,7 @@ import { IUserNotificationRepository } from '@notification/userNotification/inte
 import { UserNotification } from '@notification/userNotification/domain/userNotification';
 import { UserNotificationType } from '@prisma/client';
 import { FullDataUserNotificationDto } from '@notification/userNotification/use-case/dto/full-data-userNotification.dto';
-import { ReadStatus } from "@notification/userNotification/use-case/dto/userNotification-update.dto";
+import { ReadStatus } from '@notification/userNotification/use-case/dto/userNotification-update.dto';
 
 @Injectable()
 export class FindMethodsUserNotificationUseCase {

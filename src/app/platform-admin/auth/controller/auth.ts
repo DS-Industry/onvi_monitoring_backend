@@ -70,6 +70,7 @@ export class Auth {
         response.tokens.refreshToken,
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { tokens, ...responseWithoutTokens } = response;
       return responseWithoutTokens;
     } catch (e) {

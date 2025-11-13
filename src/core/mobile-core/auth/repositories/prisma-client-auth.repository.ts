@@ -100,7 +100,9 @@ export class PrismaClientAuthRepository extends IClientAuthRepository {
     });
   }
 
-  async findActiveSessionByRefreshToken(refreshToken: string): Promise<ClientSession> {
+  async findActiveSessionByRefreshToken(
+    refreshToken: string,
+  ): Promise<ClientSession> {
     const user = await this.prisma.lTYUser.findFirst({
       where: {
         refreshTokenId: refreshToken,

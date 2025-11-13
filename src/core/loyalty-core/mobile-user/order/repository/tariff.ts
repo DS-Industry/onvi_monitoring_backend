@@ -18,7 +18,7 @@ export class TariffRepository extends ITariffRepository {
       return null;
     }
 
-    console.log("card.cardTierId => ", card.cardTierId)
+    console.log('card.cardTierId => ', card.cardTierId);
 
     const tierWithBenefits = await this.prisma.lTYCardTier.findUnique({
       where: { id: card.cardTierId },
@@ -36,5 +36,3 @@ export class TariffRepository extends ITariffRepository {
     return benefit ? { bonus: benefit.bonus } : null;
   }
 }
-
-

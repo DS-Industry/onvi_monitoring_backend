@@ -1,7 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Logger } from 'nestjs-pino';
-import { IPosService, DeviceType, SendStatus } from '@infra/pos/interface/pos.interface';
+import {
+  IPosService,
+  DeviceType,
+  SendStatus,
+} from '@infra/pos/interface/pos.interface';
 import { OrderStatus } from '@loyalty/order/domain/enums';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
@@ -14,7 +23,12 @@ export class StartPosUseCase {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
-  async execute(orderId: number, carWashId: number, carWashDeviceId: number, bayType?: DeviceType): Promise<any> {
+  async execute(
+    orderId: number,
+    carWashId: number,
+    carWashDeviceId: number,
+    bayType?: DeviceType,
+  ): Promise<any> {
     const order = await this.orderRepository.findOneById(orderId);
 
     if (!order) {
@@ -38,9 +52,13 @@ export class StartPosUseCase {
     }
 
     try {
-      const card = await this.findMethodsCardUseCase.getById(order.cardMobileUserId);
+      const card = await this.findMethodsCardUseCase.getById(
+        order.cardMobileUserId,
+      );
       if (!card) {
-        throw new BadRequestException(`Card with ID ${order.cardMobileUserId} not found`);
+        throw new BadRequestException(
+          `Card with ID ${order.cardMobileUserId} not found`,
+        );
       }
 
       const bayDetails = await this.posService.ping({
@@ -134,7 +152,12 @@ export class StartPosUseCase {
       return false;
     }
 
-    const pingResult = await this.performPingAttempts(carWashId, carWashDeviceId,  bayType, cycle);
+    const pingResult = await this.performPingAttempts(
+      carWashId,
+      carWashDeviceId,
+      bayType,
+      cycle,
+    );
 
     if (pingResult.success) {
       this.logger.log(`Car wash verified as started on cycle ${cycle}`);
@@ -144,7 +167,12 @@ export class StartPosUseCase {
     if (cycle < MAX_RETRY_CYCLES) {
       this.logger.log(`Retrying verification after cycle ${cycle}`);
       await this.sleep(1000);
-      return this.verifyCarWashStartedRecursive(carWashId, carWashDeviceId, bayType, cycle + 1);
+      return this.verifyCarWashStartedRecursive(
+        carWashId,
+        carWashDeviceId,
+        bayType,
+        cycle + 1,
+      );
     }
 
     return false;
@@ -197,4 +225,3 @@ export class StartPosUseCase {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
-

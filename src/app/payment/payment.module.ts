@@ -17,7 +17,10 @@ import { RefundPaymentUseCaseCore } from '../../core/payment-core/use-cases/refu
   imports: [
     forwardRef(() => LoyaltyCoreModule),
     PrismaModule,
-    BullModule.registerQueue({ configKey: 'worker', name: 'payment-orchestrate' }),
+    BullModule.registerQueue({
+      configKey: 'worker',
+      name: 'payment-orchestrate',
+    }),
   ],
   providers: [
     OrderProvider,

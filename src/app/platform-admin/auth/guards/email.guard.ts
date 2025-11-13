@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class EmailGuard extends AuthGuard('adminEmail') {
     super();
   }
 
-  handleRequest(err: any, user: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any) {
     if (err || !user) {
       throw new Error(err);
     }

@@ -13,5 +13,3 @@ export interface SystemStatusResponse {
   timestamp: string;
   version: string;
 }
-
-

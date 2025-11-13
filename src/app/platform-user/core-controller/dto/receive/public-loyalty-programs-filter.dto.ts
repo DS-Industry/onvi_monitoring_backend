@@ -1,5 +1,5 @@
 import { IsOptional, IsString, IsNumber, IsEnum } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { LTYProgramStatus } from '@prisma/client';
 
 export class PublicLoyaltyProgramsFilterDto {

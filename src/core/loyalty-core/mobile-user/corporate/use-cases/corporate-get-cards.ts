@@ -7,7 +7,10 @@ import { CorporateCardsFilterDto } from '@platform-user/core-controller/dto/rece
 export class CorporateGetCardsUseCase {
   constructor(private readonly corporateRepository: ICorporateRepository) {}
 
-  async execute(corporateId: number, data: CorporateCardsFilterDto): Promise<CorporateCardsPaginatedResponseDto> {
+  async execute(
+    corporateId: number,
+    data: CorporateCardsFilterDto,
+  ): Promise<CorporateCardsPaginatedResponseDto> {
     const corporate = await this.corporateRepository.findOneById(corporateId);
     if (!corporate) {
       throw new Error('Corporate client not exists');

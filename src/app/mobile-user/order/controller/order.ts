@@ -33,7 +33,7 @@ export class OrderController {
     private readonly updateMobileOrderUseCase: UpdateMobileOrderUseCase,
     private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
     private readonly posService: IPosService,
-    private readonly registerPaymentUseCase: RegisterPaymentUseCase, 
+    private readonly registerPaymentUseCase: RegisterPaymentUseCase,
   ) {}
   @UseGuards(JwtGuard)
   @Post('create')
@@ -71,10 +71,7 @@ export class OrderController {
   @UseGuards(JwtGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getOrderById(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: any,
-  ) {
+  async getOrderById(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     try {
       const { user } = req;
       return await this.getMobileOrderByIdUseCase.execute({
@@ -188,7 +185,7 @@ export class OrderController {
       carWashDeviceId: Number(query.carWashDeviceId),
       type: query?.bayType ?? null,
     });
-    
+
     return res;
   }
 
@@ -203,4 +200,3 @@ export class OrderController {
     };
   }
 }
-

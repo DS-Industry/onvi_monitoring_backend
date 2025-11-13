@@ -36,11 +36,9 @@ import { ShiftGradingRepositoryProvider } from '@finance/shiftReport/shiftGradin
 import { FindMethodsShiftGradingUseCase } from '@finance/shiftReport/shiftGrading/use-cases/shiftGrading-find-methods';
 import { FindMethodsGradingParameterUseCase } from '@finance/shiftReport/gradingParameter/use-cases/gradingParameter-find-methods';
 import { FindMethodsGradingEstimationUseCase } from '@finance/shiftReport/gradingEstimation/use-cases/gradingEstimation-find-methods';
-import { FullDataShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data";
-import {
-  CalculationPaymentShiftReportUseCase
-} from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment";
-import { CalculateDailyPayoutShiftReportUseCase } from "@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout";
+import { FullDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data';
+import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
+import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,

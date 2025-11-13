@@ -10,15 +10,17 @@ export class ConnectionWorkerPosUseCase {
   ) {}
 
   async execute(posIds: number[], workerId: number) {
-    const existingWorker = await this.findMethodsWorkerUseCase.getById(workerId);
+    const existingWorker =
+      await this.findMethodsWorkerUseCase.getById(workerId);
     if (!existingWorker) {
       throw new Error('Worker not found');
     }
 
-    const existingPoses = await this.workerRepository.findPosesByWorkerId(workerId);
+    const existingPoses =
+      await this.workerRepository.findPosesByWorkerId(workerId);
     const existingPosIds = existingPoses.map((pos) => pos.id);
 
-    const deletePosIds = existingPosIds.filter((id) => !posIds.includes(id)); 
+    const deletePosIds = existingPosIds.filter((id) => !posIds.includes(id));
     const addPosIds = posIds.filter((id) => !existingPosIds.includes(id));
 
     await this.workerRepository.updateConnectionPos(
@@ -26,7 +28,7 @@ export class ConnectionWorkerPosUseCase {
       addPosIds,
       deletePosIds,
     );
-    
+
     return { status: 'SUCCESS' };
   }
 }

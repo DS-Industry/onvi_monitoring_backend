@@ -1,4 +1,4 @@
-export class SalePriceUpdateValueDto{
+export class SalePriceUpdateValueDto {
   id: number;
   price: number;
 }

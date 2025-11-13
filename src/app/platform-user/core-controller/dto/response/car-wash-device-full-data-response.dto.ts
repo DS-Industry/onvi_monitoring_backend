@@ -9,5 +9,5 @@ export interface CarWashDeviceFullDataResponseDto {
   deviceType: {
     name: string;
     code: string;
-  }
+  };
 }

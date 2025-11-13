@@ -1,9 +1,4 @@
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { AddressCreateDto } from '@platform-user/core-controller/dto/receive/address-create.dto';
 import { CarWashPosType } from '@pos/carWashPos/domain/carWashPosType';

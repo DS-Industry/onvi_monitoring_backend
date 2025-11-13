@@ -5,10 +5,7 @@ import { DeviceValidateRules } from '@platform-device/validate/validate-rules/de
 import { LoyaltyDeviceController } from '@platform-device/device/controller/loyalty';
 import { ValidatePlatformDeviceLib } from '@platform-device/validate/validate-platform-device.lib';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
-const validate: Provider[] = [
-  ValidatePlatformDeviceLib,
-  DeviceValidateRules,
-];
+const validate: Provider[] = [ValidatePlatformDeviceLib, DeviceValidateRules];
 const controllers = [CarWashDeviceController, LoyaltyDeviceController];
 @Module({
   imports: [BusinessCoreModule, LoyaltyCoreModule],

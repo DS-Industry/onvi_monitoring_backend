@@ -8,16 +8,11 @@ import {
   ArrayMinSize,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { CampaignExecutionType } from '@prisma/client';
+import { CampaignExecutionType } from '@loyalty/marketing-campaign/domain/enums/campaign-execution-type.enum';
 
 enum MarketingCampaignType {
   PROMOCODE = 'PROMOCODE',
   DISCOUNT = 'DISCOUNT',
-}
-
-enum MarketingDiscountType {
-  FIXED = 'FIXED',
-  PERCENTAGE = 'PERCENTAGE',
 }
 
 enum MarketingCampaignStatus {
@@ -38,12 +33,12 @@ export class MarketingCampaignUpdateDto {
   type?: MarketingCampaignType;
 
   @IsDate()
-  @Transform(({ value }) => value ? new Date(value) : undefined)
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   @IsOptional()
   launchDate?: Date;
 
   @IsDate()
-  @Transform(({ value }) => value ? new Date(value) : undefined)
+  @Transform(({ value }) => (value ? new Date(value) : undefined))
   @IsOptional()
   endDate?: Date;
 
@@ -69,9 +64,7 @@ export class MarketingCampaignUpdateDto {
   @IsOptional()
   status?: MarketingCampaignStatus;
 
-
   @IsEnum(CampaignExecutionType)
   @IsOptional()
   executionType?: CampaignExecutionType;
 }
-

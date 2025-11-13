@@ -1,12 +1,6 @@
-import {
-  IsArray, IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString
-} from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PermissionAction } from "@platform-user/permissions/user-permissions/domain/permissionAction";
+import { PermissionAction } from '@platform-user/permissions/user-permissions/domain/permissionAction';
 
 export class CreatePermissionsDto {
   @IsEnum(PermissionAction)

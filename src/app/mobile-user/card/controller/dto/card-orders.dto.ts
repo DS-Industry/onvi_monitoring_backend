@@ -34,4 +34,3 @@ export class AccountTransferDataResponseDto {
   balance: number;
   monthlyLimit?: number;
 }
-

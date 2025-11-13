@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class InventoryItemMonitoringDto {

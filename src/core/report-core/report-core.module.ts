@@ -10,7 +10,6 @@ import { ReportTemplateTransactionProvider } from '@report/transaction/provider/
 import { CreateTransactionUseCase } from '@report/transaction/use-cases/transaction-create';
 import { UpdateTransactionUseCase } from '@report/transaction/use-cases/transaction-update';
 import { FindMethodsTransactionUseCase } from '@report/transaction/use-cases/transaction-find-methods';
-import { ReportTemplateConsumer } from "../../infra/handler/reportTemplate/comsumer/report-template.consumer";
 
 const repositories: Provider[] = [
   ReportTemplateRepositoryProvider,

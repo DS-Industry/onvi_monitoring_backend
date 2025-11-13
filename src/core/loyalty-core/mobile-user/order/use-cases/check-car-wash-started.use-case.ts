@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Logger } from 'nestjs-pino';
 import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
@@ -85,7 +90,9 @@ export class CheckCarWashStartedUseCase {
         });
 
         if (pingResult.status !== 'Free') {
-          this.logger.log(`Car wash verified as started on ping attempt ${pingAttempt}`);
+          this.logger.log(
+            `Car wash verified as started on ping attempt ${pingAttempt}`,
+          );
           return true;
         }
 
@@ -117,4 +124,3 @@ export class CheckCarWashStartedUseCase {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
-

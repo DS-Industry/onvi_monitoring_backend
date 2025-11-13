@@ -1,5 +1,4 @@
-import { UserNotificationType } from "@prisma/client";
-import { UserNotificationTag } from "@notification/userNotificationTag/domain/userNotificationTag";
+import { UserNotificationType } from '@prisma/client';
 
 export interface FullDataUserNotificationDto {
   id: number;

@@ -70,9 +70,11 @@ export class PrismaCardMobileUserMapper {
       loyaltyProgram: entity.cardTier?.ltyProgram
         ? {
             organizations:
-              entity.cardTier.ltyProgram.programParticipants?.filter(p => p.status === 'ACTIVE').map((p) => ({
-                id: p.organizationId,
-              })) || [],
+              entity.cardTier.ltyProgram.programParticipants
+                ?.filter((p) => p.status === 'ACTIVE')
+                .map((p) => ({
+                  id: p.organizationId,
+                })) || [],
           }
         : undefined,
     };

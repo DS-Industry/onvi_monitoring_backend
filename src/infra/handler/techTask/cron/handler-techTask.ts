@@ -18,13 +18,16 @@ export class HandlerTechTaskCron {
     try {
       const result = await this.handlerTechTaskUseCase.execute();
       const executionTime = Date.now() - startTime;
-      
-      this.logger.log(`Tech task cron job completed successfully in ${executionTime}ms`, {
-        executionTime,
-        processedTasks: result?.processedTasks || 0,
-        createdTasks: result?.createdTasks || 0,
-        overdueTasksUpdated: result?.overdueTasksUpdated || 0,
-      });
+
+      this.logger.log(
+        `Tech task cron job completed successfully in ${executionTime}ms`,
+        {
+          executionTime,
+          processedTasks: result?.processedTasks || 0,
+          createdTasks: result?.createdTasks || 0,
+          overdueTasksUpdated: result?.overdueTasksUpdated || 0,
+        },
+      );
     } catch (error) {
       const executionTime = Date.now() - startTime;
       this.logger.error(`Tech task cron job failed after ${executionTime}ms`, {

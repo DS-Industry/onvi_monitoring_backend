@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsNotEmpty, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class SaleDocumentFilterDto {
   @IsNotEmpty({ message: 'dateStart is required' })

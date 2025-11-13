@@ -79,7 +79,7 @@ export class ReportTechTaskUseCase {
         executorId: techTask.executorId,
         tags: techTags.map((tag) => tag.getProps()),
         createdBy: techTask.createdBy || null,
-        executor: techTask.executor || null
+        executor: techTask.executor || null,
       });
     }
 

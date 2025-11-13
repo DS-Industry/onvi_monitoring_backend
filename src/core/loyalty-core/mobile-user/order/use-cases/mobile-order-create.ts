@@ -11,16 +11,17 @@ import { DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
 import { ITariffRepository } from '../interface/tariff';
-import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
+import {
+  IFlowProducer,
+  IFLOW_PRODUCER,
+} from '@loyalty/order/interface/flow-producer.interface';
 import {
   OrderValidationService,
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
 } from '@loyalty/order/domain/services';
-import {
-  CardNotFoundForOrderException,
-} from '@loyalty/order/domain/exceptions';
+import { CardNotFoundForOrderException } from '@loyalty/order/domain/exceptions';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -84,7 +85,6 @@ export class CreateMobileOrderUseCase {
       });
     }
 
-  
     const tariff = await this.tariffRepository.findCardTariff(card.id);
     const bonusPercent = tariff?.bonus ?? 0;
     const computedCashback = this.cashbackCalculationService.calculateCashback({
@@ -183,4 +183,3 @@ export class CreateMobileOrderUseCase {
     };
   }
 }
-

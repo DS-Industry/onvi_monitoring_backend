@@ -34,11 +34,7 @@ export class TransferAccountUseCase {
     user: Client,
   ): Promise<TransferAccountResponse> {
     if (!body.sum || body.sum <= 0) {
-      throw new InsufficientBalanceExceptions(
-        body.devNumber,
-        0,
-        body.sum || 0,
-      );
+      throw new InsufficientBalanceExceptions(body.devNumber, 0, body.sum || 0);
     }
 
     if (!body.devNumber || body.devNumber.trim() === '') {
@@ -65,8 +61,9 @@ export class TransferAccountUseCase {
       throw new CardNotMatchExceptions(body.devNumber);
     }
 
-    const oldCardClient =
-      await this.findMethodsClientUseCase.getById(oldCard.mobileUserId);
+    const oldCardClient = await this.findMethodsClientUseCase.getById(
+      oldCard.mobileUserId,
+    );
 
     if (!oldCardClient) {
       throw new CardNotMatchExceptions(body.devNumber);
@@ -122,4 +119,3 @@ export class TransferAccountUseCase {
     };
   }
 }
-

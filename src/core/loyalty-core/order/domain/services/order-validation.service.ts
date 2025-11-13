@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IPosService, DeviceType } from '@infra/pos/interface/pos.interface';
-import {
-  BayBusyException,
-  CarWashUnavailableException,
-} from '../exceptions';
+import { BayBusyException, CarWashUnavailableException } from '../exceptions';
 
 export interface ValidatePosStatusRequest {
   posId: number;
@@ -31,4 +28,3 @@ export class OrderValidationService {
     }
   }
 }
-

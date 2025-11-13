@@ -52,6 +52,3 @@ export class FreeVacuumValidationService {
     return { startDate, endDate };
   }
 }
-
-
-

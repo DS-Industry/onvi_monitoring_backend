@@ -1,5 +1,5 @@
-import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from "class-validator";
-import { Transform, Type } from "class-transformer";
+import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class SaleDocumentCreateDto {
   @IsNumber()

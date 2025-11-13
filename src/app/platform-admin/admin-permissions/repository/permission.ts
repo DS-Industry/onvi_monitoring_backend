@@ -26,7 +26,6 @@ export class PermissionRepository extends IPermissionsRepository {
     return PrismaPlatformAdminPermissionMapper.toDomain(permission);
   }
 
-
   async update(id: number, input: AdminPermission): Promise<AdminPermission> {
     const permissionPrismaEntity =
       PrismaPlatformAdminPermissionMapper.toPrisma(input);
@@ -39,8 +38,7 @@ export class PermissionRepository extends IPermissionsRepository {
     return PrismaPlatformAdminPermissionMapper.toDomain(permission);
   }
 
-  
-  async remove(id: number): Promise<AdminPermission> {
+  async remove(): Promise<AdminPermission> {
     throw new Error('Method not implemented.');
   }
   async findAll(): Promise<AdminPermission[]> {

@@ -38,16 +38,20 @@ export class OtpToken extends BaseEntity<OtpTokenProps> {
   }
 
   isValid(inputCode: string): boolean {
-    return !this.props.isUsed && 
-           !this.isExpired() && 
-           this.props.code === inputCode;
+    return (
+      !this.props.isUsed && !this.isExpired() && this.props.code === inputCode
+    );
   }
 
   markAsUsed(): void {
     this.props.isUsed = true;
   }
 
-  static create(phone: string, code: string, expiryMinutes: number = 5): OtpToken {
+  static create(
+    phone: string,
+    code: string,
+    expiryMinutes: number = 5,
+  ): OtpToken {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + expiryMinutes);
 

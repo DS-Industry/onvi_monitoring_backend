@@ -4,7 +4,3 @@ export enum PlatformType {
   LUKOIL = 'LUKOIL',
   LOCAL_LOYALTY = 'LOCAL_LOYALTY',
 }
-
-
-
-

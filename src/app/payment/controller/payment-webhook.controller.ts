@@ -21,8 +21,6 @@ export class PaymentWebhookController {
     private readonly verifyWebhookSignatureUseCase: VerifyWebhookSignatureUseCase,
   ) {}
 
-
-
   @Post('/webhook')
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
@@ -31,13 +29,24 @@ export class PaymentWebhookController {
     @Headers('webhook-signature') signature: string,
     @Headers('x-request-id') requestId?: string,
   ) {
-    const rawBody = req.rawBody || Buffer.from(JSON.stringify(webhookData), 'utf-8');
-    
-    const httpMethod = req.method || 'POST';
-    const url = req.path || req.url?.split('?')[0] || '/payment-webhook/webhook';
+    const rawBody =
+      req.rawBody || Buffer.from(JSON.stringify(webhookData), 'utf-8');
 
-    if (!this.verifyWebhookSignatureUseCase.execute({ httpMethod, url, rawBody, signature })) {
-      this.logger.warn(`Invalid webhook signature. Request ID: ${requestId || 'unknown'}`);
+    const httpMethod = req.method || 'POST';
+    const url =
+      req.path || req.url?.split('?')[0] || '/payment-webhook/webhook';
+
+    if (
+      !this.verifyWebhookSignatureUseCase.execute({
+        httpMethod,
+        url,
+        rawBody,
+        signature,
+      })
+    ) {
+      this.logger.warn(
+        `Invalid webhook signature. Request ID: ${requestId || 'unknown'}`,
+      );
       throw new UnauthorizedException('Invalid webhook signature');
     }
 
@@ -53,7 +62,12 @@ export class PaymentWebhookController {
     }
 
     try {
-      await this.orchestratePaymentUseCase.execute(event, object.id, webhookData, requestId);
+      await this.orchestratePaymentUseCase.execute(
+        event,
+        object.id,
+        webhookData,
+        requestId,
+      );
       return { ok: true };
     } catch (error) {
       this.logger.error(
@@ -63,5 +77,3 @@ export class PaymentWebhookController {
     }
   }
 }
-
-

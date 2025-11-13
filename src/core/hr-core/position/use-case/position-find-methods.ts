@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IPositionRepository } from '@hr/position/interface/position';
 import { Position } from '@hr/position/domain/position';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class FindMethodsPositionUseCase {

@@ -26,7 +26,7 @@ export class CorporateRepository extends ICorporateRepository {
         id,
       },
       include: {
-        owner: true
+        owner: true,
       },
     });
 
@@ -238,13 +238,14 @@ export class CorporateRepository extends ICorporateRepository {
       };
     }
 
-    let workersWithCards = corporate.workers.filter(worker => worker.card);
+    let workersWithCards = corporate.workers.filter((worker) => worker.card);
 
     if (search) {
-      workersWithCards = workersWithCards.filter(worker => 
-        worker.name.toLowerCase().includes(search.toLowerCase()) ||
-        worker.card.unqNumber.toLowerCase().includes(search.toLowerCase()) ||
-        worker.card.number.toLowerCase().includes(search.toLowerCase())
+      workersWithCards = workersWithCards.filter(
+        (worker) =>
+          worker.name.toLowerCase().includes(search.toLowerCase()) ||
+          worker.card.unqNumber.toLowerCase().includes(search.toLowerCase()) ||
+          worker.card.number.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
@@ -259,16 +260,18 @@ export class CorporateRepository extends ICorporateRepository {
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(skip || 0, (skip || 0) + (take || 10));
 
-    const data = paginatedWorkers.map(worker => ({
+    const data = paginatedWorkers.map((worker) => ({
       id: worker.card.id,
       ownerName: worker.name,
       cardUnqNumber: worker.card.unqNumber,
       cardNumber: worker.card.number,
       cardBalance: worker.card.balance,
-      cardTier: worker.card.cardTier ? {
-        name: worker.card.cardTier.name,
-        limitBenefit: worker.card.cardTier.limitBenefit,
-      } : null,
+      cardTier: worker.card.cardTier
+        ? {
+            name: worker.card.cardTier.name,
+            limitBenefit: worker.card.cardTier.limitBenefit,
+          }
+        : null,
     }));
 
     return {
@@ -327,8 +330,8 @@ export class CorporateRepository extends ICorporateRepository {
     }
 
     const cardIds = corporate.workers
-      .filter(worker => worker.card)
-      .map(worker => worker.card.id);
+      .filter((worker) => worker.card)
+      .map((worker) => worker.card.id);
 
     if (cardIds.length === 0) {
       const page = skip && take ? Math.floor(skip / take) + 1 : 1;
@@ -449,7 +452,7 @@ export class CorporateRepository extends ICorporateRepository {
       take: take || 10,
     });
 
-    const data = orders.map(order => ({
+    const data = orders.map((order) => ({
       id: order.id,
       transactionId: order.transactionId,
       cardId: order.cardId,

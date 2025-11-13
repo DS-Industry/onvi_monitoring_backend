@@ -9,9 +9,10 @@ export class ReadTechTaskCommentsUseCase {
   ) {}
 
   async execute(techTaskId: number): Promise<TechTaskCommentResponseDto[]> {
-    const comments = await this.techTaskCommentRepository.findByTechTaskId(techTaskId);
+    const comments =
+      await this.techTaskCommentRepository.findByTechTaskId(techTaskId);
 
-    return comments.map(comment => ({
+    return comments.map((comment) => ({
       id: comment.id,
       content: comment.content,
       imageUrl: comment.imageUrl,

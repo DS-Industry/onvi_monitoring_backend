@@ -4,13 +4,13 @@ export enum CampaignConditionType {
   WEEKDAY = 'WEEKDAY',
 
   // User behavior conditions
-  VISIT_COUNT = 'VISIT_COUNT', 
-  PURCHASE_AMOUNT = 'PURCHASE_AMOUNT', 
-  BIRTHDAY = 'BIRTHDAY', 
+  VISIT_COUNT = 'VISIT_COUNT',
+  PURCHASE_AMOUNT = 'PURCHASE_AMOUNT',
+  BIRTHDAY = 'BIRTHDAY',
   INACTIVITY = 'INACTIVITY',
 
   // Transaction-based conditions
-  PROMOCODE_ENTRY = 'PROMOCODE_ENTRY', 
+  PROMOCODE_ENTRY = 'PROMOCODE_ENTRY',
 }
 
 export enum ConditionOperator {
@@ -39,4 +39,3 @@ export enum Weekday {
   SATURDAY = 'SATURDAY',
   SUNDAY = 'SUNDAY',
 }
-

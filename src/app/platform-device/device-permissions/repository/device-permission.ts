@@ -34,7 +34,7 @@ export class DevicePermissionsRepository extends IDevicePermissionsRepository {
     return PrismaDevicePermissionMapper.toDomain(permission);
   }
 
-  async remove(id: number): Promise<DevicePermission> {
+  async remove(): Promise<DevicePermission> {
     throw new Error('Method not implemented.');
   }
 

@@ -8,9 +8,7 @@ export abstract class IWarehouseRepository {
     skip?: number,
     take?: number,
   ): Promise<Warehouse[]>;
-  abstract findCountAllByPosId(
-    posId: number,
-  ): Promise<number>;
+  abstract findCountAllByPosId(posId: number): Promise<number>;
   abstract findAllByPermission(
     ability: any,
     placementId?: number,

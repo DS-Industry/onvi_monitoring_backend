@@ -1,5 +1,9 @@
 import { Order } from '@loyalty/order/domain/order';
-import { OrderStatus, PlatformType, ContractType } from '@loyalty/order/domain/enums';
+import {
+  OrderStatus,
+  PlatformType,
+  ContractType,
+} from '@loyalty/order/domain/enums';
 
 export abstract class IOrderRepository {
   abstract create(input: Order): Promise<Order>;

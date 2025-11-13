@@ -398,11 +398,9 @@ export class WarehouseController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<any> {
     try {
-      const { user, ability } = req;
-      const data = await this.warehouseValidateRules.createNomenclatureFile(
-        file,
-        ability,
-      );
+      const { user } = req;
+      const data =
+        await this.warehouseValidateRules.createNomenclatureFile(file);
       await this.createNomenclatureUseCase.createMany(data, user);
       return { status: 'SUCCESS' };
     } catch (e) {

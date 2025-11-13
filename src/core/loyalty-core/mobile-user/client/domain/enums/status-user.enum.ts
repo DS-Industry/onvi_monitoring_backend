@@ -5,4 +5,3 @@ export enum StatusUser {
   VERIFICATE = 'VERIFICATE',
   DELETED = 'DELETED',
 }
-

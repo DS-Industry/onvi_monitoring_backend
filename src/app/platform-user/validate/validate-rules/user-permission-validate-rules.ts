@@ -29,7 +29,10 @@ export class UserPermissionValidateRules {
     );
   }
 
-  public async updateConnectedUserLoyaltyProgramValidate(loyaltyProgramIds: number[], ability: any) {
+  public async updateConnectedUserLoyaltyProgramValidate(
+    loyaltyProgramIds: number[],
+    ability: any,
+  ) {
     const response: ValidateResponse[] = [];
     response.push(
       await this.validateLib.loyaltyProgramIdAndPermissionsLoyaltyProgramIdComparison(
@@ -56,17 +59,19 @@ export class UserPermissionValidateRules {
     );
   }
 
-  public async getUserLoyaltyProgramAccessValidate(userId: number, ability: any) {
+  public async getUserLoyaltyProgramAccessValidate(
+    userId: number,
+    ability: any,
+  ) {
     const response = [];
-    
+
     const userCheck = await this.validateLib.userByIdExists(userId);
     response.push(userCheck);
-    
+
     if (userCheck.code === 200 && userCheck.object) {
-      const user = userCheck.object;
-      
-      const targetUserLoyaltyPrograms = await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
-      
+      const targetUserLoyaltyPrograms =
+        await this.findMethodsLoyaltyProgramUseCase.getAllByUserId(userId);
+
       if (targetUserLoyaltyPrograms.length === 0) {
         response.push({
           code: 404,
@@ -74,21 +79,22 @@ export class UserPermissionValidateRules {
         });
       } else {
         const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
-        
+
         if (userLoyaltyProgramIds.length === 0) {
           response.push({
             code: 403,
             errorMessage: 'Access denied: No loyalty program permissions',
           });
         } else {
-          const hasAccess = targetUserLoyaltyPrograms.some(program => 
-            userLoyaltyProgramIds.includes(program.id)
+          const hasAccess = targetUserLoyaltyPrograms.some((program) =>
+            userLoyaltyProgramIds.includes(program.id),
           );
-          
+
           if (!hasAccess) {
             response.push({
               code: 403,
-              errorMessage: 'Access denied: You do not have access to this user\'s loyalty programs',
+              errorMessage:
+                "Access denied: You do not have access to this user's loyalty programs",
             });
           }
         }
@@ -100,7 +106,7 @@ export class UserPermissionValidateRules {
       ExceptionType.USER,
       USER_UPDATE_ROLE_EXCEPTION_CODE,
     );
-    
+
     return userCheck.object;
   }
 
@@ -108,7 +114,11 @@ export class UserPermissionValidateRules {
     const userLoyaltyProgramIds: number[] = [];
     if (ability && ability.rules) {
       for (const rule of ability.rules) {
-        if (rule.subject === 'LTYProgram' && rule.conditions && rule.conditions.id) {
+        if (
+          rule.subject === 'LTYProgram' &&
+          rule.conditions &&
+          rule.conditions.id
+        ) {
           if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
             userLoyaltyProgramIds.push(...rule.conditions.id.in);
           }

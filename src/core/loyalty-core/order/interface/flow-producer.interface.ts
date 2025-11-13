@@ -21,4 +21,3 @@ export interface FlowJobOptions {
     delay: number;
   };
 }
-

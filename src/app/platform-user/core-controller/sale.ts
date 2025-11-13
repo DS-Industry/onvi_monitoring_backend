@@ -24,10 +24,8 @@ import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-ca
 import { UpdateSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-update';
 import { SalePriceUpdateDto } from '@platform-user/core-controller/dto/receive/sale-price-update.dto';
 import { CreateSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-create';
-import { SaleDocument } from '@warehouse/sale/MNGSaleDocument/domain/saleDocument';
 import { SaleDocumentCreateDto } from '@platform-user/core-controller/dto/receive/sale-document-create.dto';
 import { WarehouseValidateRules } from '@platform-user/validate/validate-rules/warehouse-validate-rules';
-import { User } from '@platform-user/user/domain/user';
 import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { MANAGER_REPORT_PERIOD_ROLE_IDS } from '@constant/constants';
 import { SalePriceResponseDto } from '@warehouse/sale/MNGSalePrice/use-cases/dto/salePrice-response.dto';
@@ -41,9 +39,11 @@ import { FindMethodsSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-case
 import {
   CheckAbilities,
   CreateManagerPaperAbility,
-  ReadManagerPaperAbility, ReadWarehouseAbility, UpdateWarehouseAbility
-} from "@common/decorators/abilities.decorator";
-import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
+  ReadManagerPaperAbility,
+  ReadWarehouseAbility,
+  UpdateWarehouseAbility,
+} from '@common/decorators/abilities.decorator';
+import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 
 @Controller('sale')
 export class SaleController {

@@ -4,7 +4,6 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Otp } from '@mobile-user/otp/domain/otp';
 import { map } from 'rxjs/operators';
-import { AxiosResponse } from 'axios';
 import * as url from 'url';
 
 @Injectable()
@@ -33,7 +32,7 @@ export class SmsService implements ISmsAdapter {
       return this.httpService
         .post(this.urlSms, params, header)
         .pipe(
-          map((axiosResponse: AxiosResponse) => {
+          map(() => {
             return { message: 'Success', to: input.phone };
           }),
         )

@@ -1,6 +1,6 @@
-import { TypeOrganization } from "@prisma/client";
+import { TypeOrganization } from '@prisma/client';
 
-export class OrganizationPreCreateDto{
+export class OrganizationPreCreateDto {
   fullName: string;
   organizationType: TypeOrganization;
   addressRegistration: string;

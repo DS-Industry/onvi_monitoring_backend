@@ -1,6 +1,6 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { StatusHrWorker } from "@prisma/client";
+import { StatusHrWorker } from '@prisma/client';
 
 export class WorkerUpdateDto {
   @Transform(({ value }) => parseInt(value))

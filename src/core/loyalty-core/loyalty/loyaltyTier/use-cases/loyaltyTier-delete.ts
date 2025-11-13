@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyTierRepository } from '@loyalty/loyalty/loyaltyTier/interface/loyaltyTier';
-import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 
 @Injectable()
 export class DeleteLoyaltyTierUseCase {

@@ -3,7 +3,3 @@ export enum OrderHandlerStatus {
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR',
 }
-
-
-
-

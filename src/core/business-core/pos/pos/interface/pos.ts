@@ -1,5 +1,5 @@
 import { Pos } from '@pos/pos/domain/pos';
-import { PosResponseDto } from "@platform-user/core-controller/dto/response/pos-response.dto";
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 export abstract class IPosRepository {
   abstract create(input: Pos): Promise<Pos>;

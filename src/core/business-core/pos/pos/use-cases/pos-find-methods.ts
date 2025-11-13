@@ -47,7 +47,9 @@ export class FindMethodsPosUseCase {
     );
   }
 
-  async getAllByOrganizationIds(organizationIds: number[]): Promise<PosResponseDto[]> {
+  async getAllByOrganizationIds(
+    organizationIds: number[],
+  ): Promise<PosResponseDto[]> {
     return await this.posRepository.findAllByOrganizationIds(organizationIds);
   }
 }

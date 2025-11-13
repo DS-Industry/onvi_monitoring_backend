@@ -20,7 +20,9 @@ export class CreateLoyaltyProgramParticipantRequestUseCase {
     );
 
     if (existingRequest) {
-      throw new Error('A pending participation request already exists for this organization and loyalty program');
+      throw new Error(
+        'A pending participation request already exists for this organization and loyalty program',
+      );
     }
 
     const participantRequest = await this.participantRequestRepository.create(

@@ -6,7 +6,7 @@ import * as randomstring from 'randomstring';
 import { OrganizationConfirmMail } from '../domain/confirmMail';
 import { ConfirmMailCreateDto } from '@organization/confirmMail/use-case/dto/confirm-mail-create.dto';
 import { StatusDeviceDataRaw } from '@prisma/client';
-import { ConfigService } from "@nestjs/config";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SendOrganizationConfirmMailUseCase {
@@ -17,7 +17,8 @@ export class SendOrganizationConfirmMailUseCase {
     private readonly mailService: IMailAdapter,
     private readonly configService: ConfigService,
   ) {
-    this.emailConfigPrefix = this.configService.get<string>('emailConfirmPrefix');
+    this.emailConfigPrefix =
+      this.configService.get<string>('emailConfirmPrefix');
   }
 
   async execute(data: ConfirmMailCreateDto, subject: string): Promise<any> {

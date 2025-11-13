@@ -1,8 +1,16 @@
-import { TechTaskComment as PrismaTechTaskComment, User, Prisma } from '@prisma/client';
+import {
+  TechTaskComment as PrismaTechTaskComment,
+  User,
+  Prisma,
+} from '@prisma/client';
 import { TechTaskComment } from '@tech-task/comment/domain/techTaskComment';
 
 export class PrismaTechTaskCommentMapper {
-  static toDomain(entity: PrismaTechTaskComment & { author?: Pick<User, 'id' | 'name' | 'surname'> }): TechTaskComment {
+  static toDomain(
+    entity: PrismaTechTaskComment & {
+      author?: Pick<User, 'id' | 'name' | 'surname'>;
+    },
+  ): TechTaskComment {
     if (!entity) {
       return null;
     }
@@ -14,15 +22,19 @@ export class PrismaTechTaskCommentMapper {
       authorId: entity.authorId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      author: entity.author ? {
-        id: entity.author.id,
-        firstName: entity.author.name,
-        lastName: entity.author.surname,
-      } : undefined,
+      author: entity.author
+        ? {
+            id: entity.author.id,
+            firstName: entity.author.name,
+            lastName: entity.author.surname,
+          }
+        : undefined,
     });
   }
 
-  static toPrisma(comment: TechTaskComment): Prisma.TechTaskCommentUncheckedCreateInput {
+  static toPrisma(
+    comment: TechTaskComment,
+  ): Prisma.TechTaskCommentUncheckedCreateInput {
     return {
       id: comment.id,
       content: comment.content,

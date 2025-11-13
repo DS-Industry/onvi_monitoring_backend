@@ -10,8 +10,8 @@ export class WorkerPosConnectionDto {
   @IsNotEmpty()
   @IsArray()
   @IsInt({ each: true })
-  @Transform(({ value }) => 
-    Array.isArray(value) ? value.map(id => parseInt(id)) : [parseInt(value)]
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value.map((id) => parseInt(id)) : [parseInt(value)],
   )
   posIds: number[];
 }

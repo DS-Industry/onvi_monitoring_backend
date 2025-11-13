@@ -1,5 +1,5 @@
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
-import { DestinyNomenclature, NomenclatureStatus } from "@prisma/client";
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 
 export abstract class INomenclatureRepository {
   abstract create(input: Nomenclature): Promise<Nomenclature>;

@@ -5,9 +5,13 @@ import { LoyaltyHubRequestsListResponseDto } from '@platform-user/core-controlle
 
 @Injectable()
 export class FindLoyaltyHubRequestsUseCase {
-  constructor(private readonly hubRequestRepository: ILoyaltyProgramHubRequestRepository) {}
+  constructor(
+    private readonly hubRequestRepository: ILoyaltyProgramHubRequestRepository,
+  ) {}
 
-  async execute(filter: LoyaltyHubRequestsFilterDto): Promise<LoyaltyHubRequestsListResponseDto> {
+  async execute(
+    filter: LoyaltyHubRequestsFilterDto,
+  ): Promise<LoyaltyHubRequestsListResponseDto> {
     return this.hubRequestRepository.findManyWithPagination(filter);
   }
 }

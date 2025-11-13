@@ -9,4 +9,3 @@ import { PaymentModule } from '../../payment/payment.module';
   providers: [],
 })
 export class MobileOrderModule {}
-

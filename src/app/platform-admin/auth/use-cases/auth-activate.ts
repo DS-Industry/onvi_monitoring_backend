@@ -4,7 +4,7 @@ import { SignAccessTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign
 import { SignRefreshTokenUseCase } from '@platform-admin/auth/use-cases/auth-sign-refresh-token';
 import { SetRefreshTokenUseCase } from '@platform-admin/auth/use-cases/auth-set-refresh-token';
 import { UpdateAdminUseCase } from '@platform-admin/admin/use-cases/admin-update';
-import { StatusUser } from "@prisma/client";
+import { StatusUser } from '@prisma/client';
 
 @Injectable()
 export class ActivateAuthUseCase {

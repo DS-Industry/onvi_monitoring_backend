@@ -10,4 +10,3 @@ export class CardNotMatchExceptions extends BaseException {
     return HttpStatus.NOT_FOUND;
   }
 }
-

@@ -2,7 +2,10 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { IFlowProducer, IFLOW_PRODUCER } from '@loyalty/order/interface/flow-producer.interface';
+import {
+  IFlowProducer,
+  IFLOW_PRODUCER,
+} from '@loyalty/order/interface/flow-producer.interface';
 
 @Processor('payment-orchestrate')
 @Injectable()
@@ -20,9 +23,12 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<void> {
-    const { orderId, transactionId, carWashId, carWashDeviceId, bayType } = job.data || {};
-    this.logger.log(`[PAYMENT-ORCHESTRATE] Processing job ${job.id} for order#${orderId}`);
-    
+    const { orderId, transactionId, carWashId, carWashDeviceId, bayType } =
+      job.data || {};
+    this.logger.log(
+      `[PAYMENT-ORCHESTRATE] Processing job ${job.id} for order#${orderId}`,
+    );
+
     this.logger.log(`[PAYMENT-ORCHESTRATE] Building flow for order#${orderId}`);
 
     const order = await this.orderRepository.findOneById(orderId);
@@ -38,12 +44,12 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
           queueName: 'check-car-wash-started',
           data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
           opts: {
-            ignoreDependencyOnFailure: true, 
+            ignoreDependencyOnFailure: true,
             failParentOnFailure: false,
-            attempts: 3,              
+            attempts: 3,
             backoff: {
               type: 'fixed',
-              delay: 5000,           
+              delay: 5000,
             },
           },
           children: [
@@ -52,12 +58,12 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
               queueName: 'car-wash-launch',
               data: { orderId: order.id, carWashId, carWashDeviceId, bayType },
               opts: {
-                ignoreDependencyOnFailure: true, 
+                ignoreDependencyOnFailure: true,
                 failParentOnFailure: false,
-                attempts: 5,          
+                attempts: 5,
                 backoff: {
                   type: 'fixed',
-                  delay: 5000,        
+                  delay: 5000,
                 },
               },
             },
@@ -65,10 +71,5 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
         },
       ],
     });
-    
   }
 }
-
-
-
-

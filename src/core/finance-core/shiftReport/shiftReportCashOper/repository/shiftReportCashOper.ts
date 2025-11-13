@@ -20,9 +20,7 @@ export class ShiftReportCashOperRepository extends IShiftReportCashOperRepositor
       await this.prisma.mNGShiftReportCashOper.create({
         data: workDayShiftReportCashOperEntity,
       });
-    return PrismaShiftReportCashOperMapper.toDomain(
-      workDayShiftReportCashOper,
-    );
+    return PrismaShiftReportCashOperMapper.toDomain(workDayShiftReportCashOper);
   }
 
   public async findAllByShiftReportId(

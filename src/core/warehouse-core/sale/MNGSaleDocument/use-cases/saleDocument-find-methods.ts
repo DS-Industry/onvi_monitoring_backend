@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ISaleDocumentRepository } from '@warehouse/sale/MNGSaleDocument/interface/saleDocument';
-import { SaleDocument } from '@warehouse/sale/MNGSaleDocument/domain/saleDocument';
 import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
 
 @Injectable()

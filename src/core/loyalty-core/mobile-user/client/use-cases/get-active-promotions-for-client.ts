@@ -12,7 +12,10 @@ export class GetActivePromotionsForClientUseCase {
 
   private readonly mapboxAccessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
-  private async getRegionCodeFromLocation(location: { latitude: number; longitude: number }): Promise<string | null> {
+  private async getRegionCodeFromLocation(location: {
+    latitude: number;
+    longitude: number;
+  }): Promise<string | null> {
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location.longitude},${location.latitude}.json`;
     const params = {
       access_token: this.mapboxAccessToken,
@@ -38,14 +41,19 @@ export class GetActivePromotionsForClientUseCase {
     return null;
   }
 
-  async execute(clientId: number, location?: { latitude: number; longitude: number }): Promise<any[]> {
+  async execute(
+    clientId: number,
+    location?: { latitude: number; longitude: number },
+  ): Promise<any[]> {
     let regionCode: string | null = null;
 
     if (location) {
       regionCode = await this.getRegionCodeFromLocation(location);
     }
 
-    return await this.marketingCampaignRepository.findActiveCampaignsForClient(clientId, regionCode);
+    return await this.marketingCampaignRepository.findActiveCampaignsForClient(
+      clientId,
+      regionCode,
+    );
   }
 }
-

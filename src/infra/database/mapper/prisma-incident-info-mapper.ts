@@ -1,4 +1,7 @@
-import { IncidentInfo as PrismaIncidentInfoReason, Prisma } from '@prisma/client';
+import {
+  IncidentInfo as PrismaIncidentInfoReason,
+  Prisma,
+} from '@prisma/client';
 import { IncidentInfo } from '@equipment/incident/incidentInfo/domain/incidentInfo';
 
 export class PrismaIncidentInfoMapper {

@@ -4,9 +4,7 @@ import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport
 
 @Injectable()
 export class DeleteShiftReportUseCase {
-  constructor(
-    private readonly shiftReportRepository: IShiftReportRepository,
-  ) {}
+  constructor(private readonly shiftReportRepository: IShiftReportRepository) {}
 
   async execute(shiftReport: ShiftReport): Promise<void> {
     await this.shiftReportRepository.delete(shiftReport.id);

@@ -6,7 +6,7 @@ import { CreatePaymentDto, RefundPaymentDto } from './dto/create-payment.dto';
 export class PaymentService {
   constructor(
     @Inject('PAYMENT_GATEWAY')
-    private readonly paymentGateway: IPaymentGateway
+    private readonly paymentGateway: IPaymentGateway,
   ) {}
 
   async createPayment(params: CreatePaymentDto) {

@@ -5,7 +5,7 @@ import { AdminRoleModule } from '@platform-admin/admin-role/admin-role.module';
 import { AdminPermissionsModule } from '@platform-admin/admin-permissions/admin-permissions.module';
 import { DeviceAuthModule } from '@platform-device/auth/device-auth.module';
 import { PlatformUserModule } from '@platform-user/platform-user.module';
-import { DeviceModule } from "@platform-device/device/device.module";
+import { DeviceModule } from '@platform-device/device/device.module';
 
 export const routeConfig: Routes = [
   {

@@ -78,7 +78,9 @@ export class CreatePosUseCase {
 
     try {
       await this.redisService.del(`ability:${owner.id}:`);
-      console.log(`Invalidated ability cache for user ${owner.id} after POS creation`);
+      console.log(
+        `Invalidated ability cache for user ${owner.id} after POS creation`,
+      );
     } catch (error) {
       console.error('Failed to invalidate ability cache:', error);
     }

@@ -9,7 +9,9 @@ export class UpdateClientMetaUseCase {
   constructor(private readonly clientMetaRepository: IClientMetaRepository) {}
 
   async execute(dto: ClientMetaUpdateDto): Promise<ClientMeta> {
-    const existingMeta = await this.clientMetaRepository.findOneById(dto.metaId);
+    const existingMeta = await this.clientMetaRepository.findOneById(
+      dto.metaId,
+    );
     if (!existingMeta) {
       throw new ClientMetaNotFoundExceptions(dto.metaId);
     }

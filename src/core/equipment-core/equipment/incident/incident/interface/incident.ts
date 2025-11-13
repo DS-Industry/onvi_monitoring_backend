@@ -1,5 +1,5 @@
 import { Incident } from '@equipment/incident/incident/domain/incident';
-import { IncidentWithInfoDataDto } from "@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto";
+import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
 
 export abstract class IIncidentRepository {
   abstract create(input: Incident): Promise<Incident>;

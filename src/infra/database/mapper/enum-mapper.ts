@@ -87,16 +87,21 @@ export class EnumMapper {
     return status as StatusUser;
   }
 
-  static toPrismaStatusUser(status: StatusUser | undefined): PrismaStatusUser | undefined {
+  static toPrismaStatusUser(
+    status: StatusUser | undefined,
+  ): PrismaStatusUser | undefined {
     return status ? (status as PrismaStatusUser) : undefined;
   }
 
-  static toDomainLTYProgramStatus(status: PrismaLTYProgramStatus): LTYProgramStatus {
+  static toDomainLTYProgramStatus(
+    status: PrismaLTYProgramStatus,
+  ): LTYProgramStatus {
     return status as LTYProgramStatus;
   }
 
-  static toPrismaLTYProgramStatus(status: LTYProgramStatus): PrismaLTYProgramStatus {
+  static toPrismaLTYProgramStatus(
+    status: LTYProgramStatus,
+  ): PrismaLTYProgramStatus {
     return status as PrismaLTYProgramStatus;
   }
 }
-

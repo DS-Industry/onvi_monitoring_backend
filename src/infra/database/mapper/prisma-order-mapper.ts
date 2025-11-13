@@ -8,7 +8,11 @@ import { Order } from '@loyalty/order/domain/order';
 import { EnumMapper } from './enum-mapper';
 
 export class PrismaOrderMapper {
-  static toDomain(entity: PrismaOrder & { carWashDevice?: CarWashDevice & { carWashDeviceType?: CarWashDeviceType } }): Order {
+  static toDomain(
+    entity: PrismaOrder & {
+      carWashDevice?: CarWashDevice & { carWashDeviceType?: CarWashDeviceType };
+    },
+  ): Order {
     if (!entity) {
       return null;
     }

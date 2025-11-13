@@ -6,4 +6,3 @@ export const TechTaskCommentProvider: Provider = {
   provide: ITechTaskCommentRepository,
   useClass: TechTaskCommentRepository,
 };
-

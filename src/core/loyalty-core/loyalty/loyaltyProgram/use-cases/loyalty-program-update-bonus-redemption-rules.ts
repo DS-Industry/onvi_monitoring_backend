@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
-import { LTYProgram, BonusBurnoutType } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import {
+  LTYProgram,
+  BonusBurnoutType,
+} from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 export interface BonusRedemptionRulesDto {
   loyaltyProgramId: number;
@@ -20,11 +23,11 @@ export class UpdateBonusRedemptionRulesUseCase {
     input: BonusRedemptionRulesDto,
     oldLoyaltyProgram: LTYProgram,
   ): Promise<LTYProgram> {
-    const { 
-      burnoutType, 
-      lifetimeBonusDays, 
-      maxRedeemPercentage, 
-      hasBonusWithSale 
+    const {
+      burnoutType,
+      lifetimeBonusDays,
+      maxRedeemPercentage,
+      hasBonusWithSale,
     } = input;
 
     // Update bonus burnout settings

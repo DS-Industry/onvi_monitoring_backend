@@ -1,4 +1,10 @@
-import { IsNumber, IsOptional, IsString, IsDateString, IsEnum } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { PlatformType, OrderStatus, ContractType } from '@prisma/client';
 

@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PaymentCalculateWorkersDto {
