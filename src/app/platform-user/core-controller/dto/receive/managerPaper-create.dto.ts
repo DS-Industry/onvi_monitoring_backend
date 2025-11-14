@@ -15,7 +15,7 @@ export class ManagerPaperCreateDto {
   @IsNotEmpty({ message: 'eventDate is required' })
   @Transform(({ value }) => new Date(value))
   eventDate: Date;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsNotEmpty({ message: 'sum is required' })
   sum: number;
   @Transform(({ value }) => parseInt(value))

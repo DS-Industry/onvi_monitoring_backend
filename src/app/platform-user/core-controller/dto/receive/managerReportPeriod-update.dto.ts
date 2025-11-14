@@ -11,10 +11,10 @@ export class ManagerReportPeriodUpdateDto {
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   endPeriod?: Date;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsOptional()
   sumStartPeriod?: number;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsOptional()
   sumEndPeriod?: number;
 }

@@ -18,7 +18,7 @@ export class ManagerPaperUpdateDto {
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   eventDate?: Date;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsOptional()
   sum?: number;
   @Transform(({ value }) => parseInt(value))

@@ -8,10 +8,10 @@ export class ManagerReportPeriodCreateDto {
   @IsNotEmpty({ message: 'endPeriod is required' })
   @Transform(({ value }) => new Date(value))
   endPeriod: Date;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsNotEmpty({ message: 'sumStartPeriod is required' })
   sumStartPeriod: number;
-  @Transform(({ value }) => parseInt(value))
+  @Transform(({ value }) => parseFloat(value))
   @IsNotEmpty({ message: 'sumEndPeriod is required' })
   sumEndPeriod: number;
   @Transform(({ value }) => parseInt(value))
