@@ -174,7 +174,7 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     if (data.status !== undefined) updateData.status = data.status;
     if (data.executionType !== undefined)
       updateData.executionType = data.executionType;
-    if (data.activeDays !== undefined && data.activeDays !== null) {
+    if (data.activeDays !== undefined) {
       updateData.activeDays = data.activeDays;
     }
 
