@@ -1949,7 +1949,10 @@ export class LoyaltyController {
       });
 
       if (!condition) {
-        throw new LoyaltyException(404, 'Marketing campaign condition not found');
+        throw new LoyaltyException(
+          404,
+          'Marketing campaign condition not found',
+        );
       }
 
       await this.loyaltyValidateRules.getMarketingCampaignByIdValidate(
