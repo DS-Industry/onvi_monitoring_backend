@@ -30,22 +30,17 @@ export class UpdateCashCollectionDeviceUseCase {
     oldCashCollectionDevice.tookMoneyTime = tookMoneyTime
       ? tookMoneyTime
       : oldCashCollectionDevice.tookMoneyTime;
-    oldCashCollectionDevice.sum = sum ? sum : oldCashCollectionDevice.sum;
-    oldCashCollectionDevice.sumCoin = sumCoin
-      ? sumCoin
-      : oldCashCollectionDevice.sumCoin;
-    oldCashCollectionDevice.sumPaper = sumPaper
-      ? sumPaper
-      : oldCashCollectionDevice.sumPaper;
-    oldCashCollectionDevice.sumCard = sumCard
-      ? sumCard
-      : oldCashCollectionDevice.sumCard;
-    oldCashCollectionDevice.carCount = carCount
-      ? carCount
-      : oldCashCollectionDevice.carCount;
-    oldCashCollectionDevice.virtualSum = virtualSum
-      ? virtualSum
-      : oldCashCollectionDevice.virtualSum;
+    oldCashCollectionDevice.sum = sum ?? oldCashCollectionDevice.sum;
+    oldCashCollectionDevice.sumCoin =
+      sumCoin ?? oldCashCollectionDevice.sumCoin;
+    oldCashCollectionDevice.sumPaper =
+      sumPaper ?? oldCashCollectionDevice.sumPaper;
+    oldCashCollectionDevice.sumCard =
+      sumCard ?? oldCashCollectionDevice.sumCard;
+    oldCashCollectionDevice.carCount =
+      carCount ?? oldCashCollectionDevice.carCount;
+    oldCashCollectionDevice.virtualSum =
+      virtualSum ?? oldCashCollectionDevice.virtualSum;
 
     return await this.cashCollectionDeviceRepository.update(
       oldCashCollectionDevice,
