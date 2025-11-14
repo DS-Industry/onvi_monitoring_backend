@@ -1,4 +1,6 @@
 export class CashCollectionRecalculateDto {
+  oldCashCollectionDate?: Date;
+  cashCollectionDate?: Date;
   cashCollectionDeviceData: CashCollectionDeviceDataDto[];
   cashCollectionDeviceTypeData: CashCollectionDeviceTypeDataDto[];
 }

@@ -6,7 +6,8 @@ export interface CashCollectionsResponseDto {
 export interface CashCollectionsDataResponseDto {
   id: number;
   posId: number;
-  period: string;
+  oldCashCollectionDate: Date;
+  cashCollectionDate: Date;
   sumFact: number;
   sumCard: number;
   sumVirtual: number;

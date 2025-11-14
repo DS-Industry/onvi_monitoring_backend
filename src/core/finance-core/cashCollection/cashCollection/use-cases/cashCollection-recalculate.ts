@@ -13,6 +13,8 @@ import { StatusCashCollection } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
 import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
+import { IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 @Injectable()
 export class RecalculateCashCollectionUseCase {
@@ -77,6 +79,8 @@ export class RecalculateCashCollectionUseCase {
       sendDate,
       cashCollection,
       user,
+      data.oldCashCollectionDate,
+      data.cashCollectionDate,
     );
 
     return this.buildResponse(
@@ -186,9 +190,13 @@ export class RecalculateCashCollectionUseCase {
     sendDate: Date | undefined,
     cashCollection: CashCollection,
     user: User,
+    oldCashCollectionDate: Date | undefined,
+    cashCollectionDate: Date | undefined,
   ): Promise<CashCollection> {
     return this.updateCashCollectionUseCase.execute(
       {
+        oldCashCollectionDate,
+        cashCollectionDate,
         sendDate,
         status,
         sumFact,

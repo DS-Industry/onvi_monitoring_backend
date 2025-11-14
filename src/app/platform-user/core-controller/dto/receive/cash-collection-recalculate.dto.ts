@@ -2,6 +2,12 @@ import { IsArray, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CashCollectionRecalculateDto {
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  oldCashCollectionDate?: Date;
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  cashCollectionDate?: Date;
   @IsArray()
   cashCollectionDeviceData: CashCollectionDeviceDataDto[];
   @IsArray()

@@ -50,7 +50,8 @@ export class GetAllByFilterCashCollectionUseCase {
       response.push({
         id: cashCollection.id,
         posId: cashCollection.posId,
-        period: `${cashCollection.oldCashCollectionDate.toString()}-${cashCollection.cashCollectionDate.toString()}`,
+        oldCashCollectionDate: cashCollection.oldCashCollectionDate,
+        cashCollectionDate: cashCollection.cashCollectionDate,
         sumFact: cashCollection.sumFact,
         sumCard: cashCollection.sumCard,
         sumVirtual: cashCollection.virtualSum,
