@@ -11,7 +11,10 @@ import { CreateMarketingCampaignConditionDto } from '@platform-user/core-control
 import { UpsertMarketingCampaignMobileDisplayDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-mobile-display-upsert.dto';
 import { MarketingCampaignMobileDisplayResponseDto } from '@platform-user/core-controller/dto/response/marketing-campaign-mobile-display-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { MarketingCampaignStatus } from '@prisma/client';
+import {
+  LTYProgramParticipantStatus,
+  MarketingCampaignStatus,
+} from '@prisma/client';
 import { MarketingCampaignMobileDisplayType } from '@loyalty/marketing-campaign/domain';
 import { MarketingCampaignActionCreateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-create.dto';
 import { MarketingCampaignActionUpdateDto } from '@platform-user/core-controller/dto/receive/marketing-campaign-action-update.dto';
@@ -65,19 +68,63 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
       },
     });
 
-    const poses = await this.prisma.pos.findMany({
-      where: {
-        organization: {
-          id: data.ltyProgramParticipantId,
+    let organizationIds: number[] = [];
+    
+    if (data.ltyProgramParticipantId) {
+      const programParticipant =
+        await this.prisma.lTYProgramParticipant.findUnique({
+          where: { id: data.ltyProgramParticipantId },
+          select: { organizationId: true },
+        });
+      if (programParticipant) {
+        organizationIds = [programParticipant.organizationId];
+      }
+    } else if (data.ltyProgramId) {
+      const participants = await this.prisma.lTYProgramParticipant.findMany({
+        where: {
+          ltyProgramId: data.ltyProgramId,
+          status: LTYProgramParticipantStatus.ACTIVE,
         },
-      },
-      select: {
-        id: true,
-      },
-    });
+        select: {
+          organizationId: true,
+        },
+      });
+      organizationIds = participants.map((p) => p.organizationId);
+    }
+
+    const poses =
+      organizationIds.length > 0
+        ? await this.prisma.pos.findMany({
+            where: {
+              organization: {
+                id: { in: organizationIds },
+              },
+            },
+            select: {
+              id: true,
+            },
+          })
+        : [];
 
     const posCount = poses.length;
     const posIds = poses.map((pos) => pos.id);
+
+    const eligibleUserIds =
+      organizationIds.length > 0
+        ? await this.prisma.lTYUser.findMany({
+            where: {
+              status: 'ACTIVE',
+              card: {
+                organizationId: { in: organizationIds },
+              },
+            },
+            select: {
+              id: true,
+            },
+          })
+        : [];
+
+    const userIds = eligibleUserIds.map((u) => u.id);
 
     await this.prisma.marketingCampaign.update({
       where: { id: campaign.id },
@@ -85,6 +132,11 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
         poses: {
           connect: posIds.map((posId) => ({ id: posId })),
         },
+        ...(userIds.length > 0 && {
+          ltyUsers: {
+            connect: userIds.map((userId) => ({ id: userId })),
+          },
+        }),
       },
     });
 
