@@ -148,6 +148,13 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@infra/(.*)$": "<rootDir>/infra/$1",
+      "^@db/(.*)$": "<rootDir>/infra/database/$1",
+      "^@config/(.*)$": "<rootDir>/../config/$1",
+      "^@utils/(.*)$": "<rootDir>/utils/$1",
+      "^@loyalty/(.*)$": "<rootDir>/core/loyalty-core/$1"
+    }
   }
 }

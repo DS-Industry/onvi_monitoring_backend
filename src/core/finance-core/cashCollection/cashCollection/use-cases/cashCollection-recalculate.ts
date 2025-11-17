@@ -13,8 +13,6 @@ import { StatusCashCollection } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
 import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
-import { IsOptional } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 @Injectable()
 export class RecalculateCashCollectionUseCase {
