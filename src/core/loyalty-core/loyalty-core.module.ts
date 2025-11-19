@@ -117,6 +117,7 @@ import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-cas
 import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
 import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
+import { MarketingCampaignDiscountService } from './mobile-user/order/use-cases/marketing-campaign-discount.service';
 import {
   OrderValidationService,
   CashbackCalculationService,
@@ -252,6 +253,7 @@ const mobileOrderUseCase: Provider[] = [
   StartPosUseCase,
   CarWashLaunchUseCase,
   CheckCarWashStartedUseCase,
+  MarketingCampaignDiscountService,
 ];
 
 const orderDomainServices: Provider[] = [

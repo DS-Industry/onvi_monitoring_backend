@@ -27,7 +27,8 @@ import {
   DiscountCalculationService,
 } from '@loyalty/order/domain/services';
 import { CardNotFoundForOrderException } from '@loyalty/order/domain/exceptions';
-import { CampaignRedemptionType } from '@prisma/client';
+import { CampaignRedemptionType, CampaignExecutionType } from '@prisma/client';
+import { MarketingCampaignDiscountService } from './marketing-campaign-discount.service';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -58,6 +59,7 @@ export class CreateMobileOrderUseCase {
     private readonly cashbackCalculationService: CashbackCalculationService,
     private readonly freeVacuumValidationService: FreeVacuumValidationService,
     private readonly orderStatusDeterminationService: OrderStatusDeterminationService,
+    private readonly marketingCampaignDiscountService: MarketingCampaignDiscountService,
     @Inject(IFLOW_PRODUCER)
     private readonly flowProducer: IFlowProducer,
   ) {}
@@ -122,6 +124,8 @@ export class CreateMobileOrderUseCase {
       orderHandlerStatus: OrderHandlerStatus.CREATED,
     });
 
+    const orderDate = new Date();
+
     const discountWindows =
       await this.activationWindowRepository.findDiscountActivationWindows(
         request.cardMobileUserId,
@@ -146,6 +150,55 @@ export class CreateMobileOrderUseCase {
       }
     }
 
+    let transactionalCampaignDiscount = 0;
+    let usedTransactionalCampaign: {
+      campaignId: number;
+      actionId: number;
+      discountAmount: number;
+    } | null = null;
+
+    const eligibleCampaigns =
+      await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
+        request.cardMobileUserId,
+        orderDate,
+      );
+
+    const transactionalDiscounts: Array<{
+      campaignId: number;
+      actionId: number;
+      discountAmount: number;
+    }> = [];
+
+    for (const campaign of eligibleCampaigns) {
+      if (campaign.executionType === CampaignExecutionType.TRANSACTIONAL) {
+        const discountResult =
+          await this.marketingCampaignDiscountService.evaluateTransactionalCampaignDiscount(
+            campaign,
+            request.cardMobileUserId,
+            request.sum,
+            orderDate,
+            request.rewardPointsUsed || 0,
+            request.promoCodeId || null,
+          );
+
+        if (discountResult && discountResult.discountAmount > 0) {
+          transactionalDiscounts.push({
+            campaignId: discountResult.campaignId,
+            actionId: discountResult.actionId,
+            discountAmount: discountResult.discountAmount,
+          });
+        }
+      }
+    }
+
+    if (transactionalDiscounts.length > 0) {
+      const bestTransactional = transactionalDiscounts.reduce((best, current) =>
+        current.discountAmount > best.discountAmount ? current : best,
+      );
+      transactionalCampaignDiscount = bestTransactional.discountAmount;
+      usedTransactionalCampaign = bestTransactional;
+    }
+
     let promoCodeDiscount = 0;
     if (request.promoCodeId) {
       promoCodeDiscount = await this.promoCodeService.applyPromoCode(
@@ -156,25 +209,45 @@ export class CreateMobileOrderUseCase {
       );
     }
 
-    const finalDiscount = Math.max(activationWindowDiscount, promoCodeDiscount);
+    const finalDiscount = Math.max(
+      activationWindowDiscount,
+      transactionalCampaignDiscount,
+      promoCodeDiscount,
+    );
     order.sumDiscount = finalDiscount;
     order.sumReal = request.sum - finalDiscount;
 
     const createdOrder = await this.orderRepository.create(order);
 
-    if (
-      activationWindowDiscount > 0 &&
-      activationWindowDiscount >= promoCodeDiscount &&
-      usedActivationWindow
-    ) {
-      await this.activationWindowRepository.createUsage({
-        campaignId: usedActivationWindow.campaignId,
-        actionId: usedActivationWindow.actionId,
-        ltyUserId: request.cardMobileUserId,
-        orderId: createdOrder.id,
-        posId: request.carWashId,
-        type: CampaignRedemptionType.DISCOUNT,
-      });
+    if (finalDiscount > 0) {
+      if (
+        transactionalCampaignDiscount > 0 &&
+        transactionalCampaignDiscount >= activationWindowDiscount &&
+        transactionalCampaignDiscount >= promoCodeDiscount &&
+        usedTransactionalCampaign
+      ) {
+        await this.activationWindowRepository.createUsage({
+          campaignId: usedTransactionalCampaign.campaignId,
+          actionId: usedTransactionalCampaign.actionId,
+          ltyUserId: request.cardMobileUserId,
+          orderId: createdOrder.id,
+          posId: request.carWashId,
+          type: CampaignRedemptionType.DISCOUNT,
+        });
+      } else if (
+        activationWindowDiscount > 0 &&
+        activationWindowDiscount >= promoCodeDiscount &&
+        usedActivationWindow
+      ) {
+        await this.activationWindowRepository.createUsage({
+          campaignId: usedActivationWindow.campaignId,
+          actionId: usedActivationWindow.actionId,
+          ltyUserId: request.cardMobileUserId,
+          orderId: createdOrder.id,
+          posId: request.carWashId,
+          type: CampaignRedemptionType.DISCOUNT,
+        });
+      }
     }
 
     if (isFreeVacuum) {
