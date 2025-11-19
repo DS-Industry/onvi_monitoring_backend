@@ -10,6 +10,10 @@ import {
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { PromoCodeService } from './promo-code-service';
+import {
+  IActivationWindowRepository,
+  ActiveActivationWindow,
+} from '../interface/activation-window-repository.interface';
 import { ITariffRepository } from '../interface/tariff';
 import {
   IFlowProducer,
@@ -20,8 +24,10 @@ import {
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  DiscountCalculationService,
 } from '@loyalty/order/domain/services';
 import { CardNotFoundForOrderException } from '@loyalty/order/domain/exceptions';
+import { CampaignRedemptionType } from '@prisma/client';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -45,6 +51,8 @@ export class CreateMobileOrderUseCase {
     private readonly orderRepository: IOrderRepository,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly promoCodeService: PromoCodeService,
+    private readonly activationWindowRepository: IActivationWindowRepository,
+    private readonly discountCalculationService: DiscountCalculationService,
     private readonly tariffRepository: ITariffRepository,
     private readonly orderValidationService: OrderValidationService,
     private readonly cashbackCalculationService: CashbackCalculationService,
@@ -114,18 +122,60 @@ export class CreateMobileOrderUseCase {
       orderHandlerStatus: OrderHandlerStatus.CREATED,
     });
 
+    const discountWindows =
+      await this.activationWindowRepository.findDiscountActivationWindows(
+        request.cardMobileUserId,
+      );
+
+    let activationWindowDiscount = 0;
+    let usedActivationWindow: ActiveActivationWindow | null = null;
+    if (discountWindows.length > 0) {
+      const bestDiscount = this.discountCalculationService.calculateBestDiscount(
+        {
+          originalSum: request.sum,
+          rewardPointsUsed: request.rewardPointsUsed || 0,
+          discountWindows,
+        },
+      );
+      if (bestDiscount) {
+        activationWindowDiscount = bestDiscount.discountAmount;
+        usedActivationWindow =
+          discountWindows.find(
+            (w) => w.id === bestDiscount.activationWindowId,
+          ) || null;
+      }
+    }
+
+    let promoCodeDiscount = 0;
     if (request.promoCodeId) {
-      const discountAmount = await this.promoCodeService.applyPromoCode(
+      promoCodeDiscount = await this.promoCodeService.applyPromoCode(
         request.promoCodeId,
         order,
         card,
         carWashDeviceId,
       );
-      order.sumDiscount = discountAmount;
-      order.sumReal = request.sum - discountAmount;
     }
 
+    const finalDiscount = Math.max(activationWindowDiscount, promoCodeDiscount);
+    order.sumDiscount = finalDiscount;
+    order.sumReal = request.sum - finalDiscount;
+
     const createdOrder = await this.orderRepository.create(order);
+
+    if (
+      activationWindowDiscount > 0 &&
+      activationWindowDiscount >= promoCodeDiscount &&
+      usedActivationWindow
+    ) {
+      await this.activationWindowRepository.createUsage({
+        campaignId: usedActivationWindow.campaignId,
+        actionId: usedActivationWindow.actionId,
+        ltyUserId: request.cardMobileUserId,
+        orderId: createdOrder.id,
+        posId: request.carWashId,
+        type: CampaignRedemptionType.DISCOUNT,
+      });
+    }
 
     if (isFreeVacuum) {
       await this.flowProducer.add({

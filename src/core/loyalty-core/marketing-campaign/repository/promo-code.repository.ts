@@ -6,6 +6,7 @@ import {
   CreateMarketingCampaignUsageInput,
   CreatePromoCodeInput,
 } from '../interface/promo-code-repository.interface';
+import { CampaignRedemptionType } from '@prisma/client';
 
 @Injectable()
 export class PromoCodeRepository extends IPromoCodeRepository {
@@ -41,6 +42,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
     return {
       id: promocode.id,
       campaignId: promocode.campaignId,
+      actionId: promocode.actionId,
       code: promocode.code,
       discountType: promocode.discountType || '',
       discountValue: Number(promocode.discountValue || 0),
@@ -71,6 +73,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
     return {
       id: promoCode.id,
       campaignId: promoCode.campaignId,
+      actionId: promoCode.actionId,
       code: promoCode.code,
       discountType: promoCode.discountType,
       discountValue: Number(promoCode.discountValue),
@@ -117,6 +120,11 @@ export class PromoCodeRepository extends IPromoCodeRepository {
         promocodeId: input.promocodeId,
         ltyUserId: input.ltyUserId,
         orderId: input.orderId,
+        posId: input.posId,
+        actionId: input.actionId || null,
+        type: input.type
+          ? (input.type as CampaignRedemptionType)
+          : CampaignRedemptionType.PROMOCODE,
         usedAt: new Date(),
       },
     });

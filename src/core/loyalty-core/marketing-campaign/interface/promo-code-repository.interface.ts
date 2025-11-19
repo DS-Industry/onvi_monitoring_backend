@@ -1,6 +1,7 @@
 export interface PromoCode {
   id: number;
   campaignId: number | null;
+  actionId: number | null;
   code: string;
   discountType: string;
   discountValue: number;
@@ -20,6 +21,8 @@ export interface CreateMarketingCampaignUsageInput {
   ltyUserId: number;
   posId: number;
   orderId: number;
+  actionId?: number | null;
+  type?: string;
 }
 
 export interface CreatePromoCodeInput {

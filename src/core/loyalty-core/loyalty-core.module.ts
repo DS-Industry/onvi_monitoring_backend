@@ -109,8 +109,10 @@ import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
+import { GetActivationWindowsUseCase } from './mobile-user/order/use-cases/get-activation-windows.use-case';
 import { ITariffRepository } from './mobile-user/order/interface/tariff';
 import { TariffRepository } from './mobile-user/order/repository/tariff';
+import { ActivationWindowRepositoryProvider } from './mobile-user/order/provider/activation-window.repository';
 import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-case';
 import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
@@ -120,6 +122,7 @@ import {
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  DiscountCalculationService,
 } from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
@@ -142,6 +145,7 @@ const repositories: Provider[] = [
   LoyaltyProgramHubRequestRepositoryProvider,
   LoyaltyProgramParticipantRequestRepositoryProvider,
   { provide: ITariffRepository, useClass: TariffRepository },
+  ActivationWindowRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [
@@ -244,6 +248,7 @@ const mobileOrderUseCase: Provider[] = [
   UpdateMobileOrderUseCase,
   GetMobileOrderByTransactionIdUseCase,
   PromoCodeService,
+  GetActivationWindowsUseCase,
   StartPosUseCase,
   CarWashLaunchUseCase,
   CheckCarWashStartedUseCase,
@@ -254,6 +259,7 @@ const orderDomainServices: Provider[] = [
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  DiscountCalculationService,
 ];
 
 const corporateUseCase: Provider[] = [

@@ -3,6 +3,7 @@ import { Order } from '@loyalty/order/domain/order';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
 import { DiscountType } from '@loyalty/marketing-campaign/domain/enums/discount-type.enum';
+import { CampaignRedemptionType } from '@prisma/client';
 
 @Injectable()
 export class PromoCodeService {
@@ -47,13 +48,17 @@ export class PromoCodeService {
       order.sumBonus,
     );
 
-    await this.promoCodeRepository.createUsage({
-      campaignId: promoCode.campaignId || 0,
-      promocodeId: promoCodeId,
-      ltyUserId: card.mobileUserId || 0,
-      orderId: order.id,
-      posId: carWashId,
-    });
+    if (promoCode.campaignId) {
+      await this.promoCodeRepository.createUsage({
+        campaignId: promoCode.campaignId,
+        promocodeId: promoCodeId,
+        ltyUserId: card.mobileUserId || 0,
+        orderId: order.id,
+        posId: carWashId,
+        actionId: promoCode.actionId || null,
+        type: CampaignRedemptionType.PROMOCODE,
+      });
+    }
 
     await this.promoCodeRepository.incrementUsage(promoCodeId);
 
