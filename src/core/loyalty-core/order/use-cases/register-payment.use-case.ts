@@ -57,8 +57,15 @@ export class RegisterPaymentUseCase {
 
       const idempotenceKey = `order-${order.id}-register`;
 
-      const defaultReturnUrl =
-        process.env.PAYMENT_RETURN_URL
+      let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
+      
+      if (!returnUrl && !data.paymentToken) {
+        const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
+        returnUrl = `${baseUrl}/payment/success?orderId=${order.id}`;
+        this.logger.warn(
+          `No returnUrl provided and PAYMENT_RETURN_URL not set. Using generated default: ${returnUrl}`,
+        );
+      }
 
       paymentResult =
         process.env.PAYMENT_TEST_MODE === 'true'
@@ -73,7 +80,7 @@ export class RegisterPaymentUseCase {
               description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
               phone: data.receiptReturnPhoneNumber,
               idempotenceKey,
-              returnUrl: data.returnUrl || defaultReturnUrl,
+              returnUrl: returnUrl,
               metadata: {
                 orderId: String(order.id),
                 order_id: String(order.id),
