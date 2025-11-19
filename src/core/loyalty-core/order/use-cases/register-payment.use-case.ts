@@ -8,9 +8,10 @@ import { VerifyPaymentUseCaseCore } from '../../../payment-core/use-cases/verify
 
 export interface IRegisterPaymentDto {
   orderId: number;
-  paymentToken: string;
+  paymentToken?: string;
   amount: number;
   receiptReturnPhoneNumber: string;
+  returnUrl?: string;
 }
 
 @Injectable()
@@ -46,14 +47,18 @@ export class RegisterPaymentUseCase {
           action: 'payment_processing',
           timestamp: new Date(),
           details: JSON.stringify({
-            paymentToken: data.paymentToken,
+            paymentToken: data.paymentToken || 'none (using redirect)',
             amount: data.amount,
+            returnUrl: data.returnUrl || 'none',
           }),
         },
         `Payment processing initiated for order ${order.id} with amount ${data.amount}`,
       );
 
       const idempotenceKey = `order-${order.id}-register`;
+
+      const defaultReturnUrl =
+        process.env.PAYMENT_RETURN_URL
 
       paymentResult =
         process.env.PAYMENT_TEST_MODE === 'true'
@@ -68,6 +73,11 @@ export class RegisterPaymentUseCase {
               description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
               phone: data.receiptReturnPhoneNumber,
               idempotenceKey,
+              returnUrl: data.returnUrl || defaultReturnUrl,
+              metadata: {
+                orderId: String(order.id),
+                order_id: String(order.id),
+              },
             });
 
       paymentCreated = true;

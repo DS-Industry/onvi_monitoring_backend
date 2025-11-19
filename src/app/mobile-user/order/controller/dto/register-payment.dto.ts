@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty, IsString } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class RegisterPaymentDto {
   @IsNumber()
@@ -6,8 +6,8 @@ export class RegisterPaymentDto {
   orderId: number;
 
   @IsString()
-  @IsNotEmpty()
-  paymentToken: string;
+  @IsOptional()
+  paymentToken?: string;
 
   @IsNumber()
   @IsNotEmpty()
@@ -16,4 +16,8 @@ export class RegisterPaymentDto {
   @IsString()
   @IsNotEmpty()
   receiptReturnPhoneNumber: string;
+
+  @IsString()
+  @IsOptional()
+  returnUrl?: string;
 }

@@ -23,6 +23,7 @@ import { HrCoreModule } from '@hr/hr-core.module';
 import { NotificationCoreModule } from '@notification/notification-core.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
+import { PaymentModule } from './app/payment/payment.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@infra/cache/redis.module';
@@ -119,6 +120,7 @@ import { multerConfig } from '@libs/multer/multerConfig';
     ReportCoreModule,
     NotificationCoreModule,
     ManagerPaperCoreModule,
+    PaymentModule,
     Logger,
     RedisModule,
   ],

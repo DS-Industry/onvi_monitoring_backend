@@ -7,6 +7,10 @@ export interface CreatePaymentDto {
   paymentToken?: string;
   capture?: boolean;
   idempotenceKey?: string;
+  confirmation?: {
+    type: 'redirect' | 'embedded' | 'qr' | 'mobile_application';
+    return_url?: string;
+  };
   receipt?: {
     phone: string;
     items: Array<{

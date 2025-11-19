@@ -35,24 +35,19 @@ export const rolesMapBootstrap = {
 
     app.use(
       '/payment-webhook/webhook',
+      express.raw({ type: 'application/json', limit: '10mb' }),
       (
         req: express.Request,
         res: express.Response,
         next: express.NextFunction,
       ) => {
-        if (req.headers['content-type']?.includes('application/json')) {
-          let data = '';
-          req.setEncoding('utf8');
-          req.on('data', (chunk: string) => {
-            data += chunk;
-          });
-          req.on('end', () => {
-            (req as any).rawBody = Buffer.from(data, 'utf-8');
-            next();
-          });
-        } else {
-          next();
+        (req as any).rawBody = req.body;
+        try {
+          (req as any).body = JSON.parse(req.body.toString('utf8'));
+        } catch (e) {
+          return next(new Error('Invalid JSON in request body'));
         }
+        next();
       },
     );
 

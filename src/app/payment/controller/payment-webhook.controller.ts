@@ -26,9 +26,17 @@ export class PaymentWebhookController {
   async handleWebhook(
     @Req() req: any,
     @Body() webhookData: any,
-    @Headers('webhook-signature') signature: string,
+    @Headers('webhook-signature') signature?: string,
     @Headers('x-request-id') requestId?: string,
   ) {
+    const signatureHeader =
+      signature ||
+      req.headers['webhook-signature'] ||
+      req.headers['webhook_signature'] ||
+      req.headers['signature'] ||
+      req.headers['x-webhook-signature'] ||
+      req.headers['x-signature'];
+
     const rawBody =
       req.rawBody || Buffer.from(JSON.stringify(webhookData), 'utf-8');
 
@@ -36,16 +44,23 @@ export class PaymentWebhookController {
     const url =
       req.path || req.url?.split('?')[0] || '/payment-webhook/webhook';
 
+    const relevantHeaders = Object.keys(req.headers).filter((h) =>
+      h.toLowerCase().includes('webhook') || h.toLowerCase().includes('signature'),
+    );
+    this.logger.debug(
+      `Webhook received. Signature-related headers: ${JSON.stringify(relevantHeaders)}. Found signature: ${signatureHeader ? 'yes' : 'no'}`,
+    );
+
     if (
       !this.verifyWebhookSignatureUseCase.execute({
         httpMethod,
         url,
         rawBody,
-        signature,
+        signature: signatureHeader || '',
       })
     ) {
       this.logger.warn(
-        `Invalid webhook signature. Request ID: ${requestId || 'unknown'}`,
+        `Invalid webhook signature. Request ID: ${requestId || 'unknown'}. Signature header: ${signatureHeader ? 'present' : 'missing'}`,
       );
       throw new UnauthorizedException('Invalid webhook signature');
     }

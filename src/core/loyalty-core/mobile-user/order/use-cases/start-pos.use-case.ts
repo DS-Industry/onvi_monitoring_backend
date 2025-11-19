@@ -76,7 +76,7 @@ export class StartPosUseCase {
       const carWashResponse = await this.posService.send({
         cardNumber: card.devNumber,
         sum: totalSum,
-        deviceId: bayDetails.id,
+        deviceId: String(carWashDeviceId),
       });
 
       if (carWashResponse.sendStatus === SendStatus.FAIL) {

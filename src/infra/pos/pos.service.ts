@@ -26,7 +26,7 @@ export class PosService implements IPosService {
     const headers = this.buildHeaders();
     try {
       const url =
-        `${this.baseUrl}/external/collection/device?carwashId=${data.posId}&carWashDeviceId=${data.carWashDeviceId}` +
+        `${this.baseUrl}/external/collection/device/by-id?carwashId=${data.posId}&carWashDeviceId=${data.carWashDeviceId}` +
         (data.type ? `&type=${data.type}` : '');
 
       const response = await firstValueFrom(
@@ -52,6 +52,7 @@ export class PosService implements IPosService {
     }
   }
 
+  // TODO: deviceId is undefined!
   async send(data: SendRequestDto): Promise<SendResponseDto> {
     const headers = this.buildHeaders();
     try {
