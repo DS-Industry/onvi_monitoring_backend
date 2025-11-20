@@ -118,6 +118,9 @@ import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
 import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
 import { MarketingCampaignDiscountService } from './mobile-user/order/use-cases/marketing-campaign-discount.service';
+import { MarketingCampaignRewardService } from './mobile-user/order/use-cases/marketing-campaign-reward.service';
+import { ApplyMarketingCampaignRewardsUseCase } from './mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
+import { ApplyMarketingCampaignRewardsConsumer } from '@infra/handler/marketing-campaign/consumer/apply-marketing-campaign-rewards.consumer';
 import {
   OrderValidationService,
   CashbackCalculationService,
@@ -254,6 +257,8 @@ const mobileOrderUseCase: Provider[] = [
   CarWashLaunchUseCase,
   CheckCarWashStartedUseCase,
   MarketingCampaignDiscountService,
+  MarketingCampaignRewardService,
+  ApplyMarketingCampaignRewardsUseCase,
 ];
 
 const orderDomainServices: Provider[] = [
@@ -340,6 +345,19 @@ const redisProviders: Provider[] = [RedisService];
           },
         },
       },
+      {
+        configKey: 'worker',
+        name: 'apply-marketing-campaign-rewards',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+          backoff: {
+            type: 'fixed',
+            delay: 5000,
+          },
+        },
+      },
     ),
   ],
   providers: [
@@ -362,6 +380,7 @@ const redisProviders: Provider[] = [RedisService];
     ...orderDomainServices,
     ...redisProviders,
     StartPosProcess,
+    ApplyMarketingCampaignRewardsConsumer,
   ],
   exports: [
     ...repositories,

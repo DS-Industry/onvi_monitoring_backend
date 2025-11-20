@@ -62,6 +62,16 @@ export class ActivationWindowRepository extends IActivationWindowRepository {
     );
   }
 
+  async findRewardActivationWindows(
+    ltyUserId: number,
+    actionTypes: MarketingCampaignActionType[],
+  ): Promise<ActiveActivationWindow[]> {
+    const activeWindows = await this.findActiveActivationWindows(ltyUserId);
+    return activeWindows.filter((window) =>
+      actionTypes.includes(window.actionType),
+    );
+  }
+
   async createUsage(input: CreateActivationWindowUsageInput): Promise<void> {
     await this.prisma.marketingCampaignUsage.create({
       data: {

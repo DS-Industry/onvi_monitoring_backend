@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
 export interface GetMobileOrderByTransactionIdRequest {
   transactionId: string;
@@ -8,7 +9,10 @@ export interface GetMobileOrderByTransactionIdRequest {
 
 @Injectable()
 export class GetMobileOrderByTransactionIdUseCase {
-  constructor(private readonly orderRepository: IOrderRepository) {}
+  constructor(
+    private readonly orderRepository: IOrderRepository,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+  ) {}
 
   async execute(request: GetMobileOrderByTransactionIdRequest) {
     const order = await this.orderRepository.findOneByTransactionId(
@@ -21,7 +25,16 @@ export class GetMobileOrderByTransactionIdUseCase {
       );
     }
 
-    if (order.cardMobileUserId !== request.clientId) {
+    if (order.cardMobileUserId) {
+      const card = await this.findMethodsCardUseCase.getById(
+        order.cardMobileUserId,
+      );
+      if (!card || card.mobileUserId !== request.clientId) {
+        throw new NotFoundException(
+          `Order with transaction ID ${request.transactionId} not found`,
+        );
+      }
+    } else if (request.clientId) {
       throw new NotFoundException(
         `Order with transaction ID ${request.transactionId} not found`,
       );

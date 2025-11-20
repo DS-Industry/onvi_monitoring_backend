@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { OrderStatus } from '@loyalty/order/domain/enums';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
 export interface UpdateMobileOrderRequest {
   orderId: number;
@@ -10,7 +11,10 @@ export interface UpdateMobileOrderRequest {
 
 @Injectable()
 export class UpdateMobileOrderUseCase {
-  constructor(private readonly orderRepository: IOrderRepository) {}
+  constructor(
+    private readonly orderRepository: IOrderRepository,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+  ) {}
 
   async execute(request: UpdateMobileOrderRequest) {
     const order = await this.orderRepository.findOneById(request.orderId);
@@ -19,7 +23,14 @@ export class UpdateMobileOrderUseCase {
       throw new NotFoundException(`Order with ID ${request.orderId} not found`);
     }
 
-    if (order.cardMobileUserId !== request.clientId) {
+    if (order.cardMobileUserId) {
+      const card = await this.findMethodsCardUseCase.getById(
+        order.cardMobileUserId,
+      );
+      if (!card || card.mobileUserId !== request.clientId) {
+        throw new NotFoundException(`Order with ID ${request.orderId} not found`);
+      }
+    } else if (request.clientId) {
       throw new NotFoundException(`Order with ID ${request.orderId} not found`);
     }
 

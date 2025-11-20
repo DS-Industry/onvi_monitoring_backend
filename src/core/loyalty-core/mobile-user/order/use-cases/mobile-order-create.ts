@@ -116,7 +116,7 @@ export class CreateMobileOrderUseCase {
       sumCashback: computedCashback,
       carWashDeviceId: carWashDeviceId,
       platform: PlatformType.ONVI,
-      cardMobileUserId: request.cardMobileUserId,
+      cardMobileUserId: card.id,
       typeMobileUser: ContractType.INDIVIDUAL,
       orderData: new Date(),
       createData: new Date(),
@@ -179,6 +179,7 @@ export class CreateMobileOrderUseCase {
             orderDate,
             request.rewardPointsUsed || 0,
             request.promoCodeId || null,
+            card.id,
           );
 
         if (discountResult && discountResult.discountAmount > 0) {
@@ -247,7 +248,37 @@ export class CreateMobileOrderUseCase {
           posId: request.carWashId,
           type: CampaignRedemptionType.DISCOUNT,
         });
+      } else if (
+        promoCodeDiscount > 0 &&
+        request.promoCodeId
+      ) {
+        await this.promoCodeService.createPromoCodeUsage(
+          request.promoCodeId,
+          createdOrder.id,
+          card,
+          request.carWashId,
+        );
       }
+    }
+
+    const noDiscountApplied = finalDiscount === 0;
+    const noPromoCodeUsed = !request.promoCodeId;
+
+    if (noDiscountApplied && noPromoCodeUsed) {
+      await this.flowProducer.add({
+        name: 'apply-marketing-campaign-rewards',
+        queueName: 'apply-marketing-campaign-rewards',
+        data: { orderId: createdOrder.id },
+        opts: {
+          failParentOnFailure: false,
+          ignoreDependencyOnFailure: true,
+          attempts: 3,
+          backoff: {
+            type: 'fixed',
+            delay: 5000,
+          },
+        },
+      });
     }
 
     if (isFreeVacuum) {

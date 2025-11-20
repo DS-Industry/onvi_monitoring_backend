@@ -48,21 +48,32 @@ export class PromoCodeService {
       order.sumBonus,
     );
 
-    if (promoCode.campaignId) {
-      await this.promoCodeRepository.createUsage({
-        campaignId: promoCode.campaignId,
-        promocodeId: promoCodeId,
-        ltyUserId: card.mobileUserId || 0,
-        orderId: order.id,
-        posId: carWashId,
-        actionId: promoCode.actionId || null,
-        type: CampaignRedemptionType.PROMOCODE,
-      });
-    }
-
     await this.promoCodeRepository.incrementUsage(promoCodeId);
 
     return discountAmount;
+  }
+
+  async createPromoCodeUsage(
+    promoCodeId: number,
+    orderId: number,
+    card: Card,
+    carWashId: number,
+  ): Promise<void> {
+    const promoCode = await this.promoCodeRepository.findById(promoCodeId);
+
+    if (!promoCode || !promoCode.campaignId) {
+      return; // No campaign linked, no usage record needed
+    }
+
+    await this.promoCodeRepository.createUsage({
+      campaignId: promoCode.campaignId,
+      promocodeId: promoCodeId,
+      ltyUserId: card.mobileUserId || 0,
+      orderId: orderId,
+      posId: carWashId,
+      actionId: promoCode.actionId || null,
+      type: CampaignRedemptionType.PROMOCODE,
+    });
   }
 
   private calculateDiscount(

@@ -393,6 +393,8 @@ async function verifyOrderResults(
 
 /**
  * Test 1: TRANSACTIONAL - VISIT_COUNT condition (ALL_TIME cycle)
+ * IMPORTANT: This tests the fix where current order is included in count (+1)
+ * User has 4 completed orders, creates 5th order -> should get discount (4 + 1 = 5)
  */
 async function testTransactionalVisitCount() {
   let infrastructure: any = null;
@@ -403,8 +405,9 @@ async function testTransactionalVisitCount() {
     infrastructure = await createTestInfrastructure();
     const { user, card, pos, device, programParticipant } = infrastructure;
 
-    // Create 5 completed orders for the user
-    for (let i = 0; i < 5; i++) {
+    // Create 4 completed orders for the user (NOT 5!)
+    // The 5th order being created should trigger the discount
+    for (let i = 0; i < 4; i++) {
       await prisma.lTYOrder.create({
         data: {
           cardId: card.id,
@@ -425,7 +428,7 @@ async function testTransactionalVisitCount() {
     // Create TRANSACTIONAL campaign with VISIT_COUNT >= 5
     const campaign = await prisma.marketingCampaign.create({
       data: {
-        name: 'TRANSACTIONAL: VISIT_COUNT (ALL_TIME)',
+        name: 'TRANSACTIONAL: VISIT_COUNT (ALL_TIME) - Fixed Test',
         status: MarketingCampaignStatus.ACTIVE,
         executionType: CampaignExecutionType.TRANSACTIONAL,
         launchDate: new Date(Date.now() - 86400000),
@@ -472,11 +475,31 @@ async function testTransactionalVisitCount() {
     orderId = result.orderId;
     const verification = await verifyOrderResults(result.orderId, 500, orderSum, campaign.id);
 
+    // Verify progress was updated
+    const progress = await prisma.userCampaignProgress.findUnique({
+      where: {
+        campaignId_ltyUserId: {
+          campaignId: campaign.id,
+          ltyUserId: user.id,
+        },
+      },
+    });
+
+    const progressState = progress?.state as any;
+    const visitsInCycle = progressState?.visits_in_cycle;
+
+    const passed = verification.passed && visitsInCycle === 5; // 4 completed + 1 current = 5
+
     await logTest(
-      'TRANSACTIONAL: VISIT_COUNT (ALL_TIME) - Order Created',
-      verification.passed,
-      verification.error,
-      verification.details,
+      'TRANSACTIONAL: VISIT_COUNT (ALL_TIME) - Current Order Included (+1)',
+      passed,
+      passed ? undefined : `Expected visits_in_cycle: 5, got: ${visitsInCycle}. ${verification.error || ''}`,
+      {
+        ...verification.details,
+        completedOrders: 4,
+        visitsInCycle,
+        expectedVisitsInCycle: 5,
+      },
       result.orderId,
       verification.details.actualDiscount,
     );
@@ -484,6 +507,7 @@ async function testTransactionalVisitCount() {
     // Cleanup
     if (orderId) {
       await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } });
+      await prisma.userCampaignProgress.deleteMany({ where: { campaignId: campaign.id } });
       await prisma.lTYOrder.delete({ where: { id: orderId } });
     }
     await prisma.marketingCampaign.delete({ where: { id: campaign.id } });
@@ -497,7 +521,7 @@ async function testTransactionalVisitCount() {
       carWashPosId: infrastructure.carWashPos.id,
     });
   } catch (error: any) {
-    await logTest('TRANSACTIONAL: VISIT_COUNT', false, error.message);
+    await logTest('TRANSACTIONAL: VISIT_COUNT (ALL_TIME) - Current Order Included (+1)', false, error.message);
     if (orderId) {
       await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } }).catch(() => {});
       await prisma.lTYOrder.delete({ where: { id: orderId } }).catch(() => {});
@@ -853,7 +877,124 @@ async function testTransactionalWeekday() {
 }
 
 /**
- * Test 5: TRANSACTIONAL - PROMOCODE_ENTRY condition
+ * Test 5: TRANSACTIONAL - BIRTHDAY condition
+ */
+async function testTransactionalBirthday() {
+  let infrastructure: any = null;
+  let campaignId: number | null = null;
+  let orderId: number | null = null;
+
+  try {
+    infrastructure = await createTestInfrastructure();
+    const { user, card, pos, device, programParticipant } = infrastructure;
+
+    // Set user's birthday to today
+    const today = new Date();
+    await prisma.lTYUser.update({
+      where: { id: user.id },
+      data: {
+        birthday: today,
+      },
+    });
+
+    // Create TRANSACTIONAL campaign with BIRTHDAY condition
+    const campaign = await prisma.marketingCampaign.create({
+      data: {
+        name: 'TRANSACTIONAL: BIRTHDAY',
+        status: MarketingCampaignStatus.ACTIVE,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        launchDate: new Date(Date.now() - 86400000),
+        createdById: infrastructure.adminUser.id,
+        updatedById: infrastructure.adminUser.id,
+        ltyProgramParticipantId: programParticipant.id,
+        ltyUsers: { connect: { id: user.id } },
+        action: {
+          create: {
+            actionType: MarketingCampaignActionType.DISCOUNT,
+            payload: {
+              discountType: DiscountType.PERCENTAGE,
+              discountValue: 20,
+              maxDiscountAmount: 1000,
+            },
+          },
+        },
+        conditions: {
+          create: {
+            tree: [
+              {
+                type: CampaignConditionType.BIRTHDAY,
+              },
+            ],
+          },
+        },
+      },
+    });
+    campaignId = campaign.id;
+
+    const useCase = createUseCaseInstance();
+    const orderSum = 3000;
+    const result = await useCase.execute({
+      sum: orderSum,
+      sumBonus: 0,
+      carWashId: pos.id,
+      cardMobileUserId: user.id,
+      carWashDeviceId: device.id,
+      rewardPointsUsed: 0,
+    });
+
+    orderId = result.orderId;
+    const expectedDiscount = 600; // 20% of 3000 (capped at 1000, but 600 < 1000)
+    const verification = await verifyOrderResults(result.orderId, expectedDiscount, orderSum, campaign.id);
+
+    await logTest(
+      'TRANSACTIONAL: BIRTHDAY - Order Created',
+      verification.passed,
+      verification.error,
+      verification.details,
+      result.orderId,
+      verification.details.actualDiscount,
+    );
+
+    // Cleanup
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } });
+      await prisma.lTYOrder.delete({ where: { id: orderId } });
+    }
+    await prisma.marketingCampaign.delete({ where: { id: campaign.id } });
+    await cleanupTestInfrastructure({
+      userId: user.id,
+      cardId: card.id,
+      posId: pos.id,
+      deviceId: device.id,
+      organizationId: infrastructure.organization.id,
+      programParticipantId: programParticipant.id,
+      carWashPosId: infrastructure.carWashPos.id,
+    });
+  } catch (error: any) {
+    await logTest('TRANSACTIONAL: BIRTHDAY', false, error.message);
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } }).catch(() => {});
+      await prisma.lTYOrder.delete({ where: { id: orderId } }).catch(() => {});
+    }
+    if (campaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: campaignId } }).catch(() => {});
+    }
+    if (infrastructure) {
+      await cleanupTestInfrastructure({
+        userId: infrastructure.user.id,
+        cardId: infrastructure.card.id,
+        posId: infrastructure.pos.id,
+        deviceId: infrastructure.device.id,
+        organizationId: infrastructure.organization.id,
+        programParticipantId: infrastructure.programParticipant.id,
+        carWashPosId: infrastructure.carWashPos?.id,
+      });
+    }
+  }
+}
+
+/**
+ * Test 6: TRANSACTIONAL - PROMOCODE_ENTRY condition
  */
 async function testTransactionalPromocodeEntry() {
   let infrastructure: any = null;
@@ -979,7 +1120,464 @@ async function testTransactionalPromocodeEntry() {
 // ============================================================================
 
 /**
- * Test 6: BEHAVIORAL - BIRTHDAY condition (with activation window)
+ * Test 7: TRANSACTIONAL - Combined Conditions (VISIT_COUNT + PURCHASE_AMOUNT)
+ */
+async function testTransactionalCombinedConditions() {
+  let infrastructure: any = null;
+  let campaignId: number | null = null;
+  let orderId: number | null = null;
+
+  try {
+    infrastructure = await createTestInfrastructure();
+    const { user, card, pos, device, programParticipant } = infrastructure;
+
+    // Create 3 completed orders
+    for (let i = 0; i < 3; i++) {
+      await prisma.lTYOrder.create({
+        data: {
+          cardId: card.id,
+          sumFull: 1000,
+          sumReal: 1000,
+          sumBonus: 0,
+          sumDiscount: 0,
+          sumCashback: 0,
+          carWashDeviceId: device.id,
+          platform: 'ONVI',
+          orderData: new Date(),
+          createData: new Date(),
+          orderStatus: OrderStatus.COMPLETED,
+        },
+      });
+    }
+
+    // Create TRANSACTIONAL campaign with VISIT_COUNT >= 3 AND PURCHASE_AMOUNT >= 2000
+    const campaign = await prisma.marketingCampaign.create({
+      data: {
+        name: 'TRANSACTIONAL: Combined (VISIT_COUNT + PURCHASE_AMOUNT)',
+        status: MarketingCampaignStatus.ACTIVE,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        launchDate: new Date(Date.now() - 86400000),
+        createdById: infrastructure.adminUser.id,
+        updatedById: infrastructure.adminUser.id,
+        ltyProgramParticipantId: programParticipant.id,
+        ltyUsers: { connect: { id: user.id } },
+        action: {
+          create: {
+            actionType: MarketingCampaignActionType.DISCOUNT,
+            payload: {
+              discountType: DiscountType.FIXED_AMOUNT,
+              discountValue: 800,
+            },
+          },
+        },
+        conditions: {
+          create: {
+            tree: [
+              {
+                type: CampaignConditionType.VISIT_COUNT,
+                operator: ConditionOperator.GREATER_THAN_OR_EQUAL,
+                value: 3,
+                cycle: VisitCycle.ALL_TIME,
+              },
+              {
+                type: CampaignConditionType.PURCHASE_AMOUNT,
+                operator: ConditionOperator.GREATER_THAN_OR_EQUAL,
+                value: 2000,
+              },
+            ],
+          },
+        },
+      },
+    });
+    campaignId = campaign.id;
+
+    const useCase = createUseCaseInstance();
+    const orderSum = 2500; // Meets both conditions: 3+ visits (3 completed + 1 current = 4) AND >= 2000
+    const result = await useCase.execute({
+      sum: orderSum,
+      sumBonus: 0,
+      carWashId: pos.id,
+      cardMobileUserId: user.id,
+      carWashDeviceId: device.id,
+      rewardPointsUsed: 0,
+    });
+
+    orderId = result.orderId;
+    const expectedDiscount = 800;
+    const verification = await verifyOrderResults(result.orderId, expectedDiscount, orderSum, campaign.id);
+
+    await logTest(
+      'TRANSACTIONAL: Combined Conditions (VISIT_COUNT + PURCHASE_AMOUNT)',
+      verification.passed,
+      verification.error,
+      verification.details,
+      result.orderId,
+      verification.details.actualDiscount,
+    );
+
+    // Cleanup
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } });
+      await prisma.lTYOrder.delete({ where: { id: orderId } });
+    }
+    await prisma.marketingCampaign.delete({ where: { id: campaign.id } });
+    await cleanupTestInfrastructure({
+      userId: user.id,
+      cardId: card.id,
+      posId: pos.id,
+      deviceId: device.id,
+      organizationId: infrastructure.organization.id,
+      programParticipantId: programParticipant.id,
+      carWashPosId: infrastructure.carWashPos.id,
+    });
+  } catch (error: any) {
+    await logTest('TRANSACTIONAL: Combined Conditions', false, error.message);
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } }).catch(() => {});
+      await prisma.lTYOrder.delete({ where: { id: orderId } }).catch(() => {});
+    }
+    if (campaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: campaignId } }).catch(() => {});
+    }
+    if (infrastructure) {
+      await cleanupTestInfrastructure({
+        userId: infrastructure.user.id,
+        cardId: infrastructure.card.id,
+        posId: infrastructure.pos.id,
+        deviceId: infrastructure.device.id,
+        organizationId: infrastructure.organization.id,
+        programParticipantId: infrastructure.programParticipant.id,
+        carWashPosId: infrastructure.carWashPos?.id,
+      });
+    }
+  }
+}
+
+/**
+ * Test 8: TRANSACTIONAL - VISIT_COUNT with MONTHLY cycle
+ */
+async function testTransactionalVisitCountMonthly() {
+  let infrastructure: any = null;
+  let campaignId: number | null = null;
+  let orderId: number | null = null;
+
+  try {
+    infrastructure = await createTestInfrastructure();
+    const { user, card, pos, device, programParticipant } = infrastructure;
+
+    // Create 2 completed orders this month
+    const now = new Date();
+    for (let i = 0; i < 2; i++) {
+      await prisma.lTYOrder.create({
+        data: {
+          cardId: card.id,
+          sumFull: 1000,
+          sumReal: 1000,
+          sumBonus: 0,
+          sumDiscount: 0,
+          sumCashback: 0,
+          carWashDeviceId: device.id,
+          platform: 'ONVI',
+          orderData: new Date(now.getFullYear(), now.getMonth(), now.getDate() - i),
+          createData: new Date(),
+          orderStatus: OrderStatus.COMPLETED,
+        },
+      });
+    }
+
+    // Create TRANSACTIONAL campaign with VISIT_COUNT >= 3 in MONTHLY cycle
+    const campaign = await prisma.marketingCampaign.create({
+      data: {
+        name: 'TRANSACTIONAL: VISIT_COUNT (MONTHLY)',
+        status: MarketingCampaignStatus.ACTIVE,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        launchDate: new Date(Date.now() - 86400000),
+        createdById: infrastructure.adminUser.id,
+        updatedById: infrastructure.adminUser.id,
+        ltyProgramParticipantId: programParticipant.id,
+        ltyUsers: { connect: { id: user.id } },
+        action: {
+          create: {
+            actionType: MarketingCampaignActionType.DISCOUNT,
+            payload: {
+              discountType: DiscountType.FIXED_AMOUNT,
+              discountValue: 400,
+            },
+          },
+        },
+        conditions: {
+          create: {
+            tree: [
+              {
+                type: CampaignConditionType.VISIT_COUNT,
+                operator: ConditionOperator.GREATER_THAN_OR_EQUAL,
+                value: 3,
+                cycle: VisitCycle.MONTHLY,
+              },
+            ],
+          },
+        },
+      },
+    });
+    campaignId = campaign.id;
+
+    const useCase = createUseCaseInstance();
+    const orderSum = 2000;
+    const result = await useCase.execute({
+      sum: orderSum,
+      sumBonus: 0,
+      carWashId: pos.id,
+      cardMobileUserId: user.id,
+      carWashDeviceId: device.id,
+      rewardPointsUsed: 0,
+    });
+
+    orderId = result.orderId;
+    const expectedDiscount = 400; // 2 completed + 1 current = 3 visits this month
+    const verification = await verifyOrderResults(result.orderId, expectedDiscount, orderSum, campaign.id);
+
+    await logTest(
+      'TRANSACTIONAL: VISIT_COUNT (MONTHLY) - Order Created',
+      verification.passed,
+      verification.error,
+      verification.details,
+      result.orderId,
+      verification.details.actualDiscount,
+    );
+
+    // Cleanup
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } });
+      await prisma.lTYOrder.delete({ where: { id: orderId } });
+    }
+    await prisma.marketingCampaign.delete({ where: { id: campaign.id } });
+    await cleanupTestInfrastructure({
+      userId: user.id,
+      cardId: card.id,
+      posId: pos.id,
+      deviceId: device.id,
+      organizationId: infrastructure.organization.id,
+      programParticipantId: programParticipant.id,
+      carWashPosId: infrastructure.carWashPos.id,
+    });
+  } catch (error: any) {
+    await logTest('TRANSACTIONAL: VISIT_COUNT (MONTHLY)', false, error.message);
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } }).catch(() => {});
+      await prisma.lTYOrder.delete({ where: { id: orderId } }).catch(() => {});
+    }
+    if (campaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: campaignId } }).catch(() => {});
+    }
+    if (infrastructure) {
+      await cleanupTestInfrastructure({
+        userId: infrastructure.user.id,
+        cardId: infrastructure.card.id,
+        posId: infrastructure.pos.id,
+        deviceId: infrastructure.device.id,
+        organizationId: infrastructure.organization.id,
+        programParticipantId: infrastructure.programParticipant.id,
+        carWashPosId: infrastructure.carWashPos?.id,
+      });
+    }
+  }
+}
+
+/**
+ * Test 9: Promocode Discount Winning Scenario
+ */
+async function testPromocodeDiscountWinning() {
+  let infrastructure: any = null;
+  let campaignId: number | null = null;
+  let promocodeId: number | null = null;
+  let promocodeCampaignId: number | null = null;
+  let orderId: number | null = null;
+
+  try {
+    infrastructure = await createTestInfrastructure();
+    const { user, card, pos, device, programParticipant, adminUser } = infrastructure;
+
+    // Create a campaign with lower discount
+    const campaign = await prisma.marketingCampaign.create({
+      data: {
+        name: 'TRANSACTIONAL: Lower Discount (300)',
+        status: MarketingCampaignStatus.ACTIVE,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        launchDate: new Date(Date.now() - 86400000),
+        createdById: adminUser.id,
+        updatedById: adminUser.id,
+        ltyProgramParticipantId: programParticipant.id,
+        ltyUsers: { connect: { id: user.id } },
+        action: {
+          create: {
+            actionType: MarketingCampaignActionType.DISCOUNT,
+            payload: {
+              discountType: DiscountType.FIXED_AMOUNT,
+              discountValue: 300,
+            },
+          },
+        },
+        conditions: {
+          create: {
+            tree: [
+              {
+                type: CampaignConditionType.PURCHASE_AMOUNT,
+                operator: ConditionOperator.GREATER_THAN_OR_EQUAL,
+                value: 1000,
+              },
+            ],
+          },
+        },
+      },
+    });
+    campaignId = campaign.id;
+
+    // Create a campaign for the promocode (to track usage)
+    const promocodeCampaign = await prisma.marketingCampaign.create({
+      data: {
+        name: 'Promocode Campaign',
+        status: MarketingCampaignStatus.ACTIVE,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        launchDate: new Date(Date.now() - 86400000),
+        createdById: adminUser.id,
+        updatedById: adminUser.id,
+        ltyProgramParticipantId: programParticipant.id,
+        action: {
+          create: {
+            actionType: MarketingCampaignActionType.PROMOCODE_ISSUE,
+            payload: {},
+          },
+        },
+      },
+    });
+    promocodeCampaignId = promocodeCampaign.id;
+
+    const promocodeAction = await prisma.marketingCampaignAction.findUnique({
+      where: { campaignId: promocodeCampaign.id },
+    });
+
+    // Create promocode with higher discount (500) linked to campaign
+    const promocode = await prisma.lTYPromocode.create({
+      data: {
+        code: `WINNER${Date.now()}`,
+        isActive: true,
+        promocodeType: 'STANDALONE',
+        discountType: DiscountType.FIXED_AMOUNT,
+        discountValue: 500,
+        maxUsagePerUser: 10,
+        validFrom: new Date(),
+        campaignId: promocodeCampaign.id,
+        actionId: promocodeAction?.id || null,
+      },
+    });
+    promocodeId = promocode.id;
+
+    const useCase = createUseCaseInstance();
+    const orderSum = 2000;
+    const result = await useCase.execute({
+      sum: orderSum,
+      sumBonus: 0,
+      carWashId: pos.id,
+      cardMobileUserId: user.id,
+      carWashDeviceId: device.id,
+      rewardPointsUsed: 0,
+      promoCodeId: promocode.id,
+    });
+
+    orderId = result.orderId;
+    const expectedDiscount = 500; // Promocode should win (500 > 300)
+    const createdOrder = await prisma.lTYOrder.findUnique({
+      where: { id: result.orderId },
+    });
+
+    const actualDiscount = createdOrder?.sumDiscount || 0;
+    const expectedSumReal = orderSum - expectedDiscount;
+    const actualSumReal = createdOrder?.sumReal || 0;
+
+    // Verify promocode usage was recorded
+    const promocodeUsage = await prisma.marketingCampaignUsage.findFirst({
+      where: {
+        orderId: result.orderId,
+        promocodeId: promocode.id,
+      },
+    });
+
+    const passed =
+      actualDiscount === expectedDiscount &&
+      actualSumReal === expectedSumReal &&
+      promocodeUsage !== null;
+
+    await logTest(
+      'Promocode Discount Winning (500 > 300)',
+      passed,
+      passed
+        ? undefined
+        : `Expected discount: ${expectedDiscount}, got: ${actualDiscount}. Promocode usage recorded: ${promocodeUsage !== null}`,
+      {
+        orderId: result.orderId,
+        orderSum,
+        campaignDiscount: 300,
+        promocodeDiscount: 500,
+        expectedBest: expectedDiscount,
+        actualDiscount,
+        promocodeUsageRecorded: promocodeUsage !== null,
+      },
+      result.orderId,
+      actualDiscount,
+    );
+
+    // Cleanup
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } });
+      await prisma.lTYOrder.delete({ where: { id: orderId } });
+    }
+    await prisma.marketingCampaign.delete({ where: { id: campaign.id } });
+    if (promocodeId) {
+      await prisma.lTYPromocode.delete({ where: { id: promocodeId } });
+    }
+    if (promocodeCampaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: promocodeCampaignId } }).catch(() => {});
+    }
+    await cleanupTestInfrastructure({
+      userId: user.id,
+      cardId: card.id,
+      posId: pos.id,
+      deviceId: device.id,
+      organizationId: infrastructure.organization.id,
+      programParticipantId: programParticipant.id,
+      carWashPosId: infrastructure.carWashPos.id,
+    });
+  } catch (error: any) {
+    await logTest('Promocode Discount Winning', false, error.message);
+    if (orderId) {
+      await prisma.marketingCampaignUsage.deleteMany({ where: { orderId } }).catch(() => {});
+      await prisma.lTYOrder.delete({ where: { id: orderId } }).catch(() => {});
+    }
+    if (promocodeId) {
+      await prisma.lTYPromocode.delete({ where: { id: promocodeId } }).catch(() => {});
+    }
+    if (promocodeCampaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: promocodeCampaignId } }).catch(() => {});
+    }
+    if (campaignId) {
+      await prisma.marketingCampaign.delete({ where: { id: campaignId } }).catch(() => {});
+    }
+    if (infrastructure) {
+      await cleanupTestInfrastructure({
+        userId: infrastructure.user.id,
+        cardId: infrastructure.card.id,
+        posId: infrastructure.pos.id,
+        deviceId: infrastructure.device.id,
+        organizationId: infrastructure.organization.id,
+        programParticipantId: infrastructure.programParticipant.id,
+        carWashPosId: infrastructure.carWashPos?.id,
+      });
+    }
+  }
+}
+
+/**
+ * Test 10: BEHAVIORAL - BIRTHDAY condition (with activation window)
  */
 async function testBehavioralBirthday() {
   let infrastructure: any = null;
@@ -1122,7 +1720,7 @@ async function testBehavioralBirthday() {
 }
 
 /**
- * Test 7: BEHAVIORAL - INACTIVITY condition (with activation window)
+ * Test 11: BEHAVIORAL - INACTIVITY condition (with activation window)
  */
 async function testBehavioralInactivity() {
   let infrastructure: any = null;
@@ -1271,7 +1869,7 @@ async function testBehavioralInactivity() {
 // ============================================================================
 
 /**
- * Test 8: Multiple Discounts - Best One Selected
+ * Test 12: Multiple Discounts - Best One Selected
  */
 async function testMultipleDiscountsBestSelected() {
   let infrastructure: any = null;
@@ -1544,23 +2142,32 @@ async function runAllTests() {
   console.log('⚠️  WARNING: This script creates test data in your database!\n');
   console.log('📋 Testing Scenarios:\n');
   console.log('   TRANSACTIONAL Campaigns:');
-  console.log('   1. VISIT_COUNT (ALL_TIME)');
+  console.log('   1. VISIT_COUNT (ALL_TIME) - Current Order Included (+1)');
   console.log('   2. PURCHASE_AMOUNT');
   console.log('   3. TIME_RANGE');
   console.log('   4. WEEKDAY');
-  console.log('   5. PROMOCODE_ENTRY');
+  console.log('   5. BIRTHDAY (NEW)');
+  console.log('   6. PROMOCODE_ENTRY');
+  console.log('   7. Combined Conditions (VISIT_COUNT + PURCHASE_AMOUNT)');
+  console.log('   8. VISIT_COUNT (MONTHLY cycle)');
+  console.log('   Discount Comparison:');
+  console.log('   9. Promocode Discount Winning');
   console.log('   BEHAVIORAL Campaigns:');
-  console.log('   6. BIRTHDAY (with activation window)');
-  console.log('   7. INACTIVITY (with activation window)');
+  console.log('   10. BIRTHDAY (with activation window)');
+  console.log('   11. INACTIVITY (with activation window)');
   console.log('   Multiple Discounts:');
-  console.log('   8. Best Discount Selected\n');
+  console.log('   12. Best Discount Selected\n');
 
   try {
     await testTransactionalVisitCount();
     await testTransactionalPurchaseAmount();
     await testTransactionalTimeRange();
     await testTransactionalWeekday();
+    await testTransactionalBirthday();
     await testTransactionalPromocodeEntry();
+    await testTransactionalCombinedConditions();
+    await testTransactionalVisitCountMonthly();
+    await testPromocodeDiscountWinning();
     await testBehavioralBirthday();
     await testBehavioralInactivity();
     await testMultipleDiscountsBestSelected();

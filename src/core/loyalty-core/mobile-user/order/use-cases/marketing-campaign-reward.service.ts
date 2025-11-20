@@ -4,7 +4,6 @@ import {
   MarketingCampaignStatus,
   CampaignExecutionType,
   MarketingCampaignActionType,
-  DiscountType,
   OrderStatus,
 } from '@prisma/client';
 import { CampaignConditionTree } from '@loyalty/marketing-campaign/domain/schemas/condition-tree.schema';
@@ -13,21 +12,15 @@ import {
   ConditionOperator,
   VisitCycle,
 } from '@loyalty/marketing-campaign/domain/enums/condition-type.enum';
-import { DiscountCalculationService } from '@loyalty/order/domain/services/discount-calculation.service';
 import { ActiveActivationWindow } from '../interface/activation-window-repository.interface';
 
-export interface CampaignDiscountResult {
-  discountAmount: number;
+export interface CampaignRewardResult {
   campaignId: number;
   actionId: number;
   executionType: CampaignExecutionType;
   activationWindowId?: number;
-}
-
-export interface OrderEvaluationData {
-  orderDate: Date;
-  orderSum: number;
-  promoCodeId?: number | null;
+  rewardAmount: number;
+  actionType: MarketingCampaignActionType;
 }
 
 export interface MarketingCampaignWithRelations {
@@ -40,21 +33,19 @@ export interface MarketingCampaignWithRelations {
   } | null;
   conditions?: Array<{
     id: number;
-    tree: CampaignConditionTree;
+    tree: any;
   }>;
 }
 
 @Injectable()
-export class MarketingCampaignDiscountService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly discountCalculationService: DiscountCalculationService,
-  ) {}
+export class MarketingCampaignRewardService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findEligibleDiscountCampaigns(
+  async findEligibleRewardCampaigns(
     ltyUserId: number,
     orderDate: Date,
-  ): Promise<any[]> {
+    actionTypes: MarketingCampaignActionType[],
+  ): Promise<MarketingCampaignWithRelations[]> {
     const now = orderDate;
 
     const card = await this.prisma.lTYCard.findFirst({
@@ -115,8 +106,11 @@ export class MarketingCampaignDiscountService {
             status: MarketingCampaignStatus.ACTIVE,
             launchDate: { lte: now },
             OR: [{ endDate: null }, { endDate: { gte: now } }],
+            executionType: CampaignExecutionType.TRANSACTIONAL, // Only TRANSACTIONAL campaigns
             action: {
-              actionType: MarketingCampaignActionType.DISCOUNT,
+              actionType: {
+                in: actionTypes,
+              },
             },
           },
           {
@@ -144,221 +138,234 @@ export class MarketingCampaignDiscountService {
     return campaigns;
   }
 
-  async evaluateTransactionalCampaignDiscount(
-    campaign: MarketingCampaignWithRelations,
-    ltyUserId: number,
+  evaluateActivationWindowReward(
+    window: ActiveActivationWindow,
     orderSum: number,
-    orderDate: Date,
-    rewardPointsUsed: number = 0,
-    promoCodeId?: number | null,
-    cardId?: number | null,
-  ): Promise<CampaignDiscountResult | null> {
-    if (campaign.executionType !== CampaignExecutionType.TRANSACTIONAL) {
+    baseCashback: number,
+  ): CampaignRewardResult | null {
+    if (
+      window.actionType !== MarketingCampaignActionType.CASHBACK_BOOST &&
+      window.actionType !== MarketingCampaignActionType.GIFT_POINTS
+    ) {
       return null;
     }
 
-    if (!campaign.conditions || campaign.conditions.length === 0) {
-      return null;
-    }
+    let rewardAmount = 0;
 
-    if (!campaign.action || campaign.action.actionType !== MarketingCampaignActionType.DISCOUNT) {
-      return null;
-    }
-
-    let progress = await this.prisma.userCampaignProgress.findUnique({
-      where: {
-        campaignId_ltyUserId: {
-          campaignId: campaign.id,
-          ltyUserId,
-        },
-      },
-    });
-
-    if (!progress) {
-      progress = await this.prisma.userCampaignProgress.create({
-        data: {
-          campaignId: campaign.id,
-          ltyUserId,
-          state: {},
-          cycleStartedAt: new Date(),
-        },
-      });
-    }
-
-    const conditionTree = campaign.conditions[0].tree as CampaignConditionTree;
-    const conditions = Array.isArray(conditionTree)
-      ? conditionTree
-      : [conditionTree];
-
-    const progressConditions = conditions.filter(
-      (cond) =>
-        cond.type !== CampaignConditionType.TIME_RANGE &&
-        cond.type !== CampaignConditionType.WEEKDAY &&
-        cond.type !== CampaignConditionType.PROMOCODE_ENTRY &&
-        cond.type !== CampaignConditionType.BIRTHDAY &&
-        cond.type !== CampaignConditionType.INACTIVITY, // INACTIVITY is only for behavioral campaigns
-    );
-
-    const orderData: OrderEvaluationData = {
-      orderDate,
-      orderSum,
-      promoCodeId,
-    };
-
-    const updatedState = { ...(progress.state as Record<string, any>) };
-    let allConditionsMet = true;
-
-    for (const condition of progressConditions) {
-      const isMet = await this.evaluateCondition(
-        condition,
-        ltyUserId,
-        orderData,
-        updatedState,
-        cardId,
-      );
-
-      if (!isMet) {
-        allConditionsMet = false;
-      }
-    }
-
-    const eligibilityConditions = conditions.filter(
-      (cond) =>
-        cond.type === CampaignConditionType.TIME_RANGE ||
-        cond.type === CampaignConditionType.WEEKDAY ||
-        cond.type === CampaignConditionType.PROMOCODE_ENTRY ||
-        cond.type === CampaignConditionType.BIRTHDAY,
-    );
-
-    let isEligible = true;
-    for (const condition of eligibilityConditions) {
-      if (condition.type === CampaignConditionType.TIME_RANGE) {
-        isEligible = this.evaluateTimeRange(condition, orderData);
-      } else if (condition.type === CampaignConditionType.WEEKDAY) {
-        isEligible = this.evaluateWeekday(condition, orderData);
-      } else if (condition.type === CampaignConditionType.PROMOCODE_ENTRY) {
-        isEligible = await this.evaluatePromocodeEntry(condition, orderData);
-      } else if (condition.type === CampaignConditionType.BIRTHDAY) {
-        isEligible = await this.evaluateBirthday(condition, ltyUserId);
-      }
-
-      if (!isEligible) {
-        break;
-      }
-    }
-
-    await this.prisma.userCampaignProgress.update({
-      where: {
-        id: progress.id,
-      },
-      data: {
-        state: updatedState,
-        updatedAt: new Date(),
-      },
-    });
-
-    if (allConditionsMet && isEligible) {
-      const discountAmount = this.calculateDiscountFromAction(
+    if (window.actionType === MarketingCampaignActionType.CASHBACK_BOOST) {
+      rewardAmount = this.calculateCashbackBoost(
         orderSum,
-        campaign.action.payload as any,
-        rewardPointsUsed,
+        baseCashback,
+        window.payload,
       );
-
-      if (discountAmount > 0) {
-        return {
-          discountAmount,
-          campaignId: campaign.id,
-          actionId: campaign.action.id,
-          executionType: CampaignExecutionType.TRANSACTIONAL,
-        };
-      }
+    } else if (window.actionType === MarketingCampaignActionType.GIFT_POINTS) {
+      rewardAmount = this.calculateGiftPoints(window.payload);
     }
 
-    return null;
-  }
-
-  getBehavioralCampaignDiscount(
-    campaign: MarketingCampaignWithRelations,
-    activationWindows: ActiveActivationWindow[],
-    orderSum: number,
-    rewardPointsUsed: number = 0,
-  ): CampaignDiscountResult | null {
-    if (campaign.executionType !== CampaignExecutionType.BEHAVIORAL) {
-      return null;
-    }
-
-    const window = activationWindows.find(
-      (w) => w.campaignId === campaign.id,
-    );
-
-    if (!window) {
-      return null;
-    }
-
-    const discountAmount = this.calculateDiscountFromAction(
-      orderSum,
-      window.payload,
-      rewardPointsUsed,
-    );
-
-    if (discountAmount > 0) {
+    if (rewardAmount > 0) {
       return {
-        discountAmount,
-        campaignId: campaign.id,
+        campaignId: window.campaignId,
         actionId: window.actionId,
         executionType: CampaignExecutionType.BEHAVIORAL,
         activationWindowId: window.id,
+        rewardAmount,
+        actionType: window.actionType,
       };
     }
 
     return null;
   }
 
-  private calculateDiscountFromAction(
-    originalSum: number,
+  async evaluateTransactionalCampaignReward(
+    campaign: MarketingCampaignWithRelations,
+    ltyUserId: number,
+    orderSum: number,
+    baseCashback: number,
+    orderDate: Date,
+    cardId?: number | null,
+    orderId?: number | null,
+  ): Promise<CampaignRewardResult | null> {
+    if (campaign.executionType !== CampaignExecutionType.TRANSACTIONAL) {
+      return null;
+    }
+
+    if (!campaign.action) {
+      return null;
+    }
+
+    if (
+      campaign.action.actionType !== MarketingCampaignActionType.CASHBACK_BOOST &&
+      campaign.action.actionType !== MarketingCampaignActionType.GIFT_POINTS
+    ) {
+      return null;
+    }
+
+    if (campaign.conditions && campaign.conditions.length > 0) {
+      const conditionTree = campaign.conditions[0].tree as CampaignConditionTree;
+      const conditions = Array.isArray(conditionTree)
+        ? conditionTree
+        : [conditionTree];
+
+      let progress = await this.prisma.userCampaignProgress.findUnique({
+        where: {
+          campaignId_ltyUserId: {
+            campaignId: campaign.id,
+            ltyUserId,
+          },
+        },
+      });
+
+      if (!progress) {
+        progress = await this.prisma.userCampaignProgress.create({
+          data: {
+            campaignId: campaign.id,
+            ltyUserId,
+            state: {},
+            cycleStartedAt: new Date(),
+          },
+        });
+      }
+
+      const orderData = {
+        orderDate,
+        orderSum,
+      };
+
+      const progressConditions = conditions.filter(
+        (cond) =>
+          cond.type !== CampaignConditionType.TIME_RANGE &&
+          cond.type !== CampaignConditionType.WEEKDAY &&
+          cond.type !== CampaignConditionType.PROMOCODE_ENTRY &&
+          cond.type !== CampaignConditionType.BIRTHDAY &&
+          cond.type !== CampaignConditionType.INACTIVITY,
+      );
+
+      const updatedState = { ...(progress.state as Record<string, any>) };
+      let allConditionsMet = true;
+
+      for (const condition of progressConditions) {
+        const isMet = await this.evaluateCondition(
+          condition,
+          ltyUserId,
+          orderData,
+          updatedState,
+          cardId,
+          orderId,
+        );
+
+        if (!isMet) {
+          allConditionsMet = false;
+        }
+      }
+
+      const eligibilityConditions = conditions.filter(
+        (cond) =>
+          cond.type === CampaignConditionType.TIME_RANGE ||
+          cond.type === CampaignConditionType.WEEKDAY ||
+          cond.type === CampaignConditionType.PROMOCODE_ENTRY ||
+          cond.type === CampaignConditionType.BIRTHDAY,
+      );
+
+      let isEligible = true;
+      for (const condition of eligibilityConditions) {
+        if (condition.type === CampaignConditionType.TIME_RANGE) {
+          isEligible = this.evaluateTimeRange(condition, orderData);
+        } else if (condition.type === CampaignConditionType.WEEKDAY) {
+          isEligible = this.evaluateWeekday(condition, orderData);
+        } else if (condition.type === CampaignConditionType.PROMOCODE_ENTRY) {
+          isEligible = false;
+        } else if (condition.type === CampaignConditionType.BIRTHDAY) {
+          isEligible = await this.evaluateBirthday(condition, ltyUserId);
+        }
+
+        if (!isEligible) {
+          break;
+        }
+      }
+
+      await this.prisma.userCampaignProgress.update({
+        where: {
+          id: progress.id,
+        },
+        data: {
+          state: updatedState,
+          updatedAt: new Date(),
+        },
+      });
+
+      if (!allConditionsMet || !isEligible) {
+        return null;
+      }
+    }
+
+    let rewardAmount = 0;
+
+    if (campaign.action.actionType === MarketingCampaignActionType.CASHBACK_BOOST) {
+      rewardAmount = this.calculateCashbackBoost(
+        orderSum,
+        baseCashback,
+        campaign.action.payload,
+      );
+    } else if (campaign.action.actionType === MarketingCampaignActionType.GIFT_POINTS) {
+      rewardAmount = this.calculateGiftPoints(campaign.action.payload);
+    }
+
+    if (rewardAmount > 0) {
+      return {
+        campaignId: campaign.id,
+        actionId: campaign.action.id,
+        executionType: CampaignExecutionType.TRANSACTIONAL,
+        rewardAmount,
+        actionType: campaign.action.actionType,
+      };
+    }
+
+    return null;
+  }
+
+  private calculateCashbackBoost(
+    orderSum: number,
+    baseCashback: number,
     payload: {
-      discountType: DiscountType;
-      discountValue: number;
-      maxDiscountAmount?: number;
+      multiplier?: number;
+      percentage?: number;
     },
-    rewardPointsUsed: number,
   ): number {
     if (!payload) {
       return 0;
     }
 
-    let discountAmount = 0;
-
-    if (payload.discountType === DiscountType.FIXED_AMOUNT) {
-      discountAmount = Math.min(
-        payload.discountValue,
-        originalSum - rewardPointsUsed,
-      );
-    } else if (payload.discountType === DiscountType.PERCENTAGE) {
-      const percentageDiscount = (payload.discountValue / 100) * originalSum;
-      const maxDiscount = payload.maxDiscountAmount || originalSum;
-      discountAmount = Math.min(
-        percentageDiscount,
-        maxDiscount,
-        originalSum - rewardPointsUsed,
-      );
-    } else if (payload.discountType === DiscountType.FREE_SERVICE) {
-      discountAmount = originalSum - rewardPointsUsed;
+    if (payload.multiplier && payload.multiplier > 0) {
+      return Math.round(baseCashback * payload.multiplier);
     }
 
-    return discountAmount;
+    if (payload.percentage && payload.percentage > 0) {
+      const additionalCashback = (orderSum * payload.percentage) / 100;
+      return Math.round(additionalCashback);
+    }
+
+    return 0;
+  }
+
+  private calculateGiftPoints(payload: { points?: number }): number {
+    if (!payload || !payload.points) {
+      return 0;
+    }
+
+    return payload.points;
   }
 
   private async evaluateCondition(
     condition: any,
     ltyUserId: number,
-    orderData: OrderEvaluationData,
+    orderData: { orderDate: Date; orderSum: number },
     state: Record<string, any>,
     cardId?: number | null,
+    orderId?: number | null,
   ): Promise<boolean> {
     switch (condition.type) {
       case CampaignConditionType.VISIT_COUNT:
-        return this.evaluateVisitCount(condition, ltyUserId, state, orderData, cardId);
+        return this.evaluateVisitCount(condition, ltyUserId, state, orderData, cardId, orderId);
 
       case CampaignConditionType.PURCHASE_AMOUNT:
         return this.evaluatePurchaseAmount(condition, orderData);
@@ -372,8 +379,9 @@ export class MarketingCampaignDiscountService {
     condition: any,
     ltyUserId: number,
     state: Record<string, any>,
-    orderData: OrderEvaluationData,
+    orderData: { orderDate: Date; orderSum: number },
     cardId?: number | null,
+    orderId?: number | null,
   ): Promise<boolean> {
     const cycle = condition.cycle || VisitCycle.ALL_TIME;
     const required = condition.value;
@@ -421,7 +429,22 @@ export class MarketingCampaignDiscountService {
       });
     }
 
-    currentCount += 1;
+    if (orderId) {
+      const currentOrder = await this.prisma.lTYOrder.findUnique({
+        where: { id: orderId },
+        select: { orderStatus: true, cardId: true },
+      });
+
+      if (
+        currentOrder &&
+        currentOrder.cardId === card.id &&
+        currentOrder.orderStatus &&
+        currentOrder.orderStatus !== OrderStatus.COMPLETED &&
+        currentOrder.orderStatus !== OrderStatus.PAYED
+      ) {
+        currentCount += 1;
+      }
+    }
 
     state.visits_in_cycle = currentCount;
     state.required_visits = required;
@@ -432,7 +455,7 @@ export class MarketingCampaignDiscountService {
 
   private evaluatePurchaseAmount(
     condition: any,
-    orderData: OrderEvaluationData,
+    orderData: { orderDate: Date; orderSum: number },
   ): boolean {
     const operator = condition.operator || ConditionOperator.GREATER_THAN_OR_EQUAL;
     const required = condition.value;
@@ -441,14 +464,20 @@ export class MarketingCampaignDiscountService {
     return this.compareValues(orderAmount, operator, required);
   }
 
-  private evaluateTimeRange(condition: any, orderData: OrderEvaluationData): boolean {
+  private evaluateTimeRange(
+    condition: any,
+    orderData: { orderDate: Date; orderSum: number },
+  ): boolean {
     const orderDate = new Date(orderData.orderDate);
     const orderTime = `${orderDate.getHours().toString().padStart(2, '0')}:${orderDate.getMinutes().toString().padStart(2, '0')}`;
 
     return orderTime >= condition.start && orderTime <= condition.end;
   }
 
-  private evaluateWeekday(condition: any, orderData: OrderEvaluationData): boolean {
+  private evaluateWeekday(
+    condition: any,
+    orderData: { orderDate: Date; orderSum: number },
+  ): boolean {
     const orderDate = new Date(orderData.orderDate);
     const dayNames = [
       'SUNDAY',
@@ -462,26 +491,6 @@ export class MarketingCampaignDiscountService {
     const orderDay = dayNames[orderDate.getDay()];
 
     return condition.values?.includes(orderDay) || false;
-  }
-
-  private async evaluatePromocodeEntry(
-    condition: any,
-    orderData: OrderEvaluationData,
-  ): Promise<boolean> {
-    if (!orderData.promoCodeId || !condition.code) {
-      return false;
-    }
-
-    const promocode = await this.prisma.lTYPromocode.findUnique({
-      where: { id: orderData.promoCodeId },
-      select: { code: true, isActive: true },
-    });
-
-    if (!promocode || !promocode.isActive) {
-      return false;
-    }
-
-    return promocode.code === condition.code;
   }
 
   private async evaluateBirthday(
@@ -499,7 +508,7 @@ export class MarketingCampaignDiscountService {
 
     const today = new Date();
     const birthday = new Date(user.birthday);
-    const todayMonth = today.getMonth() + 1; 
+    const todayMonth = today.getMonth() + 1;
     const todayDay = today.getDate();
     const birthdayMonth = birthday.getMonth() + 1;
     const birthdayDay = birthday.getDate();

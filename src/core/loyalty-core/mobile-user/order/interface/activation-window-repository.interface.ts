@@ -33,6 +33,11 @@ export abstract class IActivationWindowRepository {
     ltyUserId: number,
   ): Promise<ActiveActivationWindow[]>;
 
+  abstract findRewardActivationWindows(
+    ltyUserId: number,
+    actionTypes: MarketingCampaignActionType[],
+  ): Promise<ActiveActivationWindow[]>;
+
   abstract createUsage(
     input: CreateActivationWindowUsageInput,
   ): Promise<void>;
