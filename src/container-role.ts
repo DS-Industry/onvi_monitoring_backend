@@ -19,16 +19,25 @@ export const rolesMapBootstrap = {
     const PORT = configService.get<number>('port');
     const appName = configService.get<string>('appName');
 
-    // Enable CORS only for local development
     app.enableCors({
       origin: [
         'http://localhost:5173',
         'https://ds-industry.github.io',
-        'https://app.onvione.ru/',
-        'https://st.app.onvione.ru/',
+        'https://app.onvione.ru',
+        'https://st.app.onvione.ru',
       ],
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+      ],
+      exposedHeaders: ['Content-Range', 'X-Content-Range'],
       credentials: true,
+      preflightContinue: false,
+      optionsSuccessStatus: 204, 
     });
 
     app.use(cookieParser());
