@@ -728,15 +728,6 @@ export class LoyaltyValidateRules {
     campaignId: number,
     ability: any,
   ) {
-    const userLoyaltyProgramIds = this.extractLoyaltyProgramIds(ability);
-
-    if (userLoyaltyProgramIds.length === 0) {
-      throw new LoyaltyException(
-        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Access denied: No loyalty program permissions',
-      );
-    }
-
     const campaignCheck =
       await this.validateLib.marketingCampaignByIdExists(campaignId);
 
@@ -749,13 +740,20 @@ export class LoyaltyValidateRules {
 
     const campaign = campaignCheck.object;
 
-    if (
-      campaign.ltyProgramId &&
-      !userLoyaltyProgramIds.includes(campaign.ltyProgramId)
-    ) {
-      throw new LoyaltyException(
-        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
-        'Access denied: You do not have access to this marketing campaign',
+    if (campaign.ltyProgramId) {
+      const loyaltyProgramCheck =
+        await this.validateLib.loyaltyProgramByIdExists(campaign.ltyProgramId);
+
+      if (loyaltyProgramCheck.code !== 200 || !loyaltyProgramCheck.object) {
+        throw new LoyaltyException(
+          LOYALTY_GET_ONE_EXCEPTION_CODE,
+          'Loyalty program not found',
+        );
+      }
+
+      ForbiddenError.from(ability).throwUnlessCan(
+        PermissionAction.read,
+        loyaltyProgramCheck.object,
       );
     }
   }
