@@ -107,6 +107,8 @@ export class ApplyMarketingCampaignRewardsUseCase {
         { rewardAmount: 0 } as typeof rewardResults[0],
       );
 
+    console.log({ bestCashbackBoost, bestGiftPoints });
+
     if (bestCashbackBoost.rewardAmount > 0) {
       await this.createCardBonusOperUseCase.execute(
         {

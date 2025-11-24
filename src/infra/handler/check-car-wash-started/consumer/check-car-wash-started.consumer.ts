@@ -16,8 +16,10 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<string> {
+    const startTime = new Date().toISOString();
+    const parentId = job.parent?.id;
     this.logger.log(
-      `[CHECK-CAR-WASH-STARTED] Processing job ${job.id} for order#${job.data.orderId}`,
+      `[CHECK-CAR-WASH-STARTED] [${startTime}] START - Job ${job.id} for order#${job.data.orderId}. Parent: ${parentId || 'none'}`,
     );
     let carWashLaunchSuccess = false;
     try {
@@ -53,13 +55,15 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
         job.data.carWashDeviceId,
         job.data.bayType,
       );
+      const endTime = new Date().toISOString();
       this.logger.log(
-        `[CHECK-CAR-WASH-STARTED] Job ${job.id} completed successfully`,
+        `[CHECK-CAR-WASH-STARTED] [${endTime}] END - Job ${job.id} completed successfully for order#${job.data.orderId}`,
       );
       return 'success';
     } else {
+      const endTime = new Date().toISOString();
       this.logger.warn(
-        `[CHECK-CAR-WASH-STARTED] Job ${job.id} skipped - car-wash-launch did not succeed`,
+        `[CHECK-CAR-WASH-STARTED] [${endTime}] END - Job ${job.id} skipped - car-wash-launch did not succeed for order#${job.data.orderId}`,
       );
       return 'skipped';
     }

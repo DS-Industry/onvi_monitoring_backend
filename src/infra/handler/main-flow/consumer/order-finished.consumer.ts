@@ -22,8 +22,9 @@ export class OrderFinishedConsumer extends WorkerHost {
 
   async process(job: Job<any>): Promise<void> {
     const { orderId } = job.data;
+    const startTime = new Date().toISOString();
     this.logger.log(
-      `[ORDER-FINISHED] Parent job ${job.id} for order#${orderId}`,
+      `[ORDER-FINISHED] [${startTime}] START - Parent job ${job.id} for order#${orderId}`,
     );
     const order = await this.orderRepository.findOneById(orderId);
     if (!order) {
@@ -67,8 +68,9 @@ export class OrderFinishedConsumer extends WorkerHost {
       this.logger.warn(`[ORDER-FINISHED] Order#${orderId} marked as FAILED`);
     } else {
       await this.orderRepository.update(order);
+      const endTime = new Date().toISOString();
       this.logger.log(
-        `[ORDER-FINISHED] Order#${orderId} marked as COMPLETED - all children successful`,
+        `[ORDER-FINISHED] [${endTime}] END - Order#${orderId} marked as COMPLETED - all children successful`,
       );
 
       try {

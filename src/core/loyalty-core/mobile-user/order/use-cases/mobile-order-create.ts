@@ -261,26 +261,6 @@ export class CreateMobileOrderUseCase {
       }
     }
 
-    const noDiscountApplied = finalDiscount === 0;
-    const noPromoCodeUsed = !request.promoCodeId;
-
-    if (noDiscountApplied && noPromoCodeUsed) {
-      await this.flowProducer.add({
-        name: 'apply-marketing-campaign-rewards',
-        queueName: 'apply-marketing-campaign-rewards',
-        data: { orderId: createdOrder.id },
-        opts: {
-          failParentOnFailure: false,
-          ignoreDependencyOnFailure: true,
-          attempts: 3,
-          backoff: {
-            type: 'fixed',
-            delay: 5000,
-          },
-        },
-      });
-    }
-
     if (isFreeVacuum) {
       await this.flowProducer.add({
         name: 'order-finished',
@@ -326,6 +306,47 @@ export class CreateMobileOrderUseCase {
                 },
               },
             ],
+          },
+          {
+            name: 'check-behavioral-campaigns',
+            queueName: 'check-behavioral-campaigns',
+            data: {
+              orderId: createdOrder.id,
+            },
+            opts: {
+              failParentOnFailure: false,
+              ignoreDependencyOnFailure: true,
+              attempts: 3,
+              backoff: {
+                type: 'fixed',
+                delay: 5000,
+              },
+            },
+          },
+        ],
+      });
+    } else {
+      // For non-free vacuum orders, still check behavioral campaigns
+      await this.flowProducer.add({
+        name: 'order-finished',
+        queueName: 'order-finished',
+        data: { orderId: createdOrder.id },
+        children: [
+          {
+            name: 'check-behavioral-campaigns',
+            queueName: 'check-behavioral-campaigns',
+            data: {
+              orderId: createdOrder.id,
+            },
+            opts: {
+              failParentOnFailure: false,
+              ignoreDependencyOnFailure: true,
+              attempts: 3,
+              backoff: {
+                type: 'fixed',
+                delay: 5000,
+              },
+            },
           },
         ],
       });

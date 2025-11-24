@@ -121,6 +121,8 @@ import { MarketingCampaignDiscountService } from './mobile-user/order/use-cases/
 import { MarketingCampaignRewardService } from './mobile-user/order/use-cases/marketing-campaign-reward.service';
 import { ApplyMarketingCampaignRewardsUseCase } from './mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
 import { ApplyMarketingCampaignRewardsConsumer } from '@infra/handler/marketing-campaign/consumer/apply-marketing-campaign-rewards.consumer';
+import { CheckBehavioralCampaignsUseCase } from './mobile-user/order/use-cases/check-behavioral-campaigns.use-case';
+import { CheckBehavioralCampaignsConsumer } from '@infra/handler/marketing-campaign/consumer/check-behavioral-campaigns.consumer';
 import {
   OrderValidationService,
   CashbackCalculationService,
@@ -259,6 +261,7 @@ const mobileOrderUseCase: Provider[] = [
   MarketingCampaignDiscountService,
   MarketingCampaignRewardService,
   ApplyMarketingCampaignRewardsUseCase,
+  CheckBehavioralCampaignsUseCase,
 ];
 
 const orderDomainServices: Provider[] = [
@@ -358,6 +361,19 @@ const redisProviders: Provider[] = [RedisService];
           },
         },
       },
+      {
+        configKey: 'worker',
+        name: 'check-behavioral-campaigns',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+          backoff: {
+            type: 'fixed',
+            delay: 5000,
+          },
+        },
+      },
     ),
   ],
   providers: [
@@ -381,6 +397,7 @@ const redisProviders: Provider[] = [RedisService];
     ...redisProviders,
     StartPosProcess,
     ApplyMarketingCampaignRewardsConsumer,
+    CheckBehavioralCampaignsConsumer,
   ],
   exports: [
     ...repositories,
