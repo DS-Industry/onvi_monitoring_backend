@@ -25,7 +25,7 @@ export class PrismaOrderMapper {
       sumDiscount: entity.sumDiscount,
       sumCashback: entity.sumCashback,
       carWashDeviceId: entity.carWashDeviceId,
-      carWashId: entity.carWashDevice.id,
+      carWashId: entity.carWashDevice.carWashPosId,
       platform: EnumMapper.toDomainPlatformType(entity.platform),
       bayType: entity.carWashDevice.carWashDeviceType.name,
       cardMobileUserId: entity.cardId,

@@ -67,6 +67,14 @@ export class CarWashLaunchUseCase {
         type: bayType ?? null,
       });
 
+      if (bayDetails.status === 'Busy') {
+        throw new Error('Bay is busy')
+      }
+  
+      if (bayDetails.status === 'Unavailable') {
+        throw new Error("Bay is unavailable")
+      }
+
       console.log('bayDetails', bayDetails);
 
       const totalSum = (
