@@ -247,12 +247,17 @@ export class MarketingCampaignDiscountService {
       }
     }
 
+    const cycleStartedAt = updatedState.cycleStartedAt
+      ? new Date(updatedState.cycleStartedAt)
+      : undefined;
+
     await this.prisma.userCampaignProgress.update({
       where: {
         id: progress.id,
       },
       data: {
         state: updatedState,
+        cycleStartedAt: cycleStartedAt || progress.cycleStartedAt,
         updatedAt: new Date(),
       },
     });
@@ -275,6 +280,91 @@ export class MarketingCampaignDiscountService {
     }
 
     return null;
+  }
+
+  async trackVisitCountsForEligibleCampaigns(
+    campaigns: MarketingCampaignWithRelations[],
+    ltyUserId: number,
+    orderDate: Date,
+    orderSum: number,
+    cardId?: number | null,
+  ): Promise<void> {
+    for (const campaign of campaigns) {
+      if (campaign.executionType !== CampaignExecutionType.TRANSACTIONAL) {
+        continue;
+      }
+
+      if (!campaign.conditions || campaign.conditions.length === 0) {
+        continue;
+      }
+
+      const conditionTree = campaign.conditions[0].tree as CampaignConditionTree;
+      const conditions = Array.isArray(conditionTree)
+        ? conditionTree
+        : [conditionTree];
+
+      const hasVisitCountCondition = conditions.some(
+        (cond) => cond.type === CampaignConditionType.VISIT_COUNT,
+      );
+
+      if (!hasVisitCountCondition) {
+        continue;
+      }
+
+      let progress = await this.prisma.userCampaignProgress.findUnique({
+        where: {
+          campaignId_ltyUserId: {
+            campaignId: campaign.id,
+            ltyUserId,
+          },
+        },
+      });
+
+      if (!progress) {
+        progress = await this.prisma.userCampaignProgress.create({
+          data: {
+            campaignId: campaign.id,
+            ltyUserId,
+            state: {},
+            cycleStartedAt: new Date(),
+          },
+        });
+      }
+
+      const visitCountCondition = conditions.find(
+        (cond) => cond.type === CampaignConditionType.VISIT_COUNT,
+      );
+
+      if (visitCountCondition) {
+        const updatedState = { ...(progress.state as Record<string, any>) };
+        await this.evaluateVisitCount(
+          visitCountCondition,
+          ltyUserId,
+          updatedState,
+          {
+            orderDate,
+            orderSum,
+            promoCodeId: null,
+          },
+          cardId,
+        );
+
+        const cycleStartedAt = updatedState.cycleStartedAt
+          ? new Date(updatedState.cycleStartedAt)
+          : undefined;
+
+        await this.prisma.userCampaignProgress.update({
+          where: {
+            id: progress.id,
+          },
+          data: {
+            state: updatedState,
+            cycleStartedAt: cycleStartedAt || progress.cycleStartedAt,
+            updatedAt: new Date(),
+          },
+        });
+      }
+    }
   }
 
   getBehavioralCampaignDiscount(
@@ -403,31 +493,57 @@ export class MarketingCampaignDiscountService {
       return false;
     }
 
-    if (cycle === VisitCycle.ALL_TIME || cycle === 'ALL_TIME') {
-      currentCount = await this.prisma.lTYOrder.count({
-        where: {
-          cardId: card.id,
-          orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
-        },
-      });
+    const currentStateCount = state.visits_in_cycle || 0;
+    const lastVisitAt = state.last_visit_at
+      ? new Date(state.last_visit_at)
+      : null;
+    const currentOrderDate = new Date(orderData.orderDate);
+    
+    const isRecentUpdate =
+      lastVisitAt &&
+      Math.abs(currentOrderDate.getTime() - lastVisitAt.getTime()) < 1000; // 1 second
+    
+    if (isRecentUpdate) {
+      currentCount = currentStateCount;
     } else {
-      const startDate = this.getCycleStartDate(cycle, now);
-      currentCount = await this.prisma.lTYOrder.count({
-        where: {
-          cardId: card.id,
-          orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
-          orderData: { gte: startDate },
-        },
-      });
+      if (currentStateCount === 0) {
+        let dbCount = 0;
+        if (cycle === VisitCycle.ALL_TIME || cycle === 'ALL_TIME') {
+          dbCount = await this.prisma.lTYOrder.count({
+            where: {
+              cardId: card.id,
+              orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
+            },
+          });
+        } else {
+          const startDate = this.getCycleStartDate(cycle, now);
+          dbCount = await this.prisma.lTYOrder.count({
+            where: {
+              cardId: card.id,
+              orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
+              orderData: { gte: startDate },
+            },
+          });
+        }
+        currentCount = dbCount + 1;
+      } else {
+        currentCount = currentStateCount + 1;
+      }
     }
 
-    currentCount += 1;
+    const conditionMet = this.compareValues(currentCount, operator, required);
+
+    if (currentCount > required) {
+      currentCount = 1;
+      state.cycleStartedAt = orderData.orderDate;
+    }
 
     state.visits_in_cycle = currentCount;
     state.required_visits = required;
     state.last_visit_at = orderData.orderDate;
+    state.last_order_sum = orderData.orderSum || 0;
 
-    return this.compareValues(currentCount, operator, required);
+    return conditionMet;
   }
 
   private evaluatePurchaseAmount(

@@ -48,7 +48,6 @@ export class PromoCodeService {
       order.sumBonus,
     );
 
-    await this.promoCodeRepository.incrementUsage(promoCodeId);
 
     return discountAmount;
   }
@@ -61,8 +60,14 @@ export class PromoCodeService {
   ): Promise<void> {
     const promoCode = await this.promoCodeRepository.findById(promoCodeId);
 
-    if (!promoCode || !promoCode.campaignId) {
-      return; // No campaign linked, no usage record needed
+    if (!promoCode) {
+      return; 
+    }
+
+    await this.promoCodeRepository.incrementUsage(promoCodeId);
+
+    if (!promoCode.campaignId) {
+      return; 
     }
 
     await this.promoCodeRepository.createUsage({

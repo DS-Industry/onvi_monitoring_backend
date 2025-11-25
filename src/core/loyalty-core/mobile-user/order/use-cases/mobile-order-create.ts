@@ -12,7 +12,7 @@ import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-
 import { PromoCodeService } from './promo-code-service';
 import {
   IActivationWindowRepository,
-  ActiveActivationWindow,
+  // ActiveActivationWindow,
 } from '../interface/activation-window-repository.interface';
 import { ITariffRepository } from '../interface/tariff';
 import {
@@ -126,29 +126,30 @@ export class CreateMobileOrderUseCase {
 
     const orderDate = new Date();
 
-    const discountWindows =
-      await this.activationWindowRepository.findDiscountActivationWindows(
-        request.cardMobileUserId,
-      );
+    // TODO: Uncomment this when we have activation windows ready
+    // const discountWindows =
+    //   await this.activationWindowRepository.findDiscountActivationWindows(
+    //     request.cardMobileUserId,
+    //   );
 
-    let activationWindowDiscount = 0;
-    let usedActivationWindow: ActiveActivationWindow | null = null;
-    if (discountWindows.length > 0) {
-      const bestDiscount = this.discountCalculationService.calculateBestDiscount(
-        {
-          originalSum: request.sum,
-          rewardPointsUsed: request.rewardPointsUsed || 0,
-          discountWindows,
-        },
-      );
-      if (bestDiscount) {
-        activationWindowDiscount = bestDiscount.discountAmount;
-        usedActivationWindow =
-          discountWindows.find(
-            (w) => w.id === bestDiscount.activationWindowId,
-          ) || null;
-      }
-    }
+    // let activationWindowDiscount = 0;
+    // let usedActivationWindow: ActiveActivationWindow | null = null;
+    // if (discountWindows.length > 0) {
+    //   const bestDiscount = this.discountCalculationService.calculateBestDiscount(
+    //     {
+    //       originalSum: request.sum,
+    //       rewardPointsUsed: request.rewardPointsUsed || 0,
+    //       discountWindows,
+    //     },
+    //   );
+    //   if (bestDiscount) {
+    //     activationWindowDiscount = bestDiscount.discountAmount;
+    //     usedActivationWindow =
+    //       discountWindows.find(
+    //         (w) => w.id === bestDiscount.activationWindowId,
+    //       ) || null;
+    //   }
+    // }
 
     let transactionalCampaignDiscount = 0;
     let usedTransactionalCampaign: {
@@ -162,6 +163,14 @@ export class CreateMobileOrderUseCase {
         request.cardMobileUserId,
         orderDate,
       );
+
+    await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
+      eligibleCampaigns,
+      request.cardMobileUserId,
+      orderDate,
+      request.sum,
+      card.id,
+    );
 
     const transactionalDiscounts: Array<{
       campaignId: number;
@@ -211,19 +220,20 @@ export class CreateMobileOrderUseCase {
     }
 
     const finalDiscount = Math.max(
-      activationWindowDiscount,
+      // activationWindowDiscount,
       transactionalCampaignDiscount,
       promoCodeDiscount,
     );
     order.sumDiscount = finalDiscount;
-    order.sumReal = request.sum - finalDiscount;
+    order.sumReal = Math.max(0, request.sum - finalDiscount);
 
     const createdOrder = await this.orderRepository.create(order);
 
     if (finalDiscount > 0) {
       if (
         transactionalCampaignDiscount > 0 &&
-        transactionalCampaignDiscount >= activationWindowDiscount &&
+        // TODO: Uncomment this when we have activation windows ready
+        // transactionalCampaignDiscount >= activationWindowDiscount &&
         transactionalCampaignDiscount >= promoCodeDiscount &&
         usedTransactionalCampaign
       ) {
@@ -236,19 +246,20 @@ export class CreateMobileOrderUseCase {
           type: CampaignRedemptionType.DISCOUNT,
         });
       } else if (
-        activationWindowDiscount > 0 &&
-        activationWindowDiscount >= promoCodeDiscount &&
-        usedActivationWindow
-      ) {
-        await this.activationWindowRepository.createUsage({
-          campaignId: usedActivationWindow.campaignId,
-          actionId: usedActivationWindow.actionId,
-          ltyUserId: request.cardMobileUserId,
-          orderId: createdOrder.id,
-          posId: request.carWashId,
-          type: CampaignRedemptionType.DISCOUNT,
-        });
-      } else if (
+      // TODO: Uncomment this when we have activation windows ready
+      //   activationWindowDiscount > 0 &&
+      //   activationWindowDiscount >= promoCodeDiscount &&
+      //   usedActivationWindow
+      // ) {
+      //   await this.activationWindowRepository.createUsage({
+      //     campaignId: usedActivationWindow.campaignId,
+      //     actionId: usedActivationWindow.actionId,
+      //     ltyUserId: request.cardMobileUserId,
+      //     orderId: createdOrder.id,
+      //     posId: request.carWashId,
+      //     type: CampaignRedemptionType.DISCOUNT,
+      //   });
+      // } else if (
         promoCodeDiscount > 0 &&
         request.promoCodeId
       ) {
@@ -307,50 +318,53 @@ export class CreateMobileOrderUseCase {
               },
             ],
           },
-          {
-            name: 'check-behavioral-campaigns',
-            queueName: 'check-behavioral-campaigns',
-            data: {
-              orderId: createdOrder.id,
-            },
-            opts: {
-              failParentOnFailure: false,
-              ignoreDependencyOnFailure: true,
-              attempts: 3,
-              backoff: {
-                type: 'fixed',
-                delay: 5000,
-              },
-            },
-          },
+          // TODO: Uncomment this when we have activation windows ready
+          // {
+          //   name: 'check-behavioral-campaigns',
+          //   queueName: 'check-behavioral-campaigns',
+          //   data: {
+          //     orderId: createdOrder.id,
+          //   },
+          //   opts: {
+          //     failParentOnFailure: false,
+          //     ignoreDependencyOnFailure: true,
+          //     attempts: 3,
+          //     backoff: {
+          //       type: 'fixed',
+          //       delay: 5000,
+          //     },
+          //   },
+          // },
         ],
       });
-    } else {
-      // For non-free vacuum orders, still check behavioral campaigns
-      await this.flowProducer.add({
-        name: 'order-finished',
-        queueName: 'order-finished',
-        data: { orderId: createdOrder.id },
-        children: [
-          {
-            name: 'check-behavioral-campaigns',
-            queueName: 'check-behavioral-campaigns',
-            data: {
-              orderId: createdOrder.id,
-            },
-            opts: {
-              failParentOnFailure: false,
-              ignoreDependencyOnFailure: true,
-              attempts: 3,
-              backoff: {
-                type: 'fixed',
-                delay: 5000,
-              },
-            },
-          },
-        ],
-      });
-    }
+    } 
+    // TODO: Uncomment this when we have activation windows ready
+    // else {
+    //   // For non-free vacuum orders, still check behavioral campaigns
+    //   await this.flowProducer.add({
+    //     name: 'order-finished',
+    //     queueName: 'order-finished',
+    //     data: { orderId: createdOrder.id },
+    //     children: [
+    //       {
+    //         name: 'check-behavioral-campaigns',
+    //         queueName: 'check-behavioral-campaigns',
+    //         data: {
+    //           orderId: createdOrder.id,
+    //         },
+    //         opts: {
+    //           failParentOnFailure: false,
+    //           ignoreDependencyOnFailure: true,
+    //           attempts: 3,
+    //           backoff: {
+    //             type: 'fixed',
+    //             delay: 5000,
+    //           },
+    //         },
+    //       },
+    //     ],
+    //   });
+    // }
 
     return {
       orderId: createdOrder.id,
