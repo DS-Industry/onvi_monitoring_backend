@@ -10,6 +10,8 @@ export class CardImportUseCase {
 
   async execute(
     organizationId: number,
+    corporateId: number,
+    tierId: number,
     cardsData: CardImportItemDto[],
   ): Promise<ImportCardsResponseDto> {
     const errors: string[] = [];
@@ -22,22 +24,20 @@ export class CardImportUseCase {
       throw new Error(`Organization with id ${organizationId} not found`);
     }
 
+    const tierExists =
+      await this.cardRepository.validateTierExistsAndAccessible(
+        tierId,
+        organizationId,
+      );
+
+    if (!tierExists) {
+      throw new Error(
+        `Tier ${tierId} not found or not accessible for organization ${organizationId}`,
+      );
+    }
+
     for (const cardData of cardsData) {
       try {
-        const tierExists =
-          await this.cardRepository.validateTierExistsAndAccessible(
-            cardData.tierId,
-            organizationId,
-          );
-
-        if (!tierExists) {
-          errors.push(
-            `Tier ${cardData.tierId} not found or not accessible for organization ${organizationId}`,
-          );
-          errorCount++;
-          continue;
-        }
-
         const cardExists = await this.cardRepository.checkCardExists(
           cardData.devNumber,
           cardData.uniqueNumber,
@@ -55,7 +55,8 @@ export class CardImportUseCase {
           devNumber: cardData.uniqueNumber,
           number: cardData.devNumber,
           balance: 0,
-          loyaltyCardTierId: cardData.tierId,
+          loyaltyCardTierId: tierId,
+          corporateId: corporateId,
           mobileUserId: undefined,
           createdAt: new Date(),
           updatedAt: new Date(),

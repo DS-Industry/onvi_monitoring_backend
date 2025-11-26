@@ -210,17 +210,6 @@ export class CorporateRepository extends ICorporateRepository {
       where: {
         id: corporateId,
       },
-      include: {
-        workers: {
-          include: {
-            card: {
-              include: {
-                cardTier: true,
-              },
-            },
-          },
-        },
-      },
     });
 
     if (!corporate) {
@@ -238,38 +227,49 @@ export class CorporateRepository extends ICorporateRepository {
       };
     }
 
-    let workersWithCards = corporate.workers.filter((worker) => worker.card);
+    const where: any = {
+      corporateId: corporateId,
+    };
 
     if (search) {
-      workersWithCards = workersWithCards.filter(
-        (worker) =>
-          worker.name.toLowerCase().includes(search.toLowerCase()) ||
-          worker.card.unqNumber.toLowerCase().includes(search.toLowerCase()) ||
-          worker.card.number.toLowerCase().includes(search.toLowerCase()),
-      );
+      where.OR = [
+        { unqNumber: { contains: search, mode: 'insensitive' } },
+        { number: { contains: search, mode: 'insensitive' } },
+        { client: { name: { contains: search, mode: 'insensitive' } } },
+      ];
     }
 
-    const total = workersWithCards.length;
+    const total = await this.prisma.lTYCard.count({ where });
+
+    const cards = await this.prisma.lTYCard.findMany({
+      where,
+      skip: skip || 0,
+      take: take || 10,
+      include: {
+        client: true,
+        cardTier: true,
+      },
+      orderBy: [
+        { unqNumber: 'asc' },
+      ],
+    });
+
     const size = take || 10;
     const page = skip && take ? Math.floor(skip / take) + 1 : 1;
     const totalPages = size > 0 ? Math.ceil(total / size) : 1;
     const hasNext = page < totalPages;
     const hasPrevious = page > 1;
 
-    const paginatedWorkers = workersWithCards
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(skip || 0, (skip || 0) + (take || 10));
-
-    const data = paginatedWorkers.map((worker) => ({
-      id: worker.card.id,
-      ownerName: worker.name,
-      cardUnqNumber: worker.card.unqNumber,
-      cardNumber: worker.card.number,
-      cardBalance: worker.card.balance,
-      cardTier: worker.card.cardTier
+    const data = cards.map((card) => ({
+      id: card.id,
+      ownerName: card.client?.name || '',
+      cardUnqNumber: card.unqNumber,
+      cardNumber: card.number,
+      cardBalance: card.balance,
+      cardTier: card.cardTier
         ? {
-            name: worker.card.cardTier.name,
-            limitBenefit: worker.card.cardTier.limitBenefit,
+            name: card.cardTier.name,
+            limitBenefit: card.cardTier.limitBenefit,
           }
         : null,
     }));

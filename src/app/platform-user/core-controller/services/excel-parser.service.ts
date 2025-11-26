@@ -59,14 +59,13 @@ export class FileParserService {
 
         const columns = this.parseCSVLine(line);
 
-        if (columns.length >= 3) {
+        if (columns.length >= 2) {
           const card: CardImportItemDto = {
             devNumber: String(columns[0] || '').trim(),
             uniqueNumber: String(columns[1] || '').trim(),
-            tierId: Number(columns[2]) || 0,
           };
 
-          if (card.devNumber && card.uniqueNumber && card.tierId > 0) {
+          if (card.devNumber && card.uniqueNumber) {
             cards.push(card);
           } else {
             console.warn('Skipping invalid CSV row:', {
@@ -133,14 +132,13 @@ export class FileParserService {
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i] as any[];
 
-        if (row.length >= 3) {
+        if (row.length >= 2) {
           const card: CardImportItemDto = {
             devNumber: String(row[0] || '').trim(),
             uniqueNumber: String(row[1] || '').trim(),
-            tierId: Number(row[2]) || 0,
           };
 
-          if (card.devNumber && card.uniqueNumber && card.tierId > 0) {
+          if (card.devNumber && card.uniqueNumber) {
             cards.push(card);
           } else {
             console.warn('Skipping invalid Excel row:', {

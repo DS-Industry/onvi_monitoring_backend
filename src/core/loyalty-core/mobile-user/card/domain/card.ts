@@ -10,6 +10,7 @@ export interface CardProps {
   number: string;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
+  corporateId?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -47,6 +48,10 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.loyaltyCardTierId;
   }
 
+  get corporateId(): number | undefined {
+    return this.props.corporateId;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -69,6 +74,10 @@ export class Card extends BaseEntity<CardProps> {
 
   set mobileUserId(mobileUserId: number | undefined) {
     this.props.mobileUserId = mobileUserId;
+  }
+
+  set corporateId(corporateId: number | undefined) {
+    this.props.corporateId = corporateId;
   }
 
   set createdAt(createdAt: Date) {
