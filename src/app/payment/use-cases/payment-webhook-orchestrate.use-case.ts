@@ -23,11 +23,36 @@ export class PaymentWebhookOrchestrateUseCase {
     data?: any,
     requestId?: string,
   ) {
-    const order = await this.orderRepository.findOneByTransactionId(paymentId);
+    let order = await this.orderRepository.findOneByTransactionId(paymentId);
+
+    if (!order && data?.object?.metadata) {
+      const orderIdFromMetadata =
+        data.object.metadata.orderId ||
+        data.object.metadata.order_id;
+
+      if (orderIdFromMetadata) {
+        const orderId = parseInt(
+          String(orderIdFromMetadata),
+          10,
+        );
+        if (!isNaN(orderId)) {
+          try {
+            order = await this.orderRepository.findOneById(orderId);
+            this.logger.log(
+              `Found order ${orderId} by metadata for payment ${paymentId}. Request ID: ${requestId || 'unknown'}`,
+            );
+          } catch (error) {
+            this.logger.warn(
+              `Order ${orderId} from metadata not found. Request ID: ${requestId || 'unknown'}`,
+            );
+          }
+        }
+      }
+    }
 
     if (!order) {
       this.logger.warn(
-        `Webhook received for unknown order. Payment ID: ${paymentId}, Event: ${event}, Request ID: ${requestId || 'unknown'}`,
+        `Webhook received for unknown order. Payment ID: ${paymentId}, Event: ${event}, Metadata: ${JSON.stringify(data?.object?.metadata || {})}, Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
@@ -139,10 +164,15 @@ export class PaymentWebhookOrchestrateUseCase {
       return;
     }
 
+    if (event === 'payment.waiting_for_capture') {
+      this.logger.log(
+        `Payment ${paymentId} is waiting for capture for order#${order.id}. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
     this.logger.warn(
       `Unhandled webhook event: ${event} for order#${order.id}, payment ${paymentId}. Request ID: ${requestId || 'unknown'}`,
     );
-    order.orderStatus = OrderStatus.FAILED;
-    await this.orderRepository.update(order);
   }
 }

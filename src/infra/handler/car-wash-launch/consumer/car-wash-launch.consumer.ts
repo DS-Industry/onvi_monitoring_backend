@@ -14,9 +14,12 @@ export class CarWashLaunchConsumer extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<string> {
+    const startTime = new Date().toISOString();
+    const parentId = job.parent?.id;
     this.logger.log(
-      `[CAR-WASH-LAUNCH] Processing job ${job.id} for order#${job.data.orderId}`,
+      `[CAR-WASH-LAUNCH] [${startTime}] START - Job ${job.id} for order#${job.data.orderId}. Parent: ${parentId || 'none'}`,
     );
+    
     await this.carWashLaunchUseCase.execute(
       job.data.orderId,
       job.data.carWashId,
@@ -24,7 +27,10 @@ export class CarWashLaunchConsumer extends WorkerHost {
       job.data.bayType,
     );
 
-    this.logger.log(`[CAR-WASH-LAUNCH] Job ${job.id} completed successfully`);
+    const endTime = new Date().toISOString();
+    this.logger.log(
+      `[CAR-WASH-LAUNCH] [${endTime}] END - Job ${job.id} completed successfully for order#${job.data.orderId}`,
+    );
     return 'success';
   }
 }

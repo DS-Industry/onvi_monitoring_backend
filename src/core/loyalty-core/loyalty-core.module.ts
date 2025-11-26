@@ -109,17 +109,26 @@ import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
+import { GetActivationWindowsUseCase } from './mobile-user/order/use-cases/get-activation-windows.use-case';
 import { ITariffRepository } from './mobile-user/order/interface/tariff';
 import { TariffRepository } from './mobile-user/order/repository/tariff';
+import { ActivationWindowRepositoryProvider } from './mobile-user/order/provider/activation-window.repository';
 import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-case';
 import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
 import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
+import { MarketingCampaignDiscountService } from './mobile-user/order/use-cases/marketing-campaign-discount.service';
+import { MarketingCampaignRewardService } from './mobile-user/order/use-cases/marketing-campaign-reward.service';
+import { ApplyMarketingCampaignRewardsUseCase } from './mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
+import { ApplyMarketingCampaignRewardsConsumer } from '@infra/handler/marketing-campaign/consumer/apply-marketing-campaign-rewards.consumer';
+import { CheckBehavioralCampaignsUseCase } from './mobile-user/order/use-cases/check-behavioral-campaigns.use-case';
+import { CheckBehavioralCampaignsConsumer } from '@infra/handler/marketing-campaign/consumer/check-behavioral-campaigns.consumer';
 import {
   OrderValidationService,
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  DiscountCalculationService,
 } from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
@@ -142,6 +151,7 @@ const repositories: Provider[] = [
   LoyaltyProgramHubRequestRepositoryProvider,
   LoyaltyProgramParticipantRequestRepositoryProvider,
   { provide: ITariffRepository, useClass: TariffRepository },
+  ActivationWindowRepositoryProvider,
 ];
 
 const clientUseCase: Provider[] = [
@@ -244,9 +254,14 @@ const mobileOrderUseCase: Provider[] = [
   UpdateMobileOrderUseCase,
   GetMobileOrderByTransactionIdUseCase,
   PromoCodeService,
+  GetActivationWindowsUseCase,
   StartPosUseCase,
   CarWashLaunchUseCase,
   CheckCarWashStartedUseCase,
+  MarketingCampaignDiscountService,
+  MarketingCampaignRewardService,
+  ApplyMarketingCampaignRewardsUseCase,
+  CheckBehavioralCampaignsUseCase,
 ];
 
 const orderDomainServices: Provider[] = [
@@ -254,6 +269,7 @@ const orderDomainServices: Provider[] = [
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  DiscountCalculationService,
 ];
 
 const corporateUseCase: Provider[] = [
@@ -332,6 +348,32 @@ const redisProviders: Provider[] = [RedisService];
           },
         },
       },
+      {
+        configKey: 'worker',
+        name: 'apply-marketing-campaign-rewards',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+          backoff: {
+            type: 'fixed',
+            delay: 5000,
+          },
+        },
+      },
+      {
+        configKey: 'worker',
+        name: 'check-behavioral-campaigns',
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true,
+          attempts: 3,
+          backoff: {
+            type: 'fixed',
+            delay: 5000,
+          },
+        },
+      },
     ),
   ],
   providers: [
@@ -354,6 +396,8 @@ const redisProviders: Provider[] = [RedisService];
     ...orderDomainServices,
     ...redisProviders,
     StartPosProcess,
+    ApplyMarketingCampaignRewardsConsumer,
+    CheckBehavioralCampaignsConsumer,
   ],
   exports: [
     ...repositories,

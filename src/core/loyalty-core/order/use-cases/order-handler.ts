@@ -3,7 +3,7 @@ import { CreateOrderUseCase } from '@loyalty/order/use-cases/order-create';
 import { Order } from '@loyalty/order/domain/order';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { HandlerDto } from '@loyalty/order/use-cases/dto/handler.dto';
-import { OrderHandlerStatus, PlatformType } from '@loyalty/order/domain/enums';
+import { OrderHandlerStatus, PlatformType, OrderStatus } from '@loyalty/order/domain/enums';
 import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
 import {
   CASHBACK_BONUSES_OPER_TYPE_ID,
@@ -95,8 +95,20 @@ export class HandlerOrderUseCase {
       handlerError = error.message;
     }
 
+    let finalOrderStatus = order.orderStatus;
+    if (
+      orderHandlerStatus === OrderHandlerStatus.COMPLETED &&
+      order.orderStatus !== OrderStatus.COMPLETED 
+    ) {
+      finalOrderStatus = OrderStatus.COMPLETED;
+    }
+
     return await this.updateOrderUseCase.execute(
-      { orderHandlerStatus: orderHandlerStatus, handlerError: handlerError },
+      {
+        orderStatus: finalOrderStatus,
+        orderHandlerStatus: orderHandlerStatus,
+        handlerError: handlerError,
+      },
       order,
     );
   }

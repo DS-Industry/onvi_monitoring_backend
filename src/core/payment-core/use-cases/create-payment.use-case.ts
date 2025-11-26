@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PaymentSubject, PaymentMode } from '../domain/payment.types';
 import {
   IPaymentGateway,
@@ -12,6 +13,8 @@ export interface CreateGenericPaymentInput {
   paymentToken?: string;
   phone?: string;
   idempotenceKey?: string;
+  metadata?: Record<string, any>;
+  returnUrl?: string;
 }
 
 @Injectable()
@@ -19,6 +22,7 @@ export class CreatePaymentUseCaseCore {
   constructor(
     @Inject('PAYMENT_GATEWAY')
     private readonly paymentGateway: IPaymentGateway,
+    private readonly configService: ConfigService,
   ) {}
 
   async create(data: CreateGenericPaymentInput) {
@@ -40,12 +44,32 @@ export class CreatePaymentUseCaseCore {
       payment_mode: PaymentMode.FULL_PAYMENT,
     };
 
+    let returnUrl: string | undefined;
+    if (!data.paymentToken) {
+      returnUrl =
+        data.returnUrl ||
+        this.configService.get<string>('PAYMENT_RETURN_URL');
+      
+      if (!returnUrl) {
+        throw new Error(
+          'returnUrl is required when paymentToken is not provided. Either provide returnUrl in the request or set PAYMENT_RETURN_URL environment variable.',
+        );
+      }
+    }
+
     const payload: CreatePaymentDto = {
       amount,
       description: data.description,
       paymentToken: data.paymentToken,
       capture: true,
       idempotenceKey: data.idempotenceKey,
+      metadata: data.metadata,
+      confirmation: !data.paymentToken && returnUrl
+        ? {
+            type: 'redirect',
+            return_url: returnUrl,
+          }
+        : undefined,
       receipt: data.phone
         ? {
             phone: data.phone,

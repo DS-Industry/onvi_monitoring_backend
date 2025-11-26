@@ -67,6 +67,16 @@ export class CarWashLaunchUseCase {
         type: bayType ?? null,
       });
 
+      if (bayDetails.status === 'Busy') {
+        throw new Error('Bay is busy')
+      }
+  
+      if (bayDetails.status === 'Unavailable') {
+        throw new Error("Bay is unavailable")
+      }
+
+      console.log('bayDetails', bayDetails);
+
       const totalSum = (
         order.sumFull +
         (order.sumBonus || 0) +
@@ -76,7 +86,7 @@ export class CarWashLaunchUseCase {
       const carWashResponse = await this.posService.send({
         cardNumber: card.devNumber,
         sum: totalSum,
-        deviceId: bayDetails.id,
+        deviceId: String(carWashDeviceId),
       });
 
       if (carWashResponse.sendStatus === SendStatus.FAIL) {

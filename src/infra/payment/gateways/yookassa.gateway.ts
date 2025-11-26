@@ -42,7 +42,7 @@ export class YooKassaGateway implements IPaymentGateway {
 
   async createPayment(data: CreatePaymentDto): Promise<any> {
     try {
-      const { paymentToken, idempotenceKey, receipt, ...rest } = data;
+      const { paymentToken, idempotenceKey, receipt, confirmation, ...rest } = data;
 
       const paymentRequest: any = {
         ...rest,
@@ -56,6 +56,10 @@ export class YooKassaGateway implements IPaymentGateway {
         paymentRequest.idempotence_key = idempotenceKey;
       }
 
+      if (confirmation) {
+        paymentRequest.confirmation = confirmation;
+      }
+
       if (receipt) {
         paymentRequest.receipt = {
           phone: receipt.phone,
@@ -67,13 +71,51 @@ export class YooKassaGateway implements IPaymentGateway {
         };
       }
 
-      return await this.checkout.createPayment(paymentRequest);
-    } catch (error) {
-      this.logger.error(
-        `Failed to create payment: ${error.message}`,
-        error.stack,
+      this.logger.debug(
+        `Creating payment with request: ${JSON.stringify({
+          amount: paymentRequest.amount,
+          description: paymentRequest.description,
+          hasPaymentToken: !!paymentToken,
+          hasConfirmation: !!confirmation,
+          confirmationType: confirmation?.type,
+          hasReceipt: !!receipt,
+          idempotenceKey,
+        })}`,
       );
-      throw error;
+
+      const result = await this.checkout.createPayment(paymentRequest);
+      this.logger.log(
+        `Payment created successfully: ${result?.id || 'unknown'}`,
+      );
+      return result;
+    } catch (error: any) {
+      const errorMessage =
+        error?.message ||
+        error?.response?.data?.description ||
+        error?.response?.data?.message ||
+        error?.response?.statusText ||
+        JSON.stringify(error?.response?.data) ||
+        String(error);
+
+      const errorDetails = {
+        message: errorMessage,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        stack: error?.stack,
+      };
+
+      this.logger.error(
+        `Failed to create payment: ${errorMessage}`,
+        JSON.stringify(errorDetails, null, 2),
+      );
+
+      const enhancedError = new Error(
+        `YooKassa payment creation failed: ${errorMessage}`,
+      );
+      (enhancedError as any).originalError = error;
+      (enhancedError as any).response = error?.response;
+      throw enhancedError;
     }
   }
 

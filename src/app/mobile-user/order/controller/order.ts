@@ -17,6 +17,7 @@ import { CreateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/m
 import { GetMobileOrderByIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-id';
 import { UpdateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-update';
 import { GetMobileOrderByTransactionIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
+import { GetActivationWindowsUseCase } from '@loyalty/mobile-user/order/use-cases/get-activation-windows.use-case';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
@@ -32,6 +33,7 @@ export class OrderController {
     private readonly getMobileOrderByIdUseCase: GetMobileOrderByIdUseCase,
     private readonly updateMobileOrderUseCase: UpdateMobileOrderUseCase,
     private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
+    private readonly getActivationWindowsUseCase: GetActivationWindowsUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
   ) {}
@@ -51,6 +53,31 @@ export class OrderController {
         bayType: data?.bayType ?? null,
         promoCodeId: data?.promoCodeId ?? null,
         rewardPointsUsed: data.rewardPointsUsed ?? 0,
+      });
+    } catch (e: any) {
+      if (e instanceof BaseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      }
+      throw new CustomHttpException({
+        message: e?.message ?? 'Internal server error',
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('get-activation-windows')
+  @HttpCode(HttpStatus.OK)
+  async getActivationWindows(@Req() req: any) {
+    try {
+      const { user } = req;
+      return await this.getActivationWindowsUseCase.execute({
+        ltyUserId: user.props.id,
       });
     } catch (e: any) {
       if (e instanceof BaseException) {

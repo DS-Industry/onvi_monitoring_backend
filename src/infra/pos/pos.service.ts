@@ -26,13 +26,9 @@ export class PosService implements IPosService {
     const headers = this.buildHeaders();
     try {
       const url =
-        `${this.baseUrl}/external/collection/device?carwashId=${data.posId}&carWashDeviceId=${data.carWashDeviceId}` +
-        (data.type ? `&type=${data.type}` : '');
+        `${this.baseUrl}/external/collection/device/by-id?carwashId=${data.posId}&carWashDeviceId=${data.carWashDeviceId}`;
 
-      const response = await firstValueFrom(
-        this.httpService.get(url, { headers }),
-      );
-
+      const response = await firstValueFrom(this.httpService.get(url, { headers }));
       return {
         id: response.data.identifier,
         status: response.data.status,
@@ -52,6 +48,7 @@ export class PosService implements IPosService {
     }
   }
 
+  // TODO: deviceId is undefined!
   async send(data: SendRequestDto): Promise<SendResponseDto> {
     const headers = this.buildHeaders();
     try {
@@ -62,6 +59,8 @@ export class PosService implements IPosService {
       };
 
       const url = `${this.baseUrl}/external/mobile/write/${data.deviceId}`;
+      console.log("Send Data: ~~~~~~~~~~~~~~~~~~~~~~~~~~")
+      console.log('url', url);
       await firstValueFrom(this.httpService.post(url, body, { headers }));
       return {
         sendStatus: SendStatus.SUCCESS,
