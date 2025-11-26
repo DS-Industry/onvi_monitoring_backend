@@ -744,6 +744,7 @@ model LTYCorporate {
   organization   Organization?      @relation(fields: [organizationId], references: [id])
   owner          LTYUser?           @relation("Owner", fields: [ownerId], references: [id])
   workers        LTYUser[]          @relation("Worker")
+  cards          LTYCard[]
 }
 
 model LTYUserTag {
@@ -765,11 +766,13 @@ model LTYCard {
   updatedAt      DateTime?
   cardTierId     Int?
   organizationId Int?
+  corporateId    Int?
   bonusBanks     LTYBonusBank[]
   bonusOpers     LTYBonusOper[]
   cardTier       LTYCardTier?      @relation(fields: [cardTierId], references: [id])
   client         LTYUser?          @relation(fields: [clientId], references: [id])
   organization   Organization?     @relation(fields: [organizationId], references: [id])
+  corporate      LTYCorporate?     @relation(fields: [corporateId], references: [id])
   cardTierHist   LTYCardTierHist[]
   equarings      LTYEquaring[]
   orders         LTYOrder[]
