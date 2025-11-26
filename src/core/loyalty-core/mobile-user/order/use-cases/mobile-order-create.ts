@@ -162,7 +162,10 @@ export class CreateMobileOrderUseCase {
       await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
         request.cardMobileUserId,
         orderDate,
+        request.carWashId,
       );
+
+      console.log('eligibleCampaigns', eligibleCampaigns);
 
     await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
       eligibleCampaigns,

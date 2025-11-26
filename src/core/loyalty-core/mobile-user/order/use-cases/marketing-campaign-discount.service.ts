@@ -54,6 +54,7 @@ export class MarketingCampaignDiscountService {
   async findEligibleDiscountCampaigns(
     ltyUserId: number,
     orderDate: Date,
+    carWashId?: number,
   ): Promise<any[]> {
     const now = orderDate;
 
@@ -108,22 +109,33 @@ export class MarketingCampaignDiscountService {
       });
     }
 
-    const campaigns = await this.prisma.marketingCampaign.findMany({
-      where: {
-        AND: [
-          {
-            status: MarketingCampaignStatus.ACTIVE,
-            launchDate: { lte: now },
-            OR: [{ endDate: null }, { endDate: { gte: now } }],
-            action: {
-              actionType: MarketingCampaignActionType.DISCOUNT,
-            },
+    const campaignFilter: any = {
+      AND: [
+        {
+          status: MarketingCampaignStatus.ACTIVE,
+          launchDate: { lte: now },
+          OR: [{ endDate: null }, { endDate: { gte: now } }],
+          action: {
+            actionType: MarketingCampaignActionType.DISCOUNT,
           },
-          {
-            OR: userEligibilityFilter,
-          },
+        },
+        {
+          OR: userEligibilityFilter,
+        },
+      ],
+    };
+
+    if (carWashId !== undefined) {
+      campaignFilter.AND.push({
+        OR: [
+          { poses: { none: {} } },
+          { poses: { some: { id: carWashId } } },
         ],
-      },
+      });
+    }
+
+    const campaigns = await this.prisma.marketingCampaign.findMany({
+      where: campaignFilter,
       include: {
         action: {
           select: {

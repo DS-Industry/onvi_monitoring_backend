@@ -58,6 +58,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       validFrom: promocode.validFrom,
       validUntil: promocode.validUntil,
       isActive: promocode.isActive,
+      posId: promocode.posId,
     };
   }
 
@@ -89,6 +90,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       validFrom: promoCode.validFrom,
       validUntil: promoCode.validUntil,
       isActive: promoCode.isActive,
+      posId: promoCode.posId,
     };
   }
 

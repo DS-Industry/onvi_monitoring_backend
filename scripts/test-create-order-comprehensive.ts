@@ -306,7 +306,7 @@ function createUseCaseInstance() {
   
   // Create use cases
   const findMethodsCardUseCase = new FindMethodsCardUseCase(cardRepository);
-  const promoCodeService = new PromoCodeService(promoCodeRepository);
+  const promoCodeService = new PromoCodeService(promoCodeRepository, prismaService);
   const marketingCampaignDiscountService = new MarketingCampaignDiscountService(
     prismaService,
     discountCalculationService,

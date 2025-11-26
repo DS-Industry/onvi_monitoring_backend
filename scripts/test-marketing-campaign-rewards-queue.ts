@@ -243,7 +243,7 @@ function createUseCaseInstance() {
   const promoCodeRepository = new PromoCodeRepository(prismaService);
 
   const findMethodsCardUseCase = new FindMethodsCardUseCase(cardRepository);
-  const promoCodeService = new PromoCodeService(promoCodeRepository);
+  const promoCodeService = new PromoCodeService(promoCodeRepository, prismaService);
   const marketingCampaignDiscountService = new MarketingCampaignDiscountService(
     prismaService,
     discountCalculationService,

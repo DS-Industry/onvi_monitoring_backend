@@ -13,6 +13,7 @@ export interface PromoCode {
   validFrom: Date;
   validUntil: Date | null;
   isActive: boolean;
+  posId: number | null;
 }
 
 export interface CreateMarketingCampaignUsageInput {
