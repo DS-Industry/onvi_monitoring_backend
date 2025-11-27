@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PosPositionSalaryRateUpdateDto } from '@platform-user/core-controller/dto/receive/pos-position-salary-rate-update.dto';
 import { IPosPositionSalaryRateRepository } from '@finance/shiftReport/posPositionSalaryRate/interface/posPositionSalaryRate';
 import { PosPositionSalaryRate } from '@finance/shiftReport/posPositionSalaryRate/domain/posPositionSalaryRate';
+import { PosPositionSalaryRateResponseDto } from '@platform-user/core-controller/dto/response/pos-position-salary-rate-response.dto';
 
 @Injectable()
 export class UpdatePositionSalaryRateUseCase {
@@ -11,15 +12,7 @@ export class UpdatePositionSalaryRateUseCase {
 
   async execute(
     data: PosPositionSalaryRateUpdateDto,
-  ): Promise<{
-    id: number;
-    posId: number;
-    hrPositionId: number;
-    baseRateDay: number | null;
-    bonusRateDay: number | null;
-    baseRateNight: number | null;
-    bonusRateNight: number | null;
-  }> {
+  ): Promise<PosPositionSalaryRateResponseDto> {
     const existingRate =
       await this.posPositionSalaryRateRepository.findOneByPosIdAndHrPositionId(
         data.posId,

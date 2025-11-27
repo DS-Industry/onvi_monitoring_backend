@@ -57,6 +57,7 @@ import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/devic
 import { GetPositionSalaryRatesUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-position-salary-rates';
 import { UpdatePositionSalaryRateUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update-position-salary-rate';
 import { PosPositionSalaryRateUpdateDto } from '@platform-user/core-controller/dto/receive/pos-position-salary-rate-update.dto';
+import { PosPositionSalaryRateResponseDto } from '@platform-user/core-controller/dto/response/pos-position-salary-rate-response.dto';
 
 @Controller('pos')
 export class PosController {
@@ -573,7 +574,7 @@ export class PosController {
     @Request() req: any,
     @Param('id', ParseIntPipe) posId: number,
     @Body() data: PosPositionSalaryRateUpdateDto,
-  ): Promise<any> {
+  ): Promise<PosPositionSalaryRateResponseDto> {
     try {
       const { ability } = req;
       await this.posValidateRules.getOneByIdValidate(posId, ability);
