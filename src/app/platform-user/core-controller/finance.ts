@@ -83,6 +83,8 @@ import { ConnectionPosWorkerUseCase } from '@pos/pos/use-cases/pos-worker-connec
 import { ConnectedWorkerPosDto } from '@platform-user/core-controller/dto/receive/ConnectedWorkerPosDto';
 import { CarStatisticPosUseCase } from '@pos/pos/use-cases/pos-car-statistic';
 import { FullDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data';
+import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
+import { StatusWorkDayShiftReport } from '@prisma/client';
 
 @Controller('finance')
 export class FinanceController {
@@ -115,6 +117,7 @@ export class FinanceController {
     private readonly connectionPosWorkerUseCase: ConnectionPosWorkerUseCase,
     private readonly carStatisticPosUseCase: CarStatisticPosUseCase,
     private readonly fullDataShiftReportUseCase: FullDataShiftReportUseCase,
+    private readonly calculateDailyPayoutShiftReportUseCase: CalculateDailyPayoutShiftReportUseCase,
   ) {}
   @Post('cash-collection')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -633,6 +636,20 @@ export class FinanceController {
       shiftReportFull.workerName = worker.name;
       shiftReportFull.dailySalary = worker.dailySalary;
       shiftReportFull.bonusPayout = worker.bonusPayout;
+
+      if (
+        !shiftReportFull.dailyShiftPayout &&
+        shiftReport.status !== StatusWorkDayShiftReport.SENT
+      ) {
+        try {
+          shiftReportFull.dailyShiftPayout =
+            await this.calculateDailyPayoutShiftReportUseCase.execute(
+              shiftReport.id,
+              shiftReport.workerId,
+            );
+        } catch (error) {
+        }
+      }
 
       return shiftReportFull;
     } catch (e) {

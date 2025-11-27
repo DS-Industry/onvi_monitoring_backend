@@ -11,6 +11,7 @@ export class ShiftReportReceiverResponseDto {
   workerName?: string;
   dailySalary?: number;
   bonusPayout?: number;
+  dailyShiftPayout?: number;
   totalCar?: number;
   workDate: Date;
   typeWorkDay: TypeWorkDay;

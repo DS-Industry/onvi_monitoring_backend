@@ -54,6 +54,9 @@ import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
+import { GetPositionSalaryRatesUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-position-salary-rates';
+import { UpdatePositionSalaryRateUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update-position-salary-rate';
+import { PosPositionSalaryRateUpdateDto } from '@platform-user/core-controller/dto/receive/pos-position-salary-rate-update.dto';
 
 @Controller('pos')
 export class PosController {
@@ -70,6 +73,8 @@ export class PosController {
     private readonly posProgramFullUseCase: PosProgramFullUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly posValidateRules: PosValidateRules,
+    private readonly getPositionSalaryRatesUseCase: GetPositionSalaryRatesUseCase,
+    private readonly updatePositionSalaryRateUseCase: UpdatePositionSalaryRateUseCase,
   ) {}
   //Create pos
   @Post('')
@@ -532,7 +537,53 @@ export class PosController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      return await this.posValidateRules.getOneByIdValidate(id, ability);
+      const pos = await this.posValidateRules.getOneByIdValidate(id, ability);
+      
+      const positionSalaryRates = await this.getPositionSalaryRatesUseCase.execute(
+        id,
+        pos.organizationId,
+      );
+
+      return {
+        ...pos,
+        positionSalaryRates,
+      };
+    } catch (e) {
+      if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch(':id/position-salary-rate')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdatePosAbility())
+  @HttpCode(200)
+  async updatePositionSalaryRate(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) posId: number,
+    @Body() data: PosPositionSalaryRateUpdateDto,
+  ): Promise<any> {
+    try {
+      const { ability } = req;
+      await this.posValidateRules.getOneByIdValidate(posId, ability);
+      
+      const updateData = {
+        ...data,
+        posId,
+      };
+
+      return await this.updatePositionSalaryRateUseCase.execute(updateData);
     } catch (e) {
       if (e instanceof PosException) {
         throw new CustomHttpException({

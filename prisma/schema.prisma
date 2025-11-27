@@ -255,6 +255,7 @@ model Pos {
   workers                HrWorker[]               @relation("HrWorkerToPos")
   marketingCampaigns     MarketingCampaign[]      @relation("MarketingCampaignToPos")
   usersPermissions       User[]                   @relation("PosToUser")
+  positionSalaryRates    PosPositionSalaryRate[]
 
   @@index([organizationId, status])
   @@index([placementId, status])
@@ -1339,12 +1340,13 @@ model HrWorker {
 }
 
 model HrPosition {
-  id             Int           @id @default(autoincrement())
-  name           String
-  description    String?
-  organizationId Int?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  hrWorkers      HrWorker[]
+  id                  Int                     @id @default(autoincrement())
+  name                String
+  description         String?
+  organizationId      Int?
+  organization        Organization?           @relation(fields: [organizationId], references: [id])
+  hrWorkers           HrWorker[]
+  positionSalaryRates PosPositionSalaryRate[]
 }
 
 model HrPayment {
@@ -1366,6 +1368,24 @@ model HrPayment {
   createdBy    User        @relation("CreatedByUser", fields: [createdById], references: [id])
   hrWorker     HrWorker    @relation(fields: [hrWorkerId], references: [id])
   updatedBy    User?       @relation("UpdatedByUser", fields: [updatedById], references: [id])
+}
+
+model PosPositionSalaryRate {
+  id             Int        @id @default(autoincrement())
+  posId          Int
+  hrPositionId   Int
+  baseRateDay    Int?
+  bonusRateDay   Int?
+  baseRateNight  Int?
+  bonusRateNight Int?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  pos            Pos        @relation(fields: [posId], references: [id], onDelete: Cascade)
+  hrPosition     HrPosition @relation(fields: [hrPositionId], references: [id], onDelete: Cascade)
+
+  @@unique([posId, hrPositionId])
+  @@index([posId, hrPositionId])
+  @@index([hrPositionId])
 }
 
 model Notification {
