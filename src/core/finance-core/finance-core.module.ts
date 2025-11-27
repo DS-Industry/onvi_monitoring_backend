@@ -41,6 +41,7 @@ import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shift
 import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
 import { GetPositionSalaryRatesUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-position-salary-rates';
 import { UpdatePositionSalaryRateUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update-position-salary-rate';
+import { PosPositionSalaryRateRepositoryProvider } from '@finance/shiftReport/posPositionSalaryRate/provider/posPositionSalaryRate';
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -51,6 +52,7 @@ const repositories: Provider[] = [
   GradingEstimationRepositoryProvider,
   GradingParameterRepositoryProvider,
   ShiftGradingRepositoryProvider,
+  PosPositionSalaryRateRepositoryProvider,
 ];
 
 const cashCollectionUseCase: Provider[] = [

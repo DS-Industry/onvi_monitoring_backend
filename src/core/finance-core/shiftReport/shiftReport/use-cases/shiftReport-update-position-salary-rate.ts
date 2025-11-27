@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
 import { PosPositionSalaryRateUpdateDto } from '@platform-user/core-controller/dto/receive/pos-position-salary-rate-update.dto';
+import { IPosPositionSalaryRateRepository } from '@finance/shiftReport/posPositionSalaryRate/interface/posPositionSalaryRate';
+import { PosPositionSalaryRate } from '@finance/shiftReport/posPositionSalaryRate/domain/posPositionSalaryRate';
 
 @Injectable()
 export class UpdatePositionSalaryRateUseCase {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly posPositionSalaryRateRepository: IPosPositionSalaryRateRepository,
+  ) {}
 
   async execute(
     data: PosPositionSalaryRateUpdateDto,
@@ -17,37 +20,45 @@ export class UpdatePositionSalaryRateUseCase {
     baseRateNight: number | null;
     bonusRateNight: number | null;
   }> {
-    const salaryRate = await this.prisma.posPositionSalaryRate.upsert({
-      where: {
-        posId_hrPositionId: {
-          posId: data.posId,
-          hrPositionId: data.hrPositionId,
-        },
-      },
-      create: {
-        posId: data.posId,
-        hrPositionId: data.hrPositionId,
-        baseRateDay: data.baseRateDay ?? null,
-        bonusRateDay: data.bonusRateDay ?? null,
-        baseRateNight: data.baseRateNight ?? null,
-        bonusRateNight: data.bonusRateNight ?? null,
-      },
-      update: {
-        baseRateDay: data.baseRateDay ?? null,
-        bonusRateDay: data.bonusRateDay ?? null,
-        baseRateNight: data.baseRateNight ?? null,
-        bonusRateNight: data.bonusRateNight ?? null,
-      },
+    const existingRate =
+      await this.posPositionSalaryRateRepository.findOneByPosIdAndHrPositionId(
+        data.posId,
+        data.hrPositionId,
+      );
+
+    const salaryRate = new PosPositionSalaryRate({
+      posId: data.posId,
+      hrPositionId: data.hrPositionId,
+      baseRateDay:
+        data.baseRateDay !== undefined
+          ? data.baseRateDay ?? null
+          : existingRate?.baseRateDay ?? null,
+      bonusRateDay:
+        data.bonusRateDay !== undefined
+          ? data.bonusRateDay ?? null
+          : existingRate?.bonusRateDay ?? null,
+      baseRateNight:
+        data.baseRateNight !== undefined
+          ? data.baseRateNight ?? null
+          : existingRate?.baseRateNight ?? null,
+      bonusRateNight:
+        data.bonusRateNight !== undefined
+          ? data.bonusRateNight ?? null
+          : existingRate?.bonusRateNight ?? null,
     });
 
+    const updatedSalaryRate = await this.posPositionSalaryRateRepository.upsert(
+      salaryRate,
+    );
+
     return {
-      id: salaryRate.id,
-      posId: salaryRate.posId,
-      hrPositionId: salaryRate.hrPositionId,
-      baseRateDay: salaryRate.baseRateDay,
-      bonusRateDay: salaryRate.bonusRateDay,
-      baseRateNight: salaryRate.baseRateNight,
-      bonusRateNight: salaryRate.bonusRateNight,
+      id: updatedSalaryRate.id,
+      posId: updatedSalaryRate.posId,
+      hrPositionId: updatedSalaryRate.hrPositionId,
+      baseRateDay: updatedSalaryRate.baseRateDay,
+      bonusRateDay: updatedSalaryRate.bonusRateDay,
+      baseRateNight: updatedSalaryRate.baseRateNight,
+      bonusRateNight: updatedSalaryRate.bonusRateNight,
     };
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@db/prisma/prisma.service';
 import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-methods';
+import { IPosPositionSalaryRateRepository } from '@finance/shiftReport/posPositionSalaryRate/interface/posPositionSalaryRate';
 
 export interface PositionSalaryRateDto {
   hrPositionId: number;
@@ -14,18 +14,14 @@ export interface PositionSalaryRateDto {
 @Injectable()
 export class GetPositionSalaryRatesUseCase {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly posPositionSalaryRateRepository: IPosPositionSalaryRateRepository,
     private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
   ) {}
 
   async execute(posId: number, organizationId: number): Promise<PositionSalaryRateDto[]> {
     const positions = await this.findMethodsPositionUseCase.getAllByOrgId(organizationId);
 
-    const salaryRates = await this.prisma.posPositionSalaryRate.findMany({
-      where: {
-        posId,
-      },
-    });
+    const salaryRates = await this.posPositionSalaryRateRepository.findAllByPosId(posId);
 
     const salaryRateMap = new Map<number, typeof salaryRates[0]>();
     salaryRates.forEach((rate) => {

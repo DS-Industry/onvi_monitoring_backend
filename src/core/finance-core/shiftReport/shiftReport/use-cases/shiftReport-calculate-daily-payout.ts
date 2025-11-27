@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { PrismaService } from '@db/prisma/prisma.service';
+import { IPosPositionSalaryRateRepository } from '@finance/shiftReport/posPositionSalaryRate/interface/posPositionSalaryRate';
 
 @Injectable()
 export class CalculateDailyPayoutShiftReportUseCase {
@@ -9,6 +10,7 @@ export class CalculateDailyPayoutShiftReportUseCase {
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
     private readonly prisma: PrismaService,
+    private readonly posPositionSalaryRateRepository: IPosPositionSalaryRateRepository,
   ) {}
 
   private isNightShift(
@@ -64,12 +66,10 @@ export class CalculateDailyPayoutShiftReportUseCase {
 
     if (shiftReport.posId && worker.hrPositionId) {
       const positionSalaryRate =
-        await this.prisma.posPositionSalaryRate.findFirst({
-          where: {
-            posId: shiftReport.posId,
-            hrPositionId: worker.hrPositionId,
-          },
-        });
+        await this.posPositionSalaryRateRepository.findOneByPosIdAndHrPositionId(
+          shiftReport.posId,
+          worker.hrPositionId,
+        );
 
       if (positionSalaryRate) {
         baseRate = isNight
