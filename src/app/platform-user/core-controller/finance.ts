@@ -679,29 +679,70 @@ export class FinanceController {
   ): Promise<ShiftReportReceiverResponseDto> {
     try {
       const { ability, user } = req;
+
       const workDayShiftReport =
         await this.financeValidateRules.updateShiftReportById(
           shiftReportId,
           ability,
         );
-      const updateShiftReport = await this.updateShiftReportUseCase.execute(
+
+      const shouldRecalculate =
+        workDayShiftReport.status !== StatusWorkDayShiftReport.SENT &&
+        (data.gradingData !== undefined ||
+          data.startWorkingTime !== undefined ||
+          data.endWorkingTime !== undefined);
+
+      const updatedShiftReport = await this.updateShiftReportUseCase.execute(
         data,
         workDayShiftReport,
         user,
       );
 
+      if (shouldRecalculate) {
+        const calculatedPayout =
+          await this.calculateDailyPayoutShiftReportUseCase.execute(
+            updatedShiftReport.id,
+            updatedShiftReport.workerId,
+          );
+
+        const finalShiftReport = await this.updateShiftReportUseCase.execute(
+          { dailyShiftPayout: calculatedPayout },
+          updatedShiftReport,
+          user,
+        );
+
+        const shiftReportFull =
+          await this.fullDataShiftReportUseCase.execute(finalShiftReport);
+        const worker = await this.findMethodsWorkerUseCase.getById(
+          finalShiftReport.workerId,
+        );
+
+        shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
+          finalShiftReport.posId,
+          finalShiftReport.startWorkingTime,
+          finalShiftReport.endWorkingTime,
+        );
+        shiftReportFull.workerName = worker.name;
+        shiftReportFull.dailySalary = worker.dailySalary;
+        shiftReportFull.bonusPayout = worker.bonusPayout;
+
+        return shiftReportFull;
+      }
+
       const shiftReportFull =
-        await this.fullDataShiftReportUseCase.execute(updateShiftReport);
+        await this.fullDataShiftReportUseCase.execute(updatedShiftReport);
       const worker = await this.findMethodsWorkerUseCase.getById(
-        updateShiftReport.workerId,
+        updatedShiftReport.workerId,
       );
 
       shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
-        updateShiftReport.posId,
-        updateShiftReport.startWorkingTime,
-        updateShiftReport.endWorkingTime,
+        updatedShiftReport.posId,
+        updatedShiftReport.startWorkingTime,
+        updatedShiftReport.endWorkingTime,
       );
       shiftReportFull.workerName = worker.name;
+      shiftReportFull.dailySalary = worker.dailySalary;
+      shiftReportFull.bonusPayout = worker.bonusPayout;
 
       return shiftReportFull;
     } catch (e) {
