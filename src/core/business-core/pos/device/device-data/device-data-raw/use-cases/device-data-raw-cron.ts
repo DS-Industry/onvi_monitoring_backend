@@ -12,7 +12,7 @@ export class CronDeviceDataRawUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    const BATCH_SIZE = 10; 
+    const BATCH_SIZE = 25;
     const deviceDataRaws =
       await this.deviceDataRawRepository.findAndLockByStatus(
         StatusDeviceDataRaw.NEW,

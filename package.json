@@ -35,7 +35,8 @@
     "seed:dev": "dotenv -e ./config/env/.env.development -- npx prisma db seed",
     "seed:prod": "dotenv -e config/env/.env.production -- npx prisma db seed",
     "studio:dev": "dotenv -e ./config/env/.env.development -- npx prisma studio",
-    "start:infra": ""
+    "start:infra": "",
+    "deploy:prod": "scripts/build-prod.sh"
   },
   "dependencies": {
     "@a2seven/yoo-checkout": "^1.1.4",
