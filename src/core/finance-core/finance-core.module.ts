@@ -39,6 +39,9 @@ import { FindMethodsGradingEstimationUseCase } from '@finance/shiftReport/gradin
 import { FullDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data';
 import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
 import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
+import { GetPositionSalaryRatesUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-position-salary-rates';
+import { UpdatePositionSalaryRateUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update-position-salary-rate';
+import { PosPositionSalaryRateRepositoryProvider } from '@finance/shiftReport/posPositionSalaryRate/provider/posPositionSalaryRate';
 
 const repositories: Provider[] = [
   CashCollectionRepositoryProvider,
@@ -49,6 +52,7 @@ const repositories: Provider[] = [
   GradingEstimationRepositoryProvider,
   GradingParameterRepositoryProvider,
   ShiftGradingRepositoryProvider,
+  PosPositionSalaryRateRepositoryProvider,
 ];
 
 const cashCollectionUseCase: Provider[] = [
@@ -85,6 +89,8 @@ const shiftReportUseCase: Provider[] = [
   CalculationPaymentShiftReportUseCase,
   CalculateDailyPayoutShiftReportUseCase,
   DeleteShiftReportUseCase,
+  GetPositionSalaryRatesUseCase,
+  UpdatePositionSalaryRateUseCase,
 ];
 
 const shiftReportCashOperUseCase: Provider[] = [
@@ -115,6 +121,8 @@ const shiftGradingUseCase: Provider[] = [
     ...cashCollectionDeviceTypeUseCase,
     ...shiftReportUseCase,
     ...shiftReportCashOperUseCase,
+    GetPositionSalaryRatesUseCase,
+    UpdatePositionSalaryRateUseCase,
   ],
 })
 export class FinanceCoreModule {}

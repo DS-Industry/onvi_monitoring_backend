@@ -55,6 +55,7 @@ export class FullDataShiftReportUseCase {
       status: shiftReport.status,
       cashAtStart: shiftReport.cashAtStart,
       cashAtEnd: shiftReport.cashAtEnd,
+      dailyShiftPayout: shiftReport.dailyShiftPayout,
       comment: shiftReport.comment,
       gradingParameterInfo: {
         parameters: parametersInfo,
