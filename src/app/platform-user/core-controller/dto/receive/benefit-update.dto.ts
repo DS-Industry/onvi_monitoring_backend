@@ -5,7 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { BenefitType } from '@prisma/client';
+import { LTYBenefitType } from '@loyalty/loyalty/benefit/benefit/domain/benefitType';
+import { Transform } from 'class-transformer';
 
 export class BenefitUpdateDto {
   @IsNumber()
@@ -14,10 +15,13 @@ export class BenefitUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
   @IsOptional()
   bonus?: number;
-  @IsEnum(BenefitType)
+  @IsEnum(LTYBenefitType)
   @IsOptional()
-  benefitType?: BenefitType;
+  benefitType?: LTYBenefitType;
+  @IsNumber()
+  @IsOptional()
+  ltyProgramId?: number;
 }

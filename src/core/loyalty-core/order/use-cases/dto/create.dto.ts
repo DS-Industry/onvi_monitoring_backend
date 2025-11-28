@@ -3,8 +3,8 @@ import {
   OrderStatus,
   PlatformType,
   SendAnswerStatus,
-  UserType,
-} from '@prisma/client';
+  ContractType,
+} from '@loyalty/order/domain/enums';
 
 export class CreateDto {
   transactionId: string;
@@ -16,7 +16,7 @@ export class CreateDto {
   carWashDeviceId: number;
   platform: PlatformType;
   orderData: Date;
-  typeMobileUser?: UserType;
+  typeMobileUser?: ContractType;
   cardMobileUserId?: number;
   orderStatus: OrderStatus;
   sendAnswerStatus?: SendAnswerStatus;

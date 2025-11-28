@@ -9,7 +9,6 @@ export class CurrencyCreate {
   constructor(private readonly currencyRepository: ICurrencyRepository) {}
 
   async execute(input: CurrencyCreateDto): Promise<Currency> {
-    //Нужна в app проверка на имя и код
     let currencyType: CurrencyType;
     if (input.curType === 0) {
       currencyType = CurrencyType.CASH;

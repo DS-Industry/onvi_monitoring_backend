@@ -17,4 +17,18 @@ export class CreateInventoryItemUseCase {
     });
     return await this.inventoryItemRepository.create(inventoryItemData);
   }
+
+  async executeMany(
+    inputs: InventoryItemCreateDto[],
+  ): Promise<InventoryItem[]> {
+    const inventoryItemsData = inputs.map(
+      (input) =>
+        new InventoryItem({
+          nomenclatureId: input.nomenclatureId,
+          quantity: 0,
+          warehouseId: input.warehouseId,
+        }),
+    );
+    return await this.inventoryItemRepository.createMany(inventoryItemsData);
+  }
 }

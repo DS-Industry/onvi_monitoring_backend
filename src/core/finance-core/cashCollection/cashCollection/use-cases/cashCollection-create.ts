@@ -11,6 +11,8 @@ import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/
 import { CreateManyCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-create-many';
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 import { UpdateCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-update';
+import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
+import { CashCollectionDeviceType } from '@finance/cashCollection/cashCollectionDeviceType/domain/cashCollectionDeviceType';
 
 @Injectable()
 export class CreateCashCollectionUseCase {
@@ -29,76 +31,45 @@ export class CreateCashCollectionUseCase {
     user: User,
     oldCashCollection: CashCollection,
   ): Promise<CashCollectionResponseDto> {
-    const now = new Date();
     const cashCollection = await this.cashCollectionRepository.create(
       new CashCollection({
         cashCollectionDate: data.cashCollectionDate,
         posId: data.posId,
         status: StatusCashCollection.CREATED,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: new Date(Date.now()),
+        updatedAt: new Date(Date.now()),
         createdById: user.id,
         updatedById: user.id,
       }),
     );
+
     const { carCount, sumCard } =
       await this.createManyCashCollectionDeviceUseCase.execute(
         cashCollection.id,
         devices,
-        oldCashCollection?.id,
       );
     const cashCollectionDevices =
       await this.findMethodsCashCollectionDeviceUseCase.getAllByCashCollection(
         cashCollection.id,
       );
-    const deviceMap = new Map(devices.map((d) => [d.id, d]));
-    const cashCollectionDeviceResponse = cashCollectionDevices.map(
-      (cashDevice) => {
-        const matchedDevice = deviceMap.get(cashDevice.carWashDeviceId);
-        return {
-          id: cashDevice.id!,
-          deviceId: cashDevice.carWashDeviceId,
-          deviceName: matchedDevice?.name,
-          deviceType: matchedDevice?.carWashDeviceTypeName,
-          oldTookMoneyTime: cashDevice.oldTookMoneyTime,
-          tookMoneyTime: cashDevice.tookMoneyTime,
-          sumDevice: cashDevice.sum,
-          sumCoinDevice: cashDevice.sumCoin,
-          sumPaperDevice: cashDevice.sumPaper,
-          virtualSumDevice: cashDevice.virtualSum,
-        };
-      },
-    );
 
-    let sumFactCashCollection = 0;
-    let virtualSumCashCollection = 0;
-    let shortageCashCollection = 0;
-    console.log(new Date());
     await this.createManyCashCollectionTypeUseCase.execute(
       cashCollection.id,
       cashCollectionDevices,
       devices,
     );
-    const cashCollectionDeviceType =
+    const cashCollectionDeviceTypes =
       await this.findMethodsCashCollectionTypeUseCase.getAllByCashCollectionId(
         cashCollection.id,
       );
 
-    const cashCollectionDeviceTypeResponse = cashCollectionDeviceType.map(
-      (cashDeviceType) => {
-        sumFactCashCollection += cashDeviceType.sumFact;
-        virtualSumCashCollection += cashDeviceType.virtualSum;
-        shortageCashCollection += cashDeviceType.shortage;
-        return {
-          id: cashDeviceType.id,
-          typeName: cashDeviceType.carWashDeviceTypeName,
-          sumCoinDeviceType: cashDeviceType.sumCoin,
-          sumPaperDeviceType: cashDeviceType.sumPaper,
-          sumFactDeviceType: cashDeviceType.sumFact,
-          shortageDeviceType: cashDeviceType.shortage,
-          virtualSumDeviceType: cashDeviceType.virtualSum,
-        };
-      },
+    const { sumFact, virtualSum, shortage } = cashCollectionDeviceTypes.reduce(
+      (acc, curr) => ({
+        sumFact: acc.sumFact + curr.sumFact,
+        virtualSum: acc.virtualSum + curr.virtualSum,
+        shortage: acc.shortage + curr.shortage,
+      }),
+      { sumFact: 0, virtualSum: 0, shortage: 0 },
     );
 
     const cashCollectionUpdate = await this.updateCashCollectionUseCase.execute(
@@ -107,28 +78,85 @@ export class CreateCashCollectionUseCase {
           oldCashCollection?.cashCollectionDate ||
           cashCollectionDevices[0]?.oldTookMoneyTime,
         status: StatusCashCollection.SAVED,
-        sumFact: sumFactCashCollection,
-        shortage: shortageCashCollection,
+        sumFact: sumFact,
+        shortage: shortage,
         sumCard,
         countCar: carCount,
-        averageCheck:
-          (sumFactCashCollection + virtualSumCashCollection) / carCount,
-        virtualSum: virtualSumCashCollection,
+        averageCheck: (sumFact + virtualSum) / carCount,
+        virtualSum: virtualSum,
       },
       cashCollection,
       user,
     );
+
+    return this.buildCashCollectionResponse(
+      cashCollectionUpdate,
+      cashCollectionDevices,
+      devices,
+      cashCollectionDeviceTypes,
+      sumFact,
+      virtualSum,
+      shortage,
+      sumCard,
+      carCount,
+    );
+  }
+
+  private buildCashCollectionResponse(
+    cashCollection: CashCollection,
+    cashCollectionDevices: CashCollectionDevice[],
+    devices: CarWashDevice[],
+    cashCollectionDeviceTypes: CashCollectionDeviceType[],
+    sumFact: number,
+    virtualSum: number,
+    shortage: number,
+    sumCard: number,
+    carCount: number,
+  ): CashCollectionResponseDto {
+    const deviceMap = new Map(devices.map((d) => [d.id, d]));
+    const cashCollectionDeviceResponse = cashCollectionDevices.map(
+      (cashDevice) => ({
+        id: cashDevice.id!,
+        deviceId: cashDevice.carWashDeviceId,
+        deviceName: deviceMap.get(cashDevice.carWashDeviceId)?.name,
+        deviceType: deviceMap.get(cashDevice.carWashDeviceId)
+          ?.carWashDeviceTypeName,
+        oldTookMoneyTime: cashDevice.oldTookMoneyTime,
+        tookMoneyTime: cashDevice.tookMoneyTime,
+        sumDevice: cashDevice.sum,
+        sumCoinDevice: cashDevice.sumCoin,
+        sumPaperDevice: cashDevice.sumPaper,
+        virtualSumDevice: cashDevice.virtualSum,
+      }),
+    );
+
+    const cashCollectionDeviceTypeResponse = cashCollectionDeviceTypes.map(
+      (cashDeviceType) => ({
+        id: cashDeviceType.id,
+        typeName: cashDeviceType.carWashDeviceTypeName,
+        sumCoinDeviceType: cashDeviceType.sumCoin,
+        sumPaperDeviceType: cashDeviceType.sumPaper,
+        sumFactDeviceType: cashDeviceType.sumFact,
+        shortageDeviceType: cashDeviceType.shortage,
+        virtualSumDeviceType: cashDeviceType.virtualSum,
+      }),
+    );
+
+    const averageCheck = carCount > 0 ? (sumFact + virtualSum) / carCount : 0;
+
     return {
-      id: cashCollectionUpdate.id,
-      cashCollectionDate: cashCollectionUpdate.cashCollectionDate,
-      oldCashCollectionDate: cashCollectionUpdate.oldCashCollectionDate,
-      status: cashCollectionUpdate.status,
-      sumFact: cashCollectionUpdate.sumFact,
-      virtualSum: cashCollectionUpdate.virtualSum,
-      sumCard: cashCollectionUpdate.sumCard,
-      shortage: cashCollectionUpdate.shortage,
-      countCar: cashCollectionUpdate.countCar,
-      averageCheck: cashCollectionUpdate.averageCheck,
+      id: cashCollection.id,
+      cashCollectionDate: cashCollection.cashCollectionDate,
+      oldCashCollectionDate:
+        cashCollection.oldCashCollectionDate ||
+        cashCollectionDevices[0]?.oldTookMoneyTime,
+      status: cashCollection.status,
+      sumFact,
+      virtualSum,
+      sumCard,
+      shortage,
+      countCar: carCount,
+      averageCheck,
       cashCollectionDeviceType: cashCollectionDeviceTypeResponse,
       cashCollectionDevice: cashCollectionDeviceResponse,
     };

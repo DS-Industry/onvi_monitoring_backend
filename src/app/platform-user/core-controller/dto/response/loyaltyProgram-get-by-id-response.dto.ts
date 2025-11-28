@@ -1,10 +1,24 @@
-import { LoyaltyProgramStatus } from "@prisma/client";
+import { BonusBurnoutType } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgramStatus } from '@prisma/client';
 
 export class LoyaltyProgramGetByIdResponseDto {
   id: number;
   name: string;
-  status: LoyaltyProgramStatus;
+  status: LTYProgramStatus;
   startDate: Date;
-  organizationIds: number[];
+  isHub: boolean;
+  isHubRequested: boolean;
+  isHubRejected: boolean;
+  description?: string;
+  organizations: {
+    id: number;
+    name: string;
+  }[];
   lifetimeDays?: number;
+  maxLevels: number;
+  burnoutType?: BonusBurnoutType;
+  lifetimeBonusDays?: number;
+  maxRedeemPercentage?: number;
+  hasBonusWithSale?: boolean;
+  ownerOrganizationId: number;
 }

@@ -5,7 +5,7 @@ import { NomenclatureCreateDto } from '@warehouse/nomenclature/use-cases/dto/nom
 import { User } from '@platform-user/user/domain/user';
 import { v4 as uuid } from 'uuid';
 import { IFileAdapter } from '@libs/file/adapter';
-import { NomenclatureStatus } from "@prisma/client";
+import { NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class CreateNomenclatureUseCase {
@@ -26,6 +26,7 @@ export class CreateNomenclatureUseCase {
       categoryId: input.categoryId,
       supplierId: input?.supplierId,
       measurement: input.measurement,
+      destiny: input?.destiny,
       status: NomenclatureStatus.ACTIVE,
       metaData: input?.metaData,
       createdAt: new Date(Date.now()),
@@ -43,25 +44,23 @@ export class CreateNomenclatureUseCase {
   }
 
   async createMany(input: NomenclatureCreateDto[], user: User): Promise<void> {
-    const nomenclatures: Nomenclature[] = [];
-    await Promise.all(
-      input.map(async (item) => {
-        nomenclatures.push(
-          new Nomenclature({
-            name: item.name,
-            sku: item.sku,
-            organizationId: item.organizationId,
-            categoryId: item.categoryId,
-            measurement: item.measurement,
-            status: NomenclatureStatus.ACTIVE,
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-            createdById: user.id,
-            updatedById: user.id,
-          }),
-        );
-      }),
+    const nomenclatures: Nomenclature[] = input.map(
+      (item) =>
+        new Nomenclature({
+          name: item.name,
+          sku: item.sku,
+          organizationId: item.organizationId,
+          categoryId: item.categoryId,
+          measurement: item.measurement,
+          destiny: item?.destiny,
+          status: NomenclatureStatus.ACTIVE,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdById: user.id,
+          updatedById: user.id,
+        }),
     );
+
     await this.nomenclatureRepository.createMany(nomenclatures);
   }
 }

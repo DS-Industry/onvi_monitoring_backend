@@ -2,8 +2,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TokenPayload } from '@mobile-user/auth/domain/jwt-payload';
-import { GetClientIfRefreshTokenMatchesUseCase } from '@mobile-user/auth/use-cases/auth-get-account-refresh-token';
+import { TokenPayload } from '@mobile-core/auth/domain/token-pair';
+import { ValidateRefreshTokenForJwtStrategyUseCase } from '@mobile-core/auth/use-cases/validate-refresh-token-for-jwt-strategy';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -12,7 +12,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly getAccountUseCase: GetClientIfRefreshTokenMatchesUseCase,
+    private readonly validateRefreshTokenUseCase: ValidateRefreshTokenForJwtStrategyUseCase,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
@@ -24,7 +24,15 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(request: Request, payload: TokenPayload) {
     try {
       const refreshToken = request.body['refreshToken'];
-      return await this.getAccountUseCase.execute(refreshToken, payload.phone);
+      const result = await this.validateRefreshTokenUseCase.execute({
+        refreshToken,
+        phone: payload.phone,
+      });
+
+      return {
+        client: result.client,
+        refreshToken: result.refreshToken,
+      };
     } catch (e) {
       throw new Error('error');
     }

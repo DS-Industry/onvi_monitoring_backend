@@ -5,18 +5,21 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { BenefitType } from '@prisma/client';
+import { LTYBenefitType } from '@loyalty/loyalty/benefit/benefit/domain/benefitType';
 
 export class BenefitCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'name is required' })
   name: string;
-  @IsEnum(BenefitType)
+  @IsEnum(LTYBenefitType)
   @IsNotEmpty({ message: 'type is required' })
-  type: BenefitType;
+  type: LTYBenefitType;
   @IsNumber()
   @IsNotEmpty({ message: 'bonus is required' })
   bonus: number;
+  @IsNumber()
+  @IsNotEmpty({ message: 'ltyProgramId is required' })
+  ltyProgramId: number;
   @IsNumber()
   @IsOptional()
   benefitActionTypeId?: number;

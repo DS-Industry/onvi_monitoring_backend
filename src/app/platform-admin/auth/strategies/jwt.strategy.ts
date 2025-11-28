@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from '@platform-admin/auth/domain/jwt-payload';
 import { ValidateAdminForJwtStrategyUseCase } from '@platform-admin/auth/use-cases/auth-validate-jwt-strategy';
 import { Admin } from '@platform-admin/admin/domain/admin';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'adminJwt') {
@@ -13,7 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'adminJwt') {
     private readonly validateJwtStrategyUseCase: ValidateAdminForJwtStrategyUseCase,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (request: Request) => {
+          return request?.cookies?.accessToken;
+        },
+      ]),
       secretOrKey: configService.get<string>('jwtSecret'),
     });
   }

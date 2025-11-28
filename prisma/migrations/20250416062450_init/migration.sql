@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "CardMobileUser" ALTER COLUMN "devNumber" SET DATA TYPE TEXT,
+ALTER COLUMN "number" SET DATA TYPE TEXT;

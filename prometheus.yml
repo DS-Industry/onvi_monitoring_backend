@@ -11,4 +11,4 @@ global:
 scrape_configs:
   - job_name: 'nestjs_app'
     static_configs:
-      - targets: [ '130.193.53.221:5000' ]
+      - targets: [ '46.19.66.141:5001' ]

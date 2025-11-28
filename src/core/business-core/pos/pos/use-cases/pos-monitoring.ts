@@ -1,89 +1,127 @@
 import { Injectable } from '@nestjs/common';
-import { PosMonitoringResponseDto } from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
-import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
+import {
+  PosMonitoringDto,
+  PosMonitoringResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-monitoring-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 import { Pos } from '@pos/pos/domain/pos';
-import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
-import { CurrencyType } from '@prisma/client';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 
 @Injectable()
 export class MonitoringPosUseCase {
   constructor(
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
     private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
-    private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
   ) {}
 
-  async execute(
-    dateStart: Date,
-    dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
-    pos?: Pos,
-  ): Promise<PosMonitoringResponseDto[]> {
-    const response: PosMonitoringResponseDto[] = [];
-    let poses: PosResponseDto[] = [];
-    if (pos) {
-      poses.push(await this.posCreateFullDataUseCase.execute(pos));
-    } else {
-      poses = await this.findMethodsPosUseCase.getAllByAbility(
-        ability,
-        placementId,
-      );
+  async execute(data: {
+    dateStart: Date;
+    dateEnd: Date;
+    ability: any;
+    placementId?: number;
+    organizationId?: number;
+    pos?: Pos;
+    skip?: number;
+    take?: number;
+  }): Promise<PosMonitoringResponseDto> {
+    const { posData, totalCount } = await this.getPosData(data);
+    const posIds = posData.map((pos) => pos.id);
+
+    const [operations, lastOpers] = await Promise.all([
+      this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      ),
+      this.findMethodsDeviceOperationUseCase.getDataLastOperByPosIds(posIds),
+    ]);
+
+    const operationsMap = new Map<
+      number,
+      DeviceOperationMonitoringResponseDto
+    >();
+    operations.forEach((op) => operationsMap.set(op.ownerId, op));
+
+    const lastDatesMap = lastOpers.reduce((map, item) => {
+      map.set(item.ownerId, item.operDate);
+      return map;
+    }, new Map<number, Date>());
+
+    const response: PosMonitoringDto[] = [];
+
+    for (const pos of posData) {
+      const posOperations = operationsMap.get(pos.id);
+
+      response.push({
+        id: pos.id,
+        name: pos.name,
+        city: pos.city,
+        counter: posOperations?.counter,
+        cashSum: posOperations?.cashSum,
+        virtualSum: posOperations?.virtualSum,
+        yandexSum: posOperations?.yandexSum,
+        mobileSum: 0,
+        cardSum: 0,
+        lastOper: lastDatesMap.get(pos.id) || undefined,
+        discountSum: 0,
+        cashbackSumCard: 0,
+        cashbackSumMub: 0,
+      });
     }
 
-    const cashSumMap = new Map<number, number>();
-    const virtualSumMap = new Map<number, number>();
-    const yandexSumMap = new Map<number, number>();
+    return {
+      oper: response,
+      totalCount: totalCount,
+    };
+  }
 
-    await Promise.all(
-      poses.map(async (pos) => {
-        const posOperations =
-          await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
-            pos.id,
-            dateStart,
-            dateEnd,
-          );
-        const lastOper =
-          await this.findMethodsDeviceOperationUseCase.getLastByPosIdUseCase(
-            pos.id,
-          );
+  private async getPosData(data: {
+    pos?: Pos;
+    ability: any;
+    placementId?: number;
+    organizationId?: number;
+    skip?: number;
+    take?: number;
+  }): Promise<{
+    posData: { id: number; name: string; city: string }[];
+    totalCount: number;
+  }> {
+    if (data.pos) {
+      return {
+        posData: [
+          {
+            id: data.pos.id,
+            name: data.pos.name,
+            city: data.pos.address.city,
+          },
+        ],
+        totalCount: 1,
+      };
+    }
 
-        await Promise.all(
-          posOperations.map(async (posOperation) => {
-            const operSum = posOperation.operSum;
-            const posId = pos.id;
+    const totalCount =
+      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement({
+        ability: data.ability,
+        placementId: data.placementId,
+        organizationId: data.organizationId,
+      });
 
-            if (posOperation.currencyType == CurrencyType.CASH) {
-              cashSumMap.set(posId, (cashSumMap.get(posId) || 0) + operSum);
-            } else if (posOperation.currencyType == CurrencyType.CASHLESS) {
-              virtualSumMap.set(
-                posId,
-                (virtualSumMap.get(posId) || 0) + operSum,
-              );
-            } else if (posOperation.currencyType == CurrencyType.VIRTUAL) {
-              yandexSumMap.set(posId, (yandexSumMap.get(posId) || 0) + operSum);
-            }
-          }),
-        );
-        response.push({
-          id: pos.id,
-          name: pos.name,
-          city: pos.address.city,
-          counter: posOperations.length,
-          cashSum: cashSumMap.get(pos.id) || 0,
-          virtualSum: virtualSumMap.get(pos.id) || 0,
-          yandexSum: yandexSumMap.get(pos.id) || 0,
-          mobileSum: 0,
-          cardSum: 0,
-          lastOper: lastOper ? lastOper.operDate : undefined,
-          discountSum: 0,
-          cashbackSumCard: 0,
-          cashbackSumMub: 0,
-        });
-      }),
-    );
-    return response;
+    const poses = await this.findMethodsPosUseCase.getAllByFilter({
+      ability: data.ability,
+      placementId: data.placementId,
+      organizationId: data.organizationId,
+      skip: data.skip,
+      take: data.take,
+    });
+
+    return {
+      posData: poses.map((pos) => ({
+        id: pos.id,
+        name: pos.name,
+        city: pos.address.city,
+      })),
+      totalCount,
+    };
   }
 }

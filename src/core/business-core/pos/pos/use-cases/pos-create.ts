@@ -4,7 +4,6 @@ import { User } from '@platform-user/user/domain/user';
 import { Pos } from '@pos/pos/domain/pos';
 import slugify from 'slugify';
 import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
-import { CreateFullDataPosUseCase } from '@pos/pos/use-cases/pos-create-full-data';
 import { Address } from '@address/domain/address';
 import { IAddressRepository } from '@address/interfaces/address';
 import { ICarWashPosRepository } from '@pos/carWashPos/interface/carWashPos';
@@ -13,15 +12,16 @@ import { PosCreateDto } from '@pos/pos/use-cases/dto/pos-create.dto';
 import { StatusPos } from '@prisma/client';
 import { IFileAdapter } from '@libs/file/adapter';
 import { v4 as uuid } from 'uuid';
+import { RedisService } from '@infra/cache/redis.service';
 
 @Injectable()
 export class CreatePosUseCase {
   constructor(
     private readonly posRepository: IPosRepository,
     private readonly addressRepository: IAddressRepository,
-    private readonly posCreateFullDataUseCase: CreateFullDataPosUseCase,
     private readonly carWashPosRepository: ICarWashPosRepository,
     private readonly fileService: IFileAdapter,
+    private readonly redisService: RedisService,
   ) {}
 
   async execute(
@@ -40,7 +40,8 @@ export class CreatePosUseCase {
     const posData = new Pos({
       name: input.name,
       slug: slugify(input.name, '_'),
-      timeWork: input.timeWork,
+      startTime: input.startTime,
+      endTime: input.endTime,
       addressId: address.id,
       organizationId: input.organizationId,
       posMetaData: input?.posMetaData,
@@ -72,7 +73,51 @@ export class CreatePosUseCase {
       maxSumOrder: input.maxSumOrder,
       stepSumOrder: input.stepSumOrder,
     });
-    await this.carWashPosRepository.create(carWashPosData);
-    return this.posCreateFullDataUseCase.execute(pos);
+
+    const carWashPos = await this.carWashPosRepository.create(carWashPosData);
+
+    try {
+      await this.redisService.del(`ability:${owner.id}:`);
+      console.log(
+        `Invalidated ability cache for user ${owner.id} after POS creation`,
+      );
+    } catch (error) {
+      console.error('Failed to invalidate ability cache:', error);
+    }
+
+    return {
+      id: pos.id,
+      name: pos.name,
+      slug: pos.slug,
+      startTime: pos.startTime,
+      endTime: pos.endTime,
+      organizationId: pos.organizationId,
+      placementId: pos.placementId,
+      posMetaData: pos.posMetaData,
+      timezone: pos.timezone,
+      image: pos.image,
+      rating: pos.rating,
+      status: pos.status,
+      createdAt: pos.createdAt,
+      updatedAt: pos.updatedAt,
+      createdById: pos.createdById,
+      updatedById: pos.updatedById,
+      address: {
+        id: address.id,
+        city: address.city,
+        location: address.location,
+        lat: address.lat,
+        lon: address.lon,
+      },
+      posType: {
+        id: carWashPos.id,
+        name: carWashPos.name,
+        slug: carWashPos.slug,
+        carWashPosType: carWashPos.carWashPosType,
+        minSumOrder: carWashPos.minSumOrder,
+        maxSumOrder: carWashPos.maxSumOrder,
+        stepSumOrder: carWashPos.stepSumOrder,
+      },
+    };
   }
 }

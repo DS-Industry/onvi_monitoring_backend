@@ -12,14 +12,14 @@ export class CardBonusBankRepository extends ICardBonusBankRepository {
 
   public async create(input: CardBonusBank): Promise<CardBonusBank> {
     const cardBonusBankEntity = PrismaCardBonusBankMapper.toPrisma(input);
-    const cardBonusBank = await this.prisma.cardBonusBank.create({
+    const cardBonusBank = await this.prisma.lTYBonusBank.create({
       data: cardBonusBankEntity,
     });
     return PrismaCardBonusBankMapper.toDomain(cardBonusBank);
   }
 
   public async findOneById(id: number): Promise<CardBonusBank> {
-    const cardBonusBank = await this.prisma.cardBonusBank.findFirst({
+    const cardBonusBank = await this.prisma.lTYBonusBank.findFirst({
       where: {
         id,
       },
@@ -51,7 +51,7 @@ export class CardBonusBankRepository extends ICardBonusBankRepository {
       where.expiryAt = expiryAt;
     }
 
-    const cardBonusBanks = await this.prisma.cardBonusBank.findMany({
+    const cardBonusBanks = await this.prisma.lTYBonusBank.findMany({
       where,
     });
     return cardBonusBanks.map((item) =>

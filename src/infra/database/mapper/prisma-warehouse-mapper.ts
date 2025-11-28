@@ -1,8 +1,8 @@
-import { Warehouse as PrismaWarehouse, Prisma } from '@prisma/client';
+import { Warehouse as PrismaWarehouse, Prisma, User } from '@prisma/client';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 
 export class PrismaWarehouseMapper {
-  static toDomain(entity: PrismaWarehouse): Warehouse {
+  static toDomain(entity: PrismaWarehouse & { manager?: User }): Warehouse {
     if (!entity) {
       return null;
     }
@@ -11,6 +11,8 @@ export class PrismaWarehouseMapper {
       name: entity.name,
       location: entity.location,
       managerId: entity.managerId,
+      managerName:
+        entity.manager?.name + ' ' + entity.manager?.surname ?? undefined,
       posId: entity.posId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

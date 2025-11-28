@@ -1,21 +1,23 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  Post,
-  UseGuards,
-  Request,
   Param,
   ParseIntPipe,
   Patch,
-  Get,
+  Post,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import {
   DeviceException,
   FinanceException,
+  HrException,
   PosException,
 } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
@@ -51,34 +53,38 @@ import { FinanceCreateTimeStampDto } from '@platform-user/core-controller/dto/re
 import { CreateDeviceEventUseCase } from '@pos/device/device-data/device-data/device-event/device-event/use-case/device-event-create';
 import { DeviceValidateRules } from '@platform-user/validate/validate-rules/device-validate-rules';
 import { EVENT_TYPE_CASH_COLLECTION_ID } from '@constant/constants';
-import { ShiftReportCreateDto } from '@platform-user/core-controller/dto/receive/shift-report-create.dto';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { CreateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-create';
-import { ShiftReportAddWorkerDto } from '@platform-user/core-controller/dto/receive/shift-report-add-worker.dto';
-import { AddWorkerShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-add-worker';
-import { ShiftReportResponseDto } from '@platform-user/core-controller/dto/response/shift-report-response.dto';
-import { ShiftReportsResponseDto } from '@platform-user/core-controller/dto/response/shift-reports-response.dto';
-import { GetAllByFilterShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-all-by-filter';
-import { DayShiftReportGetByFilterDto } from '@platform-user/core-controller/dto/receive/day-shift-report-get-by-filter.dto';
-import { DayShiftReportGetByFilterResponseDto } from '@platform-user/core-controller/dto/response/day-shift-report-get-by-filter-response.dto';
-import { GetByFilterWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-by-filter';
-import { GetOneFullShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-one-full';
-import { UpdateWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-update';
-import { DayShiftReportUpdateDto } from '@platform-user/core-controller/dto/receive/day-shift-report-update.dto';
-import { SendWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-send';
-import { WorkDayShiftReportCashOper } from '@finance/shiftReport/workDayShiftReportCashOper/doamin/workDayShiftReportCashOper';
-import { CreateWorkDayShiftReportCashOperUseCase } from '@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-create';
+import { ShiftReportGetByFilterDto } from '@platform-user/core-controller/dto/receive/shift-report-get-by-filter.dto';
+import { ShiftReportUpdateDto } from '@platform-user/core-controller/dto/receive/shift-report-update.dto';
+import { ShiftReportCashOper } from '@finance/shiftReport/shiftReportCashOper/doamin/shiftReportCashOper';
 import { DayShiftReportCashOperCreateDto } from '@platform-user/core-controller/dto/receive/day-shift-report-cash-oper-create.dto';
 import { DayShiftReportOperDataResponseDto } from '@platform-user/core-controller/dto/response/day-shift-report-oper-data-response.dto';
-import { GetOperDataWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-get-oper-data';
-import { FindMethodsWorkDayShiftReportCashOperUseCase } from '@finance/shiftReport/workDayShiftReportCashOper/use-cases/workDayShiftReportCashOper-find-methods';
 import { CleanDataResponseDto } from '@platform-user/core-controller/dto/response/clean-data-response.dto';
 import { CleanDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-clean-data';
 import { SuspiciouslyDataDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-suspiciously-data';
 import { SuspiciouslyDataResponseDto } from '@platform-user/core-controller/dto/response/suspiciously-data-response.dto';
 import { DataFullFilterDto } from '@platform-user/core-controller/dto/receive/data-full-filter.dto';
-import { Pos } from '@pos/pos/domain/pos';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
+import { DeleteCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-delete';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
+import { ShiftReportFilterDto } from '@platform-user/core-controller/dto/receive/shiftReport-filter.dto';
+import { ShiftReportReceiverResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/day-shift-report-get-by-filter-response.dto';
+import { ReceiverShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-receiver';
+import { UpdateShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-update';
+import { SendShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-send';
+import { CreateShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-create';
+import { GetOperDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-get-oper-data';
+import { FindMethodsShiftReportCashOperUseCase } from '@finance/shiftReport/shiftReportCashOper/use-cases/shiftReportCashOper-find-methods';
+import { DeleteShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-delete';
+import { Worker } from '@hr/worker/domain/worker';
+import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
+import { ConnectionPosWorkerUseCase } from '@pos/pos/use-cases/pos-worker-connection';
+import { ConnectedWorkerPosDto } from '@platform-user/core-controller/dto/receive/ConnectedWorkerPosDto';
+import { CarStatisticPosUseCase } from '@pos/pos/use-cases/pos-car-statistic';
+import { FullDataShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-full-data';
+import { CalculateDailyPayoutShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculate-daily-payout';
+import { StatusWorkDayShiftReport } from '@prisma/client';
 
 @Controller('finance')
 export class FinanceController {
@@ -92,23 +98,27 @@ export class FinanceController {
     private readonly getOneFullDataCashCollectionUseCase: GetOneFullDataCashCollectionUseCase,
     private readonly getAllTimeStampDeviceEventUseCase: GetAllTimeStampDeviceEventUseCase,
     private readonly createDeviceEventUseCase: CreateDeviceEventUseCase,
-    private readonly createShiftReportUseCase: CreateShiftReportUseCase,
-    private readonly addWorkerShiftReportUseCase: AddWorkerShiftReportUseCase,
-    private readonly getOneFullShiftReportUseCase: GetOneFullShiftReportUseCase,
-    private readonly getAllByFilterShiftReportUseCase: GetAllByFilterShiftReportUseCase,
-    private readonly getByFilterWorkDayShiftReportUseCase: GetByFilterWorkDayShiftReportUseCase,
-    private readonly updateWorkDayShiftReportUseCase: UpdateWorkDayShiftReportUseCase,
-    private readonly sendWorkDayShiftReportUseCase: SendWorkDayShiftReportUseCase,
-    private readonly createWorkDayShiftReportCashOperUseCase: CreateWorkDayShiftReportCashOperUseCase,
-    private readonly getOperDataWorkDayShiftReportUseCase: GetOperDataWorkDayShiftReportUseCase,
-    private readonly findMethodsWorkDayShiftReportCashOperUseCase: FindMethodsWorkDayShiftReportCashOperUseCase,
     private readonly cleanDataDeviceProgramUseCase: CleanDataDeviceProgramUseCase,
     private readonly suspiciouslyDataDeviceProgramUseCase: SuspiciouslyDataDeviceProgramUseCase,
     private readonly findMethodsPosUseCase: FindMethodsPosUseCase,
+    private readonly deleteCashCollectionUseCase: DeleteCashCollectionUseCase,
     private readonly posValidateRules: PosValidateRules,
     private readonly deviceValidateRules: DeviceValidateRules,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
+    private readonly receiverShiftReportUseCase: ReceiverShiftReportUseCase,
+    private readonly updateShiftReportUseCase: UpdateShiftReportUseCase,
+    private readonly sendShiftReportUseCase: SendShiftReportUseCase,
+    private readonly createShiftReportCashOperUseCase: CreateShiftReportCashOperUseCase,
+    private readonly getOperDataShiftReportUseCase: GetOperDataShiftReportUseCase,
+    private readonly findMethodsShiftReportCashOperUseCase: FindMethodsShiftReportCashOperUseCase,
+    private readonly deleteShiftReportUseCase: DeleteShiftReportUseCase,
+    private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
+    private readonly connectionPosWorkerUseCase: ConnectionPosWorkerUseCase,
+    private readonly carStatisticPosUseCase: CarStatisticPosUseCase,
+    private readonly fullDataShiftReportUseCase: FullDataShiftReportUseCase,
+    private readonly calculateDailyPayoutShiftReportUseCase: CalculateDailyPayoutShiftReportUseCase,
   ) {}
-  //CreateCashCollection
   @Post('cash-collection')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -149,8 +159,6 @@ export class FinanceController {
       }
     }
   }
-
-  //RecalculateCashCollection
   @Post('cash-collection/recalculate/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -203,8 +211,6 @@ export class FinanceController {
       }
     }
   }
-
-  //RecalculateAndSendCashCollection
   @Post('cash-collection/send/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -257,8 +263,6 @@ export class FinanceController {
       }
     }
   }
-
-  //ReturnCashCollection
   @Patch('cash-collection/return/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateCashCollectionAbility())
@@ -274,7 +278,7 @@ export class FinanceController {
           cashCollectionId,
           ability,
         );
-      await this.updateCashCollectionUseCase.execute(
+      const newCashCollection = await this.updateCashCollectionUseCase.execute(
         {
           status: StatusCashCollection.SAVED,
           sendDate: undefined,
@@ -282,6 +286,11 @@ export class FinanceController {
         cashCollection,
         user,
       );
+
+      this.eventEmitter.emit('manager-paper.delete-cash-collection', {
+        cashCollectionId: newCashCollection.id,
+      });
+
       return { status: 'SUCCESS' };
     } catch (e) {
       if (e instanceof FinanceException) {
@@ -299,7 +308,39 @@ export class FinanceController {
       }
     }
   }
-  //GetCashCollection
+  @Delete('cash-collection/:cashCollectionId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateCashCollectionAbility())
+  @HttpCode(201)
+  async deleteCashCollection(
+    @Request() req: any,
+    @Param('cashCollectionId', ParseIntPipe) cashCollectionId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const { ability } = req;
+      const cashCollection =
+        await this.financeValidateRules.deleteCashCollectionValidate(
+          cashCollectionId,
+          ability,
+        );
+      await this.deleteCashCollectionUseCase.execute(cashCollection);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('cash-collection/:cashCollectionId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
@@ -339,7 +380,6 @@ export class FinanceController {
       }
     }
   }
-  //GetCashCollections
   @Get('cash-collections')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadCashCollectionAbility())
@@ -352,20 +392,20 @@ export class FinanceController {
       let skip = undefined;
       let take = undefined;
       const { ability } = req;
-      let poses: Pos[] = [];
-      if (data.posId != '*') {
+      let posIds: number[] = [];
+      if (data.posId != undefined) {
         const pos = await this.posValidateRules.getOneByIdValidate(
           data.posId,
           ability,
         );
-        poses.push(pos);
+        posIds.push(pos.id);
       } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          data.placementId,
-        );
+        const poses = await this.findMethodsPosUseCase.getAllByFilter({
+          ability: ability,
+          placementId: data?.placementId,
+        });
+        posIds = poses.map((pos) => pos.id);
       }
-      const posIds = poses.map((pos) => pos.id);
       if (data.page && data.size) {
         skip = data.size * (data.page - 1);
         take = data.size;
@@ -400,10 +440,9 @@ export class FinanceController {
       }
     }
   }
-  //Get TimeStamps by PosId
   @Get('time-stamp/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateCashCollectionAbility())
+  @CheckAbilities(new ReadCashCollectionAbility())
   @HttpCode(200)
   async getTimeStamps(
     @Request() req: any,
@@ -436,7 +475,6 @@ export class FinanceController {
       }
     }
   }
-  //Create TimeStamp by deviceId
   @Post('time-stamp/:deviceId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateCashCollectionAbility())
@@ -474,109 +512,24 @@ export class FinanceController {
       }
     }
   }
-  //Create ShiftReport
-  @Post('shift-report')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateShiftReportAbility())
-  @HttpCode(201)
-  async createShiftReport(
-    @Request() req: any,
-    @Body() data: ShiftReportCreateDto,
-  ): Promise<ShiftReport> {
-    try {
-      const { ability, user } = req;
-      await this.posValidateRules.getOneByIdValidate(data.posId, ability);
-      return await this.createShiftReportUseCase.execute(data, user);
-    } catch (e) {
-      if (e instanceof FinanceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //Add worker ShiftReport
-  @Post('shift-report/worker/:shiftReportId')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
-  @HttpCode(201)
-  async addWorker(
-    @Request() req: any,
-    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
-    @Body() data: ShiftReportAddWorkerDto,
-  ): Promise<ShiftReportResponseDto> {
-    try {
-      const { ability } = req;
-      await this.financeValidateRules.addWorkerShiftReport(
-        shiftReportId,
-        data.userId,
-        ability,
-      );
-      return await this.addWorkerShiftReportUseCase.execute(
-        shiftReportId,
-        data.userId,
-      );
-    } catch (e) {
-      if (e instanceof FinanceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //Get Shift Reports
   @Get('shift-reports')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadCashCollectionAbility())
+  @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(200)
   async getShiftReports(
     @Request() req: any,
-    @Query() data: DataFullFilterDto,
-  ): Promise<ShiftReportsResponseDto> {
+    @Query() data: ShiftReportFilterDto,
+  ): Promise<ShiftReport[]> {
     try {
-      let skip = undefined;
-      let take = undefined;
       const { ability } = req;
-      let poses: Pos[] = [];
-      if (data.posId != '*') {
-        const pos = await this.posValidateRules.getOneByIdValidate(
-          data.posId,
-          ability,
-        );
-        poses.push(pos);
-      } else {
-        poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-          ability,
-          data.placementId,
-        );
-      }
-      const posIds = poses.map((pos) => pos.id);
-      if (data.page && data.size) {
-        skip = data.size * (data.page - 1);
-        take = data.size;
-      }
-      return await this.getAllByFilterShiftReportUseCase.execute(
-        posIds,
+      const pos = await this.posValidateRules.getOneByIdValidate(
+        data.posId,
+        ability,
+      );
+      return await this.findMethodsShiftReportUseCase.getAllByFilter(
         data.dateStart,
         data.dateEnd,
-        skip,
-        take,
+        pos.id,
       );
     } catch (e) {
       if (e instanceof FinanceException) {
@@ -601,157 +554,104 @@ export class FinanceController {
       }
     }
   }
-  //Get one ShiftReport
+  @Post('shift/create')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateShiftReportAbility())
+  @HttpCode(201)
+  async createShiftReport(
+    @Request() req: any,
+    @Body() data: ShiftReportGetByFilterDto,
+  ): Promise<ShiftReportReceiverResponseDto> {
+    try {
+      const { ability, user } = req;
+      await this.financeValidateRules.receiverShiftReport(
+        data.posId,
+        data.workerId,
+        ability,
+      );
+      const shiftReport = await this.receiverShiftReportUseCase.execute(
+        data.posId,
+        data.workerId,
+        data.workDate,
+        user,
+        data.typeWorkDay,
+        data?.startWorkingTime,
+        data?.endWorkingTime,
+      );
+      const worker = await this.findMethodsWorkerUseCase.getById(
+        shiftReport.workerId,
+      );
+
+      shiftReport.totalCar = await this.carStatisticPosUseCase.execute(
+        shiftReport.posId,
+        shiftReport.startWorkingTime,
+        shiftReport.endWorkingTime,
+      );
+      shiftReport.workerName = worker.name;
+      shiftReport.dailySalary = worker.dailySalary;
+      shiftReport.bonusPayout = worker.bonusPayout;
+
+      return shiftReport;
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('shift-report/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
+  @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
-  async getOneById(
+  async getShiftReportById(
     @Request() req: any,
     @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
-  ): Promise<ShiftReportResponseDto> {
+  ): Promise<ShiftReportReceiverResponseDto> {
     try {
       const { ability } = req;
       const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
         shiftReportId,
         ability,
       );
-      return await this.getOneFullShiftReportUseCase.execute(shiftReport);
-    } catch (e) {
-      if (e instanceof FinanceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //Get/Create DayShiftReport
-  @Post('shift-report/day-report')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
-  @HttpCode(201)
-  async getDayReportByFilter(
-    @Request() req: any,
-    @Body() data: DayShiftReportGetByFilterDto,
-  ): Promise<DayShiftReportGetByFilterResponseDto> {
-    try {
-      const { ability, user } = req;
-      await this.financeValidateRules.addWorkerShiftReport(
-        data.shiftReportId,
-        data.userId,
-        ability,
+      const shiftReportFull =
+        await this.fullDataShiftReportUseCase.execute(shiftReport);
+      const worker = await this.findMethodsWorkerUseCase.getById(
+        shiftReport.workerId,
       );
-      return await this.getByFilterWorkDayShiftReportUseCase.execute(
-        data,
-        user,
+
+      shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
+        shiftReport.posId,
+        shiftReport.startWorkingTime,
+        shiftReport.endWorkingTime,
       );
-    } catch (e) {
-      if (e instanceof FinanceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //Get DayShiftReport by id
-  @Get('shift-report/day-report/:dayReportId')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadShiftReportAbility())
-  @HttpCode(201)
-  async getDayReportById(
-    @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
-  ): Promise<DayShiftReportGetByFilterResponseDto> {
-    try {
-      const { ability } = req;
-      const workDayShiftReport =
-        await this.financeValidateRules.getDayReportById(dayReportId, ability);
+      shiftReportFull.workerName = worker.name;
+      shiftReportFull.dailySalary = worker.dailySalary;
+      shiftReportFull.bonusPayout = worker.bonusPayout;
 
-      return {
-        id: workDayShiftReport.id,
-        workerId: workDayShiftReport.workerId,
-        workDate: workDayShiftReport.workDate,
-        typeWorkDay: workDayShiftReport.typeWorkDay,
-        timeWorkedOut: workDayShiftReport?.timeWorkedOut,
-        startWorkingTime: workDayShiftReport?.startWorkingTime,
-        endWorkingTime: workDayShiftReport?.endWorkingTime,
-        estimation: workDayShiftReport?.estimation,
-        prize: workDayShiftReport?.prize,
-        fine: workDayShiftReport?.fine,
-        comment: workDayShiftReport?.comment,
-      };
-    } catch (e) {
-      if (e instanceof FinanceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
+      if (
+        !shiftReportFull.dailyShiftPayout &&
+        shiftReport.status !== StatusWorkDayShiftReport.SENT
+      ) {
+        try {
+          shiftReportFull.dailyShiftPayout =
+            await this.calculateDailyPayoutShiftReportUseCase.execute(
+              shiftReport.id,
+              shiftReport.workerId,
+            );
+        } catch (error) {
+        }
       }
-    }
-  }
-  //Update DayShiftReport by id
-  @Patch('shift-report/day-report/:dayReportId')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateShiftReportAbility())
-  @HttpCode(201)
-  async updateDayReportById(
-    @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
-    @Body() data: DayShiftReportUpdateDto,
-  ): Promise<DayShiftReportGetByFilterResponseDto> {
-    try {
-      const { ability, user } = req;
-      const workDayShiftReport =
-        await this.financeValidateRules.updateDayReportById(
-          dayReportId,
-          ability,
-        );
-      const updateWorkDayShiftReport =
-        await this.updateWorkDayShiftReportUseCase.execute(
-          data,
-          workDayShiftReport,
-          user,
-        );
 
-      return {
-        id: updateWorkDayShiftReport.id,
-        workerId: updateWorkDayShiftReport.workerId,
-        workDate: updateWorkDayShiftReport.workDate,
-        typeWorkDay: updateWorkDayShiftReport.typeWorkDay,
-        timeWorkedOut: updateWorkDayShiftReport?.timeWorkedOut,
-        startWorkingTime: updateWorkDayShiftReport?.startWorkingTime,
-        endWorkingTime: updateWorkDayShiftReport?.endWorkingTime,
-        estimation: updateWorkDayShiftReport?.estimation,
-        status: updateWorkDayShiftReport?.status,
-        cashAtStart: updateWorkDayShiftReport?.cashAtStart,
-        cashAtEnd: updateWorkDayShiftReport?.cashAtEnd,
-        prize: updateWorkDayShiftReport?.prize,
-        fine: updateWorkDayShiftReport?.fine,
-        comment: updateWorkDayShiftReport?.comment,
-      };
+      return shiftReportFull;
     } catch (e) {
       if (e instanceof FinanceException) {
         throw new CustomHttpException({
@@ -768,41 +668,83 @@ export class FinanceController {
       }
     }
   }
-  //Send DayShiftReport by id
-  @Post('shift-report/day-report/send/:dayReportId')
+  @Patch('shift-report/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
-  async sendDayReportById(
+  async updateShiftReportById(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
-  ): Promise<DayShiftReportGetByFilterResponseDto> {
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+    @Body() data: ShiftReportUpdateDto,
+  ): Promise<ShiftReportReceiverResponseDto> {
     try {
       const { ability, user } = req;
+
       const workDayShiftReport =
-        await this.financeValidateRules.sendDayReportById(dayReportId, ability);
-      const updateWorkDayShiftReport =
-        await this.sendWorkDayShiftReportUseCase.execute(
-          workDayShiftReport,
+        await this.financeValidateRules.updateShiftReportById(
+          shiftReportId,
+          ability,
+        );
+
+      const shouldRecalculate =
+        workDayShiftReport.status !== StatusWorkDayShiftReport.SENT &&
+        (data.gradingData !== undefined ||
+          data.startWorkingTime !== undefined ||
+          data.endWorkingTime !== undefined);
+
+      const updatedShiftReport = await this.updateShiftReportUseCase.execute(
+        data,
+        workDayShiftReport,
+        user,
+      );
+
+      if (shouldRecalculate) {
+        const calculatedPayout =
+          await this.calculateDailyPayoutShiftReportUseCase.execute(
+            updatedShiftReport.id,
+            updatedShiftReport.workerId,
+          );
+
+        const finalShiftReport = await this.updateShiftReportUseCase.execute(
+          { dailyShiftPayout: calculatedPayout },
+          updatedShiftReport,
           user,
         );
 
-      return {
-        id: updateWorkDayShiftReport.id,
-        workerId: updateWorkDayShiftReport.workerId,
-        workDate: updateWorkDayShiftReport.workDate,
-        typeWorkDay: updateWorkDayShiftReport.typeWorkDay,
-        timeWorkedOut: updateWorkDayShiftReport?.timeWorkedOut,
-        startWorkingTime: updateWorkDayShiftReport?.startWorkingTime,
-        endWorkingTime: updateWorkDayShiftReport?.endWorkingTime,
-        estimation: updateWorkDayShiftReport?.estimation,
-        status: updateWorkDayShiftReport?.status,
-        cashAtStart: updateWorkDayShiftReport?.cashAtStart,
-        cashAtEnd: updateWorkDayShiftReport?.cashAtEnd,
-        prize: updateWorkDayShiftReport?.prize,
-        fine: updateWorkDayShiftReport?.fine,
-        comment: updateWorkDayShiftReport?.comment,
-      };
+        const shiftReportFull =
+          await this.fullDataShiftReportUseCase.execute(finalShiftReport);
+        const worker = await this.findMethodsWorkerUseCase.getById(
+          finalShiftReport.workerId,
+        );
+
+        shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
+          finalShiftReport.posId,
+          finalShiftReport.startWorkingTime,
+          finalShiftReport.endWorkingTime,
+        );
+        shiftReportFull.workerName = worker.name;
+        shiftReportFull.dailySalary = worker.dailySalary;
+        shiftReportFull.bonusPayout = worker.bonusPayout;
+
+        return shiftReportFull;
+      }
+
+      const shiftReportFull =
+        await this.fullDataShiftReportUseCase.execute(updatedShiftReport);
+      const worker = await this.findMethodsWorkerUseCase.getById(
+        updatedShiftReport.workerId,
+      );
+
+      shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
+        updatedShiftReport.posId,
+        updatedShiftReport.startWorkingTime,
+        updatedShiftReport.endWorkingTime,
+      );
+      shiftReportFull.workerName = worker.name;
+      shiftReportFull.dailySalary = worker.dailySalary;
+      shiftReportFull.bonusPayout = worker.bonusPayout;
+
+      return shiftReportFull;
     } catch (e) {
       if (e instanceof FinanceException) {
         throw new CustomHttpException({
@@ -819,23 +761,71 @@ export class FinanceController {
       }
     }
   }
-  //Return DayShiftReport by id
-  @Patch('shift-report/day-report/return/:dayReportId')
+  @Post('shift-report/send/:shiftReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateShiftReportAbility())
+  @HttpCode(201)
+  async sendShiftReport(
+    @Request() req: any,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+  ): Promise<ShiftReportReceiverResponseDto> {
+    try {
+      const { ability, user } = req;
+      const shiftReport = await this.financeValidateRules.updateShiftReportById(
+        shiftReportId,
+        ability,
+      );
+      const updateShiftReport = await this.sendShiftReportUseCase.execute(
+        shiftReport,
+        user,
+      );
+
+      const shiftReportFull =
+        await this.fullDataShiftReportUseCase.execute(updateShiftReport);
+      const worker = await this.findMethodsWorkerUseCase.getById(
+        updateShiftReport.workerId,
+      );
+
+      shiftReportFull.totalCar = await this.carStatisticPosUseCase.execute(
+        updateShiftReport.posId,
+        updateShiftReport.startWorkingTime,
+        updateShiftReport.endWorkingTime,
+      );
+      shiftReportFull.workerName = worker.name;
+
+      return shiftReportFull;
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Patch('shift-report/return/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateShiftReportAbility())
   @HttpCode(201)
-  async returnDayReportById(
+  async returnShiftReportById(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
   ): Promise<{ status: string }> {
     try {
       const { ability, user } = req;
       const workDayShiftReport =
         await this.financeValidateRules.returnDayReportById(
-          dayReportId,
+          shiftReportId,
           ability,
         );
-      await this.updateWorkDayShiftReportUseCase.execute(
+      await this.updateShiftReportUseCase.execute(
         {
           status: StatusCashCollection.SAVED,
         },
@@ -860,25 +850,82 @@ export class FinanceController {
       }
     }
   }
-  //Create cash oper
-  @Post('shift-report/day-report/oper/:dayReportId')
+  @Get('shift-report/worker-by-pos/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadShiftReportAbility())
+  @HttpCode(201)
+  async getWorkerByPosId(
+    @Param('posId', ParseIntPipe) posId: number,
+  ): Promise<Worker[]> {
+    try {
+      return await this.findMethodsWorkerUseCase.getAllByPosId(posId);
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Patch('shift-report/worker-pos/:posId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateShiftReportAbility())
+  @HttpCode(201)
+  async updateConnectedWorkerPos(
+    @Param('posId', ParseIntPipe) posId: number,
+    @Body() body: ConnectedWorkerPosDto,
+  ): Promise<{ status: string }> {
+    try {
+      await this.posValidateRules.updateConnectedWorkerPos(
+        body.workerIds,
+        posId,
+      );
+      return await this.connectionPosWorkerUseCase.execute(
+        body.workerIds,
+        posId,
+      );
+    } catch (e) {
+      if (e instanceof HrException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Post('shift-report/oper/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new CreateShiftReportAbility())
   @HttpCode(201)
   async createCashOper(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
     @Body() data: DayShiftReportCashOperCreateDto,
-  ): Promise<WorkDayShiftReportCashOper> {
+  ): Promise<ShiftReportCashOper> {
     try {
       const { ability, user } = req;
-      const workDayShiftReport = await this.financeValidateRules.createCashOper(
-        dayReportId,
+      const shiftReport = await this.financeValidateRules.updateShiftReportById(
+        shiftReportId,
         ability,
       );
-      return await this.createWorkDayShiftReportCashOperUseCase.execute(
+      return await this.createShiftReportCashOperUseCase.execute(
         data,
-        workDayShiftReport,
+        shiftReport,
         user,
       );
     } catch (e) {
@@ -897,22 +944,21 @@ export class FinanceController {
       }
     }
   }
-  //Get DataCashOper
-  @Get('shift-report/day-report/oper/:dayReportId')
+  @Get('shift-report/oper/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
   async getCashOper(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
   ): Promise<DayShiftReportOperDataResponseDto> {
     try {
       const { ability } = req;
-      const workDayShiftReport =
-        await this.financeValidateRules.getDayReportById(dayReportId, ability);
-      return await this.getOperDataWorkDayShiftReportUseCase.execute(
-        workDayShiftReport,
+      const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
+        shiftReportId,
+        ability,
       );
+      return await this.getOperDataShiftReportUseCase.execute(shiftReport);
     } catch (e) {
       if (e instanceof FinanceException) {
         throw new CustomHttpException({
@@ -929,21 +975,22 @@ export class FinanceController {
       }
     }
   }
-  //Get DataCashOper refund
-  @Get('shift-report/day-report/refund/:dayReportId')
+  @Get('shift-report/refund/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
   async getCashOperRefund(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
-  ): Promise<WorkDayShiftReportCashOper[]> {
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+  ): Promise<ShiftReportCashOper[]> {
     try {
       const { ability } = req;
-      const workDayShiftReport =
-        await this.financeValidateRules.getDayReportById(dayReportId, ability);
-      return await this.findMethodsWorkDayShiftReportCashOperUseCase.getAllByWorkDayIdAndType(
-        workDayShiftReport.id,
+      const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
+        shiftReportId,
+        ability,
+      );
+      return await this.findMethodsShiftReportCashOperUseCase.getAllByWorkDayIdAndType(
+        shiftReport.id,
         TypeWorkDayShiftReportCashOper.REFUND,
       );
     } catch (e) {
@@ -962,25 +1009,24 @@ export class FinanceController {
       }
     }
   }
-  //Get DayReport Cleans
-  @Get('shift-report/day-report/clean/:dayReportId')
+  @Get('shift-report/clean/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
   async getClean(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
   ): Promise<CleanDataResponseDto[]> {
     try {
       const { ability } = req;
-      const cleanData = await this.financeValidateRules.getClean(
-        dayReportId,
+      const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
+        shiftReportId,
         ability,
       );
       return await this.cleanDataDeviceProgramUseCase.execute(
-        cleanData.posId,
-        cleanData.workDay.startWorkingTime,
-        cleanData.workDay.endWorkingTime,
+        shiftReport.posId,
+        shiftReport.startWorkingTime,
+        shiftReport.endWorkingTime,
       );
     } catch (e) {
       if (e instanceof FinanceException) {
@@ -998,26 +1044,58 @@ export class FinanceController {
       }
     }
   }
-  //Get DayReport suspiciouslys
-  @Get('shift-report/day-report/suspiciously/:dayReportId')
+  @Get('shift-report/suspiciously/:shiftReportId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadShiftReportAbility())
   @HttpCode(201)
   async getSuspiciously(
     @Request() req: any,
-    @Param('dayReportId', ParseIntPipe) dayReportId: number,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
   ): Promise<SuspiciouslyDataResponseDto[]> {
     try {
       const { ability } = req;
-      const cleanData = await this.financeValidateRules.getClean(
-        dayReportId,
+      const shiftReport = await this.financeValidateRules.getOneByIdShiftReport(
+        shiftReportId,
         ability,
       );
       return await this.suspiciouslyDataDeviceProgramUseCase.execute(
-        cleanData.posId,
-        cleanData.workDay.startWorkingTime,
-        cleanData.workDay.endWorkingTime,
+        shiftReport.posId,
+        shiftReport.startWorkingTime,
+        shiftReport.endWorkingTime,
       );
+    } catch (e) {
+      if (e instanceof FinanceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('shift-report/:shiftReportId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateShiftReportAbility())
+  @HttpCode(204)
+  async deleteShiftReport(
+    @Request() req: any,
+    @Param('shiftReportId', ParseIntPipe) shiftReportId: number,
+  ): Promise<void> {
+    try {
+      const { ability } = req;
+      const shiftReport =
+        await this.financeValidateRules.deleteShiftReportValidate(
+          shiftReportId,
+          ability,
+        );
+      await this.deleteShiftReportUseCase.execute(shiftReport);
     } catch (e) {
       if (e instanceof FinanceException) {
         throw new CustomHttpException({

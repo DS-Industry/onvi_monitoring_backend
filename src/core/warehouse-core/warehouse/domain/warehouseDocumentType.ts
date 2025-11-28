@@ -1,0 +1,7 @@
+export enum WarehouseDocumentType {
+  WRITEOFF = 'WRITEOFF',
+  INVENTORY = 'INVENTORY',
+  COMMISSIONING = 'COMMISSIONING',
+  RECEIPT = 'RECEIPT',
+  MOVING = 'MOVING',
+}

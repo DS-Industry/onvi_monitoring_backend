@@ -1,7 +1,14 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { MeasurementNomenclature } from '@prisma/client';
-import { Type } from "class-transformer";
-import { PurposeType } from "@warehouse/nomenclature/interface/nomenclatureMeta";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
+import { MeasurementNomenclature } from '@warehouse/nomenclature/domain/measurementNomenclature';
 
 export class NomenclatureMetaDto {
   @IsString()

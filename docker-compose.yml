@@ -1,30 +1,44 @@
-version: "3"
-
+version: '3'
 
 services:
   onvi-business-backend:
     container_name: onvi-business-backend
-    command: npm run start:prod
-    env_file: ./config/env/.env.production
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: config/env/.env.production
+    environment:
+      - APP_ROLE=app
     ports:
-      - "5000:5000"
-    build: .
+      - "5001:5001"
     restart: always
+
   onvi-business-report-worker:
     container_name: onvi-business-report-worker
-    command: npm run report-worker:start:prod
-    env_file: ./config/env/.env.production
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: config/env/.env.production
+    environment:
+      - APP_ROLE=reportWorker
     restart: always
+
   onvi-business-data-raw-worker:
     container_name: onvi-business-data-raw-worker
-    command: npm run data-raw-worker:start:prod
-    env_file: ./config/env/.env.production
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: config/env/.env.production
+    environment:
+      - APP_ROLE=dataRawWorker
     restart: always
-  onvi-business-data-raw-cron:
-    container_name: onvi-business-data-raw-cron
-    command: npm run data-raw-cron:start:prod
-    env_file: ./config/env/.env.production
-    build: .
+
+  onvi-business-cron:
+    container_name: onvi-business-cron
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: config/env/.env.production
+    environment:
+      - APP_ROLE=cron
     restart: always

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { IConfirmMailRepository } from '@platform-user/confirmMail/interfaces/confirmMail';
-import { IBcryptAdapter } from '@libs/bcrypt/adapter';
 import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
 import { User } from '@platform-user/user/domain/user';
 

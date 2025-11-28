@@ -1,5 +1,8 @@
-import { StatusUser, UserType } from '@prisma/client';
-import { TagProps } from "@loyalty/mobile-user/tag/domain/tag";
+import {
+  StatusUser,
+  ContractType,
+} from '@loyalty/mobile-user/client/domain/enums';
+import { TagProps } from '@loyalty/mobile-user/tag/domain/tag';
 
 export class ClientFullResponseDto {
   id: number;
@@ -9,8 +12,7 @@ export class ClientFullResponseDto {
   email?: string;
   gender?: string;
   status: StatusUser;
-  type: UserType;
-  inn?: string;
+  contractType: ContractType;
   comment?: string;
   refreshTokenId?: string;
   placementId?: number;
@@ -23,10 +25,11 @@ export class ClientFullResponseDto {
 export class CardResponseDto {
   id?: number;
   balance: number;
-  mobileUserId: number;
+  mobileUserId?: number;
   devNumber: string;
   number: string;
   monthlyLimit?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  email?: string;
 }

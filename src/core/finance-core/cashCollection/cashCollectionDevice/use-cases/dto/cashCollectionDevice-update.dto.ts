@@ -1,4 +1,5 @@
 export class CashCollectionDeviceUpdateDto {
+  oldTookMoneyTime?: Date;
   tookMoneyTime?: Date;
   sum?: number;
   sumCoin?: number;

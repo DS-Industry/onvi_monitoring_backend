@@ -5,8 +5,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { TypeWorkDayShiftReportCashOper } from '@prisma/client';
 import { Transform } from 'class-transformer';
+import { TypeWorkDayShiftReportCashOper } from '@finance/shiftReport/shiftReportCashOper/doamin/typeWorkDayShiftReportCashOper';
 
 export class DayShiftReportCashOperCreateDto {
   @IsNotEmpty({ message: 'type is required' })

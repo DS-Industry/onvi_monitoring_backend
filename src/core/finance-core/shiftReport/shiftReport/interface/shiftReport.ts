@@ -1,34 +1,33 @@
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { User } from '@platform-user/user/domain/user';
+import { DataForCalculationResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto';
 
 export abstract class IShiftReportRepository {
   abstract create(input: ShiftReport): Promise<ShiftReport>;
   abstract findOneById(id: number): Promise<ShiftReport>;
-  abstract addWorker(id: number, userId: number): Promise<ShiftReport>;
-  abstract findAllWorkerById(id: number): Promise<User[]>;
+  abstract findAllByFilter(
+    dateStart: Date,
+    dateEnd: Date,
+    posId: number,
+  ): Promise<ShiftReport[]>;
+  abstract findOnePosIdAndWorkerIdAndDate(
+    posId: number,
+    workerId: number,
+    workDate: Date,
+  ): Promise<ShiftReport>;
+  abstract findLastByStatusSentAndPosId(
+    posId: number,
+    workDate: Date,
+  ): Promise<ShiftReport>;
+  abstract findAllForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<DataForCalculationResponseDto[]>;
+  abstract findAllWithPayoutForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<ShiftReport[]>;
   abstract update(input: ShiftReport): Promise<ShiftReport>;
-  abstract findAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<ShiftReport[]>;
-  abstract findAllByPosIdsAndDate(
-    posIds: number[],
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<ShiftReport[]>;
-  abstract countAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number>;
-  abstract countAllByPosIdsAndDate(
-    posIds: number[],
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number>;
+  abstract delete(id: number): Promise<void>;
 }

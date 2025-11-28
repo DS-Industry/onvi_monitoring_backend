@@ -1,10 +1,5 @@
-import {
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class OrganizationUpdateDto {
   @IsNumber()
@@ -49,7 +44,7 @@ export class OrganizationUpdateDto {
   @IsString()
   @IsOptional()
   certificateNumber?: string;
-  @IsDate()
+  @Transform(({ value }) => new Date(value))
   @IsOptional()
   dateCertificate?: Date;
 }

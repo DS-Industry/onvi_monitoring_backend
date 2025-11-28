@@ -18,6 +18,7 @@ export class UpdateWorkerUseCase {
     file?: Express.Multer.File,
   ): Promise<Worker> {
     const {
+      name,
       hrPositionId,
       placementId,
       startWorkDate,
@@ -26,8 +27,10 @@ export class UpdateWorkerUseCase {
       description,
       monthlySalary,
       dailySalary,
-      percentageSalary,
+      bonusPayout,
+      status,
       gender,
+      birthday,
       citizenship,
       passportSeries,
       passportNumber,
@@ -35,8 +38,10 @@ export class UpdateWorkerUseCase {
       passportDateIssue,
       inn,
       snils,
+      registrationAddress,
     } = input;
 
+    oldWorker.name = name ? name : oldWorker.name;
     oldWorker.hrPositionId = hrPositionId
       ? hrPositionId
       : oldWorker.hrPositionId;
@@ -51,10 +56,10 @@ export class UpdateWorkerUseCase {
       ? monthlySalary
       : oldWorker.monthlySalary;
     oldWorker.dailySalary = dailySalary ? dailySalary : oldWorker.dailySalary;
-    oldWorker.percentageSalary = percentageSalary
-      ? percentageSalary
-      : oldWorker.percentageSalary;
+    oldWorker.bonusPayout = bonusPayout ? bonusPayout : oldWorker.bonusPayout;
+    oldWorker.status = status ? status : oldWorker.status;
     oldWorker.gender = gender ? gender : oldWorker.gender;
+    oldWorker.birthday = birthday ? birthday : oldWorker.birthday;
     oldWorker.citizenship = citizenship ? citizenship : oldWorker.citizenship;
     oldWorker.passportSeries = passportSeries
       ? passportSeries
@@ -70,6 +75,9 @@ export class UpdateWorkerUseCase {
       : oldWorker.passportDateIssue;
     oldWorker.inn = inn ? inn : oldWorker.inn;
     oldWorker.snils = snils ? snils : oldWorker.snils;
+    oldWorker.registrationAddress = registrationAddress
+      ? registrationAddress
+      : oldWorker.registrationAddress;
 
     if (file) {
       if (oldWorker.avatar) {

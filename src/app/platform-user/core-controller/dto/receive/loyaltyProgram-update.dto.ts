@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class LoyaltyProgramUpdateDto {
   @IsNumber()
@@ -7,7 +7,13 @@ export class LoyaltyProgramUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsArray()
+  @IsString()
   @IsOptional()
-  organizationIds?: number[];
+  description?: string;
+  @IsNumber()
+  @IsOptional()
+  maxLevels?: number;
+  @IsNumber()
+  @IsOptional()
+  lifetimeDays?: number;
 }

@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { IFileAdapter } from '@libs/file/adapter';
 import { IDocumentsRepository } from '@organization/documents/interfaces/documents';
 import { IOrganizationRepository } from '@organization/organization/interfaces/organization';
-import { Organization } from "@organization/organization/domain/organization";
+import { Organization } from '@organization/organization/domain/organization';
 
 @Injectable()
 export class AddDocumentUseCase {

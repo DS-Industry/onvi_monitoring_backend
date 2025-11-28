@@ -1,14 +1,12 @@
 import {
   IsArray,
-  IsEmail, IsEnum,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  Matches
-} from "class-validator";
-import { Transform } from 'class-transformer';
-import { UserType } from "@prisma/client";
+} from 'class-validator';
+import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
 
 export class ClientUpdateDto {
   @IsNumber()
@@ -17,12 +15,9 @@ export class ClientUpdateDto {
   @IsString()
   @IsOptional()
   name?: string;
-  @IsEnum(UserType)
+  @IsEnum(ContractType)
   @IsOptional()
-  type?: UserType;
-  @IsString()
-  @IsOptional()
-  inn?: string;
+  contractType?: ContractType;
   @IsString()
   @IsOptional()
   comment?: string;
@@ -38,4 +33,10 @@ export class ClientUpdateDto {
   @IsArray()
   @IsOptional()
   tagIds?: number[];
+  @IsNumber()
+  @IsOptional()
+  cardId?: number;
+  @IsString()
+  @IsOptional()
+  email?: string;
 }

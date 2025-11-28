@@ -3,7 +3,7 @@ import { IPositionRepository } from '@hr/position/interface/position';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Position } from '@hr/position/domain/position';
 import { PrismaHrPositionMapper } from '@db/mapper/prisma-hr-position-mapper';
-import { accessibleBy } from '@casl/prisma';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class PositionRepository extends IPositionRepository {
@@ -33,10 +33,19 @@ export class PositionRepository extends IPositionRepository {
     return positions.map((item) => PrismaHrPositionMapper.toDomain(item));
   }
 
-  public async findAllByAbility(ability: any): Promise<Position[]> {
+  public async findAllByUser(user: User): Promise<Position[]> {
     const positions = await this.prisma.hrPosition.findMany({
       where: {
-        organization: accessibleBy(ability).Organization,
+        organization: {
+          users: {
+            some: {
+              id: user.id,
+            },
+          },
+        },
+      },
+      include: {
+        organization: true,
       },
     });
     return positions.map((item) => PrismaHrPositionMapper.toDomain(item));

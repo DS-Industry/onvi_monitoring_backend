@@ -28,7 +28,7 @@ export class RoleRepository extends IRoleRepository {
     });
     return PrismaPlatformAdminRoleMapper.toDomain(adminRole);
   }
-  async remove(id: number): Promise<AdminRole> {
+  async remove(): Promise<AdminRole> {
     throw new Error('Method not implemented.');
   }
   async findAll(): Promise<AdminRole[]> {

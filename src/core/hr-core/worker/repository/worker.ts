@@ -35,13 +35,23 @@ export class WorkerRepository extends IWorkerRepository {
     return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
   }
 
+  public async findAllByPosId(posId: number): Promise<Worker[]> {
+    const workers = await this.prisma.hrWorker.findMany({
+      where: { posWorks: { some: { id: posId } } },
+    });
+    return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
+  }
+
   public async findAllByFilter(
+    userId?: number,
     placementId?: number,
     hrPositionId?: number,
     organizationId?: number,
     name?: string,
     skip?: number,
     take?: number,
+    posId?: number,
+    search?: string,
   ): Promise<Worker[]> {
     const where: any = {};
 
@@ -53,12 +63,34 @@ export class WorkerRepository extends IWorkerRepository {
       where.organizationId = organizationId;
     }
 
+    if (search !== undefined && search.trim() !== '') {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
     if (name !== undefined) {
       where.name = name;
     }
 
     if (hrPositionId !== undefined) {
       where.hrPositionId = hrPositionId;
+    }
+
+    if (posId !== undefined) {
+      where.posWorks = { some: { id: posId } };
+    } else if (userId !== undefined) {
+      where.posWorks = {
+        ...where.posWorks,
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
     }
 
     const workers = await this.prisma.hrWorker.findMany({
@@ -72,7 +104,60 @@ export class WorkerRepository extends IWorkerRepository {
     return workers.map((item) => PrismaHrWorkerMapper.toDomain(item));
   }
 
+  public async findAllByFilterCount(
+    userId?: number,
+    placementId?: number,
+    hrPositionId?: number,
+    organizationId?: number,
+    name?: string,
+    posId?: number,
+    search?: string,
+  ): Promise<number> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (search !== undefined && search.trim() !== '') {
+      where.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
+    if (name !== undefined) {
+      where.name = name;
+    }
+
+    if (hrPositionId !== undefined) {
+      where.hrPositionId = hrPositionId;
+    }
+
+    if (posId !== undefined) {
+      where.posWorks = { some: { id: posId } };
+    } else if (userId !== undefined) {
+      where.posWorks = {
+        ...where.posWorks,
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
+    }
+
+    return this.prisma.hrWorker.count({ where: where });
+  }
+
   public async findAllForCalculatePayment(
+    userId: number,
     organizationId: number,
     billingMonth: Date,
     hrPositionId?: number,
@@ -91,6 +176,19 @@ export class WorkerRepository extends IWorkerRepository {
     if (hrPositionId !== undefined) {
       where.hrPositionId = hrPositionId;
     }
+
+    if (userId !== undefined) {
+      where.posWorks = {
+        some: {
+          usersPermissions: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      };
+    }
+
     const workers = await this.prisma.hrWorker.findMany({
       where,
     });
@@ -106,5 +204,39 @@ export class WorkerRepository extends IWorkerRepository {
       data: workerPrismaEntity,
     });
     return PrismaHrWorkerMapper.toDomain(worker);
+  }
+
+  public async findPosesByWorkerId(workerId: number): Promise<any[]> {
+    const worker = await this.prisma.hrWorker.findFirst({
+      where: {
+        id: workerId,
+      },
+      include: {
+        posWorks: {
+          include: {
+            address: true,
+          },
+        },
+      },
+    });
+    return worker?.posWorks || [];
+  }
+
+  public async updateConnectionPos(
+    workerId: number,
+    addPosIds: number[],
+    deletePosIds: number[],
+  ): Promise<any> {
+    await this.prisma.hrWorker.update({
+      where: {
+        id: workerId,
+      },
+      data: {
+        posWorks: {
+          disconnect: deletePosIds.map((id) => ({ id })),
+          connect: addPosIds.map((id) => ({ id })),
+        },
+      },
+    });
   }
 }

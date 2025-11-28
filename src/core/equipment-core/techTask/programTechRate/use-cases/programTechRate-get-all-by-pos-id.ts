@@ -17,29 +17,31 @@ export class GetAllByPosIdProgramTechRateUseCase {
     posId: number,
   ): Promise<ProgramTechRateGetAllByPosIdResponseDto[]> {
     const response: ProgramTechRateGetAllByPosIdResponseDto[] = [];
-    await Promise.all(
-      programTypes.map(async (programType) => {
-        let programRate =
-          await this.findMethodsProgramTechRateUseCase.getByCWPosIdAndProgramTypeId(
-            posId,
-            programType.id,
-          );
-        if (!programRate) {
-          const programRateData = new ProgramTechRate({
-            carWashPosId: posId,
-            carWashDeviceProgramsTypeId: programType.id,
-          });
-          programRate =
-            await this.programTechRateRepository.create(programRateData);
-        }
-        response.push({
-          id: programRate.id,
-          programTypeName: programType.name,
-          literRate: programRate.literRate,
-          concentration: programRate.concentration,
+
+    for (const programType of programTypes) {
+      let programRate =
+        await this.findMethodsProgramTechRateUseCase.getByCWPosIdAndProgramTypeId(
+          posId,
+          programType.id,
+        );
+
+      if (!programRate) {
+        const programRateData = new ProgramTechRate({
+          carWashPosId: posId,
+          carWashDeviceProgramsTypeId: programType.id,
         });
-      }),
-    );
+        programRate =
+          await this.programTechRateRepository.create(programRateData);
+      }
+
+      response.push({
+        id: programRate.id,
+        programTypeName: programType.name,
+        literRate: programRate.literRate,
+        concentration: programRate.concentration,
+      });
+    }
+
     return response;
   }
 }

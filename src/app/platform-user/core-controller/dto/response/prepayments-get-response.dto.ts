@@ -1,14 +1,15 @@
 export interface PrepaymentsGetResponseDto {
+  id: number;
   hrWorkerId: number;
+  employeeName: string;
   name: string;
   hrPositionId: number;
   billingMonth: Date;
-  paymentDate: Date;
-  monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
-  countShifts: number;
+  bonusPayout: number;
+  numberOfShiftsWorked: number;
   sum: number;
+  payoutTimestamp: Date;
   createdAt: Date;
   createdById: number;
 }

@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class WorkerCreateDto {
   @IsString()
@@ -33,8 +33,11 @@ export class WorkerCreateDto {
   @IsNotEmpty({ message: 'dailySalary is required' })
   dailySalary: number;
   @Transform(({ value }) => parseInt(value))
-  @IsNotEmpty({ message: 'percentageSalary is required' })
-  percentageSalary: number;
+  @IsNotEmpty({ message: 'bonusPayout is required' })
+  bonusPayout: number;
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  birthday?: Date;
   @IsOptional()
   @IsString()
   gender?: string;
@@ -59,4 +62,7 @@ export class WorkerCreateDto {
   @IsOptional()
   @IsString()
   snils?: string;
+  @IsOptional()
+  @IsString()
+  registrationAddress?: string;
 }

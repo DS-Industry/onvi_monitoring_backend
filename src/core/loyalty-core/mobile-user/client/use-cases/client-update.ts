@@ -21,36 +21,101 @@ export class UpdateClientUseCase {
       birthday,
       status,
       avatar,
-      type,
-      inn,
+      contractType,
       comment,
       placementId,
       refreshTokenId,
+      gender,
+      cardId,
+      email,
+      is_notifications_enabled,
     } = input;
 
     oldClient.name = name ? name : oldClient.name;
+
     oldClient.birthday = birthday ? birthday : oldClient.birthday;
     oldClient.avatar = avatar ? avatar : oldClient.avatar;
     oldClient.refreshTokenId = refreshTokenId
       ? refreshTokenId
       : oldClient.refreshTokenId;
     oldClient.status = status ? status : oldClient.status;
-    oldClient.type = type ? type : oldClient.type;
-    oldClient.inn = inn ? inn : oldClient.inn;
+    oldClient.contractType = contractType
+      ? contractType
+      : oldClient.contractType;
     oldClient.comment = comment ? comment : oldClient.comment;
     oldClient.placementId = placementId ? placementId : oldClient.placementId;
-
+    oldClient.gender = gender ? gender : oldClient.gender;
     oldClient.updatedAt = new Date(Date.now());
+    oldClient.email = email ? email : oldClient.email;
+    oldClient.is_notifications_enabled =
+      is_notifications_enabled !== undefined
+        ? is_notifications_enabled
+        : oldClient.is_notifications_enabled;
     const client = await this.clientRepository.update(oldClient);
-    const oldCard = await this.findMethodsCardUseCase.getByClientId(client.id);
-    const card = await this.updateCardUseCase.execute(
-      {
-        balance: input?.balance,
-        monthlyLimit: input?.monthlyLimit,
-        loyaltyCardTierId: input?.loyaltyCardTierId,
-      },
-      oldCard,
-    );
+
+    let card;
+
+    if (cardId) {
+      if (cardId <= 0) {
+        throw new Error(
+          `Invalid cardId: ${cardId}. Card ID must be a positive number.`,
+        );
+      }
+
+      const newCard = await this.findMethodsCardUseCase.getById(cardId);
+      if (!newCard) {
+        throw new Error(`Card with id ${cardId} not found`);
+      }
+
+      if (newCard.mobileUserId && newCard.mobileUserId !== client.id) {
+        throw new Error(
+          `Card with id ${cardId} is already assigned to another client`,
+        );
+      }
+
+      const oldCard = await this.findMethodsCardUseCase.getByClientId(
+        client.id,
+      );
+      if (oldCard) {
+        oldCard.mobileUserId = null;
+        await this.updateCardUseCase.execute(
+          {
+            mobileUserId: null,
+          },
+          oldCard,
+        );
+      }
+
+      newCard.mobileUserId = client.id;
+      card = await this.updateCardUseCase.execute(
+        {
+          mobileUserId: client.id,
+        },
+        newCard,
+      );
+    } else {
+      if (
+        input.balance !== undefined ||
+        input.monthlyLimit !== undefined ||
+        input.loyaltyCardTierId !== undefined
+      ) {
+        const oldCard = await this.findMethodsCardUseCase.getByClientId(
+          client.id,
+        );
+        if (oldCard) {
+          card = await this.updateCardUseCase.execute(
+            {
+              balance: input?.balance,
+              monthlyLimit: input?.monthlyLimit,
+              loyaltyCardTierId: input?.loyaltyCardTierId,
+            },
+            oldCard,
+          );
+        }
+      } else {
+        card = await this.findMethodsCardUseCase.getByClientId(client.id);
+      }
+    }
 
     let clientTags = await this.findMethodsTagUseCase.getAllByClientId(
       client.id,
@@ -80,24 +145,25 @@ export class UpdateClientUseCase {
       email: client?.email,
       gender: client?.gender,
       status: client.status,
-      type: client.type,
-      inn: client?.inn,
+      contractType: client.contractType,
       comment: client?.comment,
       refreshTokenId: client?.refreshTokenId,
       placementId: client?.placementId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
       tags: clientTags.map((tag) => tag.getProps()),
-      card: {
-        id: card.id,
-        balance: card.balance,
-        mobileUserId: card.mobileUserId,
-        devNumber: card.devNumber,
-        number: card.number,
-        monthlyLimit: card?.monthlyLimit,
-        createdAt: card.createdAt,
-        updatedAt: card.updatedAt,
-      },
+      card: card
+        ? {
+            id: card.id,
+            balance: card.balance,
+            mobileUserId: card.mobileUserId,
+            devNumber: card.devNumber,
+            number: card.number,
+            monthlyLimit: card?.monthlyLimit,
+            createdAt: card.createdAt,
+            updatedAt: card.updatedAt,
+          }
+        : null,
     };
   }
 }

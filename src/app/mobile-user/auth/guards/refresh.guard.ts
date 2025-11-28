@@ -7,7 +7,7 @@ export class RefreshGuard extends AuthGuard('client-jwt-refresh-token') {
     super();
   }
 
-  handleRequest(err: any, user: any, info: any, context: any, status: any) {
+  handleRequest(err: any, user: any) {
     if (!user || err) {
       throw new Error('error');
     }

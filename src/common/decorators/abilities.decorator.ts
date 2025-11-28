@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { PermissionAction } from '@prisma/client';
+import { PermissionAction } from '@platform-user/permissions/user-permissions/domain/permissionAction';
 
 export interface RequiredRule {
   action: PermissionAction;
@@ -156,23 +156,23 @@ export class DeleteShiftReportAbility implements RequiredRule {
 }
 export class ManageLoyaltyReportAbility implements RequiredRule {
   action = PermissionAction.manage;
-  subject = 'LoyaltyProgram';
+  subject = 'LTYProgram';
 }
 export class ReadLoyaltyAbility implements RequiredRule {
   action = PermissionAction.read;
-  subject = 'LoyaltyProgram';
+  subject = 'LTYProgram';
 }
 export class CreateLoyaltyAbility implements RequiredRule {
   action = PermissionAction.create;
-  subject = 'LoyaltyProgram';
+  subject = 'LTYProgram';
 }
 export class UpdateLoyaltyAbility implements RequiredRule {
   action = PermissionAction.update;
-  subject = 'LoyaltyProgram';
+  subject = 'LTYProgram';
 }
 export class DeleteLoyaltyAbility implements RequiredRule {
   action = PermissionAction.delete;
-  subject = 'LoyaltyProgram';
+  subject = 'LTYProgram';
 }
 export class ManageHrAbility implements RequiredRule {
   action = PermissionAction.manage;
@@ -193,4 +193,28 @@ export class UpdateHrAbility implements RequiredRule {
 export class DeleteHrAbility implements RequiredRule {
   action = PermissionAction.delete;
   subject = 'Hr';
+}
+export class ManageManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'ManagerPaper';
+}
+export class ReadManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.read;
+  subject = 'ManagerPaper';
+}
+export class CreateManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.create;
+  subject = 'ManagerPaper';
+}
+export class UpdateManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.update;
+  subject = 'ManagerPaper';
+}
+export class DeleteManagerPaperAbility implements RequiredRule {
+  action = PermissionAction.delete;
+  subject = 'ManagerPaper';
+}
+export class SuperAdminAbility implements RequiredRule {
+  action = PermissionAction.manage;
+  subject = 'LTYProgram';
 }

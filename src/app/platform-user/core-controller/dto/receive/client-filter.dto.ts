@@ -1,6 +1,6 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserType } from '@prisma/client';
+import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
 
 export class ClientFilterDto {
   @IsNotEmpty({ message: 'placementId is required' })
@@ -11,7 +11,16 @@ export class ClientFilterDto {
   placementId: number | '*';
   @IsNotEmpty({ message: 'type is required' })
   @IsString()
-  type: UserType | '*';
+  contractType: ContractType | '*';
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === '*') return value;
+    return parseInt(value);
+  })
+  workerCorporateId: number | '*';
+  @IsNotEmpty({ message: 'organizationId is required' })
+  @Transform(({ value }) => parseInt(value))
+  organizationId: number;
   @IsOptional()
   @Transform(({ value }) => {
     if (typeof value === 'string') {
@@ -36,4 +45,16 @@ export class ClientFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+
+  @IsOptional()
+  @IsString()
+  registrationFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  registrationTo?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

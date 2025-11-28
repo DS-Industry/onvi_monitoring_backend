@@ -8,18 +8,16 @@ export class DataFullFilterDto {
   @IsNotEmpty({ message: 'dateEnd is required' })
   @Transform(({ value }) => new Date(value))
   dateEnd: Date;
-  @IsNotEmpty({ message: 'placementId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  placementId: number | '*';
-  @IsNotEmpty({ message: 'posId is required' })
+  placementId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  posId: number | '*';
+  posId?: number;
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   page?: number;

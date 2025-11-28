@@ -15,7 +15,8 @@ export class UpdateLoyaltyTierUseCase {
     input: LoyaltyTierUpdateDto,
     oldLoyaltyTier: LoyaltyTier,
   ): Promise<LoyaltyTier> {
-    const { name, description, loyaltyProgramId, limitBenefit } = input;
+    const { name, description, loyaltyProgramId, limitBenefit, upCardTierId } =
+      input;
 
     oldLoyaltyTier.name = name ? name : oldLoyaltyTier.name;
     oldLoyaltyTier.description = description
@@ -27,6 +28,9 @@ export class UpdateLoyaltyTierUseCase {
     oldLoyaltyTier.limitBenefit = limitBenefit
       ? limitBenefit
       : oldLoyaltyTier.limitBenefit;
+    oldLoyaltyTier.upCardTierId = upCardTierId
+      ? upCardTierId
+      : oldLoyaltyTier.upCardTierId;
 
     const loyaltyTier = await this.loyaltyTierRepository.update(oldLoyaltyTier);
 

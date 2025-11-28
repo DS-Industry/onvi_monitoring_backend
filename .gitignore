@@ -2,7 +2,8 @@
 /dist
 /node_modules
 env
-/prisma/migrations
+/config/firebase
+.env
 
 # Logs
 logs

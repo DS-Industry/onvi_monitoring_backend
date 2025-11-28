@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -23,24 +24,30 @@ import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-f
 import { DeviceValidateRules } from '@platform-user/validate/validate-rules/device-validate-rules';
 import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
 import { CreateCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-create';
-import { DataByPermissionCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-data-by-permission';
 import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
 import { DataByDeviceProgramUseCase } from '@pos/device/device-data/device-data/device-program/device-program/use-case/device-program-data-by-device';
 import { DataByDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-data-by-device';
-import { DeviceFilterResponseDto } from '@platform-user/core-controller/dto/response/device-filter-response.dto';
 import { DeviceOperationMonitoringResponseDto } from '@platform-user/core-controller/dto/response/device-operation-monitoring-response.dto';
 import { DeviceProgramResponseDto } from '@platform-user/core-controller/dto/response/device-program-response.dto';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
+  DeletePosAbility,
   ReadPosAbility,
 } from '@common/decorators/abilities.decorator';
 import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
 import { FindMethodsDeviceProgramTypeUseCase } from '@pos/device/device-data/device-data/device-program/device-program-type/use-case/device-program-type-find-methods';
 import { DeviceException, PosException } from '@exception/option.exceptions';
 import { CustomHttpException } from '@exception/custom-http.exception';
-import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 import { PosFilterDto } from '@platform-user/core-controller/dto/receive/pos-filter.dto';
+import { DeviceMonitoringFilterDto } from '@platform-user/core-controller/dto/receive/device-monitoring-filter.dto';
+import { Currency } from '@pos/device/device-data/currency/currency/domain/currency';
+import { FindMethodsCurrencyUseCase } from '@pos/device/device-data/currency/currency/use-case/currency-find-methods';
+import { DeleteDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-delete';
+import { DeleteManyDto } from '@platform-user/core-controller/dto/receive/delete-many.dto';
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
+import { FalseOperationDeviceResponseDto } from '@platform-user/core-controller/dto/response/false-operation-device-response.dto';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
 
 @Controller('device')
 export class DeviceController {
@@ -48,13 +55,15 @@ export class DeviceController {
     private readonly carWashDeviceTypeCreate: CreateCarWashDeviceTypeUseCase,
     private readonly carWashDeviceTypeUpdate: UpdateCarWashDeviceTypeUseCase,
     private readonly deviceCreateCarWashDevice: CreateCarWashDeviceUseCase,
-    private readonly dataByPermissionCarWashDeviceUseCase: DataByPermissionCarWashDeviceUseCase,
     private readonly dataByDeviceOperationUseCase: DataByDeviceOperationUseCase,
     private readonly dataByDeviceProgramUseCase: DataByDeviceProgramUseCase,
     private readonly findMethodsCarWashDeviceUseCase: FindMethodsCarWashDeviceUseCase,
     private readonly findMethodsDeviceProgramTypeUseCase: FindMethodsDeviceProgramTypeUseCase,
     private readonly deviceValidateRules: DeviceValidateRules,
     private readonly posValidateRules: PosValidateRules,
+    private readonly findMethodsCurrencyUseCase: FindMethodsCurrencyUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
+    private readonly deleteDeviceOperationUseCase: DeleteDeviceOperationUseCase,
   ) {}
   //Create device
   @Post('')
@@ -96,7 +105,7 @@ export class DeviceController {
   async monitoringDevice(
     @Request() req: any,
     @Param('id', ParseIntPipe) id: number,
-    @Query() data: DataFilterDto,
+    @Query() data: DeviceMonitoringFilterDto,
   ): Promise<DeviceOperationMonitoringResponseDto> {
     try {
       let skip = undefined;
@@ -111,9 +120,34 @@ export class DeviceController {
         id,
         data.dateStart,
         data.dateEnd,
+        data.currencyType,
+        data.currencyId,
         skip,
         take,
       );
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('currency')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  async getCurrency(): Promise<Currency[]> {
+    try {
+      return await this.findMethodsCurrencyUseCase.getAll();
     } catch (e) {
       if (e instanceof DeviceException) {
         throw new CustomHttpException({
@@ -141,7 +175,7 @@ export class DeviceController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (data.posId != '*') {
+      if (data.posId) {
         await this.posValidateRules.getOneByIdValidate(data.posId, ability);
         return await this.findMethodsDeviceProgramTypeUseCase.getAllByPosId(
           data.posId,
@@ -286,38 +320,7 @@ export class DeviceController {
       }
     }
   }
-  //All device for user
-  @Get('filter')
-  @HttpCode(200)
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  async filterViewDeviceByUser(
-    @Request() req: any,
-    @Query() data: PlacementFilterDto,
-  ): Promise<DeviceFilterResponseDto[]> {
-    try {
-      const { ability } = req;
-      return await this.dataByPermissionCarWashDeviceUseCase.execute(
-        ability,
-        data.placementId,
-      );
-    } catch (e) {
-      if (e instanceof DeviceException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-  //All device for pos
+  //All device for pos DELETE?
   @Get('filter/pos/:posId')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -339,6 +342,94 @@ export class DeviceController {
           code: e.getHttpStatus(),
         });
       } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('false-operations/:deviceId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
+  @HttpCode(200)
+  @CacheSWR(120)
+  async falseOperationsDevice(
+    @Request() req: any,
+    @Param('deviceId', ParseIntPipe) deviceId: number,
+    @Query() data: DataFilterDto,
+  ): Promise<FalseOperationDeviceResponseDto> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      const { ability } = req;
+      await this.deviceValidateRules.getByIdValidate(deviceId, ability);
+      if (data.page && data.size) {
+        skip = data.size * (data.page - 1);
+        take = data.size;
+      }
+
+      const totalCount =
+        await this.findMethodsDeviceOperationUseCase.getCountByFilter({
+          carWashDeviceId: deviceId,
+          dateStart: data.dateStart,
+          dateEnd: data.dateEnd,
+        });
+      const oper =
+        await this.findMethodsDeviceOperationUseCase.getFalseOperationsByDeviceId(
+          deviceId,
+          data.dateStart,
+          data.dateEnd,
+          skip,
+          take,
+        );
+      return { oper, totalCount };
+    } catch (e) {
+      if (e instanceof DeviceException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof PosException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('operations')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeletePosAbility())
+  @HttpCode(201)
+  async deleteOperations(
+    @Body() data: DeleteManyDto,
+  ): Promise<{ status: string }> {
+    try {
+      for (const id of data.ids) {
+        const deviceOperation =
+          await this.deviceValidateRules.getDeviceOperationByIdValidate(id);
+        await this.deleteDeviceOperationUseCase.execute(deviceOperation);
+      }
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof DeviceException) {
         throw new CustomHttpException({
           type: e.type,
           innerCode: e.innerCode,

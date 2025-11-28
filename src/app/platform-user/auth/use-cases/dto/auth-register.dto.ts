@@ -6,9 +6,5 @@ export class AuthRegisterDto {
   phone: string;
   email: string;
   password: string;
-  gender?: string;
-  avatar?: string;
-  country?: string;
-  countryCode?: number;
-  timezone?: number;
+  fcmToken?: string;
 }

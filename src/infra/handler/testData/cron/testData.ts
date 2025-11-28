@@ -13,7 +13,7 @@ export class TestDataCron {
     private readonly createDeviceEventUseCase: CreateDeviceEventUseCase,
   ) {}
 
-  @Cron('0 6 * * *')
+  @Cron('0 6 * * *', { timeZone: 'UTC' })
   async execute(): Promise<void> {
     console.log('start dataTest');
     await this.createOperationsForDevice(9991, [10, 50, 100, 150, 200], 20);

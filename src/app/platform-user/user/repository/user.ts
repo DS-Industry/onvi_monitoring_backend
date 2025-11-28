@@ -33,6 +33,7 @@ export class UserRepository extends IUserRepository {
   }
 
   public async createMany(input: User[]): Promise<User[]> {
+    console.log(input);
     return Promise.resolve([]);
   }
 
@@ -41,9 +42,96 @@ export class UserRepository extends IUserRepository {
     return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
   }
 
-  public async findAllByOrgId(orgId: number): Promise<User[]> {
+  public async findAllByOrgId(
+    orgId: number,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where: { organizations: { some: { id: orgId } } },
+      include: {
+        userRole: true,
+      },
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findAllByOrgIdWithFilters(
+    orgId: number,
+    roleId?: number,
+    status?: string,
+    name?: string,
+    skip?: number,
+    take?: number,
+  ): Promise<User[]> {
+    const whereClause: any = {
+      organizations: { some: { id: orgId } },
+    };
+
+    if (roleId) {
+      whereClause.userRoleId = roleId;
+    }
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    if (name) {
+      whereClause.OR = [
+        { name: { contains: name, mode: 'insensitive' } },
+        { surname: { contains: name, mode: 'insensitive' } },
+        { middlename: { contains: name, mode: 'insensitive' } },
+      ];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: whereClause,
+      include: {
+        userRole: true,
+      },
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findCountByOrgId(orgId: number): Promise<number> {
+    return this.prisma.user.count({
+      where: { organizations: { some: { id: orgId } } },
+    });
+  }
+
+  public async findAllByPosId(posId: number): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { posesPermissions: { some: { id: posId } } },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findAllByRoleIds(roleIds: number[]): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: { userRoleId: { in: roleIds } },
+      include: {
+        userRole: true,
+      },
+    });
+    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+  }
+
+  public async findAllByRoleIdsAndPosId(
+    roleIds: number[],
+    posId: number,
+  ): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        userRoleId: { in: roleIds },
+        posesPermissions: { some: { id: posId } },
+      },
       include: {
         userRole: true,
       },
@@ -69,7 +157,7 @@ export class UserRepository extends IUserRepository {
     return PrismaPlatformUserMapper.toDomain(user);
   }
 
-  public async remove(id: number): Promise<any> {
+  public async remove(): Promise<any> {
     return Promise.resolve(undefined);
   }
 
@@ -97,18 +185,31 @@ export class UserRepository extends IUserRepository {
   }
 
   public async getAllLoyaltyProgramPermissions(id: number): Promise<number[]> {
-    const user = await this.prisma.user.findFirst({
+    const loyaltyPrograms = await this.prisma.lTYProgram.findMany({
       where: {
-        id,
+        programParticipants: {
+          some: {
+            organization: {
+              users: {
+                some: {
+                  id: id,
+                },
+              },
+            },
+            status: 'ACTIVE',
+          },
+        },
       },
-      include: {
-        loyaltyPrograms: true,
+      select: {
+        id: true,
       },
     });
-    return user?.loyaltyPrograms?.map((item) => item.id) || [];
+    return loyaltyPrograms.map((item) => item.id);
   }
 
-  public async getAllOrganizationPermissions(id: number): Promise<number[]> {
+  public async getAllOrganizationPermissions(
+    id: number,
+  ): Promise<{ id: number; name: string }[]> {
     const user = await this.prisma.user.findFirst({
       where: {
         id,
@@ -117,7 +218,11 @@ export class UserRepository extends IUserRepository {
         organizations: true,
       },
     });
-    return user?.organizations?.map((item) => item.id) || [];
+    return (
+      user?.organizations?.map((item) => {
+        return { id: item.id, name: item.name };
+      }) || []
+    );
   }
 
   public async updateConnectionPos(
@@ -136,5 +241,63 @@ export class UserRepository extends IUserRepository {
         },
       },
     });
+  }
+
+  public async updateConnectionLoyaltyProgram(): Promise<any> {
+    // TODO: Remove this method ?
+  }
+
+  public async findUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: organizationId,
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: organizationId,
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
+  }
+
+  public async findUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<User | null> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        organizations: {
+          some: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+      include: {
+        organizations: {
+          where: {
+            id: {
+              in: organizationIds,
+            },
+          },
+        },
+      },
+    });
+
+    return user ? PrismaPlatformUserMapper.toDomain(user) : null;
   }
 }

@@ -93,6 +93,39 @@ export class PaymentRepository extends IPaymentRepository {
     return payments.map((payment) => PrismaHrPaymentMapper.toDomain(payment));
   }
 
+  public async findCountByFilter(
+    startPaymentDate?: Date,
+    endPaymentDate?: Date,
+    hrWorkerId?: number,
+    paymentType?: PaymentType,
+    billingMonth?: Date,
+  ): Promise<number> {
+    const where: any = {};
+
+    if (startPaymentDate !== undefined && endPaymentDate !== undefined) {
+      where.paymentDate = {
+        gte: startPaymentDate,
+        lte: endPaymentDate,
+      };
+    }
+
+    if (hrWorkerId !== undefined) {
+      where.hrWorkerId = hrWorkerId;
+    }
+
+    if (paymentType !== undefined) {
+      where.paymentType = paymentType;
+    }
+
+    if (billingMonth !== undefined) {
+      where.billingMonth = billingMonth;
+    }
+
+    return this.prisma.hrPayment.count({
+      where,
+    });
+  }
+
   public async update(input: Payment): Promise<Payment> {
     const paymentPrismaEntity = PrismaHrPaymentMapper.toPrisma(input);
     const payment = await this.prisma.hrPayment.update({
@@ -102,5 +135,9 @@ export class PaymentRepository extends IPaymentRepository {
       data: paymentPrismaEntity,
     });
     return PrismaHrPaymentMapper.toDomain(payment);
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.hrPayment.delete({ where: { id } });
   }
 }

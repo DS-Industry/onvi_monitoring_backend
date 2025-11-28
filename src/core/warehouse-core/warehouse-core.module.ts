@@ -31,7 +31,23 @@ import { FileModule } from '@libs/file/module';
 import { SaveWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-save';
 import { DeleteWarehouseDocumentDetailUseCase } from '@warehouse/document/documentDetail/use-cases/warehouseDocumentDetail-delete';
 import { UpdateWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-update';
-import { UpdateCategoryUseCase } from "@warehouse/category/use-cases/category-update";
+import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-update';
+import { SaleDocumentRepositoryProvider } from '@warehouse/sale/MNGSaleDocument/provider/saleDocument';
+import { SaleItemRepositoryProvider } from '@warehouse/sale/MNGSaleItem/provider/saleItem';
+import { SalePriceRepositoryProvider } from '@warehouse/sale/MNGSalePrice/provider/salePrice';
+import { CreateSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-create';
+import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
+import { UpdateSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-update';
+import { CreateSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-cases/saleItem-create';
+import { FindMethodsSaleItemUseCase } from '@warehouse/sale/MNGSaleItem/use-cases/saleItem-find-methods';
+import { CreateSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-create';
+import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
+import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
+import { DeleteCategoryUseCase } from '@warehouse/category/use-cases/category-delete';
+import { DeleteSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-delete';
+import { UpdateSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-update';
+import { DeleteWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-delete';
+import { DeleteSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-delete';
 
 const repositories: Provider[] = [
   WarehouseRepositoryProvider,
@@ -41,6 +57,9 @@ const repositories: Provider[] = [
   SupplierRepositoryProvider,
   WarehouseDocumentRepositoryProvider,
   WarehouseDocumentDetailRepositoryProvider,
+  SaleDocumentRepositoryProvider,
+  SaleItemRepositoryProvider,
+  SalePriceRepositoryProvider,
 ];
 
 const warehouseUseCase: Provider[] = [
@@ -55,6 +74,7 @@ const warehouseDocumentUseCase: Provider[] = [
   FindMethodsWarehouseDocumentUseCase,
   AllByFilterWarehouseDocumentUseCase,
   UpdateWarehouseDocumentUseCase,
+  DeleteWarehouseDocumentUseCase,
 ];
 
 const warehouseDocumentDetailUseCase: Provider[] = [
@@ -66,6 +86,8 @@ const warehouseDocumentDetailUseCase: Provider[] = [
 const supplierUseCase: Provider[] = [
   CreateSupplierUseCase,
   FindMethodsSupplierUseCase,
+  DeleteSupplierUseCase,
+  UpdateSupplierUseCase,
 ];
 
 const inventoryItemUseCase: Provider[] = [
@@ -74,18 +96,37 @@ const inventoryItemUseCase: Provider[] = [
   InventoryItemMonitoringUseCase,
   UpdateInventoryItemUseCase,
   InventoryInventoryItemUseCase,
+  SaleInventoryItemUseCase,
 ];
 
 const categoryUseCase: Provider[] = [
   CreateCategoryUseCase,
   FindMethodsCategoryUseCase,
   UpdateCategoryUseCase,
+  DeleteCategoryUseCase,
 ];
 
 const nomenclatureUseCase: Provider[] = [
   CreateNomenclatureUseCase,
   UpdateNomenclatureUseCase,
   FindMethodsNomenclatureUseCase,
+];
+
+const salePriceUseCase: Provider[] = [
+  CreateSalePriceUseCase,
+  FindMethodsSalePriceUseCase,
+  UpdateSalePriceUseCase,
+  DeleteSalePriceUseCase,
+];
+
+const saleItemUseCase: Provider[] = [
+  CreateSaleItemUseCase,
+  FindMethodsSaleItemUseCase,
+];
+
+const saleDocumentUseCase: Provider[] = [
+  CreateSaleDocumentUseCase,
+  FindMethodsSaleDocumentUseCase,
 ];
 
 @Module({
@@ -99,6 +140,9 @@ const nomenclatureUseCase: Provider[] = [
     ...nomenclatureUseCase,
     ...warehouseDocumentUseCase,
     ...warehouseDocumentDetailUseCase,
+    ...salePriceUseCase,
+    ...saleItemUseCase,
+    ...saleDocumentUseCase,
   ],
   exports: [
     ...warehouseUseCase,
@@ -108,6 +152,9 @@ const nomenclatureUseCase: Provider[] = [
     ...nomenclatureUseCase,
     ...warehouseDocumentUseCase,
     ...warehouseDocumentDetailUseCase,
+    ...salePriceUseCase,
+    ...saleItemUseCase,
+    ...saleDocumentUseCase,
   ],
 })
 export class WarehouseCoreModule {}

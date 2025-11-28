@@ -122,14 +122,14 @@ export class IncidentController {
     @Query() params: PosMonitoringDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
-      if (params.posId != '*') {
+      const { user } = req;
+      if (params.posId) {
         await this.incidentValidateRules.getAllIncidentByFilterValidate(
           params.posId,
-          ability,
         );
       }
       return await this.getAllByFilterIncidentUseCase.execute(
+        user,
         params.dateStart,
         params.dateEnd,
         params.posId,

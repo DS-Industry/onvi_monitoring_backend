@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ValidationException } from './validation.exception';
 import { CustomHttpException } from './custom-http.exception';
+import { PermissionException } from './option.exceptions';
 import { SERVER_ERROR } from '@constant/error.constants';
 
 @Catch()
@@ -22,7 +23,9 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : exception instanceof ValidationException
           ? HttpStatus.BAD_REQUEST
-          : HttpStatus.INTERNAL_SERVER_ERROR;
+          : exception instanceof PermissionException
+            ? HttpStatus.FORBIDDEN
+            : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const errorResponse =
       exception instanceof CustomHttpException
@@ -37,11 +40,17 @@ export class AllExceptionFilter implements ExceptionFilter {
               innerCode: exception.innerCode,
               message: exception.message,
             }
-          : {
-              type: 'api_server',
-              innerCode: SERVER_ERROR,
-              message: (exception as Error).message,
-            };
+          : exception instanceof PermissionException
+            ? {
+                type: exception.type,
+                innerCode: exception.innerCode,
+                message: exception.message,
+              }
+            : {
+                type: 'api_server',
+                innerCode: SERVER_ERROR,
+                message: (exception as Error).message,
+              };
     const message = errorResponse.message;
 
     const error = {

@@ -2,7 +2,11 @@ import { Organization } from '@organization/organization/domain/organization';
 import { Organization as PrismaOrganization, Prisma } from '@prisma/client';
 
 export class PrismaOrganizationMapper {
-  static toDomain(entity: PrismaOrganization): Organization {
+  static toDomain(
+    entity: PrismaOrganization & {
+      ownedLtyPrograms?: { id: number; name: string }[];
+    },
+  ): Organization {
     if (!entity) {
       return null;
     }
@@ -17,6 +21,7 @@ export class PrismaOrganizationMapper {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       ownerId: entity.ownerId,
+      ltyPrograms: entity.ownedLtyPrograms,
     });
   }
 

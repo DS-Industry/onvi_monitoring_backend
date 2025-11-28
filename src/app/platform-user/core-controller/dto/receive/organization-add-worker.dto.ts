@@ -8,7 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { PositionUser } from '@prisma/client';
+import { PositionUser } from '@platform-user/user/domain/positionUser';
 
 export class AddWorkerOrganizationDto {
   @IsString()

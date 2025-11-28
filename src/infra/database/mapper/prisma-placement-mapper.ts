@@ -10,7 +10,6 @@ export class PrismaPlacementMapper {
       id: entity.id,
       country: entity.country,
       region: entity.region,
-      city: entity.city,
       utc: entity.utc,
     });
   }
@@ -20,7 +19,6 @@ export class PrismaPlacementMapper {
       id: placement?.id,
       country: placement.country,
       region: placement.region,
-      city: placement.city,
       utc: placement.utc,
     };
   }

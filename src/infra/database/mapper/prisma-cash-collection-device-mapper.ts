@@ -3,6 +3,17 @@ import {
   Prisma,
 } from '@prisma/client';
 import { CashCollectionDevice } from '@finance/cashCollection/cashCollectionDevice/domain/cashCollectionDevice';
+import { CashCollectionDeviceCalculateResponseDto } from '@finance/cashCollection/cashCollectionDevice/use-cases/dto/cashCollectionDevice-calculate-response.dto';
+export type RawDeviceOperationsSummary = {
+  deviceId: number;
+  sumCoin: bigint;
+  sumPaper: bigint;
+  virtualSum: bigint;
+  sumCard: bigint;
+  carCount: bigint;
+  oldTookMoneyTime: Date;
+  tookMoneyTime: Date;
+};
 export class PrismaCashCollectionDeviceMapper {
   static toDomain(entity: PrismaCashCollectionDevice): CashCollectionDevice {
     if (!entity) {
@@ -21,6 +32,21 @@ export class PrismaCashCollectionDeviceMapper {
       carCount: entity.carCount,
       virtualSum: entity.virtualSum,
     });
+  }
+
+  static toCalculateResponseDto(
+    item: RawDeviceOperationsSummary,
+  ): CashCollectionDeviceCalculateResponseDto {
+    return {
+      deviceId: item.deviceId,
+      sumCoin: Number(item.sumCoin),
+      sumPaper: Number(item.sumPaper),
+      virtualSum: Number(item.virtualSum),
+      sumCard: Number(item.sumCard),
+      carCount: Number(item.carCount),
+      oldTookMoneyTime: item.oldTookMoneyTime,
+      tookMoneyTime: item.tookMoneyTime,
+    };
   }
 
   static toPrisma(

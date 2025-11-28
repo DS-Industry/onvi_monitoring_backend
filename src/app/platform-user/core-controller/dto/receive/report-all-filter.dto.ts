@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { CategoryReportTemplate } from '@prisma/client';
-import { Transform } from "class-transformer";
+import { Transform } from 'class-transformer';
+import { CategoryReportTemplate } from '@report/report/domain/categoryReportTemplate';
 
 export class ReportAllFilterDto {
   @IsOptional()

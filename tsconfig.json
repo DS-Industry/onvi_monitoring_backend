@@ -1,4 +1,5 @@
 {
+  "exclude": ["temp", "node_modules"],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -44,7 +45,11 @@
       "@finance/*": ["src/core/finance-core/*"],
       "@report/*": ["src/core/report-core/*"],
       "@loyalty/*": ["src/core/loyalty-core/*"],
-      "@hr/*": ["src/core/hr-core/*"]
+      "@hr/*": ["src/core/hr-core/*"],
+      "@notification/*": ["src/core/notification-core/*"],
+      "@manager-paper/*": ["src/core/manager-paper-core/*"],
+      "@mobile-core/*": ["src/core/mobile-core/*"],
+      "@infra/*": ["src/infra/*"]
     }
   }
 }

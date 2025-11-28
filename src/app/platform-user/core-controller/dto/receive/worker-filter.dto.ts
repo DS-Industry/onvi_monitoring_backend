@@ -1,25 +1,22 @@
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class WorkerFilterDto {
-  @IsNotEmpty({ message: 'placementId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  placementId: number | '*';
-  @IsNotEmpty({ message: 'hrPositionId is required' })
+  placementId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  hrPositionId: number | '*';
-  @IsNotEmpty({ message: 'organizationId is required' })
+  hrPositionId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  organizationId: number | '*';
+  organizationId?: number;
   @IsString()
   @IsOptional()
   name?: string;
@@ -29,4 +26,9 @@ export class WorkerFilterDto {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   size?: number;
+  @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  posId?: number;
 }

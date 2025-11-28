@@ -4,22 +4,24 @@ import {
   OrderStatus,
   PlatformType,
   SendAnswerStatus,
-  UserType,
-} from '@prisma/client';
+  ContractType,
+} from './enums';
 import { BaseEntity } from '@utils/entity';
 
 export interface OrderProps {
   id?: number;
-  transactionId: string;
+  transactionId?: string;
   sumFull: number;
   sumReal: number;
   sumBonus: number;
   sumDiscount: number;
   sumCashback: number;
   carWashDeviceId: number;
+  carWashId?: number;
+  bayType?: string;
   platform: PlatformType;
   cardMobileUserId?: number;
-  typeMobileUser: UserType;
+  typeMobileUser: ContractType;
   orderData: Date;
   createData: Date;
   orderStatus: OrderStatus;
@@ -78,7 +80,7 @@ export class Order extends BaseEntity<OrderProps> {
     return this.props.cardMobileUserId;
   }
 
-  get typeMobileUser(): UserType {
+  get typeMobileUser(): ContractType {
     return this.props.typeMobileUser;
   }
 
@@ -126,6 +128,22 @@ export class Order extends BaseEntity<OrderProps> {
     return this.props.handlerError;
   }
 
+  get carWashId(): number {
+    return this.props.carWashId;
+  }
+
+  get bayType(): string {
+    return this.props.bayType;
+  }
+
+  set carWashId(carWashId: number) {
+    this.props.carWashId = carWashId;
+  }
+
+  set bayType(bayType: string) {
+    this.props.bayType = bayType;
+  }
+
   set orderStatus(orderStatus: OrderStatus) {
     this.props.orderStatus = orderStatus;
   }
@@ -156,5 +174,13 @@ export class Order extends BaseEntity<OrderProps> {
 
   set handlerError(handlerError: string) {
     this.props.handlerError = handlerError;
+  }
+
+  set sumDiscount(sumDiscount: number) {
+    this.props.sumDiscount = sumDiscount;
+  }
+
+  set sumReal(sumReal: number) {
+    this.props.sumReal = sumReal;
   }
 }

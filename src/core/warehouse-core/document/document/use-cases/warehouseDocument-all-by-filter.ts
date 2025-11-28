@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 import { WarehouseDocumentAllByFilterResponseDto } from '@warehouse/document/document/use-cases/dto/warehouseDocument-all-by-filter-response.dto';
+import { WarehouseDocumentPaginatedResponseDto } from '@warehouse/document/document/use-cases/dto/warehouseDocument-paginated-response.dto';
 import { FindMethodsWarehouseUseCase } from '@warehouse/warehouse/use-cases/warehouse-find-methods';
 import { FindMethodsWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-find-methods';
+import { PureAbility } from '@casl/ability';
 
 @Injectable()
 export class AllByFilterWarehouseDocumentUseCase {
@@ -14,39 +16,64 @@ export class AllByFilterWarehouseDocumentUseCase {
   async execute(
     dateStart: Date,
     dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
+    ability: PureAbility,
+    placementId?: number,
     warehouse?: Warehouse,
-  ): Promise<WarehouseDocumentAllByFilterResponseDto[]> {
-    const response: WarehouseDocumentAllByFilterResponseDto[] = [];
-    let warehouses: Warehouse[] = [];
-    if (warehouse) {
-      warehouses.push(warehouse);
-    } else {
-      warehouses =
-        await this.findMethodsWarehouseUseCase.geyAllByPermission(ability, placementId);
+    page?: number,
+    size?: number,
+  ): Promise<
+    | WarehouseDocumentPaginatedResponseDto
+    | WarehouseDocumentAllByFilterResponseDto[]
+  > {
+    if (page && size) {
+      const result =
+        await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdsAndDatePaginated(
+          dateStart,
+          dateEnd,
+          ability,
+          warehouse?.id,
+          placementId,
+          page,
+          size,
+        );
+
+      return {
+        data: result.data.map((document) => ({
+          id: document.id,
+          name: document.name,
+          type: document.type,
+          warehouseId: document.warehouseId,
+          warehouseName: document.warehouseName,
+          responsibleId: document.responsibleId,
+          responsibleName: document.responsibleName,
+          status: document.status,
+          carryingAt: document.carryingAt,
+        })),
+        page,
+        size,
+        total: result.total,
+      };
     }
-    await Promise.all(
-      warehouses.map(async (warehouse) => {
-        const documents =
-          await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdAndDate(
-            warehouse.id,
-            dateStart,
-            dateEnd,
-          );
-        documents.map((document) => {
-          response.push({
-            id: document.id,
-            name: document.name,
-            type: document.type,
-            warehouseId: document.warehouseId,
-            responsibleId: document.responsibleId,
-            status: document.status,
-            carryingAt: document.carryingAt,
-          });
-        });
-      }),
-    );
-    return response;
+
+    const documents =
+      await this.findMethodsWarehouseDocumentUseCase.getAllByWarehouseIdsAndDate(
+        dateStart,
+        dateEnd,
+        ability,
+        warehouse?.id,
+        placementId,
+      );
+
+    return documents.map((document) => ({
+      id: document.id,
+      name: document.name,
+      type: document.type,
+      warehouseId: document.warehouseId,
+      warehouseName: document.warehouseName,
+      responsibleId: document.responsibleId,
+      responsibleName: document.responsibleName,
+      status: document.status,
+      carryingAt: document.carryingAt,
+    }));
   }
 }

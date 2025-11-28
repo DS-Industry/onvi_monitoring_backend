@@ -1,87 +1,161 @@
 import { Injectable } from '@nestjs/common';
 import { IDeviceOperationRepository } from '@pos/device/device-data/device-data/device-operation/interface/device-operation';
 import { CurrencyType } from '@prisma/client';
+import { DeviceOperationFullDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-data-response.dto';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
+import { DeviceOperationLastDataResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-last-data-response.dto';
+import { DeviceOperationFullSumDyPosResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-full-sum-dy-pos-response.dto';
+import { DeviceOperationDailyStatisticResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-daily-statistic-response.dto';
 import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
+import { FalseOperationResponseDto } from '@platform-user/core-controller/dto/response/false-operation-response.dto';
+import { FalseOperationDeviceDto } from '@platform-user/core-controller/dto/response/false-operation-device-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceOperationUseCase {
   constructor(
     private readonly deviceOperationRepository: IDeviceOperationRepository,
   ) {}
+  async getAllByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posIds?: number[];
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    currencyType?: CurrencyType;
+    currencyId?: number;
+    skip?: number;
+    take?: number;
+  }): Promise<DeviceOperationFullDataResponseDto[]> {
+    return await this.deviceOperationRepository.findAllByFilter(
+      data.ability,
+      data.organizationId,
+      data.posIds,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.currencyType,
+      data.currencyId,
+      data.skip,
+      data.take,
+    );
+  }
 
-  async getAllByCurTypeIdAndDateUseCase(
-    currencyType: CurrencyType,
-    carWashDeviceId: number,
+  async getCountByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posIds?: number[];
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    currencyType?: CurrencyType;
+    currencyId?: number;
+  }): Promise<number> {
+    return await this.deviceOperationRepository.findCountByFilter(
+      data.ability,
+      data.organizationId,
+      data.posIds,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.currencyType,
+      data.currencyId,
+    );
+  }
+
+  async getDataByMonitoring(
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByCurTypeAndDate(
-      currencyType,
-      carWashDeviceId,
+  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+    return await this.deviceOperationRepository.findDataByMonitoring(
+      posIds,
       dateStart,
       dateEnd,
     );
   }
 
-  async getAllByDeviceIdAndDateUseCase(
-    deviceId: number,
+  async getAllSumByPos(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationFullSumDyPosResponseDto[]> {
+    return await this.deviceOperationRepository.findAllSumByPos(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getDailyStatistics(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationDailyStatisticResponseDto[]> {
+    return await this.deviceOperationRepository.findDailyStatistics(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceOperationMonitoringResponseDto[]> {
+    return await this.deviceOperationRepository.findDataByMonitoringDetail(
+      deviceIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getDataLastOperByPosIds(
+    posIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]> {
+    return await this.deviceOperationRepository.findDataLastOperByPosIds(
+      posIds,
+    );
+  }
+
+  async getDataLastOperByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceOperationLastDataResponseDto[]> {
+    return await this.deviceOperationRepository.findDataLastOperByDeviceIds(
+      deviceIds,
+    );
+  }
+
+  async getOneById(id: number): Promise<DeviceOperation> {
+    return await this.deviceOperationRepository.findOneById(id);
+  }
+
+  async getFalseOperationsByPosId(
+    posId: number,
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<FalseOperationResponseDto[]> {
+    return await this.deviceOperationRepository.findFalseOperationsByPosId(
+      posId,
+      dateStart,
+      dateEnd,
+    );
+  }
+
+  async getFalseOperationsByDeviceId(
+    carWashDeviceId: number,
     dateStart: Date,
     dateEnd: Date,
     skip?: number,
     take?: number,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByDeviceIdAndDate(
-      deviceId,
+  ): Promise<FalseOperationDeviceDto[]> {
+    return await this.deviceOperationRepository.findFalseOperationsByDeviceId(
+      carWashDeviceId,
       dateStart,
       dateEnd,
       skip,
       take,
-    );
-  }
-
-  async getAllByOrgIdAndDateUseCase(
-    organizationId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByOrgIdAndDate(
-      organizationId,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByPosIdAndDateUseCase(
-    carWashPosId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceOperation[]> {
-    return await this.deviceOperationRepository.findAllByPosIdAndDate(
-      carWashPosId,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getLastByDeviceIdUseCase(deviceId: number): Promise<DeviceOperation> {
-    return await this.deviceOperationRepository.findLastOperByDeviceId(
-      deviceId,
-    );
-  }
-
-  async getLastByPosIdUseCase(posId: number): Promise<DeviceOperation> {
-    return await this.deviceOperationRepository.findLastOperByPosId(posId);
-  }
-
-  async getCountAllByDeviceIdAndDateOper(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return await this.deviceOperationRepository.countAllByDeviceIdAndDateOper(
-      deviceId,
-      dateStart,
-      dateEnd,
     );
   }
 }

@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { TypeOrganization } from '@prisma/client';
+import { TypeOrganization } from '@organization/organization/domain/typeOrganization';
 
 export class OrganizationCreateDto {
   @IsString()

@@ -4,6 +4,8 @@ import { TechTaskRepositoryProvider } from '@tech-task/techTask/provider/techTas
 import { TechTaskItemTemplateProvider } from '@tech-task/itemTemplate/provider/itemTemplate';
 import { TechTaskItemValueToTechTaskProvider } from '@tech-task/itemTemplateToTechTask/provider/itemValueToTechTask';
 import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
+import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
+import { DeleteManyTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete-many';
 import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
 import { HandlerTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-handler';
 import { FindMethodsTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-find-methods';
@@ -22,8 +24,11 @@ import { FileModule } from '@libs/file/module';
 import { TechTagRepositoryProvider } from '@tech-task/tag/provider/techTag';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
-import { TestDataTechTaskCron } from '../../../infra/handler/testData/cron/testDataTechTask';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ReportTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-report';
+import { TechTaskCommentProvider } from '@tech-task/comment/provider/techTaskComment';
+import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
+import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';
 
 const repositories: Provider[] = [
   TechTaskRepositoryProvider,
@@ -31,10 +36,13 @@ const repositories: Provider[] = [
   TechTaskItemValueToTechTaskProvider,
   ProgramTechRateProvider,
   TechTagRepositoryProvider,
+  TechTaskCommentProvider,
 ];
 
 const techTaskUseCases: Provider[] = [
   CreateTechTaskUseCase,
+  DeleteTechTaskUseCase,
+  DeleteManyTechTaskUseCase,
   FindMethodsTechTaskUseCase,
   UpdateTechTaskUseCase,
   HandlerTechTaskUseCase,
@@ -42,6 +50,7 @@ const techTaskUseCases: Provider[] = [
   ReadAllByPosTechTaskUseCase,
   ShapeTechTaskUseCase,
   CompletionShapeTechTaskUseCase,
+  ReportTechTaskUseCase,
 ];
 
 const itemTemplateUseCases: Provider[] = [FindMethodsItemTemplateUseCase];
@@ -62,6 +71,11 @@ const tagUseCases: Provider[] = [
   FindMethodsTechTagUseCase,
 ];
 
+const commentUseCases: Provider[] = [
+  CreateTechTaskCommentUseCase,
+  ReadTechTaskCommentsUseCase,
+];
+
 @Module({
   imports: [PrismaModule, FileModule, ScheduleModule.forRoot()],
   providers: [
@@ -71,14 +85,16 @@ const tagUseCases: Provider[] = [
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
     ...tagUseCases,
-    TestDataTechTaskCron,
+    ...commentUseCases,
   ],
   exports: [
+    ...repositories,
     ...techTaskUseCases,
     ...itemTemplateUseCases,
     ...itemTemplateToTechTaskUseCases,
     ...programTechRateUseCases,
     ...tagUseCases,
+    ...commentUseCases,
   ],
 })
 export class TechTaskModule {}

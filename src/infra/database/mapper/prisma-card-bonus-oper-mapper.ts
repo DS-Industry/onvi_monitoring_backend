@@ -1,4 +1,4 @@
-import { CardBonusOper as PrismaCardBonusOper, Prisma } from '@prisma/client';
+import { LTYBonusOper as PrismaCardBonusOper, Prisma } from '@prisma/client';
 import { CardBonusOper } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/domain/cardBonusOper';
 
 export class PrismaCardBonusOperMapper {
@@ -8,32 +8,32 @@ export class PrismaCardBonusOperMapper {
     }
     return new CardBonusOper({
       id: entity.id,
-      cardMobileUserId: entity.cardMobileUserId,
+      cardMobileUserId: entity.cardId,
       carWashDeviceId: entity.carWashDeviceId,
-      typeOperId: entity.typeOperId,
+      typeOperId: entity.typeId,
       operDate: entity.operDate,
       loadDate: entity.loadDate,
       sum: entity.sum,
       comment: entity.comment,
       creatorId: entity.creatorId,
-      orderMobileUserId: entity.orderMobileUserId,
+      orderMobileUserId: entity.orderId,
     });
   }
 
   static toPrisma(
     cardBonusOper: CardBonusOper,
-  ): Prisma.CardBonusOperUncheckedCreateInput {
+  ): Prisma.LTYBonusOperUncheckedCreateInput {
     return {
       id: cardBonusOper?.id,
-      cardMobileUserId: cardBonusOper?.cardMobileUserId,
+      cardId: cardBonusOper?.cardMobileUserId,
       carWashDeviceId: cardBonusOper?.carWashDeviceId,
-      typeOperId: cardBonusOper.typeOperId,
+      typeId: cardBonusOper.typeOperId,
       operDate: cardBonusOper.operDate,
       loadDate: cardBonusOper.loadDate,
       sum: cardBonusOper.sum,
       comment: cardBonusOper?.comment,
       creatorId: cardBonusOper?.creatorId,
-      orderMobileUserId: cardBonusOper?.orderMobileUserId,
+      orderId: cardBonusOper?.orderMobileUserId,
     };
   }
 }

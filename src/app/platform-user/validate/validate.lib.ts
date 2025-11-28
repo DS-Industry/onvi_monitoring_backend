@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@db/prisma/prisma.service';
 import { FindMethodsCarWashDeviceTypeUseCase } from '@pos/device/deviceType/use-cases/car-wash-device-type-find-methods';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
@@ -46,24 +47,26 @@ import {
   HrException,
   IncidentException,
   LoyaltyException,
+  ManagerPaperException,
   OrganizationException,
   PosException,
   ReportTemplateException,
+  SaleException,
   TechTaskException,
   UserException,
   WarehouseException,
 } from '@exception/option.exceptions';
+import { LOYALTY_CREATE_CLIENT_EXCEPTION_CODE } from '@constant/error.constants';
 import { FindMethodsCashCollectionUseCase } from '@finance/cashCollection/cashCollection/use-cases/cashCollection-find-methods';
 import { CashCollection } from '@finance/cashCollection/cashCollection/domain/cashCollection';
 import { FindMethodsCashCollectionDeviceUseCase } from '@finance/cashCollection/cashCollectionDevice/use-cases/cashCollectionDevice-find-methods';
 import { FindMethodsCashCollectionTypeUseCase } from '@finance/cashCollection/cashCollectionDeviceType/use-cases/cashCollectionType-find-methods';
 import { FindMethodsShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-find-methods';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
-import { FindMethodsWorkDayShiftReportUseCase } from '@finance/shiftReport/workDayShiftReport/use-cases/workDayShiftReport-find-methods';
-import { WorkDayShiftReport } from '@finance/shiftReport/workDayShiftReport/domain/workDayShiftReport';
 import { FindMethodsReportUseCase } from '@report/report/use-cases/report-find-methods';
 import { ReportTemplate } from '@report/report/domain/reportTemplate';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
 import { OrganizationConfirmMail } from '@organization/confirmMail/domain/confirmMail';
 import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
@@ -71,21 +74,43 @@ import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
+import { FindParticipantRequestByIdUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-find-participant-request-by-id';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
 import { FindMethodsBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-find-methods';
 import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
 import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
 import { FindMethodsBenefitActionUseCase } from '@loyalty/loyalty/benefit/benefitAction/use-case/benefitAction-find-methods';
+import { FindMethodsCorporateUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-find-methods';
+import { Corporate } from '@loyalty/mobile-user/corporate/domain/corporate';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { FindMethodsPositionUseCase } from '@hr/position/use-case/position-find-methods';
 import { Position } from '@hr/position/domain/position';
 import { Worker } from '@hr/worker/domain/worker';
 import { FindMethodsWorkerUseCase } from '@hr/worker/use-case/worker-find-methods';
 import { FindMethodsPaymentUseCase } from '@hr/payment/use-case/payment-find-methods';
-import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
+import { CalculationPaymentShiftReportUseCase } from '@finance/shiftReport/shiftReport/use-cases/shiftReport-calculation-payment';
+import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
+import { FindMethodsUserNotificationTagUseCase } from '@notification/userNotificationTag/use-case/userNotificationTag-find-methods';
+import { UserNotificationTag } from '@notification/userNotificationTag/domain/userNotificationTag';
+import { UserNotification } from '@notification/userNotification/domain/userNotification';
+import { FindMethodsUserNotificationUseCase } from '@notification/userNotification/use-case/userNotification-find-methods';
+import { FindMethodsManagerPaperUseCase } from '@manager-paper/managerPaper/use-case/managerPaper-find-methods';
+import { ManagerPaper } from '@manager-paper/managerPaper/domain/managerPaper';
+import { FindMethodsManagerReportPeriodUseCase } from '@manager-paper/managerReportPeriod/use-case/managerReportPeriod-find-methods';
+import { ManagerReportPeriod } from '@manager-paper/managerReportPeriod/domain/managerReportPeriod';
+import { FindMethodsManagerPaperTypeUseCase } from '@manager-paper/managerPaperType/use-case/managerPaperType-find-methods';
+import { ManagerPaperType } from '@manager-paper/managerPaperType/domain/managerPaperType';
+import { FindMethodsSalePriceUseCase } from '@warehouse/sale/MNGSalePrice/use-cases/salePrice-find-methods';
+import { SalePrice } from '@warehouse/sale/MNGSalePrice/domain/salePrice';
+import { FindMethodsSaleDocumentUseCase } from '@warehouse/sale/MNGSaleDocument/use-cases/saleDocument-find-methods';
+import { SaleDocumentResponseDto } from '@warehouse/sale/MNGSaleDocument/use-cases/dto/saleDocument-response.dto';
+import { FindMethodsMarketingCampaignUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-find-methods';
+import { Payment } from '@hr/payment/domain/payment';
+import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
+import { DeviceOperation } from '@pos/device/device-data/device-data/device-operation/domain/device-operation';
 export interface ValidateResponse<T = any> {
   code: number;
   errorMessage?: string;
@@ -103,6 +128,9 @@ export enum ExceptionType {
   REPORT_TEMPLATE = 'ReportTemplate',
   LOYALTY = 'Loyalty',
   HR = 'Hr',
+  NOTIFICATION = 'Notification',
+  MANAGER_PAPER = 'ManagerPaper',
+  SALE = 'Sale',
 }
 @Injectable()
 export class ValidateLib {
@@ -133,21 +161,34 @@ export class ValidateLib {
     private readonly findMethodsCashCollectionDeviceUseCase: FindMethodsCashCollectionDeviceUseCase,
     private readonly findMethodsCashCollectionTypeUseCase: FindMethodsCashCollectionTypeUseCase,
     private readonly findMethodsShiftReportUseCase: FindMethodsShiftReportUseCase,
-    private readonly findMethodsWorkDayShiftReportUseCase: FindMethodsWorkDayShiftReportUseCase,
     private readonly findMethodsReportUseCase: FindMethodsReportUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly findMethodsClientUseCase: FindMethodsClientUseCase,
     private readonly findMethodsLoyaltyProgramUseCase: FindMethodsLoyaltyProgramUseCase,
+    private readonly findParticipantRequestByIdUseCase: FindParticipantRequestByIdUseCase,
     private readonly findMethodsLoyaltyTierUseCase: FindMethodsLoyaltyTierUseCase,
     private readonly findMethodsBenefitUseCase: FindMethodsBenefitUseCase,
     private readonly findMethodsBenefitActionUseCase: FindMethodsBenefitActionUseCase,
+    private readonly findMethodsCorporateUseCase: FindMethodsCorporateUseCase,
     private readonly posManageUserUseCase: PosManageUserUseCase,
+    private readonly loyaltyProgramManageUserUseCase: LoyaltyProgramManageUserUseCase,
     private readonly findMethodsPositionUseCase: FindMethodsPositionUseCase,
     private readonly findMethodsWorkerUseCase: FindMethodsWorkerUseCase,
     private readonly findMethodsPaymentUseCase: FindMethodsPaymentUseCase,
+    private readonly calculationPaymentShiftReportUseCase: CalculationPaymentShiftReportUseCase,
     private readonly findMethodsTechTagUseCase: FindMethodsTechTagUseCase,
+    private readonly findMethodsUserNotificationTagUseCase: FindMethodsUserNotificationTagUseCase,
+    private readonly findMethodsUserNotificationUseCase: FindMethodsUserNotificationUseCase,
+    private readonly findMethodsManagerReportPeriodUseCase: FindMethodsManagerReportPeriodUseCase,
+    private readonly findMethodsManagerPaperUseCase: FindMethodsManagerPaperUseCase,
+    private readonly findMethodsManagerPaperTypeUseCase: FindMethodsManagerPaperTypeUseCase,
+    private readonly findMethodsSalePriceUseCase: FindMethodsSalePriceUseCase,
+    private readonly findMethodsSaleDocumentUseCase: FindMethodsSaleDocumentUseCase,
+    private readonly findMethodsMarketingCampaignUseCase: FindMethodsMarketingCampaignUseCase,
+    private readonly findMethodsDeviceOperationUseCase: FindMethodsDeviceOperationUseCase,
     private readonly bcrypt: IBcryptAdapter,
+    private readonly prisma: PrismaService,
   ) {}
 
   public async workerConfirmMailExists(
@@ -216,6 +257,27 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'The user was not found' };
     }
     return { code: 200, object: checkUserId };
+  }
+
+  public async userByIdWithOrganizationExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const user = await this.prisma.user.findFirst({
+      where: { id },
+      include: {
+        organizations: {
+          include: {
+            ownedLtyPrograms: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return { code: 400, errorMessage: 'The user was not found' };
+    }
+
+    return { code: 200, object: user };
   }
   public async organizationByOwnerExists(
     organizationId: number,
@@ -407,6 +469,17 @@ export class ValidateLib {
       return { code: 400, errorMessage: 'The device does not exist' };
     }
     return { code: 200, object: device };
+  }
+
+  public async deviceOperationByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<DeviceOperation>> {
+    const deviceOperation =
+      await this.findMethodsDeviceOperationUseCase.getOneById(id);
+    if (!deviceOperation) {
+      return { code: 400, errorMessage: 'The device operation does not exist' };
+    }
+    return { code: 200, object: deviceOperation };
   }
 
   public async nomenclatureExel(
@@ -612,9 +685,10 @@ export class ValidateLib {
     id: number,
     posId: number,
   ): Promise<ValidateResponse> {
-    const equipmentKnot =
-      await this.findMethodsEquipmentKnotUseCase.getById(id);
-    if (!equipmentKnot || equipmentKnot.posId != posId) {
+    const equipmentKnots =
+      await this.findMethodsEquipmentKnotUseCase.getAllByPosId(posId);
+    const exists = equipmentKnots.some((knot) => knot.id === id);
+    if (!exists) {
       return { code: 400, errorMessage: 'POS doesnt have a program type' };
     }
     return { code: 200 };
@@ -752,6 +826,18 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async cashCollectionDeleteStatus(
+    cashCollection: CashCollection,
+  ): Promise<ValidateResponse> {
+    if (cashCollection.status == StatusCashCollection.SENT) {
+      return {
+        code: 400,
+        errorMessage: 'The cashCollection can`t be delete',
+      };
+    }
+    return { code: 200 };
+  }
+
   public async cashCollectionDeviceComparisonByIdAndList(
     cashCollectionId: number,
     cashCollectionDeviceIds: number[],
@@ -803,22 +889,6 @@ export class ValidateLib {
     return { code: 200, object: shiftReport };
   }
 
-  public async workDayShiftReportByIdExists(
-    workDayShiftReportId: number,
-  ): Promise<ValidateResponse<WorkDayShiftReport>> {
-    const workDayShiftReport =
-      await this.findMethodsWorkDayShiftReportUseCase.getOneById(
-        workDayShiftReportId,
-      );
-    if (!workDayShiftReport) {
-      return {
-        code: 400,
-        errorMessage: 'The work day shift report does not exist',
-      };
-    }
-    return { code: 200, object: workDayShiftReport };
-  }
-
   public async reportByIdExists(
     reportId: number,
   ): Promise<ValidateResponse<ReportTemplate>> {
@@ -836,11 +906,13 @@ export class ValidateLib {
     const missingParams: string[] = [];
     const paramsArray: any[] = [];
 
-    for (const key of Object.keys(requiredParams)) {
-      if (!(key in clientData)) {
-        missingParams.push(key);
+    for (const param of requiredParams.params) {
+      const paramName = param.name;
+
+      if (!(paramName in clientData)) {
+        missingParams.push(paramName);
       } else {
-        paramsArray.push(clientData[key]);
+        paramsArray.push(clientData[paramName]);
       }
     }
 
@@ -862,6 +934,24 @@ export class ValidateLib {
     const unnecessaryPos = posIds.filter((item) => !posIdsCheck.includes(item));
     if (unnecessaryPos.length > 0) {
       return { code: 400, errorMessage: 'posId connection error' };
+    }
+    return { code: 200 };
+  }
+
+  public async loyaltyProgramIdAndPermissionsLoyaltyProgramIdComparison(
+    loyaltyProgramIds: number[],
+    ability: any,
+  ): Promise<ValidateResponse> {
+    const permissionLoyaltyPrograms =
+      await this.loyaltyProgramManageUserUseCase.execute(ability);
+    const loyaltyProgramIdsCheck = permissionLoyaltyPrograms.map(
+      (item) => item.id,
+    );
+    const unnecessaryLoyaltyPrograms = loyaltyProgramIds.filter(
+      (item) => !loyaltyProgramIdsCheck.includes(item),
+    );
+    if (unnecessaryLoyaltyPrograms.length > 0) {
+      return { code: 400, errorMessage: 'loyaltyProgramId connection error' };
     }
     return { code: 200 };
   }
@@ -889,6 +979,10 @@ export class ValidateLib {
   }
 
   public async tagIdsExists(tagIds: number[]): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+
     const allTagIds = await this.findMethodsTagUseCase.getAll();
     const tagIdsCheck = allTagIds.map((item) => item.id);
     const unnecessaryTagIds = tagIds.filter(
@@ -962,9 +1056,23 @@ export class ValidateLib {
     return { code: 200, object: checkClient };
   }
 
+  public async corporateClientByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Corporate>> {
+    const checkCorporateClient =
+      await this.findMethodsCorporateUseCase.getById(id);
+    if (!checkCorporateClient) {
+      return {
+        code: 400,
+        errorMessage: 'The corporate client does not exist',
+      };
+    }
+    return { code: 200, object: checkCorporateClient };
+  }
+
   public async loyaltyProgramByIdExists(
     id: number,
-  ): Promise<ValidateResponse<LoyaltyProgram>> {
+  ): Promise<ValidateResponse<LTYProgram>> {
     const checkLoyaltyProgram =
       await this.findMethodsLoyaltyProgramUseCase.getOneById(id);
     if (!checkLoyaltyProgram) {
@@ -991,6 +1099,53 @@ export class ValidateLib {
       };
     }
     return { code: 200 };
+  }
+
+  public async hubRequestByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkHubRequest =
+      await this.prisma.lTYProgramParticipantRequest.findUnique({
+        where: { id },
+      });
+    if (!checkHubRequest) {
+      return {
+        code: 400,
+        errorMessage: 'The hub request does not exist',
+      };
+    }
+    return { code: 200, object: checkHubRequest };
+  }
+
+  public async participantRequestByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkParticipantRequest =
+      await this.findParticipantRequestByIdUseCase.execute(id);
+    if (!checkParticipantRequest) {
+      return {
+        code: 400,
+        errorMessage: 'The participant request does not exist',
+      };
+    }
+    return { code: 200, object: checkParticipantRequest };
+  }
+
+  public async loyaltyProgramByOwnerOrganizationIdExists(
+    ownerOrganizationId: number,
+  ): Promise<ValidateResponse<LTYProgram>> {
+    const checkLoyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByOwnerOrganizationId(
+        ownerOrganizationId,
+      );
+    if (!checkLoyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage:
+          'The loyalty program does not exist for this organization',
+      };
+    }
+    return { code: 200, object: checkLoyaltyProgram };
   }
 
   public async loyaltyProgramByOrganizationIdAndProgramIdNotExists(
@@ -1097,6 +1252,19 @@ export class ValidateLib {
     return { code: 200 };
   }
 
+  public async paymentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<Payment>> {
+    const paymentTag = await this.findMethodsPaymentUseCase.getById(id);
+    if (!paymentTag) {
+      return {
+        code: 400,
+        errorMessage: 'The payment does not exist',
+      };
+    }
+    return { code: 200, object: paymentTag };
+  }
+
   public async techTegByNameNotExists(name: string): Promise<ValidateResponse> {
     const checkTag = await this.findMethodsTechTagUseCase.getByName(name);
     if (checkTag) {
@@ -1106,6 +1274,318 @@ export class ValidateLib {
       };
     }
     return { code: 200 };
+  }
+
+  public async notificationTegByNameNotExists(
+    name: string,
+    userId: number,
+  ): Promise<ValidateResponse> {
+    const checkTag =
+      await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
+        authorUserId: userId,
+        name: name,
+      });
+    if (checkTag.length > 0) {
+      return {
+        code: 400,
+        errorMessage: 'The tag already exists in the system for this user',
+      };
+    }
+    return { code: 200 };
+  }
+
+  public async notificationTegByIdExists(
+    id: number,
+    userId: number,
+  ): Promise<ValidateResponse<UserNotificationTag>> {
+    const checkTag =
+      await this.findMethodsUserNotificationTagUseCase.getOneById(id);
+    if (!checkTag || checkTag.authorUserId !== userId) {
+      return {
+        code: 400,
+        errorMessage: 'The tag does not exist',
+      };
+    }
+    return { code: 200, object: checkTag };
+  }
+
+  public async userNotificationByIdExists(
+    id: number,
+    userId: number,
+  ): Promise<ValidateResponse<UserNotification>> {
+    const checkUserNotification =
+      await this.findMethodsUserNotificationUseCase.getById(id);
+    if (!checkUserNotification || checkUserNotification.userId !== userId) {
+      return {
+        code: 400,
+        errorMessage: 'The userNotification does not exist',
+      };
+    }
+    return { code: 200, object: checkUserNotification };
+  }
+
+  public async userNotificationTagIdsExists(
+    tagIds: number[],
+    userId: number,
+  ): Promise<ValidateResponse> {
+    if (!tagIds || tagIds.length === 0) {
+      return { code: 200 };
+    }
+
+    const allTagIds =
+      await this.findMethodsUserNotificationTagUseCase.getAllByFilter({
+        authorUserId: userId,
+      });
+    const tagIdsCheck = allTagIds.map((item) => item.id);
+    const unnecessaryTagIds = tagIds.filter(
+      (item) => !tagIdsCheck.includes(item),
+    );
+    if (unnecessaryTagIds.length > 0) {
+      return { code: 400, errorMessage: 'tagId connection error' };
+    }
+    return { code: 200 };
+  }
+
+  public async validateExcelCsvFile(
+    file: Express.Multer.File,
+  ): Promise<ValidateResponse<Express.Multer.File>> {
+    if (!file) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'Excel (.xlsx, .xls) or CSV (.csv) file is required',
+      );
+    }
+
+    if (!file.buffer || file.buffer.length === 0) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        'File buffer is empty or missing',
+      );
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`,
+      );
+    }
+
+    const allowedMimeTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel',
+      'application/octet-stream',
+      'application/vnd.ms-office',
+      'application/zip',
+      'text/csv',
+      'text/plain',
+    ];
+
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.originalname
+      ? file.originalname
+          .toLowerCase()
+          .substring(file.originalname.lastIndexOf('.'))
+      : '';
+
+    const isValidMimeType = allowedMimeTypes.includes(file.mimetype);
+    const isValidExtension = allowedExtensions.includes(fileExtension);
+
+    if (!isValidMimeType && !isValidExtension) {
+      const hasValidKeywords =
+        file.mimetype &&
+        (file.mimetype.includes('excel') ||
+          file.mimetype.includes('spreadsheet') ||
+          file.mimetype.includes('office') ||
+          file.mimetype.includes('csv') ||
+          file.mimetype.includes('text'));
+
+      if (!hasValidKeywords) {
+        throw new LoyaltyException(
+          LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+          `File validation failed. Expected Excel (.xlsx, .xls) or CSV (.csv) file but received: mimetype=${file.mimetype}, extension=${fileExtension}, filename=${file.originalname}`,
+        );
+      }
+    }
+
+    return {
+      code: 200,
+      object: file,
+    };
+  }
+
+  public async managerPaperExists(
+    managerPaperId: number,
+  ): Promise<ValidateResponse<ManagerPaper>> {
+    const managerPaper =
+      await this.findMethodsManagerPaperUseCase.getOneById(managerPaperId);
+    if (!managerPaper) {
+      return {
+        code: 400,
+        errorMessage: 'The managerPaper does not exist',
+      };
+    }
+    return { code: 200, object: managerPaper };
+  }
+
+  public async managerPaperTypeExists(
+    managerPaperTypeId: number,
+  ): Promise<ValidateResponse<ManagerPaperType>> {
+    const managerPaperType =
+      await this.findMethodsManagerPaperTypeUseCase.getOneById(
+        managerPaperTypeId,
+      );
+    if (!managerPaperType) {
+      return {
+        code: 400,
+        errorMessage: 'The managerPaperType does not exist',
+      };
+    }
+    return { code: 200, object: managerPaperType };
+  }
+
+  public async managerReportPeriodExists(
+    managerReportPeriodId: number,
+  ): Promise<ValidateResponse<ManagerReportPeriod>> {
+    const managerReportPeriod =
+      await this.findMethodsManagerReportPeriodUseCase.getOneById(
+        managerReportPeriodId,
+      );
+    if (!managerReportPeriod) {
+      return {
+        code: 400,
+        errorMessage: 'The managerReportPeriod does not exist',
+      };
+    }
+    return { code: 200, object: managerReportPeriod };
+  }
+
+  public async salePriceByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SalePrice>> {
+    const checkSalePrice = await this.findMethodsSalePriceUseCase.getById(id);
+    if (!checkSalePrice) {
+      return {
+        code: 400,
+        errorMessage: 'The salePrice does not exist',
+      };
+    }
+    return { code: 200, object: checkSalePrice };
+  }
+
+  public async saleDocumentByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<SaleDocumentResponseDto>> {
+    const checkSaleDocument =
+      await this.findMethodsSaleDocumentUseCase.getOneById(id);
+    if (!checkSaleDocument) {
+      return {
+        code: 400,
+        errorMessage: 'The saleDocument does not exist',
+      };
+    }
+    return { code: 200, object: checkSaleDocument };
+  }
+
+  public async marketingCampaignByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkMarketingCampaign =
+      await this.findMethodsMarketingCampaignUseCase.getOneById(id);
+    if (!checkMarketingCampaign) {
+      return {
+        code: 400,
+        errorMessage: 'The marketing campaign does not exist',
+      };
+    }
+    return { code: 200, object: checkMarketingCampaign };
+  }
+
+  public async ltyProgramParticipantByIdExists(
+    id: number,
+  ): Promise<ValidateResponse<any>> {
+    const checkParticipant = await this.prisma.lTYProgramParticipant.findUnique(
+      {
+        where: { id },
+        include: {
+          ltyProgram: true,
+          organization: {
+            include: {
+              ownedLtyPrograms: true,
+            },
+          },
+        },
+      },
+    );
+    if (!checkParticipant) {
+      return {
+        code: 400,
+        errorMessage: 'The loyalty program participant does not exist',
+      };
+    }
+    return { code: 200, object: checkParticipant };
+  }
+
+  public async cardBelongsToAccessibleLoyaltyProgram(
+    cardId: number,
+    ability: any,
+  ): Promise<ValidateResponse<Card>> {
+    const card = await this.findMethodsCardUseCase.getById(cardId);
+
+    if (!card) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not exist',
+      };
+    }
+
+    const userLoyaltyProgramIds: number[] = [];
+    if (ability && ability.rules) {
+      for (const rule of ability.rules) {
+        if (
+          rule.subject === 'LTYProgram' &&
+          rule.conditions &&
+          rule.conditions.id
+        ) {
+          if (rule.conditions.id.in && Array.isArray(rule.conditions.id.in)) {
+            userLoyaltyProgramIds.push(...rule.conditions.id.in);
+          }
+        }
+      }
+    }
+
+    if (!card.loyaltyCardTierId) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not have a loyalty tier assigned',
+      };
+    }
+
+    const loyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(
+        card.loyaltyCardTierId,
+      );
+    if (!loyaltyProgram) {
+      return {
+        code: 400,
+        errorMessage: 'Card does not have a valid loyalty program',
+      };
+    }
+
+    const loyaltyProgramId = loyaltyProgram.id;
+
+    if (
+      userLoyaltyProgramIds.length > 0 &&
+      !userLoyaltyProgramIds.includes(loyaltyProgramId)
+    ) {
+      return {
+        code: 403,
+        errorMessage:
+          "Access denied: You do not have access to this card's loyalty program",
+      };
+    }
+
+    return { code: 200, object: card };
   }
 
   public handlerArrayResponse(
@@ -1141,7 +1621,136 @@ export class ValidateLib {
         throw new LoyaltyException(exceptionCode, errorCodes);
       } else if (exceptionType == ExceptionType.HR) {
         throw new HrException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.NOTIFICATION) {
+        throw new HrException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.MANAGER_PAPER) {
+        throw new ManagerPaperException(exceptionCode, errorCodes);
+      } else if (exceptionType == ExceptionType.SALE) {
+        throw new SaleException(exceptionCode, errorCodes);
       }
+    }
+  }
+
+  public async userBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ): Promise<ValidateResponse<any>> {
+    const user =
+      await this.findMethodsUserUseCase.findUserBelongsToOrganization(
+        userId,
+        organizationId,
+      );
+
+    if (!user) {
+      return {
+        code: 400,
+        errorMessage: `User with ID ${userId} does not belong to organization with ID ${organizationId}`,
+      };
+    }
+
+    return {
+      code: 200,
+      object: user,
+    };
+  }
+
+  public async userBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ): Promise<ValidateResponse<any>> {
+    const user =
+      await this.findMethodsUserUseCase.findUserBelongsToOrganizations(
+        userId,
+        organizationIds,
+      );
+
+    if (!user) {
+      return {
+        code: 400,
+        errorMessage: `User with ID ${userId} does not belong to any of the organizations with IDs: ${organizationIds.join(', ')}`,
+      };
+    }
+
+    return {
+      code: 200,
+      object: user,
+    };
+  }
+
+  public async paymentSumValidation(
+    hrWorkerId: number,
+    billingMonth: Date,
+    paymentSum: number,
+  ): Promise<ValidateResponse<any>> {
+    try {
+      const worker = await this.findMethodsWorkerUseCase.getById(hrWorkerId);
+      if (!worker) {
+        return {
+          code: 400,
+          errorMessage: `Worker with ID ${hrWorkerId} not found`,
+        };
+      }
+
+      const shiftReportData =
+        await this.calculationPaymentShiftReportUseCase.execute(billingMonth, [
+          worker,
+        ]);
+
+      if (shiftReportData.length === 0) {
+        return {
+          code: 200,
+          object: {
+            maxAvailable: paymentSum,
+            totalEarned: 0,
+            totalPrepayments: 0,
+            note: 'No shift reports found - validation bypassed',
+          },
+        };
+      }
+
+      const workerShiftData = shiftReportData.find(
+        (data) => data.hrWorkerId === hrWorkerId,
+      );
+      if (!workerShiftData) {
+        return {
+          code: 400,
+          errorMessage: `No shift data found for worker ${hrWorkerId}`,
+        };
+      }
+
+      const existingPrepayments =
+        await this.findMethodsPaymentUseCase.getAllForCalculate(
+          [hrWorkerId],
+          PaymentType.PREPAYMENT,
+          billingMonth,
+        );
+
+      const totalPrepaymentSum = existingPrepayments.reduce(
+        (sum, payment) => sum + payment.sum,
+        0,
+      );
+      /*const maxAvailableForPayment = workerShiftData.sum - totalPrepaymentSum;
+
+      if (paymentSum > maxAvailableForPayment) {
+        return {
+          code: 400,
+          errorMessage: `Payment sum ${paymentSum} exceeds maximum available amount ${maxAvailableForPayment}. Worker earned ${workerShiftData.sum} from shifts, already received ${totalPrepaymentSum} in prepayments.`,
+        };
+      }*/
+
+      return {
+        code: 200,
+        object: {
+          maxAvailable: paymentSum,
+          totalEarned: paymentSum,
+          totalPrepayments: totalPrepaymentSum,
+        },
+      };
+    } catch (error) {
+      return {
+        code: 500,
+        errorMessage: `Error validating payment sum: ${error.message}`,
+      };
     }
   }
 }

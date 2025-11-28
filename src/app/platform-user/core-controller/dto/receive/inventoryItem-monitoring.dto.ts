@@ -1,23 +1,26 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class InventoryItemMonitoringDto {
-  @IsNotEmpty({ message: 'categoryId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  categoryId: number | '*';
-  @IsNotEmpty({ message: 'warehouseId is required' })
+  categoryId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  warehouseId: number | '*';
-  @IsNotEmpty({ message: 'placementId is required' })
+  warehouseId?: number;
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  placementId: number | '*';
+  placementId?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }

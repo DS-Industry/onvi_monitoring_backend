@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IPositionRepository } from '@hr/position/interface/position';
 import { Position } from '@hr/position/domain/position';
+import { User } from '@platform-user/user/domain/user';
 
 @Injectable()
 export class FindMethodsPositionUseCase {
@@ -14,8 +15,8 @@ export class FindMethodsPositionUseCase {
     return await this.positionRepository.findAll();
   }
 
-  async getAllByAbility(ability: any): Promise<Position[]> {
-    return await this.positionRepository.findAllByAbility(ability);
+  async getAllByPermissionUser(user: User): Promise<Position[]> {
+    return await this.positionRepository.findAllByUser(user);
   }
 
   async getAllByOrgId(orgId: number): Promise<Position[]> {

@@ -28,6 +28,7 @@ export class PrismaNomenclatureMapper {
       categoryId: entity.categoryId,
       supplierId: entity.supplierId,
       measurement: entity.measurement,
+      destiny: entity.destiny,
       image: entity.image,
       status: entity.status,
       metaData: parsedMetaData,
@@ -49,6 +50,7 @@ export class PrismaNomenclatureMapper {
       categoryId: nomenclature.categoryId,
       supplierId: nomenclature?.supplierId,
       measurement: nomenclature.measurement,
+      destiny: nomenclature.destiny,
       image: nomenclature?.image,
       status: nomenclature.status,
       metaData: nomenclature.metaData

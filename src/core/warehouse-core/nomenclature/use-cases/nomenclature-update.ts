@@ -26,6 +26,7 @@ export class UpdateNomenclatureUseCase {
       categoryId,
       supplierId,
       measurement,
+      destiny,
       status,
       metaData,
     } = input;
@@ -56,6 +57,7 @@ export class UpdateNomenclatureUseCase {
     oldNomenclature.measurement = measurement
       ? measurement
       : oldNomenclature.measurement;
+    oldNomenclature.destiny = destiny ? destiny : oldNomenclature.destiny;
     oldNomenclature.status = status ? status : oldNomenclature.status;
 
     if (metaData) {

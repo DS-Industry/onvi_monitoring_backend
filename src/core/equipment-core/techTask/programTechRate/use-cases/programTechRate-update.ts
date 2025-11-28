@@ -11,17 +11,14 @@ export class UpdateProgramTechRateUseCase {
 
   async execute(value: ProgramTechRateUpdateDto[]): Promise<ProgramTechRate[]> {
     const response: ProgramTechRate[] = [];
-    await Promise.all(
-      value.map(async (techRate) =>
-        response.push(
-          await this.programTechRateRepository.updateValue(
-            techRate.programTechRateId,
-            techRate.literRate,
-            techRate.concentration,
-          ),
-        ),
-      ),
-    );
+    for (const techRate of value) {
+      const updatedRate = await this.programTechRateRepository.updateValue(
+        techRate.programTechRateId,
+        techRate.literRate,
+        techRate.concentration,
+      );
+      response.push(updatedRate);
+    }
     return response;
   }
 }

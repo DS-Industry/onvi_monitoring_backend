@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Pos } from '@pos/pos/domain/pos';
-import { PosPlanFactResponseDto } from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
+import {
+  PosPlanFactDto,
+  PosPlanFactResponseDto,
+} from '@platform-user/core-controller/dto/response/pos-plan-fact-response.dto';
 import { FindMethodsPosUseCase } from '@pos/pos/use-cases/pos-find-methods';
 import { FindMethodsDeviceOperationUseCase } from '@pos/device/device-data/device-data/device-operation/use-cases/device-operation-find-methods';
-import { CurrencyType } from '@prisma/client';
 import { FindMethodsMonthlyPlanPosUseCase } from '@pos/monthlyPlanPos/use-cases/monthlyPlanPos-find-methods';
+import { MonthlyPlanPos } from '@pos/monthlyPlanPos/domain/monthlyPlanPos';
+import { DeviceOperationMonitoringResponseDto } from '@pos/device/device-data/device-data/device-operation/use-cases/dto/device-operation-monitoring-response.dto';
 
 @Injectable()
 export class PlanFactPosUseCase {
@@ -14,114 +18,138 @@ export class PlanFactPosUseCase {
     private readonly findMethodsMonthlyPlanPosUseCase: FindMethodsMonthlyPlanPosUseCase,
   ) {}
 
-  async execute(
-    dateStart: Date,
-    dateEnd: Date,
-    ability: any,
-    placementId: number | '*',
-    pos?: Pos,
-  ): Promise<PosPlanFactResponseDto[]> {
-    const response: PosPlanFactResponseDto[] = [];
-    let poses: Pos[] = [];
-    if (pos) {
-      poses.push(pos);
-    } else {
-      poses = await this.findMethodsPosUseCase.getAllByAbilityPos(
-        ability,
-        placementId,
+  async execute(data: {
+    dateStart: Date;
+    dateEnd: Date;
+    ability: any;
+    placementId?: number;
+    pos?: Pos;
+    skip?: number;
+    take?: number;
+  }): Promise<PosPlanFactResponseDto> {
+    const { posIds, totalCount } = await this.getPosData(data);
+
+    const adjustedDateStart = this.getFirstDayOfMonth(data.dateStart);
+    const adjustedDateEnd = this.getLastDayOfMonth(data.dateEnd);
+
+    const [operations, allPlans] = await Promise.all([
+      this.findMethodsDeviceOperationUseCase.getDataByMonitoring(
+        posIds,
+        data.dateStart,
+        data.dateEnd,
+      ),
+      this.findMethodsMonthlyPlanPosUseCase.getAllByPosIdsAndDate(
+        posIds,
+        adjustedDateStart,
+        adjustedDateEnd,
+      ),
+    ]);
+
+    const operationsMap = new Map<
+      number,
+      DeviceOperationMonitoringResponseDto
+    >();
+    operations.forEach((op) => operationsMap.set(op.ownerId, op));
+
+    const response: PosPlanFactDto[] = [];
+    for (const posId of posIds) {
+      const posOperations = operationsMap.get(posId);
+      const posPlans = allPlans.filter((plan) => plan.posId === posId);
+
+      const cashSum = posOperations?.cashSum || 0;
+      const virtualSum = posOperations?.virtualSum || 0;
+      const yandexSum = posOperations?.yandexSum || 0;
+      const sumFact = cashSum + virtualSum + yandexSum;
+
+      const totalPlan = this.calculateTotalPlan(
+        posPlans,
+        data.dateStart,
+        data.dateEnd,
       );
+      const completedPercent =
+        totalPlan > 0 ? Math.round((sumFact / totalPlan) * 100) : 100;
+
+      response.push({
+        posId: posId,
+        plan: totalPlan,
+        cashFact: cashSum,
+        virtualSumFact: virtualSum,
+        yandexSumFact: yandexSum,
+        sumFact: sumFact,
+        completedPercent: completedPercent,
+        notCompletedPercent:
+          completedPercent >= 100 ? 0 : 100 - completedPercent,
+      });
     }
 
-    const adjustedDateStart = this.getFirstDayOfMonth(dateStart);
-    const adjustedDateEnd = this.getLastDayOfMonth(dateEnd);
+    return { plan: response, totalCount: totalCount };
+  }
 
-    const cashSumMap = new Map<number, number>();
-    const virtualSumMap = new Map<number, number>();
-    const yandexSumMap = new Map<number, number>();
+  private async getPosData(data: {
+    pos?: Pos;
+    ability: any;
+    placementId?: number;
+    skip?: number;
+    take?: number;
+  }): Promise<{ posIds: number[]; totalCount: number }> {
+    if (data.pos) {
+      return {
+        posIds: [data.pos.id],
+        totalCount: 1,
+      };
+    }
 
-    await Promise.all(
-      poses.map(async (pos) => {
-        const posOperations =
-          await this.findMethodsDeviceOperationUseCase.getAllByPosIdAndDateUseCase(
-            pos.id,
-            dateStart,
-            dateEnd,
-          );
-        await Promise.all(
-          posOperations.map(async (posOperation) => {
-            const operSum = posOperation.operSum;
-            const posId = pos.id;
+    const totalCount =
+      await this.findMethodsPosUseCase.countAllByAbilityAndPlacement({
+        ability: data.ability,
+        placementId: data.placementId,
+      });
 
-            if (posOperation.currencyType == CurrencyType.CASH) {
-              cashSumMap.set(posId, (cashSumMap.get(posId) || 0) + operSum);
-            } else if (posOperation.currencyType == CurrencyType.CASHLESS) {
-              virtualSumMap.set(
-                posId,
-                (virtualSumMap.get(posId) || 0) + operSum,
-              );
-            } else if (posOperation.currencyType == CurrencyType.VIRTUAL) {
-              yandexSumMap.set(posId, (yandexSumMap.get(posId) || 0) + operSum);
-            }
-          }),
-        );
+    const posIds = data.ability.rules
+      .filter(
+        (rule: {
+          subject: string;
+          action: string;
+          conditions: { id: { in: any } };
+        }) =>
+          (rule.action === 'read' || rule.action === 'manage') &&
+          rule.subject === 'Pos' &&
+          rule.conditions?.id?.in,
+      )
+      .flatMap(
+        (rule: { conditions: { id: { in: any } } }) => rule.conditions.id.in,
+      );
 
-        const plans =
-          await this.findMethodsMonthlyPlanPosUseCase.getAllByPosIdAndDate(
-            pos.id,
-            adjustedDateStart,
-            adjustedDateEnd,
-          );
-        let totalPlan = 0;
-        plans.forEach((plan) => {
-          const planStart = new Date(plan.monthDate);
-          const planEnd = new Date(
-            planStart.getFullYear(),
-            planStart.getMonth() + 1,
-            0,
-          ); // Конец месяца
+    return {
+      posIds,
+      totalCount,
+    };
+  }
 
-          // Определяем пересечение плана с указанным периодом
-          const periodStart = dateStart > planStart ? dateStart : planStart;
-          const periodEnd = dateEnd < planEnd ? dateEnd : planEnd;
+  private calculateTotalPlan(
+    plans: MonthlyPlanPos[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): number {
+    return plans.reduce((total, plan) => {
+      const planStart = new Date(plan.monthDate);
+      const planEnd = new Date(
+        planStart.getFullYear(),
+        planStart.getMonth() + 1,
+        0,
+      );
 
-          // Количество дней в плане и в периоде
-          const planDays =
-            (planEnd.getTime() - planStart.getTime()) / (1000 * 3600 * 24);
-          const periodDays =
-            (periodEnd.getTime() - periodStart.getTime()) / (1000 * 3600 * 24);
+      const periodStart = dateStart > planStart ? dateStart : planStart;
+      const periodEnd = dateEnd < planEnd ? dateEnd : planEnd;
 
-          // Доля плана, которая приходится на указанный период
-          const planRatio = periodDays / planDays;
-          totalPlan += plan.monthlyPlan * planRatio;
-        });
+      const planDays =
+        (planEnd.getTime() - planStart.getTime()) / (1000 * 3600 * 24);
+      const periodDays =
+        (periodEnd.getTime() - periodStart.getTime()) / (1000 * 3600 * 24);
 
-        totalPlan = Math.round(totalPlan);
-
-        const cashFact = cashSumMap.get(pos.id) || 0;
-        const virtualSumFact = virtualSumMap.get(pos.id) || 0;
-        const yandexSumFact = yandexSumMap.get(pos.id) || 0;
-
-        const sumFact = cashFact + virtualSumFact + yandexSumFact;
-
-        const completedPercent =
-          totalPlan > 0 ? Math.round((sumFact / totalPlan) * 100) : 100;
-        const notCompletedPercent =
-          completedPercent >= 100 ? 0 : 100 - completedPercent;
-
-        response.push({
-          posId: pos.id,
-          plan: totalPlan,
-          cashFact,
-          virtualSumFact,
-          yandexSumFact,
-          sumFact,
-          completedPercent,
-          notCompletedPercent,
-        });
-      }),
-    );
-
-    return response;
+      const planRatio = periodDays / planDays;
+      return total + Math.round(plan.monthlyPlan * planRatio);
+    }, 0);
   }
 
   private getFirstDayOfMonth(date: Date): Date {

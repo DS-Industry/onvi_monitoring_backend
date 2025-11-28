@@ -8,17 +8,22 @@ import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { TechTask } from '@tech-task/techTask/domain/techTask';
 import {
-  LOYALTY_CREATE_TAG_EXCEPTION_CODE,
   TECH_TASK_COMPLETION_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_CREATE_EXCEPTION_CODE, TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
+  TECH_TASK_CREATE_EXCEPTION_CODE,
+  TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
+  TECH_TASK_DELETE_EXCEPTION_CODE,
   TECH_TASK_GET_SHAPE_EXCEPTION_CODE,
-  TECH_TASK_UPDATE_EXCEPTION_CODE
-} from "@constant/error.constants";
+  TECH_TASK_UPDATE_EXCEPTION_CODE,
+} from '@constant/error.constants';
 import { TechTaskException } from '@exception/option.exceptions';
+import { ITechTaskRepository } from '@tech-task/techTask/interface/techTask';
 
 @Injectable()
 export class TechTaskValidateRules {
-  constructor(private readonly validateLib: ValidateLib) {}
+  constructor(
+    private readonly validateLib: ValidateLib,
+    private readonly techTaskRepository: ITechTaskRepository,
+  ) {}
 
   public async createValidate(
     posId: number,
@@ -126,5 +131,56 @@ export class TechTaskValidateRules {
       ExceptionType.LOYALTY,
       TECH_TASK_CREATE_TAG_EXCEPTION_CODE,
     );
+  }
+
+  public async deleteValidate(
+    techTaskId: number,
+    ability: any,
+  ): Promise<TechTask> {
+    const response = await this.validateLib.techTaskByIdExists(techTaskId);
+
+    if (response.code !== 200) {
+      throw new TechTaskException(
+        TECH_TASK_DELETE_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.delete,
+      response.object,
+    );
+    return response.object;
+  }
+
+  public async deleteManyValidate(
+    techTaskIds: number[],
+    ability: any,
+    posId?: number,
+    organizationId?: number,
+  ): Promise<TechTask[]> {
+    const techTasks = await this.techTaskRepository.findManyByIds(
+      techTaskIds,
+      posId,
+      organizationId,
+    );
+
+    if (techTasks.length !== techTaskIds.length) {
+      const foundIds = techTasks.map((task) => task.id);
+      const missingIds = techTaskIds.filter((id) => !foundIds.includes(id));
+      throw new TechTaskException(
+        TECH_TASK_DELETE_EXCEPTION_CODE,
+        `Tech tasks not found or not accessible: ${missingIds.join(', ')}`,
+      );
+    }
+
+    techTasks.forEach((techTask) => {
+      ForbiddenError.from(ability).throwUnlessCan(
+        PermissionAction.delete,
+        techTask,
+      );
+    });
+
+    return techTasks;
   }
 }

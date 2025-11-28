@@ -1,4 +1,4 @@
-import { UserTag as PrismaUserTag, Prisma } from '@prisma/client';
+import { LTYUserTag as PrismaUserTag, Prisma } from '@prisma/client';
 import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 
 export class PrismaUserTagMapper {
@@ -13,7 +13,7 @@ export class PrismaUserTagMapper {
     });
   }
 
-  static toPrisma(tag: Tag): Prisma.UserTagUncheckedCreateInput {
+  static toPrisma(tag: Tag): Prisma.LTYUserTagUncheckedCreateInput {
     return {
       id: tag?.id,
       name: tag.name,

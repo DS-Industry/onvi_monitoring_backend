@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { TokenPayload } from '@mobile-user/auth/domain/jwt-payload';
-import { ValidateClientForJwtStrategyUseCase } from '@mobile-user/auth/use-cases/auth-validate-jwt-strategy';
+import { TokenPayload } from '@mobile-core/auth/domain/token-pair';
+import { ValidateClientForJwtStrategyUseCase } from '@mobile-core/auth/use-cases/validate-client-for-jwt-strategy';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'clientJwt') {

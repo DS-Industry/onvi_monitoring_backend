@@ -1,10 +1,18 @@
-import { UserType } from '@prisma/client';
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 export class ClientFilterDto {
   placementId: number | '*';
-  type: UserType | '*';
+  contractType: ContractType | '*';
+  workerCorporateId: number | '*';
+  organizationId: number | '*';
   tagIds: number[];
   phone?: string;
+  name?: string;
+  page?: number;
+  size?: number;
   skip?: number;
   take?: number;
+  registrationFrom?: string;
+  registrationTo?: string;
+  search?: string;
 }

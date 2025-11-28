@@ -1,12 +1,14 @@
-import { StatusUser, UserType } from "@prisma/client";
+import {
+  StatusUser,
+  ContractType,
+} from '@loyalty/mobile-user/client/domain/enums';
 
 export interface ClientUpdateDto {
   name?: string;
   birthday?: Date;
   status?: StatusUser;
   avatar?: string;
-  type?: UserType;
-  inn?: string;
+  contractType?: ContractType;
   comment?: string;
   placementId?: number;
   tagIds?: number[];
@@ -14,4 +16,8 @@ export interface ClientUpdateDto {
   balance?: number;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
+  gender?: string;
+  cardId?: number;
+  email?: string;
+  is_notifications_enabled?: boolean;
 }

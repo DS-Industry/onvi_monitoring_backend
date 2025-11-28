@@ -4,6 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Pos } from '@pos/pos/domain/pos';
 import { PrismaPosMapper } from '@db/mapper/prisma-pos-mapper';
 import { accessibleBy } from '@casl/prisma';
+import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
 
 @Injectable()
 export class PosRepository extends IPosRepository {
@@ -22,25 +23,6 @@ export class PosRepository extends IPosRepository {
     return PrismaPosMapper.toDomain(pos);
   }
 
-  public async findAll(): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany();
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
-  }
-
-  public async findAllByOrgId(orgId: number): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany({
-      where: { organizationId: orgId },
-    });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
-  }
-
-  public async findAllByUserId(userId: number): Promise<Pos[]> {
-    const pos = await this.prisma.pos.findMany({
-      where: { usersPermissions: { some: { id: userId } } },
-    });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
-  }
-
   public async findOneById(id: number): Promise<Pos> {
     const pos = await this.prisma.pos.findFirst({
       where: {
@@ -48,6 +30,7 @@ export class PosRepository extends IPosRepository {
       },
       include: {
         address: true,
+        carWashPos: true,
       },
     });
     return PrismaPosMapper.toDomain(pos);
@@ -57,15 +40,6 @@ export class PosRepository extends IPosRepository {
     const pos = await this.prisma.pos.findFirst({
       where: {
         name,
-      },
-    });
-    return PrismaPosMapper.toDomain(pos);
-  }
-
-  public async findOneBySlug(slug: string): Promise<Pos> {
-    const pos = await this.prisma.pos.findFirst({
-      where: {
-        slug,
       },
     });
     return PrismaPosMapper.toDomain(pos);
@@ -82,18 +56,141 @@ export class PosRepository extends IPosRepository {
     return PrismaPosMapper.toDomain(pos);
   }
 
-  public async findAllByPermission(
-    ability: any,
-    placementId?: number | '*',
-  ): Promise<Pos[]> {
+  public async findAllByFilter(
+    ability?: any,
+    placementId?: number,
+    organizationId?: number,
+    userId?: number,
+    skip?: number,
+    take?: number,
+  ): Promise<PosResponseDto[]> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (userId !== undefined) {
+      where.usersPermissions = { some: { id: userId } };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [accessibleBy(ability).Pos, where],
+        }
+      : where;
+
     const pos = await this.prisma.pos.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
       where: {
-        AND: [
-          accessibleBy(ability).Pos,
-          placementId !== '*' ? { placementId } : {},
-        ],
+        AND: finalWhere,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+      include: {
+        carWashPos: true,
+        address: true,
       },
     });
-    return pos.map((item) => PrismaPosMapper.toDomain(item));
+    return pos.map((item) => PrismaPosMapper.toDomainFullData(item));
+  }
+
+  public async countAllByAbilityAndPlacement(
+    ability?: any,
+    placementId?: number,
+    organizationId?: number,
+    userId?: number,
+  ): Promise<number> {
+    const where: any = {};
+
+    if (placementId !== undefined) {
+      where.placementId = placementId;
+    }
+
+    if (organizationId !== undefined) {
+      where.organizationId = organizationId;
+    }
+
+    if (userId !== undefined) {
+      where.usersPermissions = { some: { id: userId } };
+    }
+
+    const finalWhere = ability
+      ? {
+          AND: [accessibleBy(ability).Pos, where],
+        }
+      : where;
+
+    return this.prisma.pos.count({
+      where: {
+        AND: finalWhere,
+      },
+    });
+  }
+
+  public async updateConnectionWorker(
+    posId: number,
+    addWorkerIds: number[],
+    deleteWorkerIds: number[],
+  ): Promise<any> {
+    await this.prisma.pos.update({
+      where: {
+        id: posId,
+      },
+      data: {
+        workers: {
+          disconnect: deleteWorkerIds.map((id) => ({ id })),
+          connect: addWorkerIds.map((id) => ({ id })),
+        },
+      },
+    });
+  }
+
+  public async softDelete(id: number): Promise<Pos> {
+    const pos = await this.prisma.pos.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'DELETED',
+        updatedAt: new Date(Date.now()),
+      },
+    });
+    return PrismaPosMapper.toDomain(pos);
+  }
+
+  public async findAllByOrganizationIds(
+    organizationIds: number[],
+  ): Promise<PosResponseDto[]> {
+    const poses = await this.prisma.pos.findMany({
+      where: {
+        organizationId: {
+          in: organizationIds,
+        },
+        status: {
+          not: 'DELETED',
+        },
+      },
+      orderBy: {
+        id: 'asc',
+      },
+      include: {
+        carWashPos: true,
+        address: true,
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+    return poses.map((item) => PrismaPosMapper.toDomainFullData(item));
   }
 }

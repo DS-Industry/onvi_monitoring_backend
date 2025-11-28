@@ -8,11 +8,14 @@ export class UpdateBenefitUseCase {
   constructor(private readonly benefitRepository: IBenefitRepository) {}
 
   async execute(input: UpdateDto, oldBenefit: Benefit): Promise<Benefit> {
-    const { name, benefitType, bonus } = input;
+    const { name, benefitType, bonus, ltyProgramId } = input;
 
     oldBenefit.name = name ? name : oldBenefit.name;
     oldBenefit.bonus = bonus ? bonus : oldBenefit.bonus;
     oldBenefit.benefitType = benefitType ? benefitType : oldBenefit.benefitType;
+    oldBenefit.ltyProgramId = ltyProgramId
+      ? ltyProgramId
+      : oldBenefit.ltyProgramId;
 
     return await this.benefitRepository.update(oldBenefit);
   }

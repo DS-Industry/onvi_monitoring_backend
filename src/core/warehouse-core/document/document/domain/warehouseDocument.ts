@@ -6,7 +6,9 @@ export interface WarehouseDocumentProps {
   name: string;
   type: WarehouseDocumentType;
   warehouseId?: number;
+  warehouseName?: string;
   responsibleId?: number;
+  responsibleName?: string;
   status: WarehouseDocumentStatus;
   carryingAt: Date;
   createdAt?: Date;
@@ -40,8 +42,16 @@ export class WarehouseDocument extends BaseEntity<WarehouseDocumentProps> {
     return this.props.responsibleId;
   }
 
+  get responsibleName(): string {
+    return this.props.responsibleName;
+  }
+
   get warehouseId(): number {
     return this.props.warehouseId;
+  }
+
+  get warehouseName(): string {
+    return this.props.warehouseName;
   }
 
   get carryingAt(): Date {
@@ -80,8 +90,16 @@ export class WarehouseDocument extends BaseEntity<WarehouseDocumentProps> {
     this.props.warehouseId = warehouseId;
   }
 
+  set warehouseName(warehouseName: string) {
+    this.props.warehouseName = warehouseName;
+  }
+
   set responsibleId(responsibleId: number) {
     this.props.responsibleId = responsibleId;
+  }
+
+  set responsibleName(responsibleName: string) {
+    this.props.responsibleName = responsibleName;
   }
 
   set carryingAt(carryingAt: Date) {

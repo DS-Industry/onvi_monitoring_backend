@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
 import { UpdateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/update.dto';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
-import { Organization } from '@organization/organization/domain/organization';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 
 @Injectable()
 export class UpdateLoyaltyProgramUseCase {
@@ -12,32 +11,21 @@ export class UpdateLoyaltyProgramUseCase {
 
   async execute(
     input: UpdateDto,
-    oldLoyaltyProgram: LoyaltyProgram,
-    organizations: Organization[],
-  ): Promise<LoyaltyProgram> {
-    const { name, organizationIds } = input;
+    oldLoyaltyProgram: LTYProgram,
+  ): Promise<LTYProgram> {
+    const { name, description, maxLevels, lifetimeDays } = input;
 
     oldLoyaltyProgram.name = name ? name : oldLoyaltyProgram.name;
-    let deleteOrganizationIds = [];
-    let addOrganizationIds = [];
+    oldLoyaltyProgram.description = description
+      ? description
+      : oldLoyaltyProgram.description;
+    oldLoyaltyProgram.maxLevels = maxLevels
+      ? maxLevels
+      : oldLoyaltyProgram.maxLevels;
+    oldLoyaltyProgram.lifetimeDays = lifetimeDays
+      ? lifetimeDays
+      : oldLoyaltyProgram.lifetimeDays;
 
-    if (input.organizationIds) {
-      const existingOrganizationIds = organizations.map(
-        (organization) => organization.id,
-      );
-
-      deleteOrganizationIds = existingOrganizationIds.filter(
-        (id) => !organizationIds.includes(id),
-      );
-      addOrganizationIds = organizationIds.filter(
-        (id) => !existingOrganizationIds.includes(id),
-      );
-    }
-
-    return await this.loyaltyProgramRepository.update(
-      oldLoyaltyProgram,
-      addOrganizationIds,
-      deleteOrganizationIds,
-    );
+    return await this.loyaltyProgramRepository.update(oldLoyaltyProgram);
   }
 }

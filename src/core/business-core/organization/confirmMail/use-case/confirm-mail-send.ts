@@ -6,14 +6,20 @@ import * as randomstring from 'randomstring';
 import { OrganizationConfirmMail } from '../domain/confirmMail';
 import { ConfirmMailCreateDto } from '@organization/confirmMail/use-case/dto/confirm-mail-create.dto';
 import { StatusDeviceDataRaw } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SendOrganizationConfirmMailUseCase {
+  private readonly emailConfigPrefix: string;
   constructor(
     private readonly organizationConfirmRepository: IOrganizationConfirmMailRepository,
     private readonly dateService: IDateAdapter,
     private readonly mailService: IMailAdapter,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.emailConfigPrefix =
+      this.configService.get<string>('emailConfirmPrefix');
+  }
 
   async execute(data: ConfirmMailCreateDto, subject: string): Promise<any> {
     const confirmTime = this.dateService.generateOtpTime();
@@ -44,7 +50,7 @@ export class SendOrganizationConfirmMailUseCase {
     return await this.mailService.send(
       data.email,
       subject,
-      `Для окончания регистрации перейдите по ссылке: https://ds-industry.github.io/onvi-monitoring-frontend/#/inviteUser?key=${confirmMail.confirmString}`,
+      `Для окончания регистрации перейдите по ссылке: ${this.emailConfigPrefix}/inviteUser?key=${confirmMail.confirmString}`,
     );
   }
 }

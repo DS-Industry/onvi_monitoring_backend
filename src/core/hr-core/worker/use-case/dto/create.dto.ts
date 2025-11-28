@@ -9,8 +9,9 @@ export interface CreateDto {
   description?: string;
   monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  bonusPayout: number;
   gender?: string;
+  birthday?: Date;
   citizenship?: string;
   passportSeries?: string;
   passportNumber?: string;
@@ -18,4 +19,5 @@ export interface CreateDto {
   passportDateIssue?: Date;
   inn?: string;
   snils?: string;
+  registrationAddress?: string;
 }

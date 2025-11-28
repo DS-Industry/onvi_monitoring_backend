@@ -1,27 +1,43 @@
 import { Injectable } from '@nestjs/common';
 import { ILoyaltyProgramRepository } from '@loyalty/loyalty/loyaltyProgram/interface/loyaltyProgram';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
-import { LoyaltyProgramStatus } from '@prisma/client';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { LTYProgramStatus } from '@loyalty/loyalty/loyaltyProgram/domain/enums';
 import { CreateDto } from '@loyalty/loyalty/loyaltyProgram/use-cases/dto/create.dto';
-import { User } from "@platform-user/user/domain/user";
+import { User } from '@platform-user/user/domain/user';
+import { RedisService } from '@infra/cache/redis.service';
 
 @Injectable()
 export class CreateLoyaltyProgramUseCase {
   constructor(
     private readonly loyaltyProgramRepository: ILoyaltyProgramRepository,
+    private readonly redisService: RedisService,
   ) {}
 
-  async execute(data: CreateDto, user: User): Promise<LoyaltyProgram> {
-    const loyaltyProgram = new LoyaltyProgram({
+  async execute(data: CreateDto, user: User): Promise<LTYProgram> {
+    try {
+      await this.redisService.del(`ability:${user.id}:`);
+      console.log(
+        `Invalidated ability cache for user ${user.id} before loyalty program creation`,
+      );
+    } catch (error) {
+      console.error('Failed to invalidate cache:', error);
+    }
+
+    const loyaltyProgram = new LTYProgram({
       name: data.name,
-      status: LoyaltyProgramStatus.ACTIVE,
+      description: data.description,
+      maxLevels: data.maxLevels,
+      ownerOrganizationId: data.ownerOrganizationId,
+      status: LTYProgramStatus.PAUSE,
       startDate: new Date(Date.now()),
       lifetimeDays: data?.lifetimeDays,
     });
-    return await this.loyaltyProgramRepository.create(
+
+    const createdLoyaltyProgram = await this.loyaltyProgramRepository.create(
       loyaltyProgram,
-      data.organizationIds,
-      user.id,
+      data.ownerOrganizationId,
     );
+
+    return createdLoyaltyProgram;
   }
 }

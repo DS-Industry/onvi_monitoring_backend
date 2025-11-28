@@ -1,4 +1,4 @@
-import { UserType } from "@prisma/client";
+import { ContractType } from '@loyalty/mobile-user/client/domain/enums';
 
 export interface ClientCreateDto {
   name: string;
@@ -6,12 +6,12 @@ export interface ClientCreateDto {
   phone: string;
   email?: string;
   gender?: string;
-  type: UserType;
-  inn?: string;
+  contractType: ContractType;
   comment?: string;
   placementId?: number;
   devNumber?: string;
   number?: string;
   monthlyLimit?: number;
-  tagIds: number[];
+  tagIds?: number[];
+  cardId?: number;
 }

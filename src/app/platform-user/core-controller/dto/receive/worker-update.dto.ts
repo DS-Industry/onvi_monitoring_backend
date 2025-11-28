@@ -1,10 +1,14 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { StatusHrWorker } from '@prisma/client';
 
 export class WorkerUpdateDto {
   @Transform(({ value }) => parseInt(value))
   @IsNotEmpty({ message: 'workerId is required' })
   workerId: number;
+  @IsOptional()
+  @IsString()
+  name?: string;
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
   hrPositionId?: number;
@@ -31,7 +35,13 @@ export class WorkerUpdateDto {
   dailySalary?: number;
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
-  percentageSalary?: number;
+  bonusPayout?: number;
+  @IsOptional()
+  @IsEnum(StatusHrWorker)
+  status?: StatusHrWorker;
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  birthday?: Date;
   @IsOptional()
   @IsString()
   gender?: string;
@@ -56,4 +66,7 @@ export class WorkerUpdateDto {
   @IsOptional()
   @IsString()
   snils?: string;
+  @IsOptional()
+  @IsString()
+  registrationAddress?: string;
 }

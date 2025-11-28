@@ -20,6 +20,8 @@ import { ActivateAuthUseCase } from '@platform-admin/auth/use-cases/auth-activat
 import { PasswordConfirmMailAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-confirm';
 import { PasswordResetAdminUseCase } from '@platform-admin/auth/use-cases/auth-password-reset';
 import { AbilityModule } from '@platform-admin/permissions/ability.module';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
+import { LogoutUseCase } from '@platform-admin/auth/use-cases/auth-logout';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { AbilityModule } from '@platform-admin/permissions/ability.module';
     ValidateAdminForJwtStrategyUseCase,
     ValidateAdminEmailStrategyUseCase,
     GetAdminIfRefreshTokenMatchesUseCase,
+    SetCookiesUseCase,
+    LogoutUseCase,
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,

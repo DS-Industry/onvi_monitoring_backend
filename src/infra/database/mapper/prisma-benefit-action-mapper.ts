@@ -1,5 +1,5 @@
 import {
-  BenefitActionType as PrismaBenefitAction,
+  LTYBenefitActionType as PrismaBenefitAction,
   Prisma,
 } from '@prisma/client';
 import { BenefitAction } from '@loyalty/loyalty/benefit/benefitAction/domain/benefitAction';
@@ -18,7 +18,7 @@ export class PrismaBenefitActionMapper {
 
   static toPrisma(
     benefitAction: BenefitAction,
-  ): Prisma.BenefitActionTypeUncheckedCreateInput {
+  ): Prisma.LTYBenefitActionTypeUncheckedCreateInput {
     return {
       id: benefitAction?.id,
       name: benefitAction.name,

@@ -27,9 +27,7 @@ export class IncidentNameRepository extends IIncidentNameRepository {
     return PrismaIncidentNameMapper.toDomain(equipment);
   }
 
-  public async findAllByEquipmentKnotId(
-    id: number,
-  ): Promise<IncidentName[]> {
+  public async findAllByEquipmentKnotId(id: number): Promise<IncidentName[]> {
     const equipments = await this.prisma.incidentName.findMany({
       where: {
         equipmentKnots: {

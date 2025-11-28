@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, Post, Get, Param, ParseIntPipe } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  Get,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CreateDevicePermissionUseCase } from '../use-cases/permission-create';
 import { GetAllDevicePermissionsUseCase } from '../use-cases/permission-get-all';
 import { GetDevicePermissionByIdUseCase } from '../use-cases/permission-get-by-id';

@@ -1,8 +1,5 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-} from 'class-validator';
-import { WarehouseDocumentType } from '@prisma/client';
+import { IsEnum, IsNotEmpty } from 'class-validator';
+import { WarehouseDocumentType } from '@warehouse/warehouse/domain/warehouseDocumentType';
 
 export class WarehouseDocumentCreateDto {
   @IsEnum(WarehouseDocumentType)

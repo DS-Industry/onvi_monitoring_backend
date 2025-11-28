@@ -3,8 +3,8 @@ import { IShiftReportRepository } from '@finance/shiftReport/shiftReport/interfa
 import { PrismaService } from '@db/prisma/prisma.service';
 import { ShiftReport } from '@finance/shiftReport/shiftReport/domain/shiftReport';
 import { PrismaShiftReportMapper } from '@db/mapper/prisma-shift-report-mapper';
-import { User } from '@platform-user/user/domain/user';
-import { PrismaPlatformUserMapper } from '@db/mapper/prisma-platform-user-mapper';
+import { StatusWorkDayShiftReport, TypeWorkDay } from '@prisma/client';
+import { DataForCalculationResponseDto } from '@finance/shiftReport/shiftReport/use-cases/dto/data-for-calculation-response.dto';
 
 @Injectable()
 export class ShiftReportRepository extends IShiftReportRepository {
@@ -14,46 +14,143 @@ export class ShiftReportRepository extends IShiftReportRepository {
 
   public async create(input: ShiftReport): Promise<ShiftReport> {
     const shiftReportEntity = PrismaShiftReportMapper.toPrisma(input);
-    const shiftReport = await this.prisma.shiftReport.create({
+    const shiftReport = await this.prisma.mNGShiftReport.create({
       data: shiftReportEntity,
     });
     return PrismaShiftReportMapper.toDomain(shiftReport);
   }
   public async findOneById(id: number): Promise<ShiftReport> {
-    const shiftReport = await this.prisma.shiftReport.findFirst({
+    const shiftReport = await this.prisma.mNGShiftReport.findFirst({
       where: {
         id,
       },
     });
     return PrismaShiftReportMapper.toDomain(shiftReport);
   }
-  public async addWorker(id: number, userId: number): Promise<ShiftReport> {
-    const shiftReport = await this.prisma.shiftReport.update({
-      where: { id },
-      data: {
-        users: {
-          connect: { id: userId },
+  public async findAllByFilter(
+    dateStart: Date,
+    dateEnd: Date,
+    posId: number,
+  ): Promise<ShiftReport[]> {
+    const shiftReports = await this.prisma.mNGShiftReport.findMany({
+      where: {
+        posId,
+        workDate: {
+          gte: dateStart,
+          lte: dateEnd,
         },
-        updatedAt: new Date(Date.now()),
+      },
+      orderBy: {
+        workDate: 'asc',
+      },
+    });
+    return shiftReports.map((item) => PrismaShiftReportMapper.toDomain(item));
+  }
+  public async findOnePosIdAndWorkerIdAndDate(
+    posId: number,
+    workerId: number,
+    workDate: Date,
+  ): Promise<ShiftReport> {
+    const shiftReport = await this.prisma.mNGShiftReport.findFirst({
+      where: {
+        posId,
+        workerId,
+        workDate,
       },
     });
     return PrismaShiftReportMapper.toDomain(shiftReport);
   }
-  public async findAllWorkerById(id: number): Promise<User[]> {
-    const shiftReport = await this.prisma.shiftReport.findFirst({
+  public async findLastByStatusSentAndPosId(
+    posId: number,
+    workDate: Date,
+  ): Promise<ShiftReport> {
+    const shiftReport = await this.prisma.mNGShiftReport.findFirst({
       where: {
-        id,
+        posId,
+        status: StatusWorkDayShiftReport.SENT,
+        workDate: {
+          lt: workDate,
+        },
+      },
+      orderBy: {
+        workDate: 'desc',
+      },
+    });
+    return PrismaShiftReportMapper.toDomain(shiftReport);
+  }
+  public async findAllForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<DataForCalculationResponseDto[]> {
+    const shiftReports = await this.prisma.mNGShiftReport.findMany({
+      where: {
+        workDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        workerId: {
+          in: workerIds,
+        },
+        typeWorkDay: TypeWorkDay.WORKING,
+        status: StatusWorkDayShiftReport.SENT,
       },
       include: {
-        users: true,
+        shiftGrading: {
+          include: {
+            gradingParameter: true,
+            gradingEstimation: true,
+          },
+        },
+      },
+      orderBy: {
+        workDate: 'asc',
       },
     });
-    const users = shiftReport?.users || [];
-    return users.map((item) => PrismaPlatformUserMapper.toDomain(item));
+
+    return shiftReports.map((report) => ({
+      workerId: report.workerId,
+      shiftReportId: report.id,
+      gradingData: report.shiftGrading.map((grading) => ({
+        parameterWeightPercent: grading.gradingParameter?.weightPercent || 0,
+        estimationWeightPercent: grading.gradingEstimation?.weightPercent || 0,
+      })),
+    }));
   }
+
+  public async findAllWithPayoutForCalculation(
+    dateStart: Date,
+    dateEnd: Date,
+    workerIds: number[],
+  ): Promise<ShiftReport[]> {
+    const shiftReports = await this.prisma.mNGShiftReport.findMany({
+      where: {
+        workDate: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        workerId: {
+          in: workerIds,
+        },
+        typeWorkDay: TypeWorkDay.WORKING,
+        status: StatusWorkDayShiftReport.SENT,
+        dailyShiftPayout: {
+          not: null,
+        },
+      },
+      orderBy: {
+        workDate: 'asc',
+      },
+    });
+
+    return shiftReports.map((report) =>
+      PrismaShiftReportMapper.toDomain(report),
+    );
+  }
+
   public async update(input: ShiftReport): Promise<ShiftReport> {
     const shiftReportEntity = PrismaShiftReportMapper.toPrisma(input);
-    const shiftReport = await this.prisma.shiftReport.update({
+    const shiftReport = await this.prisma.mNGShiftReport.update({
       where: {
         id: input.id,
       },
@@ -62,86 +159,10 @@ export class ShiftReportRepository extends IShiftReportRepository {
     return PrismaShiftReportMapper.toDomain(shiftReport);
   }
 
-  public async findAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<ShiftReport[]> {
-    const shiftReports = await this.prisma.shiftReport.findMany({
-      skip: skip ?? undefined,
-      take: take ?? undefined,
+  public async delete(id: number): Promise<void> {
+    await this.prisma.mNGShiftReport.delete({
       where: {
-        posId,
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return shiftReports.map((item) =>
-      PrismaShiftReportMapper.toDomain(item),
-    );
-  }
-
-  public async findAllByPosIdsAndDate(
-    posIds: number[],
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<ShiftReport[]> {
-    const shiftReports = await this.prisma.shiftReport.findMany({
-      skip: skip ?? undefined,
-      take: take ?? undefined,
-      where: {
-        posId: { in: posIds },
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return shiftReports.map((item) =>
-      PrismaShiftReportMapper.toDomain(item),
-    );
-  }
-
-  public async countAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return this.prisma.shiftReport.count({
-      where: {
-        posId,
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-      },
-    });
-  }
-
-  public async countAllByPosIdsAndDate(
-    posIds: number[],
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<number> {
-    return this.prisma.shiftReport.count({
-      where: {
-        posId: { in: posIds },
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
+        id,
       },
     });
   }

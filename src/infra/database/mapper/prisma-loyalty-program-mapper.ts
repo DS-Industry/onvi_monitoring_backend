@@ -1,29 +1,62 @@
-import { LoyaltyProgram as PrismaLoyaltyProgram, Prisma } from '@prisma/client';
-import { LoyaltyProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import {
+  LTYProgram as PrismaLoyaltyProgram,
+  Prisma,
+  LTYProgramHubRequest,
+  LTYProgramRequestStatus,
+  LTYProgramParticipant,
+} from '@prisma/client';
+import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
+import { EnumMapper } from './enum-mapper';
 
 export class PrismaLoyaltyProgramMapper {
-  static toDomain(entity: PrismaLoyaltyProgram): LoyaltyProgram {
+  static toDomain(
+    entity: PrismaLoyaltyProgram & {
+      hubRequest?: LTYProgramHubRequest;
+      programParticipants?: LTYProgramParticipant[];
+    },
+  ): LTYProgram {
     if (!entity) {
       return null;
     }
-    return new LoyaltyProgram({
+    return new LTYProgram({
       id: entity.id,
       name: entity.name,
-      status: entity.status,
+      status: EnumMapper.toDomainLTYProgramStatus(entity.status),
       startDate: entity.startDate,
-      lifetimeDays: entity.lifetimeBonusDays,
+      lifetimeBonusDays: entity.lifetimeBonusDays,
+      ownerOrganizationId: entity.ownerOrganizationId,
+      isHub: entity.isHub,
+      isHubRequested: entity.hubRequest ? true : false,
+      isHubRejected: entity.hubRequest
+        ? entity.hubRequest.status === LTYProgramRequestStatus.REJECTED
+        : false,
+      isPublic: (entity as any).isPublic,
+      programParticipantOrganizationIds: (entity.programParticipants ?? []).map(
+        (participant) => participant.organizationId,
+      ),
+      description: entity.description,
+      maxLevels: entity.maxLevels,
+      burnoutType: (entity as any).burnoutType,
+      maxRedeemPercentage: (entity as any).maxRedeemPercentage,
+      hasBonusWithSale: (entity as any).hasBonusWithSale,
     });
   }
 
-  static toPrisma(
-    loyaltyProgram: LoyaltyProgram,
-  ): Prisma.LoyaltyProgramUncheckedCreateInput {
+  static toPrisma(loyaltyProgram: LTYProgram): Prisma.LTYProgramCreateInput {
     return {
-      id: loyaltyProgram?.id,
       name: loyaltyProgram.name,
-      status: loyaltyProgram.status,
+      status: EnumMapper.toPrismaLTYProgramStatus(loyaltyProgram.status),
       startDate: loyaltyProgram.startDate,
-      lifetimeBonusDays: loyaltyProgram?.lifetimeDays,
+      lifetimeBonusDays: loyaltyProgram.lifetimeBonusDays,
+      isPublic: loyaltyProgram.isPublic,
+      ownerOrganization: loyaltyProgram.ownerOrganizationId
+        ? { connect: { id: loyaltyProgram.ownerOrganizationId } }
+        : undefined,
+      description: loyaltyProgram.description,
+      maxLevels: loyaltyProgram.maxLevels,
+      burnoutType: loyaltyProgram.burnoutType,
+      maxRedeemPercentage: loyaltyProgram.maxRedeemPercentage,
+      hasBonusWithSale: loyaltyProgram.hasBonusWithSale,
     };
   }
 }

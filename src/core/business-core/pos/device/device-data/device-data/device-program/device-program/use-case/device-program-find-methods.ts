@@ -1,70 +1,97 @@
 import { Injectable } from '@nestjs/common';
 import { IDeviceProgramRepository } from '@pos/device/device-data/device-data/device-program/device-program/interface/device-program';
-import { DeviceProgram } from '@pos/device/device-data/device-data/device-program/device-program/domain/device-program';
+import { DeviceProgramFullDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-full-data-response.dto';
+import { DeviceProgramMonitoringResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-monitoring-response.dto';
+import { DeviceProgramLastDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-last-data-response.dto';
+import { DeviceProgramCleanDataResponseDto } from '@pos/device/device-data/device-data/device-program/device-program/use-case/dto/device-program-clean-data-response.dto';
 
 @Injectable()
 export class FindMethodsDeviceProgramUseCase {
   constructor(
     private readonly deviceProgramRepository: IDeviceProgramRepository,
   ) {}
+  async getAllByFilter(data: {
+    ability?: any;
+    organizationId?: number;
+    posIds?: number[];
+    carWashDeviceId?: number;
+    dateStart?: Date;
+    dateEnd?: Date;
+    programCode?: string;
+    isPaid?: number;
+    skip?: number;
+    take?: number;
+  }): Promise<DeviceProgramFullDataResponseDto[]> {
+    return await this.deviceProgramRepository.findAllByFilter(
+      data.ability,
+      data.organizationId,
+      data.posIds,
+      data.carWashDeviceId,
+      data.dateStart,
+      data.dateEnd,
+      data.programCode,
+      data.isPaid,
+      data.skip,
+      data.take,
+    );
+  }
+  async getDataByMonitoring(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByMonitoring(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getDataByMonitoringDetail(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByMonitoringDetail(
+      deviceIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getDataByMonitoringDetailPortal(
+    deviceIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramMonitoringResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByMonitoringDetailPortal(
+      deviceIds,
+      dateStart,
+      dateEnd,
+    );
+  }
+  async getDataByClean(
+    posIds: number[],
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<DeviceProgramCleanDataResponseDto[]> {
+    return await this.deviceProgramRepository.findDataByClean(
+      posIds,
+      dateStart,
+      dateEnd,
+    );
+  }
 
-  async getAllByDeviceIdAndDateProgram(
-    deviceId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    skip?: number,
-    take?: number,
-  ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByDeviceIdAndDate(
-      deviceId,
-      dateStart,
-      dateEnd,
-      skip,
-      take,
-    );
+  async getLastByPosIds(
+    posIds: number[],
+  ): Promise<DeviceProgramLastDataResponseDto[]> {
+    return await this.deviceProgramRepository.findDataLastProgByPosIds(posIds);
   }
-  async getAllByOrgIdAndDateProgram(
-    organizationId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByOrgIdAndDate(
-      organizationId,
-      dateStart,
-      dateEnd,
+
+  async getLastByDeviceIds(
+    deviceIds: number[],
+  ): Promise<DeviceProgramLastDataResponseDto[]> {
+    return await this.deviceProgramRepository.findDataLastProgByDeviceIds(
+      deviceIds,
     );
-  }
-  async getAllByPosIdAndDateProgram(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByPosIdAndDate(
-      posId,
-      dateStart,
-      dateEnd,
-    );
-  }
-  async getAllByPosIdAndProgramCodeAndDate(
-    posId: number,
-    code: string,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByPosIdAndProgramCodeAndDate(
-      posId,
-      code,
-      dateStart,
-      dateEnd,
-    );
-  }
-  async getLastByDeviceId(deviceId: number): Promise<DeviceProgram> {
-    return await this.deviceProgramRepository.findLastProgramByDeviceId(
-      deviceId,
-    );
-  }
-  async getLastByPosId(posId: number): Promise<DeviceProgram> {
-    return await this.deviceProgramRepository.findLastProgramByPosId(posId);
   }
 
   async getCountAllByDeviceIdAndDateProgram(
@@ -74,20 +101,6 @@ export class FindMethodsDeviceProgramUseCase {
   ): Promise<number> {
     return await this.deviceProgramRepository.countAllByDeviceIdAndDateProgram(
       deviceId,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByPosIdAndPaidTypeAndDate(
-    carWashPosId: number,
-    isPaid: number,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<DeviceProgram[]> {
-    return await this.deviceProgramRepository.findAllByPosIdAndPaidTypeAndDate(
-      carWashPosId,
-      isPaid,
       dateStart,
       dateEnd,
     );

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DeviceDataRawHandlerResponse } from '@pos/device/device-data/device-data-raw/use-cases/dto/device-data-raw-handler-response';
-import { FindMethodsCarWashDeviceUseCase } from "@pos/device/device/use-cases/car-wash-device-find-methods";
-import { IDeviceMfuRepository } from "@pos/device/device-data/device-data/device-mfu/interface/device-mfu";
-import { DeviceMfy } from "@pos/device/device-data/device-data/device-mfu/domain/device-mfu";
+import { FindMethodsCarWashDeviceUseCase } from '@pos/device/device/use-cases/car-wash-device-find-methods';
+import { IDeviceMfuRepository } from '@pos/device/device-data/device-data/device-mfu/interface/device-mfu';
+import { DeviceMfy } from '@pos/device/device-data/device-data/device-mfu/domain/device-mfu';
 
 @Injectable()
 export class DeviceMfuHandlerUseCase {

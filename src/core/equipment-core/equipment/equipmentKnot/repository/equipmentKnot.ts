@@ -4,7 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { EquipmentKnot } from '@equipment/equipmentKnot/domain/equipmentKnot';
 import { PrismaEquipmentKnotMapper } from '@db/mapper/prisma-equipment-knot-mapper';
 import { IncidentName } from '@equipment/incident/incidentName/domain/incidentName';
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class EquipmentKnotRepository extends IEquipmentKnotRepository {
@@ -32,7 +32,7 @@ export class EquipmentKnotRepository extends IEquipmentKnotRepository {
   public async findAllByPosId(posId: number): Promise<EquipmentKnot[]> {
     const equipmentKnots = await this.prisma.equipmentKnot.findMany({
       where: {
-        posId,
+        poses: { some: { id: posId } },
       },
     });
     return equipmentKnots.map((item) =>

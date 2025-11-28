@@ -12,21 +12,21 @@ export class BenefitActionRepository extends IBenefitActionRepository {
 
   public async create(input: BenefitAction): Promise<BenefitAction> {
     const benefitActionEntity = PrismaBenefitActionMapper.toPrisma(input);
-    const benefitAction = await this.prisma.benefitActionType.create({
+    const benefitAction = await this.prisma.lTYBenefitActionType.create({
       data: benefitActionEntity,
     });
     return PrismaBenefitActionMapper.toDomain(benefitAction);
   }
 
   public async findOneById(id: number): Promise<BenefitAction> {
-    const benefitAction = await this.prisma.benefitActionType.findFirst({
+    const benefitAction = await this.prisma.lTYBenefitActionType.findFirst({
       where: { id },
     });
     return PrismaBenefitActionMapper.toDomain(benefitAction);
   }
 
   public async findAll(): Promise<BenefitAction[]> {
-    const benefitActions = await this.prisma.benefitActionType.findMany();
+    const benefitActions = await this.prisma.lTYBenefitActionType.findMany();
     return benefitActions.map((item) =>
       PrismaBenefitActionMapper.toDomain(item),
     );
@@ -34,7 +34,7 @@ export class BenefitActionRepository extends IBenefitActionRepository {
 
   public async update(input: BenefitAction): Promise<BenefitAction> {
     const benefitActionEntity = PrismaBenefitActionMapper.toPrisma(input);
-    const benefitAction = await this.prisma.benefitActionType.update({
+    const benefitAction = await this.prisma.lTYBenefitActionType.update({
       where: {
         id: input.id,
       },

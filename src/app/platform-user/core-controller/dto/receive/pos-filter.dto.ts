@@ -1,11 +1,10 @@
-import { IsNotEmpty } from "class-validator";
-import { Transform } from "class-transformer";
+import { IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class PosFilterDto {
-  @IsNotEmpty({ message: 'posId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  posId: number | '*';
+  posId?: number;
 }

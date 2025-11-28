@@ -4,6 +4,7 @@ import { CreateDto } from '@hr/worker/use-case/dto/create.dto';
 import { Worker } from '@hr/worker/domain/worker';
 import { IFileAdapter } from '@libs/file/adapter';
 import { v4 as uuid } from 'uuid';
+import { StatusHrWorker } from '@prisma/client';
 
 @Injectable()
 export class CreateWorkerUseCase {
@@ -22,10 +23,12 @@ export class CreateWorkerUseCase {
       phone: data?.phone,
       email: data?.email,
       description: data?.description,
-      monthlySalary: data.monthlySalary,
-      dailySalary: data.dailySalary,
-      percentageSalary: data.percentageSalary,
+      monthlySalary: data.monthlySalary || 0,
+      dailySalary: data.dailySalary || 0,
+      bonusPayout: data.bonusPayout || 0,
+      status: StatusHrWorker.WORKS,
       gender: data?.gender,
+      birthday: data?.birthday,
       citizenship: data?.citizenship,
       passportSeries: data?.passportSeries,
       passportNumber: data?.passportNumber,
@@ -33,6 +36,7 @@ export class CreateWorkerUseCase {
       passportDateIssue: data?.passportDateIssue,
       inn: data?.inn,
       snils: data?.snils,
+      registrationAddress: data?.registrationAddress,
     });
 
     if (file) {

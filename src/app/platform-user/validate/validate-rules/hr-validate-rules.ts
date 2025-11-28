@@ -7,14 +7,17 @@ import { Position } from '@hr/position/domain/position';
 import {
   HR_CREATE_POSITION_EXCEPTION_CODE,
   HR_CREATE_PREPAYMENT_EXCEPTION_CODE,
+  HR_CREATE_PAYMENT_EXCEPTION_CODE,
   HR_CREATE_WORKER_EXCEPTION_CODE,
   HR_GET_ONE_POSITION_EXCEPTION_CODE,
   HR_GET_ONE_WORKER_EXCEPTION_CODE,
-  HR_UPDATE_WORKER_EXCEPTION_CODE
-} from "@constant/error.constants";
+  HR_UPDATE_WORKER_EXCEPTION_CODE,
+  HR_GET_ONE_PAYMENT_EXCEPTION_CODE,
+} from '@constant/error.constants';
 import { ForbiddenError } from '@casl/ability';
 import { PermissionAction } from '@prisma/client';
 import { Worker } from '@hr/worker/domain/worker';
+import { Payment } from '@hr/payment/domain/payment';
 
 @Injectable()
 export class HrValidateRules {
@@ -130,5 +133,38 @@ export class HrValidateRules {
       ExceptionType.HR,
       HR_CREATE_PREPAYMENT_EXCEPTION_CODE,
     );
+  }
+
+  public async createPayment(
+    hrWorkerId: number,
+    billingMonth: Date,
+    paymentSum: number,
+  ): Promise<any> {
+    const response = [];
+    response.push(await this.validateLib.workerByIdExists(hrWorkerId));
+    response.push(
+      await this.validateLib.paymentSumValidation(
+        hrWorkerId,
+        billingMonth,
+        paymentSum,
+      ),
+    );
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.HR,
+      HR_CREATE_PAYMENT_EXCEPTION_CODE,
+    );
+  }
+
+  public async findOneByIdPaymentValidate(paymentId: number): Promise<Payment> {
+    const response = [];
+    const paymentCheck = await this.validateLib.paymentByIdExists(paymentId);
+    response.push(paymentCheck);
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.HR,
+      HR_GET_ONE_PAYMENT_EXCEPTION_CODE,
+    );
+    return paymentCheck.object;
   }
 }

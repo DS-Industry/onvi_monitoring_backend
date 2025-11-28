@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class LoyaltyTierCreateDto {
   @IsString()
@@ -13,4 +13,7 @@ export class LoyaltyTierCreateDto {
   @IsNumber()
   @IsNotEmpty({ message: 'limitBenefit is required' })
   limitBenefit: number;
+  @IsNumber()
+  @IsOptional()
+  upCardTierId?: number;
 }

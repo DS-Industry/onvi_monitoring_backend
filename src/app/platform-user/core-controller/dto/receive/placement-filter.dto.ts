@@ -1,11 +1,34 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsOptional, IsBoolean, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class PlacementFilterDto {
-  @IsNotEmpty({ message: 'placementId is required' })
+  @IsOptional()
   @Transform(({ value }) => {
-    if (value === '*') return value;
     return parseInt(value);
   })
-  placementId: number | '*';
+  placementId?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    return parseInt(value);
+  })
+  posId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  noLoyaltyProgram?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
+  @IsNumber({}, { message: 'organizationId must be a number' })
+  organizationId?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  page?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  size?: number;
 }

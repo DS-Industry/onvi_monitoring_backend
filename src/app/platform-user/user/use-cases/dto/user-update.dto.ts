@@ -1,4 +1,4 @@
-import { PositionUser, StatusUser } from "@prisma/client";
+import { PositionUser, StatusUser } from '@prisma/client';
 
 export class UpdateUserDto {
   id: number;
@@ -11,6 +11,7 @@ export class UpdateUserDto {
   position?: PositionUser;
   status?: StatusUser;
   refreshTokenId?: string;
+  fcmToken?: string;
   receiveNotifications?: number;
   roleId?: number;
 }

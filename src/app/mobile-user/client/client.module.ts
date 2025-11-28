@@ -1,12 +1,31 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '@db/prisma/prisma.module';
 import { ClientController } from '@mobile-user/client/controller/client';
-import { FileModule } from '@libs/file/module';
 import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
+import { UpdateAccountUseCase } from './use-cases/update-account.use-case';
+import { GetCurrentAccountUseCase } from './use-cases/get-current-account.use-case';
+import { CreateClientMetaUseCase } from './use-cases/create-client-meta.use-case';
+import { UpdateClientMetaUseCase } from './use-cases/update-client-meta.use-case';
+import { CreateClientUseCaseWrapper } from './use-cases/create-client.use-case';
+import { UpdateClientUseCaseWrapper } from './use-cases/update-client.use-case';
 
 @Module({
-  imports: [PrismaModule, FileModule, LoyaltyCoreModule],
+  imports: [LoyaltyCoreModule],
   controllers: [ClientController],
-  exports: [LoyaltyCoreModule],
+  providers: [
+    UpdateAccountUseCase,
+    GetCurrentAccountUseCase,
+    CreateClientMetaUseCase,
+    UpdateClientMetaUseCase,
+    CreateClientUseCaseWrapper,
+    UpdateClientUseCaseWrapper,
+  ],
+  exports: [
+    UpdateAccountUseCase,
+    GetCurrentAccountUseCase,
+    CreateClientMetaUseCase,
+    UpdateClientMetaUseCase,
+    CreateClientUseCaseWrapper,
+    UpdateClientUseCaseWrapper,
+  ],
 })
 export class ClientModule {}

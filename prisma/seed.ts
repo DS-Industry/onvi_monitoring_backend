@@ -13,7 +13,12 @@ import { TechTaskItemTemplate } from './seedData/techTaskItemTemplate';
 import { Organizations } from './seedData/organization';
 import { Poses } from './seedData/pos';
 import { Devices } from './seedData/device';
-import { test } from "./seedData/test";
+import { test } from './seedData/test';
+import { EquipmentKnot } from "./seedData/equipmentKnot";
+import { IncidentInfos } from "./seedData/incidentInfo";
+import { IncidentNames } from "./seedData/incidentName";
+import { Warehouses } from "./seedData/warehouse";
+import { ManagerPaperTypes } from "./seedData/managerPaperType";
 
 async function main() {
   //DeviceType
@@ -116,7 +121,51 @@ async function main() {
     }),
   );
   console.log('TechTaskItemTemplate create');
+  //EquipmentKnot
   await Promise.all(
+    EquipmentKnot.map(async (equipment) => {
+      await prisma.equipmentKnot.upsert({
+        where: { id: equipment.id },
+        update: equipment,
+        create: equipment,
+      });
+    }),
+  );
+  console.log('equipmentKnot create')
+  //IncidentName
+  await Promise.all(
+    IncidentNames.map(async (incidentName) => {
+      await prisma.incidentName.upsert({
+        where: { id: incidentName.id },
+        update: incidentName,
+        create: incidentName,
+      });
+    }),
+  );
+  console.log('incidentInfo create');
+  //IncidentInfo
+  await Promise.all(
+    IncidentInfos.map(async (incidentInfo) => {
+      await prisma.incidentInfo.upsert({
+        where: { id: incidentInfo.id },
+        update: incidentInfo,
+        create: incidentInfo,
+      });
+    }),
+  );
+  console.log('incidentInfo create');*/
+  //ManagerPaperType
+  await Promise.all(
+    ManagerPaperTypes.map(async (managerPaperType) => {
+      await prisma.managerPaperType.upsert({
+        where: { id: managerPaperType.id },
+        update: managerPaperType,
+        create: managerPaperType,
+      });
+    }),
+  );
+  console.log('managerPaperType create');
+  /*await Promise.all(
     Organizations.map(async (organization) => {
       await prisma.organization.upsert({
         where: { id: organization.id },
@@ -145,8 +194,19 @@ async function main() {
       });
     }),
   );
-  console.log('Device create');*/
+  console.log('Device create');
+    //Warehouse
   await Promise.all(
+    Warehouses.map(async (warehouse) => {
+      await prisma.warehouse.upsert({
+        where: { id: warehouse.id },
+        update: warehouse,
+        create: warehouse,
+      });
+    }),
+  );
+  console.log('Warehouse create');*/
+  /*await Promise.all(
     test.map(async (test) => {
       await prisma.carWashDevice.upsert({
         where: { id: test.id },
@@ -155,7 +215,7 @@ async function main() {
       });
     }),
   );
-  console.log('Organization create');
+  console.log('Organization create');*/
 }
 main()
   .then(async () => {

@@ -1,5 +1,5 @@
-import { BaseEntity } from "@utils/entity";
-import { PaymentType } from "@prisma/client";
+import { BaseEntity } from '@utils/entity';
+import { PaymentType } from '@prisma/client';
 
 export interface PaymentProps {
   id?: number;
@@ -11,10 +11,12 @@ export interface PaymentProps {
   sum: number;
   prize: number;
   fine: number;
+  virtualSum?: number;
+  comment?: string;
   createdAt: Date;
   updatedAt: Date;
   createdById: number;
-  updatedById: number
+  updatedById: number;
 }
 
 export class Payment extends BaseEntity<PaymentProps> {
@@ -82,6 +84,22 @@ export class Payment extends BaseEntity<PaymentProps> {
     this.props.fine = fine;
   }
 
+  get virtualSum(): number {
+    return this.props.virtualSum;
+  }
+
+  set virtualSum(virtualSum: number) {
+    this.props.virtualSum = virtualSum;
+  }
+
+  get comment(): string {
+    return this.props.comment;
+  }
+
+  set comment(comment: string) {
+    this.props.comment = comment;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -105,5 +123,4 @@ export class Payment extends BaseEntity<PaymentProps> {
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
   }
-
 }

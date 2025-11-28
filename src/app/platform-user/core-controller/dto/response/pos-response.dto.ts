@@ -4,8 +4,10 @@ export interface PosResponseDto {
   id: number;
   name: string;
   slug: string;
-  timeWork: string;
+  startTime?: string;
+  endTime?: string;
   organizationId: number;
+  placementId: number;
   posMetaData: string;
   timezone: number;
   image: string;
@@ -19,8 +21,8 @@ export interface PosResponseDto {
     id: number;
     city: string;
     location: string;
-    lat: number;
-    lon: number;
+    lat: string;
+    lon: string;
   };
   posType: {
     id: number;

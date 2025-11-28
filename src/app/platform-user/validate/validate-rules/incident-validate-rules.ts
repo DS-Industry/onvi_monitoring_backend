@@ -61,10 +61,6 @@ export class IncidentValidateRules {
       ExceptionType.INCIDENT,
       INCIDENT_CREATE_EXCEPTION_CODE,
     );
-    ForbiddenError.from(input.ability).throwUnlessCan(
-      PermissionAction.read,
-      posCheck.object,
-    );
   }
 
   public async updateValidate(input: IncidentUpdateDto): Promise<Incident> {
@@ -119,7 +115,7 @@ export class IncidentValidateRules {
     return incidentCheck.object;
   }
 
-  public async getAllIncidentByFilterValidate(posId: number, ability: any) {
+  public async getAllIncidentByFilterValidate(posId: number) {
     const posCheck = await this.validateLib.posByIdExists(posId);
 
     if (posCheck.code !== 200) {
@@ -128,10 +124,5 @@ export class IncidentValidateRules {
         posCheck.errorMessage,
       );
     }
-
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      posCheck.object,
-    );
   }
 }

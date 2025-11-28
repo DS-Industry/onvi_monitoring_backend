@@ -6,13 +6,14 @@ export class PrismaCurrencyMapper {
     if (!entity) {
       return null;
     }
-    return new Currency({
+    const currencyProps = new Currency({
       id: entity.id,
       code: entity.code,
       name: entity.name,
       currencyView: entity.currencyView,
       currencyType: entity.currencyType,
     });
+    return <Currency>currencyProps.getProps();
   }
 
   static toPrisma(currency: Currency): Prisma.CurrencyUncheckedCreateInput {

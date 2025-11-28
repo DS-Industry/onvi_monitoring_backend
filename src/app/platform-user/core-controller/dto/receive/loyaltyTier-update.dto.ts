@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class LoyaltyTierUpdateDto {
   @IsNumber()
@@ -10,4 +16,7 @@ export class LoyaltyTierUpdateDto {
   @IsArray()
   @IsOptional()
   benefitIds: number[];
+  @IsNumber()
+  @IsOptional()
+  limitBenefit?: number;
 }

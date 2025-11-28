@@ -5,24 +5,28 @@ import {
   Post,
   UseGuards,
   Request,
+  HttpStatus,
 } from '@nestjs/common';
 import { LocalGuard } from '@mobile-user/auth/guards/local.guard';
 import { AuthLoginDto } from '@mobile-user/auth/controller/dto/auth-login.dto';
-import { LoginAuthUseCase } from '@mobile-user/auth/use-cases/auth-login';
-import { SignAccessTokenUseCase } from '@mobile-user/auth/use-cases/auth-sign-access-token';
 import { AuthSendOtpDto } from '@mobile-user/auth/controller/dto/auth-send-otp.dto';
-import { SendOtpAuthUseCase } from '@mobile-user/auth/use-cases/auth-send-otp';
 import { RefreshGuard } from '@mobile-user/auth/guards/refresh.guard';
 import { AuthRegisterDto } from '@mobile-user/auth/controller/dto/auth-register.dto';
-import { RegisterAuthUseCase } from '@mobile-user/auth/use-cases/auth-register';
+import { InvalidOtpException } from '@mobile-user/shared/exceptions/auth.exceptions';
+import { CustomHttpException } from '@exception/custom-http.exception';
+
+import { AuthenticateClientUseCase } from '@mobile-core/auth/use-cases/authenticate-client';
+import { RegisterClientUseCase } from '@mobile-core/auth/use-cases/register-client';
+import { SendOtpUseCase } from '@mobile-core/auth/use-cases/send-otp';
+import { RefreshTokensUseCase } from '@mobile-core/auth/use-cases/refresh-tokens';
 
 @Controller('auth')
 export class Auth {
   constructor(
-    private readonly authLogin: LoginAuthUseCase,
-    private readonly authSendOtp: SendOtpAuthUseCase,
-    private readonly singAccessToken: SignAccessTokenUseCase,
-    private readonly authRegister: RegisterAuthUseCase,
+    private readonly authenticateClient: AuthenticateClientUseCase,
+    private readonly registerClient: RegisterClientUseCase,
+    private readonly sendOtpUseCase: SendOtpUseCase,
+    private readonly refreshTokens: RefreshTokensUseCase,
   ) {}
 
   @UseGuards(LocalGuard)
@@ -38,39 +42,54 @@ export class Auth {
           type: 'register-required',
         };
       }
-      return await this.authLogin.execute(body.phone, user.props.id);
+      return await this.authenticateClient.execute({
+        client: user,
+      });
     } catch (e) {
-      throw new Error(e);
+      if (e instanceof InvalidOtpException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: 401,
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
     }
   }
 
   @Post('/register')
   @HttpCode(201)
-  async register(@Body() body: AuthRegisterDto, @Request() req: any) {
-    const { correctClient, accessToken, refreshToken } =
-      await this.authRegister.execute(body.phone, body.otp);
-    return {
-      client: correctClient,
-      tokens: {
-        accessToken: accessToken.token,
-        accessTokenExp: accessToken.expirationDate,
-        refreshToken: refreshToken.token,
-        refreshTokenExp: refreshToken.expirationDate,
-      },
-    };
+  async register(@Body() body: AuthRegisterDto) {
+    try {
+      return await this.registerClient.execute({
+        phone: body.phone,
+        otp: body.otp,
+      });
+    } catch (e) {
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   @HttpCode(201)
   @Post('/send/otp')
   async sendOtp(@Body() body: AuthSendOtpDto) {
     try {
-      const otp = await this.authSendOtp.execute(body.phone);
-      return {
-        status: 'SUCCESS',
-        target: otp.phone,
-      };
+      return await this.sendOtpUseCase.execute({
+        phone: body.phone,
+      });
     } catch (e) {
-      throw new Error(e);
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 
@@ -80,16 +99,14 @@ export class Auth {
   async refresh(@Body() body: any, @Request() req: any) {
     try {
       const { user } = req;
-      const accessToken = await this.singAccessToken.execute(
-        user.props.phone,
-        user.props.id,
-      );
-      return {
-        accessToken: accessToken.token,
-        accessTokenExp: accessToken.expirationDate,
-      };
+      return await this.refreshTokens.execute({
+        refreshToken: user.refreshToken,
+      });
     } catch (e) {
-      throw new Error(e);
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.UNAUTHORIZED,
+      });
     }
   }
 }

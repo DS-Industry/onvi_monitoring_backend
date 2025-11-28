@@ -3,5 +3,6 @@ export interface LoyaltyTierUpdateDto {
   description?: string;
   loyaltyProgramId?: number;
   limitBenefit?: number;
+  upCardTierId?: number;
   benefitIds?: number[];
 }

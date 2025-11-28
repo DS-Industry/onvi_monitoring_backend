@@ -1,6 +1,14 @@
 import { Incident as PrismaIncident, Prisma } from '@prisma/client';
 import { Incident } from '@equipment/incident/incident/domain/incident';
-
+import { IncidentWithInfoDataDto } from '@equipment/incident/incident/use-cases/dto/incident-with-info-data.dto';
+export type PrismaIncidentWithInfo = Prisma.IncidentGetPayload<{
+  include: {
+    equipmentKnot: true;
+    incidentName: true;
+    incidentReason: true;
+    incidentSolution: true;
+  };
+}>;
 export class PrismaIncidentMapper {
   static toDomain(entity: PrismaIncident): Incident {
     if (!entity) {
@@ -26,6 +34,30 @@ export class PrismaIncidentMapper {
       createdById: entity.createdById,
       updatedById: entity.updatedById,
     });
+  }
+
+  static toDomainWithInfo(
+    entity: PrismaIncidentWithInfo,
+  ): IncidentWithInfoDataDto {
+    if (!entity) {
+      return null;
+    }
+    return {
+      id: entity.id,
+      posId: entity.posId,
+      workerId: entity.workerId,
+      appearanceDate: entity.appearanceDate,
+      startDate: entity.startDate,
+      finishDate: entity.finishDate,
+      objectName: entity.objectName,
+      downtime: entity.downtime,
+      equipmentKnot: entity.equipmentKnot?.name,
+      incidentName: entity.incidentName?.name,
+      incidentReason: entity.incidentReason?.name,
+      incidentSolution: entity.incidentSolution?.name,
+      comment: entity.comment,
+      carWashDeviceProgramsTypeId: entity?.carWashDeviceProgramsTypeId,
+    };
   }
 
   static toPrisma(incident: Incident): Prisma.IncidentUncheckedCreateInput {

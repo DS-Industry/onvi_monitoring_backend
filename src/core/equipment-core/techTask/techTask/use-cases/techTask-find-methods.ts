@@ -11,95 +11,83 @@ export class FindMethodsTechTaskUseCase {
     return await this.techTaskRepository.findOneById(input);
   }
 
-  async getAllByPosId(posId: number): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosId(posId);
-  }
-
-  async getAllByPosIdAndStatuses(
-    posId: number,
-    statuses: StatusTechTask[],
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdAndStatuses(
-      posId,
-      statuses,
+  async getAllByFilter(data: {
+    posId?: number;
+    userId?: number;
+    gteStartDate?: Date;
+    lteStartDate?: Date;
+    gteEndSpecifiedDate?: Date;
+    lteEndSpecifiedDate?: Date;
+    gteNextCreateDate?: Date;
+    lteNextCreateDate?: Date;
+    type?: TypeTechTask;
+    statuses?: StatusTechTask[];
+    codeTag?: string;
+    skip?: number;
+    take?: number;
+    organizationId?: number;
+    name?: string;
+    tags?: string[];
+    authorId?: number;
+    executorId?: number;
+  }): Promise<TechTask[]> {
+    return await this.techTaskRepository.findAllByFilter(
+      data.posId,
+      data.userId,
+      data.gteStartDate,
+      data.lteStartDate,
+      data.gteEndSpecifiedDate,
+      data.lteEndSpecifiedDate,
+      data.gteNextCreateDate,
+      data.lteNextCreateDate,
+      data.type,
+      data.statuses,
+      data.codeTag,
+      data.skip,
+      data.take,
+      data.organizationId,
+      data.name,
+      data.tags,
+      data.authorId,
+      data.executorId,
     );
   }
 
-  async getAllByPosIdsAndStatuses(
-    posIds: number[],
-    statuses: StatusTechTask[],
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdsAndStatuses(
-      posIds,
-      statuses,
+  async getCountByFilter(data: {
+    posId?: number;
+    userId?: number;
+    gteStartDate?: Date;
+    lteStartDate?: Date;
+    gteEndSpecifiedDate?: Date;
+    lteEndSpecifiedDate?: Date;
+    gteNextCreateDate?: Date;
+    lteNextCreateDate?: Date;
+    type?: TypeTechTask;
+    statuses?: StatusTechTask[];
+    codeTag?: string;
+    organizationId?: number;
+    name?: string;
+    tags?: string[];
+    authorId?: number;
+    executorId?: number;
+  }): Promise<number> {
+    return await this.techTaskRepository.countAllByFilter(
+      data.posId,
+      data.userId,
+      data.gteStartDate,
+      data.lteStartDate,
+      data.gteEndSpecifiedDate,
+      data.lteEndSpecifiedDate,
+      data.gteNextCreateDate,
+      data.lteNextCreateDate,
+      data.type,
+      data.statuses,
+      data.codeTag,
+      data.organizationId,
+      data.name,
+      data.tags,
+      data.authorId,
+      data.executorId,
     );
-  }
-
-  async getAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    status: StatusTechTask,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByPosIdAndDate(
-      posId,
-      dateStart,
-      dateEnd,
-      status,
-    );
-  }
-
-  async getAllAllByTypeAndPosIdAndDate(
-    posId: number,
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByTypeAndPosIdAndDate(
-      posId,
-      type,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllAllByTypeAndPosIdsAndDate(
-    posIds: number[],
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByTypeAndPosIdsAndDate(
-      posIds,
-      type,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByCodeTagAndPosIdsAndDate(
-    posIds: number[],
-    code: string,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllCodeTagAndPosIdsAndDate(
-      posIds,
-      code,
-      dateStart,
-      dateEnd,
-    );
-  }
-
-  async getAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllByStatus(status);
-  }
-
-  async getAllForHandler(): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllForHandler();
-  }
-
-  async getAllForOverdue(): Promise<TechTask[]> {
-    return await this.techTaskRepository.findAllForOverdue();
   }
 }

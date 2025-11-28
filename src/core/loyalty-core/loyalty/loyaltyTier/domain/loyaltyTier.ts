@@ -6,6 +6,7 @@ export interface LoyaltyTierProps {
   description?: string;
   loyaltyProgramId: number;
   limitBenefit: number;
+  upCardTierId?: number;
 }
 
 export class LoyaltyTier extends BaseEntity<LoyaltyTierProps> {
@@ -47,5 +48,13 @@ export class LoyaltyTier extends BaseEntity<LoyaltyTierProps> {
 
   set limitBenefit(limitBenefit: number) {
     this.props.limitBenefit = limitBenefit;
+  }
+
+  get upCardTierId(): number {
+    return this.props.upCardTierId;
+  }
+
+  set upCardTierId(upCardTierId: number) {
+    this.props.upCardTierId = upCardTierId;
   }
 }

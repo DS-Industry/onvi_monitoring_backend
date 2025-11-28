@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
-import { ConfigModule } from '@nestjs/config';
 import { configuration } from '@config/configuration';
 import * as process from 'process';
 import { RouterModule } from '@nestjs/core';
@@ -15,21 +14,31 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule as Logger } from '../src/infra/logger/module';
 import { EquipmentCoreModule } from './core/equipment-core/equipment-core.module';
-import { HandlerModule } from './infra/handler/handler.module';
 import { WarehouseCoreModule } from '@warehouse/warehouse-core.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { FinanceCoreModule } from '@finance/finance-core.module';
 import { ReportCoreModule } from '@report/report-core.module';
-import { LoyaltyCoreModule } from './core/loyalty-core/loyalty-core.module';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
 import { HrCoreModule } from '@hr/hr-core.module';
+import { NotificationCoreModule } from '@notification/notification-core.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
+import { PaymentModule } from './app/payment/payment.module';
+
+import { ConfigModule } from '@nestjs/config';
+import { RedisModule } from '@infra/cache/redis.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheSWRInterceptor } from '@common/interceptors/cache-swr.interceptor';
+import { MulterModule } from '@nestjs/platform-express';
+import { multerConfig } from '@libs/multer/multerConfig';
 
 @Module({
   imports: [
     LoggerModule.forRoot({
       pinoHttp:
-        process.env.NODE_ENV === 'development'
+        process.env.NODE_ENV === 'developmen'
           ? {
-              customProps: (req, res) => ({
+              customProps: () => ({
                 context: 'HTTP',
               }),
               transport: {
@@ -46,7 +55,7 @@ import { HrCoreModule } from '@hr/hr-core.module';
               },
             }
           : {
-              customProps: (req, res) => ({
+              customProps: () => ({
                 context: 'HTTP',
               }),
               transport: {
@@ -77,7 +86,7 @@ import { HrCoreModule } from '@hr/hr-core.module';
         keepAlive: 30000,
         connectTimeout: 60000,
         retryStrategy: (times) => Math.min(times * 100, 3000),
-      }
+      },
     }),
     BullModule.forRoot('worker', {
       connection: {
@@ -88,11 +97,15 @@ import { HrCoreModule } from '@hr/hr-core.module';
         keepAlive: 30000,
         connectTimeout: 60000,
         retryStrategy: (times) => Math.min(times * 100, 3000),
-      }
+      },
     }),
     RouterModule.register(routeConfig),
     ScheduleModule.forRoot(),
     PrometheusModule.register(),
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
+    MulterModule.register(multerConfig),
     PrismaModule,
     PlatformAdminModule,
     PlatformUserModule,
@@ -105,10 +118,19 @@ import { HrCoreModule } from '@hr/hr-core.module';
     FinanceCoreModule,
     HrCoreModule,
     ReportCoreModule,
-    HandlerModule,
+    NotificationCoreModule,
+    ManagerPaperCoreModule,
+    PaymentModule,
     Logger,
+    RedisModule,
   ],
   controllers: [],
-  providers: [],
+
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheSWRInterceptor,
+    },
+  ],
 })
 export class AppModule {}

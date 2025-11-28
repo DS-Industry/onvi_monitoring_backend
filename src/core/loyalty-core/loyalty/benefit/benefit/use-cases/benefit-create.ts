@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IBenefitRepository } from '@loyalty/loyalty/benefit/benefit/interface/benefit';
-import { BenefitType } from '@prisma/client';
+import { LTYBenefitType } from '@prisma/client';
 import { Benefit } from '@loyalty/loyalty/benefit/benefit/domain/benefit';
 
 @Injectable()
@@ -10,7 +10,8 @@ export class CreateBenefitUseCase {
   async execute(
     name: string,
     bonus: number,
-    benefitType: BenefitType,
+    benefitType: LTYBenefitType,
+    ltyProgramId: number,
     benefitActionId?: number,
   ): Promise<Benefit> {
     const benefit = new Benefit({
@@ -18,6 +19,7 @@ export class CreateBenefitUseCase {
       bonus: bonus,
       benefitType: benefitType,
       benefitActionTypeId: benefitActionId,
+      ltyProgramId: ltyProgramId,
     });
     return await this.benefitRepository.create(benefit);
   }

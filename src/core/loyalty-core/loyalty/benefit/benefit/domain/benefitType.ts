@@ -1,0 +1,5 @@
+export enum LTYBenefitType {
+  CASHBACK = 'CASHBACK',
+  DISCOUNT = 'DISCOUNT',
+  GIFT_POINTS = 'GIFT_POINTS',
+}

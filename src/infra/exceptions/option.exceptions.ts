@@ -110,6 +110,36 @@ export class HrException extends BaseException {
   }
 }
 
+export class NotificationException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_Notification', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
+export class ManagerPaperException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_ManagerPaper', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
+export class SaleException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_Sale', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.NOT_FOUND;
+  }
+}
+
 export class WarehouseDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
     super('domain_warehouse', innerCode, message);
@@ -122,10 +152,20 @@ export class WarehouseDomainException extends BaseException {
 
 export class LoyaltyDomainException extends BaseException {
   constructor(innerCode: number, message: string) {
-    super('loyalty_warehouse', innerCode, message);
+    super('domain_loyalty', innerCode, message);
   }
 
   getHttpStatus(): number {
     return HttpStatus.CONFLICT;
+  }
+}
+
+export class PermissionException extends BaseException {
+  constructor(innerCode: number, message: string) {
+    super('api_permission', innerCode, message);
+  }
+
+  getHttpStatus(): number {
+    return HttpStatus.FORBIDDEN;
   }
 }

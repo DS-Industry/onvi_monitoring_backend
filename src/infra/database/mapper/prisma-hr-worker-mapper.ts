@@ -19,8 +19,10 @@ export class PrismaHrWorkerMapper {
       avatar: entity.avatar,
       monthlySalary: entity.monthlySalary,
       dailySalary: entity.dailySalary,
-      percentageSalary: entity.percentageSalary,
+      bonusPayout: entity.bonusPayout,
+      status: entity.status,
       gender: entity.gender,
+      birthday: entity.birthday,
       citizenship: entity.citizenship,
       passportSeries: entity.passportSeries,
       passportNumber: entity.passportNumber,
@@ -28,6 +30,7 @@ export class PrismaHrWorkerMapper {
       passportDateIssue: entity.passportDateIssue,
       inn: entity.inn,
       snils: entity.snils,
+      registrationAddress: entity.registrationAddress,
     });
   }
 
@@ -45,8 +48,10 @@ export class PrismaHrWorkerMapper {
       avatar: worker?.avatar,
       monthlySalary: worker.monthlySalary,
       dailySalary: worker.dailySalary,
-      percentageSalary: worker.percentageSalary,
+      bonusPayout: worker.bonusPayout,
+      status: worker.status,
       gender: worker?.gender,
+      birthday: worker?.birthday,
       citizenship: worker?.citizenship,
       passportSeries: worker?.passportSeries,
       passportNumber: worker?.passportNumber,
@@ -54,6 +59,7 @@ export class PrismaHrWorkerMapper {
       passportDateIssue: worker?.passportDateIssue,
       inn: worker?.inn,
       snils: worker?.snils,
+      registrationAddress: worker?.registrationAddress,
     };
   }
 }

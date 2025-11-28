@@ -19,4 +19,7 @@ export class UpdateUserDto {
   @IsNumber()
   @IsOptional()
   receiveNotifications?: number;
+  @IsString()
+  @IsOptional()
+  fcmToken?: string;
 }

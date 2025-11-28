@@ -61,7 +61,23 @@ import { UpdateCategoryUseCase } from '@warehouse/category/use-cases/category-up
 import { CategoryUpdateDto } from '@platform-user/core-controller/dto/receive/category-update.dto';
 import { Category } from '@warehouse/category/domain/category';
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-pos-filter.dto';
-import { NomenclatureStatus } from '@prisma/client';
+import { WarehousePaginatedResponseDto } from '@platform-user/core-controller/dto/response/warehouse-paginated-response.dto';
+import { WarehousePaginatedFilterDto } from '@platform-user/core-controller/dto/receive/warehouse-paginated-filter.dto';
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
+import { PaginationDto } from '@platform-user/core-controller/dto/receive/pagination.dto';
+import { NomenclatureFilterDto } from '@platform-user/core-controller/dto/receive/nomenclature-filter.dto';
+import { SupplierGetAllDto } from '@platform-user/core-controller/dto/receive/supplier-get-all.dto';
+import { PurposeType } from '@warehouse/nomenclature/interface/nomenclatureMeta';
+import { SaleInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-sale';
+import { InventoryItemSaleResponseDto } from '@warehouse/inventoryItem/use-cases/dto/inventoryItem-sale-response.dto';
+import { DeleteCategoryUseCase } from '@warehouse/category/use-cases/category-delete';
+import { DeleteSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-delete';
+import { UpdateSupplierUseCase } from '@warehouse/supplier/use-cases/supplier-update';
+import { SupplierUpdateDto } from '@platform-user/core-controller/dto/receive/supplier-update.dto';
+import { Supplier } from '@warehouse/supplier/domain/supplier';
+import { DeleteWarehouseDocumentUseCase } from '@warehouse/document/document/use-cases/warehouseDocument-delete';
+import { FindMethodsInventoryItemUseCase } from '@warehouse/inventoryItem/use-cases/inventoryItem-find-methods';
+import { Warehouse } from '@warehouse/warehouse/domain/warehouse';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -69,6 +85,7 @@ export class WarehouseController {
     private readonly createWarehouseUseCase: CreateWarehouseUseCase,
     private readonly warehouseValidateRules: WarehouseValidateRules,
     private readonly findMethodsWarehouseUseCase: FindMethodsWarehouseUseCase,
+    private readonly findMethodsInventoryItemUseCase: FindMethodsInventoryItemUseCase,
     private readonly inventoryItemMonitoringUseCase: InventoryItemMonitoringUseCase,
     private readonly createCategoryUseCase: CreateCategoryUseCase,
     private readonly updateCategoryUseCase: UpdateCategoryUseCase,
@@ -85,6 +102,11 @@ export class WarehouseController {
     private readonly allByFilterWarehouseDocumentUseCase: AllByFilterWarehouseDocumentUseCase,
     private readonly inventoryInventoryItemUseCase: InventoryInventoryItemUseCase,
     private readonly createWarehouseDocumentUseCase: CreateWarehouseDocumentUseCase,
+    private readonly saleInventoryItemUseCase: SaleInventoryItemUseCase,
+    private readonly deleteCategoryUseCase: DeleteCategoryUseCase,
+    private readonly deleteSupplierUseCase: DeleteSupplierUseCase,
+    private readonly updateSupplierUseCase: UpdateSupplierUseCase,
+    private readonly deleteWarehouseDocumentUseCase: DeleteWarehouseDocumentUseCase,
   ) {}
   //Create warehouse
   @Post()
@@ -131,16 +153,24 @@ export class WarehouseController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<any> {
     try {
-      const { user, ability } = req;
+      const { user } = req;
       await this.warehouseValidateRules.createNomenclatureValidate(
         data.sku,
         data.name,
         data.organizationId,
         data.categoryId,
-        ability,
         data?.supplierId,
       );
-      return await this.createNomenclatureUseCase.create(data, user, file);
+      let destiny: DestinyNomenclature = DestinyNomenclature.INTERNAL;
+      if (data.metaData.purpose == PurposeType.SALE) {
+        destiny = DestinyNomenclature.SALE;
+      }
+
+      return await this.createNomenclatureUseCase.create(
+        { ...data, destiny },
+        user,
+        file,
+      );
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -175,8 +205,16 @@ export class WarehouseController {
           ...data,
           ability,
         });
+      let destiny: DestinyNomenclature;
+      if (data.metaData.purpose) {
+        if (data.metaData.purpose == PurposeType.SALE) {
+          destiny = DestinyNomenclature.SALE;
+        } else {
+          destiny = DestinyNomenclature.INTERNAL;
+        }
+      }
       return await this.updateNomenclatureUseCase.execute(
-        data,
+        { ...data, destiny },
         oldNomenclature,
         user,
         file,
@@ -240,18 +278,99 @@ export class WarehouseController {
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
   async getAllNomenclatureByOrgId(
-    @Request() req: any,
     @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: NomenclatureFilterDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
       await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
-        ability,
       );
-      return await this.findMethodsNomenclatureUseCase.getAllByOrganizationId(
+      return await this.findMethodsNomenclatureUseCase.getAllByFilter({
+        organizationId: orgId,
+        status: NomenclatureStatus.ACTIVE,
+        skip: skip,
+        take: take,
+        search: params.search,
+      });
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('nomenclature-sale/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllNomenclatureForSale(
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: PaginationDto,
+  ): Promise<any> {
+    try {
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
         orgId,
       );
+      return await this.findMethodsNomenclatureUseCase.getAllByFilter({
+        organizationId: orgId,
+        destiny: DestinyNomenclature.SALE,
+        skip: skip,
+        take: take,
+      });
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('nomenclature-count/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllNomenclatureByOrgId(
+    @Param('orgId', ParseIntPipe) orgId: number,
+  ): Promise<{ count: number }> {
+    try {
+      await this.warehouseValidateRules.getAllNomenclatureByOrgIdValidate(
+        orgId,
+      );
+      const count =
+        await this.findMethodsNomenclatureUseCase.getCountAllByFilter({
+          organizationId: orgId,
+          status: NomenclatureStatus.ACTIVE,
+        });
+      return { count };
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -279,11 +398,9 @@ export class WarehouseController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<any> {
     try {
-      const { user, ability } = req;
-      const data = await this.warehouseValidateRules.createNomenclatureFile(
-        file,
-        ability,
-      );
+      const { user } = req;
+      const data =
+        await this.warehouseValidateRules.createNomenclatureFile(file);
       await this.createNomenclatureUseCase.createMany(data, user);
       return { status: 'SUCCESS' };
     } catch (e) {
@@ -363,6 +480,34 @@ export class WarehouseController {
       }
     }
   }
+  @Delete('category/:categoryId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async deleteCategory(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const category =
+        await this.warehouseValidateRules.updateCategoryValidate(categoryId);
+      await this.deleteCategoryUseCase.execute(category.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Get all category
   @Get('category')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -414,14 +559,102 @@ export class WarehouseController {
       }
     }
   }
-  //Get all supplier
+  @Patch('supplier/:supplierId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async updateSupplier(
+    @Param('supplierId', ParseIntPipe) supplierId: number,
+    @Body() data: SupplierUpdateDto,
+  ): Promise<Supplier> {
+    try {
+      const supplier =
+        await this.warehouseValidateRules.updateSupplierValidate(supplierId);
+      return await this.updateSupplierUseCase.execute(data, supplier);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Delete('supplier/:supplierId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateWarehouseAbility())
+  @HttpCode(201)
+  async deleteSupplier(
+    @Param('supplierId', ParseIntPipe) supplierId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const category =
+        await this.warehouseValidateRules.updateSupplierValidate(supplierId);
+      await this.deleteSupplierUseCase.execute(category.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   @Get('supplier')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadWarehouseAbility())
   @HttpCode(200)
-  async getAllSupplier(): Promise<any> {
+  async getAllSupplier(@Query() params: SupplierGetAllDto): Promise<any> {
     try {
-      return await this.findMethodsSupplierUseCase.getAll();
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+      return await this.findMethodsSupplierUseCase.getAll(
+        params?.name,
+        skip,
+        take,
+      );
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('supplier-count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllSupplier(): Promise<{ count: number }> {
+    try {
+      return await this.findMethodsSupplierUseCase.getCountAll();
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -450,6 +683,14 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { ability } = req;
+
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+
       await this.warehouseValidateRules.getAllInventoryItemValidate({
         orgId,
         ability,
@@ -458,8 +699,67 @@ export class WarehouseController {
       return await this.inventoryItemMonitoringUseCase.execute({
         orgId,
         ability,
+        skip,
+        take,
         ...params,
       });
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  @Get('inventory-item-count/:orgId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllInventoryItem(
+    @Request() req: any,
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Query() params: InventoryItemMonitoringDto,
+  ): Promise<{ count: number }> {
+    try {
+      const { ability } = req;
+
+      await this.warehouseValidateRules.getAllInventoryItemValidate({
+        orgId,
+        ability,
+        ...params,
+      });
+
+      let warehouses: Warehouse[] = [];
+
+      if (params.warehouseId) {
+        warehouses.push(
+          await this.findMethodsWarehouseUseCase.getById(params.warehouseId),
+        );
+      } else {
+        warehouses = await this.findMethodsWarehouseUseCase.geyAllByPermission(
+          ability,
+          params.placementId,
+        );
+      }
+
+      const count =
+        await this.findMethodsInventoryItemUseCase.getCountByWarehouseIdsForInventory(
+          {
+            warehouseIds: warehouses.map((w) => w.id),
+            organizationId: orgId,
+            categoryId: params.categoryId,
+            status: NomenclatureStatus.ACTIVE,
+          },
+        );
+      return { count };
     } catch (e) {
       if (e instanceof WarehouseException) {
         throw new CustomHttpException({
@@ -508,6 +808,37 @@ export class WarehouseController {
       }
     }
   }
+  @Get('inventory-item/sale/:warehouseId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllInventoryItemBySale(
+    @Request() req: any,
+    @Param('warehouseId', ParseIntPipe) warehouseId: number,
+  ): Promise<InventoryItemSaleResponseDto[]> {
+    try {
+      const { ability } = req;
+      await this.warehouseValidateRules.getOneByIdValidate(
+        warehouseId,
+        ability,
+      );
+      return await this.saleInventoryItemUseCase.execute(warehouseId);
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Get all
   @Get('')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -519,15 +850,127 @@ export class WarehouseController {
   ): Promise<any> {
     try {
       const { ability } = req;
-      if (params.posId != '*') {
-        await this.warehouseValidateRules.getAllByPosId(params.posId, ability);
+
+      let skip = undefined;
+      let take = undefined;
+      if (params.page && params.size) {
+        skip = params.size * (params.page - 1);
+        take = params.size;
+      }
+
+      if (params.posId) {
+        await this.warehouseValidateRules.getAllByPosId(params.posId);
         return await this.findMethodsWarehouseUseCase.getAllByPosId(
           params.posId,
+          skip,
+          take,
         );
       } else {
         return await this.findMethodsWarehouseUseCase.geyAllByPermission(
           ability,
-          params.placementId,
+          params?.placementId,
+          skip,
+          take,
+        );
+      }
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('paginated')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getAllByPosIdPaginated(
+    @Request() req: any,
+    @Query() params: WarehousePaginatedFilterDto,
+  ): Promise<WarehousePaginatedResponseDto> {
+    try {
+      const { ability } = req;
+
+      const page = params.page || 1;
+      const size = params.size || 10;
+      const skip = size * (page - 1);
+      const take = size;
+
+      const [data, { count: total }] = await Promise.all([
+        this.findMethodsWarehouseUseCase.getAllByOrganizationId(
+          params.organizationId,
+          ability,
+          params.posId,
+          skip,
+          take,
+        ),
+        this.findMethodsWarehouseUseCase.getCountAllByOrganizationId(
+          params.organizationId,
+          ability,
+          params.posId,
+        ),
+      ]);
+
+      const totalPages = Math.ceil(total / size);
+      const hasNext = page < totalPages;
+      const hasPrevious = page > 1;
+
+      return {
+        data,
+        total,
+        page,
+        size,
+        totalPages,
+        hasNext,
+        hasPrevious,
+      };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('count')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadWarehouseAbility())
+  @HttpCode(200)
+  async getCountAllByPosId(
+    @Request() req: any,
+    @Query() params: PlacementFilterDto,
+  ): Promise<{ count: number }> {
+    try {
+      const { ability } = req;
+
+      if (params.posId) {
+        await this.warehouseValidateRules.getAllByPosId(params.posId);
+        return await this.findMethodsWarehouseUseCase.getCountAllByPosId(
+          params.posId,
+        );
+      } else {
+        return await this.findMethodsWarehouseUseCase.getCountAllByPermission(
+          ability,
+          params?.placementId,
         );
       }
     } catch (e) {
@@ -549,7 +992,7 @@ export class WarehouseController {
   //Create Document
   @Post('document')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async createDocument(
     @Request() req: any,
@@ -574,10 +1017,45 @@ export class WarehouseController {
       }
     }
   }
+  @Delete('document/:documentId')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateWarehouseAbility())
+  @HttpCode(201)
+  async deleteDocument(
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ): Promise<{ status: string }> {
+    try {
+      const oldDocument =
+        await this.warehouseValidateRules.deleteDocumentValidate(documentId);
+      await this.deleteWarehouseDocumentUseCase.execute(oldDocument.id);
+      return { status: 'SUCCESS' };
+    } catch (e) {
+      if (e instanceof WarehouseException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else if (e instanceof WarehouseDomainException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
   //Save Document
   @Post('document/save/:documentId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async saveDocument(
     @Request() req: any,
@@ -619,7 +1097,7 @@ export class WarehouseController {
   //Send Document
   @Post('document/send/:documentId')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateWarehouseAbility())
+  @CheckAbilities(new CreateWarehouseAbility())
   @HttpCode(201)
   async sendDocument(
     @Request() req: any,
@@ -714,7 +1192,7 @@ export class WarehouseController {
     try {
       const { ability } = req;
       let warehouse = null;
-      if (params.warehouseId != '*') {
+      if (params.warehouseId) {
         warehouse = await this.warehouseValidateRules.getOneByIdValidate(
           params.warehouseId,
           ability,
@@ -726,6 +1204,8 @@ export class WarehouseController {
         ability,
         params.placementId,
         warehouse,
+        params.page,
+        params.size,
       );
     } catch (e) {
       if (e instanceof WarehouseException) {

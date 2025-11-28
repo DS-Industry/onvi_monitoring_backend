@@ -9,7 +9,6 @@ export class PrismaEquipmentKnotMapper {
     return new EquipmentKnot({
       id: entity.id,
       name: entity.name,
-      posId: entity.posId,
     });
   }
 
@@ -19,7 +18,6 @@ export class PrismaEquipmentKnotMapper {
     return {
       id: object?.id,
       name: object.name,
-      posId: object.posId,
     };
   }
 }

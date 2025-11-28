@@ -38,6 +38,14 @@ export class OrganizationRepository extends IOrganizationRepository {
       where: {
         id,
       },
+      include: {
+        ownedLtyPrograms: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
     return PrismaOrganizationMapper.toDomain(organization);
   }
@@ -67,7 +75,11 @@ export class OrganizationRepository extends IOrganizationRepository {
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 
-  public async findAllByUser(userId: number): Promise<Organization[]> {
+  public async findAllByUser(
+    userId: number,
+    placementId: number | '*',
+    findAllByUser?: boolean,
+  ): Promise<Organization[]> {
     const organization = await this.prisma.organization.findMany({
       where: {
         users: {
@@ -75,20 +87,54 @@ export class OrganizationRepository extends IOrganizationRepository {
             id: userId,
           },
         },
+        ...(placementId !== '*' && { placementId }),
+        ...(findAllByUser && { ltyProgramId: null }),
+      },
+    });
+
+    return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
+  }
+
+  public async findAllByLoyaltyProgramId(
+    ltyProgramId: number,
+  ): Promise<Organization[]> {
+    const organization = await this.prisma.organization.findMany({
+      where: {
+        ownedLtyPrograms: {
+          some: {
+            id: ltyProgramId,
+          },
+        },
       },
     });
     return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 
-  public async findAllByLoyaltyProgramId(
-    loyaltyProgramId: number,
+  public async findAllParticipantOrganizationsByLoyaltyProgramId(
+    ltyProgramId: number,
   ): Promise<Organization[]> {
-    const organization = await this.prisma.organization.findMany({
+    const organizations = await this.prisma.organization.findMany({
       where: {
-        loyaltyProgramId,
+        OR: [
+          {
+            ownedLtyPrograms: {
+              some: {
+                id: ltyProgramId,
+              },
+            },
+          },
+          {
+            LTYProgramParticipant: {
+              some: {
+                ltyProgramId: ltyProgramId,
+                status: 'ACTIVE',
+              },
+            },
+          },
+        ],
       },
     });
-    return organization.map((item) => PrismaOrganizationMapper.toDomain(item));
+    return organizations.map((item) => PrismaOrganizationMapper.toDomain(item));
   }
 
   public async findAllUser(id: number): Promise<User[]> {

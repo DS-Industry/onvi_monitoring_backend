@@ -1,8 +1,17 @@
-import { Client } from "@loyalty/mobile-user/client/domain/client";
-import { MobileUser as PrismaMobileUser, Prisma } from '@prisma/client';
+import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { ClientMeta } from '@loyalty/mobile-user/client/domain/clientMeta';
+import {
+  LTYUser as PrismaMobileUser,
+  LTYUserMeta as PrismaMobileUserMeta,
+  Prisma,
+  LTYCard,
+} from '@prisma/client';
+import { EnumMapper } from './enum-mapper';
 
 export class PrismaMobileUserMapper {
-  static toDomain(entity: PrismaMobileUser): Client {
+  static toDomain(
+    entity: PrismaMobileUser & { meta?: PrismaMobileUserMeta; card?: LTYCard },
+  ): Client {
     if (!entity) {
       return null;
     }
@@ -13,20 +22,23 @@ export class PrismaMobileUserMapper {
       phone: entity.phone,
       email: entity.email,
       gender: entity.gender,
-      status: entity.status,
+      status: entity.status
+        ? EnumMapper.toDomainStatusUser(entity.status)
+        : undefined,
       avatar: entity.avatar,
-      type: entity.type,
-      inn: entity.inn,
+      contractType: EnumMapper.toDomainContractType(entity.contractType),
       comment: entity.comment,
       placementId: entity.placementId,
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      mobileUserRoleId: entity.mobileUserRoleId,
+      is_notifications_enabled: entity.is_notifications_enabled,
+      meta: entity.meta ? this.toDomainClientMeta(entity.meta) : undefined,
+      cardId: entity.card?.id,
     });
   }
 
-  static toPrisma(client: Client): Prisma.MobileUserUncheckedCreateInput {
+  static toPrisma(client: Client): Prisma.LTYUserUncheckedCreateInput {
     return {
       id: client?.id,
       name: client.name,
@@ -34,16 +46,44 @@ export class PrismaMobileUserMapper {
       phone: client.phone,
       email: client?.email,
       gender: client?.gender,
-      status: client?.status,
+      status: client?.status
+        ? EnumMapper.toPrismaStatusUser(client.status)
+        : undefined,
       avatar: client?.avatar,
-      type: client.type,
-      inn: client?.inn,
+      contractType: EnumMapper.toPrismaContractType(client.contractType),
       comment: client?.comment,
       placementId: client?.placementId,
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
-      mobileUserRoleId: client?.mobileUserRoleId,
+      is_notifications_enabled: client.is_notifications_enabled,
+    };
+  }
+
+  static toDomainClientMeta(entity: PrismaMobileUserMeta): ClientMeta {
+    if (!entity) {
+      return null;
+    }
+    return new ClientMeta({
+      id: entity.id,
+      clientId: entity.clientId,
+      deviceId: entity.deviceId,
+      model: entity.model,
+      name: entity.name,
+      platform: entity.platform,
+    });
+  }
+
+  static toPrismaClientMeta(
+    clientMeta: ClientMeta,
+  ): Prisma.LTYUserMetaUncheckedCreateInput {
+    return {
+      id: clientMeta?.id,
+      clientId: clientMeta.clientId,
+      deviceId: clientMeta.deviceId,
+      model: clientMeta.model,
+      name: clientMeta.name,
+      platform: clientMeta.platform,
     };
   }
 }

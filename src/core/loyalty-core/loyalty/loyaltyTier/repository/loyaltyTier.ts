@@ -3,6 +3,7 @@ import { ILoyaltyTierRepository } from '@loyalty/loyalty/loyaltyTier/interface/l
 import { PrismaService } from '@db/prisma/prisma.service';
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { PrismaLoyaltyTierMapper } from '@db/mapper/prisma-loyalty-tier-mapper';
+import { LoyaltyTierUpdateInfoResponseDto } from '@loyalty/loyalty/loyaltyTier/use-cases/dto/loyaltyTier-update-info-response.dto';
 
 @Injectable()
 export class LoyaltyTierRepository extends ILoyaltyTierRepository {
@@ -12,14 +13,14 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
 
   public async create(input: LoyaltyTier): Promise<LoyaltyTier> {
     const loyaltyTierEntity = PrismaLoyaltyTierMapper.toPrisma(input);
-    const loyaltyTier = await this.prisma.loyaltyCardTier.create({
+    const loyaltyTier = await this.prisma.lTYCardTier.create({
       data: loyaltyTierEntity,
     });
     return PrismaLoyaltyTierMapper.toDomain(loyaltyTier);
   }
 
   public async findOneById(id: number): Promise<LoyaltyTier> {
-    const loyaltyTier = await this.prisma.loyaltyCardTier.findFirst({
+    const loyaltyTier = await this.prisma.lTYCardTier.findFirst({
       where: {
         id,
       },
@@ -28,32 +29,90 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
   }
 
   public async findAllByLoyaltyProgramId(
-    loyaltyProgramId: number,
+    ltyProgramId: number,
+    onlyWithoutChildren: boolean = false,
   ): Promise<LoyaltyTier[]> {
-    const loyaltyTiers = await this.prisma.loyaltyCardTier.findMany({
-      where: {
-        loyaltyProgramId,
-      },
+    let whereClause: any = {
+      ltyProgramId,
+    };
+
+    if (onlyWithoutChildren) {
+      whereClause = {
+        ...whereClause,
+        NOT: {
+          downCardTiers: {
+            some: {},
+          },
+        },
+      };
+    }
+
+    const loyaltyTiers = await this.prisma.lTYCardTier.findMany({
+      where: whereClause,
     });
+
     return loyaltyTiers.map((item) => PrismaLoyaltyTierMapper.toDomain(item));
   }
 
   public async findAllByLoyaltyProgramIds(
-    loyaltyProgramIds: number[],
+    ltyProgramIds: number[],
   ): Promise<LoyaltyTier[]> {
-    const loyaltyTiers = await this.prisma.loyaltyCardTier.findMany({
+    const loyaltyTiers = await this.prisma.lTYCardTier.findMany({
       where: {
-        loyaltyProgramId: {
-          in: loyaltyProgramIds,
+        ltyProgramId: {
+          in: ltyProgramIds,
         },
       },
     });
     return loyaltyTiers.map((item) => PrismaLoyaltyTierMapper.toDomain(item));
   }
 
+  async findCardsForTierUpdate(
+    dateStart: Date,
+    dateEnd: Date,
+  ): Promise<LoyaltyTierUpdateInfoResponseDto[]> {
+    const result = await this.prisma.$queryRaw<
+      LoyaltyTierUpdateInfoResponseDto[]
+    >`
+    WITH CardSpend AS (
+      SELECT
+        c.id as card_id,
+        c."cardTierId" as current_tier_id,
+        COALESCE(SUM(o."sumFull"), 0) as spent_sum
+      FROM "LTYCard" c
+      LEFT JOIN "LTYOrder" o ON o."cardId" = c.id
+        AND o."orderData" BETWEEN ${dateStart}::timestamp AND ${dateEnd}::timestamp
+        AND o."orderStatus" = 'COMPLETED'
+      WHERE c."type" = 'PHYSICAL'
+      GROUP BY c.id, c."cardTierId"
+    )
+    SELECT
+      cs.card_id as "cardId",
+      cs.current_tier_id as "currentTierId",
+      cs.spent_sum as "spentSum",
+      CASE
+        WHEN cs.spent_sum >= ct."limitBenefit" THEN ct."upCardTierId"
+        ELSE (SELECT id FROM "LTYCardTier" WHERE "upCardTierId" = ct.id LIMIT 1)
+      END as "nextTierId",
+      CASE
+        WHEN cs.spent_sum >= ct."limitBenefit" AND ct."upCardTierId" IS NOT NULL THEN 'UPGRADE'::text
+        WHEN cs.spent_sum < ct."limitBenefit" AND (SELECT id FROM "LTYCardTier" WHERE "upCardTierId" = ct.id LIMIT 1) IS NOT NULL THEN 'DOWNGRADE'::text
+        ELSE 'NO_CHANGE'::text
+      END as "actionTier"
+    FROM CardSpend cs
+    INNER JOIN "LTYCardTier" ct ON cs.current_tier_id = ct.id
+    WHERE
+      (cs.spent_sum >= ct."limitBenefit" AND ct."upCardTierId" IS NOT NULL)
+      OR (cs.spent_sum < ct."limitBenefit" AND (SELECT id FROM "LTYCardTier" WHERE "upCardTierId" = ct.id LIMIT 1) IS NOT NULL)
+    ORDER BY cs.card_id
+  `;
+
+    return result.filter((item) => item.actionTier !== 'NO_CHANGE');
+  }
+
   public async update(input: LoyaltyTier): Promise<LoyaltyTier> {
     const loyaltyTierEntity = PrismaLoyaltyTierMapper.toPrisma(input);
-    const loyaltyTier = await this.prisma.loyaltyCardTier.update({
+    const loyaltyTier = await this.prisma.lTYCardTier.update({
       where: {
         id: input.id,
       },
@@ -67,7 +126,7 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
     addBenefitIds: number[],
     deleteBenefitIds: number[],
   ): Promise<any> {
-    await this.prisma.loyaltyCardTier.update({
+    await this.prisma.lTYCardTier.update({
       where: {
         id: loyaltyTierId,
       },
@@ -76,6 +135,14 @@ export class LoyaltyTierRepository extends ILoyaltyTierRepository {
           disconnect: deleteBenefitIds.map((id) => ({ id })),
           connect: addBenefitIds.map((id) => ({ id })),
         },
+      },
+    });
+  }
+
+  public async delete(loyaltyTierId: number): Promise<void> {
+    await this.prisma.lTYCardTier.delete({
+      where: {
+        id: loyaltyTierId,
       },
     });
   }

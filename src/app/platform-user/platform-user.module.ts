@@ -15,6 +15,8 @@ import { ActivateAuthUseCase } from '@platform-user/auth/use-cases/auth-activate
 import { PasswordResetUserUseCase } from '@platform-user/auth/use-cases/auth-password-reset';
 import { ValidateUserEmailStrategyUseCase } from '@platform-user/auth/strategies/validate/auth-validate-email-strategy';
 import { AuthRegisterWorkerUseCase } from '@platform-user/auth/use-cases/auth-register-worker';
+import { SetCookiesUseCase } from '@platform-admin/auth/use-cases/auth-set-cookies';
+import { LogoutUseCase } from '@platform-admin/auth/use-cases/auth-logout';
 import { Auth } from '@platform-user/auth/controller/auth';
 import { BcryptModule } from '@libs/bcrypt/module';
 import { JwtModule } from '@libs/auth/module';
@@ -64,13 +66,25 @@ import { ReportController } from '@platform-user/core-controller/report';
 import { ReportValidateRules } from '@platform-user/validate/validate-rules/report-validate-rules';
 import { PosManageUserUseCase } from '@platform-user/user/use-cases/user-pos-manage';
 import { ConnectionUserPosUseCase } from '@platform-user/user/use-cases/user-pos-connection';
+import { LoyaltyProgramManageUserUseCase } from '@platform-user/user/use-cases/user-loyalty-program-manage';
+import { ConnectionUserLoyaltyProgramUseCase } from '@platform-user/user/use-cases/user-loyalty-program-connection';
 import { PlacementController } from '@platform-user/core-controller/placement';
-import { LoyaltyValidateRules } from "@platform-user/validate/validate-rules/loyalty-validate-rules";
-import { LoyaltyCoreModule } from "@loyalty/loyalty-core.module";
-import { LoyaltyController } from "@platform-user/core-controller/loyalty";
-import { HrController } from "@platform-user/core-controller/hr";
-import { HrCoreModule } from "@hr/hr-core.module";
-import { HrValidateRules } from "@platform-user/validate/validate-rules/hr-validate-rules";
+import { LoyaltyValidateRules } from '@platform-user/validate/validate-rules/loyalty-validate-rules';
+import { LoyaltyCoreModule } from '@loyalty/loyalty-core.module';
+import { LoyaltyController } from '@platform-user/core-controller/loyalty';
+import { HrController } from '@platform-user/core-controller/hr';
+import { HrCoreModule } from '@hr/hr-core.module';
+import { HrValidateRules } from '@platform-user/validate/validate-rules/hr-validate-rules';
+import { NotificationController } from '@platform-user/core-controller/notification';
+import { NotificationValidateRules } from '@platform-user/validate/validate-rules/notification-validate-rules';
+import { NotificationCoreModule } from '@notification/notification-core.module';
+import { ManagerPaperController } from '@platform-user/core-controller/managerPaper';
+import { ManagerPaperValidateRules } from '@platform-user/validate/validate-rules/manager-paper-validate-rules';
+import { ManagerPaperCoreModule } from '@manager-paper/manager-paper-core.module';
+import { SaleController } from '@platform-user/core-controller/sale';
+import { FileParserService } from '@platform-user/core-controller/services/excel-parser.service';
+import { S3Controller } from '@platform-user/core-controller/s3';
+import { S3Module } from '@libs/s3/module';
 
 const repositories: Provider[] = [
   ConfirmMailProvider,
@@ -94,6 +108,10 @@ const controllers = [
   PlacementController,
   LoyaltyController,
   HrController,
+  NotificationController,
+  ManagerPaperController,
+  SaleController,
+  S3Controller,
 ];
 const authUseCase: Provider[] = [
   SignRefreshTokenUseCase,
@@ -110,6 +128,8 @@ const authUseCase: Provider[] = [
   PasswordResetUserUseCase,
   ValidateUserEmailStrategyUseCase,
   AuthRegisterWorkerUseCase,
+  SetCookiesUseCase,
+  LogoutUseCase,
 ];
 
 const userUseCase: Provider[] = [
@@ -119,6 +139,8 @@ const userUseCase: Provider[] = [
   OrganizationManageUserUseCase,
   PosManageUserUseCase,
   ConnectionUserPosUseCase,
+  LoyaltyProgramManageUserUseCase,
+  ConnectionUserLoyaltyProgramUseCase,
 ];
 
 const confirmMailUseCase: Provider[] = [
@@ -141,6 +163,8 @@ const validate: Provider[] = [
   ReportValidateRules,
   LoyaltyValidateRules,
   HrValidateRules,
+  NotificationValidateRules,
+  ManagerPaperValidateRules,
 ];
 
 const permission: Provider[] = [
@@ -148,6 +172,8 @@ const permission: Provider[] = [
   FindMethodsRoleUseCase,
   GetAllPermissionsInfoUseCases,
 ];
+
+const services: Provider[] = [FileParserService];
 
 @Module({
   imports: [
@@ -163,8 +189,11 @@ const permission: Provider[] = [
     ReportCoreModule,
     LoyaltyCoreModule,
     HrCoreModule,
+    NotificationCoreModule,
+    ManagerPaperCoreModule,
     ObjectModule,
     FileModule,
+    S3Module,
   ],
   controllers: [...controllers],
   providers: [
@@ -174,6 +203,8 @@ const permission: Provider[] = [
     ...validate,
     ...permission,
     ...userUseCase,
+    ...services,
   ],
+  exports: [...userUseCase, ...permission],
 })
 export class PlatformUserModule {}

@@ -1,12 +1,13 @@
 import { BaseEntity } from '@utils/entity';
-import { BenefitType } from '@prisma/client';
+import { LTYBenefitType } from '@prisma/client';
 
 export interface BenefitProps {
   id?: number;
   name: string;
   bonus: number;
-  benefitType: BenefitType;
+  benefitType: LTYBenefitType;
   benefitActionTypeId?: number;
+  ltyProgramId: number;
 }
 
 export class Benefit extends BaseEntity<BenefitProps> {
@@ -22,7 +23,7 @@ export class Benefit extends BaseEntity<BenefitProps> {
     return this.props.bonus;
   }
 
-  get benefitType(): BenefitType {
+  get benefitType(): LTYBenefitType {
     return this.props.benefitType;
   }
 
@@ -34,11 +35,15 @@ export class Benefit extends BaseEntity<BenefitProps> {
     return this.props.benefitActionTypeId;
   }
 
+  get ltyProgramId(): number {
+    return this.props.ltyProgramId;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
 
-  set benefitType(benefitType: BenefitType) {
+  set benefitType(benefitType: LTYBenefitType) {
     this.props.benefitType = benefitType;
   }
 
@@ -48,5 +53,9 @@ export class Benefit extends BaseEntity<BenefitProps> {
 
   set benefitActionTypeId(benefitActionTypeId: number) {
     this.props.benefitActionTypeId = benefitActionTypeId;
+  }
+
+  set ltyProgramId(ltyProgramId: number) {
+    this.props.ltyProgramId = ltyProgramId;
   }
 }

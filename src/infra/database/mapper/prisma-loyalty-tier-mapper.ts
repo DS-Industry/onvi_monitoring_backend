@@ -1,5 +1,5 @@
 import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
-import { LoyaltyCardTier as PrismaLoyaltyTier, Prisma } from '@prisma/client';
+import { LTYCardTier as PrismaLoyaltyTier, Prisma } from '@prisma/client';
 
 export class PrismaLoyaltyTierMapper {
   static toDomain(entity: PrismaLoyaltyTier): LoyaltyTier {
@@ -10,20 +10,22 @@ export class PrismaLoyaltyTierMapper {
       id: entity.id,
       name: entity.name,
       description: entity.description,
-      loyaltyProgramId: entity.loyaltyProgramId,
+      loyaltyProgramId: entity.ltyProgramId,
       limitBenefit: entity.limitBenefit,
+      upCardTierId: entity.upCardTierId,
     });
   }
 
   static toPrisma(
     loyaltyTier: LoyaltyTier,
-  ): Prisma.LoyaltyCardTierUncheckedCreateInput {
+  ): Prisma.LTYCardTierUncheckedCreateInput {
     return {
       id: loyaltyTier?.id,
       name: loyaltyTier.name,
       description: loyaltyTier?.description,
-      loyaltyProgramId: loyaltyTier.loyaltyProgramId,
-      limitBenefit: loyaltyTier.limitBenefit,
+      ltyProgramId: loyaltyTier.loyaltyProgramId,
+      limitBenefit: loyaltyTier?.limitBenefit,
+      upCardTierId: loyaltyTier?.upCardTierId,
     };
   }
 }

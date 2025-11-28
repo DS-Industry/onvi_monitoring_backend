@@ -1,4 +1,4 @@
-import { WarehouseDocumentStatus, WarehouseDocumentType } from "@prisma/client";
+import { WarehouseDocumentStatus, WarehouseDocumentType } from '@prisma/client';
 
 export class WarehouseDocumentAllByFilterResponseDto {
   id: number;

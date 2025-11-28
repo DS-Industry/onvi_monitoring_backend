@@ -15,6 +15,21 @@ export class TechTaskRepository extends ITechTaskRepository {
     const techTaskEntity = PrismaTechTaskMapper.toPrisma(input);
     const techTask = await this.prisma.techTask.create({
       data: techTaskEntity,
+      include: {
+        tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
+        },
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -24,205 +39,295 @@ export class TechTaskRepository extends ITechTaskRepository {
       where: {
         id,
       },
+      include: {
+        tags: true,
+        pos: {
+          select: {
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
+        },
+        executor: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
+        },
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
-
-  public async findAllByPosId(posId: number): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllByPosIdAndDate(
-    posId: number,
-    dateStart: Date,
-    dateEnd: Date,
-    status: StatusTechTask,
+  public async findAllByFilter(
+    posId?: number,
+    userId?: number,
+    gteStartDate?: Date,
+    lteStartDate?: Date,
+    gteEndSpecifiedDate?: Date,
+    lteEndSpecifiedDate?: Date,
+    gteNextCreateDate?: Date,
+    lteNextCreateDate?: Date,
+    type?: TypeTechTask,
+    statuses?: StatusTechTask[],
+    codeTag?: string,
+    skip?: number,
+    take?: number,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
+    executorId?: number,
   ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId,
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-        status: status,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
+    const where: any = {};
 
-  public async findAllByTypeAndPosIdAndDate(
-    posId: number,
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId,
-        type,
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-        status: StatusTechTask.FINISHED,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllByTypeAndPosIdsAndDate(
-    posIds: number[],
-    type: TypeTechTask,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId: { in: posIds },
-        type,
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
-        },
-        status: StatusTechTask.FINISHED,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllCodeTagAndPosIdsAndDate(
-    posIds: number[],
-    codeTag: string,
-    dateStart: Date,
-    dateEnd: Date,
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId: { in: posIds },
-        tags: {
+    if (posId !== undefined) {
+      where.posId = posId;
+    } else {
+      where.pos = {
+        ...where.pos,
+        usersPermissions: {
           some: {
-            code: codeTag,
+            id: userId,
           },
         },
-        startDate: {
-          gte: dateStart,
-          lte: dateEnd,
+      };
+    }
+
+    if (organizationId !== undefined) {
+      where.pos = {
+        ...where.pos,
+        organizationId: organizationId,
+      };
+    }
+
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
+    }
+
+    if (
+      gteEndSpecifiedDate !== undefined ||
+      lteEndSpecifiedDate !== undefined
+    ) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
+    }
+
+    if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
+      where.nextCreateDate = {
+        gte: gteNextCreateDate,
+        lte: lteNextCreateDate,
+      };
+    }
+
+    if (type !== undefined) {
+      where.type = type;
+    }
+
+    if (statuses !== undefined) {
+      where.status = {
+        in: statuses,
+      };
+    }
+
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map((tag) => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } },
+            ],
+          })),
         },
-        status: StatusTechTask.FINISHED,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllByPosIdAndStatuses(
-    posId: number,
-    statuses: StatusTechTask[],
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId,
-        status: { in: statuses },
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllByPosIdsAndStatuses(
-    posIds: number[],
-    statuses: StatusTechTask[],
-  ): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        posId: { in: posIds },
-        status: { in: statuses },
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllByStatus(status: StatusTechTask): Promise<TechTask[]> {
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        status,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
-  }
-
-  public async findAllForHandler(): Promise<TechTask[]> {
-    const todayUTC = new Date();
-    todayUTC.setUTCHours(0, 0, 0, 0);
-    const tomorrowUTC = new Date(todayUTC);
-    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
-
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        nextCreateDate: {
-          gte: todayUTC,
-          lt: tomorrowUTC,
+      };
+    } else if (codeTag !== undefined) {
+      where.tags = {
+        some: {
+          code: codeTag,
         },
-        status: {
-          not: StatusTechTask.PAUSE,
+      };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
+    }
+
+    if (executorId !== undefined) {
+      where.executorId = executorId;
+    }
+
+    const techTasks = await this.prisma.techTask.findMany({
+      skip: skip ?? undefined,
+      take: take ?? undefined,
+      where: where,
+      orderBy: {
+        endSpecifiedDate: 'desc',
+      },
+      include: {
+        tags: true,
+        pos: true,
+        createdBy: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
+        },
+        executor: {
+          select: {
+            name: true,
+            surname: true,
+            id: true,
+          },
         },
       },
-      orderBy: {
-        startDate: 'asc',
-      },
     });
 
     return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 
-  public async findAllForOverdue(): Promise<TechTask[]> {
-    const todayUTC = new Date();
-    todayUTC.setUTCHours(0, 0, 0, 0);
-    const tomorrowUTC = new Date(todayUTC);
-    tomorrowUTC.setUTCDate(todayUTC.getUTCDate() + 1);
+  public async countAllByFilter(
+    posId?: number,
+    userId?: number,
+    gteStartDate?: Date,
+    lteStartDate?: Date,
+    gteEndSpecifiedDate?: Date,
+    lteEndSpecifiedDate?: Date,
+    gteNextCreateDate?: Date,
+    lteNextCreateDate?: Date,
+    type?: TypeTechTask,
+    statuses?: StatusTechTask[],
+    codeTag?: string,
+    organizationId?: number,
+    name?: string,
+    tags?: string[],
+    authorId?: number,
+    executorId?: number,
+  ): Promise<number> {
+    const where: any = {};
 
-    const techTasks = await this.prisma.techTask.findMany({
-      where: {
-        endSpecifiedDate: {
-          gte: todayUTC,
-          lt: tomorrowUTC,
+    if (posId !== undefined) {
+      where.posId = posId;
+    } else {
+      where.pos = {
+        ...where.pos,
+        usersPermissions: {
+          some: {
+            id: userId,
+          },
         },
-        status: StatusTechTask.ACTIVE,
-      },
-      orderBy: {
-        startDate: 'asc',
-      },
-    });
+      };
+    }
 
-    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
+    if (organizationId !== undefined) {
+      where.pos = {
+        ...where.pos,
+        organizationId: organizationId,
+      };
+    }
+
+    if (gteStartDate !== undefined || lteStartDate !== undefined) {
+      where.startDate = {};
+      if (gteStartDate !== undefined) {
+        where.startDate.gte = gteStartDate;
+      }
+      if (lteStartDate !== undefined) {
+        where.startDate.lte = lteStartDate;
+      }
+    }
+
+    if (
+      gteEndSpecifiedDate !== undefined ||
+      lteEndSpecifiedDate !== undefined
+    ) {
+      where.endSpecifiedDate = {};
+      if (gteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.gte = gteEndSpecifiedDate;
+      }
+      if (lteEndSpecifiedDate !== undefined) {
+        where.endSpecifiedDate.lte = lteEndSpecifiedDate;
+      }
+    }
+
+    if (gteNextCreateDate !== undefined && lteNextCreateDate !== undefined) {
+      where.nextCreateDate = {
+        gte: gteNextCreateDate,
+        lte: lteNextCreateDate,
+      };
+    }
+
+    if (type !== undefined) {
+      where.type = type;
+    }
+
+    if (statuses !== undefined) {
+      where.status = {
+        in: statuses,
+      };
+    }
+
+    if (name !== undefined) {
+      where.name = {
+        contains: name,
+        mode: 'insensitive',
+      };
+    }
+
+    // Handle tag filtering - prioritize new tags array over legacy codeTag
+    if (tags !== undefined && tags.length > 0) {
+      where.tags = {
+        some: {
+          OR: tags.map((tag) => ({
+            OR: [
+              { name: { contains: tag, mode: 'insensitive' } },
+              { code: { contains: tag, mode: 'insensitive' } },
+            ],
+          })),
+        },
+      };
+    } else if (codeTag !== undefined) {
+      where.tags = {
+        some: {
+          code: codeTag,
+        },
+      };
+    }
+
+    if (authorId !== undefined) {
+      where.createdById = authorId;
+    }
+
+    if (executorId !== undefined) {
+      where.executorId = executorId;
+    }
+
+    return this.prisma.techTask.count({
+      where: where,
+    });
   }
 
   public async update(input: TechTask): Promise<TechTask> {
@@ -232,6 +337,9 @@ export class TechTaskRepository extends ITechTaskRepository {
         id: input.id,
       },
       data: techTaskEntity,
+      include: {
+        tags: true,
+      },
     });
     return PrismaTechTaskMapper.toDomain(techTask);
   }
@@ -252,5 +360,70 @@ export class TechTaskRepository extends ITechTaskRepository {
         },
       },
     });
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.techTaskItemValueToTechTask.deleteMany({
+        where: {
+          techTaskId: id,
+        },
+      });
+
+      await prisma.techTask.delete({
+        where: {
+          id: id,
+        },
+      });
+    });
+  }
+
+  public async deleteMany(ids: number[]): Promise<void> {
+    await this.prisma.$transaction(async (prisma) => {
+      await prisma.techTaskItemValueToTechTask.deleteMany({
+        where: {
+          techTaskId: {
+            in: ids,
+          },
+        },
+      });
+
+      await prisma.techTask.deleteMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      });
+    });
+  }
+
+  public async findManyByIds(
+    ids: number[],
+    posId?: number,
+    organizationId?: number,
+  ): Promise<TechTask[]> {
+    const where: any = {
+      id: {
+        in: ids,
+      },
+    };
+
+    if (posId !== undefined) {
+      where.posId = posId;
+    } else if (organizationId !== undefined) {
+      where.pos = {
+        organizationId: organizationId,
+      };
+    }
+
+    const techTasks = await this.prisma.techTask.findMany({
+      where: where,
+      include: {
+        tags: true,
+      },
+    });
+
+    return techTasks.map((item) => PrismaTechTaskMapper.toDomain(item));
   }
 }

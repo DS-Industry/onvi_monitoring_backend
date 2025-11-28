@@ -1,14 +1,11 @@
 import {
-  IsDate,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   Matches,
 } from 'class-validator';
-import { StatusUser } from '@prisma/client';
-import { Transform } from "class-transformer";
+import { Transform } from 'class-transformer';
 
 export class AuthRegisterDto {
   @IsString()
@@ -37,17 +34,5 @@ export class AuthRegisterDto {
   password: string;
   @IsString()
   @IsOptional()
-  gender?: string;
-  @IsString()
-  @IsOptional()
-  avatar?: string;
-  @IsString()
-  @IsOptional()
-  country?: string;
-  @IsNumber()
-  @IsOptional()
-  countryCode?: number;
-  @IsNumber()
-  @IsOptional()
-  timezone?: number;
+  fcmToken?: string;
 }

@@ -1,4 +1,11 @@
-import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class PaymentCreateDto {
@@ -41,4 +48,12 @@ export class PaymentItemDto {
   @IsNumber()
   @IsNotEmpty({ message: 'fine is required' })
   fine: number;
+
+  @IsNumber()
+  @IsOptional()
+  virtualSum?: number;
+
+  @IsString()
+  @IsOptional()
+  comment?: string;
 }

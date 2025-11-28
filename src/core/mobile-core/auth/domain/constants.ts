@@ -1,0 +1,5 @@
+export const AUTH_CONSTANTS = {
+  OTP_EXPIRY_TIME_MINUTES: 5,
+  OTP_LENGTH: 4,
+  DEFAULT_CLIENT_NAME_PREFIX: 'Onvi',
+} as const;

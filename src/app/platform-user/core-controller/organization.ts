@@ -30,15 +30,12 @@ import { OrganizationCreateDto } from '@platform-user/core-controller/dto/receiv
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { DataFilterDto } from '@platform-user/core-controller/dto/receive/data-filter.dto';
 import { OrganizationFilterResponseDto } from '@platform-user/core-controller/dto/response/organization-filter-response.dto';
-import { PosResponseDto } from '@platform-user/core-controller/dto/response/pos-response.dto';
-import { FindMethodsUserUseCase } from '@platform-user/user/use-cases/user-find-methods';
 import { OrganizationUpdateDto } from '@platform-user/core-controller/dto/receive/organization-update.dto';
 import { UpdateOrganizationUseCase } from '@organization/organization/use-cases/organization-update';
 import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
 import {
   CheckAbilities,
   CreateOrgAbility,
-  ReadOrgAbility,
   ReadPosAbility,
   UpdateOrgAbility,
 } from '@common/decorators/abilities.decorator';
@@ -48,11 +45,17 @@ import { FindMethodsDocumentUseCase } from '@organization/documents/use-cases/do
 import { PlacementFilterDto } from '@platform-user/core-controller/dto/receive/placement-filter.dto';
 import { OrganizationStatisticGrafResponseDto } from '@platform-user/core-controller/dto/response/organization-statistic-graf-response.dto';
 import { GetStatisticsGrafOrganizationUseCase } from '@organization/organization/use-cases/organization-get-statistics-graf';
+import { UpdateUserUseCase } from '@platform-user/user/use-cases/user-update';
+import { StatusUser } from '@prisma/client';
+import { OrganizationPreCreateDto } from '@platform-user/core-controller/dto/receive/organization-pre-create.dto';
+import { PreCreateOrganizationUseCase } from '@organization/organization/use-cases/organization-pre-create';
+import { CacheSWR } from '@common/decorators/cache-swr.decorator';
 
 @Controller('organization')
 export class OrganizationController {
   constructor(
     private readonly organizationCreate: CreateOrganizationUseCase,
+    private readonly preCreateOrganizationUseCase: PreCreateOrganizationUseCase,
     private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
     private readonly organizationAddDocuments: AddDocumentUseCase,
     private readonly filterByUserOrganizationUseCase: FilterByUserOrganizationUseCase,
@@ -60,25 +63,25 @@ export class OrganizationController {
     private readonly getStatisticsOrganizationUseCase: GetStatisticsOrganizationUseCase,
     private readonly sendOrganizationConfirmMailUseCase: SendOrganizationConfirmMailUseCase,
     private readonly organizationValidateRules: OrganizationValidateRules,
-    private readonly findMethodsUserUseCase: FindMethodsUserUseCase,
     private readonly findMethodsDocumentUseCase: FindMethodsDocumentUseCase,
     private readonly updateOrganizationUseCase: UpdateOrganizationUseCase,
     private readonly getStatisticsGrafOrganizationUseCase: GetStatisticsGrafOrganizationUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
   //All organization for user
   @Get('filter')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadOrgAbility())
+  @UseGuards(JwtGuard)
   @HttpCode(200)
   async filterViewOrganizationByUser(
     @Request() req: any,
     @Query() data: PlacementFilterDto,
   ): Promise<OrganizationFilterResponseDto[]> {
     try {
-      const { ability } = req;
+      const { user } = req;
       return await this.filterByUserOrganizationUseCase.execute(
-        ability,
+        user,
         data.placementId,
+        data.noLoyaltyProgram,
       );
     } catch (e) {
       if (e instanceof OrganizationException) {
@@ -108,7 +111,43 @@ export class OrganizationController {
     try {
       const { user } = req;
       await this.organizationValidateRules.createValidate(data.fullName);
-      return await this.organizationCreate.execute(data, user);
+      const newOrganization = await this.organizationCreate.execute(data, user);
+      if (user.status == StatusUser.VERIFICATE) {
+        await this.updateUserUseCase.execute({
+          id: user.id,
+          status: StatusUser.ACTIVE,
+        });
+      }
+      return newOrganization;
+    } catch (e) {
+      if (e instanceof OrganizationException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+  //PreCreate organization
+  @Post('pre-create')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateOrgAbility())
+  @HttpCode(201)
+  async preCreate(
+    @Body() data: OrganizationPreCreateDto,
+    @Request() req: any,
+  ): Promise<any> {
+    try {
+      const { user } = req;
+      await this.organizationValidateRules.createValidate(data.fullName);
+      return await this.preCreateOrganizationUseCase.execute(data, user);
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({
@@ -128,19 +167,29 @@ export class OrganizationController {
   //Update organization
   @Patch('')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateOrgAbility())
+  @CheckAbilities(new CreateOrgAbility())
   @HttpCode(201)
   async update(
     @Request() req: any,
     @Body() data: OrganizationUpdateDto,
   ): Promise<any> {
     try {
-      const { ability } = req;
+      const { ability, user } = req;
       const organization = await this.organizationValidateRules.updateValidate(
         data.organizationId,
         ability,
       );
-      return await this.updateOrganizationUseCase.execute(data, organization);
+      const newOrganization = await this.updateOrganizationUseCase.execute(
+        data,
+        organization,
+      );
+      if (user.status == StatusUser.VERIFICATE) {
+        await this.updateUserUseCase.execute({
+          id: user.id,
+          status: StatusUser.ACTIVE,
+        });
+      }
+      return newOrganization;
     } catch (e) {
       if (e instanceof OrganizationException) {
         throw new CustomHttpException({
@@ -159,18 +208,14 @@ export class OrganizationController {
   }
   //Send email for add worker
   @Post('worker')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateOrgAbility())
   @HttpCode(201)
-  async addWorker(
-    @Body() data: AddWorkerOrganizationDto,
-    @Request() req: any,
-  ): Promise<any> {
+  async addWorker(@Body() data: AddWorkerOrganizationDto): Promise<any> {
     try {
-      const { user } = req;
       await this.organizationValidateRules.addWorkerValidate(
         data.email,
         data.organizationId,
-        user.id,
       );
       return await this.sendOrganizationConfirmMailUseCase.execute(
         data,
@@ -182,15 +227,15 @@ export class OrganizationController {
   }
   //Statistics for organization
   @Get('statistics')
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async statisticsOrg(
     @Request() req: any,
   ): Promise<OrganizationStatisticsResponseDto> {
     try {
-      const { user } = req;
-      const organizationId =
-        await this.findMethodsUserUseCase.getOrgPermissionById(user.id);
+      const { ability } = req;
       const today = new Date();
       const input = {
         dateStart: new Date(
@@ -211,7 +256,7 @@ export class OrganizationController {
           59,
           999,
         ),
-        organizationId: organizationId[0],
+        ability: ability,
       };
       return await this.getStatisticsOrganizationUseCase.execute(input);
     } catch (e) {
@@ -233,7 +278,9 @@ export class OrganizationController {
   //Statistics-graf for organization
   @Get('statistics-graf')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async statisticsGrafOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
@@ -264,7 +311,9 @@ export class OrganizationController {
   //Rating for organization
   @Get('rating')
   @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadPosAbility())
   @HttpCode(200)
+  @CacheSWR(120)
   async ratingPosByOrg(
     @Request() req: any,
     @Query() data: DataFilterDto,
@@ -292,7 +341,7 @@ export class OrganizationController {
       }
     }
   }
-  //Get org by id
+  //Get org by id DELETE?
   @Get(':id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -326,6 +375,7 @@ export class OrganizationController {
   //Get all worker for org
   @Get('worker/:id')
   @HttpCode(200)
+  @CacheSWR(60)
   async getUsersById(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       return this.findMethodsOrganizationUseCase.getAllWorker(id);
@@ -345,7 +395,7 @@ export class OrganizationController {
       }
     }
   }
-  //Get all worker for org
+  //Get document for org
   @Get('document/:id')
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new ReadPosAbility())
@@ -377,35 +427,10 @@ export class OrganizationController {
       }
     }
   }
-  //Get all pos for org
-  @Get('pos/:id')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new ReadPosAbility())
-  @HttpCode(200)
-  async getPosesById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<PosResponseDto[]> {
-    try {
-      return this.findMethodsOrganizationUseCase.getAllPos(id);
-    } catch (e) {
-      if (e instanceof OrganizationException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
   //Get all org for owner
   @Get('owner/:id')
   @HttpCode(200)
+  @CacheSWR(900)
   async getOrganizationByOwner(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<any> {
@@ -430,6 +455,7 @@ export class OrganizationController {
   @Get('contact/:id')
   @UseGuards(JwtGuard)
   @HttpCode(200)
+  @CacheSWR(900)
   async getContactData(@Param('id', ParseIntPipe) id: number): Promise<any> {
     try {
       const organization = await this.organizationValidateRules.getContact(id);

@@ -13,14 +13,14 @@ export class CardBonusOperTypeRepository extends ICardBonusOperTypeRepository {
   public async create(input: CardBonusOperType): Promise<CardBonusOperType> {
     const cardBonusOperTypeEntity =
       PrismaCardBonusOperTypeMapper.toPrisma(input);
-    const cardBonusOperType = await this.prisma.cardBonusOperType.create({
+    const cardBonusOperType = await this.prisma.lTYBonusOperType.create({
       data: cardBonusOperTypeEntity,
     });
     return PrismaCardBonusOperTypeMapper.toDomain(cardBonusOperType);
   }
 
   public async findOneById(id: number): Promise<CardBonusOperType> {
-    const cardBonusOperType = await this.prisma.cardBonusOperType.findFirst({
+    const cardBonusOperType = await this.prisma.lTYBonusOperType.findFirst({
       where: {
         id,
       },
@@ -29,7 +29,7 @@ export class CardBonusOperTypeRepository extends ICardBonusOperTypeRepository {
   }
 
   public async findAll(): Promise<CardBonusOperType[]> {
-    const cardBonusOperTypes = await this.prisma.cardBonusOperType.findMany();
+    const cardBonusOperTypes = await this.prisma.lTYBonusOperType.findMany();
     return cardBonusOperTypes.map((item) =>
       PrismaCardBonusOperTypeMapper.toDomain(item),
     );

@@ -37,13 +37,8 @@ export class CreateCardBonusOperUseCase {
         await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(
           card.loyaltyCardTierId,
         );
-      if (loyaltyProgram.lifetimeDays) {
-        await this.handleBonusCreation(
-          card.id,
-          input.sum,
-          loyaltyProgram.lifetimeDays,
-        );
-      }
+      const expiryDate = loyaltyProgram.getCalculatedExpiryDate();
+      await this.handleBonusCreation(card.id, input.sum, expiryDate);
     }
     const cardBonusOper = new CardBonusOper({
       cardMobileUserId: card.id,
@@ -62,16 +57,15 @@ export class CreateCardBonusOperUseCase {
   private async handleBonusCreation(
     cardId: number,
     sum: number,
-    lifetimeDays: number,
+    expiryDate: Date,
   ): Promise<void> {
-    const expiryDate = new Date();
-    expiryDate.setUTCDate(expiryDate.getDate() + lifetimeDays);
-    expiryDate.setUTCHours(0, 0, 0, 0);
+    const finalExpiryDate = new Date(expiryDate);
+    finalExpiryDate.setUTCHours(23, 59, 59, 999);
 
     await this.createCardBonusBankUseCase.execute({
       cardMobileUserId: cardId,
       sum: sum,
-      expiryAt: expiryDate,
+      expiryAt: finalExpiryDate,
     });
   }
 }

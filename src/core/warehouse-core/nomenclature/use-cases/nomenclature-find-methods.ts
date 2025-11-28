@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { INomenclatureRepository } from '@warehouse/nomenclature/interface/nomenclature';
 import { Nomenclature } from '@warehouse/nomenclature/domain/nomenclature';
+import { DestinyNomenclature, NomenclatureStatus } from '@prisma/client';
 
 @Injectable()
 export class FindMethodsNomenclatureUseCase {
@@ -32,31 +33,43 @@ export class FindMethodsNomenclatureUseCase {
     );
   }
 
-  async getAllByOrganizationId(
-    organizationId: number,
-  ): Promise<Nomenclature[]> {
-    return await this.nomenclatureRepository.findAllByOrganizationId(
-      organizationId,
+  async getAllByFilter(data: {
+    organizationId?: number;
+    categoryId?: number;
+    destiny?: DestinyNomenclature;
+    status?: NomenclatureStatus;
+    skip?: number;
+    take?: number;
+    search?: string;
+  }): Promise<Nomenclature[]> {
+    return await this.nomenclatureRepository.findAllByFilter(
+      data.organizationId,
+      data.categoryId,
+      data.destiny,
+      data.status,
+      data.skip,
+      data.take,
+      data.search,
     );
   }
 
-  async getAllByCategoryIdAndOrganizationId(
-    categoryId: number,
-    organizationId: number,
-  ): Promise<Nomenclature[]> {
-    return await this.nomenclatureRepository.findAllByCategoryIdAndOrganizationId(
-      categoryId,
-      organizationId,
+  async getCountAllByFilter(data: {
+    organizationId?: number;
+    categoryId?: number;
+    destiny?: DestinyNomenclature;
+    status?: NomenclatureStatus;
+    search?: string;
+  }): Promise<number> {
+    return await this.nomenclatureRepository.findAllByFilterCount(
+      data.organizationId,
+      data.categoryId,
+      data.destiny,
+      data.status,
+      data.search,
     );
   }
 
-  async getAllBySupplierIdAndOrganizationId(
-    supplierId: number,
-    organizationId: number,
-  ): Promise<Nomenclature[]> {
-    return await this.nomenclatureRepository.findAllBySupplierIdAndOrganizationId(
-      supplierId,
-      organizationId,
-    );
+  async getManyByIds(ids: number[]): Promise<Nomenclature[]> {
+    return await this.nomenclatureRepository.findManyByIds(ids);
   }
 }

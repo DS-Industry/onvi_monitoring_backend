@@ -1,4 +1,5 @@
 import { BaseEntity } from '@utils/entity';
+import { StatusHrWorker } from '@prisma/client';
 
 export interface WorkerProps {
   id?: number;
@@ -13,8 +14,10 @@ export interface WorkerProps {
   avatar?: string;
   monthlySalary: number;
   dailySalary: number;
-  percentageSalary: number;
+  bonusPayout: number;
+  status: StatusHrWorker;
   gender?: string;
+  birthday?: Date;
   citizenship?: string;
   passportSeries?: string;
   passportNumber?: string;
@@ -22,6 +25,7 @@ export interface WorkerProps {
   passportDateIssue?: Date;
   inn?: string;
   snils?: string;
+  registrationAddress?: string;
 }
 
 export class Worker extends BaseEntity<WorkerProps> {
@@ -121,12 +125,20 @@ export class Worker extends BaseEntity<WorkerProps> {
     this.props.dailySalary = dailySalary;
   }
 
-  get percentageSalary(): number {
-    return this.props.percentageSalary;
+  get bonusPayout(): number {
+    return this.props.bonusPayout;
   }
 
-  set percentageSalary(percentageSalary: number) {
-    this.props.percentageSalary = percentageSalary;
+  set bonusPayout(bonusPayout: number) {
+    this.props.bonusPayout = bonusPayout;
+  }
+
+  get status(): StatusHrWorker {
+    return this.props.status;
+  }
+
+  set status(status: StatusHrWorker) {
+    this.props.status = status;
   }
 
   get gender(): string {
@@ -135,6 +147,14 @@ export class Worker extends BaseEntity<WorkerProps> {
 
   set gender(gender: string) {
     this.props.gender = gender;
+  }
+
+  get birthday(): Date {
+    return this.props.birthday;
+  }
+
+  set birthday(birthday: Date) {
+    this.props.birthday = birthday;
   }
 
   get citizenship(): string {
@@ -166,7 +186,7 @@ export class Worker extends BaseEntity<WorkerProps> {
   }
 
   set passportExtradition(passportExtradition: string) {
-    this.props.passportNumber = passportExtradition;
+    this.props.passportExtradition = passportExtradition;
   }
 
   get passportDateIssue(): Date {
@@ -191,5 +211,13 @@ export class Worker extends BaseEntity<WorkerProps> {
 
   set snils(snils: string) {
     this.props.snils = snils;
+  }
+
+  get registrationAddress(): string {
+    return this.props.registrationAddress;
+  }
+
+  set registrationAddress(registrationAddress: string) {
+    this.props.registrationAddress = registrationAddress;
   }
 }

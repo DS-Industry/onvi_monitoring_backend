@@ -1,4 +1,4 @@
-export class OrganizationGetRatingResponseDto{
+export class OrganizationGetRatingResponseDto {
   posName: string;
   sum: number;
 }

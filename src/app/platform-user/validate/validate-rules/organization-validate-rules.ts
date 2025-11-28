@@ -10,23 +10,22 @@ import {
   ORGANIZATION_CREATE_EXCEPTION_CODE,
   ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
   ORGANIZATION_UPDATE_EXCEPTION_CODE,
-  ORGANIZATION_VERIFICATE_EXCEPTION_CODE, USER_GET_CONTACT_EXCEPTION_CODE
-} from "@constant/error.constants";
-import { OrganizationException, UserException } from "@exception/option.exceptions";
+  ORGANIZATION_VERIFICATE_EXCEPTION_CODE,
+} from '@constant/error.constants';
+import {
+  OrganizationException,
+  UserException,
+} from '@exception/option.exceptions';
 
 @Injectable()
 export class OrganizationValidateRules {
   constructor(private readonly validateLib: ValidateLib) {}
 
-  public async addWorkerValidate(
-    email: string,
-    organizationId: number,
-    userId: number,
-  ) {
+  public async addWorkerValidate(email: string, organizationId: number) {
     const response = [];
     response.push(await this.validateLib.userByEmailNotExists(email));
     response.push(
-      await this.validateLib.organizationByOwnerExists(organizationId, userId),
+      await this.validateLib.organizationByIdExists(organizationId),
     );
     this.validateLib.handlerArrayResponse(
       response,
@@ -103,5 +102,43 @@ export class OrganizationValidateRules {
         response.errorMessage,
       );
     }
+  }
+
+  public async validateUserBelongsToOrganization(
+    userId: number,
+    organizationId: number,
+  ) {
+    const response = await this.validateLib.userBelongsToOrganization(
+      userId,
+      organizationId,
+    );
+
+    if (response.code !== 200) {
+      throw new OrganizationException(
+        ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
+  }
+
+  public async validateUserBelongsToOrganizations(
+    userId: number,
+    organizationIds: number[],
+  ) {
+    const response = await this.validateLib.userBelongsToOrganizations(
+      userId,
+      organizationIds,
+    );
+
+    if (response.code !== 200) {
+      throw new OrganizationException(
+        ORGANIZATION_GET_ONE_BY_ID_EXCEPTION_CODE,
+        response.errorMessage,
+      );
+    }
+
+    return response.object;
   }
 }

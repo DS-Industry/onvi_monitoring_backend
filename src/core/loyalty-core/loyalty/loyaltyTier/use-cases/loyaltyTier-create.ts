@@ -11,12 +11,14 @@ export class CreateLoyaltyTierUseCase {
     loyaltyProgramId: number,
     limitBenefit: number,
     description?: string,
+    upCardTierId?: number,
   ): Promise<LoyaltyTier> {
     const loyaltyTier = new LoyaltyTier({
       name: name,
       description: description,
       loyaltyProgramId: loyaltyProgramId,
       limitBenefit: limitBenefit,
+      upCardTierId: upCardTierId,
     });
     return await this.loyaltyTierRepository.create(loyaltyTier);
   }

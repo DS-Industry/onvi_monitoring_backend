@@ -4,8 +4,8 @@ export abstract class IMonthlyPlanPosRepository {
   abstract create(input: MonthlyPlanPos): Promise<MonthlyPlanPos>;
   abstract findOneById(id: number): Promise<MonthlyPlanPos>;
   abstract findAllByPosId(posId: number): Promise<MonthlyPlanPos[]>;
-  abstract findAllByPosIdAndDate(
-    posId: number,
+  abstract findAllByPosIdsAndDate(
+    posIds: number[],
     dateStart: Date,
     dateEnd: Date,
   ): Promise<MonthlyPlanPos[]>;
