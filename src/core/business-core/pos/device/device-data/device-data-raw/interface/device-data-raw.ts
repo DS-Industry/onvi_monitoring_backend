@@ -7,5 +7,9 @@ export abstract class IDeviceDataRawRepository {
   abstract findAllByStatus(
     status: StatusDeviceDataRaw,
   ): Promise<DeviceDataRaw[]>;
+  abstract findAndLockByStatus(
+    status: StatusDeviceDataRaw,
+    limit: number,
+  ): Promise<DeviceDataRaw[]>;
   abstract update(input: DeviceDataRaw): Promise<DeviceDataRaw>;
 }

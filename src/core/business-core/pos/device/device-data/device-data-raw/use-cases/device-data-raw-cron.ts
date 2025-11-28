@@ -12,15 +12,15 @@ export class CronDeviceDataRawUseCase {
   ) {}
 
   async execute(): Promise<void> {
-    const deviceDataRaws = await this.deviceDataRawRepository.findAllByStatus(
-      StatusDeviceDataRaw.NEW,
-    );
+    const BATCH_SIZE = 10; 
+    const deviceDataRaws =
+      await this.deviceDataRawRepository.findAndLockByStatus(
+        StatusDeviceDataRaw.NEW,
+        BATCH_SIZE,
+      );
+
     for (const deviceDataRaw of deviceDataRaws) {
-      deviceDataRaw.status = StatusDeviceDataRaw.PENDING;
-      deviceDataRaw.updatedAt = new Date(Date.now());
-      const newDeviceDataRaw =
-        await this.deviceDataRawRepository.update(deviceDataRaw);
-      await this.dataQueue.add('deviceDataRaw', newDeviceDataRaw, {
+      await this.dataQueue.add('deviceDataRaw', deviceDataRaw, {
         removeOnComplete: true,
         removeOnFail: true,
       });
