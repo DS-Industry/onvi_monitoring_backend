@@ -26,13 +26,17 @@ export class TechTaskValidateRules {
   ) {}
 
   public async createValidate(
-    posId: number,
+    posIds: number[],
     techTaskItem: number[],
     ability: any,
   ) {
     const response: ValidateResponse[] = [];
-    const checkPos = await this.validateLib.posByIdExists(posId);
-    response.push(checkPos);
+    const checkPosResults = await Promise.all(
+      posIds.map(async (posId) => {
+        return await this.validateLib.posByIdExists(posId);
+      }),
+    );
+    response.push(...checkPosResults);
     await Promise.all(
       techTaskItem.map(async (item) => {
         response.push(await this.validateLib.itemTemplateByIdExists(item));
@@ -44,10 +48,12 @@ export class TechTaskValidateRules {
       ExceptionType.TECH_TASK,
       TECH_TASK_CREATE_EXCEPTION_CODE,
     );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.read,
-      checkPos.object,
-    );
+    for (const checkPos of checkPosResults) {
+      ForbiddenError.from(ability).throwUnlessCan(
+        PermissionAction.read,
+        checkPos.object,
+      );
+    }
   }
 
   public async updateValidate(

@@ -15,9 +15,10 @@ export class TechTaskCreateDto {
   @IsString()
   @IsNotEmpty({ message: 'name is required' })
   name: string;
-  @IsNumber()
-  @IsNotEmpty({ message: 'posId is required' })
-  posId: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsNotEmpty({ message: 'posIds is required' })
+  posIds: number[];
   @IsEnum(TypeTechTask)
   @IsNotEmpty({ message: 'Type pos is required' })
   type: TypeTechTask;
