@@ -95,15 +95,30 @@ export class TechTaskController {
   async create(
     @Body() data: TechTaskCreateDto,
     @Request() req: any,
-  ): Promise<TechTaskResponseDto> {
+  ): Promise<TechTaskResponseDto[]> {
     try {
       const { user, ability } = req;
       await this.techTaskValidateRules.createValidate(
-        data.posId,
+        data.posIds,
         data.techTaskItem,
         ability,
       );
-      return await this.createTechTaskUseCase.execute(data, user.id);
+      
+      return await this.createTechTaskUseCase.executeMany(
+        {
+          name: data.name,
+          posIds: data.posIds,
+          type: data.type,
+          periodType: data.periodType,
+          customPeriodDays: data.customPeriodDays,
+          markdownDescription: data.markdownDescription,
+          endSpecifiedDate: data.endSpecifiedDate,
+          startDate: data.startDate,
+          techTaskItem: data.techTaskItem,
+          tagIds: data.tagIds,
+        },
+        user.id,
+      );
     } catch (e) {
       if (e instanceof TechTaskException) {
         throw new CustomHttpException({

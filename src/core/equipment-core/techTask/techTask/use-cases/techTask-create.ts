@@ -8,6 +8,7 @@ import { TechTaskItemValueToTechTask } from '@tech-task/itemTemplateToTechTask/d
 import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
 import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
 import { PeriodCalculator } from '../utils/period-calculator';
+import { PeriodType } from '../domain/periodType';
 
 @Injectable()
 export class CreateTechTaskUseCase {
@@ -101,5 +102,48 @@ export class CreateTechTaskUseCase {
       updatedById: techTask.updatedById,
       tags: techTags.map((tag) => tag.getProps()),
     };
+  }
+
+  async executeMany(
+    input: {
+      name: string;
+      posIds: number[];
+      type: TypeTechTask;
+      periodType?: PeriodType;
+      customPeriodDays?: number;
+      markdownDescription?: string;
+      endSpecifiedDate?: Date;
+      startDate: Date;
+      techTaskItem: number[];
+      tagIds: number[];
+    },
+    userId: number,
+  ): Promise<TechTaskResponseDto[]> {
+    const BATCH_SIZE = 10;
+    const createdTasks: TechTaskResponseDto[] = [];
+
+    for (let i = 0; i < input.posIds.length; i += BATCH_SIZE) {
+      const batch = input.posIds.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map((posId) => {
+          const taskData: TechTaskCreateDto = {
+            name: input.name,
+            posId: posId,
+            type: input.type,
+            periodType: input.periodType,
+            customPeriodDays: input.customPeriodDays,
+            markdownDescription: input.markdownDescription,
+            endSpecifiedDate: input.endSpecifiedDate,
+            startDate: input.startDate,
+            techTaskItem: input.techTaskItem,
+            tagIds: input.tagIds,
+          };
+          return this.execute(taskData, userId);
+        }),
+      );
+      createdTasks.push(...batchResults);
+    }
+
+    return createdTasks;
   }
 }
