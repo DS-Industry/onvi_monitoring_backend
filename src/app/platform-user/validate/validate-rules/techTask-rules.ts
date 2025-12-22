@@ -48,7 +48,6 @@ export class TechTaskValidateRules {
       ExceptionType.TECH_TASK,
       TECH_TASK_CREATE_EXCEPTION_CODE,
     );
-    // Check permissions for all POS
     for (const checkPos of checkPosResults) {
       ForbiddenError.from(ability).throwUnlessCan(
         PermissionAction.read,
