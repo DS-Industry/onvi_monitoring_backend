@@ -141,6 +141,7 @@ export class HandlerTechTaskUseCase {
     try {
       const allRecurringTasks =
         await this.findMethodsTechTaskUseCase.getAllByFilter({
+          gteNextCreateDate: todayUTC,
           lteNextCreateDate: tomorrowUTC,
           type: TypeTechTask.REGULAR,
           statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE],
