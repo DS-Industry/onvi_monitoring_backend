@@ -99,10 +99,6 @@ export class PosValidateRules {
       ExceptionType.POS,
       POS_PATCH_PROGRAM_RATE_EXCEPTION_CODE,
     );
-    ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.update,
-      pos.object,
-    );
   }
 
   public async updateConnectedWorkerPos(workerIds: number[], posId: number) {
