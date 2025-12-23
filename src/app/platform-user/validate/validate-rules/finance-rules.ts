@@ -72,27 +72,24 @@ export class FinanceValidateRules {
     cashCollectionDeviceTypeIds: number[],
     ability: any,
   ): Promise<CashCollection> {
-    const response = [];
     const cashCollectionCheck =
       await this.validateLib.cashCollectionByIdExists(cashCollectionId);
-    response.push(cashCollectionCheck);
-    response.push(
-      await this.validateLib.cashCollectionRecalculateStatus(
+    
+    const [statusCheck, deviceCheck, typeCheck] = await Promise.all([
+      this.validateLib.cashCollectionRecalculateStatus(
         cashCollectionCheck.object,
       ),
-    );
-    response.push(
-      await this.validateLib.cashCollectionDeviceComparisonByIdAndList(
+      this.validateLib.cashCollectionDeviceComparisonByIdAndList(
         cashCollectionId,
         cashCollectionDeviceIds,
       ),
-    );
-    response.push(
-      await this.validateLib.cashCollectionDeviceTypeComparisonByIdAndList(
+      this.validateLib.cashCollectionDeviceTypeComparisonByIdAndList(
         cashCollectionId,
         cashCollectionDeviceTypeIds,
       ),
-    );
+    ]);
+
+    const response = [cashCollectionCheck, statusCheck, deviceCheck, typeCheck];
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.FINANCE,
