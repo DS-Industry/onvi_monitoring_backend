@@ -364,6 +364,7 @@ model CarWashDeviceOperationsEvent {
   @@index([operDate(sort: Desc), operSum])
   @@index([currencyId, operDate(sort: Desc)])
   @@index([confirm])
+  @@index([carWashDeviceId, operDate, currencyId])
 }
 
 model CarWashDeviceOperationsCardEvent {
@@ -1187,6 +1188,9 @@ model CashCollection {
   cashCollectionDevices     CashCollectionDevice[]
   cashCollectionDeviceTypes CashCollectionDeviceType[]
   managerPaper              ManagerPaper[]
+
+  @@index([status, sendAt])
+  @@index([posId, status])
 }
 
 model CashCollectionDeviceType {
@@ -1200,6 +1204,8 @@ model CashCollectionDeviceType {
   virtualSum          Int
   carWashDeviceType   CarWashDeviceType? @relation(fields: [carWashDeviceTypeId], references: [id])
   cashCollection      CashCollection?    @relation(fields: [cashCollectionId], references: [id])
+
+  @@index([cashCollectionId])
 }
 
 model CashCollectionDevice {
@@ -1216,6 +1222,9 @@ model CashCollectionDevice {
   sumCard          Int
   carWashDevice    CarWashDevice?  @relation(fields: [carWashDeviceId], references: [id])
   cashCollection   CashCollection? @relation(fields: [cashCollectionId], references: [id])
+
+  @@index([cashCollectionId])
+  @@index([carWashDeviceId])
 }
 
 model MNGShiftReport {

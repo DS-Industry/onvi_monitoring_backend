@@ -129,14 +129,14 @@ export class FinanceController {
   ): Promise<CashCollectionResponseDto> {
     try {
       const { user, ability } = req;
-      const oldCashCollection =
-        await this.financeValidateRules.createCashCollectionValidate(
+      const [oldCashCollection, carWashDevice] = await Promise.all([
+        this.financeValidateRules.createCashCollectionValidate(
           data.posId,
           data.cashCollectionDate,
           ability,
-        );
-      const carWashDevice =
-        await this.findMethodsCarWashDeviceUseCase.getAllByPos(data.posId);
+        ),
+        this.findMethodsCarWashDeviceUseCase.getAllByPos(data.posId),
+      ]);
       return await this.createCashCollectionUseCase.execute(
         data,
         carWashDevice,

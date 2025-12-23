@@ -83,6 +83,7 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         "CashCollectionDevice" ccd ON cc.id = ccd."cashCollectionId"
       WHERE
         cc."status" = 'SENT'
+        AND ccd."carWashDeviceId" = ANY(${deviceIds}::int[])
         AND cc."sendAt" = (SELECT MAX("sendAt") FROM "CashCollection" WHERE "status" = 'SENT' AND "sendAt" IS NOT NULL)
     ),
     last_event AS (
@@ -93,6 +94,7 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         "CarWashDeviceEvent"
       WHERE
         "carWashDeviceEventTypeId" = ${EVENT_TYPE_CASH_COLLECTION_ID}
+        AND "carWashDeviceId" = ANY(${deviceIds}::int[])
       GROUP BY
         "carWashDeviceId"
     ),
@@ -109,6 +111,8 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         last_cash_collection lcc ON d.id = lcc."carWashDeviceId"
       LEFT JOIN
         last_event le ON d.id = le."carWashDeviceId"
+      WHERE
+        d.id = ANY(${deviceIds}::int[])
     ),
     device_programs AS (
       SELECT
@@ -120,6 +124,8 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
         "CarWashDeviceProgramsEvent" dpe
       JOIN
         "CarWashDeviceProgramsType" dpt ON dpe."carWashDeviceProgramsTypeId" = dpt.id
+      WHERE
+        dpe."carWashDeviceId" = ANY(${deviceIds}::int[])
     ),
     check_auto_programs AS (
       SELECT
