@@ -26,7 +26,10 @@ export class ShapeTechTaskUseCase {
       ),
       this.findMethodsTechTagUseCase.getAllByTechTaskId(techTask.id),
     ]);
-    for (const itemValue of itemsValueToTechTask) {
+    const sortedItemsValueToTechTask = itemsValueToTechTask.sort(
+      (a, b) => a.techTaskItemTemplateId - b.techTaskItemTemplateId,
+    );
+    for (const itemValue of sortedItemsValueToTechTask) {
       const itemTechTask = await this.findMethodsItemTemplateUseCase.getById(
         itemValue.techTaskItemTemplateId,
       );
