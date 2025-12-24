@@ -13,8 +13,8 @@ export class PrismaProgramTechRateMapper {
       id: entity.id,
       carWashPosId: entity.carWashPosId,
       carWashDeviceProgramsTypeId: entity.carWashDeviceProgramsTypeId,
-      literRate: entity.literRate,
-      concentration: entity.concentration,
+      literRate: entity.literRate/100,
+      concentration: entity.concentration/100,
     });
   }
 
@@ -25,8 +25,8 @@ export class PrismaProgramTechRateMapper {
       id: programTechRate?.id,
       carWashPosId: programTechRate.carWashPosId,
       carWashDeviceProgramsTypeId: programTechRate.carWashDeviceProgramsTypeId,
-      literRate: programTechRate?.literRate,
-      concentration: programTechRate?.concentration,
+      literRate: programTechRate?.literRate*100,
+      concentration: programTechRate?.concentration*100,
     };
   }
 }

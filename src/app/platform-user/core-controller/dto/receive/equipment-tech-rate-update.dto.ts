@@ -1,4 +1,5 @@
 import { IsArray, IsNotEmpty, IsNumber } from 'class-validator';
+import { Transform } from "class-transformer";
 
 export class EquipmentTechRateUpdateDto {
   @IsArray()
@@ -9,10 +10,10 @@ export class itemValueDto {
   @IsNumber()
   @IsNotEmpty({ message: 'programTechRateId is required' })
   programTechRateId: number;
-  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
   @IsNotEmpty({ message: 'literRate is required' })
   literRate: number;
-  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
   @IsNotEmpty({ message: 'concentration is required' })
   concentration: number;
 }
