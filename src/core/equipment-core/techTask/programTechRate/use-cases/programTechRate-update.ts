@@ -14,8 +14,8 @@ export class UpdateProgramTechRateUseCase {
     for (const techRate of value) {
       const updatedRate = await this.programTechRateRepository.updateValue(
         techRate.programTechRateId,
-        techRate.literRate,
-        techRate.concentration,
+        techRate.literRate*100,
+        techRate.concentration*100,
       );
       response.push(updatedRate);
     }

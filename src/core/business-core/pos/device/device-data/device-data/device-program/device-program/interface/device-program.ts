@@ -14,7 +14,7 @@ export abstract class IDeviceProgramRepository {
     carWashDeviceId?: number,
     dateStart?: Date,
     dateEnd?: Date,
-    programCode?: string,
+    programCodes?: string[],
     isPaid?: number,
     skip?: number,
     take?: number,

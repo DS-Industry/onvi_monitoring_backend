@@ -60,6 +60,22 @@ export class TechTaskItemValueToTechTaskRepository extends ITechTaskItemValueToT
     );
   }
 
+  public async findAllByTaskIds(
+    techTaskIds: number[],
+  ): Promise<TechTaskItemValueToTechTask[]> {
+    const itemValueToTechTasks =
+      await this.prisma.techTaskItemValueToTechTask.findMany({
+        where: {
+          techTaskId: {
+            in: techTaskIds
+          },
+        },
+      });
+    return itemValueToTechTasks.map((item) =>
+      PrismaTechTaskItemValueToTechTaskMapper.toDomain(item),
+    );
+  }
+
   public async updateValue(
     id: number,
     value: string,

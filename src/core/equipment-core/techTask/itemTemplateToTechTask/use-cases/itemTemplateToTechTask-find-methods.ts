@@ -15,4 +15,12 @@ export class FindMethodsItemTemplateToTechTaskUseCase {
       techTaskId,
     );
   }
+
+  async findAllByTaskIds(
+    techTaskIds: number[],
+  ): Promise<TechTaskItemValueToTechTask[]> {
+    return await this.techTaskItemValueToTechTaskRepository.findAllByTaskIds(
+      techTaskIds,
+    );
+  }
 }

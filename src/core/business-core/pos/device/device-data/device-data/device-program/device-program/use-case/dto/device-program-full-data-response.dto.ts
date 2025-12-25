@@ -14,5 +14,6 @@ export class DeviceProgramFullDataResponseDto {
   minute?: Prisma.Decimal;
   errNumId?: number;
   programName?: string;
+  programCode?: string;
   posId?: number;
 }

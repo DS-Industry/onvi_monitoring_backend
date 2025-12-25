@@ -73,6 +73,11 @@ export class PrismaCarWashDeviceProgramMapper {
         ? entity.carWashDeviceProgramsType.name
         : undefined;
 
+    const programCode =
+      'carWashDeviceProgramsType' in entity && entity.carWashDeviceProgramsType
+        ? entity.carWashDeviceProgramsType.code
+        : undefined;
+
     let posId: number | undefined;
     if ('carWashDevice' in entity && entity.carWashDevice?.carWasPos?.pos) {
       posId = entity.carWashDevice.carWasPos.pos.id;
@@ -92,6 +97,7 @@ export class PrismaCarWashDeviceProgramMapper {
       minute: entity.minute,
       errNumId: entity.errNumId,
       programName: programName,
+      programCode: programCode,
       posId: posId,
     };
   }

@@ -31,6 +31,20 @@ export class TechTaskItemTemplateRepository extends ITechTaskItemTemplateReposit
     return PrismaTechTaskItemTemplateMapper.toDomain(techTaskItemTemplate);
   }
 
+  public async findAllByIds(ids: number[]): Promise<TechTaskItemTemplate[]> {
+    const techTaskItemTemplates =
+      await this.prisma.techTaskItemTemplate.findMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+      });
+    return techTaskItemTemplates.map(
+      PrismaTechTaskItemTemplateMapper.toDomain,
+    );
+  }
+
   public async findAll(): Promise<TechTaskItemTemplate[]> {
     const techTaskItemTemplates =
       await this.prisma.techTaskItemTemplate.findMany();

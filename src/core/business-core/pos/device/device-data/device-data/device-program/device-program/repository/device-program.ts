@@ -45,7 +45,7 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
     carWashDeviceId?: number,
     dateStart?: Date,
     dateEnd?: Date,
-    programCode?: string,
+    programCodes?: string[],
     isPaid?: number,
     skip?: number,
     take?: number,
@@ -97,9 +97,11 @@ export class DeviceProgramRepository extends IDeviceProgramRepository {
       where.isPaid = isPaid;
     }
 
-    if (programCode !== undefined) {
+    if (programCodes !== undefined && posIds.length > 0) {
       where.carWashDeviceProgramsType = {
-        code: programCode,
+        code: {
+          in: programCodes
+        },
       };
     }
 
