@@ -84,7 +84,14 @@ export class CashCollectionDeviceRepository extends ICashCollectionDeviceReposit
       WHERE
         cc."status" = 'SENT'
         AND ccd."carWashDeviceId" = ANY(${deviceIds}::int[])
-        AND cc."sendAt" = (SELECT MAX("sendAt") FROM "CashCollection" WHERE "status" = 'SENT' AND "sendAt" IS NOT NULL)
+        AND cc."sendAt" = (
+          SELECT MAX(cc2."sendAt")
+          FROM "CashCollection" cc2
+          JOIN "CashCollectionDevice" ccd2 ON cc2.id = ccd2."cashCollectionId"
+          WHERE cc2."status" = 'SENT'
+            AND cc2."sendAt" IS NOT NULL
+            AND ccd2."carWashDeviceId" = ccd."carWashDeviceId"
+        )
     ),
     last_event AS (
       SELECT
