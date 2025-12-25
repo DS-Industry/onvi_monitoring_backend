@@ -9,8 +9,8 @@ export class ImportCardsDto {
 
   @Transform(({ value }) => (value !== undefined ? Number(value) : undefined))
   @IsNumber({}, { message: 'corporateClientId must be a number' })
-  @IsNotEmpty({ message: 'corporateClientId is required' })
-  corporateClientId: number;
+  @IsOptional()
+  corporateClientId?: number;
 
   @Transform(({ value }) => (value !== undefined ? Number(value) : undefined))
   @IsNumber({}, { message: 'tierId must be a number' })

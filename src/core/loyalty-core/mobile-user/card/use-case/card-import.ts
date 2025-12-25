@@ -10,9 +10,9 @@ export class CardImportUseCase {
 
   async execute(
     organizationId: number,
-    corporateId: number,
     tierId: number,
     cardsData: CardImportItemDto[],
+    corporateId?: number,
   ): Promise<ImportCardsResponseDto> {
     const errors: string[] = [];
     let successCount = 0;
