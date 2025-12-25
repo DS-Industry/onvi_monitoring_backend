@@ -1522,9 +1522,9 @@ export class LoyaltyController {
 
       return await this.cardImportUseCase.execute(
         data.organizationId,
-        data.corporateClientId,
         data.tierId,
         cardsData,
+        data.corporateClientId,
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
