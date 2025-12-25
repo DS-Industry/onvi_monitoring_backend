@@ -17,7 +17,7 @@ export class FindMethodsDeviceProgramUseCase {
     carWashDeviceId?: number;
     dateStart?: Date;
     dateEnd?: Date;
-    programCode?: string;
+    programCodes?: string[];
     isPaid?: number;
     skip?: number;
     take?: number;
@@ -29,7 +29,7 @@ export class FindMethodsDeviceProgramUseCase {
       data.carWashDeviceId,
       data.dateStart,
       data.dateEnd,
-      data.programCode,
+      data.programCodes,
       data.isPaid,
       data.skip,
       data.take,

@@ -12,6 +12,9 @@ export abstract class ITechTaskItemValueToTechTaskRepository {
   abstract findAllByTaskId(
     techTaskId: number,
   ): Promise<TechTaskItemValueToTechTask[]>;
+  abstract findAllByTaskIds(
+    techTaskIds: number[],
+  ): Promise<TechTaskItemValueToTechTask[]>;
   abstract updateValue(
     id: number,
     value: string,

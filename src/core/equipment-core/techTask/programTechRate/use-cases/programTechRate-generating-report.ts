@@ -36,13 +36,20 @@ export class GeneratingReportProgramTechRate {
       return response;
     }
 
+    techTasks.sort((a, b) => {
+      if (!a.sendWorkDate) return 1;
+      if (!b.sendWorkDate) return -1;
+      return new Date(a.sendWorkDate).getTime() - new Date(b.sendWorkDate).getTime();
+    });
     const rateCodes = ['SOAP', 'PRESOAK', 'TIRE', 'BRUSH', 'WAX', 'TPOWER'];
 
+    const shapedTasksMap = await this.shapeTechTaskUseCase.executeBatch(techTasks);
+
     for (let i = 1; i < techTasks.length; i++) {
-      const [lastTechReport, currentTechReport] = await Promise.all([
-        this.shapeTechTaskUseCase.execute(techTasks[i - 1]),
-        this.shapeTechTaskUseCase.execute(techTasks[i]),
-      ]);
+      const lastTechReport = shapedTasksMap.get(techTasks[i - 1].id);
+      const currentTechReport = shapedTasksMap.get(techTasks[i].id);
+
+      if (!lastTechReport || !currentTechReport) continue;
 
       const techRateInfos: TechRateInfoDto[] = [];
 
@@ -62,9 +69,9 @@ export class GeneratingReportProgramTechRate {
         response.push({
           techTaskId: techTasks[i].id,
           posId: techTasks[i].posId,
-          dateStart: techTasks[i - 1].startWorkDate,
-          dateEnd: techTasks[i].startWorkDate,
-          techRateInfos: techRateInfos,
+          dateStart: techTasks[i - 1].sendWorkDate,
+          dateEnd: techTasks[i].sendWorkDate,
+          techRateInfos,
         });
       }
     }

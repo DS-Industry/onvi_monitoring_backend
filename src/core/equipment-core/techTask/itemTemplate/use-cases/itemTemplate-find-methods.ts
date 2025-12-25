@@ -12,6 +12,10 @@ export class FindMethodsItemTemplateUseCase {
     return await this.itemTemplateRepository.findOneById(input);
   }
 
+  async getByIds(ids: number[]): Promise<TechTaskItemTemplate[]> {
+    return await this.itemTemplateRepository.findAllByIds(ids);
+  }
+
   async getAll(): Promise<TechTaskItemTemplate[]> {
     return await this.itemTemplateRepository.findAll();
   }
