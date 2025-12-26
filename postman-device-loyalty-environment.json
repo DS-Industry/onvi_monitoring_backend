@@ -1,0 +1,38 @@
+{
+	"id": "device-loyalty-env-001",
+	"name": "Device Loyalty API - Local",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "device_id",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "device_token",
+			"value": "your-device-token-here",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "card_dev_number",
+			"value": "1234567890",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "transaction_sum",
+			"value": "100",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+}
+

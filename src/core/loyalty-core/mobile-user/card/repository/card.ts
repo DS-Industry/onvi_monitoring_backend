@@ -92,6 +92,7 @@ export class CardRepository extends ICardRepository {
             },
           },
         },
+        corporate: true,
       },
     });
 
@@ -134,6 +135,7 @@ export class CardRepository extends ICardRepository {
             },
           },
         },
+        corporate: true,
       },
     });
     return PrismaCardMobileUserMapper.toLoyaltyCardInfoFullDto(card);

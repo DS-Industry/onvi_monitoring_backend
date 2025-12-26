@@ -15,4 +15,7 @@ export class LoyaltyCardInfoFullResponseDto {
       id: number;
     }[];
   };
+  corporate?: {
+    id: number;
+  };
 }

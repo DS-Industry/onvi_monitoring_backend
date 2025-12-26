@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "card-oper-collection-001",
+		"name": "Onvi Monitoring Backend - Device Loyalty API",
+		"description": "Collection for testing device loyalty endpoints, specifically the card-oper endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Card Operation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response is a string', function () {",
+							"    pm.expect(pm.response.text()).to.be.a('string');",
+							"});",
+							"",
+							"pm.test('Response contains errcode', function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('errcode');",
+							"});",
+							"",
+							"pm.test('Response contains balance', function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('balance');",
+							"});",
+							"",
+							"pm.test('Response contains oper_id', function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('oper_id');",
+							"});",
+							"",
+							"pm.test('Parse and validate response structure', function () {",
+							"    const responseText = pm.response.text();",
+							"    // Remove newlines and parse JSON",
+							"    const jsonText = responseText.replace(/\\n/g, '');",
+							"    try {",
+							"        const json = JSON.parse(jsonText);",
+							"        pm.expect(json).to.have.property('errcode');",
+							"        pm.expect(json).to.have.property('errmes');",
+							"        pm.expect(json).to.have.property('balance');",
+							"        pm.expect(json).to.have.property('oper_id');",
+							"        ",
+							"        // Validate errcode is a number",
+							"        pm.expect(json.errcode).to.be.a('number');",
+							"        ",
+							"        // Validate balance is a number",
+							"        pm.expect(json.balance).to.be.a('number');",
+							"        ",
+							"        // Validate oper_id is a number",
+							"        pm.expect(json.oper_id).to.be.a('number');",
+							"        ",
+							"        // If successful, errcode should be 200",
+							"        if (json.errcode === 200) {",
+							"            pm.expect(json.oper_id).to.be.above(0);",
+							"        }",
+							"        ",
+							"        // Store response data for use in other requests",
+							"        pm.environment.set('last_oper_id', json.oper_id);",
+							"        pm.environment.set('last_balance', json.balance);",
+							"        pm.environment.set('last_errcode', json.errcode);",
+							"    } catch (e) {",
+							"        pm.expect.fail('Failed to parse response as JSON: ' + e.message);",
+							"    }",
+							"});",
+							"",
+							"pm.test('Validate error codes', function () {",
+							"    const responseText = pm.response.text();",
+							"    const jsonText = responseText.replace(/\\n/g, '');",
+							"    try {",
+							"        const json = JSON.parse(jsonText);",
+							"        ",
+							"        // Valid error codes: 1, 2, 3, 4, 5, 200",
+							"        const validErrorCodes = [1, 2, 3, 4, 5, 200];",
+							"        pm.expect(validErrorCodes).to.include(json.errcode);",
+							"        ",
+							"        // Error code meanings:",
+							"        // 1 = Card not found",
+							"        // 2 = Unexpected error",
+							"        // 3 = No access by card",
+							"        // 4 = Insufficient funds",
+							"        // 5 = Card not activated",
+							"        // 200 = Success",
+							"    } catch (e) {",
+							"        // Ignore parse errors, already tested above",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Validate required variables are set",
+							"if (!pm.variables.get('device_id')) {",
+							"    console.warn('Warning: device_id variable is not set');",
+							"}",
+							"if (!pm.variables.get('card_dev_number')) {",
+							"    console.warn('Warning: card_dev_number variable is not set');",
+							"}",
+							"if (!pm.variables.get('transaction_sum')) {",
+							"    console.warn('Warning: transaction_sum variable is not set');",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "dev_id",
+						"value": "{{device_id}}",
+						"type": "text"
+					},
+					{
+						"key": "token",
+						"value": "{{device_token}}",
+						"type": "text"
+					},
+					{
+						"key": "ucn",
+						"value": "{{card_dev_number}}",
+						"type": "text"
+					},
+					{
+						"key": "sum",
+						"value": "{{transaction_sum}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/cwash/api/service/card_oper",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"cwash",
+						"api",
+						"service",
+						"card_oper"
+					]
+				},
+				"description": "Performs a card operation (transaction) for a loyalty card.\n\n**Required Headers:**\n- `dev_id`: Device ID (number)\n- `token`: Device authentication token\n- `ucn`: Card device number (unique card number)\n- `sum`: Transaction amount (number)\n\n**Response Format:**\nThe response is a formatted string (not standard JSON) with newlines:\n```\n{\n\"errcode\":200,\n\"errmes\":\"\",\n\"balance\":950,\n\"oper_id\":12345\n}\n```\n\n**Error Codes:**\n- `200`: Success\n- `1`: Card not found\n- `2`: Unexpected error\n- `3`: No access by card\n- `4`: Insufficient funds\n- `5`: Card not activated"
+			},
+			"response": []
+		},
+		{
+			"name": "Card Balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response contains errcode', function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('errcode');",
+							"});",
+							"",
+							"pm.test('Response contains balance', function () {",
+							"    const responseText = pm.response.text();",
+							"    pm.expect(responseText).to.include('balance');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "dev_id",
+						"value": "{{device_id}}",
+						"type": "text"
+					},
+					{
+						"key": "token",
+						"value": "{{device_token}}",
+						"type": "text"
+					},
+					{
+						"key": "ucn",
+						"value": "{{card_dev_number}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/cwash/api/service/card_balance_2",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"cwash",
+						"api",
+						"service",
+						"card_balance_2"
+					]
+				},
+				"description": "Gets the balance for a loyalty card. This is useful to check the balance before performing a card operation."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "device_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "device_token",
+			"value": "your-device-token-here",
+			"type": "string"
+		},
+		{
+			"key": "card_dev_number",
+			"value": "1234567890",
+			"type": "string"
+		},
+		{
+			"key": "transaction_sum",
+			"value": "100",
+			"type": "string"
+		}
+	]
+}

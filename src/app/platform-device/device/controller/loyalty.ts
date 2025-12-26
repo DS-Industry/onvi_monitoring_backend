@@ -5,7 +5,7 @@ import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-
 import { DeviceValidateRules } from '@platform-device/validate/validate-rules/device-validate-rules';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 
-@Controller('loyalty')
+@Controller('api/service')
 export class LoyaltyDeviceController {
   constructor(
     private readonly orderGetBalanceForDeviceUseCase: OrderGetBalanceForDeviceUseCase,
@@ -13,7 +13,7 @@ export class LoyaltyDeviceController {
     private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
 
-  @Post('card-balance')
+  @Post('card_balance_2')
   async cardBalance(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
@@ -37,7 +37,7 @@ export class LoyaltyDeviceController {
     }
   }
 
-  @Post('card-oper')
+  @Post('card_oper')
   async cardOper(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,

@@ -33,8 +33,9 @@ export class OrderOperForDeviceUseCase {
     if (!this.checkOrganizationAccess(pos, cardData)) {
       return this.createErrorResponse(3, 'Нет доступа по карте');
     }
-    const ownerCard =
-      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
+    const ownerCard = cardData.corporate?.id
+      ? await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber)
+      : null;
 
     let finalBalance: number;
     if (ownerCard) {
@@ -128,14 +129,12 @@ export class OrderOperForDeviceUseCase {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const orders = await this.findMethodsOrderUseCase.getAllByFilter({
-      dateStart: firstDayOfMonth,
-      dateEnd: lastDayOfMonth,
-      cardId: cardId,
-      orderStatus: OrderStatus.COMPLETED,
-    });
-
-    return orders.reduce((total, order) => total + order.sumFull, 0);
+    return await this.findMethodsOrderUseCase.sumOrdersByFilter(
+      firstDayOfMonth,
+      lastDayOfMonth,
+      cardId,
+      OrderStatus.COMPLETED,
+    );
   }
 
   private createErrorResponse(

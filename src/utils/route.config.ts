@@ -27,4 +27,8 @@ export const routeConfig: Routes = [
     path: 'device',
     children: [DeviceAuthModule, DeviceModule],
   },
+  {
+    path: 'cwash',
+    children: [DeviceModule],
+  },
 ];

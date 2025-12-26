@@ -20,18 +20,20 @@ export class OrderGetBalanceForDeviceUseCase {
   ): Promise<LoyaltyCardBalanceResponseDto> {
     const cardData =
       await this.findMethodsCardUseCase.getFullCardInfoForDevice(devNumber);
+
     if (!cardData) {
       return this.createErrorResponse(1);
     }
-    if (cardData.status != StatusUser.ACTIVE) {
+    if (cardData.status !== StatusUser.ACTIVE) {
       return this.createErrorResponse(2);
     }
     if (!this.checkOrganizationAccess(pos, cardData)) {
       return this.createErrorResponse(3);
     }
 
-    const ownerCard =
-      await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber);
+    const ownerCard = cardData.corporate?.id
+      ? await this.findMethodsCardUseCase.getOwnerCorporationCard(devNumber)
+      : null;
 
     let finalBalance: number;
     let targetBenefits: { bonus: number; benefitType: LTYBenefitType }[];
@@ -110,14 +112,12 @@ export class OrderGetBalanceForDeviceUseCase {
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const orders = await this.findMethodsOrderUseCase.getAllByFilter({
-      dateStart: firstDayOfMonth,
-      dateEnd: lastDayOfMonth,
-      cardId: cardId,
-      orderStatus: OrderStatus.COMPLETED,
-    });
-
-    return orders.reduce((total, order) => total + order.sumFull, 0);
+    return await this.findMethodsOrderUseCase.sumOrdersByFilter(
+      firstDayOfMonth,
+      lastDayOfMonth,
+      cardId,
+      OrderStatus.COMPLETED,
+    );
   }
 
   private createErrorResponse(errcode: number): LoyaltyCardBalanceResponseDto {

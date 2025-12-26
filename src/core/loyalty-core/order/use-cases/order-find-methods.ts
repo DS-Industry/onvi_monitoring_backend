@@ -30,4 +30,18 @@ export class FindMethodsOrderUseCase {
       data.cardId,
     );
   }
+
+  async sumOrdersByFilter(
+    dateStart: Date,
+    dateEnd: Date,
+    cardId: number,
+    orderStatus: OrderStatus,
+  ): Promise<number> {
+    return await this.orderRepository.sumOrdersByFilter(
+      dateStart,
+      dateEnd,
+      cardId,
+      orderStatus,
+    );
+  }
 }

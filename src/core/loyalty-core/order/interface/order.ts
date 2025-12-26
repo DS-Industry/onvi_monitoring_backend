@@ -19,6 +19,12 @@ export abstract class IOrderRepository {
     cardId?: number,
     deviceTypeCode?: string,
   ): Promise<Order[]>;
+  abstract sumOrdersByFilter(
+    dateStart: Date,
+    dateEnd: Date,
+    cardId: number,
+    orderStatus: OrderStatus,
+  ): Promise<number>;
   abstract update(input: Order): Promise<Order>;
   abstract updateStatusIf(
     id: number,

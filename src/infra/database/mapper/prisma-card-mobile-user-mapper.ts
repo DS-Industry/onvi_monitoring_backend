@@ -4,6 +4,7 @@ import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loy
 type PrismaCardMobileUserWithRelations = Prisma.LTYCardGetPayload<{
   include: {
     client: true;
+    corporate: true;
     cardTier: {
       include: {
         benefits: true;
@@ -79,6 +80,7 @@ export class PrismaCardMobileUserMapper {
                 })) || [],
           }
         : undefined,
+      corporate: entity.corporate ? { id: entity.corporate.id } : undefined,
     };
   }
 }
