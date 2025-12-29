@@ -1,4 +1,4 @@
-import { Controller, Post, Headers } from '@nestjs/common';
+import { Controller, Post, Headers, HttpCode } from "@nestjs/common";
 import { LoyaltyCardBalanceResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardBalance-response.dto';
 import { LoyaltyCardOperResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardOper-response.dto';
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
@@ -14,6 +14,7 @@ export class LoyaltyDeviceController {
   ) {}
 
   @Post('card_balance_2')
+  @HttpCode(200)
   async cardBalance(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
@@ -38,6 +39,7 @@ export class LoyaltyDeviceController {
   }
 
   @Post('card_oper')
+  @HttpCode(200)
   async cardOper(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
