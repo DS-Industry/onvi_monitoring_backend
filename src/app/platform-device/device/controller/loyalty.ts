@@ -1,11 +1,11 @@
-import { Controller, Post, Headers } from '@nestjs/common';
+import { Controller, Post, Headers, HttpCode } from "@nestjs/common";
 import { LoyaltyCardBalanceResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardBalance-response.dto';
 import { LoyaltyCardOperResponseDto } from '@platform-device/device/controller/dto/response/loyalty-cardOper-response.dto';
 import { OrderGetBalanceForDeviceUseCase } from '@loyalty/order/use-cases/order-get-balance-for-device';
 import { DeviceValidateRules } from '@platform-device/validate/validate-rules/device-validate-rules';
 import { OrderOperForDeviceUseCase } from '@loyalty/order/use-cases/order-oper-for-device';
 
-@Controller('loyalty')
+@Controller('api/service')
 export class LoyaltyDeviceController {
   constructor(
     private readonly orderGetBalanceForDeviceUseCase: OrderGetBalanceForDeviceUseCase,
@@ -13,7 +13,8 @@ export class LoyaltyDeviceController {
     private readonly deviceValidateRules: DeviceValidateRules,
   ) {}
 
-  @Post('card-balance')
+  @Post('card_balance_2')
+  @HttpCode(200)
   async cardBalance(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,
@@ -37,7 +38,8 @@ export class LoyaltyDeviceController {
     }
   }
 
-  @Post('card-oper')
+  @Post('card_oper')
+  @HttpCode(200)
   async cardOper(
     @Headers('dev_id') deviceId: string,
     @Headers('token') token: string,

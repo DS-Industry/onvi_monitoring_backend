@@ -120,6 +120,29 @@ export class OrderRepository extends IOrderRepository {
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
   }
 
+  public async sumOrdersByFilter(
+    dateStart: Date,
+    dateEnd: Date,
+    cardId: number,
+    orderStatus: OrderStatus,
+  ): Promise<number> {
+    const result = await this.prisma.lTYOrder.aggregate({
+      where: {
+        cardId: cardId,
+        orderData: {
+          gte: dateStart,
+          lte: dateEnd,
+        },
+        orderStatus: orderStatus,
+      },
+      _sum: {
+        sumFull: true,
+      },
+    });
+
+    return result._sum.sumFull ?? 0;
+  }
+
   public async update(input: Order): Promise<Order> {
     const orderEntity = PrismaOrderMapper.toPrisma(input);
     const order = await this.prisma.lTYOrder.update({
