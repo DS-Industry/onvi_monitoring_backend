@@ -414,6 +414,9 @@ export class TechTaskController {
         data.dateStart,
         data.dateEnd,
       );
+      if (techRateInfo.length == 0) {
+        return [];
+      }
       return await this.posChemistryProductionUseCase.execute(techRateInfo);
     } catch (e) {
       if (e instanceof PosException) {
