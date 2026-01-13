@@ -103,7 +103,7 @@ export class OrderController {
       const { user } = req;
       return await this.getMobileOrderByIdUseCase.execute({
         orderId: id,
-        clientId: user.clientId,
+        clientId: user.props.id,
       });
     } catch (e: any) {
       if (e instanceof BaseException) {
@@ -133,7 +133,7 @@ export class OrderController {
       const { user } = req;
       await this.updateMobileOrderUseCase.execute({
         orderId: id,
-        clientId: user.clientId,
+        clientId: user.props.id,
         status: data.status as OrderStatus,
       });
       return { message: 'Order status updated successfully' };
@@ -164,7 +164,7 @@ export class OrderController {
       const { user } = req;
       return await this.getMobileOrderByTransactionIdUseCase.execute({
         transactionId,
-        clientId: user.clientId,
+        clientId: user.props.id,
       });
     } catch (e: any) {
       if (e instanceof BaseException) {
