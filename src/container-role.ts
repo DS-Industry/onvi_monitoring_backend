@@ -19,6 +19,10 @@ export const rolesMapBootstrap = {
     const PORT = configService.get<number>('port');
     const appName = configService.get<string>('appName');
 
+    const httpAdapter = app.getHttpAdapter();
+    const expressInstance = httpAdapter.getInstance();
+    expressInstance.set('trust proxy', 1);
+
     app.enableCors({
       origin: [
         'http://localhost:5173',

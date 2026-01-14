@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { PaymentWebhookOrchestrateUseCase } from '../use-cases/payment-webhook-orchestrate.use-case';
-import { VerifyWebhookSignatureUseCase } from '../use-cases/verify-webhook-signature.use-case';
+import { VerifyWebhookIpUseCase } from '../use-cases/verify-webhook-ip.use-case';
 
 @Controller('payment-webhook')
 export class PaymentWebhookController {
@@ -18,7 +18,7 @@ export class PaymentWebhookController {
 
   constructor(
     private readonly orchestratePaymentUseCase: PaymentWebhookOrchestrateUseCase,
-    private readonly verifyWebhookSignatureUseCase: VerifyWebhookSignatureUseCase,
+    private readonly verifyWebhookIpUseCase: VerifyWebhookIpUseCase,
   ) {}
 
   @Post('/webhook')
@@ -26,47 +26,29 @@ export class PaymentWebhookController {
   async handleWebhook(
     @Req() req: any,
     @Body() webhookData: any,
-    @Headers('webhook-signature') signature?: string,
     @Headers('x-request-id') requestId?: string,
   ) {
-    const signatureHeader =
-      signature ||
-      req.headers['webhook-signature'] ||
-      req.headers['webhook_signature'] ||
-      req.headers['signature'] ||
-      req.headers['x-webhook-signature'] ||
-      req.headers['x-signature'];
+    const clientIp =
+      req.ip ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+      req.headers['x-real-ip'] ||
+      'unknown';
 
-    const rawBody =
-      req.rawBody || Buffer.from(JSON.stringify(webhookData), 'utf-8');
-
-    const httpMethod = req.method || 'POST';
-    const url =
-      req.path || req.url?.split('?')[0] || '/payment-webhook/webhook';
-
-    const relevantHeaders = Object.keys(req.headers).filter((h) =>
-      h.toLowerCase().includes('webhook') || h.toLowerCase().includes('signature'),
-    );
     this.logger.debug(
-      `Webhook received. Signature-related headers: ${JSON.stringify(relevantHeaders)}. Found signature: ${signatureHeader ? 'yes' : 'no'}`,
+      `Webhook received from IP: ${clientIp}. Request ID: ${requestId || 'unknown'}`,
     );
 
-    if (
-      !this.verifyWebhookSignatureUseCase.execute({
-        httpMethod,
-        url,
-        rawBody,
-        signature: signatureHeader || '',
-      })
-    ) {
+    if (!this.verifyWebhookIpUseCase.execute(clientIp)) {
       this.logger.warn(
-        `Invalid webhook signature. Request ID: ${requestId || 'unknown'}. Signature header: ${signatureHeader ? 'present' : 'missing'}`,
+        `Webhook from unauthorized IP address: ${clientIp}. Request ID: ${requestId || 'unknown'}`,
       );
-      throw new UnauthorizedException('Invalid webhook signature');
+      throw new UnauthorizedException('Unauthorized IP address');
     }
 
     this.logger.log(
-      `Received verified payment webhook. Request ID: ${requestId || 'unknown'}`,
+      `Received verified payment webhook from authorized IP. Request ID: ${requestId || 'unknown'}`,
       JSON.stringify(webhookData),
     );
 

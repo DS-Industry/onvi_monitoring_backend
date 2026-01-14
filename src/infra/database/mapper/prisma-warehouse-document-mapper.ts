@@ -24,8 +24,9 @@ export class PrismaWarehouseDocumentMapper {
       warehouseName: entity.warehouse?.name ?? undefined,
       responsibleId: entity.responsibleId,
       responsibleName:
-        entity.responsible?.name + ' ' + entity.responsible?.surname ??
-        undefined,
+        entity.responsible?.name && entity.responsible?.surname
+          ? `${entity.responsible.name} ${entity.responsible.surname}`
+          : undefined,
       status: entity.status,
       carryingAt: entity.carryingAt,
       createdAt: entity.createdAt,

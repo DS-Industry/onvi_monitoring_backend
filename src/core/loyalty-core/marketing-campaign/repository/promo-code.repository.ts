@@ -5,6 +5,7 @@ import {
   PromoCode,
   CreateMarketingCampaignUsageInput,
   CreatePromoCodeInput,
+  MarketingCampaignUsage,
 } from '../interface/promo-code-repository.interface';
 import { CampaignRedemptionType } from '@prisma/client';
 
@@ -130,5 +131,30 @@ export class PromoCodeRepository extends IPromoCodeRepository {
         usedAt: new Date(),
       },
     });
+  }
+
+  async findUsageByOrderId(orderId: number): Promise<MarketingCampaignUsage | null> {
+    const usage = await this.prisma.marketingCampaignUsage.findFirst({
+      where: {
+        orderId,
+        promocodeId: { not: null },
+      },
+    });
+
+    if (!usage) {
+      return null;
+    }
+
+    return {
+      id: usage.id,
+      campaignId: usage.campaignId,
+      promocodeId: usage.promocodeId,
+      ltyUserId: usage.ltyUserId,
+      orderId: usage.orderId,
+      usedAt: usage.usedAt,
+      type: usage.type || null,
+      actionId: usage.actionId,
+      posId: usage.posId,
+    };
   }
 }

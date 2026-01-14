@@ -7,12 +7,12 @@ import {
   IFLOW_PRODUCER,
   FlowJobConfig,
 } from '@loyalty/order/interface/flow-producer.interface';
-import { PrismaService } from '@db/prisma/prisma.service';
 import {
   PaymentOrchestrateJobData,
 } from '@infra/handler/shared/job-data.types';
 import { JobValidationUtil } from '@infra/handler/shared/job-validation.util';
 import { Order } from '@loyalty/order/domain/order';
+import { ShouldAddMarketingRewardsUseCase } from '@loyalty/order/use-cases/should-add-marketing-rewards.use-case';
 
 @Processor('payment-orchestrate')
 @Injectable()
@@ -24,7 +24,7 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
     private readonly orderRepository: IOrderRepository,
     @Inject(IFLOW_PRODUCER)
     private readonly flowProducer: IFlowProducer,
-    private readonly prisma: PrismaService,
+    private readonly shouldAddMarketingRewardsUseCase: ShouldAddMarketingRewardsUseCase,
   ) {
     super();
     this.logger.log('[PAYMENT-ORCHESTRATE] Consumer initialized');
@@ -58,7 +58,7 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
     );
 
     const order = await this.validateAndFetchOrder(orderId, job.id);
-    const shouldAddMarketingRewards = await this.shouldAddMarketingCampaignRewards(order);
+    const shouldAddMarketingRewards = await this.shouldAddMarketingRewardsUseCase.execute(order);
     const flowChildren = this.buildFlowChildren(
       order,
       carWashId,
@@ -90,29 +90,6 @@ export class PaymentOrchestrateConsumer extends WorkerHost {
     );
 
     return order;
-  }
-
-  private async shouldAddMarketingCampaignRewards(
-    order: Order,
-  ): Promise<boolean> {
-    const noDiscountApplied = order.sumDiscount === 0;
-    this.logger.log(
-      `[PAYMENT-ORCHESTRATE] Checking promocode usage for order#${order.id}`,
-    );
-    
-    const promocodeUsage = await this.prisma.marketingCampaignUsage.findFirst({
-      where: {
-        orderId: order.id,
-        promocodeId: { not: null },
-      },
-    });
-    const noPromoCodeUsed = !promocodeUsage;
-
-    this.logger.log(
-      `[PAYMENT-ORCHESTRATE] Promocode check: noDiscountApplied=${noDiscountApplied}, noPromoCodeUsed=${noPromoCodeUsed}`,
-    );
-
-    return noDiscountApplied && noPromoCodeUsed;
   }
 
   private buildFlowChildren(

@@ -12,7 +12,9 @@ export class PrismaWarehouseMapper {
       location: entity.location,
       managerId: entity.managerId,
       managerName:
-        entity.manager?.name + ' ' + entity.manager?.surname ?? undefined,
+        entity.manager?.name && entity.manager?.surname
+          ? `${entity.manager.name} ${entity.manager.surname}`
+          : undefined,
       posId: entity.posId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

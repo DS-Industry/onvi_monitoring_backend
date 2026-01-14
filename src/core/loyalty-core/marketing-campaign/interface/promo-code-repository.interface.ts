@@ -16,6 +16,18 @@ export interface PromoCode {
   posId: number | null;
 }
 
+export interface MarketingCampaignUsage {
+  id: number;
+  campaignId: number;
+  promocodeId: number | null;
+  ltyUserId: number;
+  orderId: number | null;
+  usedAt: Date;
+  type: string | null;
+  actionId: number | null;
+  posId: number | null;
+}
+
 export interface CreateMarketingCampaignUsageInput {
   campaignId: number;
   promocodeId: number;
@@ -57,4 +69,5 @@ export abstract class IPromoCodeRepository {
     userId: number,
   ): Promise<number>;
   abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
+  abstract findUsageByOrderId(orderId: number): Promise<MarketingCampaignUsage | null>;
 }
