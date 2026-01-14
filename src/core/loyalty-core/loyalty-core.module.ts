@@ -323,7 +323,7 @@ const redisProviders: Provider[] = [RedisService];
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: true,
-          attempts: 1,
+          attempts: 3, 
         },
       },
       {

@@ -48,7 +48,6 @@ export class PosService implements IPosService {
     }
   }
 
-  // TODO: deviceId is undefined!
   async send(data: SendRequestDto): Promise<SendResponseDto> {
     const headers = this.buildHeaders();
     try {
@@ -59,8 +58,7 @@ export class PosService implements IPosService {
       };
 
       const url = `${this.baseUrl}/external/mobile/write/${data.deviceId}`;
-      console.log("Send Data: ~~~~~~~~~~~~~~~~~~~~~~~~~~")
-      console.log('url', url);
+
       await firstValueFrom(this.httpService.post(url, body, { headers }));
       return {
         sendStatus: SendStatus.SUCCESS,

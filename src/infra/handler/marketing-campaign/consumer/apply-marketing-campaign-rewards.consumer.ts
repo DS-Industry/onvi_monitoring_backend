@@ -2,6 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { ApplyMarketingCampaignRewardsUseCase } from '@loyalty/mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
+import { ApplyMarketingCampaignRewardsJobData, JobResult } from '@infra/handler/shared/job-data.types';
+import { JobValidationUtil } from '@infra/handler/shared/job-validation.util';
 
 @Processor('apply-marketing-campaign-rewards')
 @Injectable()
@@ -15,39 +17,71 @@ export class ApplyMarketingCampaignRewardsConsumer extends WorkerHost {
     this.logger.log('[APPLY-MARKETING-CAMPAIGN-REWARDS] Consumer initialized');
   }
 
-  async process(job: Job<any>): Promise<string> {
+  async process(job: Job<ApplyMarketingCampaignRewardsJobData>): Promise<string> {
     const { orderId } = job.data;
-    const startTime = new Date().toISOString();
-    
-    // Log parent job information for debugging
     const parentId = job.parent?.id;
     const parentKey = job.parentKey;
-    this.logger.log(
-      `[APPLY-MARKETING-CAMPAIGN-REWARDS] [${startTime}] START - Job ${job.id} for order#${orderId}. Parent ID: ${parentId || 'none'}, ParentKey: ${parentKey || 'none'}`,
+    
+    const startTime = JobValidationUtil.logJobStart(
+      job.id,
+      orderId,
+      job.attemptsMade,
+      job.opts?.attempts,
+      parentId,
+      { parentKey: parentKey || 'none' },
+      this.logger,
+      'APPLY-MARKETING-CAMPAIGN-REWARDS',
     );
     
-    // In BullMQ flows, child jobs should only run after parent completes
-    // If this job is running before car-wash-launch, there's a flow configuration issue
-    if (!parentId) {
-      this.logger.warn(
-        `[APPLY-MARKETING-CAMPAIGN-REWARDS] WARNING: Job ${job.id} has no parent. This job should be a child of car-wash-launch.`,
-      );
-    }
+    JobValidationUtil.validateRequiredField(
+      orderId,
+      'orderId',
+      job.id || 'unknown',
+      this.logger,
+      'APPLY-MARKETING-CAMPAIGN-REWARDS',
+    );
+    
+    this.validateParentJob(parentId, job.id);
 
     try {
-      await this.applyMarketingCampaignRewardsUseCase.execute(orderId);
-      const endTime = new Date().toISOString();
       this.logger.log(
-        `[APPLY-MARKETING-CAMPAIGN-REWARDS] [${endTime}] END - Job ${job.id} completed successfully for order#${orderId}`,
+        `[APPLY-MARKETING-CAMPAIGN-REWARDS] Executing applyMarketingCampaignRewardsUseCase for order#${orderId}`,
       );
-      return 'success';
+      
+      await this.applyMarketingCampaignRewardsUseCase.execute(orderId);
+      
+      JobValidationUtil.logJobSuccess(
+        job.id,
+        orderId,
+        startTime,
+        this.logger,
+        'APPLY-MARKETING-CAMPAIGN-REWARDS',
+      );
+      
+      return JobResult.SUCCESS;
     } catch (error: any) {
-      const errorTime = new Date().toISOString();
-      this.logger.error(
-        `[APPLY-MARKETING-CAMPAIGN-REWARDS] [${errorTime}] ERROR - Failed to process order#${orderId}: ${error.message}`,
-        error.stack,
+      JobValidationUtil.logJobError(
+        error,
+        job.id,
+        orderId,
+        job.attemptsMade,
+        this.logger,
+        'APPLY-MARKETING-CAMPAIGN-REWARDS',
       );
+      
       throw error;
+    }
+  }
+
+  private validateParentJob(parentId: string | undefined, jobId: string | undefined): void {
+    if (!parentId) {
+      this.logger.warn(
+        `[APPLY-MARKETING-CAMPAIGN-REWARDS] WARNING: Job ${jobId} has no parent. This job should be a child of car-wash-launch.`,
+      );
+    } else {
+      this.logger.log(
+        `[APPLY-MARKETING-CAMPAIGN-REWARDS] Parent job ${parentId} completed successfully, proceeding with marketing campaign rewards`,
+      );
     }
   }
 }

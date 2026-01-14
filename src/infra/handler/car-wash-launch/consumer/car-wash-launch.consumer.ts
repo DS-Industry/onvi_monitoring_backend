@@ -2,6 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { CarWashLaunchUseCase } from '@loyalty/mobile-user/order/use-cases/car-wash-launch.use-case';
 import { Injectable, Logger } from '@nestjs/common';
+import { CarWashLaunchJobData, JobResult } from '@infra/handler/shared/job-data.types';
+import { JobValidationUtil } from '@infra/handler/shared/job-validation.util';
 
 @Processor('car-wash-launch')
 @Injectable()
@@ -13,24 +15,60 @@ export class CarWashLaunchConsumer extends WorkerHost {
     this.logger.log('[CAR-WASH-LAUNCH] Consumer initialized');
   }
 
-  async process(job: Job<any>): Promise<string> {
-    const startTime = new Date().toISOString();
-    const parentId = job.parent?.id;
-    this.logger.log(
-      `[CAR-WASH-LAUNCH] [${startTime}] START - Job ${job.id} for order#${job.data.orderId}. Parent: ${parentId || 'none'}`,
+  async process(job: Job<CarWashLaunchJobData>): Promise<string> {
+    const { orderId, carWashId, carWashDeviceId, bayType } = job.data;
+    
+    const startTime = JobValidationUtil.logJobStart(
+      job.id,
+      orderId,
+      job.attemptsMade,
+      job.opts?.attempts,
+      job.parent?.id,
+      { carWashId, carWashDeviceId, bayType },
+      this.logger,
+      'CAR-WASH-LAUNCH',
     );
     
-    await this.carWashLaunchUseCase.execute(
-      job.data.orderId,
-      job.data.carWashId,
-      job.data.carWashDeviceId,
-      job.data.bayType,
+    JobValidationUtil.validateRequiredFields(
+      { orderId, carWashId, carWashDeviceId },
+      ['orderId', 'carWashId', 'carWashDeviceId'],
+      job.id || 'unknown',
+      this.logger,
+      'CAR-WASH-LAUNCH',
     );
 
-    const endTime = new Date().toISOString();
-    this.logger.log(
-      `[CAR-WASH-LAUNCH] [${endTime}] END - Job ${job.id} completed successfully for order#${job.data.orderId}`,
-    );
-    return 'success';
+    try {
+      this.logger.log(
+        `[CAR-WASH-LAUNCH] Executing carWashLaunchUseCase for order#${orderId}`,
+      );
+      
+      await this.carWashLaunchUseCase.execute(
+        orderId,
+        carWashId,
+        carWashDeviceId,
+        bayType,
+      );
+
+      JobValidationUtil.logJobSuccess(
+        job.id,
+        orderId,
+        startTime,
+        this.logger,
+        'CAR-WASH-LAUNCH',
+      );
+      
+      return JobResult.SUCCESS;
+    } catch (error: any) {
+      JobValidationUtil.logJobError(
+        error,
+        job.id,
+        orderId,
+        job.attemptsMade,
+        this.logger,
+        'CAR-WASH-LAUNCH',
+      );
+      
+      throw error;
+    }
   }
 }
