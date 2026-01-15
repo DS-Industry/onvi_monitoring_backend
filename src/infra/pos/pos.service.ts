@@ -54,12 +54,12 @@ export class PosService implements IPosService {
       const body = {
         GVLCardNum: data.cardNumber,
         GVLCardSum: data.sum,
-        GVLSource: this.sourceCode,
+        GVLSource: this.sourceCode.toString(),
       };
 
       const url = `${this.baseUrl}/external/mobile/write/${data.deviceId}`;
 
-      await firstValueFrom(this.httpService.post(url, body, { headers }));
+      await firstValueFrom(this.httpService.post(url, body, { headers }));      
       return {
         sendStatus: SendStatus.SUCCESS,
         errorMessage: null,

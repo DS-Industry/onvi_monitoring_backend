@@ -130,6 +130,9 @@ import {
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
   DiscountCalculationService,
+  OrderBuilderService,
+  OrderDiscountService,
+  OrderUsageDataService,
 } from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
@@ -272,6 +275,9 @@ const orderDomainServices: Provider[] = [
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
   DiscountCalculationService,
+  OrderBuilderService,
+  OrderDiscountService,
+  OrderUsageDataService,
 ];
 
 const corporateUseCase: Provider[] = [
