@@ -315,7 +315,6 @@ function createUseCaseInstance() {
     discountCalculationService,
   );
 
-  // Create new domain services
   const orderBuilderService = new OrderBuilderService(
     tariffRepository,
     cashbackCalculationService,

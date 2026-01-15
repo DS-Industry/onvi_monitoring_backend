@@ -124,8 +124,16 @@ export class OrderController {
   @UseGuards(JwtGuard)
   @Post('register')
   @HttpCode(201)
-  async registerPayment(@Body() data: RegisterPaymentDto) {
-    return await this.registerPaymentUseCase.execute(data);
+  async registerPayment(
+    @Body() data: RegisterPaymentDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const { user } = req;
+
+    return await this.registerPaymentUseCase.execute({
+      ...data,
+      clientId: user.id,
+    });
   }
 
   @Get('ping')
