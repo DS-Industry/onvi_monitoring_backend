@@ -46,10 +46,6 @@ export class PromoCodeService {
       throw new BadRequestException('Promo code usage limit exceeded');
     }
 
-    if (promoCode.posId !== null && promoCode.posId !== carWashId) {
-      throw new BadRequestException('Promo code is not valid for this car wash');
-    }
-
     if (promoCode.campaignId) {
       const campaign = await this.prisma.marketingCampaign.findUnique({
         where: { id: promoCode.campaignId },

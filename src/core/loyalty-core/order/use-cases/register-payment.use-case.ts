@@ -9,7 +9,6 @@ import { VerifyPaymentUseCaseCore } from '../../../payment-core/use-cases/verify
 export interface IRegisterPaymentDto {
   orderId: number;
   paymentToken?: string;
-  amount: number;
   receiptReturnPhoneNumber: string;
   returnUrl?: string;
 }
@@ -48,11 +47,11 @@ export class RegisterPaymentUseCase {
           timestamp: new Date(),
           details: JSON.stringify({
             paymentToken: data.paymentToken || 'none (using redirect)',
-            amount: data.amount,
+            amount: order.sumReal,
             returnUrl: data.returnUrl || 'none',
           }),
         },
-        `Payment processing initiated for order ${order.id} with amount ${data.amount}`,
+        `Payment processing initiated for order ${order.id} with amount ${order.sumReal}`,
       );
 
       const idempotenceKey = `order-${order.id}-register`;
@@ -75,7 +74,7 @@ export class RegisterPaymentUseCase {
               status: 'pending',
             } as any)
           : await this.paymentUseCase.create({
-              amount: String(data.amount),
+              amount: String(order.sumReal),
               paymentToken: data.paymentToken,
               description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
               phone: data.receiptReturnPhoneNumber,
@@ -147,7 +146,7 @@ export class RegisterPaymentUseCase {
           timestamp: new Date(),
           details: JSON.stringify(paymentResult),
         },
-        `Payment has been registered for order ${order.id} with amount ${data.amount}`,
+        `Payment has been registered for order ${order.id} with amount ${order.sumReal}`,
       );
 
       return {

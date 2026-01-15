@@ -9,10 +9,6 @@ export class RegisterPaymentDto {
   @IsOptional()
   paymentToken?: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  amount: number;
-
   @IsString()
   @IsNotEmpty()
   receiptReturnPhoneNumber: string;

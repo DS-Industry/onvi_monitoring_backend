@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { IOrderRepository } from '@loyalty/order/interface/order';
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import { IOrderRepository, OrderUsageData } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
 import {
   OrderStatus,
@@ -12,7 +12,6 @@ import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-
 import { PromoCodeService } from './promo-code-service';
 import {
   IActivationWindowRepository,
-  // ActiveActivationWindow,
 } from '../interface/activation-window-repository.interface';
 import { ITariffRepository } from '../interface/tariff';
 import {
@@ -26,8 +25,11 @@ import {
   OrderStatusDeterminationService,
   DiscountCalculationService,
 } from '@loyalty/order/domain/services';
-import { CardNotFoundForOrderException } from '@loyalty/order/domain/exceptions';
-import { CampaignRedemptionType, CampaignExecutionType } from '@prisma/client';
+import {
+  CardNotFoundForOrderException,
+  CardOwnershipException,
+} from '@loyalty/order/domain/exceptions';
+import { CampaignExecutionType } from '@prisma/client';
 import { MarketingCampaignDiscountService } from './marketing-campaign-discount.service';
 
 export interface CreateMobileOrderRequest {
@@ -48,6 +50,8 @@ export interface CreateMobileOrderResponse {
 
 @Injectable()
 export class CreateMobileOrderUseCase {
+  private readonly logger = new Logger(CreateMobileOrderUseCase.name);
+
   constructor(
     private readonly orderRepository: IOrderRepository,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
@@ -67,10 +71,36 @@ export class CreateMobileOrderUseCase {
   async execute(
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
+    this.logger.log(
+      `Starting order creation for user ${request.cardMobileUserId}, carWashId: ${request.carWashId}, sum: ${request.sum}`,
+    );
+
+    if (request.sum <= 0) {
+      this.logger.warn(
+        `Invalid order sum: ${request.sum} for user ${request.cardMobileUserId}`,
+      );
+      throw new Error('Order sum must be greater than zero');
+    }
+
+    if (request.sumBonus < 0) {
+      this.logger.warn(
+        `Invalid bonus sum: ${request.sumBonus} for user ${request.cardMobileUserId}`,
+      );
+      throw new Error('Bonus sum cannot be negative');
+    }
+
+    if (request.sumBonus > request.sum) {
+      this.logger.warn(
+        `Bonus sum ${request.sumBonus} exceeds order sum ${request.sum} for user ${request.cardMobileUserId}`,
+      );
+      throw new Error('Bonus sum cannot exceed order sum');
+    }
+
     const carWashDeviceId = request.carWashDeviceId;
+    const carWashId = request.carWashId;
 
     await this.orderValidationService.validatePosStatus({
-      posId: request.carWashId,
+      posId: carWashId,
       carWashDeviceId: carWashDeviceId,
       bayType: request?.bayType ?? null,
     });
@@ -80,8 +110,22 @@ export class CreateMobileOrderUseCase {
     );
 
     if (!card) {
+      this.logger.warn(
+        `Card not found for user ${request.cardMobileUserId}`,
+      );
       throw new CardNotFoundForOrderException(request.cardMobileUserId);
     }
+
+    if (card.mobileUserId !== request.cardMobileUserId) {
+      this.logger.warn(
+        `Authorization failed: Card ${card.id} does not belong to user ${request.cardMobileUserId}. Card owner: ${card.mobileUserId}`,
+      );
+      throw new CardOwnershipException(request.cardMobileUserId);
+    }
+
+    this.logger.debug(
+      `Card ${card.id} verified for user ${request.cardMobileUserId}`,
+    );
 
     const isFreeVacuum = this.orderStatusDeterminationService.isFreeVacuum({
       sum: request.sum,
@@ -162,10 +206,13 @@ export class CreateMobileOrderUseCase {
       await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
         request.cardMobileUserId,
         orderDate,
-        request.carWashId,
+        carWashId,
       );
 
-      console.log('eligibleCampaigns', eligibleCampaigns);
+
+    this.logger.debug(
+      `Found ${eligibleCampaigns.length} eligible campaigns for user ${request.cardMobileUserId}`,
+    );
 
     await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
       eligibleCampaigns,
@@ -210,6 +257,10 @@ export class CreateMobileOrderUseCase {
       );
       transactionalCampaignDiscount = bestTransactional.discountAmount;
       usedTransactionalCampaign = bestTransactional;
+
+      this.logger.debug(
+        `Best transactional campaign discount: ${transactionalCampaignDiscount} for campaign ${bestTransactional.campaignId}`,
+      );
     }
 
     let promoCodeDiscount = 0;
@@ -218,7 +269,11 @@ export class CreateMobileOrderUseCase {
         request.promoCodeId,
         order,
         card,
-        carWashDeviceId,
+        carWashId,
+      );
+
+      this.logger.debug(
+        `Promo code discount applied: ${promoCodeDiscount} for promoCodeId ${request.promoCodeId}`,
       );
     }
 
@@ -230,116 +285,137 @@ export class CreateMobileOrderUseCase {
     order.sumDiscount = finalDiscount;
     order.sumReal = Math.max(0, request.sum - finalDiscount);
 
-    const createdOrder = await this.orderRepository.create(order);
+    this.logger.log(
+      `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${finalDiscount}, sumReal: ${order.sumReal}`,
+    );
 
+    let usageData: OrderUsageData | undefined;
     if (finalDiscount > 0) {
       if (
         transactionalCampaignDiscount > 0 &&
-        // TODO: Uncomment this when we have activation windows ready
-        // transactionalCampaignDiscount >= activationWindowDiscount &&
         transactionalCampaignDiscount >= promoCodeDiscount &&
         usedTransactionalCampaign
       ) {
-        await this.activationWindowRepository.createUsage({
-          campaignId: usedTransactionalCampaign.campaignId,
-          actionId: usedTransactionalCampaign.actionId,
-          ltyUserId: request.cardMobileUserId,
-          orderId: createdOrder.id,
-          posId: request.carWashId,
-          type: CampaignRedemptionType.DISCOUNT,
-        });
-      } else if (
-      // TODO: Uncomment this when we have activation windows ready
-      //   activationWindowDiscount > 0 &&
-      //   activationWindowDiscount >= promoCodeDiscount &&
-      //   usedActivationWindow
-      // ) {
-      //   await this.activationWindowRepository.createUsage({
-      //     campaignId: usedActivationWindow.campaignId,
-      //     actionId: usedActivationWindow.actionId,
-      //     ltyUserId: request.cardMobileUserId,
-      //     orderId: createdOrder.id,
-      //     posId: request.carWashId,
-      //     type: CampaignRedemptionType.DISCOUNT,
-      //   });
-      // } else if (
-        promoCodeDiscount > 0 &&
-        request.promoCodeId
-      ) {
-        await this.promoCodeService.createPromoCodeUsage(
-          request.promoCodeId,
-          createdOrder.id,
-          card,
-          request.carWashId,
+        usageData = {
+          transactionalCampaign: {
+            campaignId: usedTransactionalCampaign.campaignId,
+            actionId: usedTransactionalCampaign.actionId,
+            ltyUserId: request.cardMobileUserId,
+            posId: carWashId,
+          },
+        };
+
+        this.logger.debug(
+          `Prepared campaign usage data for campaign ${usedTransactionalCampaign.campaignId}`,
+        );
+      } else if (promoCodeDiscount > 0 && request.promoCodeId) {
+        usageData = {
+          promoCode: {
+            promoCodeId: request.promoCodeId,
+            ltyUserId: card.mobileUserId || 0,
+            posId: carWashId,
+          },
+        };
+
+        this.logger.debug(
+          `Prepared promo code usage data for promoCodeId ${request.promoCodeId}`,
         );
       }
     }
 
+    let createdOrder: Order;
+    try {
+      createdOrder = await this.orderRepository.createWithUsage(
+        order,
+        usageData,
+      );
+
+      this.logger.log(
+        `Order created successfully: orderId=${createdOrder.id}, userId=${request.cardMobileUserId}, sum=${order.sumFull}, discount=${finalDiscount}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error creating order for user ${request.cardMobileUserId}: ${error.message}`,
+        error.stack,
+      );
+      throw error;
+    }
+
     if (isFreeVacuum) {
-      await this.flowProducer.add({
-        name: 'order-finished',
-        queueName: 'order-finished',
-        data: { orderId: createdOrder.id },
-        children: [
-          {
-            name: 'check-car-wash-started',
-            queueName: 'check-car-wash-started',
-            data: {
-              orderId: createdOrder.id,
-              carWashId: request.carWashId,
-              carWashDeviceId: createdOrder.carWashDeviceId,
-              bayType: request.bayType,
-            },
-            opts: {
-              failParentOnFailure: false,
-              ignoreDependencyOnFailure: true,
-              attempts: 3,
-              backoff: {
-                type: 'fixed',
-                delay: 5000,
+      try {
+        await this.flowProducer.add({
+          name: 'order-finished',
+          queueName: 'order-finished',
+          data: { orderId: createdOrder.id },
+          children: [
+            {
+              name: 'check-car-wash-started',
+              queueName: 'check-car-wash-started',
+              data: {
+                orderId: createdOrder.id,
+                carWashId: carWashId,
+                carWashDeviceId: createdOrder.carWashDeviceId,
+                bayType: request.bayType,
               },
-            },
-            children: [
-              {
-                name: 'car-wash-launch',
-                queueName: 'car-wash-launch',
-                data: {
-                  orderId: createdOrder.id,
-                  carWashId: request.carWashId,
-                  carWashDeviceId: createdOrder.carWashDeviceId,
-                  bayType: request.bayType,
+              opts: {
+                failParentOnFailure: false,
+                ignoreDependencyOnFailure: true,
+                attempts: 3,
+                backoff: {
+                  type: 'fixed',
+                  delay: 5000,
                 },
-                opts: {
-                  failParentOnFailure: false,
-                  ignoreDependencyOnFailure: true,
-                  attempts: 3,
-                  backoff: {
-                    type: 'fixed',
-                    delay: 5000,
+              },
+              children: [
+                {
+                  name: 'car-wash-launch',
+                  queueName: 'car-wash-launch',
+                  data: {
+                    orderId: createdOrder.id,
+                    carWashId: carWashId,
+                    carWashDeviceId: createdOrder.carWashDeviceId,
+                    bayType: request.bayType,
+                  },
+                  opts: {
+                    failParentOnFailure: false,
+                    ignoreDependencyOnFailure: true,
+                    attempts: 3,
+                    backoff: {
+                      type: 'fixed',
+                      delay: 5000,
+                    },
                   },
                 },
-              },
-            ],
-          },
-          // TODO: Uncomment this when we have activation windows ready
-          // {
-          //   name: 'check-behavioral-campaigns',
-          //   queueName: 'check-behavioral-campaigns',
-          //   data: {
-          //     orderId: createdOrder.id,
-          //   },
-          //   opts: {
-          //     failParentOnFailure: false,
-          //     ignoreDependencyOnFailure: true,
-          //     attempts: 3,
-          //     backoff: {
-          //       type: 'fixed',
-          //       delay: 5000,
-          //     },
-          //   },
-          // },
-        ],
-      });
+              ],
+            },
+            // TODO: Uncomment this when we have activation windows ready
+            // {
+            //   name: 'check-behavioral-campaigns',
+            //   queueName: 'check-behavioral-campaigns',
+            //   data: {
+            //     orderId: createdOrder.id,
+            //   },
+            //   opts: {
+            //     failParentOnFailure: false,
+            //     ignoreDependencyOnFailure: true,
+            //     attempts: 3,
+            //     backoff: {
+            //       type: 'fixed',
+            //       delay: 5000,
+            //     },
+            //   },
+            // },
+          ],
+        });
+
+        this.logger.debug(
+          `Flow producer job added for order ${createdOrder.id}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to add order ${createdOrder.id} to flow producer: ${error.message}`,
+        );
+      }
     } 
     // TODO: Uncomment this when we have activation windows ready
     // else {
