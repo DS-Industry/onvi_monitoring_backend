@@ -4,6 +4,7 @@ import { OrderStatus } from '@loyalty/order/domain/enums';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { VerifyPaymentUseCaseCore } from '../../../core/payment-core/use-cases/verify-payment.use-case';
+import { YooKassaWebhookDto } from '../dto/webhook.dto';
 
 @Injectable()
 export class PaymentWebhookOrchestrateUseCase {
@@ -20,7 +21,7 @@ export class PaymentWebhookOrchestrateUseCase {
   async execute(
     event: string,
     paymentId: string,
-    data?: any,
+    data?: YooKassaWebhookDto,
     requestId?: string,
   ) {
     let order = await this.orderRepository.findOneByTransactionId(paymentId);

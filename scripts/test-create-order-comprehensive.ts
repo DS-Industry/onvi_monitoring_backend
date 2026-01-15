@@ -44,6 +44,9 @@ import { OrderValidationService } from '../src/core/loyalty-core/order/domain/se
 import { CashbackCalculationService } from '../src/core/loyalty-core/order/domain/services/cashback-calculation.service';
 import { FreeVacuumValidationService } from '../src/core/loyalty-core/order/domain/services/free-vacuum-validation.service';
 import { OrderStatusDeterminationService } from '../src/core/loyalty-core/order/domain/services/order-status-determination.service';
+import { OrderBuilderService } from '../src/core/loyalty-core/order/domain/services/order-builder.service';
+import { OrderDiscountService } from '../src/core/loyalty-core/order/domain/services/order-discount.service';
+import { OrderUsageDataService } from '../src/core/loyalty-core/order/domain/services/order-usage-data.service';
 import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/mobile-user/order/use-cases/marketing-campaign-discount.service';
 import { CardRepository } from '../src/core/loyalty-core/mobile-user/card/repository/card';
 import { PromoCodeRepository } from '../src/core/loyalty-core/marketing-campaign/repository/promo-code.repository';
@@ -312,19 +315,28 @@ function createUseCaseInstance() {
     discountCalculationService,
   );
 
+  const orderBuilderService = new OrderBuilderService(
+    tariffRepository,
+    cashbackCalculationService,
+    orderStatusDeterminationService,
+  );
+  const orderDiscountService = new OrderDiscountService(
+    marketingCampaignDiscountService,
+    promoCodeService,
+  );
+  const orderUsageDataService = new OrderUsageDataService();
+
   // Create the main use case
   const useCase = new CreateMobileOrderUseCase(
     orderRepository,
     findMethodsCardUseCase,
-    promoCodeService,
-    activationWindowRepository,
-    discountCalculationService,
     tariffRepository,
     orderValidationService,
-    cashbackCalculationService,
     freeVacuumValidationService,
     orderStatusDeterminationService,
-    marketingCampaignDiscountService,
+    orderBuilderService,
+    orderDiscountService,
+    orderUsageDataService,
     mockFlowProducer as any,
   );
 

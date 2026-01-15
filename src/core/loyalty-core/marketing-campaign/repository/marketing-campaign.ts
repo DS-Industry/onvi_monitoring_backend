@@ -909,19 +909,18 @@ export class MarketingCampaignRepository extends IMarketingCampaignRepository {
     switch (data.type) {
       case 'TIME_RANGE':
         if (data.startTime && data.endTime) {
-          const startHours = data.startTime
-            .getHours()
-            .toString()
-            .padStart(2, '0');
-          const startMinutes = data.startTime
-            .getMinutes()
-            .toString()
-            .padStart(2, '0');
-          const endHours = data.endTime.getHours().toString().padStart(2, '0');
-          const endMinutes = data.endTime
-            .getMinutes()
-            .toString()
-            .padStart(2, '0');
+          const startDate = data.startTime instanceof Date 
+            ? data.startTime 
+            : new Date(data.startTime);
+          const endDate = data.endTime instanceof Date 
+            ? data.endTime 
+            : new Date(data.endTime);
+          
+          const startHours = startDate.getUTCHours().toString().padStart(2, '0');
+          const startMinutes = startDate.getUTCMinutes().toString().padStart(2, '0');
+          const endHours = endDate.getUTCHours().toString().padStart(2, '0');
+          const endMinutes = endDate.getUTCMinutes().toString().padStart(2, '0');
+          
           newCondition.start = `${startHours}:${startMinutes}`;
           newCondition.end = `${endHours}:${endMinutes}`;
         }

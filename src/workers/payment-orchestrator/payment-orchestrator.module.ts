@@ -10,6 +10,7 @@ import { PaymentOrchestrateConsumer } from '@infra/handler/payment-orchestrate/c
 import { CarWashLaunchConsumer } from '@infra/handler/car-wash-launch/consumer/car-wash-launch.consumer';
 import { CheckCarWashStartedConsumer } from '@infra/handler/check-car-wash-started/consumer/check-car-wash-started.consumer';
 import { OrderFinishedConsumer } from '@infra/handler/main-flow/consumer/order-finished.consumer';
+import { ApplyMarketingCampaignRewardsConsumer } from '@infra/handler/marketing-campaign/consumer/apply-marketing-campaign-rewards.consumer';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RedisModule } from '@infra/cache/redis.module';
 import { LoggerModule } from 'nestjs-pino';
@@ -72,7 +73,7 @@ import { LoggerModule } from 'nestjs-pino';
       defaultJobOptions: {
         removeOnComplete: true,
         removeOnFail: true,
-        attempts: 1,
+        attempts: 3, 
       },
     }),
     BullModule.registerQueue({
@@ -106,12 +107,26 @@ import { LoggerModule } from 'nestjs-pino';
         },
       },
     }),
+    BullModule.registerQueue({
+      configKey: 'worker',
+      name: 'apply-marketing-campaign-rewards',
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: true,
+        attempts: 3,
+        backoff: {
+          type: 'fixed',
+          delay: 5000,
+        },
+      },
+    }),
   ],
   providers: [
     PaymentOrchestrateConsumer,
     OrderFinishedConsumer,
     CarWashLaunchConsumer,
     CheckCarWashStartedConsumer,
+    ApplyMarketingCampaignRewardsConsumer,
   ],
 })
 export class PaymentOrchestratorModule {}

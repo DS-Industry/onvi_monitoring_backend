@@ -84,6 +84,7 @@ import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provide
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
+import { ShouldAddMarketingRewardsUseCase } from '@loyalty/order/use-cases/should-add-marketing-rewards.use-case';
 import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
@@ -129,6 +130,9 @@ import {
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
   DiscountCalculationService,
+  OrderBuilderService,
+  OrderDiscountService,
+  OrderUsageDataService,
 } from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
@@ -246,6 +250,7 @@ const orderUseCase: Provider[] = [
   OrderOperForDeviceUseCase,
   FindMethodsOrderUseCase,
   RegisterPaymentUseCase,
+  ShouldAddMarketingRewardsUseCase,
 ];
 
 const mobileOrderUseCase: Provider[] = [
@@ -270,6 +275,9 @@ const orderDomainServices: Provider[] = [
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
   DiscountCalculationService,
+  OrderBuilderService,
+  OrderDiscountService,
+  OrderUsageDataService,
 ];
 
 const corporateUseCase: Provider[] = [
@@ -323,7 +331,7 @@ const redisProviders: Provider[] = [RedisService];
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: true,
-          attempts: 1,
+          attempts: 3, 
         },
       },
       {

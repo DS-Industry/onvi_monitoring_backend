@@ -1,17 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { IOrderRepository } from '@loyalty/order/interface/order';
 import { Order, OrderProps } from '@loyalty/order/domain/order';
 import { OrderStatus } from '@loyalty/order/domain/enums';
 import { CreatePaymentUseCaseCore } from '../../../payment-core/use-cases/create-payment.use-case';
 import { VerifyPaymentUseCaseCore } from '../../../payment-core/use-cases/verify-payment.use-case';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 
 export interface IRegisterPaymentDto {
   orderId: number;
   paymentToken?: string;
-  amount: number;
   receiptReturnPhoneNumber: string;
   returnUrl?: string;
+  clientId: number;
 }
 
 @Injectable()
@@ -22,16 +23,34 @@ export class RegisterPaymentUseCase {
     private readonly orderRepository: IOrderRepository,
     private readonly paymentUseCase: CreatePaymentUseCaseCore,
     private readonly verifyPaymentUseCase: VerifyPaymentUseCaseCore,
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
   ) {}
 
   async execute(data: IRegisterPaymentDto): Promise<any> {
-    const order = await this.orderRepository.updateStatusIf(
+    const order = await this.orderRepository.findOneById(data.orderId);
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${data.orderId} not found`);
+    }
+
+    if (order.cardMobileUserId) {
+      const card = await this.findMethodsCardUseCase.getById(
+        order.cardMobileUserId,
+      );
+      if (!card || card.mobileUserId !== data.clientId) {
+        throw new NotFoundException(`Order with ID ${data.orderId} not found`);
+      }
+    } else if (data.clientId) {
+      throw new NotFoundException(`Order with ID ${data.orderId} not found`);
+    }
+
+    const orderForProcessing = await this.orderRepository.updateStatusIf(
       data.orderId,
       OrderStatus.CREATED,
       OrderStatus.PAYMENT_PROCESSING,
     );
 
-    if (!order) {
+    if (!orderForProcessing) {
       throw new Error(
         `Order ${data.orderId} not found or already processed (not in CREATED status)`,
       );
@@ -43,25 +62,25 @@ export class RegisterPaymentUseCase {
     try {
       this.logger.log(
         {
-          orderId: order.id,
+          orderId: orderForProcessing.id,
           action: 'payment_processing',
           timestamp: new Date(),
           details: JSON.stringify({
             paymentToken: data.paymentToken || 'none (using redirect)',
-            amount: data.amount,
+            amount: orderForProcessing.sumReal,
             returnUrl: data.returnUrl || 'none',
           }),
         },
-        `Payment processing initiated for order ${order.id} with amount ${data.amount}`,
+        `Payment processing initiated for order ${orderForProcessing.id} with amount ${orderForProcessing.sumReal}`,
       );
 
-      const idempotenceKey = `order-${order.id}-register`;
+      const idempotenceKey = `order-${orderForProcessing.id}-register`;
 
       let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
       
       if (!returnUrl && !data.paymentToken) {
         const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
-        returnUrl = `${baseUrl}/payment/success?orderId=${order.id}`;
+        returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
         this.logger.warn(
           `No returnUrl provided and PAYMENT_RETURN_URL not set. Using generated default: ${returnUrl}`,
         );
@@ -75,15 +94,15 @@ export class RegisterPaymentUseCase {
               status: 'pending',
             } as any)
           : await this.paymentUseCase.create({
-              amount: String(data.amount),
+              amount: String(orderForProcessing.sumReal),
               paymentToken: data.paymentToken,
-              description: `Оплата за мойку, устройство № ${order.carWashDeviceId}`,
+              description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
               phone: data.receiptReturnPhoneNumber,
               idempotenceKey,
               returnUrl: returnUrl,
               metadata: {
-                orderId: String(order.id),
-                order_id: String(order.id),
+                orderId: String(orderForProcessing.id),
+                order_id: String(orderForProcessing.id),
               },
             });
 
@@ -102,52 +121,52 @@ export class RegisterPaymentUseCase {
           }
 
           this.logger.log(
-            `Payment ${paymentResult.id} created with status: ${payment.status} for order ${order.id}`,
+            `Payment ${paymentResult.id} created with status: ${payment.status} for order ${orderForProcessing.id}`,
           );
         } catch (verifyError: any) {
           this.logger.warn(
-            `Payment verification failed for payment ${paymentResult.id}, order ${order.id}: ${verifyError.message}`,
+            `Payment verification failed for payment ${paymentResult.id}, order ${orderForProcessing.id}: ${verifyError.message}`,
           );
         }
       }
 
       const updatedOrder = new Order({
-        id: order.id,
+        id: orderForProcessing.id,
         transactionId: paymentResult.id,
-        sumFull: order.sumFull,
-        sumReal: order.sumReal,
-        sumBonus: order.sumBonus,
-        sumDiscount: order.sumDiscount,
-        sumCashback: order.sumCashback,
-        carWashDeviceId: order.carWashDeviceId,
-        carWashId: order.carWashId,
-        bayType: order.bayType,
-        platform: order.platform,
-        cardMobileUserId: order.cardMobileUserId,
-        typeMobileUser: order.typeMobileUser,
-        orderData: order.orderData,
-        createData: order.createData,
+        sumFull: orderForProcessing.sumFull,
+        sumReal: orderForProcessing.sumReal,
+        sumBonus: orderForProcessing.sumBonus,
+        sumDiscount: orderForProcessing.sumDiscount,
+        sumCashback: orderForProcessing.sumCashback,
+        carWashDeviceId: orderForProcessing.carWashDeviceId,
+        carWashId: orderForProcessing.carWashId,
+        bayType: orderForProcessing.bayType,
+        platform: orderForProcessing.platform,
+        cardMobileUserId: orderForProcessing.cardMobileUserId,
+        typeMobileUser: orderForProcessing.typeMobileUser,
+        orderData: orderForProcessing.orderData,
+        createData: orderForProcessing.createData,
         orderStatus: OrderStatus.WAITING_PAYMENT,
-        sendAnswerStatus: order.sendAnswerStatus,
-        sendTime: order.sendTime,
-        debitingMoney: order.debitingMoney,
-        executionStatus: order.executionStatus,
-        reasonError: order.reasonError,
-        executionError: order.executionError,
-        orderHandlerStatus: order.orderHandlerStatus,
-        handlerError: order.handlerError,
+        sendAnswerStatus: orderForProcessing.sendAnswerStatus,
+        sendTime: orderForProcessing.sendTime,
+        debitingMoney: orderForProcessing.debitingMoney,
+        executionStatus: orderForProcessing.executionStatus,
+        reasonError: orderForProcessing.reasonError,
+        executionError: orderForProcessing.executionError,
+        orderHandlerStatus: orderForProcessing.orderHandlerStatus,
+        handlerError: orderForProcessing.handlerError,
       } as OrderProps);
 
       await this.orderRepository.update(updatedOrder);
 
       this.logger.log(
         {
-          orderId: order.id,
+          orderId: orderForProcessing.id,
           action: 'payment_registered',
           timestamp: new Date(),
           details: JSON.stringify(paymentResult),
         },
-        `Payment has been registered for order ${order.id} with amount ${data.amount}`,
+        `Payment has been registered for order ${orderForProcessing.id} with amount ${orderForProcessing.sumReal}`,
       );
 
       return {

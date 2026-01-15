@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@db/prisma/prisma.service';
 import {
   MarketingCampaignStatus,
@@ -46,6 +46,8 @@ export interface MarketingCampaignWithRelations {
 
 @Injectable()
 export class MarketingCampaignDiscountService {
+  private readonly logger = new Logger(MarketingCampaignDiscountService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly discountCalculationService: DiscountCalculationService,
@@ -208,7 +210,7 @@ export class MarketingCampaignDiscountService {
         cond.type !== CampaignConditionType.WEEKDAY &&
         cond.type !== CampaignConditionType.PROMOCODE_ENTRY &&
         cond.type !== CampaignConditionType.BIRTHDAY &&
-        cond.type !== CampaignConditionType.INACTIVITY, // INACTIVITY is only for behavioral campaigns
+        cond.type !== CampaignConditionType.INACTIVITY,
     );
 
     const orderData: OrderEvaluationData = {
@@ -570,10 +572,68 @@ export class MarketingCampaignDiscountService {
   }
 
   private evaluateTimeRange(condition: any, orderData: OrderEvaluationData): boolean {
-    const orderDate = new Date(orderData.orderDate);
-    const orderTime = `${orderDate.getHours().toString().padStart(2, '0')}:${orderDate.getMinutes().toString().padStart(2, '0')}`;
+    if (!condition.start || !condition.end) {
+      this.logger.warn(
+        `Time range condition missing start or end: start=${condition.start}, end=${condition.end}`,
+      );
+      return false;
+    }
 
-    return orderTime >= condition.start && orderTime <= condition.end;
+    const startMatch = condition.start.match(/^(\d{1,2}):(\d{2})$/);
+    const endMatch = condition.end.match(/^(\d{1,2}):(\d{2})$/);
+
+    if (!startMatch || !endMatch) {
+      this.logger.warn(
+        `Invalid time format in condition: start=${condition.start}, end=${condition.end}`,
+      );
+      return false;
+    }
+
+    const startHours = parseInt(startMatch[1], 10);
+    const startMinutes = parseInt(startMatch[2], 10);
+    const endHours = parseInt(endMatch[1], 10);
+    const endMinutes = parseInt(endMatch[2], 10);
+
+    if (
+      startHours < 0 ||
+      startHours > 23 ||
+      startMinutes < 0 ||
+      startMinutes > 59 ||
+      endHours < 0 ||
+      endHours > 23 ||
+      endMinutes < 0 ||
+      endMinutes > 59
+    ) {
+      this.logger.warn(
+        `Invalid time values in condition: start=${condition.start} (${startHours}:${startMinutes}), end=${condition.end} (${endHours}:${endMinutes})`,
+      );
+      return false;
+    }
+
+    const startTimeMinutes = startHours * 60 + startMinutes;
+    const endTimeMinutes = endHours * 60 + endMinutes;
+
+    const orderDate = new Date(orderData.orderDate);
+    const orderHours = orderDate.getHours();
+    const orderMinutes = orderDate.getMinutes();
+    const orderTimeMinutes = orderHours * 60 + orderMinutes;
+
+    let isInRange: boolean;
+    if (startTimeMinutes > endTimeMinutes) {
+      isInRange =
+        orderTimeMinutes >= startTimeMinutes ||
+        orderTimeMinutes <= endTimeMinutes;
+    } else {
+      isInRange =
+        orderTimeMinutes >= startTimeMinutes &&
+        orderTimeMinutes <= endTimeMinutes;
+    }
+
+    this.logger.debug(
+      `Time range evaluation: condition start=${condition.start} (${startTimeMinutes}min), end=${condition.end} (${endTimeMinutes}min), order time=${orderHours.toString().padStart(2, '0')}:${orderMinutes.toString().padStart(2, '0')} (${orderTimeMinutes}min), result=${isInRange}`,
+    );
+
+    return isInRange;
   }
 
   private evaluateWeekday(condition: any, orderData: OrderEvaluationData): boolean {

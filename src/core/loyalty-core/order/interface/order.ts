@@ -5,8 +5,26 @@ import {
   ContractType,
 } from '@loyalty/order/domain/enums';
 
+export interface OrderUsageData {
+  transactionalCampaign?: {
+    campaignId: number;
+    actionId: number;
+    ltyUserId: number;
+    posId: number;
+  };
+  promoCode?: {
+    promoCodeId: number;
+    ltyUserId: number;
+    posId: number;
+  };
+}
+
 export abstract class IOrderRepository {
   abstract create(input: Order): Promise<Order>;
+  abstract createWithUsage(
+    input: Order,
+    usageData?: OrderUsageData,
+  ): Promise<Order>;
   abstract findOneById(id: number): Promise<Order>;
   abstract findOneByTransactionId(transactionId: string): Promise<Order>;
   abstract findAllByFilter(

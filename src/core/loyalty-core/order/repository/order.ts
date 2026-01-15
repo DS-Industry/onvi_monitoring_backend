@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IOrderRepository } from '@loyalty/order/interface/order';
+import {
+  IOrderRepository,
+  OrderUsageData,
+} from '@loyalty/order/interface/order';
 import { PrismaService } from '@db/prisma/prisma.service';
 import { Order } from '@loyalty/order/domain/order';
 import { PrismaOrderMapper } from '@db/mapper/prisma-order-mapper';
@@ -8,6 +11,7 @@ import {
   PlatformType,
   ContractType,
 } from '@loyalty/order/domain/enums';
+import { CampaignRedemptionType } from '@prisma/client';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {
@@ -28,6 +32,78 @@ export class OrderRepository extends IOrderRepository {
       },
     });
     return PrismaOrderMapper.toDomain(order);
+  }
+
+  public async createWithUsage(
+    input: Order,
+    usageData?: OrderUsageData,
+  ): Promise<Order> {
+    return await this.prisma.$transaction(async (tx) => {
+      const orderEntity = PrismaOrderMapper.toPrisma(input);
+      const orderRecord = await tx.lTYOrder.create({
+        data: orderEntity,
+        include: {
+          carWashDevice: {
+            include: {
+              carWashDeviceType: true,
+            },
+          },
+        },
+      });
+      const createdOrderDomain = PrismaOrderMapper.toDomain(orderRecord);
+
+      if (usageData) {
+        if (usageData.transactionalCampaign) {
+          const { campaignId, actionId, ltyUserId, posId } =
+            usageData.transactionalCampaign;
+          await tx.marketingCampaignUsage.create({
+            data: {
+              campaignId,
+              actionId,
+              ltyUserId,
+              orderId: createdOrderDomain.id,
+              posId,
+              type: CampaignRedemptionType.DISCOUNT,
+              usedAt: new Date(),
+            },
+          });
+        } else if (usageData.promoCode) {
+          const { promoCodeId, ltyUserId, posId } = usageData.promoCode;
+
+          const promoCode = await tx.lTYPromocode.findUnique({
+            where: { id: promoCodeId },
+          });
+
+          if (promoCode) {
+            await tx.lTYPromocode.update({
+              where: { id: promoCodeId },
+              data: {
+                currentUsage: {
+                  increment: 1,
+                },
+              },
+            });
+
+            if (promoCode.campaignId) {
+              await tx.marketingCampaignUsage.create({
+                data: {
+                  campaignId: promoCode.campaignId,
+                  promocodeId: promoCodeId,
+                  ltyUserId,
+                  orderId: createdOrderDomain.id,
+                  posId,
+                  actionId: promoCode.actionId || null,
+                  type: CampaignRedemptionType.PROMOCODE,
+                  usedAt: new Date(),
+                },
+              });
+            }
+          }
+        }
+      }
+
+      return createdOrderDomain;
+    });
   }
 
   public async findOneById(id: number): Promise<Order> {

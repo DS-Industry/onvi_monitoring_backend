@@ -75,8 +75,6 @@ export class CarWashLaunchUseCase {
         throw new Error("Bay is unavailable")
       }
 
-      console.log('bayDetails', bayDetails);
-
       const totalSum = (
         order.sumFull +
         (order.sumBonus || 0) +

@@ -48,20 +48,18 @@ export class PosService implements IPosService {
     }
   }
 
-  // TODO: deviceId is undefined!
   async send(data: SendRequestDto): Promise<SendResponseDto> {
     const headers = this.buildHeaders();
     try {
       const body = {
         GVLCardNum: data.cardNumber,
         GVLCardSum: data.sum,
-        GVLSource: this.sourceCode,
+        GVLSource: this.sourceCode.toString(),
       };
 
       const url = `${this.baseUrl}/external/mobile/write/${data.deviceId}`;
-      console.log("Send Data: ~~~~~~~~~~~~~~~~~~~~~~~~~~")
-      console.log('url', url);
-      await firstValueFrom(this.httpService.post(url, body, { headers }));
+
+      await firstValueFrom(this.httpService.post(url, body, { headers }));      
       return {
         sendStatus: SendStatus.SUCCESS,
         errorMessage: null,

@@ -55,6 +55,9 @@ import {
   CashbackCalculationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
+  OrderBuilderService,
+  OrderDiscountService,
+  OrderUsageDataService,
 } from '../src/core/loyalty-core/order/domain/services';
 import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/mobile-user/order/use-cases/marketing-campaign-discount.service';
 import { IPosService } from '../src/infra/pos/interface/pos.interface';
@@ -249,19 +252,29 @@ function createUseCaseInstance() {
     discountCalculationService,
   );
 
+  // Create new domain services
+  const orderBuilderService = new OrderBuilderService(
+    tariffRepository,
+    cashbackCalculationService,
+    orderStatusDeterminationService,
+  );
+  const orderDiscountService = new OrderDiscountService(
+    marketingCampaignDiscountService,
+    promoCodeService,
+  );
+  const orderUsageDataService = new OrderUsageDataService();
+
   // Use the global mockFlowProducer that tracks calls
   const useCase = new CreateMobileOrderUseCase(
     orderRepository,
     findMethodsCardUseCase,
-    promoCodeService,
-    activationWindowRepository,
-    discountCalculationService,
     tariffRepository,
     orderValidationService,
-    cashbackCalculationService,
     freeVacuumValidationService,
     orderStatusDeterminationService,
-    marketingCampaignDiscountService,
+    orderBuilderService,
+    orderDiscountService,
+    orderUsageDataService,
     mockFlowProducer,
   );
 

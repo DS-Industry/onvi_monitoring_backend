@@ -2,6 +2,8 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { CheckCarWashStartedUseCase } from '@loyalty/mobile-user/order/use-cases/check-car-wash-started.use-case';
 import { Injectable, Logger } from '@nestjs/common';
+import { CheckCarWashStartedJobData, JobResult } from '@infra/handler/shared/job-data.types';
+import { JobValidationUtil } from '@infra/handler/shared/job-validation.util';
 
 @Processor('check-car-wash-started')
 @Injectable()
@@ -15,57 +17,131 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
     this.logger.log('[CHECK-CAR-WASH-STARTED] Consumer initialized');
   }
 
-  async process(job: Job<any>): Promise<string> {
-    const startTime = new Date().toISOString();
-    const parentId = job.parent?.id;
-    this.logger.log(
-      `[CHECK-CAR-WASH-STARTED] [${startTime}] START - Job ${job.id} for order#${job.data.orderId}. Parent: ${parentId || 'none'}`,
+  async process(job: Job<CheckCarWashStartedJobData>): Promise<string> {
+    const { orderId, carWashId, carWashDeviceId, bayType } = job.data;
+    
+    const startTime = JobValidationUtil.logJobStart(
+      job.id,
+      orderId,
+      job.attemptsMade,
+      job.opts?.attempts,
+      job.parent?.id,
+      { carWashId, carWashDeviceId, bayType },
+      this.logger,
+      'CHECK-CAR-WASH-STARTED',
     );
-    let carWashLaunchSuccess = false;
+    
+    JobValidationUtil.validateRequiredField(
+      orderId,
+      'orderId',
+      job.id || 'unknown',
+      this.logger,
+      'CHECK-CAR-WASH-STARTED',
+    );
+    
+    const carWashLaunchSuccess = await this.checkChildJobResult(job, orderId);
+
+    if (carWashLaunchSuccess) {
+      return await this.executeCheckCarWashStarted(
+        orderId,
+        carWashId,
+        carWashDeviceId,
+        bayType,
+        job,
+      );
+    } else {
+      const endTime = new Date().toISOString();
+      this.logger.warn(
+        `[CHECK-CAR-WASH-STARTED] [${endTime}] SKIPPED - Job ${job.id} skipped - car-wash-launch did not succeed for order#${orderId}`,
+      );
+      return JobResult.SKIPPED;
+    }
+  }
+
+  private async checkChildJobResult(
+    job: Job<CheckCarWashStartedJobData>,
+    orderId: number,
+  ): Promise<boolean> {
     try {
-      const childrenResults = await job.getChildrenValues<any>();
+      this.logger.log(
+        `[CHECK-CAR-WASH-STARTED] Waiting for child job (car-wash-launch) to complete...`,
+      );
+      
+      const childrenResults = await job.getChildrenValues<string>();
       const childResultsArray = Object.values(childrenResults);
+      const childKeys = Object.keys(childrenResults);
+
+      this.logger.log(
+        `[CHECK-CAR-WASH-STARTED] Received ${childResultsArray.length} child result(s). Child jobs: ${childKeys.join(', ')}`,
+      );
 
       if (childResultsArray.length > 0) {
         const childResult = childResultsArray[0];
-        carWashLaunchSuccess = childResult === 'success';
+        const success = childResult === JobResult.SUCCESS;
 
-        if (!carWashLaunchSuccess) {
+        if (!success) {
           this.logger.warn(
-            `[CHECK-CAR-WASH-STARTED] Child job car-wash-launch returned: ${childResult}`,
+            `[CHECK-CAR-WASH-STARTED] Child job car-wash-launch failed or returned non-success result: ${JSON.stringify(childResult)}`,
           );
         } else {
           this.logger.log(
             `[CHECK-CAR-WASH-STARTED] Child job car-wash-launch succeeded`,
           );
         }
+        
+        return success;
       } else {
-        this.logger.warn(`[CHECK-CAR-WASH-STARTED] No child results found`);
+        this.logger.warn(
+          `[CHECK-CAR-WASH-STARTED] No child results found - car-wash-launch may have failed or not completed`,
+        );
+        return false;
       }
     } catch (error: any) {
-      this.logger.warn(
-        `[CHECK-CAR-WASH-STARTED] Failed to get child results: ${error.message}`,
+      this.logger.error(
+        `[CHECK-CAR-WASH-STARTED] ERROR - Failed to get child results: ${error.message} | Stack: ${error.stack}`,
       );
+      return false;
     }
+  }
 
-    if (carWashLaunchSuccess) {
-      await this.checkCarWashStartedUseCase.execute(
-        job.data.orderId,
-        job.data.carWashId,
-        job.data.carWashDeviceId,
-        job.data.bayType,
-      );
-      const endTime = new Date().toISOString();
+  private async executeCheckCarWashStarted(
+    orderId: number,
+    carWashId: number,
+    carWashDeviceId: number,
+    bayType: any,
+    job: Job<CheckCarWashStartedJobData>,
+  ): Promise<string> {
+    try {
       this.logger.log(
-        `[CHECK-CAR-WASH-STARTED] [${endTime}] END - Job ${job.id} completed successfully for order#${job.data.orderId}`,
+        `[CHECK-CAR-WASH-STARTED] Executing checkCarWashStartedUseCase for order#${orderId}`,
       );
-      return 'success';
-    } else {
-      const endTime = new Date().toISOString();
-      this.logger.warn(
-        `[CHECK-CAR-WASH-STARTED] [${endTime}] END - Job ${job.id} skipped - car-wash-launch did not succeed for order#${job.data.orderId}`,
+      
+      await this.checkCarWashStartedUseCase.execute(
+        orderId,
+        carWashId,
+        carWashDeviceId,
+        bayType,
       );
-      return 'skipped';
+      
+      JobValidationUtil.logJobSuccess(
+        job.id,
+        orderId,
+        new Date().toISOString(),
+        this.logger,
+        'CHECK-CAR-WASH-STARTED',
+      );
+      
+      return JobResult.SUCCESS;
+    } catch (error: any) {
+      JobValidationUtil.logJobError(
+        error,
+        job.id,
+        orderId,
+        job.attemptsMade,
+        this.logger,
+        'CHECK-CAR-WASH-STARTED',
+      );
+      throw error;
     }
   }
 }
