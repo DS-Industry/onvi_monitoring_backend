@@ -19,6 +19,7 @@ import { UpdateMobileOrderUseCase } from '@loyalty/mobile-user/order/use-cases/m
 import { GetMobileOrderByTransactionIdUseCase } from '@loyalty/mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { GetActivationWindowsUseCase } from '@loyalty/mobile-user/order/use-cases/get-activation-windows.use-case';
 import { CalculateOrderDiscountPreviewUseCase } from '@loyalty/mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
+import { GetAvailableMarketingCampaignsUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CalculateDiscountDto } from './dto/calculate-discount.dto';
@@ -44,6 +45,7 @@ export class OrderController {
     private readonly getMobileOrderByTransactionIdUseCase: GetMobileOrderByTransactionIdUseCase,
     private readonly getActivationWindowsUseCase: GetActivationWindowsUseCase,
     private readonly calculateOrderDiscountPreviewUseCase: CalculateOrderDiscountPreviewUseCase,
+    private readonly getAvailableMarketingCampaignsUseCase: GetAvailableMarketingCampaignsUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
   ) {}
@@ -98,6 +100,21 @@ export class OrderController {
       promoCodeId: data?.promoCodeId ?? null,
       rewardPointsUsed: data.rewardPointsUsed ?? 0,
     });
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('marketing-campaigns')
+  @HttpCode(HttpStatus.OK)
+  async getAvailableMarketingCampaigns(
+    @Req() req: AuthenticatedRequest,
+    @Query('carWashId') carWashId?: string,
+  ) {
+    const { user } = req;
+
+    return await this.getAvailableMarketingCampaignsUseCase.execute(
+      user.id,
+      carWashId ? Number(carWashId) : undefined,
+    );
   }
 
   @UseGuards(JwtGuard)
