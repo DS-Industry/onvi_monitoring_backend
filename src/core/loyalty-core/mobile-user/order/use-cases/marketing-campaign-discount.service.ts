@@ -32,6 +32,7 @@ export interface OrderEvaluationData {
 
 export interface MarketingCampaignWithRelations {
   id: number;
+  name: string;
   executionType: CampaignExecutionType;
   action?: {
     id: number;
@@ -138,7 +139,10 @@ export class MarketingCampaignDiscountService {
 
     const campaigns = await this.prisma.marketingCampaign.findMany({
       where: campaignFilter,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        executionType: true,
         action: {
           select: {
             id: true,
