@@ -15,7 +15,7 @@ export class ValidateClientForLocalStrategyUseCase {
     phone: string,
     otp: string,
   ): Promise<Client | { register: boolean }> {
-    const isValidOtp = await this.otpService.validateOtp(phone, otp);
+    const isValidOtp = await this.otpService.validateOtp(phone, otp, false);
     if (!isValidOtp) {
       throw new Error('Invalid OTP');
     }
@@ -25,6 +25,8 @@ export class ValidateClientForLocalStrategyUseCase {
     if (!client) {
       return { register: true };
     }
+
+    await this.otpService.removeOtp(phone);
 
     if (
       client.status === StatusUser.BLOCKED ||

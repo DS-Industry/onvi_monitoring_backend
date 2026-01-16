@@ -43,7 +43,11 @@ export class RedisOtpService extends IOtpService {
     );
   }
 
-  async validateOtp(phone: string, code: string): Promise<boolean> {
+  async validateOtp(
+    phone: string,
+    code: string,
+    deleteOnSuccess: boolean = true,
+  ): Promise<boolean> {
     const currentOtp = await this.otpRepository.findOne(phone);
 
     if (!currentOtp) {
@@ -63,7 +67,9 @@ export class RedisOtpService extends IOtpService {
       return false;
     }
 
-    await this.otpRepository.removeOne(phone);
+    if (deleteOnSuccess) {
+      await this.otpRepository.removeOne(phone);
+    }
     return true;
   }
 
