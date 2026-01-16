@@ -22,6 +22,7 @@ export interface DiscountResult {
   promoCodeDiscount: number;
   usedTransactionalCampaign: {
     campaignId: number;
+    campaignName: string;
     actionId: number;
     discountAmount: number;
   } | null;
@@ -73,6 +74,7 @@ export class OrderDiscountService {
     discountAmount: number;
     campaign: {
       campaignId: number;
+      campaignName: string;
       actionId: number;
       discountAmount: number;
     } | null;
@@ -98,6 +100,7 @@ export class OrderDiscountService {
 
     const transactionalDiscounts: Array<{
       campaignId: number;
+      campaignName: string;
       actionId: number;
       discountAmount: number;
     }> = [];
@@ -118,6 +121,7 @@ export class OrderDiscountService {
         if (discountResult && discountResult.discountAmount > 0) {
           transactionalDiscounts.push({
             campaignId: discountResult.campaignId,
+            campaignName: campaign.name || '',
             actionId: discountResult.actionId,
             discountAmount: discountResult.discountAmount,
           });
