@@ -9,9 +9,9 @@ export class ClientMetaCreateDto {
   @IsNotEmpty({ message: 'clientId is required' })
   clientId: number;
 
-  @IsNumber()
+  @IsString()
   @IsNotEmpty({ message: 'deviceId is required' })
-  deviceId: number;
+  deviceId: string;
 
   @IsString()
   @IsNotEmpty({ message: 'model is required' })

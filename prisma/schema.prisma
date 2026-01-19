@@ -726,7 +726,7 @@ model LTYUser {
 model LTYUserMeta {
   id       Int     @id @default(autoincrement())
   clientId Int     @unique
-  deviceId Int
+  deviceId String
   model    String
   name     String
   platform String

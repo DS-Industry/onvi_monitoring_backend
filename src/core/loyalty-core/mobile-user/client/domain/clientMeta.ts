@@ -3,7 +3,7 @@ import { BaseEntity } from '@utils/entity';
 export interface ClientMetaProps {
   id?: number;
   clientId: number;
-  deviceId: number;
+  deviceId: string;
   model: string;
   name: string;
   platform: string;
@@ -22,7 +22,7 @@ export class ClientMeta extends BaseEntity<ClientMetaProps> {
     return this.props.clientId;
   }
 
-  get deviceId(): number {
+  get deviceId(): string {
     return this.props.deviceId;
   }
 
@@ -38,7 +38,7 @@ export class ClientMeta extends BaseEntity<ClientMetaProps> {
     return this.props.platform;
   }
 
-  set deviceId(deviceId: number) {
+  set deviceId(deviceId: string) {
     this.props.deviceId = deviceId;
   }
 
