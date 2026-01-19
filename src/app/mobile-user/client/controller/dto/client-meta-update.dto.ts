@@ -9,9 +9,9 @@ export class ClientMetaUpdateDto {
   @IsOptional()
   clientId?: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  deviceId?: number;
+  deviceId?: string;
 
   @IsString()
   @IsOptional()

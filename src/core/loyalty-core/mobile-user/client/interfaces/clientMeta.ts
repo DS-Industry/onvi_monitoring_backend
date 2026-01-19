@@ -5,7 +5,7 @@ export abstract class IClientMetaRepository {
   abstract createMany(input: ClientMeta[]): Promise<ClientMeta[]>;
   abstract findOneById(id: number): Promise<ClientMeta>;
   abstract findOneByClientId(clientId: number): Promise<ClientMeta>;
-  abstract findOneByDeviceId(deviceId: number): Promise<ClientMeta>;
+  abstract findOneByDeviceId(deviceId: string): Promise<ClientMeta>;
   abstract findAll(): Promise<ClientMeta[]>;
   abstract update(input: ClientMeta): Promise<ClientMeta>;
   abstract remove(id: number): Promise<any>;

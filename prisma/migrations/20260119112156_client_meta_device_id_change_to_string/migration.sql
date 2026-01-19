@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "LTYUserMeta" ALTER COLUMN "deviceId" SET DATA TYPE TEXT;

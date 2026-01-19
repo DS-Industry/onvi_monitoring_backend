@@ -49,7 +49,7 @@ export class ClientMetaRepository extends IClientMetaRepository {
     return PrismaMobileUserMapper.toDomainClientMeta(clientMeta);
   }
 
-  public async findOneByDeviceId(deviceId: number): Promise<ClientMeta> {
+  public async findOneByDeviceId(deviceId: string): Promise<ClientMeta> {
     const clientMeta = await this.prisma.lTYUserMeta.findFirst({
       where: {
         deviceId,
