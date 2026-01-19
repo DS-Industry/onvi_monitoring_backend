@@ -116,7 +116,7 @@ export class ClientController {
   @HttpCode(204)
   async deleteAccount(@Request() request: any): Promise<void> {
     const { user } = request;
-    await this.deleteClientUseCase.execute(user.clientId);
+    await this.deleteClientUseCase.execute(user.props.id);
   }
 
   @Get(':id')
