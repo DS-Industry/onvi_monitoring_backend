@@ -8,14 +8,14 @@ set -e
 usage() {
   cat <<EOF
 Usage:
-  npm run build:prod <backend_ver> <report_ver> <data_raw_ver> <cron_ver>
+  npm run build:prod <backend_ver> <report_ver> <data_raw_ver> <cron_ver> <payment_orchestrator_ver>
 
   or with named args (recommended with npm):
-  npm run build:prod -- --backend <ver> --report <ver> --data-raw <ver> --cron <ver>
+  npm run build:prod -- --backend <ver> --report <ver> --data-raw <ver> --cron <ver> --payment-orchestrator <ver>
 
 Examples:
-  npm run build:prod 0.7.5 1.3.0 0.9.2 2.1.0
-  npm run build:prod -- --backend 0.7.5 --report 1.3.0 --data-raw 0.9.2 --cron 2.1.0
+  npm run build:prod 0.7.5 1.3.0 0.9.2 2.1.0 1.0.0
+  npm run build:prod -- --backend 0.7.5 --report 1.3.0 --data-raw 0.9.2 --cron 2.1.0 --payment-orchestrator 1.0.0
 EOF
 }
 
@@ -32,6 +32,7 @@ BACKEND_VER=""
 REPORT_VER=""
 DATA_RAW_VER=""
 CRON_VER=""
+PAYMENT_ORCHESTRATOR_VER=""
 
 # =========================
 #  Parse args
@@ -62,6 +63,10 @@ if [[ "$1" == --* ]]; then
         CRON_VER="$2"
         shift 2
         ;;
+      --payment-orchestrator|--payment_orchestrator)
+        PAYMENT_ORCHESTRATOR_VER="$2"
+        shift 2
+        ;;
       --help|-h)
         usage
         exit 0
@@ -79,13 +84,14 @@ else
   REPORT_VER="$2"
   DATA_RAW_VER="$3"
   CRON_VER="$4"
+  PAYMENT_ORCHESTRATOR_VER="$5"
 fi
 
 # =========================
 #  Validate presence
 # =========================
 
-if [[ -z "$BACKEND_VER" || -z "$REPORT_VER" || -z "$DATA_RAW_VER" || -z "$CRON_VER" ]]; then
+if [[ -z "$BACKEND_VER" || -z "$REPORT_VER" || -z "$DATA_RAW_VER" || -z "$CRON_VER" || -z "$PAYMENT_ORCHESTRATOR_VER" ]]; then
   echo "❌ ERROR: Not enough arguments."
   usage
   exit 1
@@ -99,7 +105,8 @@ for pair in \
   "Backend:$BACKEND_VER" \
   "Report worker:$REPORT_VER" \
   "Data raw worker:$DATA_RAW_VER" \
-  "Cron worker:$CRON_VER"
+  "Cron worker:$CRON_VER" \
+  "Payment orchestrator:$PAYMENT_ORCHESTRATOR_VER"
 do
   NAME="${pair%%:*}"
   VER="${pair##*:}"
@@ -111,10 +118,11 @@ do
 done
 
 echo "✅ Versions accepted:"
-echo "   Backend:        $BACKEND_VER"
-echo "   Report worker:  $REPORT_VER"
-echo "   Data raw:       $DATA_RAW_VER"
-echo "   Cron:           $CRON_VER"
+echo "   Backend:              $BACKEND_VER"
+echo "   Report worker:        $REPORT_VER"
+echo "   Data raw:             $DATA_RAW_VER"
+echo "   Cron:                 $CRON_VER"
+echo "   Payment orchestrator: $PAYMENT_ORCHESTRATOR_VER"
 echo ""
 
 # =========================
@@ -130,6 +138,7 @@ docker buildx build \
   -t devonvione/onvi_business_report_worker:$REPORT_VER \
   -t devonvione/onvi_business_data_raw_worker:$DATA_RAW_VER \
   -t devonvione/onvi_business_cron:$CRON_VER \
+  -t devonvione/onvi_business_payment_orchestrator:$PAYMENT_ORCHESTRATOR_VER \
   -f Dockerfile \
   . \
   --push
@@ -140,4 +149,5 @@ echo "   devonvione/onvi_business_backend:$BACKEND_VER"
 echo "   devonvione/onvi_business_report_worker:$REPORT_VER"
 echo "   devonvione/onvi_business_data_raw_worker:$DATA_RAW_VER"
 echo "   devonvione/onvi_business_cron:$CRON_VER"
+echo "   devonvione/onvi_business_payment_orchestrator:$PAYMENT_ORCHESTRATOR_VER"
 echo ""
