@@ -10,10 +10,10 @@ export class UpdateClientMetaUseCase {
 
   async execute(dto: ClientMetaUpdateDto): Promise<ClientMeta> {
     const existingMeta = await this.clientMetaRepository.findOneById(
-      dto.metaId,
+      dto.id,
     );
     if (!existingMeta) {
-      throw new ClientMetaNotFoundExceptions(dto.metaId);
+      throw new ClientMetaNotFoundExceptions(dto.id);
     }
 
     if (dto.deviceId !== undefined) existingMeta.deviceId = dto.deviceId;

@@ -2,8 +2,8 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class ClientMetaUpdateDto {
   @IsNumber()
-  @IsNotEmpty({ message: 'metaId is required' })
-  metaId: number;
+  @IsNotEmpty({ message: 'id is required' })
+  id: number;
 
   @IsNumber()
   @IsOptional()
