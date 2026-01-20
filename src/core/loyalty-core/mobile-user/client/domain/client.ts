@@ -21,6 +21,9 @@ export interface ClientProps {
   cardId?: number;
   is_notifications_enabled?: boolean;
   meta?: ClientMeta;
+  cardUnqNumber?: string; 
+  cardNumber?: string;    
+  cardBalance?: number;   
 }
 
 export class Client extends BaseEntity<ClientProps> {
@@ -90,6 +93,18 @@ export class Client extends BaseEntity<ClientProps> {
 
   get cardId(): number {
     return this.props.cardId;
+  }
+
+  get cardUnqNumber(): string {
+    return this.props.cardUnqNumber;
+  }
+
+  get cardNumber(): string {
+    return this.props.cardNumber;
+  }
+
+  get cardBalance(): number {
+    return this.props.cardBalance;
   }
 
   get meta(): ClientMeta {
