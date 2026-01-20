@@ -26,18 +26,17 @@ export class ValidateClientForLocalStrategyUseCase {
       return { register: true };
     }
 
-    await this.otpService.removeOtp(phone);
-
     if (
-      client.status === StatusUser.BLOCKED ||
-      client.status === StatusUser.DELETED
+      client.status === StatusUser.BLOCKED
     ) {
       throw new Error('Client account is blocked or deleted');
     }
 
     if (client.status !== StatusUser.ACTIVE) {
-      throw new Error('Client account is not active');
+      return { register: true };
     }
+
+    await this.otpService.removeOtp(phone);
 
     return client;
   }

@@ -50,26 +50,29 @@ export class RegisterClientUseCase {
     }
 
     const existingClient = await this.findClientUseCase.getByPhone(phone);
+
+    let client: Client;
+
     if (existingClient) {
       if (
-        existingClient.status === StatusUser.BLOCKED ||
-        existingClient.status === StatusUser.DELETED
+        existingClient.status === StatusUser.BLOCKED
       ) {
         throw new Error('Client account is blocked or deleted');
       }
-      throw new Error('Client already exists');
+      existingClient.status = StatusUser.ACTIVE;
+      client = await this.clientRepository.update(existingClient);
+    } else {
+      const clientData = new Client({
+        name: `Onvi ${phone}`,
+        phone: phone,
+        contractType: ContractType.INDIVIDUAL,
+        status: StatusUser.ACTIVE,
+      });
+
+      client = await this.clientRepository.create(clientData);
+
+      await this.createCardForClient(client.id);
     }
-
-    const clientData = new Client({
-      name: `Onvi ${phone}`,
-      phone: phone,
-      contractType: ContractType.INDIVIDUAL,
-      status: StatusUser.ACTIVE,
-    });
-
-    const client = await this.clientRepository.create(clientData);
-
-    await this.createCardForClient(client.id);
 
     const tokens = await this.tokenService.generateTokens({
       phone: client.phone,
