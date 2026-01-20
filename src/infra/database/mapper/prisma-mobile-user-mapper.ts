@@ -35,6 +35,9 @@ export class PrismaMobileUserMapper {
       is_notifications_enabled: entity.is_notifications_enabled,
       meta: entity.meta ? this.toDomainClientMeta(entity.meta) : undefined,
       cardId: entity.card?.id,
+      cardUnqNumber: entity.card?.unqNumber,  
+      cardNumber: entity.card?.number,     
+      cardBalance: entity.card?.balance,   
     });
   }
 
