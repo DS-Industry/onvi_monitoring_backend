@@ -55,11 +55,16 @@ export class GetAvailableMarketingCampaignsUseCase {
         clientId: ltyUserId,
       },
       select: {
-        organizationId: true,
+        cardTierId: true,
+        cardTier: {
+          select: {
+            ltyProgramId: true,
+          },
+        },
       },
     });
 
-    const organizationId = cardData?.organizationId || null;
+    const ltyProgramId = cardData?.cardTier?.ltyProgramId || null;
 
     const userEligibilityFilter: any[] = [
       {
@@ -71,27 +76,11 @@ export class GetAvailableMarketingCampaignsUseCase {
       },
     ];
 
-    if (organizationId) {
-      userEligibilityFilter.push(
-        {
-          ltyProgramParticipant: {
-            organizationId: organizationId,
-          },
-        },
-        {
-          ltyProgram: {
-            programParticipants: {
-              some: {
-                organizationId: organizationId,
-                status: 'ACTIVE',
-              },
-            },
-          },
-        },
-      );
-    }
-
-    if (!organizationId) {
+    if (ltyProgramId) {
+      userEligibilityFilter.push({
+        ltyProgramId: ltyProgramId,
+      });
+    } else {
       userEligibilityFilter.push({
         AND: [
           { ltyUsers: { none: {} } },
