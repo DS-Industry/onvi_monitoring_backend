@@ -244,6 +244,7 @@ model Pos {
   managerPaper           ManagerPaper[]
   marketingCampaignUsage MarketingCampaignUsage[]
   monthlyPlans           MonthlyPlanPos[]
+  favorites              LTYUserFavorites[]
   address                Address?                 @relation(fields: [addressId], references: [id])
   createdBy              User                     @relation("CreatedByUser", fields: [createdById], references: [id])
   organization           Organization             @relation(fields: [organizationId], references: [id])
@@ -721,6 +722,7 @@ model LTYUser {
   marketingCampaigns       MarketingCampaign[]      @relation("MarketingCampaignToLTYUser")
   campaignProgress         UserCampaignProgress[]
   activationWindows        ActivationWindow[]
+  favorites                LTYUserFavorites[]       @relation("LTYUserToLTYUserFavorites")
 }
 
 model LTYUserMeta {
@@ -731,6 +733,18 @@ model LTYUserMeta {
   name     String
   platform String
   client   LTYUser @relation("LTYUserToLTYUserMeta", fields: [clientId], references: [id])
+}
+
+model LTYUserFavorites {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  posId     Int
+  createdAt DateTime @default(now())
+  client    LTYUser  @relation("LTYUserToLTYUserFavorites", fields: [clientId], references: [id], onDelete: Cascade)
+  pos       Pos      @relation(fields: [posId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, posId])
+  @@index([clientId])
 }
 
 model LTYCorporate {

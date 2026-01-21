@@ -7,6 +7,7 @@ import { CreateClientMetaUseCase } from './use-cases/create-client-meta.use-case
 import { UpdateClientMetaUseCase } from './use-cases/update-client-meta.use-case';
 import { CreateClientUseCaseWrapper } from './use-cases/create-client.use-case';
 import { UpdateClientUseCaseWrapper } from './use-cases/update-client.use-case';
+import { FavoritesUseCase } from './use-cases/favorites.use-case';
 
 @Module({
   imports: [LoyaltyCoreModule],
@@ -18,6 +19,7 @@ import { UpdateClientUseCaseWrapper } from './use-cases/update-client.use-case';
     UpdateClientMetaUseCase,
     CreateClientUseCaseWrapper,
     UpdateClientUseCaseWrapper,
+    FavoritesUseCase,
   ],
   exports: [
     UpdateAccountUseCase,

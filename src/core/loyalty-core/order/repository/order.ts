@@ -189,6 +189,15 @@ export class OrderRepository extends IOrderRepository {
         carWashDevice: {
           include: {
             carWashDeviceType: true,
+            carWasPos: {
+              include: {
+                pos: {
+                  include: {
+                    address: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

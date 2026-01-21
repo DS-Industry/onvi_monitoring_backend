@@ -20,6 +20,12 @@ import { GetMobileOrderByTransactionIdUseCase } from '@loyalty/mobile-user/order
 import { GetActivationWindowsUseCase } from '@loyalty/mobile-user/order/use-cases/get-activation-windows.use-case';
 import { CalculateOrderDiscountPreviewUseCase } from '@loyalty/mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
 import { GetAvailableMarketingCampaignsUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
+import { GetAvailablePromocodesUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-promocodes.use-case';
+import {
+  PROMOCODE_FILTER,
+  VALID_PROMOCODE_FILTERS,
+  PromocodeFilterType,
+} from '@loyalty/mobile-user/order/constants/promocode-filter.constants';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CalculateDiscountDto } from './dto/calculate-discount.dto';
@@ -46,6 +52,7 @@ export class OrderController {
     private readonly getActivationWindowsUseCase: GetActivationWindowsUseCase,
     private readonly calculateOrderDiscountPreviewUseCase: CalculateOrderDiscountPreviewUseCase,
     private readonly getAvailableMarketingCampaignsUseCase: GetAvailableMarketingCampaignsUseCase,
+    private readonly getAvailablePromocodesUseCase: GetAvailablePromocodesUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
   ) {}
@@ -114,6 +121,28 @@ export class OrderController {
     return await this.getAvailableMarketingCampaignsUseCase.execute(
       user.id,
       carWashId ? Number(carWashId) : undefined,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('promocodes')
+  @HttpCode(HttpStatus.OK)
+  async getAvailablePromocodes(
+    @Req() req: AuthenticatedRequest,
+    @Query('carWashId') carWashId?: string,
+    @Query('filter') filter?: string,
+  ) {
+    const { user } = req;
+
+    const validFilter: PromocodeFilterType =
+      filter && VALID_PROMOCODE_FILTERS.includes(filter as PromocodeFilterType)
+        ? (filter as PromocodeFilterType)
+        : PROMOCODE_FILTER.ALL;
+
+    return await this.getAvailablePromocodesUseCase.execute(
+      user.id,
+      carWashId ? Number(carWashId) : undefined,
+      validFilter,
     );
   }
 

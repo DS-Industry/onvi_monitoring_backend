@@ -16,6 +16,8 @@ export interface TransactionHistoryItem {
   orderStatus: OrderStatus;
   platform: string;
   carWashDeviceId: number;
+  posName: string | null;
+  posAddress: string | null;
 }
 
 export interface TransactionsHistoryResponse {
@@ -94,6 +96,8 @@ export class GetCardTransactionsHistoryUseCase {
         orderStatus: order.orderStatus,
         platform: order.platform,
         carWashDeviceId: order.carWashDeviceId,
+        posName: order.posName || null,
+        posAddress: order.posAddress || null,
       })),
       meta: {
         total,

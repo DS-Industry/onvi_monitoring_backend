@@ -82,6 +82,7 @@ import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/pr
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
+import { FavoritesRepositoryProvider } from './mobile-user/client/provider/favorites';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { ShouldAddMarketingRewardsUseCase } from '@loyalty/order/use-cases/should-add-marketing-rewards.use-case';
@@ -110,6 +111,7 @@ import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
 import { CalculateOrderDiscountPreviewUseCase } from './mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
 import { GetAvailableMarketingCampaignsUseCase } from './mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
+import { GetAvailablePromocodesUseCase } from './mobile-user/order/use-cases/get-available-promocodes.use-case';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
 import { GetActivationWindowsUseCase } from './mobile-user/order/use-cases/get-activation-windows.use-case';
@@ -140,6 +142,7 @@ import {
 const repositories: Provider[] = [
   ClientRepositoryProvider,
   ClientMetaRepositoryProvider,
+  FavoritesRepositoryProvider,
   TagRepositoryProvider,
   CardRepositoryProvider,
   LoyaltyProgramRepositoryProvider,
@@ -262,6 +265,7 @@ const mobileOrderUseCase: Provider[] = [
   GetMobileOrderByTransactionIdUseCase,
   CalculateOrderDiscountPreviewUseCase,
   GetAvailableMarketingCampaignsUseCase,
+  GetAvailablePromocodesUseCase,
   PromoCodeService,
   GetActivationWindowsUseCase,
   StartPosUseCase,

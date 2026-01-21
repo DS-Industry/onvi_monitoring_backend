@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -12,6 +13,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Req,
 } from '@nestjs/common';
 import { GetByIdClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-get-by-id';
 import { DeleteClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-delete';
@@ -29,6 +31,9 @@ import { ClientMetaCreateDto } from './dto/client-meta-create.dto';
 import { ClientMetaUpdateDto } from './dto/client-meta-update.dto';
 import { ClientResponseDto } from './dto/client-response.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
+import { FavoritesUseCase } from '../use-cases/favorites.use-case';
+import { AccountFavoritesDto } from './dto/account-favorites.dto';
+import { CustomHttpException } from '@infra/exceptions/custom-http.exception';
 
 @Controller('client')
 export class ClientController {
@@ -42,6 +47,7 @@ export class ClientController {
     private readonly createClientMetaUseCase: CreateClientMetaUseCase,
     private readonly updateClientMetaUseCase: UpdateClientMetaUseCase,
     private readonly getActivePromotionsUseCase: GetActivePromotionsForClientUseCase,
+    private readonly favoritesUseCase: FavoritesUseCase,
   ) {}
   @Post()
   @HttpCode(201)
@@ -145,5 +151,65 @@ export class ClientController {
   @HttpCode(204)
   async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.deleteClientUseCase.execute(id);
+  }
+
+  @Get('/favorites')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async getFavorites(@Req() request: any): Promise<number[]> {
+    try {
+      const { user } = request;
+
+      return await this.favoritesUseCase.getFavoritesByClientId(user.id);
+    } catch (e) {
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @Post('/favorites')
+  @UseGuards(JwtGuard)
+  @HttpCode(201)
+  async addFavorites(
+    @Body() body: AccountFavoritesDto,
+    @Req() request: any,
+  ): Promise<number[]> {
+    try {
+      const { user } = request;
+
+      return await this.favoritesUseCase.addFavoritesByClientId(
+        body,
+        user.id,
+      );
+    } catch (e) {
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
+  }
+
+  @Delete('/favorites')
+  @UseGuards(JwtGuard)
+  @HttpCode(200)
+  async removeFavorite(
+    @Body() body: AccountFavoritesDto,
+    @Req() request: any,
+  ): Promise<number[]> {
+    try {
+      const { user } = request;
+
+      return await this.favoritesUseCase.removeFavoriteByClientId(
+        body,
+        user.id,
+      );
+    } catch (e) {
+      throw new CustomHttpException({
+        message: e.message,
+        code: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
+    }
   }
 }

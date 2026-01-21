@@ -33,6 +33,8 @@ export interface OrderProps {
   executionError?: string;
   orderHandlerStatus?: OrderHandlerStatus;
   handlerError?: string;
+  posName?: string;
+  posAddress?: string;
 }
 
 export class Order extends BaseEntity<OrderProps> {
@@ -182,5 +184,13 @@ export class Order extends BaseEntity<OrderProps> {
 
   set sumReal(sumReal: number) {
     this.props.sumReal = sumReal;
+  }
+
+  get posName(): string | undefined {
+    return this.props.posName;
+  }
+
+  get posAddress(): string | undefined {
+    return this.props.posAddress;
   }
 }
