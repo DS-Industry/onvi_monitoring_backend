@@ -12,7 +12,10 @@ export class JwtTokenService implements IJwtAdapter {
     });
   }
 
-  async validate(token: string): Promise<any> {
+  async validate(token: string, secret?: string): Promise<any> {
+    if (secret) {
+      return await this.jwtService.verifyAsync(token, { secret });
+    }
     return await this.jwtService.verifyAsync(token);
   }
 }

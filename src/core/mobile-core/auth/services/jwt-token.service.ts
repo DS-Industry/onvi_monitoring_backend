@@ -82,7 +82,11 @@ export class JwtTokenService extends ITokenService {
   }
 
   async validateRefreshToken(token: string): Promise<TokenPayload> {
-    return this.jwtService.validate(token);
+    const secret = this.configService.get<string>('jwtRefreshTokenSecret');
+    if (!secret) {
+      throw new Error('JWT_REFRESH_TOKEN_SECRET is not configured');
+    }
+    return this.jwtService.validate(token, secret);
   }
 
   async refreshTokens(refreshToken: string): Promise<TokenPair> {
