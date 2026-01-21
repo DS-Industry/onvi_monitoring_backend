@@ -3,6 +3,9 @@ import {
   Prisma,
   CarWashDevice,
   CarWashDeviceType,
+  CarWashPos,
+  Pos,
+  Address,
 } from '@prisma/client';
 import { Order } from '@loyalty/order/domain/order';
 import { EnumMapper } from './enum-mapper';
@@ -10,7 +13,14 @@ import { EnumMapper } from './enum-mapper';
 export class PrismaOrderMapper {
   static toDomain(
     entity: PrismaOrder & {
-      carWashDevice?: CarWashDevice & { carWashDeviceType?: CarWashDeviceType };
+      carWashDevice?: CarWashDevice & {
+        carWashDeviceType?: CarWashDeviceType;
+        carWasPos?: CarWashPos & {
+          pos?: Pos & {
+            address?: Address | null;
+          };
+        };
+      };
     },
   ): Order {
     if (!entity) {
@@ -47,6 +57,8 @@ export class PrismaOrderMapper {
       orderHandlerStatus: entity.orderHandlerStatus
         ? EnumMapper.toDomainOrderHandlerStatus(entity.orderHandlerStatus)
         : undefined,
+      posName: entity.carWashDevice?.carWasPos?.name,
+      posAddress: entity.carWashDevice?.carWasPos?.pos?.address?.location || undefined,
     });
   }
 
