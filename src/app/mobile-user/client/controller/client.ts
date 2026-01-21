@@ -117,41 +117,6 @@ export class ClientController {
     return { status: 'SUCCESS' };
   }
 
-  @Delete()
-  @UseGuards(JwtGuard)
-  @HttpCode(204)
-  async deleteAccount(@Request() request: any): Promise<void> {
-    const { user } = request;
-    await this.deleteClientUseCase.execute(user.props.id);
-  }
-
-  @Get(':id')
-  @HttpCode(200)
-  async getOneById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<ClientResponseDto> {
-    const client = await this.getClientByIdUseCase.execute(id);
-    return new ClientResponseDto(client);
-  }
-
-  @Put(':id')
-  @HttpCode(200)
-  async updateClient(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateData: UpdateClientDto,
-  ): Promise<ClientResponseDto> {
-    const client = await this.updateClientUseCaseWrapper.execute(
-      id,
-      updateData,
-    );
-    return new ClientResponseDto(client);
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.deleteClientUseCase.execute(id);
-  }
 
   @Get('/favorites')
   @UseGuards(JwtGuard)
@@ -211,5 +176,41 @@ export class ClientController {
         code: HttpStatus.INTERNAL_SERVER_ERROR,
       });
     }
+  }
+
+  @Delete()
+  @UseGuards(JwtGuard)
+  @HttpCode(204)
+  async deleteAccount(@Request() request: any): Promise<void> {
+    const { user } = request;
+    await this.deleteClientUseCase.execute(user.props.id);
+  }
+
+  @Get(':id')
+  @HttpCode(200)
+  async getOneById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ClientResponseDto> {
+    const client = await this.getClientByIdUseCase.execute(id);
+    return new ClientResponseDto(client);
+  }
+
+  @Put(':id')
+  @HttpCode(200)
+  async updateClient(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: UpdateClientDto,
+  ): Promise<ClientResponseDto> {
+    const client = await this.updateClientUseCaseWrapper.execute(
+      id,
+      updateData,
+    );
+    return new ClientResponseDto(client);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteClient(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.deleteClientUseCase.execute(id);
   }
 }
