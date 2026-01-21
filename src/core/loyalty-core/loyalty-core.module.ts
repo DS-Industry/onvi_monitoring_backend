@@ -82,6 +82,7 @@ import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/pr
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
+import { FavoritesRepositoryProvider } from './mobile-user/client/provider/favorites';
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { ShouldAddMarketingRewardsUseCase } from '@loyalty/order/use-cases/should-add-marketing-rewards.use-case';
@@ -140,6 +141,7 @@ import {
 const repositories: Provider[] = [
   ClientRepositoryProvider,
   ClientMetaRepositoryProvider,
+  FavoritesRepositoryProvider,
   TagRepositoryProvider,
   CardRepositoryProvider,
   LoyaltyProgramRepositoryProvider,
