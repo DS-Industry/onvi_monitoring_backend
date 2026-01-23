@@ -76,35 +76,32 @@ export class RegisterPaymentUseCase {
 
       const idempotenceKey = `order-${orderForProcessing.id}-register`;
 
-      let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
+      // Always try to get returnUrl - will be used for confirmation even with paymentToken
+      // let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
       
-      if (!returnUrl && !data.paymentToken) {
-        const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
-        returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
-        this.logger.warn(
-          `No returnUrl provided and PAYMENT_RETURN_URL not set. Using generated default: ${returnUrl}`,
-        );
-      }
+      // Generate default returnUrl if not provided (for both paymentToken and non-paymentToken flows)
+      // if (!returnUrl) {
+      //   const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
+      //   returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
+      //   this.logger.log(
+      //     `Using generated returnUrl: ${returnUrl} for order ${orderForProcessing.id}`,
+      //   );
+      // }
 
-      paymentResult =
-        process.env.PAYMENT_TEST_MODE === 'true'
-          ? ({
-              id: randomUUID(),
-              confirmation: { confirmation_url: '' },
-              status: 'pending',
-            } as any)
-          : await this.paymentUseCase.create({
+      paymentResult = await this.paymentUseCase.create({
               amount: String(orderForProcessing.sumReal),
               paymentToken: data.paymentToken,
               description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
               phone: data.receiptReturnPhoneNumber,
               idempotenceKey,
-              returnUrl: returnUrl,
+              // returnUrl: returnUrl, // Pass returnUrl even when paymentToken is provided
               metadata: {
                 orderId: String(orderForProcessing.id),
                 order_id: String(orderForProcessing.id),
               },
             });
+
+        console.log("paymentResult", paymentResult);
 
       paymentCreated = true;
 

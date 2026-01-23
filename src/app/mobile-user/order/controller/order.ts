@@ -36,6 +36,7 @@ import { RegisterPaymentDto } from './dto/register-payment.dto';
 import { OrderStatus } from '@loyalty/order/domain/enums';
 import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { GetGatewayCredentialsUseCase } from '../../../payment/use-cases/get-gateway-credentials.use-case';
 
 interface AuthenticatedRequest extends Request {
   user: Client;
@@ -55,6 +56,7 @@ export class OrderController {
     private readonly getAvailablePromocodesUseCase: GetAvailablePromocodesUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
+    private readonly getGatewayCredentialsUseCase: GetGatewayCredentialsUseCase,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -146,6 +148,25 @@ export class OrderController {
     );
   }
 
+  @Get('credentials')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  async getCredentials(@Req() req: AuthenticatedRequest) {
+    return await this.getGatewayCredentialsUseCase.execute();
+  }
+
+  @Get('ping')
+  @UseGuards(JwtGuard)
+  async pingCarWash(@Query() query: any) {
+    const res = await this.posService.ping({
+      posId: Number(query.carWashId),
+      carWashDeviceId: Number(query.carWashDeviceId),
+      type: query?.bayType ?? null,
+    });
+
+    return res;
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -204,18 +225,6 @@ export class OrderController {
       ...data,
       clientId: user.id,
     });
-  }
-
-  @Get('ping')
-  @UseGuards(JwtGuard)
-  async pingCarWash(@Query() query: any) {
-    const res = await this.posService.ping({
-      posId: Number(query.carWashId),
-      carWashDeviceId: Number(query.carWashDeviceId),
-      type: query?.bayType ?? null,
-    });
-
-    return res;
   }
 
   @Get('/latest')
