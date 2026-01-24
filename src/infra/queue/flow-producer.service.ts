@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FlowProducer } from 'bullmq';
+import { FlowProducer, Queue } from 'bullmq';
 import {
   IFlowProducer,
   FlowJobConfig,
@@ -32,7 +32,27 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
     }
 
     try {
-      await this.flowProducer.add({
+      const logFlowStructure = (children: any[], level: number = 0): string => {
+        let result = '';
+        const indent = '  '.repeat(level);
+        children?.forEach((child, idx) => {
+          result += `${indent}${idx > 0 ? '├─' : '└─'} ${child.queueName}:${child.name}\n`;
+          if (child.children && child.children.length > 0) {
+            result += logFlowStructure(child.children, level + 1);
+          }
+        });
+        return result;
+      };
+      
+      const flowStructure = config.children && config.children.length > 0
+        ? `\n${logFlowStructure(config.children)}`
+        : ' (no children)';
+      
+      this.logger.log(
+        `[FlowProducer] Creating flow: ${config.queueName}:${config.name}${flowStructure}`,
+      );
+      
+      const result = await this.flowProducer.add({
         name: config.name,
         queueName: config.queueName,
         data: config.data,
@@ -40,9 +60,47 @@ export class BullMQFlowProducer implements IFlowProducer, OnModuleDestroy {
         opts: config.opts,
       });
 
-      this.logger.debug(
-        `Flow job added successfully: ${config.name} to queue: ${config.queueName}`,
-      );
+      const flowNode = result as any;
+      const rootJobId = flowNode?.job?.id || 'unknown';
+    
+      if (flowNode?.job) {
+        try {
+          const jobState = await flowNode.job.getState();
+          this.logger.log(
+            `[FlowProducer] Flow job added successfully: ${config.name} to queue: ${config.queueName}. Root job ID: ${rootJobId}, Initial state: ${jobState}`,
+          );
+        } catch (stateError) {
+          this.logger.log(
+            `[FlowProducer] Flow job added successfully: ${config.name} to queue: ${config.queueName}. Root job ID: ${rootJobId} (could not get initial state: ${stateError})`,
+          );
+        }
+      } else {
+        this.logger.log(
+          `[FlowProducer] Flow job added successfully: ${config.name} to queue: ${config.queueName}. Root job ID: ${rootJobId} (job object not available)`,
+        );
+      }
+      
+      try {
+        const queue = new Queue(config.queueName, {
+          connection: this.getConnectionConfig(),
+        });
+        const job = await queue.getJob(rootJobId);
+        if (job) {
+          const state = await job.getState();
+          this.logger.log(
+            `[FlowProducer] Verified root job ${rootJobId} exists in queue ${config.queueName} with state: ${state}`,
+          );
+        } else {
+          this.logger.warn(
+            `[FlowProducer] WARNING: Root job ${rootJobId} not found in queue ${config.queueName} after creation!`,
+          );
+        }
+        await queue.close();
+      } catch (verifyError: any) {
+        this.logger.warn(
+          `[FlowProducer] Could not verify job in queue: ${verifyError?.message || verifyError}`,
+        );
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);

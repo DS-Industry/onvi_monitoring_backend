@@ -102,7 +102,6 @@ export class OrderController {
     return await this.calculateOrderDiscountPreviewUseCase.execute({
       cardMobileUserId: user.id,
       sum: data.sum,
-      sumBonus: data.sumBonus,
       carWashId: data.carWashId,
       carWashDeviceId: data.carWashDeviceId,
       bayType: data?.bayType ?? null,

@@ -65,4 +65,17 @@ export class CardBonusOperRepository extends ICardBonusOperRepository {
       PrismaCardBonusOperMapper.toDomain(item),
     );
   }
+
+  public async findOneByOrderIdAndType(
+    orderId: number,
+    typeOperId: number,
+  ): Promise<CardBonusOper | null> {
+    const cardBonusOper = await this.prisma.lTYBonusOper.findFirst({
+      where: {
+        orderId,
+        typeId: typeOperId,
+      },
+    });
+    return PrismaCardBonusOperMapper.toDomain(cardBonusOper);
+  }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Order } from '@loyalty/order/domain/order';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
@@ -42,6 +42,15 @@ export class OrderDiscountService {
     order: Order,
     card: Card,
   ): Promise<DiscountResult> {
+    const requestedPoints = request.rewardPointsUsed || 0;
+    const balance = card.balance || 0;
+
+    if (requestedPoints > balance) {
+      throw new BadRequestException(
+        `Недостаточно баллов: запрошено ${requestedPoints}, доступно ${balance}`,
+      );
+    }
+
     const transactionalCampaignDiscount = await this.calculateTransactionalCampaignDiscount(
       request,
       card.id,
@@ -54,10 +63,11 @@ export class OrderDiscountService {
       request.carWashId,
     );
 
-    const finalDiscount = Math.max(
+    const maxDiscount = Math.max(
       transactionalCampaignDiscount.discountAmount,
       promoCodeDiscount,
     );
+    const finalDiscount = maxDiscount;
 
     return {
       finalDiscount,

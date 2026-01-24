@@ -157,4 +157,31 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       posId: usage.posId,
     };
   }
+
+  async findDiscountUsageByOrderId(
+    orderId: number,
+  ): Promise<MarketingCampaignUsage | null> {
+    const usage = await this.prisma.marketingCampaignUsage.findFirst({
+      where: {
+        orderId,
+        type: CampaignRedemptionType.DISCOUNT,
+      },
+    });
+
+    if (!usage) {
+      return null;
+    }
+
+    return {
+      id: usage.id,
+      campaignId: usage.campaignId,
+      promocodeId: usage.promocodeId,
+      ltyUserId: usage.ltyUserId,
+      orderId: usage.orderId,
+      usedAt: usage.usedAt,
+      type: usage.type || null,
+      actionId: usage.actionId,
+      posId: usage.posId,
+    };
+  }
 }

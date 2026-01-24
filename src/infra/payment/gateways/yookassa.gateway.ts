@@ -56,9 +56,9 @@ export class YooKassaGateway implements IPaymentGateway {
         paymentRequest.idempotence_key = idempotenceKey;
       }
 
-      // if (confirmation) {
-      //   paymentRequest.confirmation = confirmation;
-      // }
+      if (confirmation) {
+        paymentRequest.confirmation = confirmation;
+      }
 
       if (receipt) {
         paymentRequest.receipt = {

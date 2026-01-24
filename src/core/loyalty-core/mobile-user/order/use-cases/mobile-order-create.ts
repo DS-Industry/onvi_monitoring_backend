@@ -91,7 +91,6 @@ export class CreateMobileOrderUseCase {
     const order = await this.orderBuilderService.buildOrder(
       {
         sum: request.sum,
-        sumBonus: request.sumBonus,
         carWashDeviceId: request.carWashDeviceId,
         bayType: request?.bayType ?? null,
       },
@@ -114,7 +113,11 @@ export class CreateMobileOrderUseCase {
     );
 
     order.sumDiscount = discountResult.finalDiscount;
-    order.sumReal = Math.max(0, request.sum - discountResult.finalDiscount);
+    order.sumBonus = request.rewardPointsUsed || 0;
+    order.sumReal = Math.max(
+      0,
+      request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
+    );
 
     this.logger.log(
       `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${order.sumReal}`,

@@ -1,10 +1,19 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@loyalty/order/domain/enums';
+import { OrderStatus, PlatformType } from '@loyalty/order/domain/enums';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { VerifyPaymentUseCaseCore } from '../../../core/payment-core/use-cases/verify-payment.use-case';
 import { YooKassaWebhookDto } from '../dto/webhook.dto';
+import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
+import { FindMethodsCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-find-methods';
+import {
+  CASHBACK_BONUSES_OPER_TYPE_ID,
+  MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
+  USING_BONUSES_OPER_TYPE_ID,
+} from '@constant/constants';
+import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
 
 @Injectable()
 export class PaymentWebhookOrchestrateUseCase {
@@ -16,7 +25,16 @@ export class PaymentWebhookOrchestrateUseCase {
     @InjectQueue('payment-orchestrate')
     private readonly paymentOrchestrateQueue: Queue,
     private readonly verifyPaymentUseCase: VerifyPaymentUseCaseCore,
-  ) {}
+    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly createCardBonusOperUseCase: CreateCardBonusOperUseCase,
+    private readonly findMethodsCardBonusOperUseCase: FindMethodsCardBonusOperUseCase,
+    @Inject(IPromoCodeRepository)
+    private readonly promoCodeRepository: IPromoCodeRepository,
+  ) {
+    this.logger.log(
+      `[WEBHOOK] PaymentWebhookOrchestrateUseCase initialized. Queue name: payment-orchestrate`,
+    );
+  }
 
   async execute(
     event: string,
@@ -145,23 +163,149 @@ export class PaymentWebhookOrchestrateUseCase {
         return;
       }
 
-      await this.paymentOrchestrateQueue.add(
-        'payment-orchestrate',
-        {
-          orderId: order.id,
-          transactionId: paymentId,
-          carWashId: order.carWashId,
-          carWashDeviceId: order.carWashDeviceId,
-          bayType: order.bayType,
-        },
-        {
-          jobId: `payment-orchestrate-${order.id}`,
-        },
-      );
+      const verifiedOrder = await this.orderRepository.findOneById(order.id);
+      if (!verifiedOrder) {
+        this.logger.error(
+          `Order#${order.id} not found after status update. Cannot create job. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
 
+      try {
+        await this.applyBonusOperations(verifiedOrder, requestId);
+      } catch (bonusError: any) {
+        this.logger.error(
+          `[WEBHOOK] Failed to apply bonus operations for order#${verifiedOrder.id}: ${bonusError.message}. Request ID: ${requestId || 'unknown'}`,
+          bonusError.stack,
+        );
+      }
+
+      const jobData = {
+        orderId: verifiedOrder.id,
+        transactionId: paymentId,
+        carWashId: verifiedOrder.carWashId,
+        carWashDeviceId: verifiedOrder.carWashDeviceId,
+        bayType: verifiedOrder.bayType,
+      };
+      
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 9);
+      const jobId = `payment-orchestrate-${order.id}-${paymentId}-${timestamp}-${random}`;
+      
+      const existingJob = await this.paymentOrchestrateQueue.getJob(jobId);
+      if (existingJob) {
+        const existingState = await existingJob.getState();
+        this.logger.warn(
+          `[WEBHOOK] Job ${jobId} already exists with state: ${existingState}. Removing it before creating new one.`,
+        );
+        try {
+          await existingJob.remove();
+        } catch (removeError: any) {
+          this.logger.warn(
+            `[WEBHOOK] Could not remove existing job: ${removeError.message}`,
+          );
+        }
+      }
+      
+      const queueName = this.paymentOrchestrateQueue.name;
+      const queueClient = (this.paymentOrchestrateQueue as any).client;
+      const redisHost = queueClient?.options?.host || 'unknown';
+      const redisPort = queueClient?.options?.port || 'unknown';
+      
       this.logger.log(
-        `Sent order#${order.id} to payment-orchestrate queue after payment.succeeded event. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Queue connection: ${queueName} -> Redis ${redisHost}:${redisPort}`,
       );
+      this.logger.log(
+        `[WEBHOOK] Adding job to payment-orchestrate queue. Job ID: ${jobId}, Data: ${JSON.stringify(jobData)}`,
+      );
+      
+      let job;
+      try {
+        job = await this.paymentOrchestrateQueue.add(
+          'payment-orchestrate',
+          jobData,
+          {
+            jobId,
+            removeOnComplete: false,
+            removeOnFail: false, 
+            attempts: 3, 
+          },
+        );
+
+        this.logger.log(
+          `[WEBHOOK] Job added successfully. Job ID: ${job.id}, Order#${order.id}, Payment ID: ${paymentId}. Request ID: ${requestId || 'unknown'}`,
+        );
+      } catch (addError: any) {
+        this.logger.error(
+          `[WEBHOOK] ❌ Failed to add job to queue: ${addError.message}`,
+          addError.stack,
+        );
+        throw addError;
+      }
+      
+      try {
+        const jobState = await job.getState();
+        this.logger.log(
+          `[WEBHOOK] Job ${job.id} state after 100ms: ${jobState}`,
+        );
+        
+        const jobFromQueue = await this.paymentOrchestrateQueue.getJob(job.id);
+        if (jobFromQueue) {
+          const queueState = await jobFromQueue.getState();
+          const jobData = jobFromQueue.data;
+          const jobProgress = jobFromQueue.progress;
+          const jobAttempts = jobFromQueue.attemptsMade;
+          const failedReason = jobFromQueue.failedReason;
+          const stacktrace = jobFromQueue.stacktrace;
+          const processedOn = jobFromQueue.processedOn;
+          const finishedOn = jobFromQueue.finishedOn;
+          
+          this.logger.log(
+            `[WEBHOOK] Verified job exists in queue. State: ${queueState}, Attempts: ${jobAttempts}, Progress: ${jobProgress}, Processed: ${processedOn ? new Date(processedOn).toISOString() : 'never'}, Finished: ${finishedOn ? new Date(finishedOn).toISOString() : 'never'}`,
+          );
+          
+          if (queueState === 'failed') {
+            this.logger.error(
+              `[WEBHOOK] ❌ Job ${job.id} FAILED! Reason: ${failedReason || 'Unknown'}`,
+            );
+            if (stacktrace && stacktrace.length > 0) {
+              this.logger.error(
+                `[WEBHOOK] Stack trace: ${JSON.stringify(stacktrace)}`,
+              );
+            }
+            this.logger.warn(
+              `[WEBHOOK] ⚠️ Job failed - check worker logs for details. If worker is not running, this job will remain failed.`,
+            );
+          } else if (queueState === 'completed') {
+            this.logger.log(
+              `[WEBHOOK] ✅ Job ${job.id} completed successfully`,
+            );
+          } else if (queueState === 'active') {
+            this.logger.log(
+              `[WEBHOOK] ⏳ Job ${job.id} is ACTIVE - worker is processing it`,
+            );
+          }
+          
+          const counts = await this.paymentOrchestrateQueue.getJobCounts();
+          this.logger.log(
+            `[WEBHOOK] Queue counts - Waiting: ${counts.waiting}, Active: ${counts.active}, Completed: ${counts.completed}, Failed: ${counts.failed}, Delayed: ${counts.delayed}`,
+          );
+          
+          if (queueState === 'active' && counts.active === 0) {
+            this.logger.warn(
+              `[WEBHOOK] ⚠️ DISCREPANCY: Job shows as 'active' but queue counts show 0 active jobs. This may indicate the job was processed very quickly or there's a state sync issue.`,
+            );
+          }
+        } else {
+          this.logger.warn(
+            `[WEBHOOK] WARNING: Job ${job.id} not found when querying queue! It may have been removed (check removeOnComplete/removeOnFail settings).`,
+          );
+        }
+      } catch (stateError: any) {
+        this.logger.warn(
+          `[WEBHOOK] Could not get job state: ${stateError?.message || stateError}`,
+        );
+      }
       return;
     }
 
@@ -175,5 +319,111 @@ export class PaymentWebhookOrchestrateUseCase {
     this.logger.warn(
       `Unhandled webhook event: ${event} for order#${order.id}, payment ${paymentId}. Request ID: ${requestId || 'unknown'}`,
     );
+  }
+
+  private async applyBonusOperations(order: any, requestId?: string) {
+    if (order.platform !== PlatformType.ONVI) {
+      return;
+    }
+
+    if (!order.cardMobileUserId) {
+      this.logger.warn(
+        `[WEBHOOK] Order#${order.id} has no cardMobileUserId. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    const card = await this.findMethodsCardUseCase.getById(order.cardMobileUserId);
+    if (!card) {
+      this.logger.warn(
+        `[WEBHOOK] Card ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    if (order.sumBonus > 0) {
+      const existingDeduction =
+        await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
+          order.id,
+          USING_BONUSES_OPER_TYPE_ID,
+        );
+      if (!existingDeduction) {
+        await this.createCardBonusOperUseCase.execute(
+          {
+            carWashDeviceId: order.carWashDeviceId,
+            typeOperId: USING_BONUSES_OPER_TYPE_ID,
+            operDate: order.orderData,
+            sum: order.sumBonus,
+            orderMobileUserId: order.id,
+          },
+          card,
+        );
+        this.logger.log(
+          `[WEBHOOK] Created bonus deduction (type ${USING_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumBonus}. Request ID: ${requestId || 'unknown'}`,
+        );
+      } else {
+        this.logger.log(
+          `[WEBHOOK] Bonus deduction already exists for order#${order.id}. Skipping. Request ID: ${requestId || 'unknown'}`,
+        );
+      }
+    }
+
+    if (order.sumCashback > 0) {
+      const existingCashback =
+        await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
+          order.id,
+          CASHBACK_BONUSES_OPER_TYPE_ID,
+        );
+      if (!existingCashback) {
+        await this.createCardBonusOperUseCase.execute(
+          {
+            carWashDeviceId: order.carWashDeviceId,
+            typeOperId: CASHBACK_BONUSES_OPER_TYPE_ID,
+            operDate: order.orderData,
+            sum: order.sumCashback,
+            orderMobileUserId: order.id,
+          },
+          card,
+        );
+        this.logger.log(
+          `[WEBHOOK] Created cashback bonus (type ${CASHBACK_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumCashback}. Request ID: ${requestId || 'unknown'}`,
+        );
+      } else {
+        this.logger.log(
+          `[WEBHOOK] Cashback bonus already exists for order#${order.id}. Skipping. Request ID: ${requestId || 'unknown'}`,
+        );
+      }
+    }
+
+    if (order.sumDiscount > 0) {
+      const marketingUsage =
+        await this.promoCodeRepository.findDiscountUsageByOrderId(order.id);
+      if (marketingUsage) {
+        const existingMarketingBonus =
+          await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
+            order.id,
+            MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
+          );
+        if (!existingMarketingBonus) {
+          await this.createCardBonusOperUseCase.execute(
+            {
+              carWashDeviceId: order.carWashDeviceId,
+              typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
+              operDate: order.orderData,
+              sum: order.sumDiscount,
+              orderMobileUserId: order.id,
+            },
+            card,
+          );
+          this.logger.log(
+            `[WEBHOOK] Created marketing campaign bonus (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
+          );
+        } else {
+          this.logger.log(
+            `[WEBHOOK] Marketing campaign bonus already exists for order#${order.id}. Skipping. Request ID: ${requestId || 'unknown'}`,
+          );
+        }
+      }
+    }
   }
 }

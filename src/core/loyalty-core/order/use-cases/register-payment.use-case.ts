@@ -76,32 +76,29 @@ export class RegisterPaymentUseCase {
 
       const idempotenceKey = `order-${orderForProcessing.id}-register`;
 
-      // Always try to get returnUrl - will be used for confirmation even with paymentToken
-      // let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
+      let returnUrl = data.returnUrl || process.env.PAYMENT_RETURN_URL;
       
-      // Generate default returnUrl if not provided (for both paymentToken and non-paymentToken flows)
-      // if (!returnUrl) {
-      //   const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
-      //   returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
-      //   this.logger.log(
-      //     `Using generated returnUrl: ${returnUrl} for order ${orderForProcessing.id}`,
-      //   );
-      // }
+      if (!returnUrl && !data.paymentToken) {
+        const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
+        returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
+        this.logger.log(
+          `Using generated returnUrl: ${returnUrl} for order ${orderForProcessing.id}`,
+        );
+      }
 
       paymentResult = await this.paymentUseCase.create({
-              amount: String(orderForProcessing.sumReal),
-              paymentToken: data.paymentToken,
-              description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
-              phone: data.receiptReturnPhoneNumber,
-              idempotenceKey,
-              // returnUrl: returnUrl, // Pass returnUrl even when paymentToken is provided
-              metadata: {
-                orderId: String(orderForProcessing.id),
-                order_id: String(orderForProcessing.id),
-              },
-            });
+        amount: String(orderForProcessing.sumReal),
+        paymentToken: data.paymentToken,
+        description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
+        phone: data.receiptReturnPhoneNumber,
+        idempotenceKey,
+        returnUrl: returnUrl,
+        metadata: {
+          orderId: String(orderForProcessing.id),
+          order_id: String(orderForProcessing.id),
+        },
+      });
 
-        console.log("paymentResult", paymentResult);
 
       paymentCreated = true;
 

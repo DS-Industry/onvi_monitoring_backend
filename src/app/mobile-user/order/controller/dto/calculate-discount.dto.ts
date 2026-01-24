@@ -6,10 +6,6 @@ export class CalculateDiscountDto {
   @IsDefined()
   sum: number;
 
-  @IsNumber()
-  @IsOptional()
-  sumBonus?: number;
-
   @IsOptional()
   @IsNumber()
   promoCodeId?: number;

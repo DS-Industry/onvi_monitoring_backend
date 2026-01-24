@@ -2,7 +2,6 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { IOrderRepository } from '@loyalty/order/interface/order';
-import { OrderStatus } from '@loyalty/order/domain/enums';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { HandlerDto } from '@loyalty/order/use-cases/dto/handler.dto';
 import { OrderHandlerStatus } from '@loyalty/order/domain/enums';
@@ -26,7 +25,23 @@ export class OrderFinishedConsumer extends WorkerHost {
 
   async process(job: Job<OrderFinishedJobData>): Promise<void> {
     const { orderId, transactionId } = job.data;
-    const startTime = JobValidationUtil.logJobStart(
+    
+    this.logger.log(
+      `[ORDER-FINISHED] ====== PROCESS METHOD CALLED ====== Job ID: ${job.id}, Order ID: ${orderId}`,
+    );
+    
+    try {
+      const jobState = await job.getState();
+      this.logger.log(
+        `[ORDER-FINISHED] Job ${job.id} current state: ${jobState}`,
+      );
+    } catch (error: any) {
+      this.logger.warn(
+        `[ORDER-FINISHED] Could not get job state: ${error.message}`,
+      );
+    }
+    
+    JobValidationUtil.logJobStart(
       job.id,
       orderId,
       job.attemptsMade,
@@ -43,6 +58,10 @@ export class OrderFinishedConsumer extends WorkerHost {
       job.id || 'unknown',
       this.logger,
       'ORDER-FINISHED',
+    );
+
+    this.logger.log(
+      `[ORDER-FINISHED] Job ${job.id} parent: ${job.parent?.id || 'none'}, parentKey: ${job.parentKey || 'none'}`,
     );
 
     const order = await this.validateAndFetchOrder(orderId, job.id);
@@ -92,6 +111,11 @@ export class OrderFinishedConsumer extends WorkerHost {
     let childrenResults: Record<string, string> = {};
 
     try {
+      const currentState = await job.getState();
+      this.logger.log(
+        `[ORDER-FINISHED] Current job state before getChildrenValues: ${currentState}`,
+      );
+      
       this.logger.log(
         `[ORDER-FINISHED] Waiting for child jobs to complete and retrieving results...`,
       );
@@ -102,6 +126,11 @@ export class OrderFinishedConsumer extends WorkerHost {
 
       this.logger.log(
         `[ORDER-FINISHED] Received ${childResultsArray.length} child result(s). Child jobs: ${childKeys.join(', ')}`,
+      );
+      
+      const stateAfter = await job.getState();
+      this.logger.log(
+        `[ORDER-FINISHED] Job state after getChildrenValues: ${stateAfter}`,
       );
 
       if (childResultsArray.length > 0) {

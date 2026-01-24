@@ -62,6 +62,10 @@ export class Order extends BaseEntity<OrderProps> {
     return this.props.sumBonus;
   }
 
+  set sumBonus(sumBonus: number) {
+    this.props.sumBonus = sumBonus;
+  }
+
   get sumDiscount(): number {
     return this.props.sumDiscount;
   }

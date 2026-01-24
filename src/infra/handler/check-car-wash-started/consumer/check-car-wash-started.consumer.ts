@@ -20,6 +20,10 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
   async process(job: Job<CheckCarWashStartedJobData>): Promise<string> {
     const { orderId, carWashId, carWashDeviceId, bayType } = job.data;
     
+    this.logger.log(
+      `[CHECK-CAR-WASH-STARTED] ====== PROCESS METHOD CALLED ====== Job ID: ${job.id}, Order ID: ${orderId}`,
+    );
+    
     const startTime = JobValidationUtil.logJobStart(
       job.id,
       orderId,
@@ -37,6 +41,10 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
       job.id || 'unknown',
       this.logger,
       'CHECK-CAR-WASH-STARTED',
+    );
+    
+    this.logger.log(
+      `[CHECK-CAR-WASH-STARTED] Job ${job.id} parent: ${job.parent?.id || 'none'}, parentKey: ${job.parentKey || 'none'}`,
     );
     
     const carWashLaunchSuccess = await this.checkChildJobResult(job, orderId);
@@ -131,7 +139,12 @@ export class CheckCarWashStartedConsumer extends WorkerHost {
         'CHECK-CAR-WASH-STARTED',
       );
       
-      return JobResult.SUCCESS;
+      const result = JobResult.SUCCESS;
+      this.logger.log(
+        `[CHECK-CAR-WASH-STARTED] Returning result: ${result} for parent job ${job.parent?.id || 'none'}`,
+      );
+      
+      return result;
     } catch (error: any) {
       JobValidationUtil.logJobError(
         error,

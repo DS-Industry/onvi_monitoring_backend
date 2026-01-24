@@ -13,7 +13,6 @@ import { OrderStatusDeterminationService } from './order-status-determination.se
 
 export interface BuildOrderRequest {
   sum: number;
-  sumBonus: number;
   carWashDeviceId: number;
   bayType?: DeviceType | null;
 }
@@ -46,7 +45,7 @@ export class OrderBuilderService {
     return new Order({
       sumFull: request.sum,
       sumReal: request.sum,
-      sumBonus: request.sumBonus || 0,
+      sumBonus: 0,
       sumDiscount: 0,
       sumCashback: computedCashback,
       carWashDeviceId: request.carWashDeviceId,

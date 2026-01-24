@@ -70,4 +70,7 @@ export abstract class IPromoCodeRepository {
   ): Promise<number>;
   abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
   abstract findUsageByOrderId(orderId: number): Promise<MarketingCampaignUsage | null>;
+  abstract findDiscountUsageByOrderId(
+    orderId: number,
+  ): Promise<MarketingCampaignUsage | null>;
 }

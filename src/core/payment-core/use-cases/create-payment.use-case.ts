@@ -44,17 +44,15 @@ export class CreatePaymentUseCaseCore {
       payment_mode: PaymentMode.FULL_PAYMENT,
     };
 
-    // // Always try to get returnUrl - either from data or config
-    // let returnUrl: string | undefined = 
-    //   data.returnUrl || 
-    //   this.configService.get<string>('PAYMENT_RETURN_URL');
+    let returnUrl: string | undefined = 
+      data.returnUrl || 
+      this.configService.get<string>('PAYMENT_RETURN_URL');
     
-    // // Only require returnUrl if paymentToken is not provided (redirect flow)
-    // if (!returnUrl && !data.paymentToken) {
-    //   throw new Error(
-    //     'returnUrl is required when paymentToken is not provided. Either provide returnUrl in the request or set PAYMENT_RETURN_URL environment variable.',
-    //   );
-    // }
+    if (!returnUrl && !data.paymentToken) {
+      throw new Error(
+        'returnUrl is required when paymentToken is not provided. Either provide returnUrl in the request or set PAYMENT_RETURN_URL environment variable.',
+      );
+    }
 
     const payload: CreatePaymentDto = {
       amount,
@@ -63,13 +61,12 @@ export class CreatePaymentUseCaseCore {
       capture: true,
       idempotenceKey: data.idempotenceKey,
       metadata: data.metadata,
-      // Always include confirmation if returnUrl is provided (even with paymentToken)
-      // confirmation: returnUrl
-      //   ? {
-      //       type: 'redirect',
-      //       return_url: returnUrl,
-      //     }
-      //   : undefined,
+      confirmation: returnUrl && !data.paymentToken
+        ? {
+            type: 'redirect',
+            return_url: returnUrl,
+          }
+        : undefined,
       receipt: data.phone
         ? {
             phone: data.phone,
