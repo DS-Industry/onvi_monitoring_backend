@@ -753,5 +753,247 @@ export class MarketingCampaignDiscountService {
         return false;
     }
   }
+
+  async getCampaignProgressState(
+    campaignId: number,
+    ltyUserId: number,
+  ): Promise<{ state: Record<string, any>; cycleStartedAt: Date } | null> {
+    const progress = await this.prisma.userCampaignProgress.findUnique({
+      where: {
+        campaignId_ltyUserId: {
+          campaignId,
+          ltyUserId,
+        },
+      },
+    });
+
+    if (!progress) {
+      return null;
+    }
+
+    return {
+      state: (progress.state as Record<string, any>) || {},
+      cycleStartedAt: progress.cycleStartedAt,
+    };
+  }
+
+  async simulateVisitCountIncrement(
+    condition: any,
+    ltyUserId: number,
+    currentState: Record<string, any>,
+    orderData: OrderEvaluationData,
+    cardId?: number | null,
+  ): Promise<Record<string, any>> {
+    const cycle = condition.cycle || VisitCycle.ALL_TIME;
+    const required = condition.value;
+    const operator = condition.operator || ConditionOperator.GREATER_THAN_OR_EQUAL;
+
+    if (required === undefined || required === null) {
+      return currentState;
+    }
+
+    let currentCount = 0;
+    const now = new Date();
+
+    let card;
+    if (cardId) {
+      card = await this.prisma.lTYCard.findUnique({
+        where: { id: cardId },
+      });
+    } else {
+      card = await this.prisma.lTYCard.findFirst({
+        where: {
+          clientId: ltyUserId,
+        },
+      });
+    }
+
+    if (!card) {
+      return currentState;
+    }
+
+    const currentStateCount = currentState.visits_in_cycle || 0;
+    const lastVisitAt = currentState.last_visit_at
+      ? new Date(currentState.last_visit_at)
+      : null;
+    const currentOrderDate = new Date(orderData.orderDate);
+    
+    const isRecentUpdate =
+      lastVisitAt &&
+      Math.abs(currentOrderDate.getTime() - lastVisitAt.getTime()) < 1000; // 1 second
+    
+    if (isRecentUpdate) {
+      currentCount = currentStateCount;
+    } else {
+      if (currentStateCount === 0) {
+        let dbCount = 0;
+        if (cycle === VisitCycle.ALL_TIME || cycle === 'ALL_TIME') {
+          dbCount = await this.prisma.lTYOrder.count({
+            where: {
+              cardId: card.id,
+              orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
+            },
+          });
+        } else {
+          const startDate = this.getCycleStartDate(cycle, now);
+          dbCount = await this.prisma.lTYOrder.count({
+            where: {
+              cardId: card.id,
+              orderStatus: { in: [OrderStatus.COMPLETED, OrderStatus.PAYED] },
+              orderData: { gte: startDate },
+            },
+          });
+        }
+        currentCount = dbCount + 1;
+      } else {
+        currentCount = currentStateCount + 1;
+      }
+    }
+
+    const simulatedState = { ...currentState };
+    
+    if (currentCount > required) {
+      simulatedState.visits_in_cycle = 1;
+      simulatedState.cycleStartedAt = orderData.orderDate;
+    } else {
+      simulatedState.visits_in_cycle = currentCount;
+    }
+    
+    simulatedState.required_visits = required;
+    simulatedState.last_visit_at = orderData.orderDate;
+    simulatedState.last_order_sum = orderData.orderSum || 0;
+
+    return simulatedState;
+  }
+
+  async evaluateTransactionalCampaignDiscountPreview(
+    campaign: MarketingCampaignWithRelations,
+    ltyUserId: number,
+    orderSum: number,
+    orderDate: Date,
+    rewardPointsUsed: number = 0,
+    promoCodeId?: number | null,
+    cardId?: number | null,
+    simulatedState?: Record<string, any>,
+  ): Promise<CampaignDiscountResult | null> {
+    if (campaign.executionType !== CampaignExecutionType.TRANSACTIONAL) {
+      return null;
+    }
+
+    if (!campaign.conditions || campaign.conditions.length === 0) {
+      return null;
+    }
+
+    if (!campaign.action || campaign.action.actionType !== MarketingCampaignActionType.DISCOUNT) {
+      return null;
+    }
+
+    const progress = await this.getCampaignProgressState(campaign.id, ltyUserId);
+    
+    const baseState = simulatedState || progress?.state || {};
+    const updatedState = { ...baseState };
+
+    const conditionTree = campaign.conditions[0].tree as CampaignConditionTree;
+    const conditions = Array.isArray(conditionTree)
+      ? conditionTree
+      : [conditionTree];
+
+    const progressConditions = conditions.filter(
+      (cond) =>
+        cond.type !== CampaignConditionType.TIME_RANGE &&
+        cond.type !== CampaignConditionType.WEEKDAY &&
+        cond.type !== CampaignConditionType.PROMOCODE_ENTRY &&
+        cond.type !== CampaignConditionType.BIRTHDAY &&
+        cond.type !== CampaignConditionType.INACTIVITY,
+    );
+
+    const orderData: OrderEvaluationData = {
+      orderDate,
+      orderSum,
+      promoCodeId,
+    };
+
+    let allConditionsMet = true;
+
+    for (const condition of progressConditions) {
+      const isMet = await this.evaluateConditionPreview(
+        condition,
+        ltyUserId,
+        orderData,
+        updatedState,
+        cardId,
+      );
+
+      if (!isMet) {
+        allConditionsMet = false;
+      }
+    }
+
+    const eligibilityConditions = conditions.filter(
+      (cond) =>
+        cond.type === CampaignConditionType.TIME_RANGE ||
+        cond.type === CampaignConditionType.WEEKDAY ||
+        cond.type === CampaignConditionType.PROMOCODE_ENTRY ||
+        cond.type === CampaignConditionType.BIRTHDAY,
+    );
+
+    let isEligible = true;
+    for (const condition of eligibilityConditions) {
+      if (condition.type === CampaignConditionType.TIME_RANGE) {
+        isEligible = this.evaluateTimeRange(condition, orderData);
+      } else if (condition.type === CampaignConditionType.WEEKDAY) {
+        isEligible = this.evaluateWeekday(condition, orderData);
+      } else if (condition.type === CampaignConditionType.PROMOCODE_ENTRY) {
+        isEligible = await this.evaluatePromocodeEntry(condition, orderData);
+      } else if (condition.type === CampaignConditionType.BIRTHDAY) {
+        isEligible = await this.evaluateBirthday(condition, ltyUserId);
+      }
+
+      if (!isEligible) {
+        break;
+      }
+    }
+
+    if (allConditionsMet && isEligible) {
+      const discountAmount = this.calculateDiscountFromAction(
+        orderSum,
+        campaign.action.payload as any,
+        rewardPointsUsed,
+      );
+
+      if (discountAmount > 0) {
+        return {
+          discountAmount,
+          campaignId: campaign.id,
+          actionId: campaign.action.id,
+          executionType: CampaignExecutionType.TRANSACTIONAL,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  private async evaluateConditionPreview(
+    condition: any,
+    ltyUserId: number,
+    orderData: OrderEvaluationData,
+    state: Record<string, any>,
+    cardId?: number | null,
+  ): Promise<boolean> {
+    switch (condition.type) {
+      case CampaignConditionType.VISIT_COUNT:
+        const currentCount = state.visits_in_cycle || 0;
+        const required = condition.value;
+        const operator = condition.operator || ConditionOperator.GREATER_THAN_OR_EQUAL;
+        return this.compareValues(currentCount, operator, required);
+
+      case CampaignConditionType.PURCHASE_AMOUNT:
+        return this.evaluatePurchaseAmount(condition, orderData);
+
+      default:
+        return false;
+    }
+  }
 }
 

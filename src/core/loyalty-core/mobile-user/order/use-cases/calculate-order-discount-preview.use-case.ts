@@ -68,7 +68,7 @@ export class CalculateOrderDiscountPreviewUseCase {
     );
 
     const orderDate = new Date();
-    const discountResult = await this.orderDiscountService.calculateDiscounts(
+    const discountResult = await this.orderDiscountService.calculateDiscountsPreview(
       {
         cardMobileUserId: request.cardMobileUserId,
         carWashId: request.carWashId,
