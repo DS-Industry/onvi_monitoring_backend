@@ -29,4 +29,14 @@ export class FindMethodsCardBonusOperUseCase {
       creatorId,
     );
   }
+
+  async getByOrderIdAndType(
+    orderId: number,
+    typeOperId: number,
+  ): Promise<CardBonusOper | null> {
+    return await this.cardBonusOperRepository.findOneByOrderIdAndType(
+      orderId,
+      typeOperId,
+    );
+  }
 }

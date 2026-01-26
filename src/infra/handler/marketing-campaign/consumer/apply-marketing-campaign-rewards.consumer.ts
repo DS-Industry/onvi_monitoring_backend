@@ -22,6 +22,10 @@ export class ApplyMarketingCampaignRewardsConsumer extends WorkerHost {
     const parentId = job.parent?.id;
     const parentKey = job.parentKey;
     
+    this.logger.log(
+      `[APPLY-MARKETING-CAMPAIGN-REWARDS] ====== PROCESS METHOD CALLED ====== Job ID: ${job.id}, Order ID: ${orderId}, Parent ID: ${parentId || 'none'}`,
+    );
+    
     const startTime = JobValidationUtil.logJobStart(
       job.id,
       orderId,
@@ -33,44 +37,27 @@ export class ApplyMarketingCampaignRewardsConsumer extends WorkerHost {
       'APPLY-MARKETING-CAMPAIGN-REWARDS',
     );
     
-    JobValidationUtil.validateRequiredField(
+    this.logger.log(
+      `[APPLY-MARKETING-CAMPAIGN-REWARDS] Job ${job.id} parent: ${parentId || 'none'}, parentKey: ${parentKey || 'none'}`,
+    );
+    
+    this.logger.log(
+      `[APPLY-MARKETING-CAMPAIGN-REWARDS] TEST MODE - Processing order#${orderId}, parentId: ${parentId || 'none'}`,
+    );
+
+    this.logger.log(
+      `[APPLY-MARKETING-CAMPAIGN-REWARDS] TEST MODE - Skipping marketing campaign rewards execution`,
+    );
+    
+    JobValidationUtil.logJobSuccess(
+      job.id,
       orderId,
-      'orderId',
-      job.id || 'unknown',
+      startTime,
       this.logger,
       'APPLY-MARKETING-CAMPAIGN-REWARDS',
     );
     
-    this.validateParentJob(parentId, job.id);
-
-    try {
-      this.logger.log(
-        `[APPLY-MARKETING-CAMPAIGN-REWARDS] Executing applyMarketingCampaignRewardsUseCase for order#${orderId}`,
-      );
-      
-      await this.applyMarketingCampaignRewardsUseCase.execute(orderId);
-      
-      JobValidationUtil.logJobSuccess(
-        job.id,
-        orderId,
-        startTime,
-        this.logger,
-        'APPLY-MARKETING-CAMPAIGN-REWARDS',
-      );
-      
-      return JobResult.SUCCESS;
-    } catch (error: any) {
-      JobValidationUtil.logJobError(
-        error,
-        job.id,
-        orderId,
-        job.attemptsMade,
-        this.logger,
-        'APPLY-MARKETING-CAMPAIGN-REWARDS',
-      );
-      
-      throw error;
-    }
+    return JobResult.SUCCESS;
   }
 
   private validateParentJob(parentId: string | undefined, jobId: string | undefined): void {

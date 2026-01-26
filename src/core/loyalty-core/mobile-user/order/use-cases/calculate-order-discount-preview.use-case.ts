@@ -7,7 +7,6 @@ import { DeviceType } from '@infra/pos/interface/pos.interface';
 export interface CalculateDiscountPreviewRequest {
   cardMobileUserId: number;
   sum: number;
-  sumBonus?: number;
   carWashId: number;
   carWashDeviceId: number;
   bayType?: DeviceType | null;
@@ -49,7 +48,7 @@ export class CalculateOrderDiscountPreviewUseCase {
       `Calculating discount preview for user ${request.cardMobileUserId}, sum: ${request.sum}, carWashId: ${request.carWashId}`,
     );
 
-    const card = await this.findMethodsCardUseCase.getById(
+    const card = await this.findMethodsCardUseCase.getByClientId(
       request.cardMobileUserId,
     );
 
@@ -62,7 +61,6 @@ export class CalculateOrderDiscountPreviewUseCase {
     const order = await this.orderBuilderService.buildOrder(
       {
         sum: request.sum,
-        sumBonus: request.sumBonus || 0,
         carWashDeviceId: request.carWashDeviceId,
         bayType: request.bayType ?? null,
       },
@@ -84,7 +82,10 @@ export class CalculateOrderDiscountPreviewUseCase {
       card,
     );
 
-    const sumReal = Math.max(0, request.sum - discountResult.finalDiscount);
+    const sumReal = Math.max(
+      0,
+      request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
+    );
 
     this.logger.log(
       `Discount preview calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${sumReal}`,

@@ -60,6 +60,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       validUntil: promocode.validUntil,
       isActive: promocode.isActive,
       posId: promocode.posId,
+      personalUserId: promocode.personalUserId,
     };
   }
 
@@ -92,6 +93,40 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       validUntil: promoCode.validUntil,
       isActive: promoCode.isActive,
       posId: promoCode.posId,
+      personalUserId: promoCode.personalUserId,
+    };
+  }
+
+  async findByCode(code: string): Promise<PromoCode | null> {
+    const promoCode = await this.prisma.lTYPromocode.findUnique({
+      where: { code },
+    });
+
+    if (!promoCode) {
+      return null;
+    }
+
+    return {
+      id: promoCode.id,
+      campaignId: promoCode.campaignId,
+      actionId: promoCode.actionId,
+      code: promoCode.code,
+      discountType: promoCode.discountType,
+      discountValue: Number(promoCode.discountValue),
+      minOrderAmount: promoCode.minOrderAmount
+        ? Number(promoCode.minOrderAmount)
+        : null,
+      maxDiscountAmount: promoCode.maxDiscountAmount
+        ? Number(promoCode.maxDiscountAmount)
+        : null,
+      maxUsage: promoCode.maxUsage,
+      maxUsagePerUser: promoCode.maxUsagePerUser,
+      currentUsage: promoCode.currentUsage,
+      validFrom: promoCode.validFrom,
+      validUntil: promoCode.validUntil,
+      isActive: promoCode.isActive,
+      posId: promoCode.posId,
+      personalUserId: promoCode.personalUserId,
     };
   }
 
@@ -138,6 +173,33 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       where: {
         orderId,
         promocodeId: { not: null },
+      },
+    });
+
+    if (!usage) {
+      return null;
+    }
+
+    return {
+      id: usage.id,
+      campaignId: usage.campaignId,
+      promocodeId: usage.promocodeId,
+      ltyUserId: usage.ltyUserId,
+      orderId: usage.orderId,
+      usedAt: usage.usedAt,
+      type: usage.type || null,
+      actionId: usage.actionId,
+      posId: usage.posId,
+    };
+  }
+
+  async findDiscountUsageByOrderId(
+    orderId: number,
+  ): Promise<MarketingCampaignUsage | null> {
+    const usage = await this.prisma.marketingCampaignUsage.findFirst({
+      where: {
+        orderId,
+        type: CampaignRedemptionType.DISCOUNT,
       },
     });
 

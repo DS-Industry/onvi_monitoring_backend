@@ -81,30 +81,24 @@ export class RegisterPaymentUseCase {
       if (!returnUrl && !data.paymentToken) {
         const baseUrl = process.env.FRONTEND_URL || 'https://app.onvione.ru';
         returnUrl = `${baseUrl}/payment/success?orderId=${orderForProcessing.id}`;
-        this.logger.warn(
-          `No returnUrl provided and PAYMENT_RETURN_URL not set. Using generated default: ${returnUrl}`,
+        this.logger.log(
+          `Using generated returnUrl: ${returnUrl} for order ${orderForProcessing.id}`,
         );
       }
 
-      paymentResult =
-        process.env.PAYMENT_TEST_MODE === 'true'
-          ? ({
-              id: randomUUID(),
-              confirmation: { confirmation_url: '' },
-              status: 'pending',
-            } as any)
-          : await this.paymentUseCase.create({
-              amount: String(orderForProcessing.sumReal),
-              paymentToken: data.paymentToken,
-              description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
-              phone: data.receiptReturnPhoneNumber,
-              idempotenceKey,
-              returnUrl: returnUrl,
-              metadata: {
-                orderId: String(orderForProcessing.id),
-                order_id: String(orderForProcessing.id),
-              },
-            });
+      paymentResult = await this.paymentUseCase.create({
+        amount: String(orderForProcessing.sumReal),
+        paymentToken: data.paymentToken,
+        description: `Оплата за мойку, устройство № ${orderForProcessing.carWashDeviceId}`,
+        phone: data.receiptReturnPhoneNumber,
+        idempotenceKey,
+        returnUrl: returnUrl,
+        metadata: {
+          orderId: String(orderForProcessing.id),
+          order_id: String(orderForProcessing.id),
+        },
+      });
+
 
       paymentCreated = true;
 

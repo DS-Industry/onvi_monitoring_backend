@@ -112,6 +112,7 @@ import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-o
 import { CalculateOrderDiscountPreviewUseCase } from './mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
 import { GetAvailableMarketingCampaignsUseCase } from './mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
 import { GetAvailablePromocodesUseCase } from './mobile-user/order/use-cases/get-available-promocodes.use-case';
+import { ValidatePromoCodeUseCase } from './mobile-user/order/use-cases/validate-promo-code.use-case';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
 import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
 import { GetActivationWindowsUseCase } from './mobile-user/order/use-cases/get-activation-windows.use-case';
@@ -266,6 +267,7 @@ const mobileOrderUseCase: Provider[] = [
   CalculateOrderDiscountPreviewUseCase,
   GetAvailableMarketingCampaignsUseCase,
   GetAvailablePromocodesUseCase,
+  ValidatePromoCodeUseCase,
   PromoCodeService,
   GetActivationWindowsUseCase,
   StartPosUseCase,

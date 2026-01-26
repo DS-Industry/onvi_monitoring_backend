@@ -44,17 +44,14 @@ export class CreatePaymentUseCaseCore {
       payment_mode: PaymentMode.FULL_PAYMENT,
     };
 
-    let returnUrl: string | undefined;
-    if (!data.paymentToken) {
-      returnUrl =
-        data.returnUrl ||
-        this.configService.get<string>('PAYMENT_RETURN_URL');
-      
-      if (!returnUrl) {
-        throw new Error(
-          'returnUrl is required when paymentToken is not provided. Either provide returnUrl in the request or set PAYMENT_RETURN_URL environment variable.',
-        );
-      }
+    let returnUrl: string | undefined = 
+      data.returnUrl || 
+      this.configService.get<string>('PAYMENT_RETURN_URL');
+    
+    if (!returnUrl && !data.paymentToken) {
+      throw new Error(
+        'returnUrl is required when paymentToken is not provided. Either provide returnUrl in the request or set PAYMENT_RETURN_URL environment variable.',
+      );
     }
 
     const payload: CreatePaymentDto = {
@@ -64,7 +61,7 @@ export class CreatePaymentUseCaseCore {
       capture: true,
       idempotenceKey: data.idempotenceKey,
       metadata: data.metadata,
-      confirmation: !data.paymentToken && returnUrl
+      confirmation: returnUrl && !data.paymentToken
         ? {
             type: 'redirect',
             return_url: returnUrl,

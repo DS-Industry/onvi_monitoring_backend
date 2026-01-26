@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   IOrderRepository,
   OrderUsageData,
@@ -15,6 +15,8 @@ import { CampaignRedemptionType } from '@prisma/client';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {
+  private readonly logger = new Logger(OrderRepository.name);
+
   constructor(private readonly prisma: PrismaService) {
     super();
   }
@@ -107,19 +109,28 @@ export class OrderRepository extends IOrderRepository {
   }
 
   public async findOneById(id: number): Promise<Order> {
-    const order = await this.prisma.lTYOrder.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        carWashDevice: {
-          include: {
-            carWashDeviceType: true,
+    try {
+      const order = await this.prisma.lTYOrder.findFirst({
+        where: {
+          id,
+        },
+        include: {
+          carWashDevice: {
+            include: {
+              carWashDeviceType: true,
+            },
           },
         },
-      },
-    });
-    return PrismaOrderMapper.toDomain(order);
+      });
+      
+      return PrismaOrderMapper.toDomain(order);
+    } catch (error: any) {
+      this.logger.error(
+        `[OrderRepository] Database error querying order#${id}: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(`Failed to query order#${id}: ${error.message}`);
+    }
   }
 
   public async findOneByTransactionId(transactionId: string): Promise<Order> {

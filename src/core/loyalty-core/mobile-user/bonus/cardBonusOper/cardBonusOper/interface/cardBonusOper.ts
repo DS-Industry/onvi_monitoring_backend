@@ -11,4 +11,8 @@ export abstract class ICardBonusOperRepository {
     carWashDeviceId?: number,
     creatorId?: number,
   ): Promise<CardBonusOper[]>;
+  abstract findOneByOrderIdAndType(
+    orderId: number,
+    typeOperId: number,
+  ): Promise<CardBonusOper | null>;
 }

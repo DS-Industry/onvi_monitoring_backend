@@ -14,6 +14,7 @@ export interface PromoCode {
   validUntil: Date | null;
   isActive: boolean;
   posId: number | null;
+  personalUserId: number | null;
 }
 
 export interface MarketingCampaignUsage {
@@ -62,6 +63,7 @@ export interface CreatePromoCodeInput {
 
 export abstract class IPromoCodeRepository {
   abstract findById(id: number): Promise<PromoCode | null>;
+  abstract findByCode(code: string): Promise<PromoCode | null>;
   abstract create(input: CreatePromoCodeInput): Promise<PromoCode>;
   abstract incrementUsage(id: number): Promise<void>;
   abstract countUsageByUser(
@@ -70,4 +72,7 @@ export abstract class IPromoCodeRepository {
   ): Promise<number>;
   abstract createUsage(input: CreateMarketingCampaignUsageInput): Promise<void>;
   abstract findUsageByOrderId(orderId: number): Promise<MarketingCampaignUsage | null>;
+  abstract findDiscountUsageByOrderId(
+    orderId: number,
+  ): Promise<MarketingCampaignUsage | null>;
 }

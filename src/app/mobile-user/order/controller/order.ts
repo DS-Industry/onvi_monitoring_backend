@@ -21,6 +21,7 @@ import { GetActivationWindowsUseCase } from '@loyalty/mobile-user/order/use-case
 import { CalculateOrderDiscountPreviewUseCase } from '@loyalty/mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
 import { GetAvailableMarketingCampaignsUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
 import { GetAvailablePromocodesUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-promocodes.use-case';
+import { ValidatePromoCodeUseCase } from '@loyalty/mobile-user/order/use-cases/validate-promo-code.use-case';
 import {
   PROMOCODE_FILTER,
   VALID_PROMOCODE_FILTERS,
@@ -29,6 +30,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CalculateDiscountDto } from './dto/calculate-discount.dto';
+import { VerifyPromoDto } from './dto/verify-promo.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 import { IPosService } from '@infra/pos/interface/pos.interface';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
@@ -36,6 +38,7 @@ import { RegisterPaymentDto } from './dto/register-payment.dto';
 import { OrderStatus } from '@loyalty/order/domain/enums';
 import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
+import { GetGatewayCredentialsUseCase } from '../../../payment/use-cases/get-gateway-credentials.use-case';
 
 interface AuthenticatedRequest extends Request {
   user: Client;
@@ -53,8 +56,10 @@ export class OrderController {
     private readonly calculateOrderDiscountPreviewUseCase: CalculateOrderDiscountPreviewUseCase,
     private readonly getAvailableMarketingCampaignsUseCase: GetAvailableMarketingCampaignsUseCase,
     private readonly getAvailablePromocodesUseCase: GetAvailablePromocodesUseCase,
+    private readonly validatePromoCodeUseCase: ValidatePromoCodeUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
+    private readonly getGatewayCredentialsUseCase: GetGatewayCredentialsUseCase,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -100,7 +105,6 @@ export class OrderController {
     return await this.calculateOrderDiscountPreviewUseCase.execute({
       cardMobileUserId: user.id,
       sum: data.sum,
-      sumBonus: data.sumBonus,
       carWashId: data.carWashId,
       carWashDeviceId: data.carWashDeviceId,
       bayType: data?.bayType ?? null,
@@ -144,6 +148,41 @@ export class OrderController {
       carWashId ? Number(carWashId) : undefined,
       validFilter,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('validate-promocode')
+  @HttpCode(HttpStatus.OK)
+  async validatePromocode(
+    @Body() data: VerifyPromoDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const { user } = req;
+
+    return await this.validatePromoCodeUseCase.execute({
+      code: data.promoCode,
+      userId: user.id,
+      carWashId: data.carWashId,
+    });
+  }
+
+  @Get('credentials')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  async getCredentials(@Req() req: AuthenticatedRequest) {
+    return await this.getGatewayCredentialsUseCase.execute();
+  }
+
+  @Get('ping')
+  @UseGuards(JwtGuard)
+  async pingCarWash(@Query() query: any) {
+    const res = await this.posService.ping({
+      posId: Number(query.carWashId),
+      carWashDeviceId: Number(query.carWashDeviceId),
+      type: query?.bayType ?? null,
+    });
+
+    return res;
   }
 
   @UseGuards(JwtGuard)
@@ -204,18 +243,6 @@ export class OrderController {
       ...data,
       clientId: user.id,
     });
-  }
-
-  @Get('ping')
-  @UseGuards(JwtGuard)
-  async pingCarWash(@Query() query: any) {
-    const res = await this.posService.ping({
-      posId: Number(query.carWashId),
-      carWashDeviceId: Number(query.carWashDeviceId),
-      type: query?.bayType ?? null,
-    });
-
-    return res;
   }
 
   @Get('/latest')
