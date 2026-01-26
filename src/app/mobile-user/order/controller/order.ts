@@ -21,6 +21,7 @@ import { GetActivationWindowsUseCase } from '@loyalty/mobile-user/order/use-case
 import { CalculateOrderDiscountPreviewUseCase } from '@loyalty/mobile-user/order/use-cases/calculate-order-discount-preview.use-case';
 import { GetAvailableMarketingCampaignsUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-marketing-campaigns.use-case';
 import { GetAvailablePromocodesUseCase } from '@loyalty/mobile-user/order/use-cases/get-available-promocodes.use-case';
+import { ValidatePromoCodeUseCase } from '@loyalty/mobile-user/order/use-cases/validate-promo-code.use-case';
 import {
   PROMOCODE_FILTER,
   VALID_PROMOCODE_FILTERS,
@@ -29,6 +30,7 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CalculateDiscountDto } from './dto/calculate-discount.dto';
+import { VerifyPromoDto } from './dto/verify-promo.dto';
 import { JwtGuard } from '@mobile-user/auth/guards/jwt.guard';
 import { IPosService } from '@infra/pos/interface/pos.interface';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
@@ -54,6 +56,7 @@ export class OrderController {
     private readonly calculateOrderDiscountPreviewUseCase: CalculateOrderDiscountPreviewUseCase,
     private readonly getAvailableMarketingCampaignsUseCase: GetAvailableMarketingCampaignsUseCase,
     private readonly getAvailablePromocodesUseCase: GetAvailablePromocodesUseCase,
+    private readonly validatePromoCodeUseCase: ValidatePromoCodeUseCase,
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
     private readonly getGatewayCredentialsUseCase: GetGatewayCredentialsUseCase,
@@ -145,6 +148,22 @@ export class OrderController {
       carWashId ? Number(carWashId) : undefined,
       validFilter,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('validate-promocode')
+  @HttpCode(HttpStatus.OK)
+  async validatePromocode(
+    @Body() data: VerifyPromoDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const { user } = req;
+
+    return await this.validatePromoCodeUseCase.execute({
+      code: data.promoCode,
+      userId: user.id,
+      carWashId: data.carWashId,
+    });
   }
 
   @Get('credentials')
