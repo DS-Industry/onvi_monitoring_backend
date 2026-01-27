@@ -119,8 +119,19 @@ export class CreateMobileOrderUseCase {
       request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
     );
 
+    if (request.rewardPointsUsed && request.rewardPointsUsed > 0) {
+      order.sumCashback = 0;
+    }
+
+    if (order.sumReal < 1) {
+      this.logger.warn(
+        `Order sumReal is less than 1 ruble: ${order.sumReal}, setting to 1 for user ${request.cardMobileUserId}`,
+      );
+      order.sumReal = 1;
+    }
+
     this.logger.log(
-      `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${order.sumReal}`,
+      `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${order.sumReal}, sumCashback: ${order.sumCashback}`,
     );
 
     const usageData = this.orderUsageDataService.buildUsageData(

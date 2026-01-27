@@ -87,16 +87,20 @@ export class CalculateOrderDiscountPreviewUseCase {
       request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
     );
 
+    const finalCashback = (request.rewardPointsUsed && request.rewardPointsUsed > 0) 
+      ? 0 
+      : order.sumCashback;
+
     this.logger.log(
-      `Discount preview calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${sumReal}`,
+      `Discount preview calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${sumReal}, sumCashback: ${finalCashback}`,
     );
 
     return {
       sumFull: order.sumFull,
       sumBonus: order.sumBonus,
       sumDiscount: discountResult.finalDiscount,
-      sumReal,
-      sumCashback: order.sumCashback,
+      sumReal: sumReal > 0 ? sumReal : 1,
+      sumCashback: finalCashback,
       transactionalCampaignDiscount: discountResult.transactionalCampaignDiscount,
       promoCodeDiscount: discountResult.promoCodeDiscount,
       usedTransactionalCampaign: discountResult.usedTransactionalCampaign,

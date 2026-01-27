@@ -74,6 +74,10 @@ export class Order extends BaseEntity<OrderProps> {
     return this.props.sumCashback;
   }
 
+  set sumCashback(sumCashback: number) {
+    this.props.sumCashback = sumCashback;
+  }
+
   get carWashDeviceId(): number {
     return this.props.carWashDeviceId;
   }
