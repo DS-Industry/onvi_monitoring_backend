@@ -75,15 +75,9 @@ export class CarWashLaunchUseCase {
         throw new Error("Bay is unavailable")
       }
 
-      const totalSum = (
-        order.sumFull +
-        (order.sumBonus || 0) +
-        (order.sumDiscount || 0)
-      ).toString();
-
       const carWashResponse = await this.posService.send({
         cardNumber: card.devNumber,
-        sum: totalSum,
+        sum: order.sumFull.toString(),
         deviceId: String(carWashDeviceId),
       });
 
