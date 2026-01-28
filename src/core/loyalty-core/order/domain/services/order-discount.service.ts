@@ -106,10 +106,19 @@ export class OrderDiscountService {
       promoCodeDiscount,
     );
 
+    if (promoCodeDiscount > transactionalCampaignDiscount.discountAmount) {
+      return {
+        finalDiscount: maxDiscount,
+        transactionalCampaignDiscount: 0,
+        promoCodeDiscount,
+        usedTransactionalCampaign: null,
+      };
+    }
+
     return {
       finalDiscount: maxDiscount,
       transactionalCampaignDiscount: transactionalCampaignDiscount.discountAmount,
-      promoCodeDiscount,
+      promoCodeDiscount: 0,
       usedTransactionalCampaign: transactionalCampaignDiscount.campaign,
     };
   }
