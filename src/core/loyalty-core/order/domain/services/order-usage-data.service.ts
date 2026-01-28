@@ -7,7 +7,7 @@ import { DiscountResult } from './order-discount.service';
 export class OrderUsageDataService {
   private readonly logger = new Logger(OrderUsageDataService.name);
 
-  buildUsageData(
+  createUsageTrackingData(
     discountResult: DiscountResult,
     cardMobileUserId: number,
     carWashId: number,

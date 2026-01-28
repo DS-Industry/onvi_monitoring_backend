@@ -114,7 +114,6 @@ import { GetAvailableMarketingCampaignsUseCase } from './mobile-user/order/use-c
 import { GetAvailablePromocodesUseCase } from './mobile-user/order/use-cases/get-available-promocodes.use-case';
 import { ValidatePromoCodeUseCase } from './mobile-user/order/use-cases/validate-promo-code.use-case';
 import { GetMobileOrderByTransactionIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-transaction-id';
-import { PromoCodeService } from './mobile-user/order/use-cases/promo-code-service';
 import { GetActivationWindowsUseCase } from './mobile-user/order/use-cases/get-activation-windows.use-case';
 import { ITariffRepository } from './mobile-user/order/interface/tariff';
 import { TariffRepository } from './mobile-user/order/repository/tariff';
@@ -123,7 +122,6 @@ import { StartPosUseCase } from './mobile-user/order/use-cases/start-pos.use-cas
 import { StartPosProcess } from '@infra/handler/pos-process/consumer/pos-process.consumer';
 import { CarWashLaunchUseCase } from './mobile-user/order/use-cases/car-wash-launch.use-case';
 import { CheckCarWashStartedUseCase } from './mobile-user/order/use-cases/check-car-wash-started.use-case';
-import { MarketingCampaignDiscountService } from './mobile-user/order/use-cases/marketing-campaign-discount.service';
 import { MarketingCampaignRewardService } from './mobile-user/order/use-cases/marketing-campaign-reward.service';
 import { ApplyMarketingCampaignRewardsUseCase } from './mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
 import { ApplyMarketingCampaignRewardsConsumer } from '@infra/handler/marketing-campaign/consumer/apply-marketing-campaign-rewards.consumer';
@@ -138,6 +136,10 @@ import {
   OrderBuilderService,
   OrderDiscountService,
   OrderUsageDataService,
+  OrderCalculationService,
+  OrderPreparationService,
+  MarketingCampaignDiscountService,
+  PromoCodeService,
 } from '@loyalty/order/domain/services';
 
 const repositories: Provider[] = [
@@ -268,12 +270,10 @@ const mobileOrderUseCase: Provider[] = [
   GetAvailableMarketingCampaignsUseCase,
   GetAvailablePromocodesUseCase,
   ValidatePromoCodeUseCase,
-  PromoCodeService,
   GetActivationWindowsUseCase,
   StartPosUseCase,
   CarWashLaunchUseCase,
   CheckCarWashStartedUseCase,
-  MarketingCampaignDiscountService,
   MarketingCampaignRewardService,
   ApplyMarketingCampaignRewardsUseCase,
   CheckBehavioralCampaignsUseCase,
@@ -288,6 +288,10 @@ const orderDomainServices: Provider[] = [
   OrderBuilderService,
   OrderDiscountService,
   OrderUsageDataService,
+  OrderCalculationService,
+  OrderPreparationService,
+  MarketingCampaignDiscountService,
+  PromoCodeService,
 ];
 
 const corporateUseCase: Provider[] = [

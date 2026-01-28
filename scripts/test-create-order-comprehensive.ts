@@ -36,7 +36,7 @@ import { PrismaService } from '../src/infra/database/prisma/prisma.service';
 import { CreateMobileOrderUseCase } from '../src/core/loyalty-core/mobile-user/order/use-cases/mobile-order-create';
 import { OrderRepository } from '../src/core/loyalty-core/order/repository/order';
 import { FindMethodsCardUseCase } from '../src/core/loyalty-core/mobile-user/card/use-case/card-find-methods';
-import { PromoCodeService } from '../src/core/loyalty-core/mobile-user/order/use-cases/promo-code-service';
+import { PromoCodeService } from '../src/core/loyalty-core/order/domain/services/promo-code-discount.service';
 import { ActivationWindowRepository } from '../src/core/loyalty-core/mobile-user/order/repository/activation-window.repository';
 import { DiscountCalculationService } from '../src/core/loyalty-core/order/domain/services/discount-calculation.service';
 import { TariffRepository } from '../src/core/loyalty-core/mobile-user/order/repository/tariff';
@@ -47,7 +47,9 @@ import { OrderStatusDeterminationService } from '../src/core/loyalty-core/order/
 import { OrderBuilderService } from '../src/core/loyalty-core/order/domain/services/order-builder.service';
 import { OrderDiscountService } from '../src/core/loyalty-core/order/domain/services/order-discount.service';
 import { OrderUsageDataService } from '../src/core/loyalty-core/order/domain/services/order-usage-data.service';
-import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/mobile-user/order/use-cases/marketing-campaign-discount.service';
+import { OrderCalculationService } from '../src/core/loyalty-core/order/domain/services/order-calculation.service';
+import { OrderPreparationService } from '../src/core/loyalty-core/order/domain/services/order-preparation.service';
+import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/order/domain/services/marketing-campaign-discount.service';
 import { CardRepository } from '../src/core/loyalty-core/mobile-user/card/repository/card';
 import { PromoCodeRepository } from '../src/core/loyalty-core/marketing-campaign/repository/promo-code.repository';
 import { IPosService } from '../src/infra/pos/interface/pos.interface';
@@ -325,17 +327,22 @@ function createUseCaseInstance() {
     promoCodeService,
   );
   const orderUsageDataService = new OrderUsageDataService();
+  const orderCalculationService = new OrderCalculationService();
+  
+  const orderPreparationService = new OrderPreparationService(
+    cardRepository,
+    orderBuilderService,
+    orderDiscountService,
+    orderCalculationService,
+  );
 
   // Create the main use case
   const useCase = new CreateMobileOrderUseCase(
     orderRepository,
-    findMethodsCardUseCase,
-    tariffRepository,
     orderValidationService,
     freeVacuumValidationService,
     orderStatusDeterminationService,
-    orderBuilderService,
-    orderDiscountService,
+    orderPreparationService,
     orderUsageDataService,
     mockFlowProducer as any,
   );
