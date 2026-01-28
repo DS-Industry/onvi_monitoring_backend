@@ -44,7 +44,7 @@ import { PrismaService } from '../src/infra/database/prisma/prisma.service';
 import { CreateMobileOrderUseCase } from '../src/core/loyalty-core/mobile-user/order/use-cases/mobile-order-create';
 import { OrderRepository } from '../src/core/loyalty-core/order/repository/order';
 import { FindMethodsCardUseCase } from '../src/core/loyalty-core/mobile-user/card/use-case/card-find-methods';
-import { PromoCodeService } from '../src/core/loyalty-core/mobile-user/order/use-cases/promo-code-service';
+import { PromoCodeService } from '../src/core/loyalty-core/order/domain/services/promo-code-discount.service';
 import { ActivationWindowRepository } from '../src/core/loyalty-core/mobile-user/order/repository/activation-window.repository';
 import { DiscountCalculationService } from '../src/core/loyalty-core/order/domain/services/discount-calculation.service';
 import { TariffRepository } from '../src/core/loyalty-core/mobile-user/order/repository/tariff';
@@ -58,8 +58,10 @@ import {
   OrderBuilderService,
   OrderDiscountService,
   OrderUsageDataService,
+  OrderCalculationService,
+  OrderPreparationService,
 } from '../src/core/loyalty-core/order/domain/services';
-import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/mobile-user/order/use-cases/marketing-campaign-discount.service';
+import { MarketingCampaignDiscountService } from '../src/core/loyalty-core/order/domain/services/marketing-campaign-discount.service';
 import { IPosService } from '../src/infra/pos/interface/pos.interface';
 import { IFlowProducer } from '../src/core/loyalty-core/order/interface/flow-producer.interface';
 import { ApplyMarketingCampaignRewardsUseCase } from '../src/core/loyalty-core/mobile-user/order/use-cases/apply-marketing-campaign-rewards.use-case';
@@ -263,17 +265,22 @@ function createUseCaseInstance() {
     promoCodeService,
   );
   const orderUsageDataService = new OrderUsageDataService();
+  const orderCalculationService = new OrderCalculationService();
+  
+  const orderPreparationService = new OrderPreparationService(
+    cardRepository,
+    orderBuilderService,
+    orderDiscountService,
+    orderCalculationService,
+  );
 
   // Use the global mockFlowProducer that tracks calls
   const useCase = new CreateMobileOrderUseCase(
     orderRepository,
-    findMethodsCardUseCase,
-    tariffRepository,
     orderValidationService,
     freeVacuumValidationService,
     orderStatusDeterminationService,
-    orderBuilderService,
-    orderDiscountService,
+    orderPreparationService,
     orderUsageDataService,
     mockFlowProducer,
   );

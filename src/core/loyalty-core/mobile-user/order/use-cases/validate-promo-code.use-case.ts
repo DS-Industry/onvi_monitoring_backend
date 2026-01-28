@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PromoCodeService } from './promo-code-service';
+import { PromoCodeService } from '@loyalty/order/domain/services/promo-code-discount.service';
 
 export interface ValidatePromoCodeRequest {
   code: string;

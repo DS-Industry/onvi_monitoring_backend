@@ -8,8 +8,8 @@ export class CreateOrderDto {
   sum: number;
 
   @IsNumber()
-  @IsDefined()
-  rewardPointsUsed: number;
+  @IsOptional()
+  rewardPointsUsed?: number;
 
   @IsOptional()
   @IsNumber()

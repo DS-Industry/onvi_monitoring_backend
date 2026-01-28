@@ -1,8 +1,7 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { OrderBuilderService } from '@loyalty/order/domain/services/order-builder.service';
-import { OrderDiscountService } from '@loyalty/order/domain/services/order-discount.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { OrderPreparationService } from '@loyalty/order/domain/services/order-preparation.service';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
+import { OrderCalculationMode } from '@loyalty/order/domain/enums';
 
 export interface CalculateDiscountPreviewRequest {
   cardMobileUserId: number;
@@ -36,9 +35,7 @@ export class CalculateOrderDiscountPreviewUseCase {
   private readonly logger = new Logger(CalculateOrderDiscountPreviewUseCase.name);
 
   constructor(
-    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
-    private readonly orderBuilderService: OrderBuilderService,
-    private readonly orderDiscountService: OrderDiscountService,
+    private readonly orderPreparationService: OrderPreparationService,
   ) {}
 
   async execute(
@@ -48,55 +45,30 @@ export class CalculateOrderDiscountPreviewUseCase {
       `Calculating discount preview for user ${request.cardMobileUserId}, sum: ${request.sum}, carWashId: ${request.carWashId}`,
     );
 
-    const card = await this.findMethodsCardUseCase.getByClientId(
-      request.cardMobileUserId,
-    );
-
-    if (!card) {
-      throw new NotFoundException(
-        `Card with ID ${request.cardMobileUserId} not found`,
+    const { order, discountResult, totals } =
+      await this.orderPreparationService.prepareOrderWithTotals(
+        {
+          cardMobileUserId: request.cardMobileUserId,
+          sum: request.sum,
+          carWashId: request.carWashId,
+          carWashDeviceId: request.carWashDeviceId,
+          bayType: request.bayType ?? null,
+          promoCodeId: request.promoCodeId ?? null,
+          rewardPointsUsed: request.rewardPointsUsed,
+        },
+        OrderCalculationMode.PREVIEW,
       );
-    }
-
-    const order = await this.orderBuilderService.buildOrder(
-      {
-        sum: request.sum,
-        carWashDeviceId: request.carWashDeviceId,
-        bayType: request.bayType ?? null,
-      },
-      card,
-    );
-
-    const orderDate = new Date();
-    const discountResult = await this.orderDiscountService.calculateDiscountsPreview(
-      {
-        cardMobileUserId: request.cardMobileUserId,
-        carWashId: request.carWashId,
-        sum: request.sum,
-        orderDate,
-        rewardPointsUsed: request.rewardPointsUsed || 0,
-        promoCodeId: request.promoCodeId || null,
-        bayType: request.bayType ?? null,
-      },
-      order,
-      card,
-    );
-
-    const sumReal = Math.max(
-      0,
-      request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
-    );
 
     this.logger.log(
-      `Discount preview calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${sumReal}`,
+      `Discount preview calculated - sumFull: ${order.sumFull}, sumDiscount: ${totals.sumDiscount}, sumReal: ${totals.sumReal}, sumCashback: ${totals.sumCashback}`,
     );
 
     return {
       sumFull: order.sumFull,
-      sumBonus: order.sumBonus,
-      sumDiscount: discountResult.finalDiscount,
-      sumReal,
-      sumCashback: order.sumCashback,
+      sumBonus: totals.sumBonus,
+      sumDiscount: totals.sumDiscount,
+      sumReal: totals.sumReal,
+      sumCashback: totals.sumCashback,
       transactionalCampaignDiscount: discountResult.transactionalCampaignDiscount,
       promoCodeDiscount: discountResult.promoCodeDiscount,
       usedTransactionalCampaign: discountResult.usedTransactionalCampaign,

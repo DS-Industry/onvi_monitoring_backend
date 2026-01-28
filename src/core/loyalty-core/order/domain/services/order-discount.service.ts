@@ -3,10 +3,11 @@ import { Order } from '@loyalty/order/domain/order';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { CampaignExecutionType } from '@prisma/client';
-import { MarketingCampaignDiscountService } from '@loyalty/mobile-user/order/use-cases/marketing-campaign-discount.service';
-import { PromoCodeService } from '@loyalty/mobile-user/order/use-cases/promo-code-service';
+import { MarketingCampaignDiscountService } from './marketing-campaign-discount.service';
+import { PromoCodeService } from './promo-code-discount.service';
 import { CampaignConditionTree } from '@loyalty/marketing-campaign/domain/schemas/condition-tree.schema';
 import { CampaignConditionType } from '@loyalty/marketing-campaign/domain/enums/condition-type.enum';
+import { OrderCalculationMode } from '@loyalty/order/domain/enums';
 
 export interface OrderDiscountRequest {
   cardMobileUserId: number;
@@ -43,20 +44,16 @@ export class OrderDiscountService {
     request: OrderDiscountRequest,
     order: Order,
     card: Card,
+    mode: OrderCalculationMode = OrderCalculationMode.ACTUAL,
   ): Promise<DiscountResult> {
-    const requestedPoints = request.rewardPointsUsed || 0;
-    const balance = card.balance || 0;
-
-    if (requestedPoints > balance) {
-      throw new BadRequestException(
-        `Недостаточно баллов: запрошено ${requestedPoints}, доступно ${balance}`,
-      );
-    }
-
-    const transactionalCampaignDiscount = await this.calculateTransactionalCampaignDiscount(
-      request,
-      card.id,
-    );
+    this.validateRewardPoints(request, card);
+    const transactionalCampaignDiscount =
+      mode === OrderCalculationMode.PREVIEW
+        ? await this.calculateTransactionalCampaignDiscountPreview(
+            request,
+            card.id,
+          )
+        : await this.calculateTransactionalCampaignDiscount(request, card.id);
 
     const promoCodeDiscount = await this.calculatePromoCodeDiscount(
       request.promoCodeId,
@@ -65,25 +62,23 @@ export class OrderDiscountService {
       request.carWashId,
     );
 
-    const maxDiscount = Math.max(
-      transactionalCampaignDiscount.discountAmount,
+    return this.selectBestDiscount(
+      transactionalCampaignDiscount,
       promoCodeDiscount,
     );
-    const finalDiscount = maxDiscount;
-
-    return {
-      finalDiscount,
-      transactionalCampaignDiscount: transactionalCampaignDiscount.discountAmount,
-      promoCodeDiscount,
-      usedTransactionalCampaign: transactionalCampaignDiscount.campaign,
-    };
   }
-
   async calculateDiscountsPreview(
     request: OrderDiscountRequest,
     order: Order,
     card: Card,
   ): Promise<DiscountResult> {
+    return this.calculateDiscounts(request, order, card, OrderCalculationMode.PREVIEW);
+  }
+
+  private validateRewardPoints(
+    request: OrderDiscountRequest,
+    card: Card,
+  ): void {
     const requestedPoints = request.rewardPointsUsed || 0;
     const balance = card.balance || 0;
 
@@ -92,27 +87,27 @@ export class OrderDiscountService {
         `Недостаточно баллов: запрошено ${requestedPoints}, доступно ${balance}`,
       );
     }
+  }
 
-    const transactionalCampaignDiscount = await this.calculateTransactionalCampaignDiscountPreview(
-      request,
-      card.id,
-    );
-
-    const promoCodeDiscount = await this.calculatePromoCodeDiscount(
-      request.promoCodeId,
-      order,
-      card,
-      request.carWashId,
-    );
-
+  private selectBestDiscount(
+    transactionalCampaignDiscount: {
+      discountAmount: number;
+      campaign: {
+        campaignId: number;
+        campaignName: string;
+        actionId: number;
+        discountAmount: number;
+      } | null;
+    },
+    promoCodeDiscount: number,
+  ): DiscountResult {
     const maxDiscount = Math.max(
       transactionalCampaignDiscount.discountAmount,
       promoCodeDiscount,
     );
-    const finalDiscount = maxDiscount;
 
     return {
-      finalDiscount,
+      finalDiscount: maxDiscount,
       transactionalCampaignDiscount: transactionalCampaignDiscount.discountAmount,
       promoCodeDiscount,
       usedTransactionalCampaign: transactionalCampaignDiscount.campaign,

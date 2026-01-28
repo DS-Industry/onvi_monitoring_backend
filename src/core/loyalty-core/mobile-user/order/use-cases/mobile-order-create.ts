@@ -1,10 +1,8 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { IOrderRepository, OrderUsageData } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
-import { OrderStatus } from '@loyalty/order/domain/enums';
+import { OrderStatus, OrderCalculationMode } from '@loyalty/order/domain/enums';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
-import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
-import { ITariffRepository } from '../interface/tariff';
 import {
   IFlowProducer,
   IFLOW_PRODUCER,
@@ -13,17 +11,14 @@ import {
   OrderValidationService,
   FreeVacuumValidationService,
   OrderStatusDeterminationService,
-  OrderBuilderService,
-  OrderDiscountService,
   OrderUsageDataService,
+  OrderPreparationService,
 } from '@loyalty/order/domain/services';
 import {
-  CardNotFoundForOrderException,
   CardOwnershipException,
   InvalidOrderSumException,
   InvalidBonusSumException,
 } from '@loyalty/order/domain/exceptions';
-import { Card } from '@loyalty/mobile-user/card/domain/card';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -47,13 +42,10 @@ export class CreateMobileOrderUseCase {
 
   constructor(
     private readonly orderRepository: IOrderRepository,
-    private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
-    private readonly tariffRepository: ITariffRepository,
     private readonly orderValidationService: OrderValidationService,
     private readonly freeVacuumValidationService: FreeVacuumValidationService,
     private readonly orderStatusDeterminationService: OrderStatusDeterminationService,
-    private readonly orderBuilderService: OrderBuilderService,
-    private readonly orderDiscountService: OrderDiscountService,
+    private readonly orderPreparationService: OrderPreparationService,
     private readonly orderUsageDataService: OrderUsageDataService,
     @Inject(IFLOW_PRODUCER)
     private readonly flowProducer: IFlowProducer,
@@ -74,7 +66,26 @@ export class CreateMobileOrderUseCase {
       bayType: request?.bayType ?? null,
     });
 
-    const card = await this.validateAndGetCard(request.cardMobileUserId);
+    const { card, order, discountResult, totals } =
+      await this.orderPreparationService.prepareOrderWithTotals(
+        {
+          cardMobileUserId: request.cardMobileUserId,
+          sum: request.sum,
+          carWashId: request.carWashId,
+          carWashDeviceId: request.carWashDeviceId,
+          bayType: request?.bayType ?? null,
+          promoCodeId: request.promoCodeId,
+          rewardPointsUsed: request.rewardPointsUsed,
+        },
+        OrderCalculationMode.ACTUAL,
+      );
+
+    if (card.mobileUserId !== request.cardMobileUserId) {
+      this.logger.warn(
+        `Authorization failed: Card ${card.id} does not belong to user ${request.cardMobileUserId}. Card owner: ${card.mobileUserId}`,
+      );
+      throw new CardOwnershipException(request.cardMobileUserId);
+    }
 
     const isFreeVacuum = this.orderStatusDeterminationService.isFreeVacuum({
       sum: request.sum,
@@ -88,42 +99,16 @@ export class CreateMobileOrderUseCase {
       });
     }
 
-    const order = await this.orderBuilderService.buildOrder(
-      {
-        sum: request.sum,
-        carWashDeviceId: request.carWashDeviceId,
-        bayType: request?.bayType ?? null,
-      },
-      card,
-    );
-
-    const orderDate = new Date();
-    const discountResult = await this.orderDiscountService.calculateDiscounts(
-      {
-        cardMobileUserId: request.cardMobileUserId,
-        carWashId: request.carWashId,
-        sum: request.sum,
-        orderDate,
-        rewardPointsUsed: request.rewardPointsUsed || 0,
-        promoCodeId: request.promoCodeId || null,
-        bayType: request?.bayType ?? null,
-      },
-      order,
-      card,
-    );
-
-    order.sumDiscount = discountResult.finalDiscount;
-    order.sumBonus = request.rewardPointsUsed || 0;
-    order.sumReal = Math.max(
-      0,
-      request.sum - discountResult.finalDiscount - (request.rewardPointsUsed || 0),
-    );
+    order.sumDiscount = totals.sumDiscount;
+    order.sumBonus = totals.sumBonus;
+    order.sumReal = totals.sumReal;
+    order.sumCashback = totals.sumCashback;
 
     this.logger.log(
-      `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${discountResult.finalDiscount}, sumReal: ${order.sumReal}`,
+      `Order calculated - sumFull: ${order.sumFull}, sumDiscount: ${totals.sumDiscount}, sumReal: ${totals.sumReal}, sumCashback: ${totals.sumCashback}`,
     );
 
-    const usageData = this.orderUsageDataService.buildUsageData(
+    const usageData = this.orderUsageDataService.createUsageTrackingData(
       discountResult,
       request.cardMobileUserId,
       request.carWashId,
@@ -170,26 +155,6 @@ export class CreateMobileOrderUseCase {
     }
   }
 
-  private async validateAndGetCard(cardMobileUserId: number): Promise<Card> {
-    const card = await this.findMethodsCardUseCase.getByClientId(
-      cardMobileUserId,
-    );
-
-    if (!card) {
-      this.logger.warn(`Card not found for user ${cardMobileUserId}`);
-      throw new CardNotFoundForOrderException(cardMobileUserId);
-    }
-
-    if (card.mobileUserId !== cardMobileUserId) {
-      this.logger.warn(
-        `Authorization failed: Card ${card.id} does not belong to user ${cardMobileUserId}. Card owner: ${card.mobileUserId}`,
-      );
-      throw new CardOwnershipException(cardMobileUserId);
-    }
-
-    this.logger.debug(`Card ${card.id} verified for user ${cardMobileUserId}`);
-    return card;
-  }
 
   private async createOrder(
     order: Order,

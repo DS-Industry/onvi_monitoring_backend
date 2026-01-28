@@ -39,6 +39,8 @@ import { OrderStatus } from '@loyalty/order/domain/enums';
 import { ExceptionInterceptor } from '@common/interceptors/exception.interceptor';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { GetGatewayCredentialsUseCase } from '../../../payment/use-cases/get-gateway-credentials.use-case';
+import { GetLatestCarwashesUseCase } from '../use-cases/get-latest-carwashes.use-case';
+import { GetLatestCarwashesDto } from './dto/get-latest-carwashes.dto';
 
 interface AuthenticatedRequest extends Request {
   user: Client;
@@ -60,6 +62,7 @@ export class OrderController {
     private readonly posService: IPosService,
     private readonly registerPaymentUseCase: RegisterPaymentUseCase,
     private readonly getGatewayCredentialsUseCase: GetGatewayCredentialsUseCase,
+    private readonly getLatestCarwashesUseCase: GetLatestCarwashesUseCase,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -185,6 +188,18 @@ export class OrderController {
     return res;
   }
 
+  @Get('/latest')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  async getLatestCarwash(
+    @Req() request: AuthenticatedRequest,
+    @Query() query: GetLatestCarwashesDto,
+  ) {
+    const { user } = request;
+    const limit = query.limit ?? 3;
+    return await this.getLatestCarwashesUseCase.execute(user, limit);
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -243,15 +258,5 @@ export class OrderController {
       ...data,
       clientId: user.id,
     });
-  }
-
-  @Get('/latest')
-  @UseGuards(JwtGuard)
-  @HttpCode(HttpStatus.OK)
-  async getLatestCarwash(@Req() request: AuthenticatedRequest, @Query() query: any) {
-    return {
-      message: 'Get latest carwash - needs implementation',
-      query,
-    };
   }
 }
