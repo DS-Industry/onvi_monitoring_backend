@@ -21,6 +21,7 @@ export interface OrderProps {
   bayType?: string;
   platform: PlatformType;
   cardMobileUserId?: number;
+  clientId?: number;
   typeMobileUser: ContractType;
   orderData: Date;
   createData: Date;
@@ -88,6 +89,10 @@ export class Order extends BaseEntity<OrderProps> {
 
   get cardMobileUserId(): number {
     return this.props.cardMobileUserId;
+  }
+
+  get clientId(): number {
+    return this.props.clientId;
   }
 
   get typeMobileUser(): ContractType {

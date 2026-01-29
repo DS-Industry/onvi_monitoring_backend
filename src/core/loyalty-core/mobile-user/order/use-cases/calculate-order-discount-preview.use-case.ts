@@ -3,7 +3,7 @@ import { OrderPreparationService } from '@loyalty/order/domain/services/order-pr
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 
 export interface CalculateDiscountPreviewRequest {
-  cardMobileUserId: number;
+  clientId: number;
   sum: number;
   carWashId: number;
   carWashDeviceId: number;
@@ -41,13 +41,13 @@ export class CalculateOrderDiscountPreviewUseCase {
     request: CalculateDiscountPreviewRequest,
   ): Promise<CalculateDiscountPreviewResponse> {
     this.logger.log(
-      `Calculating discount preview for user ${request.cardMobileUserId}, sum: ${request.sum}, carWashId: ${request.carWashId}`,
+      `Calculating discount preview for user ${request.clientId}, sum: ${request.sum}, carWashId: ${request.carWashId}`,
     );
 
     const { order, discountResult, totals } =
       await this.orderPreparationService.prepareOrderWithTotals(
         {
-          cardMobileUserId: request.cardMobileUserId,
+          clientId: request.clientId,
           sum: request.sum,
           carWashId: request.carWashId,
           carWashDeviceId: request.carWashDeviceId,

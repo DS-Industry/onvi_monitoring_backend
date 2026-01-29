@@ -22,6 +22,7 @@ export class PrismaOrderMapper {
         };
       };
       card?: {
+        id: number | null;
         clientId: number | null;
       } | null;
     },
@@ -41,7 +42,8 @@ export class PrismaOrderMapper {
       carWashId: entity.carWashDevice.carWashPosId,
       platform: EnumMapper.toDomainPlatformType(entity.platform),
       bayType: entity.carWashDevice.carWashDeviceType.name,
-      cardMobileUserId: entity.card?.clientId ?? null,
+      cardMobileUserId: entity.cardId,
+      clientId: entity.card?.clientId ?? null,
       typeMobileUser: EnumMapper.toDomainContractType(entity.contractType),
       orderData: entity.orderData,
       createData: entity.createData,

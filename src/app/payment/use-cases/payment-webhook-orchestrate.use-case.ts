@@ -341,17 +341,17 @@ export class PaymentWebhookOrchestrateUseCase {
       return;
     }
 
-    if (!order.cardMobileUserId) {
+    if (!order.clientId) {
       this.logger.warn(
-        `[WEBHOOK] Order#${order.id} has no cardMobileUserId. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Order#${order.id} has no clientId. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
 
-    const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
+    const card = await this.findMethodsCardUseCase.getByClientId(order.clientId);
     if (!card) {
       this.logger.warn(
-        `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Card for client ${order.clientId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
@@ -447,9 +447,9 @@ export class PaymentWebhookOrchestrateUseCase {
       return;
     }
 
-    if (!order.cardMobileUserId) {
+    if (!order.clientId) {
       this.logger.warn(
-        `[WEBHOOK] Order#${order.id} has no cardMobileUserId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Order#${order.id} has no clientId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
@@ -462,17 +462,17 @@ export class PaymentWebhookOrchestrateUseCase {
     }
 
     try {
-      const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
+      const card = await this.findMethodsCardUseCase.getByClientId(order.clientId);
       if (!card) {
         this.logger.warn(
-          `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+          `[WEBHOOK] Card for client ${order.clientId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
         );
         return;
       }
 
       const eligibleCampaigns =
         await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
-          order.cardMobileUserId,
+          order.clientId,
           order.orderData,
           order.carWashId,
         );
@@ -486,7 +486,7 @@ export class PaymentWebhookOrchestrateUseCase {
 
       await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
         eligibleCampaigns,
-        order.cardMobileUserId,
+        order.clientId,
         order.orderData,
         order.sumFull,
         card.id,

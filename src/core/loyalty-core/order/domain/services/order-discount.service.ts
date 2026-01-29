@@ -9,7 +9,7 @@ import { CampaignConditionTree } from '@loyalty/marketing-campaign/domain/schema
 import { CampaignConditionType } from '@loyalty/marketing-campaign/domain/enums/condition-type.enum';
 
 export interface OrderDiscountRequest {
-  cardMobileUserId: number;
+  clientId: number;
   carWashId: number;
   sum: number;
   orderDate: Date;
@@ -123,13 +123,13 @@ export class OrderDiscountService {
   }> {
     const eligibleCampaigns =
       await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
-        request.cardMobileUserId,
+        request.clientId,
         request.orderDate,
         request.carWashId,
       );
 
     this.logger.debug(
-      `Found ${eligibleCampaigns.length} eligible campaigns for user ${request.cardMobileUserId}`,
+      `Found ${eligibleCampaigns.length} eligible campaigns for user ${request.clientId}`,
     );
 
     const simulatedProgressStates = new Map<
@@ -162,7 +162,7 @@ export class OrderDiscountService {
       const progress =
         await this.marketingCampaignDiscountService.getCampaignProgressState(
           campaign.id,
-          request.cardMobileUserId,
+          request.clientId,
         );
 
       const visitCountCondition = conditions.find(
@@ -172,7 +172,7 @@ export class OrderDiscountService {
       if (visitCountCondition) {
         const simulatedState = await this.marketingCampaignDiscountService.simulateVisitCountIncrement(
           visitCountCondition,
-          request.cardMobileUserId,
+          request.clientId,
           progress?.state || {},
           {
             orderDate: request.orderDate,
@@ -199,7 +199,7 @@ export class OrderDiscountService {
         const discountResult =
           await this.marketingCampaignDiscountService.evaluateTransactionalCampaignDiscountPreview(
             campaign,
-            request.cardMobileUserId,
+            request.clientId,
             request.sum,
             request.orderDate,
             request.rewardPointsUsed,

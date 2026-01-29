@@ -24,6 +24,7 @@ export class PosService implements IPosService {
 
   async ping(data: PingRequestDto): Promise<PingResponseDto> {
     const headers = this.buildHeaders();
+
     try {
       const url =
         `${this.baseUrl}/external/collection/device/by-id?carwashId=${data.posId}&carWashDeviceId=${data.carWashDeviceId}`;
