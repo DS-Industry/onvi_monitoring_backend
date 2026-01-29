@@ -15,6 +15,8 @@ import {
 } from '@constant/constants';
 import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
 import { MarketingCampaignDiscountService } from '@loyalty/order/domain/services';
+import { ICardBonusOperRepository } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/interface/cardBonusOper';
+import { CardBonusOper } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/domain/cardBonusOper';
 
 @Injectable()
 export class PaymentWebhookOrchestrateUseCase {
@@ -32,6 +34,8 @@ export class PaymentWebhookOrchestrateUseCase {
     @Inject(IPromoCodeRepository)
     private readonly promoCodeRepository: IPromoCodeRepository,
     private readonly marketingCampaignDiscountService: MarketingCampaignDiscountService,
+    @Inject(ICardBonusOperRepository)
+    private readonly cardBonusOperRepository: ICardBonusOperRepository,
   ) {
     this.logger.log(
       `[WEBHOOK] PaymentWebhookOrchestrateUseCase initialized. Queue name: payment-orchestrate`,
@@ -344,10 +348,10 @@ export class PaymentWebhookOrchestrateUseCase {
       return;
     }
 
-    const card = await this.findMethodsCardUseCase.getById(order.cardMobileUserId);
+    const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
     if (!card) {
       this.logger.warn(
-        `[WEBHOOK] Card ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
@@ -416,18 +420,18 @@ export class PaymentWebhookOrchestrateUseCase {
             MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
           );
         if (!existingMarketingBonus) {
-          await this.createCardBonusOperUseCase.execute(
-            {
-              carWashDeviceId: order.carWashDeviceId,
-              typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-              operDate: order.orderData,
-              sum: order.sumDiscount,
-              orderMobileUserId: order.id,
-            },
-            card,
-          );
+          const marketingBonusOper = new CardBonusOper({
+            cardMobileUserId: card.id,
+            carWashDeviceId: order.carWashDeviceId,
+            typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
+            operDate: order.orderData,
+            loadDate: new Date(),
+            sum: order.sumDiscount,
+            orderMobileUserId: order.id,
+          });
+          await this.cardBonusOperRepository.create(marketingBonusOper);
           this.logger.log(
-            `[WEBHOOK] Created marketing campaign bonus (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
+            `[WEBHOOK] Created marketing campaign bonus record (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
           );
         } else {
           this.logger.log(
@@ -458,10 +462,10 @@ export class PaymentWebhookOrchestrateUseCase {
     }
 
     try {
-      const card = await this.findMethodsCardUseCase.getById(order.cardId);
+      const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
       if (!card) {
         this.logger.warn(
-          `[WEBHOOK] Card ${order.cardMobileUserId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+          `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
         );
         return;
       }
