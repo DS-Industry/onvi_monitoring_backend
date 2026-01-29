@@ -34,7 +34,7 @@ export class RegisterPaymentUseCase {
     }
 
     if (order.cardMobileUserId) {
-      const card = await this.findMethodsCardUseCase.getById(
+      const card = await this.findMethodsCardUseCase.getByClientId(
         order.cardMobileUserId,
       );
       if (!card || card.mobileUserId !== data.clientId) {

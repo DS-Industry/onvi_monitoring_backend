@@ -50,7 +50,7 @@ export class OrderBuilderService {
       sumCashback: computedCashback,
       carWashDeviceId: request.carWashDeviceId,
       platform: PlatformType.ONVI,
-      cardMobileUserId: card.id,
+      cardMobileUserId: card.mobileUserId ?? null,
       typeMobileUser: ContractType.INDIVIDUAL,
       orderData: new Date(),
       createData: new Date(),

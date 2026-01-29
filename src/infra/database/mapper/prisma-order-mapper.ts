@@ -21,6 +21,9 @@ export class PrismaOrderMapper {
           };
         };
       };
+      card?: {
+        clientId: number | null;
+      } | null;
     },
   ): Order {
     if (!entity) {
@@ -38,7 +41,7 @@ export class PrismaOrderMapper {
       carWashId: entity.carWashDevice.carWashPosId,
       platform: EnumMapper.toDomainPlatformType(entity.platform),
       bayType: entity.carWashDevice.carWashDeviceType.name,
-      cardMobileUserId: entity.cardId,
+      cardMobileUserId: entity.card?.clientId ?? null,
       typeMobileUser: EnumMapper.toDomainContractType(entity.contractType),
       orderData: entity.orderData,
       createData: entity.createData,
@@ -62,7 +65,7 @@ export class PrismaOrderMapper {
     });
   }
 
-  static toPrisma(order: Order): Prisma.LTYOrderUncheckedCreateInput {
+  static toPrisma(order: Order, cardId?: number | null): Prisma.LTYOrderUncheckedCreateInput {
     return {
       id: order?.id,
       transactionId: order.transactionId,
@@ -73,7 +76,7 @@ export class PrismaOrderMapper {
       sumCashback: order.sumCashback,
       carWashDeviceId: order.carWashDeviceId,
       platform: EnumMapper.toPrismaPlatformType(order.platform),
-      cardId: order?.cardMobileUserId,
+      cardId: cardId ?? null,
       contractType: EnumMapper.toPrismaContractType(order.typeMobileUser),
       orderData: order.orderData,
       createData: order.createData,

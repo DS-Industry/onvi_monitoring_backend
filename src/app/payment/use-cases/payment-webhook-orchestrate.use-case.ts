@@ -14,6 +14,9 @@ import {
   USING_BONUSES_OPER_TYPE_ID,
 } from '@constant/constants';
 import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
+import { MarketingCampaignDiscountService } from '@loyalty/order/domain/services';
+import { ICardBonusOperRepository } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/interface/cardBonusOper';
+import { CardBonusOper } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/domain/cardBonusOper';
 
 @Injectable()
 export class PaymentWebhookOrchestrateUseCase {
@@ -30,6 +33,9 @@ export class PaymentWebhookOrchestrateUseCase {
     private readonly findMethodsCardBonusOperUseCase: FindMethodsCardBonusOperUseCase,
     @Inject(IPromoCodeRepository)
     private readonly promoCodeRepository: IPromoCodeRepository,
+    private readonly marketingCampaignDiscountService: MarketingCampaignDiscountService,
+    @Inject(ICardBonusOperRepository)
+    private readonly cardBonusOperRepository: ICardBonusOperRepository,
   ) {
     this.logger.log(
       `[WEBHOOK] PaymentWebhookOrchestrateUseCase initialized. Queue name: payment-orchestrate`,
@@ -177,6 +183,15 @@ export class PaymentWebhookOrchestrateUseCase {
         this.logger.error(
           `[WEBHOOK] Failed to apply bonus operations for order#${verifiedOrder.id}: ${bonusError.message}. Request ID: ${requestId || 'unknown'}`,
           bonusError.stack,
+        );
+      }
+
+      try {
+        await this.trackVisitCountsForPaidOrder(verifiedOrder, requestId);
+      } catch (trackingError: any) {
+        this.logger.error(
+          `[WEBHOOK] Failed to track visit counts for order#${verifiedOrder.id}: ${trackingError.message}. Request ID: ${requestId || 'unknown'}`,
+          trackingError.stack,
         );
       }
 
@@ -333,10 +348,10 @@ export class PaymentWebhookOrchestrateUseCase {
       return;
     }
 
-    const card = await this.findMethodsCardUseCase.getById(order.cardMobileUserId);
+    const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
     if (!card) {
       this.logger.warn(
-        `[WEBHOOK] Card ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
+        `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping бонусные операции. Request ID: ${requestId || 'unknown'}`,
       );
       return;
     }
@@ -405,18 +420,18 @@ export class PaymentWebhookOrchestrateUseCase {
             MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
           );
         if (!existingMarketingBonus) {
-          await this.createCardBonusOperUseCase.execute(
-            {
-              carWashDeviceId: order.carWashDeviceId,
-              typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-              operDate: order.orderData,
-              sum: order.sumDiscount,
-              orderMobileUserId: order.id,
-            },
-            card,
-          );
+          const marketingBonusOper = new CardBonusOper({
+            cardMobileUserId: card.id,
+            carWashDeviceId: order.carWashDeviceId,
+            typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
+            operDate: order.orderData,
+            loadDate: new Date(),
+            sum: order.sumDiscount,
+            orderMobileUserId: order.id,
+          });
+          await this.cardBonusOperRepository.create(marketingBonusOper);
           this.logger.log(
-            `[WEBHOOK] Created marketing campaign bonus (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
+            `[WEBHOOK] Created marketing campaign bonus record (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
           );
         } else {
           this.logger.log(
@@ -424,6 +439,68 @@ export class PaymentWebhookOrchestrateUseCase {
           );
         }
       }
+    }
+  }
+
+  private async trackVisitCountsForPaidOrder(order: any, requestId?: string) {
+    if (order.platform !== PlatformType.ONVI) {
+      return;
+    }
+
+    if (!order.cardMobileUserId) {
+      this.logger.warn(
+        `[WEBHOOK] Order#${order.id} has no cardMobileUserId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    if (!order.carWashId) {
+      this.logger.warn(
+        `[WEBHOOK] Order#${order.id} has no carWashId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    try {
+      const card = await this.findMethodsCardUseCase.getByClientId(order.cardMobileUserId);
+      if (!card) {
+        this.logger.warn(
+          `[WEBHOOK] Card for client ${order.cardMobileUserId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
+      const eligibleCampaigns =
+        await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
+          order.cardMobileUserId,
+          order.orderData,
+          order.carWashId,
+        );
+
+      if (eligibleCampaigns.length === 0) {
+        this.logger.debug(
+          `[WEBHOOK] No eligible campaigns found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
+      await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
+        eligibleCampaigns,
+        order.cardMobileUserId,
+        order.orderData,
+        order.sumFull,
+        card.id,
+      );
+
+      this.logger.log(
+        `[WEBHOOK] Tracked visit counts for ${eligibleCampaigns.length} eligible campaigns for order#${order.id}. Request ID: ${requestId || 'unknown'}`,
+      );
+    } catch (error: any) {
+      this.logger.error(
+        `[WEBHOOK] Error tracking visit counts for order#${order.id}: ${error.message}. Request ID: ${requestId || 'unknown'}`,
+        error.stack,
+      );
+      throw error;
     }
   }
 }

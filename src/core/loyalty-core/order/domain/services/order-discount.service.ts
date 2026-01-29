@@ -7,7 +7,6 @@ import { MarketingCampaignDiscountService } from './marketing-campaign-discount.
 import { PromoCodeService } from './promo-code-discount.service';
 import { CampaignConditionTree } from '@loyalty/marketing-campaign/domain/schemas/condition-tree.schema';
 import { CampaignConditionType } from '@loyalty/marketing-campaign/domain/enums/condition-type.enum';
-import { OrderCalculationMode } from '@loyalty/order/domain/enums';
 
 export interface OrderDiscountRequest {
   cardMobileUserId: number;
@@ -44,16 +43,10 @@ export class OrderDiscountService {
     request: OrderDiscountRequest,
     order: Order,
     card: Card,
-    mode: OrderCalculationMode = OrderCalculationMode.ACTUAL,
   ): Promise<DiscountResult> {
     this.validateRewardPoints(request, card);
     const transactionalCampaignDiscount =
-      mode === OrderCalculationMode.PREVIEW
-        ? await this.calculateTransactionalCampaignDiscountPreview(
-            request,
-            card.id,
-          )
-        : await this.calculateTransactionalCampaignDiscount(request, card.id);
+      await this.calculateTransactionalCampaignDiscount(request, card.id);
 
     const promoCodeDiscount = await this.calculatePromoCodeDiscount(
       request.promoCodeId,
@@ -66,13 +59,6 @@ export class OrderDiscountService {
       transactionalCampaignDiscount,
       promoCodeDiscount,
     );
-  }
-  async calculateDiscountsPreview(
-    request: OrderDiscountRequest,
-    order: Order,
-    card: Card,
-  ): Promise<DiscountResult> {
-    return this.calculateDiscounts(request, order, card, OrderCalculationMode.PREVIEW);
   }
 
   private validateRewardPoints(
@@ -106,10 +92,19 @@ export class OrderDiscountService {
       promoCodeDiscount,
     );
 
+    if (promoCodeDiscount > transactionalCampaignDiscount.discountAmount) {
+      return {
+        finalDiscount: maxDiscount,
+        transactionalCampaignDiscount: 0,
+        promoCodeDiscount,
+        usedTransactionalCampaign: null,
+      };
+    }
+
     return {
       finalDiscount: maxDiscount,
       transactionalCampaignDiscount: transactionalCampaignDiscount.discountAmount,
-      promoCodeDiscount,
+      promoCodeDiscount: 0,
       usedTransactionalCampaign: transactionalCampaignDiscount.campaign,
     };
   }
@@ -135,86 +130,6 @@ export class OrderDiscountService {
 
     this.logger.debug(
       `Found ${eligibleCampaigns.length} eligible campaigns for user ${request.cardMobileUserId}`,
-    );
-
-    await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
-      eligibleCampaigns,
-      request.cardMobileUserId,
-      request.orderDate,
-      request.sum,
-      cardId,
-    );
-
-    const transactionalDiscounts: Array<{
-      campaignId: number;
-      campaignName: string;
-      actionId: number;
-      discountAmount: number;
-    }> = [];
-
-    for (const campaign of eligibleCampaigns) {
-      if (campaign.executionType === CampaignExecutionType.TRANSACTIONAL) {
-        const discountResult =
-          await this.marketingCampaignDiscountService.evaluateTransactionalCampaignDiscount(
-            campaign,
-            request.cardMobileUserId,
-            request.sum,
-            request.orderDate,
-            request.rewardPointsUsed,
-            request.promoCodeId || null,
-            cardId,
-          );
-
-        if (discountResult && discountResult.discountAmount > 0) {
-          transactionalDiscounts.push({
-            campaignId: discountResult.campaignId,
-            campaignName: campaign.name || '',
-            actionId: discountResult.actionId,
-            discountAmount: discountResult.discountAmount,
-          });
-        }
-      }
-    }
-
-    if (transactionalDiscounts.length === 0) {
-      return { discountAmount: 0, campaign: null };
-    }
-
-    const bestTransactional = transactionalDiscounts.reduce((best, current) =>
-      current.discountAmount > best.discountAmount ? current : best,
-    );
-
-    this.logger.debug(
-      `Best transactional campaign discount: ${bestTransactional.discountAmount} for campaign ${bestTransactional.campaignId}`,
-    );
-
-    return {
-      discountAmount: bestTransactional.discountAmount,
-      campaign: bestTransactional,
-    };
-  }
-
-  async calculateTransactionalCampaignDiscountPreview(
-    request: OrderDiscountRequest,
-    cardId: number,
-  ): Promise<{
-    discountAmount: number;
-    campaign: {
-      campaignId: number;
-      campaignName: string;
-      actionId: number;
-      discountAmount: number;
-    } | null;
-  }> {
-    const eligibleCampaigns =
-      await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
-        request.cardMobileUserId,
-        request.orderDate,
-        request.carWashId,
-      );
-
-    this.logger.debug(
-      `[Preview] Found ${eligibleCampaigns.length} eligible campaigns for user ${request.cardMobileUserId}`,
     );
 
     const simulatedProgressStates = new Map<
@@ -313,7 +228,7 @@ export class OrderDiscountService {
     );
 
     this.logger.debug(
-      `[Preview] Best transactional campaign discount: ${bestTransactional.discountAmount} for campaign ${bestTransactional.campaignId}`,
+      `Best transactional campaign discount: ${bestTransactional.discountAmount} for campaign ${bestTransactional.campaignId}`,
     );
 
     return {

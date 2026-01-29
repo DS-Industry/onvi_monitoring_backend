@@ -22,13 +22,27 @@ export class OrderRepository extends IOrderRepository {
   }
 
   public async create(input: Order): Promise<Order> {
-    const orderEntity = PrismaOrderMapper.toPrisma(input);
+    let cardId: number | null = null;
+    if (input.cardMobileUserId) {
+      const card = await this.prisma.lTYCard.findFirst({
+        where: { clientId: input.cardMobileUserId },
+        select: { id: true },
+      });
+      cardId = card?.id ?? null;
+    }
+
+    const orderEntity = PrismaOrderMapper.toPrisma(input, cardId);
     const order = await this.prisma.lTYOrder.create({
       data: orderEntity,
       include: {
         carWashDevice: {
           include: {
             carWashDeviceType: true,
+          },
+        },
+        card: {
+          select: {
+            clientId: true,
           },
         },
       },
@@ -41,13 +55,27 @@ export class OrderRepository extends IOrderRepository {
     usageData?: OrderUsageData,
   ): Promise<Order> {
     return await this.prisma.$transaction(async (tx) => {
-      const orderEntity = PrismaOrderMapper.toPrisma(input);
+      let cardId: number | null = null;
+      if (input.cardMobileUserId) {
+        const card = await tx.lTYCard.findFirst({
+          where: { clientId: input.cardMobileUserId },
+          select: { id: true },
+        });
+        cardId = card?.id ?? null;
+      }
+
+      const orderEntity = PrismaOrderMapper.toPrisma(input, cardId);
       const orderRecord = await tx.lTYOrder.create({
         data: orderEntity,
         include: {
           carWashDevice: {
             include: {
               carWashDeviceType: true,
+            },
+          },
+          card: {
+            select: {
+              clientId: true,
             },
           },
         },
@@ -120,6 +148,11 @@ export class OrderRepository extends IOrderRepository {
               carWashDeviceType: true,
             },
           },
+          card: {
+            select: {
+              clientId: true,
+            },
+          },
         },
       });
       
@@ -139,6 +172,11 @@ export class OrderRepository extends IOrderRepository {
         carWashDevice: {
           include: {
             carWashDeviceType: true,
+          },
+        },
+        card: {
+          select: {
+            clientId: true,
           },
         },
       },
@@ -211,6 +249,11 @@ export class OrderRepository extends IOrderRepository {
             },
           },
         },
+        card: {
+          select: {
+            clientId: true,
+          },
+        },
       },
     });
     return orders.map((item) => PrismaOrderMapper.toDomain(item));
@@ -240,7 +283,16 @@ export class OrderRepository extends IOrderRepository {
   }
 
   public async update(input: Order): Promise<Order> {
-    const orderEntity = PrismaOrderMapper.toPrisma(input);
+    let cardId: number | null = null;
+    if (input.cardMobileUserId) {
+      const card = await this.prisma.lTYCard.findFirst({
+        where: { clientId: input.cardMobileUserId },
+        select: { id: true },
+      });
+      cardId = card?.id ?? null;
+    }
+
+    const orderEntity = PrismaOrderMapper.toPrisma(input, cardId);
     const order = await this.prisma.lTYOrder.update({
       where: {
         id: input.id,
@@ -250,6 +302,11 @@ export class OrderRepository extends IOrderRepository {
         carWashDevice: {
           include: {
             carWashDeviceType: true,
+          },
+        },
+        card: {
+          select: {
+            clientId: true,
           },
         },
       },
