@@ -39,7 +39,7 @@ export class HandlerOrderUseCase {
         data.clientPhone,
       );
       if (card) {
-        data.cardMobileUserId = card.id;
+        data.cardMobileUserId = card.mobileUserId ?? null;
       }
     }
     let order: Order;
@@ -55,7 +55,7 @@ export class HandlerOrderUseCase {
 
     try {
       if (data.platform == PlatformType.ONVI) {
-        const card = await this.findMethodsCardUseCase.getById(
+        const card = await this.findMethodsCardUseCase.getByClientId(
           data.cardMobileUserId,
         );
         if (data.sumBonus > 0) {

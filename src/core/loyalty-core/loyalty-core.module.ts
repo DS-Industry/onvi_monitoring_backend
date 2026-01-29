@@ -436,6 +436,7 @@ const redisProviders: Provider[] = [RedisService];
     ...cardBonusBank,
     ...corporateUseCase,
     ...marketingCampaignUseCase,
+    ...orderDomainServices,
   ],
 })
 export class LoyaltyCoreModule {}

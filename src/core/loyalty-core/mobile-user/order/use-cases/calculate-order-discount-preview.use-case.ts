@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OrderPreparationService } from '@loyalty/order/domain/services/order-preparation.service';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
-import { OrderCalculationMode } from '@loyalty/order/domain/enums';
 
 export interface CalculateDiscountPreviewRequest {
   cardMobileUserId: number;
@@ -56,7 +55,6 @@ export class CalculateOrderDiscountPreviewUseCase {
           promoCodeId: request.promoCodeId ?? null,
           rewardPointsUsed: request.rewardPointsUsed,
         },
-        OrderCalculationMode.PREVIEW,
       );
 
     this.logger.log(

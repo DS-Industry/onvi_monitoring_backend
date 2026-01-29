@@ -162,6 +162,47 @@ export class MarketingCampaignDiscountService {
     return campaigns;
   }
 
+  async findCampaignByIdWithRelations(
+    campaignId: number,
+  ): Promise<MarketingCampaignWithRelations | null> {
+    const campaign = await this.prisma.marketingCampaign.findUnique({
+      where: { id: campaignId },
+      select: {
+        id: true,
+        name: true,
+        executionType: true,
+        action: {
+          select: {
+            id: true,
+            actionType: true,
+            payload: true,
+          },
+        },
+        conditions: {
+          select: {
+            id: true,
+            tree: true,
+          },
+        },
+      },
+    });
+
+    if (!campaign) {
+      return null;
+    }
+
+    return {
+      id: campaign.id,
+      name: campaign.name,
+      executionType: campaign.executionType,
+      action: campaign.action,
+      conditions: campaign.conditions.map((cond) => ({
+        id: cond.id,
+        tree: cond.tree as CampaignConditionTree,
+      })),
+    };
+  }
+
   async evaluateTransactionalCampaignDiscount(
     campaign: MarketingCampaignWithRelations,
     ltyUserId: number,

@@ -6,7 +6,6 @@ import { OrderCalculationService, OrderTotals } from './order-calculation.servic
 import { Order } from '@loyalty/order/domain/order';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
-import { OrderCalculationMode } from '@loyalty/order/domain/enums';
 
 export interface OrderPreparationRequest {
   cardMobileUserId: number;
@@ -38,10 +37,9 @@ export class OrderPreparationService {
 
   async prepareOrderWithTotals(
     request: OrderPreparationRequest,
-    mode: OrderCalculationMode = OrderCalculationMode.ACTUAL,
   ): Promise<PreparedOrderData> {
     this.logger.debug(
-      `Preparing order calculation for user ${request.cardMobileUserId}, mode: ${mode}`,
+      `Preparing order calculation for user ${request.cardMobileUserId}`,
     );
 
     const card = await this.cardRepository.findOneByClientId(
@@ -76,7 +74,6 @@ export class OrderPreparationService {
       },
       order,
       card,
-      mode,
     );
 
     const totals = this.orderCalculationService.calculateOrderTotals(

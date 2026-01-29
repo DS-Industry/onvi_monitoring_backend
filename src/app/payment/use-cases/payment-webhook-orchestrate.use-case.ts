@@ -14,6 +14,7 @@ import {
   USING_BONUSES_OPER_TYPE_ID,
 } from '@constant/constants';
 import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
+import { MarketingCampaignDiscountService } from '@loyalty/order/domain/services';
 
 @Injectable()
 export class PaymentWebhookOrchestrateUseCase {
@@ -30,6 +31,7 @@ export class PaymentWebhookOrchestrateUseCase {
     private readonly findMethodsCardBonusOperUseCase: FindMethodsCardBonusOperUseCase,
     @Inject(IPromoCodeRepository)
     private readonly promoCodeRepository: IPromoCodeRepository,
+    private readonly marketingCampaignDiscountService: MarketingCampaignDiscountService,
   ) {
     this.logger.log(
       `[WEBHOOK] PaymentWebhookOrchestrateUseCase initialized. Queue name: payment-orchestrate`,
@@ -177,6 +179,15 @@ export class PaymentWebhookOrchestrateUseCase {
         this.logger.error(
           `[WEBHOOK] Failed to apply bonus operations for order#${verifiedOrder.id}: ${bonusError.message}. Request ID: ${requestId || 'unknown'}`,
           bonusError.stack,
+        );
+      }
+
+      try {
+        await this.trackVisitCountsForPaidOrder(verifiedOrder, requestId);
+      } catch (trackingError: any) {
+        this.logger.error(
+          `[WEBHOOK] Failed to track visit counts for order#${verifiedOrder.id}: ${trackingError.message}. Request ID: ${requestId || 'unknown'}`,
+          trackingError.stack,
         );
       }
 
@@ -424,6 +435,68 @@ export class PaymentWebhookOrchestrateUseCase {
           );
         }
       }
+    }
+  }
+
+  private async trackVisitCountsForPaidOrder(order: any, requestId?: string) {
+    if (order.platform !== PlatformType.ONVI) {
+      return;
+    }
+
+    if (!order.cardMobileUserId) {
+      this.logger.warn(
+        `[WEBHOOK] Order#${order.id} has no cardMobileUserId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    if (!order.carWashId) {
+      this.logger.warn(
+        `[WEBHOOK] Order#${order.id} has no carWashId. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+      );
+      return;
+    }
+
+    try {
+      const card = await this.findMethodsCardUseCase.getById(order.cardId);
+      if (!card) {
+        this.logger.warn(
+          `[WEBHOOK] Card ${order.cardMobileUserId} not found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
+      const eligibleCampaigns =
+        await this.marketingCampaignDiscountService.findEligibleDiscountCampaigns(
+          order.cardMobileUserId,
+          order.orderData,
+          order.carWashId,
+        );
+
+      if (eligibleCampaigns.length === 0) {
+        this.logger.debug(
+          `[WEBHOOK] No eligible campaigns found for order#${order.id}. Skipping visit count tracking. Request ID: ${requestId || 'unknown'}`,
+        );
+        return;
+      }
+
+      await this.marketingCampaignDiscountService.trackVisitCountsForEligibleCampaigns(
+        eligibleCampaigns,
+        order.cardMobileUserId,
+        order.orderData,
+        order.sumFull,
+        card.id,
+      );
+
+      this.logger.log(
+        `[WEBHOOK] Tracked visit counts for ${eligibleCampaigns.length} eligible campaigns for order#${order.id}. Request ID: ${requestId || 'unknown'}`,
+      );
+    } catch (error: any) {
+      this.logger.error(
+        `[WEBHOOK] Error tracking visit counts for order#${order.id}: ${error.message}. Request ID: ${requestId || 'unknown'}`,
+        error.stack,
+      );
+      throw error;
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { IOrderRepository, OrderUsageData } from '@loyalty/order/interface/order';
 import { Order } from '@loyalty/order/domain/order';
-import { OrderStatus, OrderCalculationMode } from '@loyalty/order/domain/enums';
+import { OrderStatus } from '@loyalty/order/domain/enums';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 import {
   IFlowProducer,
@@ -77,7 +77,6 @@ export class CreateMobileOrderUseCase {
           promoCodeId: request.promoCodeId,
           rewardPointsUsed: request.rewardPointsUsed,
         },
-        OrderCalculationMode.ACTUAL,
       );
 
     if (card.mobileUserId !== request.cardMobileUserId) {
