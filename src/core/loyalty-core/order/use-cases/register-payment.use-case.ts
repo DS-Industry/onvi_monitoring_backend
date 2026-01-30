@@ -33,9 +33,9 @@ export class RegisterPaymentUseCase {
       throw new NotFoundException(`Order with ID ${data.orderId} not found`);
     }
 
-    if (order.cardMobileUserId) {
+    if (order.clientId) {
       const card = await this.findMethodsCardUseCase.getByClientId(
-        order.cardMobileUserId,
+        order.clientId,
       );
       if (!card || card.mobileUserId !== data.clientId) {
         throw new NotFoundException(`Order with ID ${data.orderId} not found`);
@@ -137,6 +137,7 @@ export class RegisterPaymentUseCase {
         bayType: orderForProcessing.bayType,
         platform: orderForProcessing.platform,
         cardMobileUserId: orderForProcessing.cardMobileUserId,
+        clientId: orderForProcessing.clientId,
         typeMobileUser: orderForProcessing.typeMobileUser,
         orderData: orderForProcessing.orderData,
         createData: orderForProcessing.createData,

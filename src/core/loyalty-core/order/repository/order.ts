@@ -23,9 +23,9 @@ export class OrderRepository extends IOrderRepository {
 
   public async create(input: Order): Promise<Order> {
     let cardId: number | null = null;
-    if (input.cardMobileUserId) {
+    if (input.clientId) {
       const card = await this.prisma.lTYCard.findFirst({
-        where: { clientId: input.cardMobileUserId },
+        where: { clientId: input.clientId },
         select: { id: true },
       });
       cardId = card?.id ?? null;
@@ -42,6 +42,7 @@ export class OrderRepository extends IOrderRepository {
         },
         card: {
           select: {
+            id: true,
             clientId: true,
           },
         },
@@ -56,9 +57,9 @@ export class OrderRepository extends IOrderRepository {
   ): Promise<Order> {
     return await this.prisma.$transaction(async (tx) => {
       let cardId: number | null = null;
-      if (input.cardMobileUserId) {
+      if (input.clientId) {
         const card = await tx.lTYCard.findFirst({
-          where: { clientId: input.cardMobileUserId },
+          where: { clientId: input.clientId },
           select: { id: true },
         });
         cardId = card?.id ?? null;
@@ -75,6 +76,7 @@ export class OrderRepository extends IOrderRepository {
           },
           card: {
             select: {
+              id: true,
               clientId: true,
             },
           },
@@ -150,6 +152,7 @@ export class OrderRepository extends IOrderRepository {
           },
           card: {
             select: {
+              id: true,
               clientId: true,
             },
           },
@@ -176,6 +179,7 @@ export class OrderRepository extends IOrderRepository {
         },
         card: {
           select: {
+            id: true,
             clientId: true,
           },
         },
@@ -251,6 +255,7 @@ export class OrderRepository extends IOrderRepository {
         },
         card: {
           select: {
+            id: true,
             clientId: true,
           },
         },
@@ -284,9 +289,9 @@ export class OrderRepository extends IOrderRepository {
 
   public async update(input: Order): Promise<Order> {
     let cardId: number | null = null;
-    if (input.cardMobileUserId) {
+    if (input.clientId) {
       const card = await this.prisma.lTYCard.findFirst({
-        where: { clientId: input.cardMobileUserId },
+        where: { clientId: input.clientId },
         select: { id: true },
       });
       cardId = card?.id ?? null;
@@ -306,6 +311,7 @@ export class OrderRepository extends IOrderRepository {
         },
         card: {
           select: {
+            id: true,
             clientId: true,
           },
         },

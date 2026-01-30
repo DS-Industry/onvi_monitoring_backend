@@ -24,7 +24,7 @@ export interface CreateMobileOrderRequest {
   sum: number;
   sumBonus: number;
   carWashId: number;
-  cardMobileUserId: number;
+  clientId: number;
   carWashDeviceId: number;
   bayType?: DeviceType;
   promoCodeId?: number;
@@ -55,7 +55,7 @@ export class CreateMobileOrderUseCase {
     request: CreateMobileOrderRequest,
   ): Promise<CreateMobileOrderResponse> {
     this.logger.log(
-      `Starting order creation for user ${request.cardMobileUserId}, carWashId: ${request.carWashId}, sum: ${request.sum}`,
+      `Starting order creation for user ${request.clientId}, carWashId: ${request.carWashId}, sum: ${request.sum}`,
     );
 
     this.validateRequest(request);
@@ -69,7 +69,7 @@ export class CreateMobileOrderUseCase {
     const { card, order, discountResult, totals } =
       await this.orderPreparationService.prepareOrderWithTotals(
         {
-          cardMobileUserId: request.cardMobileUserId,
+          clientId: request.clientId,
           sum: request.sum,
           carWashId: request.carWashId,
           carWashDeviceId: request.carWashDeviceId,
@@ -79,11 +79,11 @@ export class CreateMobileOrderUseCase {
         },
       );
 
-    if (card.mobileUserId !== request.cardMobileUserId) {
+    if (card.mobileUserId !== request.clientId) {
       this.logger.warn(
-        `Authorization failed: Card ${card.id} does not belong to user ${request.cardMobileUserId}. Card owner: ${card.mobileUserId}`,
+        `Authorization failed: Card ${card.id} does not belong to user ${request.clientId}. Card owner: ${card.mobileUserId}`,
       );
-      throw new CardOwnershipException(request.cardMobileUserId);
+      throw new CardOwnershipException(request.clientId);
     }
 
     const isFreeVacuum = this.orderStatusDeterminationService.isFreeVacuum({
@@ -109,7 +109,7 @@ export class CreateMobileOrderUseCase {
 
     const usageData = this.orderUsageDataService.createUsageTrackingData(
       discountResult,
-      request.cardMobileUserId,
+      request.clientId,
       request.carWashId,
       request.promoCodeId,
       card,
@@ -118,7 +118,7 @@ export class CreateMobileOrderUseCase {
     const createdOrder = await this.createOrder(
       order,
       usageData,
-      request.cardMobileUserId,
+      request.clientId,
     );
 
     if (isFreeVacuum) {
@@ -134,21 +134,21 @@ export class CreateMobileOrderUseCase {
   private validateRequest(request: CreateMobileOrderRequest): void {
     if (request.sum <= 0) {
       this.logger.warn(
-        `Invalid order sum: ${request.sum} for user ${request.cardMobileUserId}`,
+        `Invalid order sum: ${request.sum} for user ${request.clientId}`,
       );
       throw new InvalidOrderSumException(request.sum);
     }
 
     if (request.sumBonus < 0) {
       this.logger.warn(
-        `Invalid bonus sum: ${request.sumBonus} for user ${request.cardMobileUserId}`,
+        `Invalid bonus sum: ${request.sumBonus} for user ${request.clientId}`,
       );
       throw new InvalidBonusSumException(request.sumBonus, request.sum, 'negative');
     }
 
     if (request.sumBonus > request.sum) {
       this.logger.warn(
-        `Bonus sum ${request.sumBonus} exceeds order sum ${request.sum} for user ${request.cardMobileUserId}`,
+        `Bonus sum ${request.sumBonus} exceeds order sum ${request.sum} for user ${request.clientId}`,
       );
       throw new InvalidBonusSumException(request.sumBonus, request.sum, 'exceeds');
     }
@@ -158,7 +158,7 @@ export class CreateMobileOrderUseCase {
   private async createOrder(
     order: Order,
     usageData: OrderUsageData | undefined,
-    cardMobileUserId: number,
+    clientId: number,
   ): Promise<Order> {
     try {
       const createdOrder = await this.orderRepository.createWithUsage(
@@ -167,13 +167,13 @@ export class CreateMobileOrderUseCase {
       );
 
       this.logger.log(
-        `Order created successfully: orderId=${createdOrder.id}, userId=${cardMobileUserId}, sum=${order.sumFull}, discount=${order.sumDiscount}`,
+        `Order created successfully: orderId=${createdOrder.id}, userId=${clientId}, sum=${order.sumFull}, discount=${order.sumDiscount}`,
       );
 
       return createdOrder;
     } catch (error) {
       this.logger.error(
-        `Error creating order for user ${cardMobileUserId}: ${error.message}`,
+        `Error creating order for user ${clientId}: ${error.message}`,
         error.stack,
       );
       throw error;

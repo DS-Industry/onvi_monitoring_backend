@@ -8,7 +8,7 @@ import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { DeviceType } from '@infra/pos/interface/pos.interface';
 
 export interface OrderPreparationRequest {
-  cardMobileUserId: number;
+  clientId: number;
   sum: number;
   carWashId: number;
   carWashDeviceId: number;
@@ -39,16 +39,16 @@ export class OrderPreparationService {
     request: OrderPreparationRequest,
   ): Promise<PreparedOrderData> {
     this.logger.debug(
-      `Preparing order calculation for user ${request.cardMobileUserId}`,
+      `Preparing order calculation for user ${request.clientId}`,
     );
 
     const card = await this.cardRepository.findOneByClientId(
-      request.cardMobileUserId,
+      request.clientId,
     );
 
     if (!card) {
       throw new NotFoundException(
-        `Card with ID ${request.cardMobileUserId} not found`,
+        `Card with client ID ${request.clientId} not found`,
       );
     }
 
@@ -64,7 +64,7 @@ export class OrderPreparationService {
     const orderDate = new Date();
     const discountResult = await this.orderDiscountService.calculateDiscounts(
       {
-        cardMobileUserId: request.cardMobileUserId,
+        clientId: request.clientId,
         carWashId: request.carWashId,
         sum: request.sum,
         orderDate,

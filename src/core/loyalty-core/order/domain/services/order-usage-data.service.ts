@@ -9,7 +9,7 @@ export class OrderUsageDataService {
 
   createUsageTrackingData(
     discountResult: DiscountResult,
-    cardMobileUserId: number,
+    clientId: number,
     carWashId: number,
     promoCodeId: number | undefined,
     card: Card,
@@ -31,7 +31,7 @@ export class OrderUsageDataService {
         transactionalCampaign: {
           campaignId: discountResult.usedTransactionalCampaign.campaignId,
           actionId: discountResult.usedTransactionalCampaign.actionId,
-          ltyUserId: cardMobileUserId,
+          ltyUserId: clientId,
           posId: carWashId,
         },
       };
