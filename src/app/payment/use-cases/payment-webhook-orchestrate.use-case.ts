@@ -409,37 +409,6 @@ export class PaymentWebhookOrchestrateUseCase {
         );
       }
     }
-
-    if (order.sumDiscount > 0) {
-      const marketingUsage =
-        await this.promoCodeRepository.findDiscountUsageByOrderId(order.id);
-      if (marketingUsage) {
-        const existingMarketingBonus =
-          await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
-            order.id,
-            MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-          );
-        if (!existingMarketingBonus) {
-          const marketingBonusOper = new CardBonusOper({
-            cardMobileUserId: card.id,
-            carWashDeviceId: order.carWashDeviceId,
-            typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-            operDate: order.orderData,
-            loadDate: new Date(),
-            sum: order.sumDiscount,
-            orderMobileUserId: order.id,
-          });
-          await this.cardBonusOperRepository.create(marketingBonusOper);
-          this.logger.log(
-            `[WEBHOOK] Created marketing campaign bonus record (type ${MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID}) for order#${order.id}, sum ${order.sumDiscount}. Request ID: ${requestId || 'unknown'}`,
-          );
-        } else {
-          this.logger.log(
-            `[WEBHOOK] Marketing campaign bonus already exists for order#${order.id}. Skipping. Request ID: ${requestId || 'unknown'}`,
-          );
-        }
-      }
-    }
   }
 
   private async trackVisitCountsForPaidOrder(order: any, requestId?: string) {
