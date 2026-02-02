@@ -55,10 +55,11 @@ export class HandlerOrderUseCase {
 
     try {
       if (data.platform == PlatformType.ONVI) {
-        const card = await this.findMethodsCardUseCase.getByClientId(
-          data.cardMobileUserId,
-        );
-        if (data.sumBonus > 0) {
+        const card = data.cardMobileUserId
+          ? await this.findMethodsCardUseCase.getById(data.cardMobileUserId)
+          : null;
+        if (card) {
+          if (data.sumBonus > 0) {
           const existingDeduction =
             await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
               order.id,
@@ -119,6 +120,7 @@ export class HandlerOrderUseCase {
               );
             }
           }
+        }
         }
       } else if (data.platform == PlatformType.LOCAL_LOYALTY && ownerCard) {
         const card = await this.findMethodsCardUseCase.getById(
