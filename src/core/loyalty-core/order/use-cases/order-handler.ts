@@ -33,8 +33,9 @@ export class HandlerOrderUseCase {
     data: HandlerDto,
     ownerCard?: LoyaltyCardInfoFullResponseDto,
     existingOrderId?: number,
+    onlyUpdateStatus = false,
   ): Promise<Order> {
-    if (data.platform != PlatformType.ONVI && data.clientPhone) {
+    if (!onlyUpdateStatus && data.platform != PlatformType.ONVI && data.clientPhone) {
       const card = await this.findMethodsCardUseCase.getByClientPhone(
         data.clientPhone,
       );
@@ -53,6 +54,7 @@ export class HandlerOrderUseCase {
     let orderHandlerStatus: OrderHandlerStatus = OrderHandlerStatus.COMPLETED;
     let handlerError = '';
 
+    if (!onlyUpdateStatus) {
     try {
       if (data.platform == PlatformType.ONVI) {
         const card = data.cardMobileUserId
@@ -97,30 +99,6 @@ export class HandlerOrderUseCase {
             );
           }
         }
-
-        if (data.sumDiscount > 0) {
-          const marketingUsage =
-            await this.promoCodeRepository.findDiscountUsageByOrderId(order.id);
-          if (marketingUsage) {
-            const existingMarketingBonus =
-              await this.findMethodsCardBonusOperUseCase.getByOrderIdAndType(
-                order.id,
-                MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-              );
-            if (!existingMarketingBonus) {
-              await this.createCardBonusOperUseCase.execute(
-                {
-                  carWashDeviceId: data.carWashDeviceId,
-                  typeOperId: MARKETING_CAMPAIGN_BONUSES_OPER_TYPE_ID,
-                  operDate: data.orderData,
-                  sum: data.sumDiscount,
-                  orderMobileUserId: order.id,
-                },
-                card,
-              );
-            }
-          }
-        }
         }
       } else if (data.platform == PlatformType.LOCAL_LOYALTY && ownerCard) {
         const card = await this.findMethodsCardUseCase.getById(
@@ -140,6 +118,7 @@ export class HandlerOrderUseCase {
     } catch (error) {
       orderHandlerStatus = OrderHandlerStatus.ERROR;
       handlerError = error.message;
+    }
     }
 
     let finalOrderStatus = order.orderStatus;

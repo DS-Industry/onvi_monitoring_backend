@@ -242,7 +242,12 @@ export class OrderFinishedConsumer extends WorkerHost {
         `[ORDER-FINISHED] Executing order handler for order#${orderId}`,
       );
       
-      await this.handlerOrderUseCase.execute(handlerDto, undefined, order.id);
+      await this.handlerOrderUseCase.execute(
+        handlerDto,
+        undefined,
+        order.id,
+        true,
+      );
       
       this.logger.log(
         `[ORDER-FINISHED] Order#${orderId} successfully processed by order handler`,
