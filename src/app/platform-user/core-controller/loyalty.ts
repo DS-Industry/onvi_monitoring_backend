@@ -42,6 +42,8 @@ import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases
 import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/client-update.dto';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
+import { CardAssignDto } from './dto/receive/card-assign.dto';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { LoyaltyParticipantProgramsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-participant-programs-filter.dto';
@@ -186,6 +188,7 @@ export class LoyaltyController {
     private readonly updateClientUseCase: UpdateClientUseCase,
     private readonly findByFilterClientUseCase: FindByFilterClientUseCase,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly updateCardUseCase: UpdateCardUseCase,
     private readonly createTagUseCase: CreateTagUseCase,
     private readonly deleteTagUseCase: DeleteTagUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
@@ -1470,6 +1473,54 @@ export class LoyaltyController {
         ability,
       );
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('card/assign')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async assignCardToClient(
+    @Body() data: CardAssignDto,
+    @Request() req: any,
+  ): Promise<Card> {
+    try {
+      const { ability } = req;
+      
+      const card = await this.loyaltyValidateRules.assignCardToClientValidate(
+        data.cardId,
+        data.clientId,
+        ability,
+      );
+
+      const existingCard = await this.findMethodsCardUseCase.getByClientId(
+        data.clientId,
+      );
+      if (existingCard && existingCard.id !== card.id) {
+        await this.updateCardUseCase.execute(
+          { mobileUserId: null },
+          existingCard,
+        );
+      }
+
+      return await this.updateCardUseCase.execute(
+        { mobileUserId: data.clientId },
+        card,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

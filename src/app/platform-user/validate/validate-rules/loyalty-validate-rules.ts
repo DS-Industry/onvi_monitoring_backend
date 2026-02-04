@@ -320,12 +320,14 @@ export class LoyaltyValidateRules {
         checkClient.object.id,
       );
 
-      const cardAccessCheck =
-        await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-          card.id,
-          ability,
-        );
-      response.push(cardAccessCheck);
+      if (card) {
+        const cardAccessCheck =
+          await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+            card.id,
+            ability,
+          );
+        response.push(cardAccessCheck);
+      }
     }
 
     this.validateLib.handlerArrayResponse(
@@ -395,6 +397,54 @@ export class LoyaltyValidateRules {
         : LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
     );
     return checkClient.object;
+  }
+
+  public async assignCardToClientValidate(
+    cardId: number,
+    clientId: number,
+    ability: any,
+  ): Promise<Card> {
+    const response = [];
+    
+    const checkCard = await this.validateLib.cardByIdExists(cardId);
+    response.push(checkCard);
+    
+    const checkClient = await this.validateLib.clientByIdExists(clientId);
+    response.push(checkClient);
+
+    if (checkCard.object && checkCard.object.mobileUserId) {
+      if (checkCard.object.mobileUserId !== clientId) {
+        response.push({
+          code: 400,
+          errorMessage: 'Card is already assigned to another client',
+        });
+      }
+    }
+
+    const existingCard = await this.findMethodsCardUseCase.getByClientId(
+      clientId,
+    );
+    if (existingCard && existingCard.id !== cardId && existingCard.balance !== 0) {
+      response.push({
+        code: 400,
+        errorMessage: 'Cannot reassign card: current card balance is not zero',
+      });
+    }
+
+    const cardAccessCheck =
+      await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+    response.push(cardAccessCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+    );
+    
+    return checkCard.object;
   }
 
   public async createTagValidate(name: string) {
