@@ -368,23 +368,21 @@ export class LoyaltyValidateRules {
       if (ability.cannot('delete', 'Client')) {
         throw new LoyaltyException(
           LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
-          'Нет прав для удаления клиента',
+          'No abilities to remove client',
         );
       }
       
-      // Проверяем что клиент еще не удален
       if (checkClient.object.deletedAt) {
         throw new LoyaltyException(
           LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
-          'Клиент уже удален',
+          'The client has already been deleted',
         );
       }
     } else {
-      // Для обычного обновления нужны права update
       if (ability.cannot('update', 'Client')) {
         throw new LoyaltyException(
           LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
-          'Нет прав для обновления клиента',
+          'No abilities to update client',
         );
       }
     }

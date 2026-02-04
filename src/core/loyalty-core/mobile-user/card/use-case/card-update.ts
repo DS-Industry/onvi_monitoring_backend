@@ -7,7 +7,7 @@ import { CardUpdateDto } from '@loyalty/mobile-user/card/use-case/dto/card-updat
 export class UpdateCardUseCase {
   constructor(private readonly cardRepository: ICardRepository) {}
 
-  async execute(input: CardUpdateDto, oldCard: Card): Promise<Card> {
+  async execute(input: CardUpdate Dto, oldCard: Card): Promise<Card> {
     const { 
       balance, 
       monthlyLimit, 
