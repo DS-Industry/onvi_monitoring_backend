@@ -270,13 +270,6 @@ export class CardRepository extends ICardRepository {
     const orders = await this.prisma.lTYOrder.findMany({
       where: {
         cardId: card.id,
-        carWashDevice: {
-          carWasPos: {
-            pos: {
-              organizationId: data.organizationId,
-            },
-          },
-        },
         orderStatus: 'COMPLETED',
       },
       select: {
@@ -352,7 +345,7 @@ export class CardRepository extends ICardRepository {
                 },
                 cardTiers: {
                   orderBy: {
-                    id: 'asc',
+                    limitBenefit: 'asc',
                   },
                 },
               },
@@ -381,17 +374,34 @@ export class CardRepository extends ICardRepository {
       );
     }
 
+    const now = new Date();
+    const startOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+    const endOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
     const orders = await this.prisma.lTYOrder.findMany({
       where: {
         cardId: card.id,
-        carWashDevice: {
-          carWasPos: {
-            pos: {
-              organizationId: data.organizationId,
-            },
-          },
-        },
         orderStatus: 'COMPLETED',
+        orderData: {
+          gte: startOfLastMonth,
+          lte: endOfLastMonth,
+        },
       },
       select: {
         sumReal: true,
@@ -424,18 +434,18 @@ export class CardRepository extends ICardRepository {
 
     const activeBonusesSum = activeBonuses._sum.sum || 0;
 
-    const accumulatedAmount = totalPurchaseAmount + totalBonusEarned;
+    const accumulatedAmount = totalPurchaseAmount;
 
-    const allTiers = card.cardTier?.ltyProgram?.cardTiers || [];
-    const currentTierIndex = allTiers.findIndex(
-      (tier) => tier.id === card.cardTierId,
+    const allTiers = [...(card.cardTier?.ltyProgram?.cardTiers || [])].sort(
+      (a, b) => a.limitBenefit - b.limitBenefit,
     );
-    const nextTier =
-      currentTierIndex >= 0 && currentTierIndex < allTiers.length - 1
-        ? allTiers[currentTierIndex + 1]
-        : null;
 
-    console.log('allTiers: ', allTiers);
+
+    const currentTierBenefitLimit = card.cardTier?.limitBenefit || 0;
+
+    const nextTier = allTiers.find(
+      (tier) => tier.limitBenefit > currentTierBenefitLimit,
+    ) || null;
 
     let amountToNextTier = 0;
     let nextTierName = null;
@@ -445,8 +455,6 @@ export class CardRepository extends ICardRepository {
     if (nextTier) {
       const currentTierId = card.cardTierId || 1;
       const nextTierIdValue = nextTier.id;
-
-      const currentTierBenefitLimit = card.cardTier?.limitBenefit || 0;
       const nextTierBenefitLimit = nextTier.limitBenefit || 0;
 
       console.log('Tier progression calculation:', {
@@ -457,17 +465,10 @@ export class CardRepository extends ICardRepository {
         accumulatedAmount,
       });
 
-      if (nextTierBenefitLimit > currentTierBenefitLimit) {
-        nextTierThreshold = nextTierBenefitLimit - currentTierBenefitLimit;
+      nextTierThreshold = nextTierBenefitLimit;
 
-        amountToNextTier = Math.max(0, nextTierThreshold - accumulatedAmount);
+      amountToNextTier = Math.max(0, nextTierBenefitLimit - accumulatedAmount);
 
-        console.log('Tier threshold calculation:', {
-          nextTierThreshold,
-          amountToNextTier,
-          calculation: `${nextTierBenefitLimit} - ${currentTierBenefitLimit} = ${nextTierThreshold}`,
-        });
-      }
 
       nextTierName = nextTier.name;
       nextTierId = nextTier.id;
