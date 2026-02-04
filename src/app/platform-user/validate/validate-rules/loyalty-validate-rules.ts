@@ -1088,4 +1088,32 @@ export class LoyaltyValidateRules {
 
     return response.object;
   }
+
+  public async getCardsPaginatedValidate(
+    organizationId: number,
+    userId: number,
+  ) {
+    const response = [];
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    const userBelongsToOrganization =
+      await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    if (userBelongsToOrganization.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        userBelongsToOrganization.errorMessage,
+      );
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_GET_ONE_EXCEPTION_CODE,
+    );
+  }
 }

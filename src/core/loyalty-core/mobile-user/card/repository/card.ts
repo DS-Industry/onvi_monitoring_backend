@@ -4,7 +4,7 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { PrismaCardMobileUserMapper } from '@db/mapper/prisma-card-mobile-user-mapper';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, LTYCardType } from '@prisma/client';
 import { ClientKeyStatsDto } from '@platform-user/core-controller/dto/receive/client-key-stats.dto';
 import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards.filter.dto';
 import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
@@ -209,6 +209,126 @@ export class CardRepository extends ICardRepository {
     });
 
     return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
+  }
+
+  public async getAllPaginated(data: {
+    organizationId: number;
+    unqNumber?: string;
+    number?: string;
+    type?: string;
+    isCorporate?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<{
+    cards: Array<{
+      id: number;
+      balance: number;
+      devNumber: string;
+      number: string;
+      type: LTYCardType;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+      loyaltyCardTierId: number | null;
+      corporateId: number | null;
+      cardTier: {
+        id: number;
+        name: string;
+        description: string | null;
+        limitBenefit: number;
+      } | null;
+      isCorporate: boolean;
+    }>;
+    total: number;
+  }> {
+    const where: Prisma.LTYCardWhereInput = {};
+
+    where.cardTier = {
+      ltyProgram: {
+        programParticipants: {
+          some: {
+            organizationId: data.organizationId,
+            status: 'ACTIVE',
+          },
+        },
+      },
+    };
+
+    if (data.unqNumber) {
+      where.unqNumber = {
+        contains: data.unqNumber,
+        mode: 'insensitive',
+      };
+    }
+
+    if (data.number) {
+      where.number = {
+        contains: data.number,
+        mode: 'insensitive',
+      };
+    }
+
+    if (data.type) {
+      where.type = data.type as LTYCardType;
+    }
+
+    if (data.isCorporate !== undefined) {
+      if (data.isCorporate) {
+        where.corporateId = { not: null };
+      } else {
+        where.corporateId = null;
+      }
+    }
+
+    const page = data.page || 1;
+    const size = data.size || 10;
+    const skip = (page - 1) * size;
+
+    const total = await this.prisma.lTYCard.count({ where });
+
+    const cards = await this.prisma.lTYCard.findMany({
+      where,
+      skip,
+      take: size,
+      select: {
+        id: true,
+        balance: true,
+        unqNumber: true,
+        number: true,
+        type: true,
+        createdAt: true,
+        updatedAt: true,
+        cardTierId: true,
+        corporateId: true,
+        cardTier: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            limitBenefit: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      cards: cards.map((card) => ({
+        id: card.id,
+        balance: card.balance,
+        devNumber: card.unqNumber,
+        number: card.number,
+        type: card.type,
+        createdAt: card.createdAt,
+        updatedAt: card.updatedAt,
+        loyaltyCardTierId: card.cardTierId,
+        corporateId: card.corporateId,
+        cardTier: card.cardTier,
+        isCorporate: card.corporateId !== null,
+      })),
+      total,
+    };
   }
 
   public async getUserKeyStatsByOrganization(

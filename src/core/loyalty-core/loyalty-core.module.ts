@@ -22,6 +22,7 @@ import { CreateTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-create'
 import { DeleteTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-delete';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { CreateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-create';
+import { GetCardsPaginatedUseCase } from '@loyalty/mobile-user/card/use-case/card-get-paginated';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { FindByFilterClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-by-filter';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
@@ -190,6 +191,7 @@ const cardUseCase: Provider[] = [
   FindMethodsCardUseCase,
   GetBenefitsCardUseCase,
   CardImportUseCase,
+  GetCardsPaginatedUseCase,
 ];
 
 const loyaltyProgramUseCase: Provider[] = [

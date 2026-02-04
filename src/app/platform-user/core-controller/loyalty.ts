@@ -42,6 +42,7 @@ import { ClientUpdateDto } from '@platform-user/core-controller/dto/receive/clie
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
+import { GetCardsPaginatedUseCase } from '@loyalty/mobile-user/card/use-case/card-get-paginated';
 import { CardAssignDto } from './dto/receive/card-assign.dto';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
@@ -93,7 +94,9 @@ import { ExpirationCardBonusBankUseCase } from '@loyalty/mobile-user/bonus/cardB
 import { UpdateLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-update';
 import { LoyaltyProgramUpdateDto } from '@platform-user/core-controller/dto/receive/loyaltyProgram-update.dto';
 import { CardsFilterDto } from './dto/receive/cards.filter.dto';
+import { CardsPaginatedFilterDto } from './dto/receive/cards-paginated-filter.dto';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { CardsPaginatedResponseDto } from './dto/response/card-paginated-response.dto';
 import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
 import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
 import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
@@ -187,6 +190,7 @@ export class LoyaltyController {
     private readonly findByFilterClientUseCase: FindByFilterClientUseCase,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly updateCardUseCase: UpdateCardUseCase,
+    private readonly getCardsPaginatedUseCase: GetCardsPaginatedUseCase,
     private readonly createTagUseCase: CreateTagUseCase,
     private readonly deleteTagUseCase: DeleteTagUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
@@ -1398,6 +1402,48 @@ export class LoyaltyController {
   async getAllCard(@Query() data: CardsFilterDto): Promise<Card[]> {
     try {
       return await this.findMethodsCardUseCase.getAll(data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('cards/paginated')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getCardsPaginated(
+    @Request() req: any,
+    @Query() data: CardsPaginatedFilterDto,
+  ): Promise<CardsPaginatedResponseDto> {
+    try {
+      const { user } = req;
+
+      await this.loyaltyValidateRules.getCardsPaginatedValidate(
+        data.organizationId,
+        user.id,
+      );
+
+      return await this.getCardsPaginatedUseCase.execute({
+        organizationId: data.organizationId,
+        unqNumber: data.unqNumber,
+        number: data.number,
+        type: data.type,
+        isCorporate: data.isCorporate,
+        page: data.page || 1,
+        size: data.size || 10,
+      });
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
