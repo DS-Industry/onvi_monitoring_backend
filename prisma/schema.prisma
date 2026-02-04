@@ -710,6 +710,7 @@ model LTYUser {
   updatedAt                DateTime?
   workerCorporateId        Int?
   is_notifications_enabled Boolean?                 @default(true)
+  deletedAt                DateTime?                
   card                     LTYCard?
   ownerCorporates          LTYCorporate[]           @relation("Owner")
   promocodes               LTYPromocode[]
@@ -792,6 +793,7 @@ model LTYCard {
   cardTierHist   LTYCardTierHist[]
   equarings      LTYEquaring[]
   orders         LTYOrder[]
+  status         StatusCard?
 }
 
 model LTYBonusBank {
@@ -1942,6 +1944,10 @@ enum StatusUser {
   BLOCKED
   DELETED
   VERIFICATE
+}
+
+enum StatusCard {
+  INACTIVE
 }
 
 enum StatusHrWorker {
