@@ -378,13 +378,6 @@ export class LoyaltyValidateRules {
           'The client has already been deleted',
         );
       }
-    } else {
-      if (ability.cannot('update', 'Client')) {
-        throw new LoyaltyException(
-          LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
-          'No abilities to update client',
-        );
-      }
     }
 
     this.validateLib.handlerArrayResponse(
