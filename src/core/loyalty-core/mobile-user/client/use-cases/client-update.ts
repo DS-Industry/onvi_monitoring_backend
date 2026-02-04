@@ -5,6 +5,7 @@ import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
+import { StatusUser } from '../domain/enums';
 
 @Injectable()
 export class UpdateClientUseCase {
@@ -19,7 +20,7 @@ export class UpdateClientUseCase {
     const {
       name,
       birthday,
-      status,
+      status, 
       avatar,
       contractType,
       comment,
@@ -38,7 +39,14 @@ export class UpdateClientUseCase {
     oldClient.refreshTokenId = refreshTokenId
       ? refreshTokenId
       : oldClient.refreshTokenId;
-    oldClient.status = status ? status : oldClient.status;
+    
+    if (status === StatusUser.DELETED) {
+      oldClient.status = StatusUser.DELETED;
+      oldClient.deletedAt = new Date(); 
+    } else if (status) {
+      oldClient.status = status;
+    }
+    
     oldClient.contractType = contractType
       ? contractType
       : oldClient.contractType;
@@ -149,6 +157,7 @@ export class UpdateClientUseCase {
       comment: client?.comment,
       refreshTokenId: client?.refreshTokenId,
       placementId: client?.placementId,
+      deletedAt: client.deletedAt,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
       tags: clientTags.map((tag) => tag.getProps()),

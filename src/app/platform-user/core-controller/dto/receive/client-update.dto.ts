@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ContractType } from '@loyalty/mobile-user/client/domain/contractType';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 export class ClientUpdateDto {
   @IsNumber()
@@ -39,4 +40,6 @@ export class ClientUpdateDto {
   @IsString()
   @IsOptional()
   email?: string;
+  @IsOptional()
+  status?: StatusUser;
 }

@@ -25,6 +25,7 @@ import {
   ReadLoyaltyAbility,
   UpdateLoyaltyAbility,
   SuperAdminAbility,
+  DeleteLoyaltyAbility,
 } from '@common/decorators/abilities.decorator';
 import { TagCreateDto } from '@platform-user/core-controller/dto/receive/tag-create.dto';
 import { LoyaltyException } from '@exception/option.exceptions';
@@ -172,6 +173,7 @@ import { PromocodeResponseDto } from './dto/response/promocode-response.dto';
 import { MarketingCampaignActionResponseDto } from './dto/response/marketing-campaign-action-response.dto';
 import { DeleteResponseDto } from './dto/response/delete-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -1145,7 +1147,7 @@ export class LoyaltyController {
   //Update client
   @Patch('client')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility())
+  @CheckAbilities(new CreateLoyaltyAbility(), new DeleteLoyaltyAbility)
   @HttpCode(201)
   async updateClient(
     @Request() req: any,
@@ -1159,7 +1161,14 @@ export class LoyaltyController {
         ability,
         data?.cardId,
         data?.tagIds || [],
+        data?.status,
       );
+      
+      if (data.status === StatusUser.DELETED) {
+        // Можно добавить deletedById в client или передать в useCase
+        // Например: client.deletedById = user?.id;
+      }
+      
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
       if (e instanceof LoyaltyException) {

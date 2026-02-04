@@ -10,6 +10,7 @@ import {
   LOYALTY_GET_ONE_EXCEPTION_CODE,
   LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
   LOYALTY_DELETE_TIER_WITH_CARDS_EXCEPTION_CODE,
+  LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
 } from '@constant/error.constants';
 import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
@@ -21,6 +22,7 @@ import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { LoyaltyException } from '@exception/option.exceptions';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
 export class LoyaltyValidateRules {
@@ -340,26 +342,57 @@ export class LoyaltyValidateRules {
     ability: any,
     cardId: number,
     tagIds?: number[],
+    status?: StatusUser, 
   ): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
-
+    
     response.push(checkClient);
     if (tagIds) {
       response.push(await this.validateLib.tagIdsExists(tagIds));
     }
 
-    const cardAccessCheck =
-      await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId || checkClient.object.cardId,
-        ability,
-      );
-    response.push(cardAccessCheck);
+    const cardToCheck = cardId || checkClient.object?.cardId;
+    if (cardToCheck) {
+      const cardAccessCheck =
+        await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+          cardToCheck,
+          ability,
+        );
+      response.push(cardAccessCheck);
+    }
+
+    if (status === StatusUser.DELETED) {
+      if (ability.cannot('delete', 'Client')) {
+        throw new LoyaltyException(
+          LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
+          'Нет прав для удаления клиента',
+        );
+      }
+      
+      // Проверяем что клиент еще не удален
+      if (checkClient.object.deletedAt) {
+        throw new LoyaltyException(
+          LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
+          'Клиент уже удален',
+        );
+      }
+    } else {
+      // Для обычного обновления нужны права update
+      if (ability.cannot('update', 'Client')) {
+        throw new LoyaltyException(
+          LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+          'Нет прав для обновления клиента',
+        );
+      }
+    }
 
     this.validateLib.handlerArrayResponse(
       response,
       ExceptionType.LOYALTY,
-      LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+      status === StatusUser.DELETED 
+        ? LOYALTY_DELETE_CLIENT_EXCEPTION_CODE
+        : LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
     );
     return checkClient.object;
   }
