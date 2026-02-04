@@ -793,6 +793,7 @@ model LTYCard {
   cardTierHist   LTYCardTierHist[]
   equarings      LTYEquaring[]
   orders         LTYOrder[]
+  status         StatusCard?
 }
 
 model LTYBonusBank {
@@ -1943,6 +1944,10 @@ enum StatusUser {
   BLOCKED
   DELETED
   VERIFICATE
+}
+
+enum StatusCard {
+  INACTIVE
 }
 
 enum StatusHrWorker {
