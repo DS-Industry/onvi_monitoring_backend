@@ -38,6 +38,7 @@ export class CardRepository extends ICardRepository {
         clientId: id,
       },
     });
+    
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
@@ -420,19 +421,7 @@ export class CardRepository extends ICardRepository {
       0,
     );
 
-    const activeBonuses = await this.prisma.lTYBonusBank.aggregate({
-      where: {
-        cardId: card.id,
-        expiryAt: {
-          gt: new Date(),
-        },
-      },
-      _sum: {
-        sum: true,
-      },
-    });
-
-    const activeBonusesSum = activeBonuses._sum.sum || 0;
+    const activeBonusesSum = card.balance || 0;
 
     const accumulatedAmount = totalPurchaseAmount;
 
