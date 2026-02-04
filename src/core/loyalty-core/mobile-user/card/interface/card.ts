@@ -19,6 +19,35 @@ export abstract class ICardRepository {
   abstract update(input: Card): Promise<Card>;
   abstract updateTier(id: number, tierId: number): Promise<Card>;
   abstract getAll(data: CardsFilterDto): Promise<Card[]>;
+  abstract getAllPaginated(data: {
+    organizationId: number;
+    unqNumber?: string;
+    number?: string;
+    type?: string;
+    isCorporate?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<{
+    cards: Array<{
+      id: number;
+      balance: number;
+      devNumber: string;
+      number: string;
+      type: import('@prisma/client').LTYCardType;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+      loyaltyCardTierId: number | null;
+      corporateId: number | null;
+      cardTier: {
+        id: number;
+        name: string;
+        description: string | null;
+        limitBenefit: number;
+      } | null;
+      isCorporate: boolean;
+    }>;
+    total: number;
+  }>;
   abstract getUserKeyStatsByOrganization(
     data: ClientKeyStatsDto,
   ): Promise<UserKeyStatsResponseDto>;

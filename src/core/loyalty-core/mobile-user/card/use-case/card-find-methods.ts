@@ -51,6 +51,38 @@ export class FindMethodsCardUseCase {
     return await this.cardRepository.getAll(data);
   }
 
+  async getAllPaginated(data: {
+    organizationId: number;
+    unqNumber?: string;
+    number?: string;
+    type?: string;
+    isCorporate?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<{
+    cards: Array<{
+      id: number;
+      balance: number;
+      devNumber: string;
+      number: string;
+      type: string;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+      loyaltyCardTierId: number | null;
+      corporateId: number | null;
+      cardTier: {
+        id: number;
+        name: string;
+        description: string | null;
+        limitBenefit: number;
+      } | null;
+      isCorporate: boolean;
+    }>;
+    total: number;
+  }> {
+    return await this.cardRepository.getAllPaginated(data);
+  }
+
   async getUserKeyStatsByOrganization(
     data: ClientKeyStatsDto,
   ): Promise<UserKeyStatsResponseDto> {
