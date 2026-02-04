@@ -1167,11 +1167,6 @@ export class LoyaltyController {
         data?.status,
       );
       
-      if (data.status === StatusUser.DELETED) {
-        // Можно добавить deletedById в client или передать в useCase
-        // Например: client.deletedById = user?.id;
-      }
-      
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
       if (e instanceof LoyaltyException) {

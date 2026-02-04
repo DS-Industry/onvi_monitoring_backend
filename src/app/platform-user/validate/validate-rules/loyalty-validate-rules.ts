@@ -348,7 +348,7 @@ export class LoyaltyValidateRules {
   ): Promise<Client> {
     const response = [];
     const checkClient = await this.validateLib.clientByIdExists(id);
-    
+        
     response.push(checkClient);
     if (tagIds) {
       response.push(await this.validateLib.tagIdsExists(tagIds));

@@ -20,7 +20,7 @@ export class UpdateClientUseCase {
     const {
       name,
       birthday,
-      status, 
+      status,
       avatar,
       contractType,
       comment,

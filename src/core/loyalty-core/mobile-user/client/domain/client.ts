@@ -107,7 +107,7 @@ export class Client extends BaseEntity<ClientProps> {
   get cardBalance(): number {
     return this.props.cardBalance;
   }
-  
+
   get meta(): ClientMeta {
     return this.props.meta;
   }
