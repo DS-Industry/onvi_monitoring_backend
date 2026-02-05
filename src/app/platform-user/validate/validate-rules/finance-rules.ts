@@ -208,7 +208,7 @@ export class FinanceValidateRules {
       FINANCE_RETURN_EXCEPTION_CODE,
     );
     ForbiddenError.from(ability).throwUnlessCan(
-      PermissionAction.delete,
+      PermissionAction.create,
       shiftReportCheck.object,
     );
     return shiftReportCheck.object;

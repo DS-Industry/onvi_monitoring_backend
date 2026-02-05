@@ -34,6 +34,7 @@ export class UpdateTechTaskUseCase {
       customPeriodDays,
       markdownDescription,
       endSpecifiedDate,
+      templateToNextCreate,
     } = input;
 
     oldTechTask.name = name ? name : oldTechTask.name;
@@ -62,6 +63,7 @@ export class UpdateTechTaskUseCase {
         oldTechTask.customPeriodDays,
       );
     }
+    oldTechTask.templateToNextCreate = templateToNextCreate ? templateToNextCreate : oldTechTask.templateToNextCreate;
 
     oldTechTask.updatedAt = new Date(Date.now());
 
@@ -166,6 +168,7 @@ export class UpdateTechTaskUseCase {
       updatedAt: techTask?.updatedAt,
       createdById: techTask.createdById,
       updatedById: techTask.updatedById,
+      templateToNextCreate: techTask.templateToNextCreate,
       tags: techTags.map((tag) => tag.getProps()),
     };
   }

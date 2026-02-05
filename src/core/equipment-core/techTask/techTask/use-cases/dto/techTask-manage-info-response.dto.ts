@@ -24,6 +24,7 @@ export class TechTaskManageInfoResponse {
   updatedAt: Date;
   createdById: number;
   updatedById: number;
+  templateToNextCreate: boolean;
   tags: TechTagProps[];
 }
 

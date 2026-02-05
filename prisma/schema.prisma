@@ -952,6 +952,7 @@ model TechTask {
   markdownDescription          String?
   periodType                   PeriodType?
   customPeriodDays             Int?
+  templateToNextCreate         Boolean                       @default(false)
   createdBy                    User                          @relation("CreatedByUser", fields: [createdById], references: [id])
   executor                     User?                         @relation("Executor", fields: [executorId], references: [id])
   pos                          Pos?                          @relation(fields: [posId], references: [id])

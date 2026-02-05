@@ -30,6 +30,7 @@ export class FindMethodsTechTaskUseCase {
     tags?: string[];
     authorId?: number;
     executorId?: number;
+    templateToNextCreate?: boolean;
   }): Promise<TechTask[]> {
     return await this.techTaskRepository.findAllByFilter(
       data.posId,
@@ -50,6 +51,7 @@ export class FindMethodsTechTaskUseCase {
       data.tags,
       data.authorId,
       data.executorId,
+      data.templateToNextCreate,
     );
   }
 
@@ -70,6 +72,7 @@ export class FindMethodsTechTaskUseCase {
     tags?: string[];
     authorId?: number;
     executorId?: number;
+    templateToNextCreate?: boolean;
   }): Promise<number> {
     return await this.techTaskRepository.countAllByFilter(
       data.posId,
@@ -88,6 +91,7 @@ export class FindMethodsTechTaskUseCase {
       data.tags,
       data.authorId,
       data.executorId,
+      data.templateToNextCreate,
     );
   }
 }

@@ -83,6 +83,7 @@ export class ManageAllByPosAndStatusesTechTaskUseCase {
         createdById: techTask.createdById,
         updatedAt: techTask.updatedAt,
         updatedById: techTask.updatedById,
+        templateToNextCreate: techTask.templateToNextCreate,
         tags: techTags.map((tag) => tag.getProps()),
       });
     }

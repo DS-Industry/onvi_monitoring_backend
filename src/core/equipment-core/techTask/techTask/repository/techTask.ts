@@ -83,6 +83,7 @@ export class TechTaskRepository extends ITechTaskRepository {
     tags?: string[],
     authorId?: number,
     executorId?: number,
+    templateToNextCreate?: boolean,
   ): Promise<TechTask[]> {
     const where: any = {};
 
@@ -180,6 +181,10 @@ export class TechTaskRepository extends ITechTaskRepository {
       where.executorId = executorId;
     }
 
+    if (templateToNextCreate !== undefined) {
+      where.templateToNextCreate = templateToNextCreate;
+    }
+
     const techTasks = await this.prisma.techTask.findMany({
       skip: skip ?? undefined,
       take: take ?? undefined,
@@ -227,6 +232,7 @@ export class TechTaskRepository extends ITechTaskRepository {
     tags?: string[],
     authorId?: number,
     executorId?: number,
+    templateToNextCreate?: boolean,
   ): Promise<number> {
     const where: any = {};
 
@@ -323,6 +329,10 @@ export class TechTaskRepository extends ITechTaskRepository {
 
     if (executorId !== undefined) {
       where.executorId = executorId;
+    }
+
+    if (templateToNextCreate !== undefined) {
+      where.templateToNextCreate = templateToNextCreate;
     }
 
     return this.prisma.techTask.count({
