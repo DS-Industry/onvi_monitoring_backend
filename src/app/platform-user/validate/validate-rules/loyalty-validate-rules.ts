@@ -364,15 +364,8 @@ export class LoyaltyValidateRules {
       response.push(cardAccessCheck);
     }
 
-    if (status === StatusUser.DELETED) {
-      if (ability.cannot('delete', 'Client')) {
-        throw new LoyaltyException(
-          LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
-          'No abilities to remove client',
-        );
-      }
-      
-      if (checkClient.object.deletedAt) {
+    if (status === StatusUser.DELETED) {      
+      if (checkClient.object.deletedAt) {        
         throw new LoyaltyException(
           LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
           'The client has already been deleted',

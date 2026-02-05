@@ -6,6 +6,7 @@ import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-updat
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { StatusUser } from '../domain/enums';
+import { StatusCard } from '@prisma/client';
 
 @Injectable()
 export class UpdateClientUseCase {
@@ -42,9 +43,18 @@ export class UpdateClientUseCase {
     
     if (status === StatusUser.DELETED) {
       oldClient.status = StatusUser.DELETED;
-      oldClient.deletedAt = new Date(); 
-    } else if (status) {
-      oldClient.status = status;
+      oldClient.deletedAt = new Date();
+      
+      const clientCard = await this.findMethodsCardUseCase.getByClientId(oldClient.id);
+      
+      if (clientCard) {
+        await this.updateCardUseCase.execute(
+          {
+            status: StatusCard.INACTIVE, 
+          },
+          clientCard
+        );
+      }
     }
     
     oldClient.contractType = contractType

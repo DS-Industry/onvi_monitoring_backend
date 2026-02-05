@@ -25,7 +25,6 @@ import {
   ReadLoyaltyAbility,
   UpdateLoyaltyAbility,
   SuperAdminAbility,
-  DeleteLoyaltyAbility,
 } from '@common/decorators/abilities.decorator';
 import { TagCreateDto } from '@platform-user/core-controller/dto/receive/tag-create.dto';
 import { LoyaltyException } from '@exception/option.exceptions';
@@ -1150,14 +1149,14 @@ export class LoyaltyController {
   //Update client
   @Patch('client')
   @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new CreateLoyaltyAbility(), new DeleteLoyaltyAbility)
+  @CheckAbilities(new CreateLoyaltyAbility())
   @HttpCode(201)
   async updateClient(
     @Request() req: any,
     @Body() data: ClientUpdateDto,
   ): Promise<ClientFullResponseDto> {
     try {
-      const { ability } = req;
+      const { ability } = req;      
 
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
