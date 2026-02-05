@@ -10,6 +10,12 @@ import { CardsFilterDto } from '@platform-user/core-controller/dto/receive/cards
 import { UserKeyStatsResponseDto } from '@platform-user/core-controller/dto/response/user-key-stats-response.dto';
 import { ClientLoyaltyStatsDto } from '@platform-user/core-controller/dto/receive/client-loyalty-stats.dto';
 import { ClientLoyaltyStatsResponseDto } from '@platform-user/core-controller/dto/response/client-loyalty-stats-response.dto';
+import {
+  CardPaginatedResult,
+  CardInfoResult,
+} from '@loyalty/mobile-user/card/types/card-repository.types';
+import { EnumMapper } from '@db/mapper/enum-mapper';
+import { CardType, CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -161,6 +167,29 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
+  public async updateCardFields(data: {
+    id: number;
+    cardTierId?: number;
+    status?: CardStatus | null;
+  }): Promise<Card> {
+    const updateData: any = {};
+    if (data.cardTierId !== undefined) {
+      updateData.cardTierId = data.cardTierId;
+    }
+    if (data.status !== undefined) {
+      updateData.status = data.status === null ? null : EnumMapper.toPrismaCardStatus(data.status);
+    }
+    updateData.updatedAt = new Date();
+
+    const card = await this.prisma.lTYCard.update({
+      where: {
+        id: data.id,
+      },
+      data: updateData,
+    });
+    return PrismaCardMobileUserMapper.toDomain(card);
+  }
+
   public async getAll({
     unqNumber,
     organizationId,
@@ -219,27 +248,7 @@ export class CardRepository extends ICardRepository {
     isCorporate?: boolean;
     page?: number;
     size?: number;
-  }): Promise<{
-    cards: Array<{
-      id: number;
-      balance: number;
-      devNumber: string;
-      number: string;
-      type: LTYCardType;
-      createdAt: Date | null;
-      updatedAt: Date | null;
-      loyaltyCardTierId: number | null;
-      corporateId: number | null;
-      cardTier: {
-        id: number;
-        name: string;
-        description: string | null;
-        limitBenefit: number;
-      } | null;
-      isCorporate: boolean;
-    }>;
-    total: number;
-  }> {
+  }): Promise<CardPaginatedResult> {
     const where: Prisma.LTYCardWhereInput = {};
 
     where.cardTier = {
@@ -305,6 +314,7 @@ export class CardRepository extends ICardRepository {
             name: true,
             description: true,
             limitBenefit: true,
+            ltyProgramId: true,
           },
         },
       },
@@ -313,22 +323,31 @@ export class CardRepository extends ICardRepository {
       },
     });
 
-    return {
+    const result: CardPaginatedResult = {
       cards: cards.map((card) => ({
         id: card.id,
         balance: card.balance,
         devNumber: card.unqNumber,
         number: card.number,
-        type: card.type,
+        type: EnumMapper.toDomainCardType(card.type),
         createdAt: card.createdAt,
         updatedAt: card.updatedAt,
         loyaltyCardTierId: card.cardTierId,
         corporateId: card.corporateId,
-        cardTier: card.cardTier,
+        cardTier: card.cardTier
+          ? {
+              id: card.cardTier.id,
+              name: card.cardTier.name,
+              description: card.cardTier.description,
+              limitBenefit: card.cardTier.limitBenefit,
+              ltyProgramId: card.cardTier.ltyProgramId, 
+            }
+          : null,
         isCorporate: card.corporateId !== null,
       })),
       total,
     };
+    return result;
   }
 
   public async getUserKeyStatsByOrganization(
@@ -715,5 +734,74 @@ export class CardRepository extends ICardRepository {
       },
     });
     return cards.map((card) => PrismaCardMobileUserMapper.toDomain(card));
+  }
+
+  public async getCardInfoById(id: number): Promise<CardInfoResult | null> {
+    const card = (await this.prisma.lTYCard.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        balance: true,
+        unqNumber: true,
+        number: true,
+        type: true,
+        createdAt: true,
+        updatedAt: true,
+        status: true,
+        cardTier: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            limitBenefit: true,
+            ltyProgramId: true
+          },
+        },
+        corporate: {
+          select: {
+            id: true,
+            name: true,
+            inn: true,
+            address: true,
+          },
+        },
+      },
+    }))
+
+
+    if (!card) {
+      return null;
+    }
+
+    const result: CardInfoResult = {
+      id: card.id,
+      balance: card.balance,
+      unqNumber: card.unqNumber,
+      number: card.number,
+        type: EnumMapper.toDomainCardType(card.type),
+      createdAt: card.createdAt,
+      updatedAt: card.updatedAt,
+      status: EnumMapper.toDomainCardStatus(card.status),
+      cardTier: card.cardTier
+        ? {
+            id: card.cardTier.id,
+            name: card.cardTier.name,
+            description: card.cardTier.description,
+            limitBenefit: card.cardTier.limitBenefit,
+            ltyProgramId: card.cardTier.ltyProgramId,
+          }
+        : null,
+      corporate: card.corporate
+        ? {
+            id: card.corporate.id,
+            name: card.corporate.name,
+            inn: card.corporate.inn,
+            address: card.corporate.address,
+          }
+        : null,
+    };
+    return result;
   }
 }

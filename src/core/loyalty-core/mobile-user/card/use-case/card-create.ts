@@ -3,6 +3,7 @@ import { CardCreateDto } from '@loyalty/mobile-user/card/use-case/dto/card-creat
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class CreateCardUseCase {
@@ -17,6 +18,7 @@ export class CreateCardUseCase {
 
     const card = new Card({
       balance: 0,
+      status: undefined,
       mobileUserId: data.mobileUserId,
       devNumber,
       number,

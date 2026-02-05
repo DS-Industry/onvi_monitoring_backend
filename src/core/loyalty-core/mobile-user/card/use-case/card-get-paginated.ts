@@ -4,7 +4,8 @@ import {
   CardsPaginatedResponseDto,
   CardResponseDto,
 } from '@platform-user/core-controller/dto/response/card-paginated-response.dto';
-import { LTYCardType } from '@prisma/client';
+import { CardType } from '@loyalty/mobile-user/card/domain/enums';
+import { EnumMapper } from '@db/mapper/enum-mapper';
 
 @Injectable()
 export class GetCardsPaginatedUseCase {
@@ -14,7 +15,7 @@ export class GetCardsPaginatedUseCase {
     organizationId: number;
     unqNumber?: string;
     number?: string;
-    type?: LTYCardType;
+    type?: CardType;
     isCorporate?: boolean;
     page?: number;
     size?: number;
@@ -23,7 +24,7 @@ export class GetCardsPaginatedUseCase {
       organizationId: data.organizationId,
       unqNumber: data.unqNumber,
       number: data.number,
-      type: data.type,
+      type: data.type ? EnumMapper.toPrismaCardType(data.type) : undefined,
       isCorporate: data.isCorporate,
       page: data.page || 1,
       size: data.size || 10,
@@ -34,7 +35,7 @@ export class GetCardsPaginatedUseCase {
       balance: card.balance,
       unqNumber: card.devNumber,
       number: card.number,
-      type: card.type as LTYCardType,
+      type: EnumMapper.toPrismaCardType(card.type),
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
       cardTier: card.cardTier
@@ -43,6 +44,7 @@ export class GetCardsPaginatedUseCase {
             name: card.cardTier.name,
             description: card.cardTier.description,
             limitBenefit: card.cardTier.limitBenefit,
+            ltyProgramId: card.cardTier.ltyProgramId,
           }
         : null,
       isCorporate: card.isCorporate,

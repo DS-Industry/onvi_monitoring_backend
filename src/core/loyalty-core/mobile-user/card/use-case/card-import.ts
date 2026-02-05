@@ -3,6 +3,7 @@ import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { CardImportItemDto } from '@platform-user/core-controller/dto/receive/card-import-item.dto';
 import { ImportCardsResponseDto } from '@platform-user/core-controller/dto/response/import-cards-response.dto';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class CardImportUseCase {
@@ -55,6 +56,7 @@ export class CardImportUseCase {
           devNumber: cardData.uniqueNumber,
           number: cardData.devNumber,
           balance: 0,
+          status: CardStatus.INACTIVE,
           loyaltyCardTierId: tierId,
           corporateId: corporateId,
           mobileUserId: undefined,

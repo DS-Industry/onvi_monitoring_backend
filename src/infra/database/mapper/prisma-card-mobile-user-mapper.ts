@@ -1,6 +1,8 @@
 import { LTYCard as PrismaCardMobileUser, Prisma } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
+import { EnumMapper } from './enum-mapper';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 type PrismaCardMobileUserWithRelations = Prisma.LTYCardGetPayload<{
   include: {
     client: true;
@@ -26,12 +28,16 @@ export class PrismaCardMobileUserMapper {
     return new Card({
       id: entity.id,
       balance: entity.balance,
+      status: entity.status
+        ? (EnumMapper.toDomainCardStatus(entity.status) ?? undefined)
+        : undefined,
       mobileUserId: entity.clientId,
       devNumber: entity.unqNumber,
       number: entity.number,
       monthlyLimit: entity.monthlyLimit,
       loyaltyCardTierId: entity.cardTierId,
       corporateId: entity.corporateId,
+      organizationId: entity.organizationId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -41,12 +47,14 @@ export class PrismaCardMobileUserMapper {
     return {
       id: card?.id,
       balance: card.balance,
+      status: EnumMapper.toPrismaCardStatus(card.status),
       clientId: card.mobileUserId,
       unqNumber: card.devNumber,
       number: card.number,
       monthlyLimit: card?.monthlyLimit,
       cardTierId: card?.loyaltyCardTierId,
       corporateId: card?.corporateId,
+      organizationId: card?.organizationId,
       createdAt: card?.createdAt,
       updatedAt: card?.updatedAt,
     };

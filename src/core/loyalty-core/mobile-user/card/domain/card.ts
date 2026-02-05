@@ -1,16 +1,19 @@
 import { BaseEntity } from '@utils/entity';
 import { LoyaltyDomainException } from '@exception/option.exceptions';
 import { LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE } from '@constant/error.constants';
+import { CardStatus } from './enums';
 
 export interface CardProps {
   id?: number;
   balance: number;
+  status: CardStatus;
   mobileUserId?: number;
   devNumber: string;
   number: string;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
   corporateId?: number;
+  organizationId?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -52,12 +55,20 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.corporateId;
   }
 
+  get organizationId(): number | undefined {
+    return this.props.organizationId;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get status(): CardStatus {
+    return this.props.status;
   }
 
   set balance(balance: number) {
@@ -78,6 +89,10 @@ export class Card extends BaseEntity<CardProps> {
 
   set corporateId(corporateId: number | undefined) {
     this.props.corporateId = corporateId;
+  }
+
+  set organizationId(organizationId: number | undefined) {
+    this.props.organizationId = organizationId;
   }
 
   set createdAt(createdAt: Date) {

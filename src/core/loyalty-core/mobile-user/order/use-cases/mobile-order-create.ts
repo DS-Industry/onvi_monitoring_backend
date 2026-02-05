@@ -16,9 +16,11 @@ import {
 } from '@loyalty/order/domain/services';
 import {
   CardOwnershipException,
+  CardInactiveException,
   InvalidOrderSumException,
   InvalidBonusSumException,
 } from '@loyalty/order/domain/exceptions';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 export interface CreateMobileOrderRequest {
   sum: number;
@@ -84,6 +86,13 @@ export class CreateMobileOrderUseCase {
         `Authorization failed: Card ${card.id} does not belong to user ${request.clientId}. Card owner: ${card.mobileUserId}`,
       );
       throw new CardOwnershipException(request.clientId);
+    }
+
+    if (card.status === CardStatus.INACTIVE) {
+      this.logger.warn(
+        `Card ${card.id} is inactive. User ${request.clientId} cannot create an order.`,
+      );
+      throw new CardInactiveException(request.clientId);
     }
 
     const isFreeVacuum = this.orderStatusDeterminationService.isFreeVacuum({

@@ -43,7 +43,11 @@ import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/clien
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-update';
 import { GetCardsPaginatedUseCase } from '@loyalty/mobile-user/card/use-case/card-get-paginated';
+import { GetCardInfoUseCase } from '@loyalty/mobile-user/card/use-case/card-get-info';
+import { UpdateCardFieldsUseCase } from '@loyalty/mobile-user/card/use-case/card-update-fields';
 import { CardAssignDto } from './dto/receive/card-assign.dto';
+import { CardUpdateDto } from './dto/receive/card-update.dto';
+import { EnumMapper } from '@db/mapper/enum-mapper';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { LoyaltyProgramParticipantResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-participant-response.dto';
 import { LoyaltyParticipantProgramsFilterDto } from '@platform-user/core-controller/dto/receive/loyalty-participant-programs-filter.dto';
@@ -96,7 +100,10 @@ import { LoyaltyProgramUpdateDto } from '@platform-user/core-controller/dto/rece
 import { CardsFilterDto } from './dto/receive/cards.filter.dto';
 import { CardsPaginatedFilterDto } from './dto/receive/cards-paginated-filter.dto';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
-import { CardsPaginatedResponseDto } from './dto/response/card-paginated-response.dto';
+import {
+  CardsPaginatedResponseDto,
+  CardInfoResponseDto,
+} from './dto/response/card-paginated-response.dto';
 import { ClientKeyStatsDto } from './dto/receive/client-key-stats.dto';
 import { UserKeyStatsResponseDto } from './dto/response/user-key-stats-response.dto';
 import { ClientLoyaltyStatsDto } from './dto/receive/client-loyalty-stats.dto';
@@ -191,6 +198,8 @@ export class LoyaltyController {
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly updateCardUseCase: UpdateCardUseCase,
     private readonly getCardsPaginatedUseCase: GetCardsPaginatedUseCase,
+    private readonly getCardInfoUseCase: GetCardInfoUseCase,
+    private readonly updateCardFieldsUseCase: UpdateCardFieldsUseCase,
     private readonly createTagUseCase: CreateTagUseCase,
     private readonly deleteTagUseCase: DeleteTagUseCase,
     private readonly findMethodsTagUseCase: FindMethodsTagUseCase,
@@ -1439,10 +1448,144 @@ export class LoyaltyController {
         organizationId: data.organizationId,
         unqNumber: data.unqNumber,
         number: data.number,
-        type: data.type,
+        type: data.type ? EnumMapper.toDomainCardType(data.type) : undefined,
         isCorporate: data.isCorporate,
         page: data.page || 1,
         size: data.size || 10,
+      });
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('card/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getCardInfo(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<CardInfoResponseDto> {
+    try {
+      const { user, ability } = req;
+
+      await this.loyaltyValidateRules.getCardInfoValidate(
+        id,
+        user.id,
+        ability,
+      );
+
+      const cardInfo = await this.getCardInfoUseCase.execute(id);
+
+      if (!cardInfo) {
+        throw new CustomHttpException({
+          message: 'Card not found',
+          code: HttpStatus.NOT_FOUND,
+        });
+      }
+
+      return cardInfo;
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('card/assign')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async assignCardToClient(
+    @Body() data: CardAssignDto,
+    @Request() req: any,
+  ): Promise<Card> {
+    try {
+      const { ability } = req;
+      
+      const card = await this.loyaltyValidateRules.assignCardToClientValidate(
+        data.cardId,
+        data.clientId,
+        ability,
+      );
+
+      const existingCard = await this.findMethodsCardUseCase.getByClientId(
+        data.clientId,
+      );
+      if (existingCard && existingCard.id !== card.id) {
+        await this.updateCardUseCase.execute(
+          { mobileUserId: null },
+          existingCard,
+        );
+      }
+
+      return await this.updateCardUseCase.execute(
+        { mobileUserId: data.clientId },
+        card,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('card/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async updateCard(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: CardUpdateDto,
+    @Request() req: any,
+  ): Promise<Card> {
+    try {
+      const { user, ability } = req;
+
+      await this.loyaltyValidateRules.updateCardValidate(
+        id,
+        data.cardTierId,
+        user.id,
+        ability,
+      );
+
+      return await this.updateCardFieldsUseCase.execute(id, {
+        cardTierId: data.cardTierId,
+        status: data.status !== undefined
+          ? (data.status === null ? null : EnumMapper.toDomainCardStatus(data.status))
+          : undefined,
       });
     } catch (e) {
       if (e instanceof LoyaltyException) {
@@ -1510,54 +1653,6 @@ export class LoyaltyController {
         ability,
       );
       return await this.findMethodsCardUseCase.getClientLoyaltyStats(data);
-    } catch (e) {
-      if (e instanceof LoyaltyException) {
-        throw new CustomHttpException({
-          type: e.type,
-          innerCode: e.innerCode,
-          message: e.message,
-          code: e.getHttpStatus(),
-        });
-      } else {
-        throw new CustomHttpException({
-          message: e.message,
-          code: HttpStatus.INTERNAL_SERVER_ERROR,
-        });
-      }
-    }
-  }
-
-  @Patch('card/assign')
-  @UseGuards(JwtGuard, AbilitiesGuard)
-  @CheckAbilities(new UpdateLoyaltyAbility())
-  @HttpCode(200)
-  async assignCardToClient(
-    @Body() data: CardAssignDto,
-    @Request() req: any,
-  ): Promise<Card> {
-    try {
-      const { ability } = req;
-      
-      const card = await this.loyaltyValidateRules.assignCardToClientValidate(
-        data.cardId,
-        data.clientId,
-        ability,
-      );
-
-      const existingCard = await this.findMethodsCardUseCase.getByClientId(
-        data.clientId,
-      );
-      if (existingCard && existingCard.id !== card.id) {
-        await this.updateCardUseCase.execute(
-          { mobileUserId: null },
-          existingCard,
-        );
-      }
-
-      return await this.updateCardUseCase.execute(
-        { mobileUserId: data.clientId },
-        card,
-      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
