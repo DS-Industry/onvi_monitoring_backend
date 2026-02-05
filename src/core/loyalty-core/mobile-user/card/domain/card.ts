@@ -1,20 +1,21 @@
 import { BaseEntity } from '@utils/entity';
 import { LoyaltyDomainException } from '@exception/option.exceptions';
 import { LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE } from '@constant/error.constants';
-import { StatusCard } from '@prisma/client';
+import { CardStatus } from './enums';
 
 export interface CardProps {
   id?: number;
   balance: number;
+  status: CardStatus;
   mobileUserId?: number;
   devNumber: string;
   number: string;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
   corporateId?: number;
+  organizationId?: number;
   createdAt?: Date;
   updatedAt?: Date;
-  status?: StatusCard;
 }
 
 export class Card extends BaseEntity<CardProps> {
@@ -54,6 +55,10 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.corporateId;
   }
 
+  get organizationId(): number | undefined {
+    return this.props.organizationId;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -62,7 +67,7 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.updatedAt;
   }
 
-  get status(): StatusCard {
+  get status(): CardStatus {
     return this.props.status;
   }
 
@@ -86,6 +91,10 @@ export class Card extends BaseEntity<CardProps> {
     this.props.corporateId = corporateId;
   }
 
+  set organizationId(organizationId: number | undefined) {
+    this.props.organizationId = organizationId;
+  }
+
   set createdAt(createdAt: Date) {
     this.props.createdAt = createdAt;
   }
@@ -94,7 +103,7 @@ export class Card extends BaseEntity<CardProps> {
     this.props.updatedAt = updatedAt;
   }
 
-  set status(status: StatusCard) {
+  set status(status: CardStatus) {
     this.props.status = status;
   }
 

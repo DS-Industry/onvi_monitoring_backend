@@ -40,4 +40,10 @@ export const configuration = () => ({
   redisCacheUser: process.env.REDIS_CACHE_USER,
   redisCachePassword: process.env.REDIS_CACHE_PASSWORD,
   firebaseAdminKeyPath: process.env.FIREBASE_ADMIN_KEY_PATH,
+  onviOrganizationId: process.env.ONVI_ORGANIZATION_ID
+    ? parseInt(process.env.ONVI_ORGANIZATION_ID, 10)
+    : undefined,
+  onviProgramId: process.env.ONVI_PROGRAM_ID
+    ? parseInt(process.env.ONVI_PROGRAM_ID, 10)
+    : undefined,
 });

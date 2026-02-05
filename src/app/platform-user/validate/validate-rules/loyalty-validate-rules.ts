@@ -22,6 +22,8 @@ import { LoyaltyTier } from '@loyalty/loyalty/loyaltyTier/domain/loyaltyTier';
 import { LoyaltyException } from '@exception/option.exceptions';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
+import { FindMethodsLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-find-methods';
+import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Injectable()
@@ -30,6 +32,8 @@ export class LoyaltyValidateRules {
     private readonly validateLib: ValidateLib,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
     private readonly cardRepository: ICardRepository,
+    private readonly findMethodsLoyaltyProgramUseCase: FindMethodsLoyaltyProgramUseCase,
+    private readonly findMethodsOrganizationUseCase: FindMethodsOrganizationUseCase,
   ) {}
 
   public async createLoyaltyProgramValidate(
@@ -1132,5 +1136,162 @@ export class LoyaltyValidateRules {
       ExceptionType.LOYALTY,
       LOYALTY_GET_ONE_EXCEPTION_CODE,
     );
+  }
+
+  public async getCardInfoValidate(
+    cardId: number,
+    userId: number,
+    ability: any,
+  ): Promise<Card> {
+    const response = [];
+
+    const checkCard = await this.validateLib.cardByIdExists(cardId);
+    response.push(checkCard);
+
+    const cardAccessCheck =
+      await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+    response.push(cardAccessCheck);
+
+    const card = checkCard.object;
+    if (!card) {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.LOYALTY,
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+      );
+      throw new LoyaltyException(
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+        'Card not found',
+      );
+    }
+
+    if (!card.loyaltyCardTierId) {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.LOYALTY,
+        LOYALTY_GET_ONE_EXCEPTION_CODE,
+      );
+      return card;
+    }
+
+    const loyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(
+        card.loyaltyCardTierId,
+      );
+
+    if (loyaltyProgram) {
+      const organizations =
+        await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+          loyaltyProgram.id,
+        );
+
+      if (organizations.length > 0) {
+        const organizationChecks = await Promise.all(
+          organizations.map((org) =>
+            this.validateLib.userBelongsToOrganization(userId, org.id),
+          ),
+        );
+
+        const hasAccess = organizationChecks.some(
+          (check) => check.code === 200,
+        );
+        if (!hasAccess) {
+          throw new LoyaltyException(
+            LOYALTY_GET_ONE_EXCEPTION_CODE,
+            'User does not belong to the organization',
+          );
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_GET_ONE_EXCEPTION_CODE,
+    );
+
+    return card;
+  }
+
+  public async updateCardValidate(
+    cardId: number,
+    cardTierId: number | undefined,
+    userId: number,
+    ability: any,
+  ): Promise<Card> {
+    const response = [];
+
+    const checkCard = await this.validateLib.cardByIdExists(cardId);
+    response.push(checkCard);
+
+    const cardAccessCheck =
+      await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+    response.push(cardAccessCheck);
+
+    const card = checkCard.object;
+    if (!card) {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.LOYALTY,
+        LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+      );
+      throw new LoyaltyException(
+        LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+        'Card not found',
+      );
+    }
+
+    if (!card.loyaltyCardTierId) {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.LOYALTY,
+        LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+      );
+      return card;
+    }
+
+    const loyaltyProgram =
+      await this.findMethodsLoyaltyProgramUseCase.getOneByLoyaltyCardTierId(
+        card.loyaltyCardTierId,
+      );
+
+    if (loyaltyProgram) {
+      const organizations =
+        await this.findMethodsOrganizationUseCase.getAllParticipantOrganizationsByLoyaltyProgramId(
+          loyaltyProgram.id,
+        );
+
+      if (organizations.length > 0) {
+        const organizationChecks = await Promise.all(
+          organizations.map((org) =>
+            this.validateLib.userBelongsToOrganization(userId, org.id),
+          ),
+        );
+
+        const hasAccess = organizationChecks.some(
+          (check) => check.code === 200,
+        );
+        if (!hasAccess) {
+          throw new LoyaltyException(
+            LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+            'User does not belong to the organization',
+          );
+        }
+      }
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
+    );
+
+    return card;
   }
 }

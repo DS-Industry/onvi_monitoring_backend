@@ -6,7 +6,7 @@ import { UpdateCardUseCase } from '@loyalty/mobile-user/card/use-case/card-updat
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { FindMethodsTagUseCase } from '@loyalty/mobile-user/tag/use-cases/tag-find-methods';
 import { StatusUser } from '../domain/enums';
-import { StatusCard } from '@prisma/client';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class UpdateClientUseCase {
@@ -50,7 +50,7 @@ export class UpdateClientUseCase {
       if (clientCard) {
         await this.updateCardUseCase.execute(
           {
-            status: StatusCard.INACTIVE, 
+            status: CardStatus.INACTIVE, 
           },
           clientCard
         );

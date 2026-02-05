@@ -1,9 +1,9 @@
-import { StatusCard } from "@prisma/client";
+import { CardStatus } from "../../domain/enums";
 
 export interface CardUpdateDto {
   balance?: number;
   monthlyLimit?: number;
   loyaltyCardTierId?: number;
   mobileUserId?: number;
-  status?: StatusCard;
+  status?: CardStatus;
 }

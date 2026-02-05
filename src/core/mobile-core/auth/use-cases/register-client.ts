@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IOtpService } from '../interfaces/otp-service';
 import { ITokenService } from '../interfaces/token-service';
 import { IClientAuthRepository } from '../interfaces/client-auth-repository';
@@ -11,6 +12,9 @@ import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { FindMethodsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-find-methods';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
+import { FindMethodsLoyaltyTierUseCase } from '@loyalty/loyalty/loyaltyTier/use-cases/loyaltyTier-find-methods';
+
+
 
 export interface RegisterClientRequest {
   phone: string;
@@ -37,6 +41,8 @@ export class RegisterClientUseCase {
     private readonly findClientUseCase: FindMethodsClientUseCase,
     private readonly cardRepository: ICardRepository,
     private readonly findMethodsCardUseCase: FindMethodsCardUseCase,
+    private readonly findMethodsLoyaltyTierUseCase: FindMethodsLoyaltyTierUseCase,
+    private readonly configService: ConfigService,
   ) {}
 
   async execute(
@@ -71,7 +77,14 @@ export class RegisterClientUseCase {
 
       client = await this.clientRepository.create(clientData);
 
-      await this.createCardForClient(client.id);
+      const organizationId = this.configService.get<number>('onviOrganizationId');
+      const loyaltyProgramId = this.configService.get<number>('onviProgramId');
+
+      await this.createCardForClient(
+        client.id,
+        organizationId,
+        loyaltyProgramId,
+      );
     }
 
     const tokens = await this.tokenService.generateTokens({
@@ -100,15 +113,38 @@ export class RegisterClientUseCase {
     };
   }
 
-  private async createCardForClient(clientId: number): Promise<Card> {
+  private async createCardForClient(
+    clientId: number,
+    organizationId?: number,
+    loyaltyProgramId?: number,
+  ): Promise<Card> {
     const devNumber = await this.generateDevNomerCard();
     const number = await this.generateNomerCard();
 
+    let cardTierId: number | undefined;
+
+    if (loyaltyProgramId) {
+      const tiers =
+        await this.findMethodsLoyaltyTierUseCase.getAllByLoyaltyProgramId(
+          loyaltyProgramId,
+        );
+
+      if (tiers.length > 0) {
+        const tierWithSmallestLimit = tiers.reduce((prev, current) =>
+          prev.limitBenefit < current.limitBenefit ? prev : current,
+        );
+        cardTierId = tierWithSmallestLimit.id;
+      }
+    }
+
     const card = new Card({
       balance: 0,
+      status: undefined,
       mobileUserId: clientId,
       devNumber,
       number,
+      organizationId,
+      loyaltyCardTierId: cardTierId,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

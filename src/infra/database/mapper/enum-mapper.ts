@@ -7,6 +7,8 @@ import {
   SendAnswerStatus as PrismaSendAnswerStatus,
   StatusUser as PrismaStatusUser,
   LTYProgramStatus as PrismaLTYProgramStatus,
+  LTYCardType as PrismaCardType,
+  StatusCard as PrismaCardStatus,
 } from '@prisma/client';
 import {
   OrderStatus,
@@ -18,6 +20,10 @@ import {
 } from '@loyalty/order/domain/enums';
 import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 import { LTYProgramStatus } from '@loyalty/loyalty/loyaltyProgram/domain/enums';
+import {
+  CardType,
+  CardStatus,
+} from '@loyalty/mobile-user/card/domain/enums';
 
 /**
  * Maps Prisma enums to Domain enums
@@ -103,5 +109,23 @@ export class EnumMapper {
     status: LTYProgramStatus,
   ): PrismaLTYProgramStatus {
     return status as PrismaLTYProgramStatus;
+  }
+
+  static toDomainCardType(type: PrismaCardType): CardType {
+    return type as CardType;
+  }
+
+  static toPrismaCardType(type: CardType): PrismaCardType {
+    return type as PrismaCardType;
+  }
+
+  static toDomainCardStatus(status: PrismaCardStatus | null): CardStatus | null {
+    if (status === null) return null;
+    return status as CardStatus;
+  }
+
+  static toPrismaCardStatus(status: CardStatus | null): PrismaCardStatus | null {
+    if (status === null) return null;
+    return status as PrismaCardStatus;
   }
 }
