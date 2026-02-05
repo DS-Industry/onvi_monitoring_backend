@@ -184,6 +184,7 @@ import { PromocodeResponseDto } from './dto/response/promocode-response.dto';
 import { MarketingCampaignActionResponseDto } from './dto/response/marketing-campaign-action-response.dto';
 import { DeleteResponseDto } from './dto/response/delete-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
+import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -1168,14 +1169,16 @@ export class LoyaltyController {
     @Body() data: ClientUpdateDto,
   ): Promise<ClientFullResponseDto> {
     try {
-      const { ability } = req;
+      const { ability } = req;      
 
       const client = await this.loyaltyValidateRules.updateClientValidate(
         data.clientId,
         ability,
         data?.cardId,
         data?.tagIds || [],
+        data?.status,
       );
+      
       return await this.updateClientUseCase.execute(data, client);
     } catch (e) {
       if (e instanceof LoyaltyException) {

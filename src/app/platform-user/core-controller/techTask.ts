@@ -11,60 +11,65 @@ import {
   Post,
   Query,
   Request,
-  UseGuards,
-} from '@nestjs/common';
-import { CreateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-create';
-import { DeleteTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete';
-import { DeleteManyTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-delete-many';
-import { JwtGuard } from '@platform-user/auth/guards/jwt.guard';
-import { AbilitiesGuard } from '@platform-user/permissions/user-permissions/guards/abilities.guard';
+  UseGuards
+} from "@nestjs/common";
+import { CreateTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-create";
+import { DeleteTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-delete";
+import { DeleteManyTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-delete-many";
+import { JwtGuard } from "@platform-user/auth/guards/jwt.guard";
+import { AbilitiesGuard } from "@platform-user/permissions/user-permissions/guards/abilities.guard";
 import {
   CheckAbilities,
   CreateTechTaskAbility,
   DeleteTechTaskAbility,
   ReadIncidentAbility,
   ReadTechTaskAbility,
-  UpdateTechTaskAbility,
-} from '@common/decorators/abilities.decorator';
-import { TechTaskCreateDto } from '@platform-user/core-controller/dto/receive/tech-task-create.dto';
-import { TechTaskValidateRules } from '@platform-user/validate/validate-rules/techTask-rules';
-import { TechTaskUpdateDto } from '@platform-user/core-controller/dto/receive/tech-task-update.dto';
-import { UpdateTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-update';
-import { PosValidateRules } from '@platform-user/validate/validate-rules/pos-validate-rules';
-import { ManageAllByPosAndStatusesTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses';
-import { ShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-shape';
+  UpdateTechTaskAbility
+} from "@common/decorators/abilities.decorator";
+import { TechTaskCreateDto } from "@platform-user/core-controller/dto/receive/tech-task-create.dto";
+import { TechTaskValidateRules } from "@platform-user/validate/validate-rules/techTask-rules";
+import { TechTaskUpdateDto } from "@platform-user/core-controller/dto/receive/tech-task-update.dto";
+import { UpdateTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-update";
+import { PosValidateRules } from "@platform-user/validate/validate-rules/pos-validate-rules";
 import {
-  TechTaskCompletionShapeDto,
+  ManageAllByPosAndStatusesTechTaskUseCase
+} from "@tech-task/techTask/use-cases/techTask-manage-all-by-pos-and-statuses";
+import { ShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-shape";
+import {
   itemValueDto,
-} from '@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto';
-import { CompletionShapeTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-completion-shape';
-import { GeneratingReportProgramTechRate } from '@tech-task/programTechRate/use-cases/programTechRate-generating-report';
-import { PosChemistryProductionUseCase } from '@pos/pos/use-cases/pos-chemistry-production';
-import { FindMethodsItemTemplateUseCase } from '@tech-task/itemTemplate/use-cases/itemTemplate-find-methods';
-import { ReadAllByPosTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-read-all-by-pos';
-import { PosException, TechTaskException } from '@exception/option.exceptions';
-import { CustomHttpException } from '@exception/custom-http.exception';
-import { TechTaskManageInfoResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto';
-import { TechTaskReadAllResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-read-response.dto';
-import { TechTaskShapeResponseDto } from '@tech-task/techTask/use-cases/dto/techTask-shape-response.dto';
-import { CreateTechTagUseCase } from '@tech-task/tag/use-case/techTag-create';
-import { FindMethodsTechTagUseCase } from '@tech-task/tag/use-case/techTag-find-methods';
-import { TechTagCreateDto } from '@platform-user/core-controller/dto/receive/techTag-create.dto';
-import { PosChemistryProductionResponseDto } from '@pos/pos/use-cases/dto/pos-chemistry-production-response.dto';
-import { TechTaskPosFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-pos-filter.dto';
-import { TechTaskChemistryReportDto } from '@platform-user/core-controller/dto/receive/tech-task-chemistry-report.dto';
-import { TechTaskResponseDto } from '@platform-user/core-controller/dto/response/techTask-response.dto';
-import { TechTaskReportDto } from '@platform-user/core-controller/dto/receive/tech-task-report.dto';
-import { ReportTechTaskUseCase } from '@tech-task/techTask/use-cases/techTask-report';
-import { TechTaskItemTemplate } from '@tech-task/itemTemplate/domain/itemTemplate';
-import { TechTag } from '@tech-task/tag/domain/techTag';
-import { TechTask } from '@tech-task/techTask/domain/techTask';
-import { TechTaskMeFilterDto } from '@platform-user/core-controller/dto/receive/tech-task-me-filter.dto';
-import { TechTaskDeleteManyDto } from '@platform-user/core-controller/dto/receive/tech-task-delete-many.dto';
-import { CreateTechTaskCommentUseCase } from '@tech-task/comment/use-cases/techTaskComment-create';
-import { ReadTechTaskCommentsUseCase } from '@tech-task/comment/use-cases/techTaskComment-read';
-import { TechTaskCommentCreateDto } from '@platform-user/core-controller/dto/receive/tech-task-comment-create.dto';
-import { TechTaskCommentResponseDto } from '@platform-user/core-controller/dto/response/tech-task-comment-response.dto';
+  TechTaskCompletionShapeDto
+} from "@platform-user/core-controller/dto/receive/tech-task-completion-shape.dto";
+import { CompletionShapeTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-completion-shape";
+import {
+  GeneratingReportProgramTechRate
+} from "@tech-task/programTechRate/use-cases/programTechRate-generating-report";
+import { PosChemistryProductionUseCase } from "@pos/pos/use-cases/pos-chemistry-production";
+import { FindMethodsItemTemplateUseCase } from "@tech-task/itemTemplate/use-cases/itemTemplate-find-methods";
+import { ReadAllByPosTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-read-all-by-pos";
+import { PosException, TechTaskException } from "@exception/option.exceptions";
+import { CustomHttpException } from "@exception/custom-http.exception";
+import { TechTaskManageInfoResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-manage-info-response.dto";
+import { TechTaskReadAllResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-read-response.dto";
+import { TechTaskShapeResponseDto } from "@tech-task/techTask/use-cases/dto/techTask-shape-response.dto";
+import { CreateTechTagUseCase } from "@tech-task/tag/use-case/techTag-create";
+import { FindMethodsTechTagUseCase } from "@tech-task/tag/use-case/techTag-find-methods";
+import { TechTagCreateDto } from "@platform-user/core-controller/dto/receive/techTag-create.dto";
+import { PosChemistryProductionResponseDto } from "@pos/pos/use-cases/dto/pos-chemistry-production-response.dto";
+import { TechTaskPosFilterDto } from "@platform-user/core-controller/dto/receive/tech-task-pos-filter.dto";
+import { TechTaskChemistryReportDto } from "@platform-user/core-controller/dto/receive/tech-task-chemistry-report.dto";
+import { TechTaskResponseDto } from "@platform-user/core-controller/dto/response/techTask-response.dto";
+import { TechTaskReportDto } from "@platform-user/core-controller/dto/receive/tech-task-report.dto";
+import { ReportTechTaskUseCase } from "@tech-task/techTask/use-cases/techTask-report";
+import { TechTaskItemTemplate } from "@tech-task/itemTemplate/domain/itemTemplate";
+import { TechTag } from "@tech-task/tag/domain/techTag";
+import { TechTask } from "@tech-task/techTask/domain/techTask";
+import { TechTaskMeFilterDto } from "@platform-user/core-controller/dto/receive/tech-task-me-filter.dto";
+import { TechTaskDeleteManyDto } from "@platform-user/core-controller/dto/receive/tech-task-delete-many.dto";
+import { CreateTechTaskCommentUseCase } from "@tech-task/comment/use-cases/techTaskComment-create";
+import { ReadTechTaskCommentsUseCase } from "@tech-task/comment/use-cases/techTaskComment-read";
+import { TechTaskCommentCreateDto } from "@platform-user/core-controller/dto/receive/tech-task-comment-create.dto";
+import { TechTaskCommentResponseDto } from "@platform-user/core-controller/dto/response/tech-task-comment-response.dto";
+import { StatusTechTask } from "@tech-task/techTask/domain/statusTechTask";
 
 @Controller('tech-task')
 export class TechTaskController {
@@ -150,6 +155,9 @@ export class TechTaskController {
         ability,
         data?.techTaskItem,
       );
+      if (data.status === StatusTechTask.PAUSE) {
+        data.templateToNextCreate = false;
+      }
       return await this.updateTechTaskUseCase.execute(data, techTask, user);
     } catch (e) {
       if (e instanceof TechTaskException) {

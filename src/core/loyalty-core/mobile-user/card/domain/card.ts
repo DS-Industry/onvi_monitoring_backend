@@ -103,6 +103,10 @@ export class Card extends BaseEntity<CardProps> {
     this.props.updatedAt = updatedAt;
   }
 
+  set status(status: CardStatus) {
+    this.props.status = status;
+  }
+
   adjustSum(sum: number): void {
     const newBalance = this.balance + sum;
     if (newBalance < 0) {

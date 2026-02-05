@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ICardRepository } from '@loyalty/mobile-user/card/interface/card';
 import { CardInfoResponseDto } from '@platform-user/core-controller/dto/response/card-paginated-response.dto';
 import { EnumMapper } from '@db/mapper/enum-mapper';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class GetCardInfoUseCase {
@@ -22,7 +23,7 @@ export class GetCardInfoUseCase {
       type: EnumMapper.toPrismaCardType(card.type),
       createdAt: card.createdAt,
       updatedAt: card.updatedAt,
-      status: card.status ? EnumMapper.toPrismaCardStatus(card.status) : null,
+      status: card.status as CardStatus | null,
       cardTier: card.cardTier
         ? {
             id: card.cardTier.id,

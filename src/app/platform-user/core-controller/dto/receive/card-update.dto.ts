@@ -1,5 +1,5 @@
 import { IsOptional, IsNumber, IsEnum, ValidateIf } from 'class-validator';
-import { StatusCard } from '@prisma/client';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 export class CardUpdateDto {
   @IsOptional()
@@ -8,6 +8,6 @@ export class CardUpdateDto {
 
   @IsOptional()
   @ValidateIf((o) => o.status !== null)
-  @IsEnum(StatusCard, { message: 'status must be a valid StatusCard value or null' })
-  status?: StatusCard | null;
+  @IsEnum(CardStatus, { message: 'status must be a valid StatusCard value or null' })
+  status?: CardStatus | null;
 }

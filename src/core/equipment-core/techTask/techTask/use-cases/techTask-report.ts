@@ -80,6 +80,7 @@ export class ReportTechTaskUseCase {
         tags: techTags.map((tag) => tag.getProps()),
         createdBy: techTask.createdBy || null,
         executor: techTask.executor || null,
+        templateToNextCreate: techTask.templateToNextCreate,
       });
     }
 

@@ -73,6 +73,7 @@ export class ReadAllByPosTechTaskUseCase {
         type: techTask.type,
         status: techTask.status,
         endSpecifiedDate: techTask?.endSpecifiedDate,
+        templateToNextCreate: techTask.templateToNextCreate,
         startWorkDate: techTask.startWorkDate,
         sendWorkDate: techTask.sendWorkDate,
         executorId: techTask.executorId,

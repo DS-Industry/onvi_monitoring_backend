@@ -2,7 +2,7 @@ import { LTYCard as PrismaCardMobileUser, Prisma } from '@prisma/client';
 import { Card } from '@loyalty/mobile-user/card/domain/card';
 import { LoyaltyCardInfoFullResponseDto } from '@loyalty/order/use-cases/dto/loyaltyCardInfoFull-response.dto';
 import { EnumMapper } from './enum-mapper';
-import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
+
 type PrismaCardMobileUserWithRelations = Prisma.LTYCardGetPayload<{
   include: {
     client: true;

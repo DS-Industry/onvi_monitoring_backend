@@ -1,4 +1,5 @@
-import { LTYCardType, StatusCard } from '@prisma/client';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
+import { LTYCardType } from '@prisma/client';
 
 export class CardTierResponseDto {
   id: number;
@@ -37,7 +38,7 @@ export class CardInfoResponseDto {
   updatedAt?: Date | null;
   cardTier?: CardTierResponseDto | null;
   corporate?: CorporateInfoDto | null;
-  status?: StatusCard | null;
+  status?: CardStatus | null;
   limitBenefit?: number | null;
   loyaltyProgramId?: number | null;
 }

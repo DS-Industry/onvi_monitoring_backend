@@ -24,6 +24,7 @@ export interface ClientProps {
   cardUnqNumber?: string; 
   cardNumber?: string;    
   cardBalance?: number;   
+  deletedAt?: Date;
 }
 
 export class Client extends BaseEntity<ClientProps> {
@@ -111,6 +112,10 @@ export class Client extends BaseEntity<ClientProps> {
     return this.props.meta;
   }
 
+  get deletedAt(): Date {
+    return this.props.deletedAt;
+  }
+
   set name(name: string) {
     this.props.name = name;
   }
@@ -169,5 +174,9 @@ export class Client extends BaseEntity<ClientProps> {
 
   set is_notifications_enabled(is_notifications_enabled: boolean) {
     this.props.is_notifications_enabled = is_notifications_enabled;
+  }
+
+  set deletedAt(deletedAt: Date) {
+    this.props.deletedAt = deletedAt;
   }
 }

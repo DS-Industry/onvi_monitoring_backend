@@ -23,6 +23,7 @@ export interface TechTaskProps {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  templateToNextCreate: boolean;
   tags: TechTag[];
   createdBy?: {
     firstName: string;
@@ -117,6 +118,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
     return this.props.updatedById;
   }
 
+  get templateToNextCreate(): boolean {
+    return this.props.templateToNextCreate;
+  }
+
   get tags(): TechTag[] {
     return this.props.tags;
   }
@@ -187,6 +192,10 @@ export class TechTask extends BaseEntity<TechTaskProps> {
 
   set updatedById(updatedById: number) {
     this.props.updatedById = updatedById;
+  }
+
+  set templateToNextCreate(templateToNextCreate: boolean) {
+    this.props.templateToNextCreate = templateToNextCreate;
   }
 
   set tags(tags: TechTag[]) {
