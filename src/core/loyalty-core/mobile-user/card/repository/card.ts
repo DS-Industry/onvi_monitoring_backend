@@ -15,7 +15,7 @@ import {
   CardInfoResult,
 } from '@loyalty/mobile-user/card/types/card-repository.types';
 import { EnumMapper } from '@db/mapper/enum-mapper';
-import { CardType, CardStatus } from '@loyalty/mobile-user/card/domain/enums';
+import { CardStatus } from '@loyalty/mobile-user/card/domain/enums';
 
 @Injectable()
 export class CardRepository extends ICardRepository {
@@ -515,40 +515,43 @@ export class CardRepository extends ICardRepository {
     }
 
     const now = new Date();
-    const startOfLastMonth = new Date(
+    const startOfCurrentMonth = new Date(
       now.getFullYear(),
-      now.getMonth() - 1,
+      now.getMonth(),
       1,
       0,
       0,
       0,
       0,
     );
-    const endOfLastMonth = new Date(
+    const endOfCurrentMonth = new Date(
       now.getFullYear(),
-      now.getMonth(),
+      now.getMonth() + 1,
       0,
       23,
       59,
       59,
       999,
     );
+    
 
     const orders = await this.prisma.lTYOrder.findMany({
       where: {
         cardId: card.id,
         orderStatus: 'COMPLETED',
         orderData: {
-          gte: startOfLastMonth,
-          lte: endOfLastMonth,
+          gte: startOfCurrentMonth,
+          lte: endOfCurrentMonth,
         },
       },
       select: {
         sumReal: true,
         sumBonus: true,
         orderData: true,
+        sumCashback: true
       },
     });
+
 
     const totalPurchaseAmount = orders.reduce(
       (sum, order) => sum + order.sumReal,
@@ -556,6 +559,11 @@ export class CardRepository extends ICardRepository {
     );
 
     const totalBonusEarned = orders.reduce(
+      (sum, order) => sum + order.sumCashback,
+      0,
+    );
+
+    const totalBonusBurned = orders.reduce(
       (sum, order) => sum + order.sumBonus,
       0,
     );
@@ -581,17 +589,7 @@ export class CardRepository extends ICardRepository {
     let nextTierThreshold = 0;
 
     if (nextTier) {
-      const currentTierId = card.cardTierId || 1;
-      const nextTierIdValue = nextTier.id;
       const nextTierBenefitLimit = nextTier.limitBenefit || 0;
-
-      console.log('Tier progression calculation:', {
-        currentTierId,
-        nextTierId: nextTierIdValue,
-        currentTierBenefitLimit,
-        nextTierBenefitLimit,
-        accumulatedAmount,
-      });
 
       nextTierThreshold = nextTierBenefitLimit;
 
@@ -614,6 +612,7 @@ export class CardRepository extends ICardRepository {
 
       activeBonuses: activeBonusesSum,
       totalBonusEarned,
+      totalBonusBurned,
 
       cardNumber: card.number,
       cardDevNumber: card.unqNumber,
