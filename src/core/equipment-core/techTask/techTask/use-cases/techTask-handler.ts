@@ -144,7 +144,7 @@ export class HandlerTechTaskUseCase {
           gteNextCreateDate: todayUTC,
           lteNextCreateDate: tomorrowUTC,
           type: TypeTechTask.REGULAR,
-          statuses: [StatusTechTask.FINISHED, StatusTechTask.OVERDUE],
+          templateToNextCreate: true,
           take: this.config.maxTasksPerBatch,
         });
 
@@ -255,6 +255,10 @@ export class HandlerTechTaskUseCase {
         tagIds: tags.map((tag) => tag.id),
       },
       task.createdById,
+    );
+    await this.updateTechTaskUseCase.execute(
+      { templateToNextCreate: false },
+      task
     );
 
     if (this.config.enableDetailedLogging) {

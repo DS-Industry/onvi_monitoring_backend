@@ -21,5 +21,6 @@ export class TechTaskResponseDto {
   updatedAt?: Date;
   createdById: number;
   updatedById: number;
+  templateToNextCreate: boolean;
   tags: TechTagProps[];
 }

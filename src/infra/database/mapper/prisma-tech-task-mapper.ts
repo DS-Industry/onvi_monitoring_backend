@@ -41,6 +41,7 @@ export class PrismaTechTaskMapper {
       updatedAt: entity.updatedAt,
       createdById: entity.createdById,
       updatedById: entity.updateById,
+      templateToNextCreate: entity.templateToNextCreate,
       tags: entity.tags
         ? entity.tags.map(
             (tag) =>
@@ -88,6 +89,7 @@ export class PrismaTechTaskMapper {
       updatedAt: techTask?.updatedAt,
       createdById: techTask.createdById,
       updateById: techTask.updatedById,
+      templateToNextCreate: techTask.templateToNextCreate,
     };
   }
 }

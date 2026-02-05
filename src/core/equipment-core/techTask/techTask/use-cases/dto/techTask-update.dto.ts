@@ -11,4 +11,5 @@ export class TechTaskUpdateDto {
   endSpecifiedDate?: Date;
   techTaskItem?: number[];
   tagIds?: number[];
+  templateToNextCreate?: boolean;
 }

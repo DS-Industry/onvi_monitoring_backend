@@ -23,6 +23,7 @@ export abstract class ITechTaskRepository {
     tags?: string[],
     authorId?: number,
     executorId?: number,
+    templateToNextCreate?: boolean,
   ): Promise<TechTask[]>;
   abstract countAllByFilter(
     posId?: number,
@@ -41,6 +42,7 @@ export abstract class ITechTaskRepository {
     tags?: string[],
     authorId?: number,
     executorId?: number,
+    templateToNextCreate?: boolean,
   ): Promise<number>;
   abstract update(input: TechTask): Promise<TechTask>;
   abstract updateConnectionTag(

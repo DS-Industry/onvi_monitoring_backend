@@ -16,6 +16,7 @@ export class TechTaskReadAllResponse {
   startWorkDate?: Date;
   sendWorkDate?: Date;
   executorId?: number;
+  templateToNextCreate: boolean;
   tags: TechTagProps[];
   createdBy?: {
     firstName: string;

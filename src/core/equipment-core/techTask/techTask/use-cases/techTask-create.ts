@@ -24,6 +24,7 @@ export class CreateTechTaskUseCase {
   ): Promise<TechTaskResponseDto> {
     let nextCreateDate: Date | undefined;
     let endSpecifiedDate: Date | undefined;
+    let templateToNextCreate = false;
 
     if (input.type === TypeTechTask.REGULAR) {
       if (!input.periodType) {
@@ -39,6 +40,7 @@ export class CreateTechTaskUseCase {
         input.customPeriodDays,
       );
       endSpecifiedDate = input.endSpecifiedDate || nextCreateDate;
+      templateToNextCreate = true;
     } else if (input.type === TypeTechTask.ONETIME) {
       endSpecifiedDate = input.endSpecifiedDate;
     }
@@ -58,6 +60,7 @@ export class CreateTechTaskUseCase {
       updatedAt: new Date(Date.now()),
       createdById: userId,
       updatedById: userId,
+      templateToNextCreate: templateToNextCreate,
       tags: [],
     });
     const techTask = await this.techTaskRepository.create(techTaskData);
@@ -100,6 +103,7 @@ export class CreateTechTaskUseCase {
       updatedAt: techTask?.updatedAt,
       createdById: techTask.createdById,
       updatedById: techTask.updatedById,
+      templateToNextCreate: techTask.templateToNextCreate,
       tags: techTags.map((tag) => tag.getProps()),
     };
   }

@@ -1,12 +1,12 @@
 import {
-  IsArray,
+  IsArray, IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  ValidateIf,
-} from 'class-validator';
+  ValidateIf
+} from "class-validator";
 import { Transform } from 'class-transformer';
 import { StatusTechTask } from '@tech-task/techTask/domain/statusTechTask';
 import { PeriodType } from '@tech-task/techTask/domain/periodType';
@@ -40,4 +40,7 @@ export class TechTaskUpdateDto {
   @IsArray()
   @IsOptional()
   techTaskItem?: number[];
+  @IsOptional()
+  @IsBoolean()
+  templateToNextCreate?: boolean;
 }
