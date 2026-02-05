@@ -32,6 +32,7 @@ export class PrismaMobileUserMapper {
       refreshTokenId: entity.refreshTokenId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
       is_notifications_enabled: entity.is_notifications_enabled,
       meta: entity.meta ? this.toDomainClientMeta(entity.meta) : undefined,
       cardId: entity.card?.id,
@@ -59,6 +60,7 @@ export class PrismaMobileUserMapper {
       refreshTokenId: client?.refreshTokenId,
       createdAt: client.createdAt,
       updatedAt: client.updatedAt,
+      deletedAt: client.deletedAt,
       is_notifications_enabled: client.is_notifications_enabled,
     };
   }

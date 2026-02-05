@@ -1,6 +1,7 @@
 import { BaseEntity } from '@utils/entity';
 import { LoyaltyDomainException } from '@exception/option.exceptions';
 import { LOYALTY_DEBITING_BALANCE_EXCEPTION_CODE } from '@constant/error.constants';
+import { StatusCard } from '@prisma/client';
 
 export interface CardProps {
   id?: number;
@@ -13,6 +14,7 @@ export interface CardProps {
   corporateId?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  status?: StatusCard;
 }
 
 export class Card extends BaseEntity<CardProps> {
@@ -60,6 +62,10 @@ export class Card extends BaseEntity<CardProps> {
     return this.props.updatedAt;
   }
 
+  get status(): StatusCard {
+    return this.props.status;
+  }
+
   set balance(balance: number) {
     this.props.balance = balance;
   }
@@ -86,6 +92,10 @@ export class Card extends BaseEntity<CardProps> {
 
   set updatedAt(updatedAt: Date) {
     this.props.updatedAt = updatedAt;
+  }
+
+  set status(status: StatusCard) {
+    this.props.status = status;
   }
 
   adjustSum(sum: number): void {
