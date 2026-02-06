@@ -11,7 +11,12 @@ import {
   PlatformType,
   ContractType,
 } from '@loyalty/order/domain/enums';
-import { CampaignRedemptionType } from '@prisma/client';
+import {
+  CampaignRedemptionType,
+  OrderStatus as PrismaOrderStatus,
+  PlatformType as PrismaPlatformType,
+  ContractType as PrismaContractType,
+} from '@prisma/client';
 
 @Injectable()
 export class OrderRepository extends IOrderRepository {
@@ -361,5 +366,146 @@ export class OrderRepository extends IOrderRepository {
     }
 
     return await this.findOneById(id);
+  }
+
+  public async findAllByLoyaltyProgramId(
+    loyaltyProgramId: number,
+    page: number,
+    size: number,
+    filters?: {
+      search?: string;
+      orderStatus?: PrismaOrderStatus;
+      platform?: PrismaPlatformType;
+      contractType?: PrismaContractType;
+      dateFrom?: Date;
+      dateTo?: Date;
+    },
+  ): Promise<{
+    orders: any[];
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  }> {
+    const where: any = {
+      card: {
+        cardTier: {
+          ltyProgramId: loyaltyProgramId,
+        },
+      },
+    };
+
+    if (filters?.orderStatus) {
+      where.orderStatus = filters.orderStatus;
+    }
+
+    if (filters?.platform) {
+      where.platform = filters.platform;
+    }
+
+    if (filters?.contractType) {
+      where.contractType = filters.contractType;
+    }
+
+    if (filters?.dateFrom || filters?.dateTo) {
+      where.orderData = {};
+      if (filters.dateFrom) {
+        where.orderData.gte = filters.dateFrom;
+      }
+      if (filters.dateTo) {
+        where.orderData.lte = filters.dateTo;
+      }
+    }
+
+    if (filters?.search) {
+      where.OR = [
+        {
+          card: {
+            client: {
+              name: {
+                contains: filters.search,
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
+          card: {
+            unqNumber: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+        },
+        {
+          card: {
+            number: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+        },
+        {
+          transactionId: {
+            contains: filters.search,
+            mode: 'insensitive',
+          },
+        },
+      ];
+    }
+
+    const total = await this.prisma.lTYOrder.count({ where });
+
+    const skip = (page - 1) * size;
+    const orders = await this.prisma.lTYOrder.findMany({
+      where,
+      include: {
+        card: {
+          include: {
+            client: true,
+          },
+        },
+        bonusOpers: {
+          include: {
+            type: true,
+          },
+        },
+        carWashDevice: {
+          include: {
+            carWashDeviceType: true,
+            carWasPos: {
+              include: {
+                pos: {
+                  include: {
+                    address: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        orderData: 'desc',
+      },
+      skip,
+      take: size,
+    });
+
+    const totalPages = size > 0 ? Math.ceil(total / size) : 1;
+    const hasNext = page < totalPages;
+    const hasPrevious = page > 1;
+
+    return {
+      orders,
+      total,
+      page,
+      size,
+      totalPages,
+      hasNext,
+      hasPrevious,
+    };
   }
 }

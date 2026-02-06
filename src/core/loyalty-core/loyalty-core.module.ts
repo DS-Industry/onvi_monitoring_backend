@@ -89,6 +89,7 @@ import { FavoritesRepositoryProvider } from './mobile-user/client/provider/favor
 import { FindMethodsOrderUseCase } from '@loyalty/order/use-cases/order-find-methods';
 import { RegisterPaymentUseCase } from '@loyalty/order/use-cases/register-payment.use-case';
 import { ShouldAddMarketingRewardsUseCase } from '@loyalty/order/use-cases/should-add-marketing-rewards.use-case';
+import { OrderFindByLoyaltyProgramUseCase } from '@loyalty/order/use-cases/order-find-by-loyalty-program';
 import { LoyaltyTierHistRepositoryProvider } from '@loyalty/loyalty/loyaltyTierHist/provider/loyaltyTierHist';
 import { CreateLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-create';
 import { FindMethodsLoyaltyTierHistUseCase } from '@loyalty/loyalty/loyaltyTierHist/use-case/loyaltyTierHist-find-methods';
@@ -265,6 +266,7 @@ const orderUseCase: Provider[] = [
   FindMethodsOrderUseCase,
   RegisterPaymentUseCase,
   ShouldAddMarketingRewardsUseCase,
+  OrderFindByLoyaltyProgramUseCase,
 ];
 
 const mobileOrderUseCase: Provider[] = [

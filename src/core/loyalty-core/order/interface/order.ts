@@ -4,6 +4,11 @@ import {
   PlatformType,
   ContractType,
 } from '@loyalty/order/domain/enums';
+import {
+  OrderStatus as PrismaOrderStatus,
+  PlatformType as PrismaPlatformType,
+  ContractType as PrismaContractType,
+} from '@prisma/client';
 
 export interface OrderUsageData {
   transactionalCampaign?: {
@@ -53,4 +58,25 @@ export abstract class IOrderRepository {
     id: number,
     newStatus: OrderStatus,
   ): Promise<Order | null>;
+  abstract findAllByLoyaltyProgramId(
+    loyaltyProgramId: number,
+    page: number,
+    size: number,
+    filters?: {
+      search?: string;
+      orderStatus?: PrismaOrderStatus;
+      platform?: PrismaPlatformType;
+      contractType?: PrismaContractType;
+      dateFrom?: Date;
+      dateTo?: Date;
+    },
+  ): Promise<{
+    orders: any[];
+    total: number;
+    page: number;
+    size: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
+  }>;
 }
