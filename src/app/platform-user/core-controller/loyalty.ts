@@ -82,7 +82,10 @@ import { LoyaltyTierGetOneResponseDto } from '@platform-user/core-controller/dto
 import { FindMethodsOrganizationUseCase } from '@organization/organization/use-cases/organization-find-methods';
 import { LoyaltyProgramGetByIdResponseDto } from '@platform-user/core-controller/dto/response/loyaltyProgram-get-by-id-response.dto';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
+import { OrderFindByLoyaltyProgramUseCase } from '@loyalty/order/use-cases/order-find-by-loyalty-program';
 import { OrderCreateDto } from '@platform-user/core-controller/dto/receive/orderCreate';
+import { LoyaltyProgramOrdersFilterDto } from './dto/receive/loyalty-program-orders-filter.dto';
+import { LoyaltyProgramOrdersPaginatedResponseDto } from './dto/response/loyalty-program-order-response.dto';
 import {
   PlatformType,
   OrderStatus,
@@ -249,6 +252,7 @@ export class LoyaltyController {
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
     private readonly createPromocodeUseCase: CreatePromocodeUseCase,
+    private readonly orderFindByLoyaltyProgramUseCase: OrderFindByLoyaltyProgramUseCase,
     private readonly prisma: PrismaService,
   ) {}
   @Post('test-oper')
@@ -2790,6 +2794,54 @@ export class LoyaltyController {
 
       return await this.getLoyaltyProgramTransactionAnalyticsUseCase.execute(
         request,
+      );
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('program/:id/orders')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getLoyaltyProgramOrders(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Query() filter: LoyaltyProgramOrdersFilterDto,
+  ): Promise<LoyaltyProgramOrdersPaginatedResponseDto> {
+    try {
+      const { ability, user } = req;
+
+      await this.loyaltyValidateRules.getLoyaltyProgramValidate(
+        id,
+        ability,
+        user.id,
+      );
+
+      return await this.orderFindByLoyaltyProgramUseCase.execute(
+        id,
+        filter.page || 1,
+        filter.size || 10,
+        {
+          search: filter.search,
+          orderStatus: filter.orderStatus,
+          platform: filter.platform,
+          contractType: filter.contractType,
+          dateFrom: filter.dateFrom,
+          dateTo: filter.dateTo,
+        },
       );
     } catch (e) {
       if (e instanceof LoyaltyException) {
