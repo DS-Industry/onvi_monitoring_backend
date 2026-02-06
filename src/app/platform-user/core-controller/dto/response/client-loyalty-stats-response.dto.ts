@@ -10,6 +10,7 @@ export class ClientLoyaltyStatsResponseDto {
 
   activeBonuses: number;
   totalBonusEarned: number;
+  totalBonusBurned: number;
 
   cardNumber: string;
   cardDevNumber: string;
