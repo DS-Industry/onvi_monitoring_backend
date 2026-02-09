@@ -307,21 +307,19 @@ export class PromoCodeRepository extends IPromoCodeRepository {
         { code: { contains: search, mode: 'insensitive' } },
       ];
 
-      if (filterType === PromocodeFilterType.PERSONAL || where.personalUserId) {
-        searchConditions.push(
-          {
-            personalUser: {
-              name: { contains: search, mode: 'insensitive' },
-            },
+      searchConditions.push(
+        {
+          personalUser: {
+            name: { contains: search, mode: 'insensitive' },
           },
-          {
-            personalUser: {
-              phone: { contains: search, mode: 'insensitive' },
-            },
+        },
+        {
+          personalUser: {
+            phone: { contains: search, mode: 'insensitive' },
           },
-        );
-      }
-
+        },
+      );
+      
       where.AND = [
         {
           OR: searchConditions,

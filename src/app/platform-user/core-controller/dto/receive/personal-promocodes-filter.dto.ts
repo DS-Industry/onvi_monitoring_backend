@@ -1,5 +1,5 @@
 import { IsOptional, IsNumber, IsString, IsBoolean, IsNotEmpty, IsEnum } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 export enum PromocodeFilterType {
   ALL = 'all',
@@ -27,8 +27,12 @@ export class PromocodesFilterDto {
   filter?: PromocodeFilterType = PromocodeFilterType.ALL;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined;
+    if (typeof value === 'string') return value.toLowerCase() === 'true';
+    return Boolean(value);
+  })
   @IsBoolean()
-  @Type(() => Boolean)
   isActive?: boolean;
 
   @IsOptional()
