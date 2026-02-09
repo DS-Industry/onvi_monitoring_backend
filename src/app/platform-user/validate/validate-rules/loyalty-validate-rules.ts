@@ -862,6 +862,42 @@ export class LoyaltyValidateRules {
     return loyaltyProgramCheck.object;
   }
 
+  public async getPersonalPromocodesValidate(
+    organizationId: number,
+    userId: number,
+  ) {
+    const response = [];
+
+    const organizationCheck =
+      await this.validateLib.organizationByIdExists(organizationId);
+    response.push(organizationCheck);
+
+    const loyaltyProgramCheck =
+      await this.validateLib.loyaltyProgramByOwnerOrganizationIdExists(
+        organizationId,
+      );
+    response.push(loyaltyProgramCheck);
+
+    const userBelongsToOrganization =
+      await this.validateLib.userBelongsToOrganization(userId, organizationId);
+    response.push(userBelongsToOrganization);
+
+    if (userBelongsToOrganization.code !== 200) {
+      throw new LoyaltyException(
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+        userBelongsToOrganization.errorMessage,
+      );
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
+    return loyaltyProgramCheck.object;
+  }
+
   public async updateMarketingCampaignValidate(
     campaignId: number,
     data: {
