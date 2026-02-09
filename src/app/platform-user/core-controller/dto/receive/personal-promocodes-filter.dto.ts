@@ -4,6 +4,8 @@ import { Type, Transform } from 'class-transformer';
 export enum PromocodeFilterType {
   ALL = 'all',
   PERSONAL = 'personal',
+  CAMPAIGN = 'campaign',
+  STANDALONE = 'standalone',
 }
 
 export class PromocodesFilterDto {

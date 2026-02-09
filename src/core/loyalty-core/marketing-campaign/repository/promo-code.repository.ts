@@ -292,9 +292,14 @@ export class PromoCodeRepository extends IPromoCodeRepository {
 
     if (filterType === PromocodeFilterType.PERSONAL) {
       where.personalUserId = { not: null };
+    } else if (filterType === PromocodeFilterType.CAMPAIGN) {
+      where.campaignId = { not: null };
+    } else if (filterType === PromocodeFilterType.STANDALONE) {
+      where.campaignId = null;
+      where.personalUserId = null;
     }
 
-    if (personalUserId !== undefined) {
+    if (personalUserId !== undefined && filterType !== PromocodeFilterType.STANDALONE) {
       where.personalUserId = personalUserId;
     }
 
@@ -307,24 +312,34 @@ export class PromoCodeRepository extends IPromoCodeRepository {
         { code: { contains: search, mode: 'insensitive' } },
       ];
 
-      searchConditions.push(
-        {
-          personalUser: {
-            name: { contains: search, mode: 'insensitive' },
+      if (filterType === PromocodeFilterType.PERSONAL || 
+          filterType === PromocodeFilterType.ALL || 
+          personalUserId !== undefined) {
+        searchConditions.push(
+          {
+            personalUser: {
+              name: { contains: search, mode: 'insensitive' },
+            },
           },
-        },
-        {
-          personalUser: {
-            phone: { contains: search, mode: 'insensitive' },
+          {
+            personalUser: {
+              phone: { contains: search, mode: 'insensitive' },
+            },
           },
-        },
-      );
+        );
+      }
       
-      where.AND = [
-        {
+      if (where.AND) {
+        where.AND.push({
           OR: searchConditions,
-        },
-      ];
+        });
+      } else {
+        where.AND = [
+          {
+            OR: searchConditions,
+          },
+        ];
+      }
     }
 
     const total = await this.prisma.lTYPromocode.count({ where });

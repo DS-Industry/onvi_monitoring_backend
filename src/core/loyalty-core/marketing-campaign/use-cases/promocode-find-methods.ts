@@ -13,9 +13,21 @@ export class FindMethodsPromocodeUseCase {
   async findAllPromocodesPaginated(
     filter: PromocodesFilterDto,
   ): Promise<PersonalPromocodesPaginatedResponseDto> {
-    const filterType = filter.filter === PromocodeFilterType.PERSONAL 
-      ? RepoPromocodeFilterType.PERSONAL 
-      : RepoPromocodeFilterType.ALL;
+    let filterType: RepoPromocodeFilterType;
+    switch (filter.filter) {
+      case PromocodeFilterType.PERSONAL:
+        filterType = RepoPromocodeFilterType.PERSONAL;
+        break;
+      case PromocodeFilterType.CAMPAIGN:
+        filterType = RepoPromocodeFilterType.CAMPAIGN;
+        break;
+      case PromocodeFilterType.STANDALONE:
+        filterType = RepoPromocodeFilterType.STANDALONE;
+        break;
+      default:
+        filterType = RepoPromocodeFilterType.ALL;
+        break;
+    }
 
     const result = await this.promoCodeRepository.findAllPromocodesPaginated({
       organizationId: filter.organizationId,

@@ -86,6 +86,8 @@ export interface UpdatePromoCodeInput {
 export enum PromocodeFilterType {
   ALL = 'all',
   PERSONAL = 'personal',
+  CAMPAIGN = 'campaign',
+  STANDALONE = 'standalone',
 }
 
 export interface FindPromocodesFilter {
