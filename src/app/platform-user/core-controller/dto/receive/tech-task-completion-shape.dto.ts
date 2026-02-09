@@ -8,6 +8,9 @@ export class TechTaskCompletionShapeDto {
     return [];
   })
   valueData: itemValueDto[];
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  sendWorkDate?: Date;
 }
 
 export class itemValueDto {
