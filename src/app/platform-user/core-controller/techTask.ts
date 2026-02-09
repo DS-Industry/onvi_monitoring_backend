@@ -549,6 +549,7 @@ export class TechTaskController {
         techTask,
         valueData,
         user,
+        data instanceof TechTaskCompletionShapeDto ? data?.sendWorkDate : null
       );
     } catch (e) {
       if (e instanceof TechTaskException) {

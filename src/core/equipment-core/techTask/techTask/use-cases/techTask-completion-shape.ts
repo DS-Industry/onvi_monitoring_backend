@@ -18,6 +18,7 @@ export class CompletionShapeTechTaskUseCase {
     techTask: TechTask,
     value: TechTaskCompletionShapeValueDto[],
     user: User,
+    sendWorkDate?: Date
   ): Promise<TechTask> {
     for (const itemValue of value) {
       await this.techTaskItemValueToTechTaskRepository.updateValue(
@@ -27,7 +28,7 @@ export class CompletionShapeTechTaskUseCase {
       );
     }
     techTask.status = StatusTechTask.FINISHED;
-    techTask.sendWorkDate = new Date();
+    techTask.sendWorkDate = sendWorkDate || new Date();
     techTask.executorId = user.id;
 
     if (
