@@ -82,6 +82,9 @@ import { CreateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaig
 import { UpdateMarketingCampaignActionUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-action-update';
 import { UpsertMarketingCampaignMobileDisplayUseCase } from '@loyalty/marketing-campaign/use-cases/marketing-campaign-mobile-display-upsert';
 import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
+import { UpdatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-update';
+import { DeletePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-delete';
+import { FindMethodsPromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-find-methods';
 import { MarketingCampaignRepositoryProvider } from '@loyalty/marketing-campaign/provider/marketing-campaign';
 import { PromoCodeRepositoryProvider } from '@loyalty/marketing-campaign/provider/promo-code.repository';
 import { ClientMetaRepositoryProvider } from './mobile-user/client/provider/clientMeta';
@@ -324,6 +327,9 @@ const marketingCampaignUseCase: Provider[] = [
   CreateMarketingCampaignActionUseCase,
   UpdateMarketingCampaignActionUseCase,
   CreatePromocodeUseCase,
+  UpdatePromocodeUseCase,
+  DeletePromocodeUseCase,
+  FindMethodsPromocodeUseCase,
 ];
 
 const redisProviders: Provider[] = [RedisService];

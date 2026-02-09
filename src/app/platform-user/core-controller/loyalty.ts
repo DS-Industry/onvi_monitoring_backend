@@ -24,6 +24,7 @@ import {
   CreateLoyaltyAbility,
   ReadLoyaltyAbility,
   UpdateLoyaltyAbility,
+  DeleteLoyaltyAbility,
   SuperAdminAbility,
 } from '@common/decorators/abilities.decorator';
 import { TagCreateDto } from '@platform-user/core-controller/dto/receive/tag-create.dto';
@@ -182,12 +183,18 @@ import { LoyaltyProgramTransactionAnalyticsResponseDto } from '@platform-user/co
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
 import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
+import { UpdatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-update';
+import { DeletePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-delete';
+import { FindMethodsPromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-find-methods';
 import { PromocodeCreateDto } from '@platform-user/core-controller/dto/receive/promocode-create.dto';
+import { PromocodeUpdateDto } from '@platform-user/core-controller/dto/receive/promocode-update.dto';
 import { PromocodeResponseDto } from './dto/response/promocode-response.dto';
+import { PromocodesFilterDto } from './dto/receive/personal-promocodes-filter.dto';
+import { PersonalPromocodesPaginatedResponseDto } from './dto/response/personal-promocodes-paginated-response.dto';
 import { MarketingCampaignActionResponseDto } from './dto/response/marketing-campaign-action-response.dto';
 import { DeleteResponseDto } from './dto/response/delete-response.dto';
 import { PrismaService } from '@db/prisma/prisma.service';
-import { StatusUser } from '@loyalty/mobile-user/client/domain/enums';
+import { IPromoCodeRepository } from '@loyalty/marketing-campaign/interface/promo-code-repository.interface';
 
 @Controller('loyalty')
 export class LoyaltyController {
@@ -252,7 +259,11 @@ export class LoyaltyController {
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
     private readonly createPromocodeUseCase: CreatePromocodeUseCase,
+    private readonly updatePromocodeUseCase: UpdatePromocodeUseCase,
+    private readonly deletePromocodeUseCase: DeletePromocodeUseCase,
+    private readonly findMethodsPromocodeUseCase: FindMethodsPromocodeUseCase,
     private readonly orderFindByLoyaltyProgramUseCase: OrderFindByLoyaltyProgramUseCase,
+    private readonly promoCodeRepository: IPromoCodeRepository,
     private readonly prisma: PrismaService,
   ) {}
   @Post('test-oper')
@@ -393,6 +404,139 @@ export class LoyaltyController {
       }
 
       return await this.createPromocodeUseCase.execute(data, user.id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Patch('promocode/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new UpdateLoyaltyAbility())
+  @HttpCode(200)
+  async updatePromocode(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: PromocodeUpdateDto,
+  ): Promise<PromocodeResponseDto> {
+    try {
+      const { user, ability } = req;
+
+      const existingPromocode = await this.promoCodeRepository.findById(id);
+
+      if (!existingPromocode?.organizationId) {
+        throw new CustomHttpException({
+          message: 'Promocode must belong to an organization',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      await this.loyaltyValidateRules.getPersonalPromocodesValidate(
+        existingPromocode.organizationId,
+        user.id,
+      );
+
+      if (data.campaignId) {
+        await this.loyaltyValidateRules.updateMarketingCampaignValidate(
+          data.campaignId,
+          {},
+          ability,
+        );
+      }
+
+      return await this.updatePromocodeUseCase.execute(id, data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('promocode/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteLoyaltyAbility())
+  @HttpCode(200)
+  async deletePromocode(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteResponseDto> {
+    try {
+      const { user } = req;
+
+      const existingPromocode = await this.promoCodeRepository.findById(id);
+
+      if (!existingPromocode?.organizationId) {
+        throw new CustomHttpException({
+          message: 'Promocode must belong to an organization',
+          code: HttpStatus.BAD_REQUEST,
+        });
+      }
+
+      await this.loyaltyValidateRules.getPersonalPromocodesValidate(
+        existingPromocode.organizationId,
+        user.id,
+      );
+
+      await this.deletePromocodeUseCase.execute(id);
+
+      return { message: 'Promocode deleted successfully' };
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Get('promocodes')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new ReadLoyaltyAbility())
+  @HttpCode(200)
+  async getPromocodes(
+    @Request() req: any,
+    @Query() filter: PromocodesFilterDto,
+  ): Promise<PersonalPromocodesPaginatedResponseDto> {
+    try {
+      const { user } = req;
+
+      await this.loyaltyValidateRules.getPersonalPromocodesValidate(
+        filter.organizationId,
+        user.id,
+      );
+
+      return await this.findMethodsPromocodeUseCase.findAllPromocodesPaginated(
+        filter,
+      );
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

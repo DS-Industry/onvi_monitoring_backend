@@ -5,7 +5,11 @@ import {
   PromoCode,
   CreateMarketingCampaignUsageInput,
   CreatePromoCodeInput,
+  UpdatePromoCodeInput,
   MarketingCampaignUsage,
+  FindPromocodesFilter,
+  PersonalPromocodesPaginatedResult,
+  PromocodeFilterType,
 } from '../interface/promo-code-repository.interface';
 import { CampaignRedemptionType } from '@prisma/client';
 
@@ -61,6 +65,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       isActive: promocode.isActive,
       posId: promocode.posId,
       personalUserId: promocode.personalUserId,
+      organizationId: promocode.organizationId,
     };
   }
 
@@ -94,6 +99,7 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       isActive: promoCode.isActive,
       posId: promoCode.posId,
       personalUserId: promoCode.personalUserId,
+      organizationId: promoCode.organizationId,
     };
   }
 
@@ -127,6 +133,59 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       isActive: promoCode.isActive,
       posId: promoCode.posId,
       personalUserId: promoCode.personalUserId,
+      organizationId: promoCode.organizationId,
+    };
+  }
+
+  async update(id: number, input: UpdatePromoCodeInput): Promise<PromoCode> {
+    const updateData: any = {};
+
+    if (input.campaignId !== undefined) updateData.campaignId = input.campaignId;
+    if (input.code !== undefined) updateData.code = input.code;
+    if (input.promocodeType !== undefined) updateData.promocodeType = input.promocodeType as any;
+    if (input.personalUserId !== undefined) updateData.personalUserId = input.personalUserId;
+    if (input.discountType !== undefined) updateData.discountType = input.discountType as any;
+    if (input.discountValue !== undefined) updateData.discountValue = input.discountValue;
+    if (input.minOrderAmount !== undefined) updateData.minOrderAmount = input.minOrderAmount;
+    if (input.maxDiscountAmount !== undefined) updateData.maxDiscountAmount = input.maxDiscountAmount;
+    if (input.maxUsage !== undefined) updateData.maxUsage = input.maxUsage;
+    if (input.maxUsagePerUser !== undefined) updateData.maxUsagePerUser = input.maxUsagePerUser;
+    if (input.validFrom !== undefined) updateData.validFrom = input.validFrom;
+    if (input.validUntil !== undefined) updateData.validUntil = input.validUntil;
+    if (input.isActive !== undefined) updateData.isActive = input.isActive;
+    if (input.createdReason !== undefined) updateData.createdReason = input.createdReason;
+    if (input.usageRestrictions !== undefined) updateData.usageRestrictions = input.usageRestrictions;
+    if (input.organizationId !== undefined) updateData.organizationId = input.organizationId;
+    if (input.posId !== undefined) updateData.posId = input.posId;
+    if (input.placementId !== undefined) updateData.placementId = input.placementId;
+
+    const promocode = await this.prisma.lTYPromocode.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return {
+      id: promocode.id,
+      campaignId: promocode.campaignId,
+      actionId: promocode.actionId,
+      code: promocode.code,
+      discountType: promocode.discountType || '',
+      discountValue: Number(promocode.discountValue || 0),
+      minOrderAmount: promocode.minOrderAmount
+        ? Number(promocode.minOrderAmount)
+        : null,
+      maxDiscountAmount: promocode.maxDiscountAmount
+        ? Number(promocode.maxDiscountAmount)
+        : null,
+      maxUsage: promocode.maxUsage,
+      maxUsagePerUser: promocode.maxUsagePerUser,
+      currentUsage: promocode.currentUsage,
+      validFrom: promocode.validFrom,
+      validUntil: promocode.validUntil,
+      isActive: promocode.isActive,
+      posId: promocode.posId,
+      personalUserId: promocode.personalUserId,
+      organizationId: promocode.organizationId,
     };
   }
 
@@ -218,5 +277,147 @@ export class PromoCodeRepository extends IPromoCodeRepository {
       actionId: usage.actionId,
       posId: usage.posId,
     };
+  }
+
+  async findAllPromocodesPaginated(
+    filter: FindPromocodesFilter,
+  ): Promise<PersonalPromocodesPaginatedResult> {
+    const { page = 1, size = 10, organizationId, filter: filterType = PromocodeFilterType.ALL, isActive, search, personalUserId } = filter;
+    const skip = size * (page - 1);
+    const take = size;
+
+    const where: any = {
+      organizationId: organizationId,
+    };
+
+    if (filterType === PromocodeFilterType.PERSONAL) {
+      where.personalUserId = { not: null };
+    }
+
+    if (personalUserId !== undefined) {
+      where.personalUserId = personalUserId;
+    }
+
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
+    if (search) {
+      const searchConditions: any[] = [
+        { code: { contains: search, mode: 'insensitive' } },
+      ];
+
+      if (filterType === PromocodeFilterType.PERSONAL || where.personalUserId) {
+        searchConditions.push(
+          {
+            personalUser: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            personalUser: {
+              phone: { contains: search, mode: 'insensitive' },
+            },
+          },
+        );
+      }
+
+      where.AND = [
+        {
+          OR: searchConditions,
+        },
+      ];
+    }
+
+    const total = await this.prisma.lTYPromocode.count({ where });
+
+    const promocodes = await this.prisma.lTYPromocode.findMany({
+      where,
+      skip,
+      take,
+      include: {
+        personalUser: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    const data = promocodes.map((promocode) => ({
+      id: promocode.id,
+      campaignId: promocode.campaignId,
+      code: promocode.code,
+      promocodeType: promocode.promocodeType,
+      personalUserId: promocode.personalUserId,
+      discountType: promocode.discountType,
+      discountValue: promocode.discountValue ? Number(promocode.discountValue) : null,
+      minOrderAmount: promocode.minOrderAmount ? Number(promocode.minOrderAmount) : null,
+      maxDiscountAmount: promocode.maxDiscountAmount ? Number(promocode.maxDiscountAmount) : null,
+      maxUsage: promocode.maxUsage,
+      maxUsagePerUser: promocode.maxUsagePerUser,
+      currentUsage: promocode.currentUsage,
+      validFrom: promocode.validFrom,
+      validUntil: promocode.validUntil,
+      isActive: promocode.isActive,
+      createdByManagerId: promocode.createdByManagerId,
+      createdReason: promocode.createdReason,
+      organizationId: promocode.organizationId,
+      posId: promocode.posId,
+      placementId: promocode.placementId,
+      createdAt: promocode.createdAt,
+      updatedAt: promocode.updatedAt,
+      personalUser: promocode.personalUser
+        ? {
+            id: promocode.personalUser.id,
+            name: promocode.personalUser.name,
+            phone: promocode.personalUser.phone,
+            email: promocode.personalUser.email,
+          }
+        : null,
+    }));
+
+    const totalPages = Math.ceil(total / size);
+
+    return {
+      data,
+      total,
+      page,
+      size,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    };
+  }
+
+  async delete(id: number): Promise<void> {
+    const promocode = await this.prisma.lTYPromocode.findUnique({
+      where: { id },
+      select: { currentUsage: true },
+    });
+
+    if (!promocode) {
+      throw new Error('Promocode not found');
+    }
+
+    if (promocode.currentUsage > 0) {
+      await this.prisma.lTYPromocode.update({
+        where: { id },
+        data: {
+          isActive: false,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      await this.prisma.lTYPromocode.delete({
+        where: { id },
+      });
+    }
   }
 }
