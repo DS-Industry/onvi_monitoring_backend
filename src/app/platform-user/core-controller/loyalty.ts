@@ -93,6 +93,7 @@ import {
   ContractType,
   SendAnswerStatus,
   ExecutionStatus,
+  OrderHandlerStatus,
 } from '@loyalty/order/domain/enums';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { BenefitUpdateDto } from '@platform-user/core-controller/dto/receive/benefit-update.dto';
@@ -155,6 +156,13 @@ import { CorporateGetCardsUseCase } from '@loyalty/mobile-user/corporate/use-cas
 import { CorporateGetCardsOperationsUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-get-cards-operations';
 import { CreateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-create';
 import { UpdateCorporateClientUseCase } from '@loyalty/mobile-user/corporate/use-cases/corporate-update';
+import { CreateCardBonusOperUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/use-case/cardBonusOper-create';
+import { CorporateBonusOperCreateDto } from './dto/receive/corporate-bonus-oper-create.dto';
+import { CardBonusOper } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOper/domain/cardBonusOper';
+import { CreateOrderUseCase } from '@loyalty/order/use-cases/order-create';
+import { DeleteOrderUseCase } from '@loyalty/order/use-cases/order-delete';
+import { FindMethodsCardBonusOperTypeUseCase } from '@loyalty/mobile-user/bonus/cardBonusOper/cardBonusOperType/use-case/cardBonusOperType-find-methods';
+import { SignOperType } from '@prisma/client';
 import { LoyaltyProgramHubRequestDto } from './dto/receive/loyalty-program-hub-request.dto';
 import { LoyaltyProgramHubApproveDto } from './dto/receive/loyalty-program-hub-approve.dto';
 import { LoyaltyProgramHubRejectDto } from './dto/receive/loyalty-program-hub-reject.dto';
@@ -267,6 +275,10 @@ export class LoyaltyController {
     private readonly orderFindByLoyaltyProgramUseCase: OrderFindByLoyaltyProgramUseCase,
     private readonly promoCodeRepository: IPromoCodeRepository,
     private readonly prisma: PrismaService,
+    private readonly createCardBonusOperUseCase: CreateCardBonusOperUseCase,
+    private readonly createOrderUseCase: CreateOrderUseCase,
+    private readonly deleteOrderUseCase: DeleteOrderUseCase,
+    private readonly findMethodsCardBonusOperTypeUseCase: FindMethodsCardBonusOperTypeUseCase,
   ) {}
   @Post('test-oper')
   @UseGuards(JwtGuard, AbilitiesGuard)
@@ -2147,6 +2159,82 @@ export class LoyaltyController {
       );
 
       return await this.corporateGetCardsOperationsUseCase.execute(id, data);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Post('corporate-clients/:id/bonus-operations')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new CreateLoyaltyAbility())
+  @HttpCode(201)
+  async createCorporateBonusOperation(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) corporateClientId: number,
+    @Body() data: CorporateBonusOperCreateDto,
+  ): Promise<CardBonusOper> {
+    try {
+      const { user, ability } = req;
+
+      const card = await this.loyaltyValidateRules.createCorporateBonusOperValidate(
+        corporateClientId,
+        data.cardId,
+        ability,
+      );
+
+      const operType = await this.findMethodsCardBonusOperTypeUseCase.getById(
+        data.typeOperId,
+      );
+
+      const sumBonus =
+        operType.signOper === SignOperType.REPLENISHMENT ? data.sum : -data.sum;
+
+      const order = await this.createOrderUseCase.execute({
+        transactionId: `MANUAL_${Date.now()}_${user.id}`,
+        sumFull: Math.abs(data.sum), 
+        sumReal: 0, 
+        sumBonus: sumBonus,
+        sumDiscount: 0,
+        sumCashback: 0,
+        carWashDeviceId: data.carWashDeviceId,
+        platform: PlatformType.LOCAL_LOYALTY, 
+        orderData: new Date(),
+        cardMobileUserId: card.id,
+        typeMobileUser: ContractType.CORPORATE,
+        orderStatus: OrderStatus.COMPLETED,
+        orderHandlerStatus: OrderHandlerStatus.COMPLETED,
+      });
+
+      const createDto = {
+        typeOperId: data.typeOperId,
+        operDate: new Date(),
+        sum: data.sum,
+        comment: data.comment,
+        creatorId: user.id,
+        orderMobileUserId: order.id, 
+        carWashDeviceId: data.carWashDeviceId,
+      };
+
+      try {
+        return await this.createCardBonusOperUseCase.execute(createDto, card);
+      } catch (bonusOperError) {
+        await this.deleteOrderUseCase.execute(order.id).catch((deleteError) => {
+          console.error('Failed to delete order after bonus operation creation failed:', deleteError);
+        });
+        throw bonusOperError;
+      }
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

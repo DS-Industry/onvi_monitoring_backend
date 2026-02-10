@@ -305,13 +305,6 @@ export class CorporateRepository extends ICorporateRepository {
       where: {
         id: corporateId,
       },
-      include: {
-        workers: {
-          include: {
-            card: true,
-          },
-        },
-      },
     });
 
     if (!corporate) {
@@ -329,28 +322,9 @@ export class CorporateRepository extends ICorporateRepository {
       };
     }
 
-    const cardIds = corporate.workers
-      .filter((worker) => worker.card)
-      .map((worker) => worker.card.id);
-
-    if (cardIds.length === 0) {
-      const page = skip && take ? Math.floor(skip / take) + 1 : 1;
-      const size = take || 10;
-      const totalPages = 0;
-      return {
-        data: [],
-        total: 0,
-        page,
-        size,
-        totalPages,
-        hasNext: false,
-        hasPrevious: false,
-      };
-    }
-
     const where: any = {
-      cardId: {
-        in: cardIds,
+      card: {
+        corporateId: corporateId,
       },
     };
 

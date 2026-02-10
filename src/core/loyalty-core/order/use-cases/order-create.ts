@@ -29,7 +29,7 @@ export class CreateOrderUseCase {
       executionStatus: input?.executionStatus,
       reasonError: input?.reasonError,
       executionError: input?.executionError,
-      orderHandlerStatus: OrderHandlerStatus.CREATED,
+      orderHandlerStatus: input?.orderHandlerStatus ?? OrderHandlerStatus.CREATED,
     });
     return await this.orderRepository.create(order);
   }

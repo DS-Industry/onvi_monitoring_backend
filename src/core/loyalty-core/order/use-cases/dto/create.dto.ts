@@ -4,6 +4,7 @@ import {
   PlatformType,
   SendAnswerStatus,
   ContractType,
+  OrderHandlerStatus,
 } from '@loyalty/order/domain/enums';
 
 export class CreateDto {
@@ -25,4 +26,5 @@ export class CreateDto {
   executionStatus?: ExecutionStatus;
   reasonError?: string;
   executionError?: string;
+  orderHandlerStatus?: OrderHandlerStatus;
 }

@@ -56,6 +56,7 @@ import { ExpirationCardBonusBankUseCase } from '@loyalty/mobile-user/bonus/cardB
 import { OrderProvider } from '@loyalty/order/provider/order';
 import { CreateOrderUseCase } from '@loyalty/order/use-cases/order-create';
 import { UpdateOrderUseCase } from '@loyalty/order/use-cases/order-update';
+import { DeleteOrderUseCase } from '@loyalty/order/use-cases/order-delete';
 import { HandlerOrderUseCase } from '@loyalty/order/use-cases/order-handler';
 import { UpdateBenefitUseCase } from '@loyalty/loyalty/benefit/benefit/use-cases/benefit-update';
 import { GetBenefitsCardUseCase } from '@loyalty/mobile-user/card/use-case/card-get-benefits';
@@ -265,6 +266,7 @@ const cardBonusOperType: Provider[] = [FindMethodsCardBonusOperTypeUseCase];
 const orderUseCase: Provider[] = [
   CreateOrderUseCase,
   UpdateOrderUseCase,
+  DeleteOrderUseCase,
   HandlerOrderUseCase,
   OrderGetBalanceForDeviceUseCase,
   OrderOperForDeviceUseCase,
@@ -447,6 +449,7 @@ const redisProviders: Provider[] = [RedisService];
     ...benefitUseCase,
     ...benefitActionUseCase,
     ...cardBonusOper,
+    ...cardBonusOperType,
     ...orderUseCase,
     ...mobileOrderUseCase,
     ...cardBonusBank,
