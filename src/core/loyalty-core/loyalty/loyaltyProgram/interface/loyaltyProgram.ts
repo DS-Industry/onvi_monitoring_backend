@@ -42,4 +42,5 @@ export abstract class ILoyaltyProgramRepository {
   }): Promise<LTYProgram[]>;
   abstract update(input: LTYProgram): Promise<LTYProgram>;
   abstract updateIsHubStatus(id: number, isHub: boolean): Promise<LTYProgram>;
+  abstract delete(id: number): Promise<void>;
 }

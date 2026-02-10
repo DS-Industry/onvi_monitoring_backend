@@ -367,4 +367,10 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
 
     return PrismaLoyaltyProgramMapper.toDomain(updatedProgram);
   }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.lTYProgram.delete({
+      where: { id },
+    });
+  }
 }

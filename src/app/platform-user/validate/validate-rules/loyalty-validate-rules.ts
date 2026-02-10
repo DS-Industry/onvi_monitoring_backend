@@ -11,6 +11,7 @@ import {
   LOYALTY_UPDATE_TAG_EXCEPTION_CODE,
   LOYALTY_DELETE_TIER_WITH_CARDS_EXCEPTION_CODE,
   LOYALTY_DELETE_CLIENT_EXCEPTION_CODE,
+  LOYALTY_DELETE_PROGRAM_WITH_CLIENTS_EXCEPTION_CODE,
 } from '@constant/error.constants';
 import { Tag } from '@loyalty/mobile-user/tag/domain/tag';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
@@ -476,6 +477,54 @@ export class LoyaltyValidateRules {
       LOYALTY_DELETE_TIER_WITH_CARDS_EXCEPTION_CODE,
     );
     return checkLoyaltyTier.object;
+  }
+
+  public async deleteLoyaltyProgramValidate(
+    id: number,
+    ability: any,
+    userId: number,
+  ): Promise<LTYProgram> {
+    const response = [];
+    const checkLoyaltyProgram =
+      await this.validateLib.loyaltyProgramByIdExists(id);
+    response.push(checkLoyaltyProgram);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
+    ForbiddenError.from(ability).throwUnlessCan(
+      PermissionAction.delete,
+      checkLoyaltyProgram.object,
+    );
+
+    const loyaltyProgram = checkLoyaltyProgram.object;
+
+    if (loyaltyProgram.ownerOrganizationId) {
+      await this.validateUserBelongsToOrganization(
+        userId,
+        loyaltyProgram.ownerOrganizationId,
+      );
+    }
+
+    const cardsWithClientsCount =
+      await this.cardRepository.countByLoyaltyProgramId(id);
+    if (cardsWithClientsCount > 0) {
+      response.push({
+        code: 400,
+        errorMessage: `Cannot delete loyalty program. ${cardsWithClientsCount} client(s) are currently attached to this program.`,
+      });
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_DELETE_PROGRAM_WITH_CLIENTS_EXCEPTION_CODE,
+    );
+
+    return loyaltyProgram;
   }
 
   public async validateExcelCsvFileValidate(
