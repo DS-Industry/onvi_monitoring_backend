@@ -182,6 +182,7 @@ import { LoyaltyProgramTransactionAnalyticsRequestDto } from '@platform-user/cor
 import { LoyaltyProgramTransactionAnalyticsResponseDto } from '@platform-user/core-controller/dto/response/loyalty-program-transaction-analytics-response.dto';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { DeleteLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-delete';
 import { CreatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-create';
 import { UpdatePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-update';
 import { DeletePromocodeUseCase } from '@loyalty/marketing-campaign/use-cases/promocode-delete';
@@ -258,6 +259,7 @@ export class LoyaltyController {
     private readonly getLoyaltyProgramTransactionAnalyticsUseCase: GetLoyaltyProgramTransactionAnalyticsUseCase,
     private readonly publishLoyaltyProgramUseCase: PublishLoyaltyProgramUseCase,
     private readonly unpublishLoyaltyProgramUseCase: UnpublishLoyaltyProgramUseCase,
+    private readonly deleteLoyaltyProgramUseCase: DeleteLoyaltyProgramUseCase,
     private readonly createPromocodeUseCase: CreatePromocodeUseCase,
     private readonly updatePromocodeUseCase: UpdatePromocodeUseCase,
     private readonly deletePromocodeUseCase: DeletePromocodeUseCase,
@@ -671,6 +673,43 @@ export class LoyaltyController {
       await this.loyaltyValidateRules.updateLoyaltyProgramValidate(id, ability);
 
       return await this.unpublishLoyaltyProgramUseCase.execute(id);
+    } catch (e) {
+      if (e instanceof LoyaltyException) {
+        throw new CustomHttpException({
+          type: e.type,
+          innerCode: e.innerCode,
+          message: e.message,
+          code: e.getHttpStatus(),
+        });
+      } else {
+        throw new CustomHttpException({
+          message: e.message,
+          code: HttpStatus.INTERNAL_SERVER_ERROR,
+        });
+      }
+    }
+  }
+
+  @Delete('program/:id')
+  @UseGuards(JwtGuard, AbilitiesGuard)
+  @CheckAbilities(new DeleteLoyaltyAbility())
+  @HttpCode(200)
+  async deleteProgram(
+    @Request() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<DeleteResponseDto> {
+    try {
+      const { user, ability } = req;
+
+      await this.loyaltyValidateRules.deleteLoyaltyProgramValidate(
+        id,
+        ability,
+        user.id,
+      );
+
+      await this.deleteLoyaltyProgramUseCase.execute(id);
+
+      return { message: 'Loyalty program deleted successfully' };
     } catch (e) {
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({

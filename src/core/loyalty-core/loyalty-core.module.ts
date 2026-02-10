@@ -113,6 +113,7 @@ import { GetLoyaltyProgramAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgr
 import { GetLoyaltyProgramTransactionAnalyticsUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-get-transaction-analytics';
 import { PublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-publish';
 import { UnpublishLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyalty-program-unpublish';
+import { DeleteLoyaltyProgramUseCase } from '@loyalty/loyalty/loyaltyProgram/use-cases/loyaltyProgram-delete';
 import { CreateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-create';
 import { GetMobileOrderByIdUseCase } from './mobile-user/order/use-cases/mobile-order-get-by-id';
 import { UpdateMobileOrderUseCase } from './mobile-user/order/use-cases/mobile-order-update';
@@ -221,6 +222,7 @@ const loyaltyProgramUseCase: Provider[] = [
   GetLoyaltyProgramTransactionAnalyticsUseCase,
   PublishLoyaltyProgramUseCase,
   UnpublishLoyaltyProgramUseCase,
+  DeleteLoyaltyProgramUseCase,
 ];
 
 const loyaltyTierUseCase: Provider[] = [
