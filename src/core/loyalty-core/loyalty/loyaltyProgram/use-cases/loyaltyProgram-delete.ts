@@ -8,6 +8,6 @@ export class DeleteLoyaltyProgramUseCase {
   ) {}
 
   async execute(id: number): Promise<void> {
-    await this.loyaltyProgramRepository.delete(id);
+    await this.loyaltyProgramRepository.deleteWithDependencies(id);
   }
 }

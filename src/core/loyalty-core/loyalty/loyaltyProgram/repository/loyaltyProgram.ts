@@ -4,10 +4,14 @@ import { PrismaService } from '@db/prisma/prisma.service';
 import { LTYProgram } from '@loyalty/loyalty/loyaltyProgram/domain/loyaltyProgram';
 import { PrismaLoyaltyProgramMapper } from '@db/mapper/prisma-loyalty-program-mapper';
 import { accessibleBy } from '@casl/prisma';
+import { ILoyaltyTierRepository } from '@loyalty/loyalty/loyaltyTier/interface/loyaltyTier';
 
 @Injectable()
 export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly loyaltyTierRepository: ILoyaltyTierRepository,
+  ) {
     super();
   }
 
@@ -371,6 +375,43 @@ export class LoyaltyProgramRepository extends ILoyaltyProgramRepository {
   public async delete(id: number): Promise<void> {
     await this.prisma.lTYProgram.delete({
       where: { id },
+    });
+  }
+
+  public async deleteWithDependencies(id: number): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const cardTiers =
+        await this.loyaltyTierRepository.findAllByLoyaltyProgramId(id);
+      const cardTierIds = cardTiers.map((tier) => tier.id);
+
+      if (cardTierIds.length > 0) {
+        await tx.lTYCardTierHist.deleteMany({
+          where: {
+            OR: [
+              { oldCardTierId: { in: cardTierIds } },
+              { newCardTierId: { in: cardTierIds } },
+            ],
+          },
+        });
+      }
+
+      await tx.marketingCampaign.updateMany({
+        where: { ltyProgramId: id },
+        data: { ltyProgramId: null },
+      });
+
+      await tx.lTYBenefit.updateMany({
+        where: { ltyProgramId: id },
+        data: { ltyProgramId: null },
+      });
+
+      await tx.lTYCardTier.deleteMany({
+        where: { ltyProgramId: id },
+      });
+
+      await tx.lTYProgram.delete({
+        where: { id },
+      });
     });
   }
 }
