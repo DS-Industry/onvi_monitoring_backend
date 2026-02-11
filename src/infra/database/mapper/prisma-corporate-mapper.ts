@@ -25,6 +25,7 @@ export class PrismaCorporateMapper {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       organizationId: entity.organizationId,
+      ltyProgramId: entity.ltyProgramId,
     });
   }
 
@@ -40,6 +41,7 @@ export class PrismaCorporateMapper {
       createdAt: corporate?.createdAt,
       updatedAt: corporate?.updatedAt,
       organizationId: corporate?.organizationId,
+      ltyProgramId: corporate?.ltyProgramId,
       status: corporate?.status as LTYCorporateStatus,
     };
   }
