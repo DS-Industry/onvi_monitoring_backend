@@ -2014,11 +2014,13 @@ export class LoyaltyController {
     @Body() data: CorporateClientCreateDto,
   ): Promise<CorporateClientResponseDto> {
     try {
-      const { user } = req;
+      const { user, ability } = req;
 
       await this.loyaltyValidateRules.createCorporateClientValidate(
         data.organizationId,
         user.id,
+        data.ltyProgramId,
+        ability,
       );
 
       return await this.createCorporateClientUseCase.execute(data);
@@ -2190,7 +2192,6 @@ export class LoyaltyController {
 
       const card = await this.loyaltyValidateRules.createCorporateBonusOperValidate(
         corporateClientId,
-        data.cardId,
         ability,
       );
 

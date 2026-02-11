@@ -20,6 +20,7 @@ export class CreateCorporateClientUseCase {
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now()),
       organizationId: data.organizationId,
+      ltyProgramId: data.ltyProgramId,
       status: LTYCorporateStatus.INACTIVE,
     });
 

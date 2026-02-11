@@ -2,10 +2,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CorporateBonusOperCreateDto {
   @IsNumber()
-  @IsNotEmpty({ message: 'Card ID is required' })
-  cardId: number;
-
-  @IsNumber()
   @IsNotEmpty({ message: 'Operation type ID is required' })
   typeOperId: number;
 

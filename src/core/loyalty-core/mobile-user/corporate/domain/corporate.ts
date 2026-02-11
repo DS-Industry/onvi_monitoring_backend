@@ -14,6 +14,7 @@ export interface CorporateProps {
   ownerAvatar?: string;
   status?: string;
   organizationId?: number;
+  ltyProgramId?: number;
 }
 
 export class Corporate extends BaseEntity<CorporateProps> {
@@ -77,5 +78,11 @@ export class Corporate extends BaseEntity<CorporateProps> {
   }
   set organizationId(organizationId: number) {
     this.props.organizationId = organizationId;
+  }
+  get ltyProgramId(): number | undefined {
+    return this.props.ltyProgramId;
+  }
+  set ltyProgramId(ltyProgramId: number | undefined) {
+    this.props.ltyProgramId = ltyProgramId;
   }
 }

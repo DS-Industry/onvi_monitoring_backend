@@ -18,4 +18,9 @@ export class CorporateClientCreateDto {
   @IsNumber()
   @IsNotEmpty({ message: 'Organization ID is required' })
   organizationId: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty({ message: 'Loyalty program ID is required' })
+  ltyProgramId: number;
 }
