@@ -28,7 +28,9 @@ export class OrderRepository extends IOrderRepository {
 
   public async create(input: Order): Promise<Order> {
     let cardId: number | null = null;
-    if (input.clientId) {
+    if (input.cardMobileUserId) {
+      cardId = input.cardMobileUserId;
+    } else if (input.clientId) {
       const card = await this.prisma.lTYCard.findFirst({
         where: { clientId: input.clientId },
         select: { id: true },
@@ -366,6 +368,12 @@ export class OrderRepository extends IOrderRepository {
     }
 
     return await this.findOneById(id);
+  }
+
+  public async delete(id: number): Promise<void> {
+    await this.prisma.lTYOrder.delete({
+      where: { id },
+    });
   }
 
   public async findAllByLoyaltyProgramId(

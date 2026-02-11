@@ -58,6 +58,7 @@ export abstract class IOrderRepository {
     id: number,
     newStatus: OrderStatus,
   ): Promise<Order | null>;
+  abstract delete(id: number): Promise<void>;
   abstract findAllByLoyaltyProgramId(
     loyaltyProgramId: number,
     page: number,

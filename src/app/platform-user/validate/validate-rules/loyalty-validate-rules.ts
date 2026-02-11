@@ -757,6 +757,54 @@ export class LoyaltyValidateRules {
     return await this.validateCorporateClientAccess(corporateId, ability);
   }
 
+  public async createCorporateBonusOperValidate(
+    corporateClientId: number,
+    cardId: number,
+    ability: any,
+  ): Promise<Card> {
+    const response = [];
+
+    await this.validateCorporateClientAccess(
+      corporateClientId,
+      ability,
+    );
+
+    const cardCheck = await this.validateLib.cardByIdExists(cardId);
+    response.push(cardCheck);
+
+    if (cardCheck.code !== 200 || !cardCheck.object) {
+      this.validateLib.handlerArrayResponse(
+        response,
+        ExceptionType.LOYALTY,
+        LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+      );
+    }
+
+    const card = cardCheck.object;
+
+    if (card.corporateId !== corporateClientId) {
+      response.push({
+        code: 400,
+        errorMessage: 'Card does not belong to the specified corporate client',
+      });
+    }
+
+    const cardAccessCheck =
+      await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
+        cardId,
+        ability,
+      );
+    response.push(cardAccessCheck);
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
+    return card;
+  }
+
   public async createMarketingCampaignValidate(
     data: {
       ltyProgramParticipantId: number;
