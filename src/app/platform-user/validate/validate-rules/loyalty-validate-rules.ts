@@ -759,7 +759,6 @@ export class LoyaltyValidateRules {
 
   public async createCorporateBonusOperValidate(
     corporateClientId: number,
-    cardId: number,
     ability: any,
   ): Promise<Card> {
     const response = [];
@@ -769,10 +768,11 @@ export class LoyaltyValidateRules {
       ability,
     );
 
-    const cardCheck = await this.validateLib.cardByIdExists(cardId);
-    response.push(cardCheck);
+    const corporateCheck =
+      await this.validateLib.corporateClientByIdExists(corporateClientId);
+    response.push(corporateCheck);
 
-    if (cardCheck.code !== 200 || !cardCheck.object) {
+    if (corporateCheck.code !== 200 || !corporateCheck.object) {
       this.validateLib.handlerArrayResponse(
         response,
         ExceptionType.LOYALTY,
@@ -780,18 +780,37 @@ export class LoyaltyValidateRules {
       );
     }
 
-    const card = cardCheck.object;
+    const corporate = corporateCheck.object;
 
-    if (card.corporateId !== corporateClientId) {
+    if (!corporate.ownerId) {
       response.push({
         code: 400,
-        errorMessage: 'Card does not belong to the specified corporate client',
+        errorMessage:
+          'Corporate client has no owner; main corporate card cannot be determined',
       });
     }
 
+    const card = await this.cardRepository.findOneByCorporateIdAndClientId(
+      corporateClientId,
+      corporate.ownerId,
+    );
+
+    if (!card) {
+      response.push({
+        code: 404,
+        errorMessage: 'Main corporate card (owner card) not found',
+      });
+    }
+
+    this.validateLib.handlerArrayResponse(
+      response,
+      ExceptionType.LOYALTY,
+      LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
+    );
+
     const cardAccessCheck =
       await this.validateLib.cardBelongsToAccessibleLoyaltyProgram(
-        cardId,
+        card!.id,
         ability,
       );
     response.push(cardAccessCheck);
@@ -802,7 +821,7 @@ export class LoyaltyValidateRules {
       LOYALTY_CREATE_CLIENT_EXCEPTION_CODE,
     );
 
-    return card;
+    return card!;
   }
 
   public async createMarketingCampaignValidate(

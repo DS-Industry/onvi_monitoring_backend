@@ -541,6 +541,7 @@ model LTYProgram {
   participantLimit    Int?
   isPublic            Boolean                        @default(false)
   cardTiers           LTYCardTier[]
+  corporates          LTYCorporate[]
   ownerOrganization   Organization?                  @relation("LTYProgramOwner", fields: [ownerOrganizationId], references: [id])
   hubRequest          LTYProgramHubRequest?
   programParticipants LTYProgramParticipant[]
@@ -710,7 +711,7 @@ model LTYUser {
   updatedAt                DateTime?
   workerCorporateId        Int?
   is_notifications_enabled Boolean?                 @default(true)
-  deletedAt                DateTime?                
+  deletedAt                DateTime?
   card                     LTYCard?
   ownerCorporates          LTYCorporate[]           @relation("Owner")
   promocodes               LTYPromocode[]
@@ -757,8 +758,10 @@ model LTYCorporate {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @default(now())
   organizationId Int?
+  ltyProgramId   Int?
   status         LTYCorporateStatus @default(ACTIVE)
   organization   Organization?      @relation(fields: [organizationId], references: [id])
+  ltyProgram     LTYProgram?        @relation(fields: [ltyProgramId], references: [id])
   owner          LTYUser?           @relation("Owner", fields: [ownerId], references: [id])
   workers        LTYUser[]          @relation("Worker")
   cards          LTYCard[]

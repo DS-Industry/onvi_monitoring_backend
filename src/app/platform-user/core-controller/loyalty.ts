@@ -2190,7 +2190,6 @@ export class LoyaltyController {
 
       const card = await this.loyaltyValidateRules.createCorporateBonusOperValidate(
         corporateClientId,
-        data.cardId,
         ability,
       );
 

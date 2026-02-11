@@ -15,6 +15,10 @@ export abstract class ICardRepository {
   abstract create(input: Card): Promise<Card>;
   abstract findOneById(id: number): Promise<Card | null>;
   abstract findOneByClientId(id: number): Promise<Card | null>;
+  abstract findOneByCorporateIdAndClientId(
+    corporateId: number,
+    clientId: number,
+  ): Promise<Card | null>;
   abstract findOneByUnqNumber(unqNumber: string): Promise<Card | null>;
   abstract findOneByNumber(number: string): Promise<Card | null>;
   abstract findOneByClientPhone(phone: string): Promise<Card | null>;

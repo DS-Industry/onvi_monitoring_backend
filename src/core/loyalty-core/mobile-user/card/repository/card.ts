@@ -48,6 +48,19 @@ export class CardRepository extends ICardRepository {
     return PrismaCardMobileUserMapper.toDomain(card);
   }
 
+  public async findOneByCorporateIdAndClientId(
+    corporateId: number,
+    clientId: number,
+  ): Promise<Card | null> {
+    const card = await this.prisma.lTYCard.findFirst({
+      where: {
+        corporateId,
+        clientId,
+      },
+    });
+    return PrismaCardMobileUserMapper.toDomain(card);
+  }
+
   public async findOneByUnqNumber(unqNumber: string): Promise<Card | null> {
     const card = await this.prisma.lTYCard.findFirst({
       where: {
