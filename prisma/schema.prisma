@@ -1740,6 +1740,11 @@ model TechExpenseReportItem {
   id                          Int                  @id @default(autoincrement())
   techConsumablesId           Int
   techExpenseReportId         Int
+  quantityAtStart             Int
+  quantityByReport            Int
+  quantityOnWarehouse         Int
+  quantityWriteOff            Int?
+  quantityAtEnd               Int?
   techConsumables             TechConsumables      @relation(fields: [techConsumablesId], references: [id])
   techExpenseReport           TechExpenseReport      @relation(fields: [techExpenseReportId], references: [id])
 }
