@@ -168,6 +168,8 @@ model User {
   warehouseDocumentUpdated      WarehouseDocument[]            @relation("UpdateByUser")
   organizations                 Organization[]                 @relation("OrganizationToUser")
   posesPermissions              Pos[]                          @relation("PosToUser")
+  techExpenseReportCreated      TechExpenseReport[]            @relation("CreatedByUser")
+  uechExpenseReportUpdated      TechExpenseReport[]            @relation("UpdateByUser")
 }
 
 model UserMailConfirm {
@@ -245,6 +247,8 @@ model Pos {
   marketingCampaignUsage MarketingCampaignUsage[]
   monthlyPlans           MonthlyPlanPos[]
   favorites              LTYUserFavorites[]
+  techConsumables        TechConsumables[]
+  techExpenseReports     TechExpenseReport[]
   address                Address?                 @relation(fields: [addressId], references: [id])
   createdBy              User                     @relation("CreatedByUser", fields: [createdById], references: [id])
   organization           Organization             @relation(fields: [organizationId], references: [id])
@@ -1121,6 +1125,7 @@ model Nomenclature {
   inventoryItems           InventoryItem[]
   mngSaleItem              MNGSaleItem[]
   mngSalePrice             MNGSalePrice[]
+  techConsumables          TechConsumables[]
   category                 Category                  @relation(fields: [categoryId], references: [id])
   createdBy                User                      @relation("CreatedByUser", fields: [createdById], references: [id])
   organization             Organization              @relation(fields: [organizationId], references: [id])
@@ -1705,6 +1710,56 @@ model ActivationWindow {
   @@index([status, endAt])
 }
 
+model TechConsumables {
+  id                          Int                  @id @default(autoincrement())
+  nomenclatureId              Int
+  posId                       Int
+  type                        TechConsumablesType
+  nomenclature                Nomenclature         @relation(fields: [nomenclatureId], references: [id])
+  pos                         Pos                  @relation(fields: [posId], references: [id])
+  techExpenseReportItems      TechExpenseReportItem[]
+}
+
+model TechExpenseReport {
+  id                          Int                  @id @default(autoincrement())
+  posId                       Int
+  startPeriod                 DateTime
+  endPeriod                   DateTime
+  status                      TechExpenseReportStatus
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime
+  createdById                 Int
+  updatedById                 Int
+  pos                         Pos                       @relation(fields: [posId], references: [id])
+  createdBy                   User                      @relation("CreatedByUser", fields: [createdById], references: [id])
+  updatedBy                   User                      @relation("UpdateByUser", fields: [updatedById], references: [id])
+  techExpenseReportItems      TechExpenseReportItem[]
+}
+
+model TechExpenseReportItem {
+  id                          Int                  @id @default(autoincrement())
+  techConsumablesId           Int
+  techExpenseReportId         Int
+  techConsumables             TechConsumables      @relation(fields: [techConsumablesId], references: [id])
+  techExpenseReport           TechExpenseReport      @relation(fields: [techExpenseReportId], references: [id])
+}
+
+enum TechConsumablesType {
+  SPARE_EQUIPMENT
+  BRUSH
+  TPOWER
+  SOAP
+  WAX
+  PRESOAK
+  TIRE
+  SALT
+}
+
+enum TechExpenseReportStatus {
+  CREATED
+  SAVED
+  SENT
+}
 enum LTYProgramStatus {
   ACTIVE
   PAUSE
