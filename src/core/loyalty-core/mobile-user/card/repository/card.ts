@@ -618,6 +618,7 @@ export class CardRepository extends ICardRepository {
       organizationId: data.organizationId,
       organizationName: organization.name,
       clientName: client.name,
+      loyaltyProgramName: card.cardTier?.ltyProgram?.name ?? '',
 
       totalPurchaseAmount,
       accumulatedAmount,

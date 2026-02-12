@@ -3,6 +3,7 @@ export class ClientLoyaltyStatsResponseDto {
   organizationId: number;
   organizationName: string;
   clientName: string;
+  loyaltyProgramName: string;
 
   totalPurchaseAmount: number;
   accumulatedAmount: number;
