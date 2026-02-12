@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { FindMethodsClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-find-methods';
 import { UpdateClientUseCase } from '@loyalty/mobile-user/client/use-cases/client-update';
 import { Client } from '@loyalty/mobile-user/client/domain/client';
 import { AccountClientUpdateDto } from '../controller/dto/account-client-update.dto';
 import { AccountNotFoundExceptions } from '../exceptions/account-not-found.exceptions';
 import { AvatarType } from '../domain/avatar-type.enum';
+import { CustomHttpException } from '@infra/exceptions/custom-http.exception';
+import { LOYALTY_ACCOUNT_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE } from '@constant/error.constants';
 
 @Injectable()
 export class UpdateAccountUseCase {
@@ -34,15 +36,32 @@ export class UpdateAccountUseCase {
       coreUpdateData.is_notifications_enabled = is_notifications_enabled;
     }
 
-    const updatedClient = await this.updateClientUseCase.execute(
-      coreUpdateData,
-      client,
-    );
+    try {
+      const updatedClient = await this.updateClientUseCase.execute(
+        coreUpdateData,
+        client,
+      );
 
-    if (!updatedClient) {
-      throw new AccountNotFoundExceptions(client.phone);
+      if (!updatedClient) {
+        throw new AccountNotFoundExceptions(client.phone);
+      }
+
+      return updatedClient;
+    } catch (error: any) {
+      const isEmailUniqueViolation =
+        error?.code === 'P2002' &&
+        (Array.isArray(error?.meta?.target)
+          ? error.meta.target.includes('email')
+          : error?.meta?.target === 'email');
+      if (isEmailUniqueViolation) {
+        throw new CustomHttpException({
+          type: 'api_account',
+          innerCode: LOYALTY_ACCOUNT_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE,
+          message: 'An account with this email already exists',
+          code: HttpStatus.CONFLICT,
+        });
+      }
+      throw error;
     }
-
-    return updatedClient;
   }
 }
