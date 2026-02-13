@@ -40,6 +40,15 @@ export class BenefitRepository extends IBenefitRepository {
     return benefits.map((item) => PrismaBenefitMapper.toDomain(item));
   }
 
+  public async findAllByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<Benefit[]> {
+    const benefits = await this.prisma.lTYBenefit.findMany({
+      where: { ltyProgramId: loyaltyProgramId },
+    });
+    return benefits.map((item) => PrismaBenefitMapper.toDomain(item));
+  }
+
   public async findAll(): Promise<Benefit[]> {
     const benefits = await this.prisma.lTYBenefit.findMany();
     return benefits.map((item) => PrismaBenefitMapper.toDomain(item));
