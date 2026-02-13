@@ -14,6 +14,14 @@ export class FindMethodsBenefitUseCase {
     return await this.benefitRepository.findAllByLoyaltyTierId(loyaltyTierId);
   }
 
+  async getAllByLoyaltyProgramId(
+    loyaltyProgramId: number,
+  ): Promise<Benefit[]> {
+    return await this.benefitRepository.findAllByLoyaltyProgramId(
+      loyaltyProgramId,
+    );
+  }
+
   async getAll(): Promise<Benefit[]> {
     return await this.benefitRepository.findAll();
   }

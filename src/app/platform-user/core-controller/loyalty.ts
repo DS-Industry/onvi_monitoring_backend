@@ -1249,10 +1249,27 @@ export class LoyaltyController {
   @UseGuards(JwtGuard, AbilitiesGuard)
   @CheckAbilities(new UpdateLoyaltyAbility())
   @HttpCode(201)
-  async getBenefits(): Promise<Benefit[]> {
+  async getBenefits(
+    @Query('loyaltyProgramId') loyaltyProgramId?: string,
+  ): Promise<Benefit[]> {
     try {
+      if (loyaltyProgramId != null && loyaltyProgramId !== '') {
+        const id = parseInt(loyaltyProgramId, 10);
+        if (Number.isNaN(id)) {
+          throw new CustomHttpException({
+            message: 'loyaltyProgramId must be a valid number',
+            code: HttpStatus.BAD_REQUEST,
+          });
+        }
+        return await this.findMethodsBenefitUseCase.getAllByLoyaltyProgramId(
+          id,
+        );
+      }
       return await this.findMethodsBenefitUseCase.getAll();
     } catch (e) {
+      if (e instanceof CustomHttpException) {
+        throw e;
+      }
       if (e instanceof LoyaltyException) {
         throw new CustomHttpException({
           type: e.type,
